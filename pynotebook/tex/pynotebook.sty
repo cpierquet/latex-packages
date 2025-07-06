@@ -1,0 +1,444 @@
+% Author     : C. Pierquet
+% Thanks     : F. Pantigny (for helping with piton/pyluatex)
+% licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{pynotebook}[2025/06/21 0.1.4 Present codes like in jupyter notebook]
+%0.1.4	Enhancement with piton
+%0.1.3	Modification with gobble (piton)
+%0.1.2	Enhancement with gobble and new code for in/out with all numbers lines
+%0.1.1	New block In/Out
+%0.1.0	Initial version
+
+%------Usefull packages and libraries
+\RequirePackage{tcolorbox}
+\RequirePackage{iftex}
+\RequirePackage{xstring}
+\RequirePackage{calc}
+\tcbuselibrary{skins,breakable}
+
+%-----Option(s) for not loading piton and not creating environments
+\newif\if@piton \@pitontrue
+\DeclareOption{nopiton}{\@pitonfalse}%
+\DeclareOption*{}
+\ProcessOptions\relax
+
+%------Utils
+\newcommand\JupyterPromptIn{In~}
+\newcommand\JupyterPromptOut{Out}
+
+\NewDocumentCommand\promptjupyter{ s m m m m }{%
+	\IfBooleanTF{#1}%
+		{\makebox[0pt][r]{\texttt{\color{#3}#2[\phantom{00}]:#5}}}%
+		{\makebox[0pt][r]{\texttt{\color{#3}#2[#4]:#5}}}%
+}
+
+\NewDocumentCommand\promptjupyterlistings{ s m m m m }{%
+	\IfBooleanTF{#1}%
+		{\makebox[0pt][r]{\texttt{\color{#3}#2[\phantom{00}]:#5}}\vspace*{-\baselineskip}}%
+		{\makebox[0pt][r]{\texttt{\color{#3}#2[#4]:#5}}\vspace*{-\baselineskip}}%
+}
+
+\newcounter{JupyterIn}
+
+\NewDocumentCommand\SetJupyterLng{ m }{%
+	\IfStrEqCase{#1}{%
+		{en}{\renewcommand\JupyterPromptIn{In~}\renewcommand\JupyterPromptOut{Out}}%
+		{fr}{\renewcommand\JupyterPromptIn{Entrée}\renewcommand\JupyterPromptOut{Sortie}}%
+	}%
+		[\renewcommand\JupyterPromptIn{In~}\renewcommand\JupyterPromptOut{Out}]%
+}
+
+%-----Parskip
+\newlength{\JupyterParSkip}
+\setlength{\JupyterParSkip}{0.33\baselineskip}
+\NewDocumentCommand\SetJupyterParSkip{ m }{%
+	\IfStrEq{#1}{default}%
+		{\setlength{\JupyterParSkip}{0.33\baselineskip}}%
+		{\setlength{\JupyterParSkip}{#1}}%
+}
+\tcbset{tcbjpuparskip/.style={before skip=\JupyterParSkip,after skip=\JupyterParSkip}}
+
+%------With listings (pdflatex or lualatex)
+\ifluatex
+\tcbuselibrary{listings}
+\lstdefinestyle{PLJupyter}{%
+	language          = python,
+	inputencoding     = utf8,
+	basicstyle        = \ttfamily\footnotesize,
+	keywordstyle      = \color{green!50!black},
+	keywordstyle      = [2]\color{magenta},
+	commentstyle      = \color{gray}\itshape,
+	stringstyle       = \color{red!75},
+	numberstyle       = \scriptsize\ttfamily\color{gray},
+	aboveskip         = 0pt,
+	belowskip         = 0pt,
+	tabsize           = 4,
+	showstringspaces  = false,
+	columns           = fullflexible,
+	keepspaces        = true,
+	breaklines        = true,
+	breakatwhitespace = true
+}
+\else
+\tcbuselibrary{listingsutf8}
+\lstdefinestyle{PLJupyter}{%
+	language          = python,
+	inputencoding     = utf8/latin1,
+	basicstyle        = \ttfamily\footnotesize,
+	keywordstyle      = \color{green!50!black},
+	keywordstyle      = [2]\color{magenta},
+	commentstyle      = \color{gray}\itshape,
+	stringstyle       = \color{red!75},
+	numberstyle       = \scriptsize\ttfamily\color{gray},
+	aboveskip         = 0pt,
+	belowskip         = 0pt,
+	tabsize           = 4,
+	showstringspaces  = false,
+	columns           = fullflexible,
+	keepspaces        = true,
+	breaklines        = true,
+	breakatwhitespace = true
+}
+\fi
+
+\newlength{\LargeurPromptJupyterIn}
+\newlength{\LargeurPromptJupyterOut}
+\newlength{\LargeurPromptJupyter}
+\newlength{\OffsetPromptJupyter}
+\setlength{\OffsetPromptJupyter}{9pt}
+\newlength{\LargeurNumbersJupyter}
+
+\newcommand\SetJupyterLengths{%
+	\settowidth{\LargeurPromptJupyterIn}{\footnotesize\texttt{\JupyterPromptIn[10]:}}%
+	\settowidth{\LargeurPromptJupyterOut}{\footnotesize\texttt{\JupyterPromptOut[10]:}}%
+	\setlength{\LargeurPromptJupyter}{\maxof{\LargeurPromptJupyterIn}{\LargeurPromptJupyterOut}}%
+	\settowidth{\LargeurNumbersJupyter}{\scriptsize\texttt{00}}%
+}
+
+\NewDocumentEnvironment{NotebookIn}{ s O{} m }%
+{%
+	\SetJupyterLengths%
+	\addtolength{\LargeurNumbersJupyter}{0.5mm}%
+	\noindent%
+	\IfBooleanTF{#1}%
+		{\tcbset{tcbjpuptitlein/.style={title=\promptjupyterlistings*{\JupyterPromptIn}{red!75!black}{\theJupyterIn}{\hspace*{\OffsetPromptJupyter}}}}}%
+		{\refstepcounter{JupyterIn}\tcbset{tcbjpuptitlein/.style={title=\promptjupyterlistings{\JupyterPromptIn\ifnum\value{JupyterIn}<10~\fi}{red!75!black}{\theJupyterIn}{\hspace*{\OffsetPromptJupyter}}}}}%
+	\tcblisting{%
+		breakable,sharp corners=all,enhanced,size=small,width=#3,tcbjpuparskip,boxrule=0.5pt,
+		colframe=gray,colback=lightgray!15,
+		left skip=\LargeurPromptJupyter+\OffsetPromptJupyter-2mm,
+		tcbjpuptitlein,
+		fonttitle=\linespread{1}\footnotesize,
+		attach title to upper,
+		listing only,
+		listing options={style=PLJupyter,xleftmargin=\LargeurNumbersJupyter,numbers=left,firstnumber=1,numbersep=2mm},%
+		overlay={\begin{tcbclipinterior}\draw[line width=0.5pt,gray] ([xshift={\LargeurNumbersJupyter+1mm}]frame.south west)--([xshift={\LargeurNumbersJupyter+1mm}]frame.north west);\end{tcbclipinterior}},%
+		#2
+	}%
+}%
+{%
+	\endtcblisting%
+}
+
+\NewDocumentEnvironment{NotebookConsole}{ O{} m }%
+{%
+	\SetJupyterLengths%
+	\addtolength{\LargeurNumbersJupyter}{0.5mm}%
+	\noindent%
+	\tcblisting{%
+		breakable,sharp corners=all,enhanced,size=small,width=#2,tcbjpuparskip,boxrule=0.5pt,
+		colframe=lightgray!25,colback=white,
+		left skip=\LargeurPromptJupyter+\OffsetPromptJupyter-2mm,
+		attach title to upper,
+		listing only,
+		listing options={style=tcblatex,basicstyle=\ttfamily\footnotesize},%
+		#1
+	}%
+}%
+{%
+	\endtcblisting%
+}%
+
+\NewDocumentEnvironment{NotebookOut}{ s O{} m }%
+{%
+	\SetJupyterLengths%
+	\addtolength{\LargeurNumbersJupyter}{0.5mm}%
+	\IfBooleanTF{#1}%
+		{\tcbset{tcbjpuptitleout/.style={title=\promptjupyterlistings*{\JupyterPromptOut}{blue!75!black}{\theJupyterIn}{\hspace*{\OffsetPromptJupyter}}}}}%
+		{\tcbset{tcbjpuptitleout/.style={title=\promptjupyterlistings{\JupyterPromptOut\ifnum\value{JupyterIn}<10~\fi}{blue!75!black}{\theJupyterIn}{\hspace*{\OffsetPromptJupyter}}}}}%
+	\noindent%
+	\tcblisting{%
+		breakable,sharp corners=all,enhanced,size=small,width=#3,tcbjpuparskip,boxrule=0.5pt,
+		colframe=lightgray!25,colback=white,
+		left skip=\LargeurPromptJupyter+\OffsetPromptJupyter-2mm,
+		tcbjpuptitleout,
+		fonttitle=\linespread{1}\footnotesize,
+		attach title to upper,
+		listing only,
+		listing options={style=tcblatex,basicstyle=\ttfamily\footnotesize},%
+		#2
+	}%
+}%
+{%
+	\endtcblisting%
+}%
+
+\NewDocumentEnvironment{NotebookRaw}{ O{} m }%
+{%
+	\SetJupyterLengths%
+	\addtolength{\LargeurNumbersJupyter}{0.5mm}%
+	\noindent%
+	\tcblisting{%
+		breakable,sharp corners=all,enhanced,size=small,width=#2,tcbjpuparskip,boxrule=0.5pt,
+		colframe=gray,colback=lightgray!15,
+		left skip=\LargeurPromptJupyter+\OffsetPromptJupyter-2mm,
+		attach title to upper,
+		listing only,
+		listing options={style=tcblatex,basicstyle=\ttfamily\footnotesize,numberstyle=\scriptsize\ttfamily\color{gray},xleftmargin=\LargeurNumbersJupyter,numbers=left,firstnumber=1,numbersep=2mm},%
+		overlay={\begin{tcbclipinterior}\draw[line width=0.5pt,gray] ([xshift={\LargeurNumbersJupyter+1mm}]frame.south west)--([xshift={\LargeurNumbersJupyter+1mm}]frame.north west);\end{tcbclipinterior}},%
+		#1
+	}%
+}%
+{%
+	\endtcblisting%
+}%
+
+\NewDocumentEnvironment{NotebookMarkdown}{ O{} m }%
+{%
+	\SetJupyterLengths%
+	\addtolength{\LargeurNumbersJupyter}{0.5mm}%
+	\noindent%
+	\tcolorbox[breakable,sharp corners=all,enhanced,size=small,boxrule=0.5pt,width=#2,tcbjpuparskip,colframe=lightgray!25,colback=white,left skip=\LargeurPromptJupyter+\OffsetPromptJupyter-2mm,
+		attach title to upper,fontupper=\footnotesize,tcbjpuparskip,#1]%
+}%
+{%
+	\endtcolorbox%
+}%
+
+\if@piton
+%----With Piton (only lualatex)
+\ifluatex
+\RequirePackage{piton}
+%\RequirePackage{environ}
+\newlength{\LargeurPromptJupiter}
+\newlength{\LargeurPromptJupiterIn}
+\newlength{\LargeurPromptJupiterOut}
+\newlength{\OffsetPromptJupiter}
+\setlength{\OffsetPromptJupiter}{9pt}
+\newlength{\LargeurNumbersJupiter}
+
+\newcommand\SetJupiterLengths{%
+	\settowidth{\LargeurPromptJupiterIn}{\footnotesize\texttt{\JupyterPromptIn[10]:}}%
+	\settowidth{\LargeurPromptJupiterOut}{\footnotesize\texttt{\JupyterPromptOut[10]:}}%
+	\setlength{\LargeurPromptJupiter}{\maxof{\LargeurPromptJupiterIn}{\LargeurPromptJupiterOut}}%
+	\settowidth{\LargeurNumbersJupiter}{\footnotesize\texttt{00}}%
+}
+
+\NewPitonEnvironment{NotebookPitonIn}{s O{} m !D<>{} }%
+{%
+	\tcbset{reset}%
+	\SetJupiterLengths%
+	\IfBooleanTF{#1}%
+		{%
+			\tcbset{tcbjpuptitlein/.style={overlay={\draw ([yshift=-1mm+0.625pt]frame.north west) node[below left,font=\footnotesize] {\promptjupyter*{\JupyterPromptIn}{red!75!black}{\theJupyterIn}{}} ;\begin{tcbclipinterior}\draw[line width=0.5pt,gray] ([xshift={\LargeurNumbersJupiter+2.25mm}]frame.south west)--([xshift={\LargeurNumbersJupiter+2.25mm}]frame.north west);\end{tcbclipinterior}}}}%
+		}%
+		{%
+			\refstepcounter{JupyterIn}%
+			\tcbset{tcbjpuptitlein/.style={overlay={\draw ([yshift=-1mm+0.625pt]frame.north west) node[below left,font=\footnotesize] {\promptjupyter{\JupyterPromptIn\ifnum\value{JupyterIn}<10\phantom{0}\fi}{red!75!black}{\theJupyterIn}{} } ;\begin{tcbclipinterior}\draw[line width=0.5pt,gray] ([xshift={\LargeurNumbersJupiter+2.25mm}]frame.south west)--([xshift={\LargeurNumbersJupiter+2.25mm}]frame.north west);\end{tcbclipinterior}}}}%
+		}%
+	\PitonOptions{width={#3-5mm},left-margin={\LargeurNumbersJupiter+1.75mm},line-numbers={skip-empty-lines=false,label-empty-lines=true}}%
+	\PitonOptions{break-lines,indent-broken-lines,continuation-symbol={},#4}%
+	%on crée la boîte
+	\noindent\tcolorbox[size=small,breakable,sharp corners=all,boxrule=0.5pt,enhanced,width=#3,colframe=gray,colback=lightgray!15,left skip=\LargeurPromptJupiter+\OffsetPromptJupiter-2mm,,tcbjpuptitlein,fontupper=\footnotesize,bottom=-0.5mm,top=0mm,tcbjpuparskip,#2]%
+}%
+{%
+	\endtcolorbox%
+}
+
+\ExplSyntaxOn
+\NewDocumentEnvironment{NotebookPitonConsole}{ O{} m !D<>{} }%
+{%
+	\SetJupiterLengths%
+	\noindent%
+	\PitonOptions{width={#2-5mm-\LargeurPromptJupiter-\OffsetPromptJupiter+2mm},break-lines,end-of-broken-line={},continuation-symbol={},#3}%
+	%on crée la boîte
+	\PyLTVerbatimEnv%
+	\tcolorbox[breakable,sharp~corners=all,enhanced,size=small,boxrule=0.5pt,width=#2,colframe=lightgray!25,colback=white,left~skip=\LargeurPromptJupiter+\OffsetPromptJupiter-2mm,fontupper=\footnotesize,bottom=-0.5mm,tcbjpuparskip,#1]%
+	\begin{pythonq}%
+}%
+{%
+	\end{pythonq}%
+	\lua_now:n%
+	{%
+	tex.print("\\begin{Piton}")%
+	tex.print(pyluatex.get_last_output())%
+	tex.print("\\end{Piton}")%
+	tex.print("")%
+	}%
+	\endtcolorbox%
+	\ignorespacesafterend%
+}
+\ExplSyntaxOff
+
+\ExplSyntaxOn
+\NewDocumentEnvironment{NotebookPitonOut}{ s O{} m !D<>{} }%
+{%
+	\tcbset{reset}%
+	\SetJupiterLengths%
+	\IfBooleanTF{#1}%
+		{%
+			\tcbset{tcbjpuptitleout/.style={overlay={\draw([yshift=-1mm+0.625pt]frame.north~west)node[below~left,font=\footnotesize]{\promptjupyter*{\JupyterPromptOut}{blue!75!black}{\theJupyterIn}{}};}}}%
+		}%
+		{%
+			\tcbset{tcbjpuptitleout/.style={overlay={\draw([yshift=-1mm+0.625pt]frame.north~west)node[below~left,font=\footnotesize]{\promptjupyter{\JupyterPromptOut\ifnum\value{JupyterIn}<10\phantom{0}\fi}{blue!75!black}{\theJupyterIn}{}};}}}%
+		}%
+	\noindent%
+	\PitonOptions{continuation-symbol={},end-of-broken-line={},break-lines,#4}%
+	%on crée la boîte
+	\PyLTVerbatimEnv%
+	\tcolorbox[breakable,sharp~corners=all,enhanced,size=small,boxrule=0.5pt,colframe=lightgray!25,colback=white,left~skip=\LargeurPromptJupiter+\OffsetPromptJupiter-2mm,tcbjpuptitleout,fontupper=\footnotesize,bottom=-0.5mm,top=0mm,tcbjpuparskip,width=#3,#2]%
+	\begin{pythonq}%
+}%
+{%
+	\end{pythonq}%
+	\lua_now:n%
+	{%
+	tex.print("\\begin{Piton}")%
+	tex.print(pyluatex.get_last_output())%
+	tex.print("\\end{Piton}")%
+	tex.print("")%
+	}%
+	\endtcolorbox%
+	\ignorespacesafterend%
+}
+\ExplSyntaxOff
+
+\NewPitonEnvironment{NotebookPitonRaw}{ O{} m !D<>{} }%
+{%
+	\SetJupiterLengths%
+	\noindent%
+	\SetPitonStyle{Number=}%
+	\PitonOptions{left-margin={\LargeurNumbersJupiter+1.75mm},line-numbers={skip-empty-lines=false,label-empty-lines=true},language=minimal}%
+	\PitonOptions{continuation-symbol={},break-lines,indent-broken-lines,#3}%
+	%on crée la boîte
+	\tcolorbox[breakable,sharp corners=all,enhanced,size=small,boxrule=0.5pt,width=#2,colframe=gray,colback=lightgray!25,left skip=\LargeurPromptJupiter+\OffsetPromptJupiter-2mm,attach title to upper,fontupper=\footnotesize,overlay={%
+		\begin{tcbclipinterior}\draw[line width=0.5pt,gray] ([xshift={\LargeurNumbersJupiter+2.25mm}]frame.south west)--([xshift={\LargeurNumbersJupiter+2.25mm}]frame.north west);\end{tcbclipinterior}},bottom=-0.5mm,tcbjpuparskip,#1]%
+}%
+{%
+	\endtcolorbox%
+	\ignorespacesafterend%
+}
+
+\NewDocumentEnvironment{NotebookPitonMarkdown}{ O{} m }%
+{%
+	\SetJupiterLengths%
+	\noindent%
+	\tcolorbox[breakable,sharp corners=all,enhanced,size=small,boxrule=0.5pt,width=#2,tcbjpuparskip,colframe=lightgray!25,colback=white,left skip=\LargeurPromptJupiter+\OffsetPromptJupiter-2mm,
+		attach title to upper,fontupper=\footnotesize,tcbjpuparskip,#1]%
+}%
+{%
+	\endtcolorbox%
+	\ignorespacesafterend%
+}%
+
+\ExplSyntaxOn
+\NewDocumentEnvironment{NotebookPitonInOut}{ s O{} m !D<>{} }%
+{%
+	\tcbset{reset}%
+	\PyLTVerbatimEnv%
+	\begin{pythonq}%
+}%
+{%
+	\end{pythonq}%
+	\SetJupiterLengths%
+	%\tcbset{tcbjpuptitlein/.style={}}%
+	\IfBooleanTF{#1}%
+		{%
+			\tcbset{tcbjpuptitlein/.style={overlay={\draw([yshift=-1mm+0.625pt]frame.north~west)node[below~left,font=\footnotesize]{\promptjupyter*{\JupyterPromptIn}{red!75!black}{\theJupyterIn}{}};\begin{tcbclipinterior}\draw[line~width=0.5pt,gray]([xshift={\LargeurNumbersJupiter+2.25mm}]frame.south~west)--([xshift={\LargeurNumbersJupiter+2.25mm}]frame.north~west);\end{tcbclipinterior}}}}%
+		}%
+		{%
+			\refstepcounter{JupyterIn}%
+			\tcbset{tcbjpuptitlein/.style={overlay={\draw([yshift=-1mm+0.625pt]frame.north~west)node[below~left,font=\footnotesize]{\promptjupyter{\JupyterPromptIn\ifnum\value{JupyterIn}<10\phantom{0}\fi}{red!75!black}{\theJupyterIn}{}};\begin{tcbclipinterior}\draw[line~width=0.5pt,gray]([xshift={\LargeurNumbersJupiter+2.25mm}]frame.south~west)--([xshift={\LargeurNumbersJupiter+2.25mm}]frame.north~west);\end{tcbclipinterior}}}}%
+		}%
+	\noindent%
+	\tcolorbox[breakable,sharp~corners=all,enhanced,size=small,boxrule=0.5pt,width=#3,colframe=gray,colback=lightgray!15,left~skip=\LargeurPromptJupiter+\OffsetPromptJupiter-2mm,tcbjpuptitlein,fonttitle=\linespread{1}\footnotesize,attach~title~to~upper,fontupper=\footnotesize,bottom=-0.5mm,top=0mm,tcbjpuparskip,#2]%
+	\lua_now:n%
+	{%
+	tex.print("\\begin{Piton}[left-margin=\\LargeurNumbersJupiter+1.75mm,line-numbers={skip-empty-lines=false,label-empty-lines=true},break-lines,indent-broken-lines,continuation-symbol={},#4]")%
+	tex.print(pyluatex.get_last_code())%
+	tex.print("\\end{Piton}")%
+	tex.print("")%
+	}%
+	\endtcolorbox%
+	%\tcbset{tcbjpuptitleout/.style={}}%
+	\IfBooleanTF{#1}%
+		{%
+			\tcbset{tcbjpuptitleout/.style={overlay={\draw([yshift=-1mm+0.625pt]frame.north~west)node[below~left,font=\footnotesize]{\promptjupyter*{\JupyterPromptOut}{blue!75!black}{\theJupyterIn}{}};}}}%
+			%\tcbset{tcbjpuptitleout/.style={title=\promptjupyter*{\JupyterPromptOut}{blue!75!black}{\theJupyterIn}{\hspace*{\OffsetPromptJupiter}}}}%
+		}%
+		{%
+			\tcbset{tcbjpuptitleout/.style={overlay={\draw([yshift=-1mm+0.625pt]frame.north~west)node[below~left,font=\footnotesize]{\promptjupyter{\JupyterPromptOut\ifnum\value{JupyterIn}<10\phantom{0}\fi}{blue!75!black}{\theJupyterIn}{}};}}}%
+			%\tcbset{tcbjpuptitleout/.style={title=\promptjupyter{\JupyterPromptOut\ifnum\value{JupyterIn}<10~\fi}{blue!75!black}{\theJupyterIn}{\hspace*{\OffsetPromptJupiter}}}}%
+		}%
+	\tcbset{reset}%
+	\noindent%
+	\tcolorbox[breakable,sharp~corners=all,enhanced,size=small,boxrule=0.5pt,width=#3,colframe=lightgray!25,colback=white,left~skip=\LargeurPromptJupiter+\OffsetPromptJupiter-2mm,tcbjpuptitleout,fonttitle=\linespread{1}\footnotesize,attach~title~to~upper,fontupper=\footnotesize,bottom=-0.5mm,top=0mm,tcbjpuparskip,#2]%
+	\lua_now:n%
+	{%
+	tex.print("\\begin{Piton}[line-numbers=false,break-lines,indent-broken-lines,continuation-symbol={},#4]")%
+	tex.print(pyluatex.get_last_output())%
+	tex.print("\\end{Piton}")%
+	tex.print("")%
+	}%
+	\endtcolorbox%
+	\ignorespacesafterend%
+}
+\ExplSyntaxOff
+
+\ExplSyntaxOn
+\NewPitonEnvironment{NotebookPitonAllNum}{ s O{} m !D<>{} }%
+{%
+	\SetJupiterLengths
+	\IfBooleanTF{#1}%
+		{%
+			\tcbset{tcbjpuptitlein/.style={overlay={\draw([yshift=-1mm+0.625pt]frame.north~west) node[below~left,font=\footnotesize] {\promptjupyter*{\JupyterPromptIn}{red!75!black}{\theJupyterIn}{}} ;\begin{tcbclipinterior}\draw[line~width=0.5pt,gray] ([xshift={\LargeurNumbersJupiter+2.25mm}]frame.south~west)--([xshift={\LargeurNumbersJupiter+2.25mm}]frame.north~west);\end{tcbclipinterior}}}}%
+		}%
+		{%
+			\refstepcounter{JupyterIn}%
+			\tcbset{tcbjpuptitlein/.style={overlay={\draw ([yshift=-1mm+0.625pt]frame.north~west) node[below~left,font=\footnotesize] {\promptjupyter{\JupyterPromptIn\ifnum\value{JupyterIn}<10\phantom{0}\fi}{red!75!black}{\theJupyterIn}{} } ;\begin{tcbclipinterior}\draw[line~width=0.5pt,gray] ([xshift={\LargeurNumbersJupiter+2.25mm}]frame.south~west)--([xshift={\LargeurNumbersJupiter+2.25mm}]frame.north~west);\end{tcbclipinterior}}}}%
+		}%
+	\PitonOptions{width={#3-5mm-\LargeurNumbersJupiter-1.75mm},left-margin={\LargeurNumbersJupiter+1.75mm},line-numbers={skip-empty-lines=false,label-empty-lines=true}}%
+	\PitonOptions{break-lines,indent-broken-lines,continuation-symbol={},#4}%
+	%on crée la boîte n°1
+	\noindent\tcolorbox[size=small,breakable,sharp~corners=all,boxrule=0.5pt,enhanced,width=#3,colframe=gray,colback=lightgray!15,left~skip=\LargeurPromptJupiter+\OffsetPromptJupiter-2mm,tcbjpuptitlein,fontupper=\footnotesize,bottom=-0.5mm,top=0mm,tcbjpuparskip,#2]%
+}
+{
+	\endtcolorbox%
+	\tcbset{reset}%
+	\IfBooleanTF{#1}%
+		{%
+			\tcbset{tcbjpuptitleout/.style={overlay={\draw([yshift=-1mm+0.625pt]frame.north~west)node[below~left,font=\footnotesize]{\promptjupyter*{\JupyterPromptOut}{blue!75!black}{\theJupyterIn}{}};}}}%
+		}%
+		{%
+			\tcbset{tcbjpuptitleout/.style={overlay={\draw([yshift=-1mm+0.625pt]frame.north~west)node[below~left,font=\footnotesize]{\promptjupyter{\JupyterPromptOut\ifnum\value{JupyterIn}<10\phantom{0}\fi}{blue!75!black}{\theJupyterIn}{}};}}}%
+		}%
+	\tcbset{reset}%
+	\noindent%
+	%on crée la boîte n°2
+	\tcolorbox[breakable,sharp~corners=all,enhanced,size=small,boxrule=0.5pt,width=#3,colframe=lightgray!25,colback=white,left~skip=\LargeurPromptJupiter+\OffsetPromptJupiter-2mm,tcbjpuptitleout,fontupper=\footnotesize,bottom=-0.5mm,top=0mm,left=-\LargeurNumbersJupiter,tcbjpuparskip,#2]%
+	\lua_now:n%
+	{%
+	tex.print("\\begin{Piton}[line-numbers=false,break-lines,indent-broken-lines,continuation-symbol={},#4]")%
+	tex.print(pyluatex.execute(piton.get_last_code(), false, true, false, true))%
+	tex.print("\\end{Piton}")%
+	tex.print("")%
+	}%
+	\endtcolorbox%
+}
+\ExplSyntaxOff
+
+\fi
+\fi
+
+\endinput

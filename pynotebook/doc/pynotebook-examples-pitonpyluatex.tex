@@ -1,0 +1,413 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: lualatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: lualatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[a4paper,11pt]{article}
+\def\PLver{0.1.4}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{pynotebook}
+\usepackage[executable=python]{pyluatex}
+\usepackage{codehigh}
+
+\begin{document}
+
+\part*{pynotebook (\PLver), with piton and pyluatex}
+
+\section{Preamble}
+
+\begin{codehigh}
+\documentclass{article}
+\usepackage{pynotebook}
+\usepackage[executable=python]{pyluatex}  % with a specific compilation !!
+\end{codehigh}
+
+\section{With gobble}
+
+Due to \texttt{gobble} options with \textsf{piton}, it's possible to add \texttt{gobble} parameters to the environments, given within last argument between \texttt{<...>}, and default is \texttt{empty} :
+
+\begin{itemize}
+	\item \texttt{<gobble=xx>} ;
+	\item \texttt{<env-gobble>} ;
+	\item \texttt{<auto-gobble>} ;
+	\item \texttt{<tabs-auto-gobble>}.
+\end{itemize}
+
+\noindent{}\textbf{Explanations} are given in the doc of \textsf{piton} :
+
+\begin{itemize}
+	\item \texttt{https://ctan.org/pkg/piton}
+\end{itemize}
+
+\section{Examples of text blocks}
+
+\begin{codehigh}
+\begin{NotebookPitonMarkdown}{\linewidth}
+{\Large\bfseries This is a test for a \textsf{Markdown} block.}
+
+It's possible to use \LaTeX{} formulas, like %
+\[
+  \left\lbrace\begin{array}{l}
+    F_0 = 0\\
+    F_1 = 1 \\
+    F_{n+2} = F_{n+1} + F_n
+  \end{array}\right.
+\]
+\end{NotebookPitonMarkdown}
+
+\begin{NotebookPitonRaw}{\linewidth}
+This is a sample block, with RAW output.
+
+Just to use all capacities of Jupyter notebook ;-)
+\end{NotebookPitonRaw}
+\end{codehigh}
+
+\begin{NotebookPitonMarkdown}{\linewidth}
+{\Large\bfseries This is a test for a \textsf{Markdown} block.}
+
+It's possible to use \LaTeX{} formulas, like %
+\[
+\left\lbrace\begin{array}{l}
+F_0 = 0\\
+F_1 = 1 \\
+F_{n+2} = F_{n+1} + F_n
+\end{array}\right.
+\]
+\end{NotebookPitonMarkdown}
+
+\begin{NotebookPitonRaw}{\linewidth}
+This is a sample block, with RAW output.
+
+Just to use all capacities of Jupyter notebook ;-)
+\end{NotebookPitonRaw}
+
+\section{Examples of code blocks (with execution of code !)}
+
+\subsection{With block In then block Out}
+
+\begin{codehigh}
+\begin{NotebookPitonIn}{0.75\linewidth}
+def fibonacci_aux(n,a,b):
+  if n == 0 :
+    return a
+  elif n == 1 :
+    return b
+  else:
+    return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+  return fibonacci_aux(n,0,1)
+
+[fibonacci_of(n) for n in range(10)]
+\end{NotebookPitonIn}
+\end{codehigh}
+
+\begin{NotebookPitonIn}{0.75\linewidth}
+def fibonacci_aux(n,a,b):
+	if n == 0 :
+		return a
+	elif n == 1 :
+		return b
+	else:
+		return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+	return fibonacci_aux(n,0,1)
+
+[fibonacci_of(n) for n in range(10)]
+\end{NotebookPitonIn}
+
+\begin{codehigh}
+\begin{NotebookPitonOut}{0.75\linewidth}
+def fibonacci_aux(n,a,b):
+  if n == 0 :
+    return a
+  elif n == 1 :
+    return b
+  else:
+    return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+  return fibonacci_aux(n,0,1)
+
+print([fibonacci_of(n) for n in range(10)])
+\end{NotebookPitonOut}
+\end{codehigh}
+
+\begin{NotebookPitonOut}{0.75\linewidth}
+def fibonacci_aux(n,a,b):
+	if n == 0 :
+		return a
+	elif n == 1 :
+		return b
+	else:
+		return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+	return fibonacci_aux(n,0,1)
+
+print([fibonacci_of(n) for n in range(10)])
+\end{NotebookPitonOut}
+
+\pagebreak
+
+\begin{codehigh}
+\SetJupyterLng{fr}
+\SetJupyterParSkip{\baselineskip}
+\setcounter{JupyterIn}{11}
+\end{codehigh}
+
+\SetJupyterLng{fr}
+\SetJupyterParSkip{\baselineskip}
+\setcounter{JupyterIn}{11}
+
+\begin{codehigh}
+\begin{NotebookPitonIn}[center]{0.75\linewidth}
+def fibonacci_aux(n,a,b):
+  if n == 0 :
+    return a
+  elif n == 1 :
+    return b
+  else:
+    return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+  return fibonacci_aux(n,0,1)
+
+print([fibonacci_of(n) for n in range(10)])
+\end{NotebookPitonIn}
+\end{codehigh}
+
+\begin{NotebookPitonIn}[center]{0.75\linewidth}
+def fibonacci_aux(n,a,b):
+	if n == 0 :
+		return a
+	elif n == 1 :
+		return b
+	else:
+		return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+	return fibonacci_aux(n,0,1)
+
+print([fibonacci_of(n) for n in range(10)])
+\end{NotebookPitonIn}
+
+\begin{codehigh}
+\begin{NotebookPitonOut}[center]{0.75\linewidth}
+def fibonacci_aux(n,a,b):
+  if n == 0 :
+    return a
+  elif n == 1 :
+    return b
+  else:
+    return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+  return fibonacci_aux(n,0,1)
+
+print([fibonacci_of(n) for n in range(10)])
+\end{NotebookPitonOut}
+\end{codehigh}
+
+\begin{NotebookPitonOut}[center]{0.75\linewidth}
+def fibonacci_aux(n,a,b):
+	if n == 0 :
+		return a
+	elif n == 1 :
+		return b
+	else:
+		return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+	return fibonacci_aux(n,0,1)
+
+print([fibonacci_of(n) for n in range(10)])
+\end{NotebookPitonOut}
+
+\begin{codehigh}
+\begin{NotebookPitonConsole}[center]{0.75\linewidth}
+def fibonacci_aux(n,a,b):
+  if n == 0 :
+    return a
+  elif n == 1 :
+    return b
+  else:
+    return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+  return fibonacci_aux(n,0,1)
+
+print([fibonacci_of(n) for n in range(10)])
+\end{NotebookPitonConsole}
+\end{codehigh}
+
+\begin{NotebookPitonConsole}[center]{0.75\linewidth}
+def fibonacci_aux(n,a,b):
+	if n == 0 :
+		return a
+	elif n == 1 :
+		return b
+	else:
+		return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+	return fibonacci_aux(n,0,1)
+
+print([fibonacci_of(n) for n in range(10)])
+\end{NotebookPitonConsole}
+
+\pagebreak
+
+\subsection{With block In/Out}
+
+\SetJupyterLng{en}
+\SetJupyterParSkip{0.33\baselineskip}
+\setcounter{JupyterIn}{0}
+
+\begin{codehigh}
+\begin{NotebookPitonInOut}{0.75\linewidth}
+def fibonacci_aux(n,a,b):
+  if n == 0 :
+    return a
+  elif n == 1 :
+    return b
+  else:
+    return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+  return fibonacci_aux(n,0,1)
+
+print([fibonacci_of(n) for n in range(10)])
+\end{NotebookPitonInOut}
+\end{codehigh}
+
+\begin{NotebookPitonInOut}{0.75\linewidth}
+def fibonacci_aux(n,a,b):
+	if n == 0 :
+		return a
+	elif n == 1 :
+		return b
+	else:
+		return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+	return fibonacci_aux(n,0,1)
+
+print([fibonacci_of(n) for n in range(10)])
+\end{NotebookPitonInOut}
+
+%====begin todo
+
+\subsection{Alternate environment for In/Out}
+
+Thanks to F. Pantigny, an alternate environment for \texttt{In/Out} is available, with \textit{all} line numbers and continuation symbol.
+
+\begin{codehigh}
+\begin{NotebookPitonAllNum}{0.66\linewidth}
+print([i**2 for i in range(50)])
+\end{NotebookPitonAllNum}
+\end{codehigh}
+
+\begin{NotebookPitonAllNum}{0.66\linewidth}
+print([i**2 for i in range(50)])
+\end{NotebookPitonAllNum}
+
+\pagebreak
+
+%===end todo
+
+\section{Global example}
+
+\SetJupyterParSkip{default}
+\setcounter{JupyterIn}{0}
+
+\begin{NotebookPitonMarkdown}{\linewidth}
+{\Large\bfseries This is a test for a \textsf{Markdown} block.}
+
+It's possible to use \LaTeX{} formulas, like %
+\[
+\left\lbrace\begin{array}{l}
+F_0 = 0 \: ; \: F_1 = 1 \\
+F_{n+2} = F_{n+1} + F_n
+\end{array}\right.
+\]
+\end{NotebookPitonMarkdown}
+
+\begin{NotebookPitonRaw}{\linewidth}
+This is a sample block, with RAW output.
+Just to use all capacities of Jupyter notebook ;-)
+\end{NotebookPitonRaw}
+
+\begin{NotebookPitonInOut}{\linewidth}
+def fibonacci_aux(n,a,b):
+	if n == 0 :
+		return a
+	elif n == 1 :
+		return b
+	else:
+		return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+	return fibonacci_aux(n,0,1)
+
+print([fibonacci_of(n) for n in range(10)])
+\end{NotebookPitonInOut}
+
+\begin{NotebookPitonRaw}{\linewidth}
+Let’s compute Fibonacci terms from 10th to 20th :-)
+\end{NotebookPitonRaw}
+
+\begin{NotebookPitonIn}{\linewidth}
+[fibonacci_of(n) for n in range(10,21)]
+\end{NotebookPitonIn}
+
+\begin{NotebookPitonConsole}{\linewidth}
+def fibonacci_aux(n,a,b):
+	if n == 0 :
+		return a
+	elif n == 1 :
+		return b
+	else:
+		return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+	return fibonacci_aux(n,0,1)
+
+print([fibonacci_of(n) for n in range(10,21)])
+\end{NotebookPitonConsole}
+
+\begin{NotebookPitonRaw}{\linewidth}
+Let’s work with an other function.
+This time in french :-)
+\end{NotebookPitonRaw}
+
+\begin{NotebookPitonInOut}{\linewidth}
+def calculPerimetre(cote1, cote2, cote3) :
+	perimetre = cote1 + cote2 + cote3
+	return perimetre
+
+perimetre1 = calculPerimetre(6, 4, 3)
+perimetre2 = calculPerimetre(10, 3, 11)
+print(f"Le périm de mon 1er triangle est {perimetre1}, et celui de mon 2d est {perimetre2}.")
+\end{NotebookPitonInOut}
+
+\begin{NotebookPitonInOut}{\linewidth}
+A = 15
+B = 10
+C = 11
+print(f"Le périmètre de mon triangle est {calculPerimetre(A,B,C)}.")
+\end{NotebookPitonInOut}
+
+\begin{NotebookPitonIn}{\linewidth}
+calculPerimetre(4, 4, 4)
+\end{NotebookPitonIn}
+
+\begin{NotebookPitonConsole}{\linewidth}
+print(calculPerimetre(4, 4, 4))
+\end{NotebookPitonConsole}
+
+\begin{NotebookPitonInOut}{0.5\linewidth}
+print([i**2 for i in range(50)])
+\end{NotebookPitonInOut}
+
+\end{document}

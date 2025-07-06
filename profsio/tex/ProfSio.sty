@@ -1,0 +1,3171 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+%            : Luatruthtable from Chetan Shirore and Dr. Ajit Kumar https://ctan.org/pkg/luatruthtable
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ProfSio}[2025/05/05 0.3.2 Pour les enseignants de Maths en BTS SIO]
+%0.3.2	Bugfix
+%0.3.1	Ajout d'une option pour tikz.babel + option pour siunitx.fr
+%0.3.0	Mise en conformité des grilles d'évaluation CCF
+%0.2.9	Correction d'un bug dans les simplifications de Karnaugh
+%0.2.8	Ajout des grilles de CCF (E2)
+%0.2.7	Correction d'un bug dans les simplifications de Karnaugh
+%0.2.6	Corrections dans les simplifications de Karnaugh
+%0.2.5	Ajout de clés pour les tables de vérité, [Vide], pour ne pas le remplir
+%0.2.4	Ajout d'une commande pour afficher (sans simplifier) une expression booléenne + tables en base donnée + Possibilité math dans diag sagitt
+%0.2.3	Ajout d'une clé [Dense] pour condenser la résolution matricielle de système + commande \KarnaughBlocRegroupAuto pour créer les blocs automatiquement
+%0.2.2	Ajout d'une clé [enonce] pour la résolution matricielle de système (aff/naff la ligne d'énoncé)
+%0.2.1	Opérations posées (+,-,×) avec bin/hex/dec
+%0.2.0	Travail sur les systèmes 3x3 par matrices et la présentation d'un produit matriciel
+%0.1.9	Travail sur les chemins de longueur donnée + fermeture transitive
+%0.1.8	Possibilité de représenter une table de Karnaugh via son expression + corrections mineures
+%0.1.7	Ajout des simplifications booléennes d'expressions classiques
+%0.1.6	Correction dans les simplifications de Karnaugh + Possibilité de travailler avec le contraire
+%0.1.5	Simplification d'expressions booléennes (par Karnaugh)
+%0.1.4	Possibilité de remplir une table de Karnaugh sans virgule
+%0.1.3	Style alternatif et Clé [PoliceTT] pour les tables de Karnaugh
+%0.1.2	Ajout d'une option [Offset] pour les diagrammes sagittaux + Diagrammes sagittaux de composée + Tables de vérité
+%0.1.1	Correction de la documentation + Ajout des diagrammes sagittaux
+%0.1.0	Version initiale
+
+%------option
+\newif\if@loadtikzbabel \@loadtikzbabeltrue
+\newif\if@loadsiunitxfr \@loadsiunitxfrtrue
+\DeclareOption{nontikzbabel}{\@loadtikzbabelfalse}%
+\DeclareOption{nonsiunitxfr}{\@loadsiunitxfrfalse}%
+\DeclareOption*{}
+\ProcessOptions\relax
+
+%------Packages utiles
+\RequirePackage{iftex}
+\RequirePackage{tikz,pgffor}
+\RequirePackage{tabularray}
+\RequirePackage{simplekv}
+\RequirePackage{xstring}
+\RequirePackage{listofitems}
+\RequirePackage{xintexpr}
+\RequirePackage{xintbinhex}
+\RequirePackage{systeme}
+\RequirePackage{ifthen}
+\RequirePackage{siunitx}
+\if@loadsiunitxfr
+	\sisetup{%
+		locale=FR,output-decimal-marker={,},%
+		mode=match,propagate-math-font=true,%
+		reset-math-version=false,reset-text-family=false,%
+		reset-text-series=false,reset-text-shape=false,%
+		text-family-to-math=true,text-series-to-math=true,%
+		group-minimum-digits=4%
+	}%
+\fi
+\RequirePackage{calc}
+\RequirePackage{nicematrix}
+%------Librairies
+\usetikzlibrary{positioning,decorations.pathreplacing,decorations.markings,arrows,arrows.meta,calc,shapes,shapes.geometric}
+\if@loadtikzbabel
+	\usetikzlibrary{babel}
+\fi
+%------Divers
+\def\§{\mkern1.5mu\relax}
+
+%------Graphe MPM
+\defKV[MPM]{%
+	CouleurDurees=\def\MPMCoulDuree{#1},%
+	CouleurFleches=\def\MPMCoulFleche{#1},%
+	LargeurCases=\def\MPMLargBoite{#1},%
+	Epaisseur=\def\MPMThick{#1},%
+	Police=\def\MPMFont{#1},%
+	CouleurDates=\def\MPMCoulDates{#1},%
+	CouleurBords=\def\MPMCoulTraits{#1},%
+	Grille=\def\MPMGrille{#1}
+}
+
+\setKVdefault[MPM]{%
+	CouleurDurees=purple,
+	CouleurFleches=blue,%
+	LargeurCases=0.75cm,%
+	Epaisseur=0.75pt,%
+	Police=\footnotesize\sffamily,%
+	CouleurDates=teal/red,%
+	CouleurBords=black,%
+	NoirBlanc=false,%
+	Grille={}
+}
+
+\NewTblrEnviron{MPMtache}
+\SetTblrInner[MPMtache]{rowsep=1pt,colsep=1pt,colspec={Q[\MPMLargBoite,m,c]Q[\MPMLargBoite,m,c]},cells={font=\MPMFont},row{1}={font=\bfseries\MPMFont}}
+
+\tikzset{
+	pics/MPM/.style args={nom=#1,t=#2,T=#3}{%1=nom noeud,2=t,3=T
+		code = {
+			\node[inner sep=0pt,outer sep=0pt] (#1) at (0,0) {
+				\begin{MPMtache}{hlines={wd=\MPMThick,fg=\MPMCoulTraits},vlines={wd=\MPMThick,fg=\MPMCoulTraits}}
+					\SetCell[c=2]{c} {#1} & \\
+					\textcolor{\MPMCoulDatet}{#2} & \textcolor{\MPMCoulDateT}{#3} \\
+				\end{MPMtache}};
+		}
+	},
+	pics/MPMcomplet/.style args={nom=#1,t=#2,T=#3,MT=#4,ML=#5}{%1=nom noeud/2=t/3=T/4=MT/5=ML
+		code = {
+			\node[inner sep=0pt,outer sep=0pt] (#1) at (0,0) {
+				\begin{MPMtache}{hlines={wd=\MPMThick,fg=\MPMCoulTraits},vlines={wd=\MPMThick,fg=\MPMCoulTraits}}
+					\SetCell[c=2]{c} {#1} & \\
+					\textcolor{\MPMCoulDatet}{#2} & \textcolor{\MPMCoulDateT}{#3} \\
+					#4 & #5 \\
+			\end{MPMtache}};
+		}
+	},%
+	pics/MPMnotice/.style={%
+		code = {
+			\node[inner sep=0pt,outer sep=0pt] (Notice) at (0,0) {
+				\begin{MPMtache}{hline{2-Z}={wd=\MPMThick,fg=\MPMCoulTraits},vlines={2-Z}{wd=\MPMThick,fg=\MPMCoulTraits}}
+					\SetCell[c=2]{c} \textcolor{violet}{Aide} & \\
+					\SetCell[c=2]{c} \textbf{Som.} & \\
+					\textcolor{\MPMCoulDatet}{t} & \textcolor{\MPMCoulDateT}{T} \\
+			\end{MPMtache}};
+		}
+	},%
+	pics/MPMnoticecomplet/.style={%
+		code = {
+			\node[inner sep=0pt,outer sep=0pt] (Notice) at (0,0) {
+				\begin{MPMtache}{hline{2-Z}={wd=\MPMThick,fg=\MPMCoulTraits},vlines={2-Z}{wd=\MPMThick,fg=\MPMCoulTraits}}
+					\SetCell[c=2]{c} \textcolor{violet}{Aide} & \\
+					\SetCell[c=2]{c} {Som.} & \\
+					\textcolor{\MPMCoulDatet}{t} & \textcolor{\MPMCoulDateT}{T} \\
+					MT & ML \\
+			\end{MPMtache}};
+		}
+	},%
+	dureeMPM/.style={circle,draw=none,fill=white,inner sep=1pt,font=\MPMFont,text=\MPMCoulDuree},
+	arcMPM/.style={\MPMCoulFleche,->,>=latex,line width=\MPMThick,line cap=round}
+}
+
+
+\NewDocumentCommand\MPMPlaceTache{ r() r() r() }{%
+	\StrCount{#3}{,}[\MPMtmpType]
+	\xintifboolexpr{\MPMtmpType == 1 }%si il n'y a que 2 dates...
+		{%
+			\StrCut{#3}{,}{\MPMtmpt}{\MPMtmpT}%
+			\pic at (#1) {MPM={nom=#2,t=\MPMtmpt,T=\MPMtmpT}} ;
+		}%
+		{%
+			\StrBefore[1]{#3}{,}[\MPMtmpt]%
+			\StrBetween[1,2]{#3}{,}{,}[\MPMtmpT]%
+			\StrBetween[2,3]{#3}{,}{,}[\MPMtmpMT]%
+			\StrBehind[3]{#3}{,}[\MPMtmpML]%
+			\pic at (#1) {MPMcomplet={nom=#2,t=\MPMtmpt,T=\MPMtmpT,MT=\MPMtmpMT,ML=\MPMtmpML}} ;
+		}%
+}
+
+\NewDocumentCommand\MPMPlaceTaches{ m }{%
+	\setsepchar[.]{/}%
+	\readlist*\MPMListeTaches{#1}%
+	\foreach \i in {1,2,...,\MPMListeTacheslen}%
+		{%
+			\itemtomacro\MPMListeTaches[\i]{\MPMtmpData}%
+			\StrBetween[1,1]{\MPMtmpData}{(}{)}[\MPMtmpCoord]%
+			\StrBetween[2,2]{\MPMtmpData}{(}{)}[\MPMtmpTache]%
+			\StrBetween[3,3]{\MPMtmpData}{(}{)}[\MPMtmpDates]%
+			\MPMPlaceTache(\MPMtmpCoord)(\MPMtmpTache)(\MPMtmpDates)
+		}%
+}
+
+\NewDocumentCommand\MPMPlaceNotice{ s r() }{%
+	\IfBooleanTF{#1}%
+		{%
+			\pic at (#2) {MPMnoticecomplet} ;
+		}%
+		{%
+			\pic at (#2) {MPMnotice} ;
+		}%
+}
+
+\defKV[MPMarc]{%
+	DecalHorizDeb=\def\MPMOffsetHInit{#1},%
+	DecalVertDeb=\def\MPMOffsetVInit{#1},%
+	DecalHorizFin=\def\MPMOffsetHFin{#1},%
+	DecalVertFin=\def\MPMOffsetVFin{#1},%
+	SensCoude=\def\MPMOrientation{#1},%
+	HauteurCoude=\def\MPMHautCoude{#1}
+}
+
+\setKVdefault[MPMarc]{%
+	DecalHorizDeb=0pt,%
+	DecalVertDeb=0pt,%
+	DecalHorizFin=0pt,%
+	DecalVertFin=0pt,%
+	Coude=false,%
+	SensCoude=HV,%
+	HauteurCoude=10pt
+}
+
+\NewDocumentCommand\MPMPlaceDuree{ O{} m D<>{midway}}{%
+	\useKVdefault[MPMarc]%
+	\setKV[MPMarc]{#1}%
+	\StrBefore{#2}{>}[\MPMSommetDep]%
+	\StrBetween{#2}{>}{,}[\MPMSommetFin]%
+	\StrBehind{#2}{,}[\MPMduree]%
+	\ifboolKV[MPMarc]{Coude}%
+		{%
+			\IfStrEq{\MPMOrientation}{HV}%
+				{%
+					\draw[arcMPM] ([xshift=\MPMOffsetHInit,yshift=\MPMOffsetVInit]\MPMSommetDep) -| ([xshift=\MPMOffsetHFin,yshift=\MPMOffsetVFin]\MPMSommetFin) node[dureeMPM,#3] {\MPMduree} ;
+				}{}%
+			\IfStrEq{\MPMOrientation}{VH}%
+				{%
+					\draw[arcMPM] ([xshift=\MPMOffsetHInit,yshift=\MPMOffsetVInit]\MPMSommetDep) |- ([xshift=\MPMOffsetHFin,yshift=\MPMOffsetVFin]\MPMSommetFin) node[dureeMPM,#3] {\MPMduree} ;
+				}{}%
+			\IfStrEq{\MPMOrientation}{VHV}%
+				{%
+					\draw[arcMPM] ([xshift=\MPMOffsetHInit,yshift=\MPMOffsetVInit]\MPMSommetDep)--++(0,{-\MPMHautCoude}) -| ([xshift=\MPMOffsetHFin,yshift=\MPMOffsetVFin]\MPMSommetFin) node[dureeMPM,#3] {\MPMduree} ;
+				}{}%
+		}%
+		{%
+			\draw[arcMPM] ([xshift=\MPMOffsetHInit,yshift=\MPMOffsetVInit]\MPMSommetDep) -- ([xshift=\MPMOffsetHFin,yshift=\MPMOffsetVFin]\MPMSommetFin) node[dureeMPM,#3] {\MPMduree} ;
+		}%
+}
+
+\NewDocumentCommand\MPMPlaceDurees{ O{} m D<>{midway} }{%
+	\setsepchar[.]{/}*
+	\readlist*\KGHListeDurees{#2}%
+	\foreachitem\dureetache\in\KGHListeDurees{%
+		\MPMPlaceDuree[#1]{\dureetache}<#3>%
+	}
+}
+
+\NewDocumentEnvironment{GrapheMPM}{ O{} D<>{} }%
+{%
+	\useKVdefault[MPM]%
+	\setKV[MPM]{#1}%
+	\ifboolKV[MPM]{NoirBlanc}%
+		{%
+			\def\MPMCoulDuree{black}%
+			\def\MPMCoulFleche{black}%
+			\def\MPMCoulDates{black}%
+			\def\MPMCoulTraits{black}
+		}{}%
+	\IfSubStr{\MPMCoulDates}{/}%
+		{%
+			\StrCut{\MPMCoulDates}{/}{\MPMCoulDatet}{\MPMCoulDateT}%
+		}%
+		{%
+			\xdef\MPMCoulDatet{\MPMCoulDates}\xdef\MPMCoulDateT{\MPMCoulDates}
+		}%
+	\begin{tikzpicture}[#2]
+		\IfStrEq{\MPMGrille}{}%
+			{}%
+			{%
+				\StrCut{\MPMGrille}{,}{\MPMGrilleX}{\MPMGrilleY}%
+				\draw[thin,dotted,lightgray,xstep=0.5,ystep=0.5] (0,0) grid (\MPMGrille) ;
+				\draw[thin,lightgray,xstep=1,ystep=1] (0,0) grid (\MPMGrille) ;
+				\foreach \x in {0,0.5,...,\MPMGrilleX} {\draw[thin,lightgray] (\x,0)--++(0,-2pt) node[below,inner sep=1pt,font=\sffamily\tiny] {\x} ;}
+				\foreach \y in {0,0.5,...,\MPMGrilleY} {\draw[thin,lightgray] (0,\y)--++(-2pt,0) node[left,inner sep=1pt,font=\sffamily\tiny] {\y} ;}
+				\filldraw[lightgray] (0,0) circle[radius=1.5pt] ;
+			}%
+}%
+{%
+	\end{tikzpicture}
+}
+
+%------Karnaugh (3 variables)
+\defKV[tblkgh]{%
+	Unite=\def\KGHTechelle{#1},%
+	Variables=\def\KGHTvariables{#1},%
+	Epaisseur=\def\KGHThick{#1},%
+	CouleurCases=\def\KGHTCoulCases{#1},%
+	Couleur=\def\KGHTCoul{#1},%
+	PosVarLaterale=\def\KGHTPosVarA{#1},%
+	CouleurLegende=\def\KGHTCoulLegende{#1}
+}
+
+\setKVdefault[tblkgh]{%
+	Unite=1cm,%
+	Variables=a/b/c,%
+	Swap=false,%
+	Aide=false,%
+	Epaisseur=0.75pt,%
+	CouleurCases=lightgray,%
+	Legende=true,%
+	Couleur=black,%
+	PosVarLaterale=Gauche,%
+	CouleurLegende=black,%
+	StyleAlternatif=false,%
+	AideAlt=true,%
+	PoliceTT=false
+}
+
+\NewDocumentEnvironment{TableKarnaugh}{ O{} D<>{} }%
+{%
+	\useKVdefault[tblkgh]%
+	\setKV[tblkgh]{#1}%
+	\setsepchar[.]{/}%
+	\readlist*\ListeVariablesKGH\KGHTvariables%
+	\IfSubStr{\KGHTCoulLegende}{/}%
+		{%
+			\StrBefore[1]{\KGHTCoulLegende}{/}[\KGHTCoulLegendeA]%
+			\StrBetween[1,2]{\KGHTCoulLegende}{/}{/}[\KGHTCoulLegendeB]%
+			\StrBehind[2]{\KGHTCoulLegende}{/}[\KGHTCoulLegendeC]%
+		}%
+		{%
+			\def\KGHTCoulLegendeA{\KGHTCoulLegende}%
+			\def\KGHTCoulLegendeB{\KGHTCoulLegende}%
+			\def\KGHTCoulLegendeC{\KGHTCoulLegende}%
+		}%
+	\begin{tikzpicture}[x=\KGHTechelle,y=\KGHTechelle,line join=miter,#2]
+		\coordinate (A00) at (0,0) ; \coordinate (A10) at (1,0) ;
+		\coordinate (A20) at (2,0) ; \coordinate (A30) at (3,0) ;
+		\coordinate (A40) at (4,0) ; \coordinate (A01) at (0,1) ;
+		\coordinate (A11) at (1,1) ; \coordinate (A21) at (2,1) ;
+		\coordinate (A31) at (3,1) ; \coordinate (A41) at (4,1) ;
+		\coordinate (A02) at (0,2) ; \coordinate (A12) at (1,2) ;
+		\coordinate (A22) at (2,2) ; \coordinate (A32) at (3,2) ;
+		\coordinate (A42) at (4,2) ;
+		\ifboolKV[tblkgh]{StyleAlternatif}%
+			{
+				\draw[line width=\KGHThick,\KGHTCoul] (A02)--++({-0.5*sqrt(2)},{0.5*sqrt(2)}) ;
+				\ifboolKV[tblkgh]{Legende}
+					{% 
+						\draw[\KGHTCoulLegendeC,line width=\KGHThick] (-7pt,0)--++(0,1) node[midway,left=3pt,inner sep=1pt,text=\KGHTCoulLegendeC,outer sep=0pt] { \ifboolKV[tblkgh]{PoliceTT}{$\strut\mathtt{\ListeVariablesKGH[3]}$}{$\strut{\ListeVariablesKGH[3]}$} } ;
+						\draw[\KGHTCoulLegendeA,line width=\KGHThick] ($(A22)+(0,7pt)$)--++(2,0) node[midway,above,inner sep=1pt,text=\KGHTCoulLegendeA,outer sep=0pt] { \ifboolKV[tblkgh]{PoliceTT}{$\strut\mathtt{\ListeVariablesKGH[1]}$}{$\strut{\ListeVariablesKGH[1]}$} } ;
+						\draw[\KGHTCoulLegendeB,line width=\KGHThick] ($(A10)+(0,-7pt)$)--++(2,0) node[midway,below,inner sep=1pt,text=\KGHTCoulLegendeB,outer sep=0pt] { \ifboolKV[tblkgh]{PoliceTT}{$\strut\mathtt{\ListeVariablesKGH[2]}$}{$\strut{\ListeVariablesKGH[2]}$} } ;
+						\draw ($({-0.25*sqrt(2)},{2+0.25*sqrt(2)})+(-135:10pt)$) node[inner sep=1pt,text=\KGHTCoulLegendeC,outer sep=0pt] { \ifboolKV[tblkgh]{PoliceTT}{$\strut\mathtt{\ListeVariablesKGH[3]}$}{$\strut{\ListeVariablesKGH[3]}$} } ;
+						\draw ($({-0.25*sqrt(2)},{2+0.25*sqrt(2)})+(45:10pt)$) node[inner sep=1pt,outer sep=0pt] { \ifboolKV[tblkgh]{PoliceTT}{$\strut\mathtt{\mathcolor{\KGHTCoulLegendeA}{\ListeVariablesKGH[1]}\mathcolor{\KGHTCoulLegendeB}{\ListeVariablesKGH[2]}}$}{$\strut{\mathcolor{\KGHTCoulLegendeA}{\ListeVariablesKGH[1]}\mathcolor{\KGHTCoulLegendeB}{\ListeVariablesKGH[2]}}$} } ;
+					}%
+					{}%
+			}%
+			{%
+				\ifboolKV[tblkgh]{Legende}
+					{%
+						\draw[\KGHTCoulLegendeB,line width=\KGHThick,decorate,decoration={brace,amplitude=7pt}](0,2.1)--(2,2.1) node[midway,above=7pt,inner sep=1pt,text=\KGHTCoulLegendeB,outer sep=0pt] { \ifboolKV[tblkgh]{PoliceTT}{$\strut\mathtt{\ListeVariablesKGH[2]}$}{$\strut{\ListeVariablesKGH[2]}$} };
+						\draw[\KGHTCoulLegendeB,line width=\KGHThick,decorate,decoration={brace,amplitude=7pt}](2,2.1)--(4,2.1) node[midway,above=7pt,inner sep=1pt,text=\KGHTCoulLegendeB,outer sep=0pt] { \ifboolKV[tblkgh]{PoliceTT}{$\strut\mathtt{\overline{\ListeVariablesKGH[2]}}$}{$\strut{\overline{\ListeVariablesKGH[2]}}$} };
+						\ifboolKV[tblkgh]{Swap}%
+							{%
+								\draw[\KGHTCoulLegendeC,line width=\KGHThick,decorate,decoration={brace,amplitude=7pt,mirror}](1,-0.1)--(3,-0.1) node[midway,below=7pt,inner sep=1pt,text=\KGHTCoulLegendeC,outer sep=0pt] { \ifboolKV[tblkgh]{PoliceTT}{$\strut\mathtt{\ListeVariablesKGH[3]}$}{$\strut{\ListeVariablesKGH[3]}$} };
+								\node[\KGHTCoulLegendeC,inner sep=1pt,below=7pt,outer sep=0pt] at (0.5,-0.1) { \ifboolKV[tblkgh]{PoliceTT}{$\strut\mathtt{\overline{\ListeVariablesKGH[3]}}$}{$\strut{\overline{\ListeVariablesKGH[3]}}$} };
+								\node[\KGHTCoulLegendeC,inner sep=1pt,below=7pt,outer sep=0pt] at (3.5,-0.1) { \ifboolKV[tblkgh]{PoliceTT}{$\strut\mathtt{\overline{\ListeVariablesKGH[3]}}$}{$\strut{\overline{\ListeVariablesKGH[3]}}$} };
+							}%
+							{%
+								\draw[\KGHTCoulLegendeC,line width=\KGHThick,decorate,decoration={brace,amplitude=7pt,mirror}](1,-0.1)--(3,-0.1) node[midway,below=7pt,inner sep=1pt,text=\KGHTCoulLegendeC,outer sep=0pt] { \ifboolKV[tblkgh]{PoliceTT}{$\strut\mathtt{\overline{\ListeVariablesKGH[3]}}$}{$\strut{\overline{\ListeVariablesKGH[3]}}$} };
+								\node[\KGHTCoulLegendeC,inner sep=1pt,below=7pt,outer sep=0pt] at (0.5,-0.1) { \ifboolKV[tblkgh]{PoliceTT}{$\strut\mathtt{\ListeVariablesKGH[3]}$}{$\strut{\ListeVariablesKGH[3]}$} };
+								\node[\KGHTCoulLegendeC,inner sep=1pt,below=7pt,outer sep=0pt] at (3.5,-0.1) { \ifboolKV[tblkgh]{PoliceTT}{$\strut\mathtt{\ListeVariablesKGH[3]}$}{$\strut{\ListeVariablesKGH[3]}$} };
+							}%
+						\IfStrEq{\KGHTPosVarA}{Gauche}
+							{%
+								\node[\KGHTCoulLegendeA,inner sep=1pt,outer sep=0pt,left=8pt] at (0,0.5) { \ifboolKV[tblkgh]{PoliceTT}{$\strut\mathtt{\overline{\ListeVariablesKGH[1]}}$}{$\strut{\overline{\ListeVariablesKGH[1]}}$} };
+								\node[\KGHTCoulLegendeA,inner sep=1pt,outer sep=0pt,left=8pt] at (0,1.5) { \ifboolKV[tblkgh]{PoliceTT}{$\strut\mathtt{\ListeVariablesKGH[1]}$}{$\strut{\ListeVariablesKGH[1]}$} };
+							}{}%
+						\IfStrEq{\KGHTPosVarA}{Droite}
+							{%
+								\node[\KGHTCoulLegendeA,inner sep=1pt,outer sep=0pt,right=8pt] at (4,0.5) { \ifboolKV[tblkgh]{PoliceTT}{$\strut\mathtt{\overline{\ListeVariablesKGH[1]}}$}{$\strut{\overline{\ListeVariablesKGH[1]}}$} };
+								\node[\KGHTCoulLegendeA,inner sep=1pt,outer sep=0pt,right=8pt] at (4,1.5) { \ifboolKV[tblkgh]{PoliceTT}{$\strut\mathtt{\ListeVariablesKGH[1]}$}{$\strut{\ListeVariablesKGH[1]}$} };
+							}{}%
+					}%
+					{}%
+			}%
+		\draw[line width=\KGHThick,step=1,ystep=1,\KGHTCoul] (0,0) grid (4,2) ; \draw[line width=\KGHThick,\KGHTCoul] (0,0) rectangle (4,2) ;
+	}%
+	{%
+		\ifboolKV[tblkgh]{StyleAlternatif}%
+			{%
+				\ifboolKV[tblkgh]{AideAlt}%
+					{%
+						\draw (A02) node[below right=2pt,inner sep=1pt,font=\scriptsize] {000} ;
+						\draw (A12) node[below right=2pt,inner sep=1pt,font=\scriptsize] {010} ;
+						\draw (A22) node[below right=2pt,inner sep=1pt,font=\scriptsize] {110} ;
+						\draw (A32) node[below right=2pt,inner sep=1pt,font=\scriptsize] {100} ;
+						\draw (A01) node[below right=2pt,inner sep=1pt,font=\scriptsize] {001} ;
+						\draw (A11) node[below right=2pt,inner sep=1pt,font=\scriptsize] {011} ;
+						\draw (A21) node[below right=2pt,inner sep=1pt,font=\scriptsize] {111} ;
+						\draw (A31) node[below right=2pt,inner sep=1pt,font=\scriptsize] {101} ;
+					}{}%
+			}{}%
+		\ifboolKV[tblkgh]{Aide}%
+			{%
+				\foreach \noeud in {00,10,20,30,40,01,11,21,31,41,02,12,22,32,42}
+					{%
+						\draw (A\noeud) node[gray,inner sep=1pt,fill=yellow,text=red,outer sep=0pt,font=\tiny\sffamily,scale=0.75] {A\noeud} ;
+					}%
+			}{}%
+	\end{tikzpicture}
+}%
+
+\defKV[blockarnaugh]{%
+	Decalage=\def\KGHdecalage{#1},%
+	Couleur=\def\KGHcouleur{#1},%
+	Type=\def\KGHtype{#1}
+}
+
+\setKVdefault[blockarnaugh]{%
+	Decalage=2pt,%
+	Couleur=red,%
+	Type=Centre
+}
+
+\newcommand\KarnaughBlocCoul[2][lightgray]{%
+	\setsepchar[.]{,./}%
+	\readlist*\KGHListeRect{#2}%
+	\xintFor* ##1 in {\xintSeq{1}{\KGHListeRectlen}}\do{%
+		\draw[line width=\KGHThick,fill=#1] (A\KGHListeRect[##1,1]) rectangle (A\KGHListeRect[##1,2]) ;
+		\draw[line width=\KGHThick] (A\KGHListeRect[##1,1]) grid (A\KGHListeRect[##1,2]) ;
+	}%
+}
+
+\NewDocumentCommand\KarnaughCasesResult{ s m }{%
+	\IfBooleanTF{#1}%
+		{%
+			\IfSubStr{#2}{,}%
+				{%
+					\setsepchar{,}%
+					\readlist*\KGHListeResult{#2}%
+					\xintifboolexpr{\KGHListeResult[1] == 1}{\draw[line width=\KGHThick,fill=\KGHTCoulCases,draw=\KGHTCoul] (A01) rectangle (A12) ;}{}%
+					\xintifboolexpr{\KGHListeResult[2] == 1}{\draw[line width=\KGHThick,fill=\KGHTCoulCases,draw=\KGHTCoul] (A11) rectangle (A22) ;}{}%
+					\xintifboolexpr{\KGHListeResult[3] == 1}{\draw[line width=\KGHThick,fill=\KGHTCoulCases,draw=\KGHTCoul] (A21) rectangle (A32) ;}{}%
+					\xintifboolexpr{\KGHListeResult[4] == 1}{\draw[line width=\KGHThick,fill=\KGHTCoulCases,draw=\KGHTCoul] (A31) rectangle (A42) ;}{}%
+					\xintifboolexpr{\KGHListeResult[5] == 1}{\draw[line width=\KGHThick,fill=\KGHTCoulCases,draw=\KGHTCoul] (A00) rectangle (A11) ;}{}%
+					\xintifboolexpr{\KGHListeResult[6] == 1}{\draw[line width=\KGHThick,fill=\KGHTCoulCases,draw=\KGHTCoul] (A10) rectangle (A21) ;}{}%
+					\xintifboolexpr{\KGHListeResult[7] == 1}{\draw[line width=\KGHThick,fill=\KGHTCoulCases,draw=\KGHTCoul] (A20) rectangle (A31) ;}{}%
+					\xintifboolexpr{\KGHListeResult[8] == 1}{\draw[line width=\KGHThick,fill=\KGHTCoulCases,draw=\KGHTCoul] (A30) rectangle (A41) ;}{}%
+				}%
+				{%
+					\StrChar{#2}{1}[\TmpCharA]\xintifboolexpr{\TmpCharA == 1}{\draw[line width=\KGHThick,fill=\KGHTCoulCases,draw=\KGHTCoul] (A01) rectangle (A12) ;}{}%
+					\StrChar{#2}{2}[\TmpCharB]\xintifboolexpr{\TmpCharB == 1}{\draw[line width=\KGHThick,fill=\KGHTCoulCases,draw=\KGHTCoul] (A11) rectangle (A22) ;}{}%
+					\StrChar{#2}{3}[\TmpCharC]\xintifboolexpr{\TmpCharC == 1}{\draw[line width=\KGHThick,fill=\KGHTCoulCases,draw=\KGHTCoul] (A21) rectangle (A32) ;}{}%
+					\StrChar{#2}{4}[\TmpCharD]\xintifboolexpr{\TmpCharD == 1}{\draw[line width=\KGHThick,fill=\KGHTCoulCases,draw=\KGHTCoul] (A31) rectangle (A42) ;}{}%
+					\StrChar{#2}{5}[\TmpCharE]\xintifboolexpr{\TmpCharE == 1}{\draw[line width=\KGHThick,fill=\KGHTCoulCases,draw=\KGHTCoul] (A00) rectangle (A11) ;}{}%
+					\StrChar{#2}{6}[\TmpCharF]\xintifboolexpr{\TmpCharF == 1}{\draw[line width=\KGHThick,fill=\KGHTCoulCases,draw=\KGHTCoul] (A10) rectangle (A21) ;}{}%
+					\StrChar{#2}{7}[\TmpCharG]\xintifboolexpr{\TmpCharG == 1}{\draw[line width=\KGHThick,fill=\KGHTCoulCases,draw=\KGHTCoul] (A20) rectangle (A31) ;}{}%
+					\StrChar{#2}{8}[\TmpCharH]\xintifboolexpr{\TmpCharH == 1}{\draw[line width=\KGHThick,fill=\KGHTCoulCases,draw=\KGHTCoul] (A30) rectangle (A41) ;}{}%
+				}%
+		}%
+		{%
+			\IfSubStr{#2}{,}%
+				{%
+					\setsepchar{,}%
+					\readlist*\KGHListeResult{#2}%
+					\draw (0.5,1.5) node[text=\KGHTCoulCases!50!black,font=\large\ttfamily] {\KGHListeResult[1]} ;
+					\draw (1.5,1.5) node[text=\KGHTCoulCases!50!black,font=\large\ttfamily] {\KGHListeResult[2]} ;
+					\draw (2.5,1.5) node[text=\KGHTCoulCases!50!black,font=\large\ttfamily] {\KGHListeResult[3]} ;
+					\draw (3.5,1.5) node[text=\KGHTCoulCases!50!black,font=\large\ttfamily] {\KGHListeResult[4]} ;
+					\draw (0.5,0.5) node[text=\KGHTCoulCases!50!black,font=\large\ttfamily] {\KGHListeResult[5]} ;
+					\draw (1.5,0.5) node[text=\KGHTCoulCases!50!black,font=\large\ttfamily] {\KGHListeResult[6]} ;
+					\draw (2.5,0.5) node[text=\KGHTCoulCases!50!black,font=\large\ttfamily] {\KGHListeResult[7]} ;
+					\draw (3.5,0.5) node[text=\KGHTCoulCases!50!black,font=\large\ttfamily] {\KGHListeResult[8]} ;
+				}%
+				{%
+					\draw (0.5,1.5) node[text=\KGHTCoulCases!50!black,font=\large\ttfamily] {\StrChar{#2}{1}} ;
+					\draw (1.5,1.5) node[text=\KGHTCoulCases!50!black,font=\large\ttfamily] {\StrChar{#2}{2}} ;
+					\draw (2.5,1.5) node[text=\KGHTCoulCases!50!black,font=\large\ttfamily] {\StrChar{#2}{3}} ;
+					\draw (3.5,1.5) node[text=\KGHTCoulCases!50!black,font=\large\ttfamily] {\StrChar{#2}{4}} ;
+					\draw (0.5,0.5) node[text=\KGHTCoulCases!50!black,font=\large\ttfamily] {\StrChar{#2}{5}} ;
+					\draw (1.5,0.5) node[text=\KGHTCoulCases!50!black,font=\large\ttfamily] {\StrChar{#2}{6}} ;
+					\draw (2.5,0.5) node[text=\KGHTCoulCases!50!black,font=\large\ttfamily] {\StrChar{#2}{7}} ;
+					\draw (3.5,0.5) node[text=\KGHTCoulCases!50!black,font=\large\ttfamily] {\StrChar{#2}{8}} ;
+				}%
+		}%
+}
+
+\NewDocumentCommand\KarnaughCasesAuto{ s m }{%
+	\itemtomacro\ListeVariablesKGH[1]{\VarTMPA}%
+	\itemtomacro\ListeVariablesKGH[2]{\VarTMPB}%
+	\itemtomacro\ListeVariablesKGH[3]{\VarTMPC}%
+	%substitutions pour binaire
+	\StrSubstitute{#2}{\VarTMPA}{AA}[\knghbintransf]%
+	\StrSubstitute{\knghbintransf}{\VarTMPB}{BB}[\knghbintransf]%
+	\StrSubstitute{\knghbintransf}{\VarTMPC}{CC}[\knghbintransf]%
+	\xdef\knghbinres{00000000}%
+	%cas différents suivant la configuration
+	\ifboolKV[tblkgh]{StyleAlternatif}%
+		{%
+			%calculs pour 1 lettre
+			\IfSubStr{\knghbintransf}{(AA)}{\xdef\knghbinres{\inteval{\knghbinres+00110011}}}{}%
+			\IfSubStr{\knghbintransf}{(BB)}{\xdef\knghbinres{\inteval{\knghbinres+01100110}}}{}%
+			\IfSubStr{\knghbintransf}{(CC)}{\xdef\knghbinres{\inteval{\knghbinres+00001111}}}{}%
+			\IfSubStr{\knghbintransf}{(AA*)}{\xdef\knghbinres{\inteval{\knghbinres+11001100}}}{}%
+			\IfSubStr{\knghbintransf}{(BB*)}{\xdef\knghbinres{\inteval{\knghbinres+10011001}}}{}%
+			\IfSubStr{\knghbintransf}{(CC*)}{\xdef\knghbinres{\inteval{\knghbinres+11110000}}}{}%
+			%calculs pour 2 lettres
+			\IfSubStr{\knghbintransf}{(AABB)}{\xdef\knghbinres{\inteval{\knghbinres+00100010}}}{}%
+			\IfSubStr{\knghbintransf}{(AACC*)}{\xdef\knghbinres{\inteval{\knghbinres+00110000}}}{}%
+			\IfSubStr{\knghbintransf}{(AABB*)}{\xdef\knghbinres{\inteval{\knghbinres+00010001}}}{}%
+			\IfSubStr{\knghbintransf}{(AA*BB)}{\xdef\knghbinres{\inteval{\knghbinres+01000100}}}{}%
+			\IfSubStr{\knghbintransf}{(AA*CC*)}{\xdef\knghbinres{\inteval{\knghbinres+11000000}}}{}%
+			\IfSubStr{\knghbintransf}{(AA*BB*)}{\xdef\knghbinres{\inteval{\knghbinres+10001000}}}{}%
+			\IfSubStr{\knghbintransf}{(AACC)}{\xdef\knghbinres{\inteval{\knghbinres+00000011}}}{}%
+			\IfSubStr{\knghbintransf}{(AA*CC)}{\xdef\knghbinres{\inteval{\knghbinres+00001100}}}{}%
+			\IfSubStr{\knghbintransf}{(BBCC)}{\xdef\knghbinres{\inteval{\knghbinres+00000110}}}{}%
+			\IfSubStr{\knghbintransf}{(BBCC*)}{\xdef\knghbinres{\inteval{\knghbinres+01100000}}}{}%
+			\IfSubStr{\knghbintransf}{(BB*CC*)}{\xdef\knghbinres{\inteval{\knghbinres+10010000}}}{}%
+			\IfSubStr{\knghbintransf}{(BB*CC)}{\xdef\knghbinres{\inteval{\knghbinres+00001001}}}{}%
+			%calculs pour 3 lettres
+			\IfSubStr{\knghbintransf}{(AABBCC)}{\xdef\knghbinres{\inteval{\knghbinres+00000010}}}{}%
+			\IfSubStr{\knghbintransf}{(AABBCC*)}{\xdef\knghbinres{\inteval{\knghbinres+00100000}}}{}%
+			\IfSubStr{\knghbintransf}{(AABB*CC*)}{\xdef\knghbinres{\inteval{\knghbinres+00010000}}}{}%
+			\IfSubStr{\knghbintransf}{(AABB*CC)}{\xdef\knghbinres{\inteval{\knghbinres+00000001}}}{}%
+			\IfSubStr{\knghbintransf}{(AA*BBCC)}{\xdef\knghbinres{\inteval{\knghbinres+00000100}}}{}%
+			\IfSubStr{\knghbintransf}{(AA*BBCC*)}{\xdef\knghbinres{\inteval{\knghbinres+01000000}}}{}%
+			\IfSubStr{\knghbintransf}{(AA*BB*CC*)}{\xdef\knghbinres{\inteval{\knghbinres+10000000}}}{}%
+			\IfSubStr{\knghbintransf}{(AA*BB*CC)}{\xdef\knghbinres{\inteval{\knghbinres+00001000}}}{}%
+		}%
+		{%
+			\ifboolKV[tblkgh]{Swap}%c*|c|c|c* sinon c|c*|c*|c
+				{%
+					%calculs pour 1 lettre
+					\IfSubStr{\knghbintransf}{(AA)}{\xdef\knghbinres{\inteval{\knghbinres+11110000}}}{}%
+					\IfSubStr{\knghbintransf}{(BB)}{\xdef\knghbinres{\inteval{\knghbinres+11001100}}}{}%
+					\IfSubStr{\knghbintransf}{(CC)}{\xdef\knghbinres{\inteval{\knghbinres+01100110}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*)}{\xdef\knghbinres{\inteval{\knghbinres+00001111}}}{}%
+					\IfSubStr{\knghbintransf}{(BB*)}{\xdef\knghbinres{\inteval{\knghbinres+00110011}}}{}%
+					\IfSubStr{\knghbintransf}{(CC*)}{\xdef\knghbinres{\inteval{\knghbinres+10011001}}}{}%
+					%calculs pour 2 lettres
+					\IfSubStr{\knghbintransf}{(AABB)}{\xdef\knghbinres{\inteval{\knghbinres+11000000}}}{}%
+					\IfSubStr{\knghbintransf}{(AACC*)}{\xdef\knghbinres{\inteval{\knghbinres+10010000}}}{}%
+					\IfSubStr{\knghbintransf}{(AABB*)}{\xdef\knghbinres{\inteval{\knghbinres+00110000}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*BB)}{\xdef\knghbinres{\inteval{\knghbinres+00001100}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*CC*)}{\xdef\knghbinres{\inteval{\knghbinres+00001001}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*BB*)}{\xdef\knghbinres{\inteval{\knghbinres+00000011}}}{}%
+					\IfSubStr{\knghbintransf}{(AACC)}{\xdef\knghbinres{\inteval{\knghbinres+01100000}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*CC)}{\xdef\knghbinres{\inteval{\knghbinres+00000110}}}{}%
+					\IfSubStr{\knghbintransf}{(BBCC)}{\xdef\knghbinres{\inteval{\knghbinres+01000100}}}{}%
+					\IfSubStr{\knghbintransf}{(BBCC*)}{\xdef\knghbinres{\inteval{\knghbinres+10001000}}}{}%
+					\IfSubStr{\knghbintransf}{(BB*CC*)}{\xdef\knghbinres{\inteval{\knghbinres+00010001}}}{}%
+					\IfSubStr{\knghbintransf}{(BB*CC)}{\xdef\knghbinres{\inteval{\knghbinres+00100010}}}{}%
+					%calculs pour 3 lettres
+					\IfSubStr{\knghbintransf}{(AABBCC)}{\xdef\knghbinres{\inteval{\knghbinres+01000000}}}{}%
+					\IfSubStr{\knghbintransf}{(AABBCC*)}{\xdef\knghbinres{\inteval{\knghbinres+10000000}}}{}%
+					\IfSubStr{\knghbintransf}{(AABB*CC*)}{\xdef\knghbinres{\inteval{\knghbinres+00010000}}}{}%
+					\IfSubStr{\knghbintransf}{(AABB*CC)}{\xdef\knghbinres{\inteval{\knghbinres+00100000}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*BBCC)}{\xdef\knghbinres{\inteval{\knghbinres+00000100}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*BBCC*)}{\xdef\knghbinres{\inteval{\knghbinres+00001000}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*BB*CC*)}{\xdef\knghbinres{\inteval{\knghbinres+00000001}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*BB*CC)}{\xdef\knghbinres{\inteval{\knghbinres+00000010}}}{}%
+				}%
+				{%
+					%calculs pour 1 lettre
+					\IfSubStr{\knghbintransf}{(AA)}{\xdef\knghbinres{\inteval{\knghbinres+11110000}}}{}%
+					\IfSubStr{\knghbintransf}{(BB)}{\xdef\knghbinres{\inteval{\knghbinres+11001100}}}{}%
+					\IfSubStr{\knghbintransf}{(CC)}{\xdef\knghbinres{\inteval{\knghbinres+10011001}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*)}{\xdef\knghbinres{\inteval{\knghbinres+00001111}}}{}%
+					\IfSubStr{\knghbintransf}{(BB*)}{\xdef\knghbinres{\inteval{\knghbinres+00110011}}}{}%
+					\IfSubStr{\knghbintransf}{(CC*)}{\xdef\knghbinres{\inteval{\knghbinres+01100110}}}{}%
+					%calculs pour 2 lettres
+					\IfSubStr{\knghbintransf}{(AABB)}{\xdef\knghbinres{\inteval{\knghbinres+11000000}}}{}%
+					\IfSubStr{\knghbintransf}{(AACC*)}{\xdef\knghbinres{\inteval{\knghbinres+01100000}}}{}%
+					\IfSubStr{\knghbintransf}{(AABB*)}{\xdef\knghbinres{\inteval{\knghbinres+00110000}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*BB)}{\xdef\knghbinres{\inteval{\knghbinres+00001100}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*CC*)}{\xdef\knghbinres{\inteval{\knghbinres+00000110}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*BB*)}{\xdef\knghbinres{\inteval{\knghbinres+00000011}}}{}%
+					\IfSubStr{\knghbintransf}{(AACC)}{\xdef\knghbinres{\inteval{\knghbinres+10010000}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*CC)}{\xdef\knghbinres{\inteval{\knghbinres+00001001}}}{}%
+					\IfSubStr{\knghbintransf}{(BBCC)}{\xdef\knghbinres{\inteval{\knghbinres+10001000}}}{}%
+					\IfSubStr{\knghbintransf}{(BBCC*)}{\xdef\knghbinres{\inteval{\knghbinres+01000100}}}{}%
+					\IfSubStr{\knghbintransf}{(BB*CC*)}{\xdef\knghbinres{\inteval{\knghbinres+00100010}}}{}%
+					\IfSubStr{\knghbintransf}{(BB*CC)}{\xdef\knghbinres{\inteval{\knghbinres+00010001}}}{}%
+					%calculs pour 3 lettres
+					\IfSubStr{\knghbintransf}{(AABBCC)}{\xdef\knghbinres{\inteval{\knghbinres+10000000}}}{}%
+					\IfSubStr{\knghbintransf}{(AABBCC*)}{\xdef\knghbinres{\inteval{\knghbinres+01000000}}}{}%
+					\IfSubStr{\knghbintransf}{(AABB*CC*)}{\xdef\knghbinres{\inteval{\knghbinres+00100000}}}{}%
+					\IfSubStr{\knghbintransf}{(AABB*CC)}{\xdef\knghbinres{\inteval{\knghbinres+00010000}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*BBCC)}{\xdef\knghbinres{\inteval{\knghbinres+00001000}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*BBCC*)}{\xdef\knghbinres{\inteval{\knghbinres+00000100}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*BB*CC*)}{\xdef\knghbinres{\inteval{\knghbinres+00000010}}}{}%
+					\IfSubStr{\knghbintransf}{(AA*BB*CC)}{\xdef\knghbinres{\inteval{\knghbinres+00000001}}}{}%
+				}%
+		}%
+	%on complète
+	\StrLen{\knghbinres}[\knghbinresnbchiffres]
+	\ifnum\knghbinresnbchiffres<8%
+		\xdef\nbz{\inteval{8-\knghbinresnbchiffres}}%
+		\xdef\knghbinres{\KnghBourrageZeros{\nbz}\knghbinres}%
+	\fi%
+	\xintFor* ##1 in {\xintSeq{2}{8}}\do{\StrSubstitute{\knghbinres}{##1}{1}[\knghbinres]}%
+	\IfBooleanTF{#1}%
+		{%
+			\KarnaughCasesResult*{\knghbinres}
+		}%
+		{%
+			\KarnaughCasesResult{\knghbinres}
+		}%
+}
+
+\newcommand\KarnaughBlocRegroup[3][]{%
+	\useKVdefault[blockarnaugh]%
+	\setKV[blockarnaugh]{#1}%
+	\IfStrEq{\KGHtype}{Centre}%
+		{\draw[rounded corners,line width=1.25pt,color=\KGHcouleur] ($(A#2)+(-\KGHdecalage,-\KGHdecalage)$) rectangle ($(A#3)+(\KGHdecalage,\KGHdecalage)$);}%
+		{}%
+	\IfStrEq{\KGHtype}{Gauche}%#2=BG #3=HD
+		{%
+			\StrChar{#2}{1}[\KGHia]%
+			\StrChar{#2}{2}[\KGHja]%
+			\StrChar{#3}{1}[\KGHib]%
+			\StrChar{#3}{2}[\KGHjb]%
+			\draw[rounded corners,line width=1.25pt,color=\KGHcouleur]%
+			($(A#2)+(-\KGHdecalage,-\KGHdecalage)$) -- ($(A\KGHib\KGHja)+(\KGHdecalage,-\KGHdecalage)$)%
+			-- ($(A#3)+(\KGHdecalage,\KGHdecalage)$) -- ($(A\KGHia\KGHjb)+(-\KGHdecalage,\KGHdecalage)$);%
+		}%
+		{}%
+	\IfStrEq{\KGHtype}{Droite}%#2=BD #3=HG
+		{%
+			\StrChar{#2}{1}[\KGHia]%
+			\StrChar{#2}{2}[\KGHja]%
+			\StrChar{#3}{1}[\KGHib]%
+			\StrChar{#3}{2}[\KGHjb]%
+			\draw[rounded corners,line width=1.25pt,color=\KGHcouleur]%
+			($(A#2)+(\KGHdecalage,-\KGHdecalage)$) -- ($(A\KGHib\KGHja)+(-\KGHdecalage,-\KGHdecalage)$)%
+			-- ($(A#3)+(-\KGHdecalage,\KGHdecalage)$) -- ($(A\KGHia\KGHjb)+(\KGHdecalage,\KGHdecalage)$);%
+		}%
+		{}%
+}
+
+\defKV[blocksarnaugh]{%
+	Decalages=\def\KGHdecalage{#1},%
+	Couleurs=\def\KGHcouleur{#1}
+}
+
+\setKVdefault[blocksarnaugh]{%
+	Decalages={2pt,1pt,-1pt},%
+	Couleurs={red,blue,violet}
+}
+
+\newcommand\KarnaughBlocRegroupAuto[2][]{%
+	%1 = clés blocs
+	\useKVdefault[blocksarnaugh]%
+	\setKV[blocksarnaugh]{#1}%
+	\itemtomacro\ListeVariablesKGH[1]{\VarTMPA}%
+	\itemtomacro\ListeVariablesKGH[2]{\VarTMPB}%
+	\itemtomacro\ListeVariablesKGH[3]{\VarTMPC}%
+	%substitutions pour placement auto
+	\StrSubstitute{#2}{\VarTMPA}{AA}[\knghbintransf]%
+	\StrSubstitute{\knghbintransf}{\VarTMPB}{BB}[\knghbintransf]%
+	\StrSubstitute{\knghbintransf}{\VarTMPC}{CC}[\knghbintransf]%
+	%liste des regroupements
+	\setsepchar{+}%
+	\readlist*\knghlstblocks{\knghbintransf}%
+	%liste décalages/couleurs
+	\setsepchar{,}%
+	\readlist*\knghlstblockscolors{\KGHcouleur}%
+	\readlist*\knghlstblocksdecals{\KGHdecalage}%
+	\xintFor* ##1 in {\xintSeq{1}{\knghlstblockslen}}\do{%
+		\itemtomacro\knghlstblocks[##1]\tmpblockkngh%
+		\itemtomacro\knghlstblockscolors[##1]\tmpblockknghcol%
+		\itemtomacro\knghlstblocksdecals[##1]\tmpblockknghdecal%
+		\ifboolKV[tblkgh]{StyleAlternatif}%
+			{%
+				\IfStrEqCase{\tmpblockkngh}{%
+					%calculs pour 1 lettre
+					{(AA)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{20}{42}}%
+					{(BB)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{10}{32}}
+					{(CC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{41}}%
+					{(AA*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{22}}%
+					{(BB*)}{\KarnaughBlocRegroup[Type=Gauche,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{12}\KarnaughBlocRegroup[Type=Droite,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{40}{32}}%
+					{(CC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{01}{42}}%
+					%calculs pour 2 lettres
+					{(AABB)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{20}{31}}%
+					{(AACC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{21}{42}}%
+					{(AABB*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{30}{42}}%
+					{(AA*BB)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{10}{22}}%
+					{(AA*CC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{01}{22}}%
+					{(AA*BB*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{12}}%
+					{(AACC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{20}{41}}%
+					{(AA*CC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{21}}%
+					{(BBCC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{10}{31}}%
+					{(BBCC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{11}{32}}%
+					{(BB*CC*)}{\KarnaughBlocRegroup[Type=Gauche,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{01}{12}\KarnaughBlocRegroup[Type=Droite,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{41}{32}}%
+					{(BB*CC)}{\KarnaughBlocRegroup[Type=Gauche,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{11}\KarnaughBlocRegroup[Type=Droite,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{40}{31}}%
+					%calculs pour 3 lettres
+					{(AABBCC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{20}{31}}%
+					{(AABBCC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{21}{32}}%
+					{(AABB*CC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{31}{42}}%
+					{(AABB*CC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{30}{41}}%
+					{(AA*BBCC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{10}{21}}%
+					{(AA*BBCC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{11}{22}}%
+					{(AA*BB*CC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{01}{12}}%
+					{(AA*BB*CC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{11}}%
+				}%
+			}%
+			{%styles classiques, normal ou swap
+				\ifboolKV[tblkgh]{Swap}%
+					{%
+						\IfStrEqCase{\tmpblockkngh}{%
+							%calculs pour 1 lettre
+							{(AA)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{01}{42}}%
+							{(BB)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{22}}%
+							{(CC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{10}{32}}
+							{(AA*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{41}}%
+							{(BB*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{20}{44}}%
+							{(CC*)}{\KarnaughBlocRegroup[Type=Gauche,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{12}\KarnaughBlocRegroup[Type=Droite,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{40}{32}}%%
+							%calculs pour 2 lettres
+							{(AABB)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{01}{22}}%
+							{(AACC*)}{\KarnaughBlocRegroup[Type=Gauche,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{01}{12}\KarnaughBlocRegroup[Type=Droite,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{41}{32}}%
+							{(AABB*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{21}{42}}%
+							{(AA*BB)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{21}}%
+							{(AA*CC*)}{\KarnaughBlocRegroup[Type=Gauche,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{11}\KarnaughBlocRegroup[Type=Droite,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{40}{31}}%
+							{(AA*BB*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{20}{41}}%
+							{(AACC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{11}{32}}%
+							{(AA*CC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{10}{31}}%
+							{(BBCC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{10}{22}}%
+							{(BBCC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{12}}%
+							{(BB*CC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{30}{42}}%
+							{(BB*CC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{20}{32}}%
+							%calculs pour 3 lettres
+							{(AABBCC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{11}{22}}%
+							{(AABBCC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{01}{12}}%
+							{(AABB*CC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{31}{42}}%
+							{(AABB*CC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{20}{31}}%
+							{(AA*BBCC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{10}{21}}%
+							{(AA*BBCC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{11}}%
+							{(AA*BB*CC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{30}{41}}%
+							{(AA*BB*CC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{20}{31}}%
+						}%
+					}%
+					{%
+						\IfStrEqCase{\tmpblockkngh}{%
+							%calculs pour 1 lettre
+							{(AA)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{01}{42}}%
+							{(BB)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{22}}%
+							{(CC)}{\KarnaughBlocRegroup[Type=Gauche,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{12}\KarnaughBlocRegroup[Type=Droite,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{40}{32}}%
+							{(AA*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{41}}%
+							{(BB*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{20}{44}}%
+							{(CC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{10}{32}}%
+							%calculs pour 2 lettres
+							{(AABB)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{01}{22}}%
+							{(AACC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{11}{32}}%
+							{(AABB*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{21}{42}}%
+							{(AA*BB)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{21}}%
+							{(AA*CC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{10}{31}}%
+							{(AA*BB*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{20}{41}}%
+							{(AACC)}{\KarnaughBlocRegroup[Type=Gauche,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{01}{12}\KarnaughBlocRegroup[Type=Droite,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{41}{32}}%
+							{(AA*CC)}{\KarnaughBlocRegroup[Type=Gauche,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{11}\KarnaughBlocRegroup[Type=Droite,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{40}{31}}%
+							{(BBCC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{12}}%
+							{(BBCC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{10}{22}}%
+							{(BB*CC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{20}{32}}%
+							{(BB*CC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{30}{42}}%
+							%calculs pour 3 lettres
+							{(AABBCC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{01}{12}}%
+							{(AABBCC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{11}{22}}%
+							{(AABB*CC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{21}{32}}%
+							{(AABB*CC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{30}{41}}%
+							{(AA*BBCC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{00}{11}}%
+							{(AA*BBCC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{10}{21}}%
+							{(AA*BB*CC*)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{20}{31}}%
+							{(AA*BB*CC)}{\KarnaughBlocRegroup[Type=Centre,Couleur=\tmpblockknghcol,Decalage=\tmpblockknghdecal]{30}{41}}%
+						}%
+					}%
+			}%
+	}%
+}
+
+%------Graphes
+\defKV[GraphSIO]{%
+	Police=\def\GrphPoliceSommets{#1},%
+	Poids=\def\GrphPolicePoids{#1},%
+	CouleurSommets=\def\GrphCoulSommets{#1},%
+	CouleurFleches=\def\GrphCoulFleches{#1},%
+	Epaisseur=\def\GrphTchick{#1},%
+	TypeSommets=\def\GrphTypeSomm{#1},%
+	Unite=\def\GrphUnit{#1},%
+	CouleurFT=\def\GrphCoulFT{#1},%
+	Grille=\def\GrphGrille{#1},%
+	DimensionSommets=\def\GrphDimSommet{#1},%
+	PositionFleches=\def\GrphPosArrow{#1},%
+	EchelleFleches=\def\GrphScaleArrow{#1},%
+	TypeFleche=\def\GrphTypeArrow{#1}
+}
+
+\setKVdefault[GraphSIO]{%
+	Police={\bfseries\Large\sffamily},%
+	Poids={\sffamily},%
+	CouleurSommets={black},%
+	CouleurFleches={black},%
+	TypeSommets=circle,%
+	Epaisseur=thick,%
+	Unite=1cm,%
+	CouleurFT=red,%
+	Grille={},%
+	DimensionSommets=1cm,%
+	PositionFleches={Fin},%
+	EchelleFleches=1,%
+	TypeFleche=Latex
+}
+
+\NewDocumentEnvironment{GrapheTikz}{ O{} D<>{} }%
+{%
+	\restoreKV[GraphSIO]% revenir au valeurs par défaut
+	\setKV[GraphSIO]{#1}% lit les arguments optionnels
+	\IfSubStr{\GrphDimSommet}{/}%
+		{%
+			\StrCut{\GrphDimSommet}{/}{\GrphDimSommetLarg}{\GrphDimSommetHaut}%
+		}%
+		{%
+			\def\GrphDimSommetLarg{\GrphDimSommet}\def\GrphDimSommetHaut{\GrphDimSommet}%
+		}%
+	\IfSubStr{\GrphTchick}{/}%
+		{%
+			\StrCut{\GrphTchick}{/}{\GrphTchickA}{\GrphTchickB}%
+		}%
+		{%
+			\def\GrphTchickA{\GrphTchick}\def\GrphTchickB{\GrphTchick}%
+		}%
+	\IfSubStr{\GrphCoulSommets}{/}%
+		{%
+			\StrCut{\GrphCoulSommets}{/}{\GrphCoulA}{\GrphCoulB}%
+		}%
+		{%
+			\def\GrphCoulA{\GrphCoulSommets}\def\GrphCoulB{\GrphCoulSommets}%
+		}%
+	\begin{tikzpicture}[x=\GrphUnit,y=\GrphUnit,#2]
+		\tikzset{GrphStyleSommet/.style = {\GrphTchickA,draw=\GrphCoulA,\GrphTypeSomm,minimum height=\GrphDimSommetHaut,minimum width=\GrphDimSommetLarg,text=\GrphCoulB}}%
+		\tikzset{GrphStylepoids/.style = {inner sep=2pt,midway,draw=none,font=\GrphPolicePoids,text=\GrphCoulFleches,fill=white}}%
+		\IfStrEq{\GrphPosArrow}{Fin}%
+			{%
+				\tikzset{GrphStyleArc/.style = {\GrphCoulFleches,\GrphTchickB,-{\GrphTypeArrow[scale=\GrphScaleArrow]}}}%
+			}%
+			{}%
+		\IfStrEq{\GrphPosArrow}{Milieu}%
+			{%
+				\tikzset{GrphStyleArc/.style = {\GrphCoulFleches,\GrphTchickB,postaction={decorate},decoration={markings,mark=at position 0.55 with {\arrow[scale=\GrphScaleArrow,>=\GrphTypeArrow]{>}}}}}%
+			}{}%
+		\tikzset{FT/.style = {\GrphCoulFT}}%
+		\IfStrEq{\GrphGrille}{}%
+			{}%
+			{%
+				\StrCut{\GrphGrille}{,}{\GrphGrilleX}{\GrphGrilleY}%
+				\draw[thin,dotted,lightgray,xstep=0.5,ystep=0.5] (0,0) grid (\GrphGrille) ;%
+				\draw[thin,lightgray,xstep=1,ystep=1] (0,0) grid (\GrphGrille) ;%
+				\foreach \x in {0,0.5,...,\GrphGrilleX} {\draw[thin,lightgray] (\x,0)--++(0,-2pt) node[below,inner sep=1pt,font=\sffamily\tiny] {\x} ;}%
+				\foreach \y in {0,0.5,...,\GrphGrilleY} {\draw[thin,lightgray] (0,\y)--++(-2pt,0) node[left,inner sep=1pt,font=\sffamily\tiny] {\y} ;}%
+				\filldraw[lightgray] (0,0) circle[radius=1.5pt] ;%
+			}%
+}%
+{%
+	\end{tikzpicture}
+}
+
+\NewDocumentCommand\GrphPlaceSommets{ m }{%
+	\setsepchar[.]{ ./}%
+	\readlist*\GrphtmpLS{#1}%
+	\xintFor* ##1 in {\xintSeq{1}{\GrphtmpLSlen}}\do{%
+		\node[GrphStyleSommet,font=\GrphPoliceSommets] (\GrphtmpLS[##1,2]) at \GrphtmpLS[##1,1] {\GrphtmpLS[##1,2]} ;
+	}%
+}
+
+\NewDocumentCommand\GrphTraceAretes{ s O{Droit} D<>{} m }{%
+	\setsepchar[.]{ ./}%
+	\readlist*\GrphtmpLA{#4}%
+	\xintFor* ##1 in {\xintSeq{1}{\GrphtmpLAlen}}\do{%
+		\IfStrEq{#2}{Droit}%
+			{%
+				\IfBooleanTF{#1}%
+					{%
+						\draw[GrphStyleArc,#3] (\GrphtmpLA[##1,1])--(\GrphtmpLA[##1,2]) node[GrphStylepoids] {\GrphtmpLA[##1,3]} ;%
+					}%
+					{%
+						\draw[GrphStyleArc,#3] (\GrphtmpLA[##1,1])--(\GrphtmpLA[##1,2]) ;
+					}%
+			}{}%
+		\IfSubStr{#2}{AngleGauche}%
+			{%
+				\def\GrphAngle{10}%
+				\IfSubStr{#2}{=}%
+					{%
+						\StrBehind{#2}{=}[\GrphAngle]%
+					}{}%
+				\IfBooleanTF{#1}%
+					{%
+						\draw[GrphStyleArc,#3] (\GrphtmpLA[##1,1]) to[bend left=\GrphAngle] node[GrphStylepoids] {\GrphtmpLA[##1,3]} (\GrphtmpLA[##1,2]) ;%
+					}%
+					{%
+						\draw[GrphStyleArc,#3] (\GrphtmpLA[##1,1]) to[bend left=\GrphAngle] (\GrphtmpLA[##1,2]) ;
+					}%
+			}{}%
+		\IfSubStr{#2}{AngleDroit}%
+			{%
+				\def\GrphAngle{10}%
+				\IfSubStr{#2}{=}%
+					{%
+						\StrBehind{#2}{=}[\GrphAngle]%
+					}{}%
+				\IfBooleanTF{#1}%
+					{%
+						\draw[GrphStyleArc,#3] (\GrphtmpLA[##1,1]) to[bend right=\GrphAngle] node[GrphStylepoids] {\GrphtmpLA[##1,3]} (\GrphtmpLA[##1,2]) ;%
+					}%
+					{%
+						\draw[GrphStyleArc,#3] (\GrphtmpLA[##1,1]) to[bend right=\GrphAngle] (\GrphtmpLA[##1,2]) ;
+					}%
+			}{}%
+		\IfSubStr{#2}{Boucle}%
+			{%
+				\def\GrphBoucleCoeff{6}%
+				\IfSubStr{#2}{=}%
+					{%
+						\StrBehind{#2}{=}[\GrphBoucleCoeff]%
+					}{}%
+				\def\GrphAngleOut{\GrphtmpLA[##1,2]}%
+				\def\GrphAngleIn{\inteval{\GrphAngleOut+90}}%
+				\IfBooleanTF{#1}%
+					{%
+						\draw[GrphStyleArc,#3] (\GrphtmpLA[##1,1]) to[loop,looseness=\GrphBoucleCoeff,out=\GrphAngleOut,in=\GrphAngleIn] node[GrphStylepoids] {\GrphtmpLA[##1,3]} (\GrphtmpLA[##1,1]) ;%
+					}%
+					{%
+						\draw[GrphStyleArc,#3] (\GrphtmpLA[##1,1]) to[loop,looseness=\GrphBoucleCoeff,out=\GrphAngleOut,in=\GrphAngleIn] (\GrphtmpLA[##1,1]) ;
+					}%
+			}{}%
+	}%
+}
+
+%------Diagramme Sagittal
+\defKV[DiagSagitt]{%
+	E=\def\DSListeEltE{#1},%
+	MathE=\def\DSListeEltMathE{#1},%
+	F=\def\DSListeEltF{#1},%
+	MathF=\def\DSListeEltMathF{#1},%
+	DistElem=\def\DSEcartIN{#1},%
+	DistEns=\def\DSEcartIP{#1},%
+	LargEns=\def\DSLargPatates{#1},%
+	NomAppli=\def\DSNomFctPatates{#1},%
+	CouleurE=\def\DSCouleurE{#1},%
+	CouleurAppli=\def\DSCouleurFct{#1},%
+	CouleurF=\def\DSCouleurF{#1},%
+	CouleurFleches=\def\DSCouleurArc{#1},%
+	TypeFleche=\def\DSTypeFleche{#1},%
+	Epaisseur=\def\DSThick{#1},%
+	Police=\def\DSPolicePatates{#1},%
+	PoliceLabels=\def\DSPoliceLabels{#1},%
+	Ensembles=\def\DSNomEns{#1},%
+	PosLabels=\def\DSPosLabels{#1},%
+	Offset=\def\DSOffset{#1}
+}
+
+\setKVdefault[DiagSagitt]{%
+	DistElem=0.75,%
+	MathE={},%
+	MathF={},%
+	DistEns=4,%
+	LargEns=1.5,%
+	NomAppli={$f$},%
+	CouleurE={blue},%
+	CouleurAppli={violet},%
+	CouleurF={red},%
+	CouleurFleches={teal},%
+	TypeFleche=Latex,%
+	Epaisseur=0.8pt,%
+	Police={},%
+	NoirBlanc=false,%
+	Labels=true,%
+	Ensembles={$\mathcal{E}$/$\mathcal{F}$},%{E/F},%
+	PosLabels=bas,%
+	PoliceLabels={},%
+	Offset=2pt
+}
+
+\NewDocumentCommand\DiagrammeSagittal{s O{} D<>{} m }{%
+	\restoreKV[DiagSagitt]%paramètres par défaut
+	\setKV[DiagSagitt]{#2}%
+	\setsepchar{,}%
+	\readlist*\DSLstE{\DSListeEltE}%
+	\readlist*\DSLstF{\DSListeEltF}%
+	\IfStrEq{\DSListeEltMathE}{}{}{\readlist*\DSLstMathE{\DSListeEltMathE}}%
+	\IfStrEq{\DSListeEltMathF}{}{}{\readlist*\DSLstMathF{\DSListeEltMathF}}%
+	\def\DSHauteurPatateE{\fpeval{\DSEcartIN*(1+\DSLstElen)}}%
+	\def\DSHauteurPatateF{\fpeval{\DSEcartIN*(1+\DSLstFlen)}}%
+	\def\DSMaxHauteursPatates{\fpeval{max(\DSHauteurPatateE,\DSHauteurPatateF)}}%
+	\def\DSOffsetPatates{\fpeval{0.5*\DSHauteurPatateF-0.5*\DSHauteurPatateE}}%
+	\IfStrEq{\DSPosLabels}{bas}%
+		{%
+			\def\DSHautLegende{\fpeval{min(0,-\DSOffsetPatates)-0.5*\DSEcartIN}}%
+		}{}%
+	\IfStrEq{\DSPosLabels}{haut}%
+		{%
+			\def\DSHautLegende{\fpeval{max(\DSHauteurPatateE,\DSHauteurPatateF-\DSOffsetPatates)+0.5*\DSEcartIN}}%
+		}{}
+	\ifboolKV[DiagSagitt]{NoirBlanc}%
+		{%
+			\def\DSCouleurE{black}%
+			\def\DSCouleurF{black}%
+			\def\DSCouleurArc{black}%
+			\def\DSCouleurFct{black}%
+		}{}%
+	\IfBooleanTF{#1}%
+		{}%
+		{\begin{tikzpicture}[#3]}%
+		%LABELS
+		%\draw[lightgray,thin,->] (-1,0)--++(6,0) ;
+		\ifboolKV[DiagSagitt]{Labels}%
+			{%
+				\saveexpandmode\expandarg
+				\StrCut{\DSNomEns}{/}{\DSNomE}{\DSNomF}
+				\restoreexpandmode
+				\draw (0,{\DSHautLegende}) node[\DSCouleurE,inner sep=1pt,font=\DSPoliceLabels] {\DSNomE} ;
+				\draw ({\DSEcartIP},{\DSHautLegende}) node[\DSCouleurF,inner sep=1pt,font=\DSPoliceLabels] {\DSNomF} ;
+				\draw[line width=\DSThick,->,>=\DSTypeFleche] ({0.45},{\DSHautLegende})--({\DSEcartIP-0.45},{\DSHautLegende}) node[midway,above=2pt,inner sep=1pt,text=\DSCouleurFct,font=\DSPoliceLabels] {\DSNomFctPatates} ;
+			}{}%
+		%PATATE_E (ok)
+		\draw[line width=\DSThick] (0,{0.5*\DSHauteurPatateE}) ellipse ({0.5*\DSLargPatates} and {0.5*\DSHauteurPatateE} );
+		\foreach \i in {1,...,\DSLstElen}{%
+			\coordinate (E\DSLstE[\i]) at ({0.05*\DSLargPatates},{(\DSLstElen-\i+1)*\DSEcartIN}) ;%
+			\filldraw[\DSCouleurE] (E\DSLstE[\i]) circle[radius=1.5pt] node[left,font=\DSPolicePatates] {\IfStrEq{\DSListeEltMathE}{}{\DSLstE[\i]}{$\DSLstMathE[\i]$}{}} ;%
+		}%
+		%PATATE_F (ok)
+		\draw[line width=\DSThick] ({\DSEcartIP},{0.5*\DSHauteurPatateF-\DSOffsetPatates}) ellipse ({0.5*\DSLargPatates} and {0.5*\DSHauteurPatateF} );
+		\foreach \i in {1,...,\DSLstFlen}{%
+			\coordinate (F\DSLstF[\i]) at ({\DSEcartIP-0.05*\DSLargPatates},{(\DSLstFlen-\i+1)*\DSEcartIN-\DSOffsetPatates}) ;%
+			\filldraw[\DSCouleurF] (F\DSLstF[\i]) circle[radius=1.5pt] node[right,font=\DSPolicePatates] {\IfStrEq{\DSListeEltMathF}{}{\DSLstF[\i]}{$\DSLstMathF[\i]$}{}} ;%
+		}%
+		%ARCS
+		\foreach \Deb/\Fin in {#4} {%
+			\draw[line width=\DSThick,->,>=\DSTypeFleche,\DSCouleurArc] ([xshift=\DSOffset]E\Deb)--([xshift=-\DSOffset]F\Fin) ;
+		}%
+	\IfBooleanTF{#1}%
+		{}%
+		{\end{tikzpicture}}%
+}
+
+%------Diagramme Sagittal Compo
+\defKV[DiagSagittCompo]{%
+	E=\def\DSListeEltE{#1},%
+	F=\def\DSListeEltF{#1},%
+	G=\def\DSListeEltG{#1},%
+	MathE=\def\DSListeEltMathE{#1},%
+	MathF=\def\DSListeEltMathF{#1},%
+	MathG=\def\DSListeEltMathG{#1},%
+	DistElem=\def\DSEcartIN{#1},%
+	DistEns=\def\DSEcartIP{#1},%
+	LargEns=\def\DSLargPatates{#1},%
+	NomApplis=\def\DSNomsFcts{#1},%
+	CouleurE=\def\DSCouleurE{#1},%
+	CouleursAppli=\def\DSCouleursFct{#1},%
+	CouleurF=\def\DSCouleurF{#1},%
+	CouleursFleches=\def\DSCouleurArc{#1},%
+	CouleurG=\def\DSCouleurG{#1},%
+	TypeFleche=\def\DSTypeFleche{#1},%
+	Epaisseur=\def\DSThick{#1},%
+	Police=\def\DSPolicePatates{#1},%
+	PoliceLabels=\def\DSPoliceLabels{#1},%
+	Ensembles=\def\DSNomEns{#1},%
+	PosLabels=\def\DSPosLabels{#1},%
+	Offset=\def\DSOffset{#1}
+}
+
+\setKVdefault[DiagSagittCompo]{%
+	MathE={},%
+	MathF={},%
+	MathG={},%
+	DistElem=0.75,%
+	DistEns=4,%
+	LargEns=1.5,%
+	NomApplis={$f$/$g$},%
+	CouleurE={blue},%
+	CouleursAppli={violet},%
+	CouleurF={red},%
+	CouleurG={gray},%
+	CouleursFleches={teal},%
+	TypeFleche=Latex,%
+	Epaisseur=0.8pt,%
+	Police={},%
+	NoirBlanc=false,%
+	Labels=true,%
+	Ensembles={$\mathcal{E}$/$\mathcal{F}$/$\mathcal{G}$},%
+	PosLabels=bas,%
+	PoliceLabels={},%
+	Offset=2pt
+}
+
+\NewDocumentCommand\DiagrammeSagittalCompo{s O{} D<>{} m m }{%
+	\restoreKV[DiagSagittCompo]%paramètres par défaut
+	\setKV[DiagSagittCompo]{#2}%
+	\setsepchar{,}%
+	\readlist*\DSLstE{\DSListeEltE}%
+	\readlist*\DSLstF{\DSListeEltF}%
+	\readlist*\DSLstG{\DSListeEltG}%
+	\IfStrEq{\DSListeEltMathE}{}{}{\readlist*\DSLstMathE{\DSListeEltMathE}}%
+	\IfStrEq{\DSListeEltMathF}{}{}{\readlist*\DSLstMathF{\DSListeEltMathF}}%
+	\IfStrEq{\DSListeEltMathG}{}{}{\readlist*\DSLstMathG{\DSListeEltMathG}}%
+	\def\DSHauteurPatateE{\fpeval{\DSEcartIN*(1+\DSLstElen)}}%
+	\def\DSHauteurPatateF{\fpeval{1.1*\DSEcartIN*(1+\DSLstFlen)}}%
+	\def\DSHauteurPatateG{\fpeval{\DSEcartIN*(1+\DSLstGlen)}}%
+	\def\DSMaxHauteursPatates{\fpeval{max(\DSHauteurPatateE,\DSHauteurPatateF,\DSHauteurPatateG)}}%
+	\def\DSOffsetPatateF{\fpeval{0.5*\DSHauteurPatateF-0.5*\DSHauteurPatateE}}%
+	\def\DSOffsetPatateG{\fpeval{0.5*\DSHauteurPatateG-0.5*\DSHauteurPatateE}}%
+	\IfStrEq{\DSPosLabels}{bas}%
+		{%
+			\def\DSHautLegende{\fpeval{min(0,-\DSOffsetPatateF,-\DSOffsetPatateG)-0.5*\DSEcartIN}}%
+			\def\DSHautCompo{\fpeval{max(\DSHauteurPatateE,\DSHauteurPatateF-\DSOffsetPatateF,\DSHauteurPatateG-\DSOffsetPatateG)+0.5*\DSEcartIN}}%
+			\def\DSposlabelcompo{above}%
+		}{}%
+	\IfStrEq{\DSPosLabels}{haut}%
+		{%
+			\def\DSHautLegende{\fpeval{max(\DSHauteurPatateE,\DSHauteurPatateF-\DSOffsetPatateF,\DSHauteurPatateG-\DSOffsetPatateG)+0.5*\DSEcartIN}}%
+			\def\DSHautCompo{\fpeval{min(0,-\DSOffsetPatateF,-\DSOffsetPatateG)-0.5*\DSEcartIN}}%
+			\def\DSposlabelcompo{below}%
+		}{}
+	%découpage des couleurs et des noms
+	\IfSubStr{\DSCouleursFct}{/}%
+		{%
+			\StrCut{\DSCouleursFct}{/}{\DSCouleursFctF}{\DSCouleursFctG}%
+		}%
+		{%
+			\def\DSCouleursFctF{\DSCouleursFct}\def\DSCouleursFctG{\DSCouleursFct}%
+		}%
+	\IfSubStr{\DSCouleurArc}{/}%
+		{%
+			\StrCut{\DSCouleurArc}{/}{\DSCouleurArcF}{\DSCouleurArcG}%
+		}%
+		{%
+			\def\DSCouleurArcF{\DSCouleurArc}\def\DSCouleurArcG{\DSCouleurArc}%
+		}%
+	\ifboolKV[DiagSagittCompo]{NoirBlanc}%
+		{%
+			\def\DSCouleurE{black}%
+			\def\DSCouleurF{black}%
+			\def\DSCouleurG{black}%
+			\def\DSCouleurArcF{black}%
+			\def\DSCouleurArcG{black}%
+			\def\DSCouleurArcG{black}%
+			\def\DSCouleurFctF{black}%
+			\def\DSCouleurFctG{black}%
+		}{}%
+	%CONSTRUCTION
+	\IfBooleanTF{#1}%
+	{}%
+	{\begin{tikzpicture}[#3]}%
+		%LABELS
+		%\draw[lightgray,thin,->] (-1,0)--++({3*\DSEcartIP},0) ;
+		\ifboolKV[DiagSagittCompo]{Labels}%
+		{%
+			\saveexpandmode\expandarg
+			%découpage des noms d'ensembles
+			\StrBefore{\DSNomEns}{/}[\DSNomE]
+			\StrBetween[1,2]{\DSNomEns}{/}{/}[\DSNomF]
+			\StrBehind[2]{\DSNomEns}{/}[\DSNomG]
+			%découpage des fonctions
+			\StrCut{\DSNomsFcts}{/}{\DSNomFctF}{\DSNomFctG}%
+			\restoreexpandmode
+			\draw (0,{\DSHautLegende}) node[\DSCouleurE,inner sep=1pt,font=\DSPoliceLabels] {\DSNomE} ;
+			\draw ({\DSEcartIP},{\DSHautLegende}) node[\DSCouleurF,inner sep=1pt,font=\DSPoliceLabels] {\DSNomF} ;
+			\draw ({2*\DSEcartIP},{\DSHautLegende}) node[\DSCouleurG,inner sep=1pt,font=\DSPoliceLabels] {\DSNomG} ;
+			\draw (0,{\DSHautCompo}) node[\DSCouleurE,inner sep=1pt,font=\DSPoliceLabels] {\DSNomE} ;
+			\draw ({2*\DSEcartIP},{\DSHautCompo}) node[\DSCouleurG,inner sep=1pt,font=\DSPoliceLabels] {\DSNomG} ;
+			\draw[line width=\DSThick,->,>=\DSTypeFleche] ({0.45},{\DSHautLegende})--({\DSEcartIP-0.45},{\DSHautLegende}) node[midway,above=2pt,inner sep=1pt,text=\DSCouleursFctF,font=\DSPoliceLabels] {\DSNomFctF} ;
+			\draw[line width=\DSThick,->,>=\DSTypeFleche] ({\DSEcartIP+0.45},{\DSHautLegende})--({2*\DSEcartIP-0.45},{\DSHautLegende}) node[midway,above=2pt,inner sep=1pt,text=\DSCouleursFctG,font=\DSPoliceLabels] {\DSNomFctG} ;
+			\draw[line width=\DSThick,->,>=\DSTypeFleche] ({0.45},{\DSHautCompo}) -- ({2*\DSEcartIP-0.45},{\DSHautCompo}) node[midway,\DSposlabelcompo=2pt,inner sep=1pt,font=\DSPoliceLabels] {\textcolor{\DSCouleursFctG}{\DSNomFctG}{\small\,$\circ$\,}\textcolor{\DSCouleursFctF}{\DSNomFctF}} ;
+		}{}%
+		%PATATE_E (ok)
+		\draw[line width=\DSThick] (0,{0.5*\DSHauteurPatateE}) ellipse ({0.5*\DSLargPatates} and {0.5*\DSHauteurPatateE} );
+		\foreach \i in {1,...,\DSLstElen}{%
+			\coordinate (E\DSLstE[\i]) at ({0.05*\DSLargPatates},{(\DSLstElen-\i+1)*\DSEcartIN}) ;%
+			\filldraw[\DSCouleurE] (E\DSLstE[\i]) circle[radius=1.5pt] node[left,font=\DSPolicePatates] {\IfStrEq{\DSListeEltMathE}{}{\DSLstE[\i]}{$\DSLstMathE[\i]$}{}} ;%
+		}%
+		%PATATE_F (ok)
+		\draw[line width=\DSThick] ({\DSEcartIP},{0.5*\DSHauteurPatateF-\DSOffsetPatateF}) ellipse ({0.5*\DSLargPatates} and {0.5*\DSHauteurPatateF} );
+		\foreach \i in {1,...,\DSLstFlen}{%
+			\coordinate (F\DSLstF[\i]) at ({\DSEcartIP},{(\DSLstFlen-\i+1)*1.1*\DSEcartIN-\DSOffsetPatateF}) ;%
+			\filldraw[\DSCouleurF] (F\DSLstF[\i]) circle[radius=1.5pt] node[above=0pt,font=\DSPolicePatates] {\IfStrEq{\DSListeEltMathF}{}{\DSLstF[\i]}{$\DSLstMathF[\i]$}{}} ;%
+		}%
+		%PATATE_G (ok)
+		\draw[line width=\DSThick] ({2*\DSEcartIP},{0.5*\DSHauteurPatateG-\DSOffsetPatateG}) ellipse ({0.5*\DSLargPatates} and {0.5*\DSHauteurPatateG} );
+		\foreach \i in {1,...,\DSLstGlen}{%
+			\coordinate (G\DSLstG[\i]) at ({2*\DSEcartIP-0.05*\DSLargPatates},{(\DSLstGlen-\i+1)*\DSEcartIN-\DSOffsetPatateG}) ;%
+			\filldraw[\DSCouleurG] (G\DSLstG[\i]) circle[radius=1.5pt] node[right,font=\DSPolicePatates] {\IfStrEq{\DSListeEltMathG}{}{\DSLstG[\i]}{$\DSLstMathG[\i]$}{}} ;%
+		}%
+		%ARCSf
+		\foreach \Deb/\Fin in {#4} {%
+			\draw[line width=\DSThick,->,>=\DSTypeFleche,\DSCouleurArcF] ([xshift=\DSOffset]E\Deb)--([xshift=-\DSOffset]F\Fin) ;
+		}%
+		%ARCSg
+		\foreach \Deb/\Fin in {#5} {%
+			\draw[line width=\DSThick,->,>=\DSTypeFleche,\DSCouleurArcG] ([xshift=\DSOffset]F\Deb)--([xshift=-\DSOffset]G\Fin) ;
+		}%
+		\IfBooleanTF{#1}%
+		{}%
+		{\end{tikzpicture}}%
+}
+
+%------Table de vérité
+\ifluatex
+\RequirePackage{xkeyval}
+\RequirePackage{luacode}
+
+%patchs pour luatruthtable (échange 1ère ligne <-> dernière ligne), à voir si le package sera patché pour éviter de "piquer" le code !
+%patchs from luatruthtable
+\begin{luacode*}
+local function toBinary(x,y)
+	y = y or math.max(1, select(2, math.frexp(x)))
+	local res = {}
+	for i = y, 1, -1 do
+		res[i] = math.fmod(x, 2)
+		x = math.floor((x - res[i]) / 2)
+	end
+	return res
+end
+
+local function _not(a)
+	if a ==0 then return 1
+	else return 0 end
+end
+
+local lognot = {}
+
+local not_mt= {
+	__mul = function(a,b)
+	return _not(b)
+end
+}
+
+setmetatable(lognot, not_mt)
+_G.lognot = lognot
+
+local function _and(a, b)
+	if a == 1 and b == 1 then return 1
+	else return 0 end
+end
+
+local tmp1 = {}
+local logand = {}
+local v1 = 0
+
+local and_mt= {
+	__mul = function(a,b)
+	if b==logand then
+		v1 = v1 + 1 
+		tmp1[v1]=a
+		return tmp1
+	elseif a == tmp1 then
+		local w1 = _and(tmp1[v1], b)
+		v1 = v1 - 1
+		return w1
+	end
+end
+}
+
+setmetatable(tmp1, and_mt)
+setmetatable(logand, and_mt)
+_G.logand = logand
+
+local function _or(a, b)
+  if a == 0 and b == 0 then return 0
+	else return 1 end
+end
+
+local tmp2 = {}
+local logor = {}
+local v2 = 0
+
+local or_mt= {
+	__mul = function(a,b)
+	if b==logor then
+		 v2 = v2 + 1 
+		tmp2[v2] = a
+	return tmp2
+	elseif a == tmp2 then
+		local w2 =  _or(tmp2[v2], b)
+		v2 = v2 - 1
+		return w2
+	end
+end
+}
+
+setmetatable(tmp2, or_mt)
+setmetatable(logor, or_mt)
+_G.logor = logor
+
+local function _imp(a, b)
+	if a == 1 and b == 0 then return 0
+	else return 1 end
+end
+
+local tmp3 = {}
+local imp = {}
+local v3 = 0
+
+local imp_mt= {
+	__mul = function(a,b)
+	if b==imp then
+		 v3 = v3 + 1
+		tmp3[v3]=a
+		return tmp3
+	elseif a == tmp3 then
+		local w3 =  _imp(tmp3[v3], b)
+		v3 = v3 - 1
+		return w3
+	end
+end
+}
+
+setmetatable(tmp3, imp_mt)
+setmetatable(imp, imp_mt)
+_G.imp = imp
+
+local function _iff(a, b)
+	if a == b then return 1
+	else return 0 end
+end
+
+local tmp4 = {}
+local iff = {}
+local v4 = 0
+
+local iff_mt= {
+	__mul = function(a,b)
+	if b==iff then
+		v4 = v4 + 1 
+		tmp4[v4]=a
+		return tmp4
+	elseif a == tmp4 then
+		local w4 = _iff(tmp4[v4], b)
+		v4 = v4 - 1
+		return w4
+	end
+end
+}
+
+setmetatable(tmp4, iff_mt)
+setmetatable(iff, iff_mt)
+_G.iff = iff
+
+local function _xor(a, b)
+	if a ~= b then return 1
+	else return 0 end
+end
+
+local tmp5 = {}
+local logxor = {}
+local v5 = 0
+
+local xor_mt= {
+	__mul = function(a,b)
+	if b==logxor then
+	 v5 = v5 + 1 
+		tmp5[v5]=a
+		return tmp5
+	elseif a == tmp5 then
+		local w5 = _xor(tmp5[v5], b)
+		v5 = v5 - 1
+		return w5
+	end
+end
+}
+
+setmetatable(tmp5, xor_mt)
+setmetatable(logxor, xor_mt)
+_G.logxor = logxor
+
+local function _nand(a, b)
+	if a ==1 and b == 1 then return 0
+	else return 1 end
+end
+
+local tmp6 = {}
+local lognand = {}
+local v6 = 0
+
+local nand_mt= {
+	__mul = function(a,b)
+	if b==lognand then
+		 v6 = v6 + 1 
+		tmp6[v6]=a
+		return tmp6
+	elseif a == tmp6 then
+		local w6 =  _nand(tmp6[v6], b)
+		v6 = v6 - 1
+		return w6
+	end
+end
+}
+
+setmetatable(tmp6, nand_mt)
+setmetatable(lognand, nand_mt)
+_G.lognand = lognand
+
+local function _nor(a, b)
+	if a ==0 and b == 0 then return 1
+	else return 0 end
+end
+
+local tmp7 = {}
+local lognor = {}
+local v7 = 0
+
+local nor_mt= {
+	__mul = function(a,b)
+	if b==lognor then
+		v7 = v7 + 1 
+		tmp7[v7]=a
+		return tmp7
+	elseif a == tmp7 then
+		local w7 = _nor(tmp7[v7], b)
+		v7 = v7 - 1
+		return w7
+	end
+end
+}
+
+setmetatable(tmp7, nor_mt)
+setmetatable(lognor, nor_mt)
+_G.lognor = lognor
+
+local function _xnor(a, b)
+	if a == b then return 1
+	else return 0 end
+end
+
+local tmp8 = {}
+local logxnor = {}
+local v8 = 0
+
+local xnor_mt= {
+	__mul = function(a,b)
+	if b==logxnor then
+		v8 = v8 + 1 
+		tmp8[v8]=a
+		return tmp8
+	elseif a == tmp8 then
+		local w8 =  _xnor(tmp8[v8], b)
+		v8 = v8 - 1
+		return w8
+	end
+end
+}
+
+setmetatable(tmp8, xnor_mt)
+setmetatable(logxnor, xnor_mt)
+_G.logxnor = logxnor
+
+function TruthTbl(str0,str,trtext,fltext)
+	local eval=""
+	local names={lognot=lognot,logand=logand,logor=logor, imp=imp, iff=iff, logxor=logxor,lognand=lognand,lognor=lognor, logxnor=logxnor}
+	local vars={}
+	local expr={}
+	local countexp = 1
+	local countvars =1
+	local res=""
+	local sep=" & "
+	trtext = trtext or "$T$"
+	fltext = fltext or "$F$"
+	for variables in string.gmatch(str0, '([^,]+)') do
+		vars[countvars] = variables
+		countvars = countvars + 1
+	end
+	for subexp in string.gmatch(str, '([^,]+)') do
+		expr[countexp] = subexp
+		countexp = countexp + 1
+	end
+	local n =#vars
+	for i =1,2^n do
+		itr = toBinary(i,n)
+		for j=1, #itr do
+			names[vars[j]] = itr[j]
+		end
+		for k = 1, #expr do
+			res= res ..sep.. load("return " .. expr[k],nil,"t",names)()
+		end
+		if i~=2^n then
+			eval = eval .. table.concat(toBinary(i,n)," & ") .. res .. "\\\\"
+		else
+			eval = table.concat(toBinary(i,n)," & ") .. res .. "\\\\" .. eval
+		end
+		res=""
+	end
+	eval=eval:sub(1,-3)
+	if trtext:gsub("%s+", "") =="0" or trtext:gsub("%s+", "") == "$0$" or fltext:gsub("%s+", "") =="1" or fltext:gsub("%s+", "") == "$1$" then
+		eval=eval
+	else
+		eval=eval:gsub(0,fltext):gsub(1,trtext)
+	end
+	return eval
+end
+
+function TruthTblSwap(str0,str,trtext,fltext)
+	local eval=""
+	local names={lognot=lognot,logand=logand,logor=logor, imp=imp, iff=iff, logxor=logxor,lognand=lognand,lognor=lognor, logxnor=logxnor}
+	local vars={}
+	local expr={}
+	local countexp = 1
+	local countvars =1
+	local res=""
+	local sep=" & "
+	trtext = trtext or "$T$"
+	fltext = fltext or "$F$"
+	for variables in string.gmatch(str0, '([^,]+)') do
+		vars[countvars] = variables
+		countvars = countvars + 1
+	end
+	for subexp in string.gmatch(str, '([^,]+)') do
+		expr[countexp] = subexp
+		countexp = countexp + 1
+	end
+	local n =#vars
+	for i =1,2^n do
+		itr = toBinary(i,n)
+		for j=1, #itr do
+			names[vars[j]] = itr[j]
+		end
+		for k = 1, #expr do
+			res= res ..sep.. load("return " .. expr[k],nil,"t",names)()
+		end
+		if i~=2^n then
+			eval = table.concat(toBinary(i,n)," & ") .. res .. "\\\\" .. eval
+		else
+			eval = eval .. table.concat(toBinary(i,n)," & ") .. res .. "\\\\"
+		end
+		res=""
+	end
+	eval=eval:sub(1,-3)
+	if trtext:gsub("%s+", "") =="0" or trtext:gsub("%s+", "") == "$0$" or fltext:gsub("%s+", "") =="1" or fltext:gsub("%s+", "") == "$1$" then
+		eval=eval
+	else
+		eval=eval:gsub(0,fltext):gsub(1,trtext)
+	end
+	return eval
+end
+\end{luacode*}
+
+\define@key{LuaTruthTable}{trtext}{\def\luatrtbl@trtext{#1}}
+\define@key{LuaTruthTable}{fltext}{\def\luatrtbl@fltext{#1}}
+\setkeys{LuaTruthTable}{trtext=$T$,fltext=$F$}%
+
+\NewDocumentCommand\GenTruthTable{ s O{} m m }{%1=swap
+	\setkeys{LuaTruthTable}{#2}%
+	\IfBooleanTF{#1}%
+		{%
+			\directlua{tex.sprint(TruthTblSwap(\luastringN{#3},\luastringN{#4},'\luatrtbl@trtext','\luatrtbl@fltext'))}%
+		}%
+		{%
+			\directlua{tex.sprint(TruthTbl(\luastringN{#3},\luastringN{#4},'\luatrtbl@trtext','\luatrtbl@fltext'))}%
+		}%
+}
+
+\defKV[tableverite]{%
+	VF=\def\TTABLEtruefalse{#1},%
+	LargeursColonnes=\def\TTABLElargeurs{#1},%
+	CouleurEnonce=\def\TTABLEcoul{#1},%
+	CodeAvant=\def\TTABLEcodebefore{#1},%
+	CodeApres=\def\TTABLEcodeafter{#1},%
+	HauteurVide=\def\TTABLEheightempty{#1},%
+}
+
+\setKVdefault[tableverite]{%
+	VF={V/F},%
+	LargeursColonnes=auto,%
+	CouleurEnonce={},
+	CodeAvant={},%
+	CodeApres={},%
+	Swap=false,%
+	Vide=false,%
+	HauteurVide={}
+}
+
+\NewDocumentCommand\TableVerite{ O{} D<>{} m m m m }{%
+	%1=options/clés
+	%2=variables
+	%3=colonnes des variables
+	%4=calculs
+	%5=colonne des calculs
+	\useKVdefault[tableverite]%
+	\setKV[tableverite]{#1}%
+	\setsepchar{,}%
+	\readlist*\TableVeriteVariables{#4}%
+	\xdef\TableVeriteNbLignes{\xinteval{2^(\TableVeriteVariableslen)}}%
+	\readlist*\TableVeriteEnonce{#5}%
+	\readlist*\TableVeriteCalculs{#6}%
+	\StrCut{\TTABLEtruefalse}{/}{\TTTrue}{\TTFalse}%
+	\xdef\TTNbCol{\fpeval{\TableVeriteVariableslen+\TableVeriteEnoncelen}}%\TTNbCol%
+	\xdef\TTNbColMu{\fpeval{\TableVeriteVariableslen+\TableVeriteEnoncelen-1}}%\TTNbCol%
+	\IfStrEq{\TTABLElargeurs}{auto}%
+		{%
+			\begin{NiceTabular}[cell-space-limits=3pt,#2]{|*{\TTNbCol}{c|}}%
+		}%
+		{%
+			\IfSubStr{\TTABLElargeurs}{/}%
+				{%
+					\StrCut{\TTABLElargeurs}{/}{\TTlargvars}{\TTlargcals}%
+				}%
+				{%
+					\def\TTlargvars{\TTABLElargeurs}\def\TTlargcals{\TTABLElargeurs}%
+				}%
+			\begin{NiceTabular}[cell-space-limits=3pt,#2]{|*{\TableVeriteVariableslen}{W{c}{\TTlargvars}|}*{\TableVeriteEnoncelen}{W{c}{\TTlargcals}|}}%
+		}%
+		\CodeBefore
+			\IfStrEq{\TTABLEcodebefore}{}{}{\TTABLEcodebefore}%
+			\IfStrEq{\TTABLEcoul}{}{}{\rowcolor{\TTABLEcoul}{1}}%
+		\Body
+		\hline
+		{\TableVeriteVariables[1]}\xintifboolexpr{\TableVeriteVariableslen==1}{}{\xintFor*##1in{\xintSeq{2}{\TableVeriteVariableslen}}\do{&\TableVeriteVariables[##1]}}&\TableVeriteCalculs[1]\xintifboolexpr{\TableVeriteCalculslen==1}{}{\xintFor*##1in{\xintSeq{2}{\TableVeriteCalculslen}}\do{&\TableVeriteCalculs[##1]}} \\ \hline
+		\ifboolKV[tableverite]{Vide}%
+			{%
+				\xintFor*##1in{\xintSeq{1}{\TableVeriteNbLignes}}\do{\IfStrEq{\TTABLEheightempty}{}{}{\rule{0cm}{\TTABLEheightempty-6pt}}\xintFor*##2in{\xintSeq{2}{\TTNbCol}}\do{&}\\ \hline}
+			}%
+			{%
+				\ifboolKV[tableverite]{Swap}%
+					{%
+						\GenTruthTable[trtext=\TTTrue,fltext=\TTFalse]{#3}{#5} \\ \hline
+					}%
+					{%
+						\GenTruthTable*[trtext=\TTTrue,fltext=\TTFalse]{#3}{#5} \\ \hline
+					}%
+			}%
+		\CodeAfter
+			\IfStrEq{\TTABLEcodeafter}{}{}{\TTABLEcodeafter}%
+	\end{NiceTabular}%
+}
+
+\fi
+
+%------Simplifications booléennes
+\defKV[SimplifKngh]{%
+	Couleurs=\def\SimplifKnghCoul{#1},%
+	CouleurPlus=\def\SimplifKnghCoulPlus{#1},%
+	Variables=\def\SimplifKnghVar{#1}
+}
+
+\setKVdefault[SimplifKngh]{%
+	Couleurs={black/black/black},%
+	CouleurPlus=black,%
+	Variables={a/b/c},%
+	Swap=false,%
+	Espace=true,%
+	StyleAlternatif=false,%
+	Contraire=false
+}
+
+\NewDocumentCommand\SimplificationKarnaugh{ O{} m }{%
+	\useKVdefault[SimplifKngh]%
+	\setKV[SimplifKngh]{#1}%
+	\setsepchar[.]{/}%
+	\readlist*\SplfKnghVars{\SimplifKnghVar}%
+	\readlist*\SplfKnghCouls{\SimplifKnghCoul}%
+	\itemtomacro\SplfKnghVars[1]\KngVarA%
+	\itemtomacro\SplfKnghVars[2]\KngVarB%
+	\itemtomacro\SplfKnghVars[3]\KngVarC%
+	\itemtomacro\SplfKnghCouls[1]\KngCoulA%
+	\itemtomacro\SplfKnghCouls[2]\KngCoulB%
+	\itemtomacro\SplfKnghCouls[3]\KngCoulC%
+	\ifboolKV[SimplifKngh]{StyleAlternatif}%
+		{%
+			\def\tmp@kngh@Bb{\mathcolor{\KngCoulA}{\KngVarA}}%
+			\def\tmp@kngh@B{\mathcolor{\KngCoulA}{\overline{\KngVarA}}}%
+			\def\tmp@kngh@A{\mathcolor{\KngCoulC}{\overline{\KngVarC}}}%
+			\def\tmp@kngh@Ab{\mathcolor{\KngCoulC}{\KngVarC}}%
+			\def\tmp@kngh@C{\mathcolor{\KngCoulB}{\overline{\KngVarB}}}%
+			\def\tmp@kngh@Cb{\mathcolor{\KngCoulB}{\KngVarB}}%
+		}%
+		{%
+			\def\tmp@kngh@A{\mathcolor{\KngCoulA}{\KngVarA}}%
+			\def\tmp@kngh@Ab{\mathcolor{\KngCoulA}{\overline{\KngVarA}}}%
+			\def\tmp@kngh@B{\mathcolor{\KngCoulB}{\KngVarB}}%
+			\def\tmp@kngh@Bb{\mathcolor{\KngCoulB}{\overline{\KngVarB}}}%
+			\ifboolKV[SimplifKngh]{Swap}%
+				{%
+					\def\tmp@kngh@C{\mathcolor{\KngCoulC}{\overline{\KngVarC}}}%
+					\def\tmp@kngh@Cb{\mathcolor{\KngCoulC}{\KngVarC}}%
+				}%
+				{%
+					\def\tmp@kngh@C{\mathcolor{\KngCoulC}{\KngVarC}}%
+					\def\tmp@kngh@Cb{\mathcolor{\KngCoulC}{\overline{\KngVarC}}}%
+				}%
+		}%
+	\ifboolKV[SimplifKngh]{Espace}%
+		{%
+			\def\tmp@kngh@space{\§}%
+		}%
+		{%
+			\def\tmp@kngh@space{}%
+		}%
+	\ifboolKV[SimplifKngh]{Contraire}%
+		{%
+			\StrSubstitute{#2}{0}{2}[\tmp@kngh@binswap]%
+			\StrSubstitute{\tmp@kngh@binswap}{1}{0}[\tmp@kngh@binswapb]%
+			\StrSubstitute{\tmp@kngh@binswapb}{2}{1}[\tmp@kngh@bin]%
+		}%
+		{\def\tmp@kngh@bin{#2}}%
+	\def\tmp@kngh@plus{\mathcolor{\SimplifKnghCoulPlus}{+}}%
+	\ensuremath{%
+	\IfStrEq{\tmp@kngh@bin}{00000000}{0}{}%
+	\IfStrEq{\tmp@kngh@bin}{00000001}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00000010}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00000011}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00000100}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00000101}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00000110}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00000111}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00001000}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00001001}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00001010}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00001011}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00001100}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B}{}%
+	\IfStrEq{\tmp@kngh@bin}{00001101}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00001110}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00001111}{\tmp@kngh@Ab}{}%
+	\IfStrEq{\tmp@kngh@bin}{00010000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00010001}{\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00010010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00010011}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00010100}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00010101}{\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00010110}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00010111}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00011000}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00011001}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00011010}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00011011}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00011100}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00011101}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00011110}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00011111}{\tmp@kngh@Ab\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00100000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00100001}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00100010}{\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00100011}{\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00100100}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00100101}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00100110}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00100111}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00101000}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00101001}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00101010}{\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00101011}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00101100}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00101101}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00101110}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00101111}{\tmp@kngh@Ab\tmp@kngh@plus\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00110000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00110001}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00110010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00110011}{\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00110100}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00110101}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00110110}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00110111}{\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00111000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00111001}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00111010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00111011}{\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00111100}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B}{}%
+	\IfStrEq{\tmp@kngh@bin}{00111101}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{00111110}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{00111111}{\tmp@kngh@Ab\tmp@kngh@plus\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01000000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01000001}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01000010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01000011}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01000100}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01000101}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01000110}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01000111}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01001000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01001001}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01001010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01001011}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01001100}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01001101}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01001110}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01001111}{\tmp@kngh@Ab\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01010000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01010001}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01010010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01010011}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01010100}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01010101}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01010110}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01010111}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01011000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01011001}{\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01011010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01011011}{\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01011100}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01011101}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01011110}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01011111}{\tmp@kngh@Ab\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01100000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01100001}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01100010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01100011}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01100100}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01100101}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01100110}{\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01100111}{\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01101000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01101001}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01101010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01101011}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01101100}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B}{}%
+	\IfStrEq{\tmp@kngh@bin}{01101101}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01101110}{\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B}{}%
+	\IfStrEq{\tmp@kngh@bin}{01101111}{\tmp@kngh@Ab\tmp@kngh@plus\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01110000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01110001}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01110010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01110011}{\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01110100}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01110101}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01110110}{\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01110111}{\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01111000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01111001}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01111010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01111011}{\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{01111100}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B}{}%
+	\IfStrEq{\tmp@kngh@bin}{01111101}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B}{}%
+	\IfStrEq{\tmp@kngh@bin}{01111110}{\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{01111111}{\tmp@kngh@Ab\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10000000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10000001}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10000010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10000011}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10000100}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10000101}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10000110}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10000111}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10001000}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10001001}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10001010}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10001011}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10001100}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B}{}%
+	\IfStrEq{\tmp@kngh@bin}{10001101}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10001110}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10001111}{\tmp@kngh@Ab\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10010000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10010001}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10010010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10010011}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10010100}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10010101}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10010110}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10010111}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10011000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10011001}{\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10011010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10011011}{\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10011100}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B}{}%
+	\IfStrEq{\tmp@kngh@bin}{10011101}{\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B}{}%
+	\IfStrEq{\tmp@kngh@bin}{10011110}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10011111}{\tmp@kngh@Ab\tmp@kngh@plus\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10100000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10100001}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10100010}{\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10100011}{\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10100100}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10100101}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10100110}{\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10100111}{\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10101000}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10101001}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10101010}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10101011}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10101100}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10101101}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10101110}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10101111}{\tmp@kngh@Ab\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10110000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10110001}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10110010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10110011}{\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10110100}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10110101}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10110110}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10110111}{\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10111000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10111001}{\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10111010}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10111011}{\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10111100}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{10111101}{\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10111110}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{10111111}{\tmp@kngh@Ab\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11000000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B}{}%
+	\IfStrEq{\tmp@kngh@bin}{11000001}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11000010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11000011}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11000100}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11000101}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11000110}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11000111}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11001000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11001001}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11001010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11001011}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11001100}{\tmp@kngh@B}{}%
+	\IfStrEq{\tmp@kngh@bin}{11001101}{\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11001110}{\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11001111}{\tmp@kngh@Ab\tmp@kngh@plus\tmp@kngh@B}{}%
+	\IfStrEq{\tmp@kngh@bin}{11010000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11010001}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11010010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11010011}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11010100}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11010101}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11010110}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11010111}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11011000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11011001}{\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B}{}%
+	\IfStrEq{\tmp@kngh@bin}{11011010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11011011}{\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11011100}{\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11011101}{\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11011110}{\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11011111}{\tmp@kngh@Ab\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11100000}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11100001}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11100010}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11100011}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11100100}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11100101}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11100110}{\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B}{}%
+	\IfStrEq{\tmp@kngh@bin}{11100111}{\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11101000}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11101001}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11101010}{\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11101011}{\tmp@kngh@A\tmp@kngh@space\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11101100}{\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11101101}{\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@A\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Ab\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11101110}{\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11101111}{\tmp@kngh@Ab\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11110000}{\tmp@kngh@A}{}%
+	\IfStrEq{\tmp@kngh@bin}{11110001}{\tmp@kngh@A\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11110010}{\tmp@kngh@A\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11110011}{\tmp@kngh@A\tmp@kngh@plus\tmp@kngh@Bb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11110100}{\tmp@kngh@A\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11110101}{\tmp@kngh@A\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@Cb\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11110110}{\tmp@kngh@A\tmp@kngh@plus\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11110111}{\tmp@kngh@A\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11111000}{\tmp@kngh@A\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11111001}{\tmp@kngh@A\tmp@kngh@plus\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11111010}{\tmp@kngh@A\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@space\tmp@kngh@C\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@space\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11111011}{\tmp@kngh@A\tmp@kngh@plus\tmp@kngh@Bb\tmp@kngh@plus\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11111100}{\tmp@kngh@A\tmp@kngh@plus\tmp@kngh@B}{}%
+	\IfStrEq{\tmp@kngh@bin}{11111101}{\tmp@kngh@A\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@C}{}%
+	\IfStrEq{\tmp@kngh@bin}{11111110}{\tmp@kngh@A\tmp@kngh@plus\tmp@kngh@B\tmp@kngh@plus\tmp@kngh@Cb}{}%
+	\IfStrEq{\tmp@kngh@bin}{11111111}{1}{}%
+	}%
+}
+
+\ExplSyntaxOn
+\NewExpandableDocumentCommand{\KnghBourrageZeros}{m}
+{
+	\int_compare:nT { #1 > 0 }
+	{
+		0 \prg_replicate:nn { #1 - 1 } { 0 }
+	}
+}
+\ExplSyntaxOff
+
+\defKV[simplifbool]{%
+	Variables=\def\simplifboolvars{#1},
+	Couleurs=\def\simplifboolcoul{#1},%
+	CouleurPlus=\def\simplifboolcoulplus{#1},%
+}
+
+\setKVdefault[simplifbool]{%
+	Variables={a/b/c},%
+	Enonce=true,%
+	Espace=true,%
+	Contraire=false,%
+	Couleurs={black/black/black},%
+	CouleurPlus=black,%
+}
+
+\NewDocumentCommand\ExprBool{ O{} m D<>{} }{%semble ok
+	\useKVdefault[simplifbool]%
+	\setKV[simplifbool]{#1}%
+	\setsepchar[.]{/}%
+	\readlist*\ListeVariablesKGH{\simplifboolvars}%
+	\itemtomacro\ListeVariablesKGH[1]{\VarTMPA}%
+	\itemtomacro\ListeVariablesKGH[2]{\VarTMPB}%
+	\itemtomacro\ListeVariablesKGH[3]{\VarTMPC}%
+	%gestion des espaces
+	\ifboolKV[simplifbool]{Espace}%
+		{%
+			\def\tmp@kngh@space{\§}%
+		}%
+		{%
+			\def\tmp@kngh@space{}%
+		}%
+	%énoncé
+	\StrSubstitute{#2}{\VarTMPA}{AA}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{\VarTMPB}{BB}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{\VarTMPC}{CC}[\knghenoncetransf]%
+	%\knghenoncetransf%
+	\StrSubstitute{\knghenoncetransf}{(AA)}{\VarTMPA}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(BB)}{\VarTMPB}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(CC)}{\VarTMPC}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*)}{\overline{\VarTMPA}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(BB*)}{\overline{\VarTMPB}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(CC*)}{\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AABB)}{\VarTMPA\tmp@kngh@space\VarTMPB}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AACC*)}{\VarTMPA\tmp@kngh@space\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AABB*)}{\VarTMPA\tmp@kngh@space\overline{\VarTMPB}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*BB)}{\overline{\VarTMPA}\tmp@kngh@space\VarTMPB}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*CC*)}{\overline{\VarTMPA}\tmp@kngh@space\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*BB*)}{\overline{\VarTMPA}\tmp@kngh@space\overline{\VarTMPB}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AACC)}{\VarTMPA\tmp@kngh@space\VarTMPC}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*CC)}{\overline{\VarTMPA}\tmp@kngh@space\VarTMPC}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(BBCC)}{\VarTMPB\tmp@kngh@space\VarTMPC}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(BBCC*)}{\VarTMPB\tmp@kngh@space\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(BB*CC*)}{\overline{\VarTMPB}\tmp@kngh@space\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(BB*CC)}{\overline{\VarTMPB}\tmp@kngh@space\VarTMPC}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AABBCC)}{\VarTMPA\tmp@kngh@space\VarTMPB\tmp@kngh@space\VarTMPC}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AABBCC*)}{\VarTMPA\tmp@kngh@space\VarTMPB\tmp@kngh@space\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AABB*CC*)}{\VarTMPA\tmp@kngh@space\overline{\VarTMPB}\tmp@kngh@space\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AABB*CC)}{\VarTMPA\tmp@kngh@space\overline{\VarTMPB}\tmp@kngh@space\VarTMPC}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*BBCC)}{\overline{\VarTMPA}\tmp@kngh@space\VarTMPB\tmp@kngh@space\VarTMPC}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*BBCC*)}{\overline{\VarTMPA}\tmp@kngh@space\VarTMPB\tmp@kngh@space\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*BB*CC*)}{\overline{\VarTMPA}\tmp@kngh@space\overline{\VarTMPB}\tmp@kngh@space\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*BB*CC)}{\overline{\VarTMPA}\tmp@kngh@space\overline{\VarTMPB}\tmp@kngh@space\VarTMPC}[\knghenoncetransf]%
+	\ensuremath{\ifboolKV[simplifbool]{Contraire}{\overline{\knghenoncetransf}}{\knghenoncetransf}}%
+}
+
+\NewDocumentCommand\SimplificationBooleenne{ O{} m D<>{} }{%semble OK
+	\useKVdefault[simplifbool]%
+	\setKV[simplifbool]{#1}%
+	\setsepchar[.]{/}%
+	\readlist*\ListeVariablesKGH{\simplifboolvars}%
+	\itemtomacro\ListeVariablesKGH[1]{\VarTMPA}%
+	\itemtomacro\ListeVariablesKGH[2]{\VarTMPB}%
+	\itemtomacro\ListeVariablesKGH[3]{\VarTMPC}%
+	%gestion des espaces
+	\ifboolKV[simplifbool]{Espace}%
+		{%
+			\def\tmp@kngh@space{\§}%
+		}%
+		{%
+			\def\tmp@kngh@space{}%
+		}%
+	%énoncé
+	\StrSubstitute{#2}{\VarTMPA}{AA}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{\VarTMPB}{BB}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{\VarTMPC}{CC}[\knghenoncetransf]%
+	%\knghenoncetransf%
+	\StrSubstitute{\knghenoncetransf}{(AA)}{\VarTMPA}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(BB)}{\VarTMPB}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(CC)}{\VarTMPC}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*)}{\overline{\VarTMPA}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(BB*)}{\overline{\VarTMPB}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(CC*)}{\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AABB)}{\VarTMPA\tmp@kngh@space\VarTMPB}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AACC*)}{\VarTMPA\tmp@kngh@space\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AABB*)}{\VarTMPA\tmp@kngh@space\overline{\VarTMPB}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*BB)}{\overline{\VarTMPA}\tmp@kngh@space\VarTMPB}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*CC*)}{\overline{\VarTMPA}\tmp@kngh@space\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*BB*)}{\overline{\VarTMPA}\tmp@kngh@space\overline{\VarTMPB}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AACC)}{\VarTMPA\tmp@kngh@space\VarTMPC}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*CC)}{\overline{\VarTMPA}\tmp@kngh@space\VarTMPC}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(BBCC)}{\VarTMPB\tmp@kngh@space\VarTMPC}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(BBCC*)}{\VarTMPB\tmp@kngh@space\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(BB*CC*)}{\overline{\VarTMPB}\tmp@kngh@space\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(BB*CC)}{\overline{\VarTMPB}\tmp@kngh@space\VarTMPC}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AABBCC)}{\VarTMPA\tmp@kngh@space\VarTMPB\tmp@kngh@space\VarTMPC}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AABBCC*)}{\VarTMPA\tmp@kngh@space\VarTMPB\tmp@kngh@space\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AABB*CC*)}{\VarTMPA\tmp@kngh@space\overline{\VarTMPB}\tmp@kngh@space\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AABB*CC)}{\VarTMPA\tmp@kngh@space\overline{\VarTMPB}\tmp@kngh@space\VarTMPC}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*BBCC)}{\overline{\VarTMPA}\tmp@kngh@space\VarTMPB\tmp@kngh@space\VarTMPC}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*BBCC*)}{\overline{\VarTMPA}\tmp@kngh@space\VarTMPB\tmp@kngh@space\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*BB*CC*)}{\overline{\VarTMPA}\tmp@kngh@space\overline{\VarTMPB}\tmp@kngh@space\overline{\VarTMPC}}[\knghenoncetransf]%
+	\StrSubstitute{\knghenoncetransf}{(AA*BB*CC)}{\overline{\VarTMPA}\tmp@kngh@space\overline{\VarTMPB}\tmp@kngh@space\VarTMPC}[\knghenoncetransf]%
+	%substitutions pour binaire
+	\StrSubstitute{#2}{\VarTMPA}{AA}[\knghbintransf]%
+	\StrSubstitute{\knghbintransf}{\VarTMPB}{BB}[\knghbintransf]%
+	\StrSubstitute{\knghbintransf}{\VarTMPC}{CC}[\knghbintransf]%
+	\xdef\knghbinres{00000000}%
+	%calculs pour 1 lettre
+	\IfSubStr{\knghbintransf}{(AA)}{\xdef\knghbinres{\inteval{\knghbinres+11110000}}}{}%
+	\IfSubStr{\knghbintransf}{(BB)}{\xdef\knghbinres{\inteval{\knghbinres+11001100}}}{}%
+	\IfSubStr{\knghbintransf}{(CC)}{\xdef\knghbinres{\inteval{\knghbinres+01100110}}}{}%version c intérieure !!
+	\IfSubStr{\knghbintransf}{(AA*)}{\xdef\knghbinres{\inteval{\knghbinres+00001111}}}{}%
+	\IfSubStr{\knghbintransf}{(BB*)}{\xdef\knghbinres{\inteval{\knghbinres+00110011}}}{}%
+	\IfSubStr{\knghbintransf}{(CC*)}{\xdef\knghbinres{\inteval{\knghbinres+10011001}}}{}%version bar(c) extérieure
+	%calculs pour 2 lettres
+	\IfSubStr{\knghbintransf}{(AABB)}{\xdef\knghbinres{\inteval{\knghbinres+11000000}}}{}%
+	\IfSubStr{\knghbintransf}{(AACC*)}{\xdef\knghbinres{\inteval{\knghbinres+10010000}}}{}%=====!
+	\IfSubStr{\knghbintransf}{(AABB*)}{\xdef\knghbinres{\inteval{\knghbinres+00110000}}}{}%
+	\IfSubStr{\knghbintransf}{(AA*BB)}{\xdef\knghbinres{\inteval{\knghbinres+00001100}}}{}%
+	\IfSubStr{\knghbintransf}{(AA*CC*)}{\xdef\knghbinres{\inteval{\knghbinres+00001001}}}{}%=====!
+	\IfSubStr{\knghbintransf}{(AA*BB*)}{\xdef\knghbinres{\inteval{\knghbinres+00000011}}}{}%
+	\IfSubStr{\knghbintransf}{(AACC)}{\xdef\knghbinres{\inteval{\knghbinres+01100000}}}{}%=====!
+	\IfSubStr{\knghbintransf}{(AA*CC)}{\xdef\knghbinres{\inteval{\knghbinres+00000110}}}{}%=====!
+	\IfSubStr{\knghbintransf}{(BBCC)}{\xdef\knghbinres{\inteval{\knghbinres+01000100}}}{}%=====!
+	\IfSubStr{\knghbintransf}{(BBCC*)}{\xdef\knghbinres{\inteval{\knghbinres+10001000}}}{}%=====!
+	\IfSubStr{\knghbintransf}{(BB*CC*)}{\xdef\knghbinres{\inteval{\knghbinres+00010001}}}{}%=====!
+	\IfSubStr{\knghbintransf}{(BB*CC)}{\xdef\knghbinres{\inteval{\knghbinres+00100010}}}{}%=====!
+	%calculs pour 3 lettres
+	\IfSubStr{\knghbintransf}{(AABBCC)}{\xdef\knghbinres{\inteval{\knghbinres+01000000}}}{}%=====!
+	\IfSubStr{\knghbintransf}{(AABBCC*)}{\xdef\knghbinres{\inteval{\knghbinres+10000000}}}{}%=====!
+	\IfSubStr{\knghbintransf}{(AABB*CC*)}{\xdef\knghbinres{\inteval{\knghbinres+00010000}}}{}%=====!
+	\IfSubStr{\knghbintransf}{(AABB*CC)}{\xdef\knghbinres{\inteval{\knghbinres+00100000}}}{}%=====!
+	\IfSubStr{\knghbintransf}{(AA*BBCC)}{\xdef\knghbinres{\inteval{\knghbinres+00000100}}}{}%=====!
+	\IfSubStr{\knghbintransf}{(AA*BBCC*)}{\xdef\knghbinres{\inteval{\knghbinres+00001000}}}{}%=====!
+	\IfSubStr{\knghbintransf}{(AA*BB*CC*)}{\xdef\knghbinres{\inteval{\knghbinres+00000001}}}{}%=====!
+	\IfSubStr{\knghbintransf}{(AA*BB*CC)}{\xdef\knghbinres{\inteval{\knghbinres+00000010}}}{}%=====!
+	%on complète
+	\StrLen{\knghbinres}[\knghbinresnbchiffres]
+	\ifnum\knghbinresnbchiffres<8%
+		\xdef\nbz{\inteval{8-\knghbinresnbchiffres}}%
+		\xdef\knghbinres{\KnghBourrageZeros{\nbz}\knghbinres}%
+	\fi%
+	\xintFor* ##1 in {\xintSeq{2}{8}}\do{\StrSubstitute{\knghbinres}{##1}{1}[\knghbinres]}%
+	\ifboolKV[simplifbool]{Contraire}%
+		{%
+			\StrSubstitute{\knghbinres}{0}{2}[\knghbinres]%
+			\StrSubstitute{\knghbinres}{1}{0}[\knghbinres]%
+			\StrSubstitute{\knghbinres}{2}{1}[\knghbinres]%
+		}%
+		{}%
+	\ensuremath{%\knghbinres=%
+		\ifboolKV[simplifbool]{Enonce}{\ifboolKV[simplifbool]{Contraire}{\overline{\knghenoncetransf}}{\knghenoncetransf}=}{}%
+		\ifboolKV[simplifbool]{Espace}%
+			{\SimplificationKarnaugh[Variables={\simplifboolvars},Espace=true,Swap,#3,Couleurs={\simplifboolcoul},CouleurPlus={\simplifboolcoulplus}]{\knghbinres}}%
+			{\SimplificationKarnaugh[Variables={\simplifboolvars},Espace=false,Swap,#3,Couleurs={\simplifboolcoul},CouleurPlus={\simplifboolcoulplus}]{\knghbinres}}%
+		}
+}
+
+%------Chemins de longueur donnée + fermeture transitive
+\ifluatex
+\RequirePackage{lualinalg}
+
+\setKVdefault[MatAdj]{Bordure=false,Sommets=ABCDEFGHIJKLMNOPQRSTUVWXYZ,Num=false,PoliceBordure=\footnotesize}
+
+\NewDocumentCommand\MatriceAdjacence{ O{} m }{%
+	\restoreKV[MatAdj]%
+	\setKV[MatAdj]{#1}%
+	%on définit la matrice
+	\matrixNew{M}{#2}%
+	%formatage
+	\ifboolKV[MatAdj]{Bordure}%
+		{%
+			\ensuremath{%
+				\begin{pNiceMatrix}[first-row,first-col]
+					\xintFor* ##1 in {\xintSeq{1}{\matrixNumRows{M}}}\do{&\Block{1-1}<\useKV[MatAdj]{PoliceBordure}>{\StrChar{\useKV[MatAdj]{Sommets}}{##1}}} \\
+					\xintFor* ##1 in {\xintSeq{1}{\matrixNumRows{M}}}\do{%
+						\Block{1-1}<\scriptsize>{\StrChar{\useKV[MatAdj]{Sommets}}{##1}} \xintFor* ##2 in {\xintSeq{1}{\matrixNumRows{M}}}\do{&\ifboolKV[MatAdj]{Num}{\num{\matrixGetElement{M}{##1}{##2}}}{\matrixGetElement{M}{##1}{##2}}} \\
+					}%
+				\end{pNiceMatrix}%
+				}%
+		}%
+		{%
+			\ensuremath{\matrixPrint[type=pmatrix]{M}}
+		}%
+}
+
+\NewDocumentCommand\PuissanceMatrice{ O{} m m }{%
+	\restoreKV[MatAdj]%
+	\setKV[MatAdj]{#1}%
+	%on définit la matrice
+	\matrixNew{M}{#2}%
+	\matrixOp{Mpuiss}{M^#3}%
+	%formatage
+	\ifboolKV[MatAdj]{Bordure}%
+		{%
+			\ensuremath{%
+				\begin{pNiceMatrix}[first-row,first-col]
+					\xintFor* ##1 in {\xintSeq{1}{\matrixNumRows{M}}}\do{&\Block{1-1}<\useKV[MatAdj]{PoliceBordure}>{\StrChar{\useKV[MatAdj]{Sommets}}{##1}}} \\
+					\xintFor* ##1 in {\xintSeq{1}{\matrixNumRows{M}}}\do{%
+						\Block{1-1}<\useKV[MatAdj]{PoliceBordure}>{\StrChar{\useKV[MatAdj]{Sommets}}{##1}} \xintFor* ##2 in {\xintSeq{1}{\matrixNumRows{M}}}\do{&\ifboolKV[MatAdj]{Num}{\num{\matrixGetElement{Mpuiss}{##1}{##2}}}{\matrixGetElement{Mpuiss}{##1}{##2}}} \\
+					}%
+				\end{pNiceMatrix}%
+				}%
+		}%
+		{%
+			\ensuremath{\matrixPrint[type=pmatrix]{Mpuiss}}
+		}%
+}
+
+\defKV[GrphNbChemLg]{De=\def\GrphNbChemLgDeb{#1},Vers=\def\GrphNbChemLgFin{#1},Sommets=\def\GrphNbChemLgSomm{#1}}
+\setKVdefault[GrphNbChemLg]{Longueur=2,De=A,Vers=A,Sommets={ABCDEFGHIJKLMNOPQRSTUVWXYZ},Num=false}
+
+\NewDocumentCommand\NbCheminsLongueur{ O{} m }{%
+	\restoreKV[GrphNbChemLg]%
+	\setKV[GrphNbChemLg]{#1}%
+	%on définit la matrice
+	\matrixNew{M}{#2}%
+	\StrPosition{\GrphNbChemLgSomm}{\GrphNbChemLgDeb}[\nbcheminsdepart]%
+	\StrPosition{\GrphNbChemLgSomm}{\GrphNbChemLgFin}[\nbcheminsarrivee]%
+	%on calcule la puissance
+	\matrixOp{Mpuiss}{M^\useKV[GrphNbChemLg]{Longueur}}%
+	%test !!
+	\ifboolKV[GrphNbChemLg]{Num}%
+		{%
+			\num{\matrixGetElement{Mpuiss}{\nbcheminsdepart}{\nbcheminsarrivee}}%
+		}%
+		{%
+			\matrixGetElement{Mpuiss}{\nbcheminsdepart}{\nbcheminsarrivee}%
+		}%
+}
+
+\setKVdefault[GrphFermTrans]{Enonce=false,Formule=false,Brut=false,NomMatrice=M,Bordure=false,Sommets=ABCDEFGHIJKLMNOPQRSTUVWXYZ,Num=false,PoliceBordure=\footnotesize,Complet=false}
+
+\NewDocumentCommand\FermetureTransitive{ O{} m }{%
+	\restoreKV[GrphFermTrans]%
+	\setKV[GrphFermTrans]{#1}%
+	\matrixNew{M}{#2}%
+	%formule de calcul
+	\xdef\FermTransFormule{M}%
+	\xintFor* ##1 in {\xintSeq{2}{\matrixNumRows{M}}}\do{%
+		\xdef\FermTransFormule{\FermTransFormule+M^##1}%
+	}%
+	\matrixOp{MFT}{\FermTransFormule}%
+	%gestion de la clé complète
+	\ifboolKV[GrphFermTrans]{Complet}%
+		{%
+			\setKV[GrphFermTrans]{Enonce=true,Formule=true}%
+		}%
+		{}%
+	%simplification éventuelle
+	\ifboolKV[GrphFermTrans]{Brut}%
+		{%
+			\ensuremath{\ifboolKV[GrphFermTrans]{Formule}{\useKV[GrphFermTrans]{NomMatrice} \xintFor* ##1 in {\xintSeq{2}{\matrixNumRows{M}}}\do{+\useKV[GrphFermTrans]{NomMatrice}^{##1}}=}{}\matrixPrint[type=pmatrix]{MFT}}%
+		}%
+		{%
+			\xintFor* ##1 in {\xintSeq{1}{\matrixNumRows{M}}}\do{%lignes
+				\xintFor* ##2 in {\xintSeq{1}{\matrixNumRows{M}}}\do{%colonnes
+					\xintifboolexpr{\matrixGetElement{MFT}{##1}{##2} == 0}%
+						{}%
+						{\matrixSetElement{MFT}{##1}{##2}{1}}%
+				}%
+			}%
+			\ifboolKV[GrphFermTrans]{Bordure}%
+				{%
+					\ensuremath{%
+						\ifboolKV[GrphFermTrans]{Enonce}{\widehat{\useKV[GrphFermTrans]{NomMatrice}}=}{}\ifboolKV[GrphFermTrans]{Formule}{\useKV[GrphFermTrans]{NomMatrice} \xintFor* ##1 in {\xintSeq{2}{\matrixNumRows{M}}}\do{\oplus\useKV[GrphFermTrans]{NomMatrice}^{[##1]}}=}{}%
+						\begin{pNiceMatrix}[first-row,first-col]
+							\xintFor* ##1 in {\xintSeq{1}{\matrixNumRows{M}}}\do{&\Block{1-1}<\useKV[GrphFermTrans]{PoliceBordure}>{\StrChar{\useKV[GrphFermTrans]{Sommets}}{##1}}} \\
+							\xintFor* ##1 in {\xintSeq{1}{\matrixNumRows{M}}}\do{%
+								\Block{1-1}<\useKV[GrphFermTrans]{PoliceBordure}>{\StrChar{\useKV[GrphFermTrans]{Sommets}}{##1}} \xintFor* ##2 in {\xintSeq{1}{\matrixNumRows{M}}}\do{&\matrixGetElement{MFT}{##1}{##2}} \\
+							}%
+						\end{pNiceMatrix}%
+						}%
+				}%
+				{%
+					\ensuremath{\ifboolKV[GrphFermTrans]{Enonce}{\widehat{\useKV[GrphFermTrans]{NomMatrice}}=}{}\ifboolKV[GrphFermTrans]{Formule}{\useKV[GrphFermTrans]{NomMatrice} \xintFor* ##1 in {\xintSeq{2}{\matrixNumRows{M}}}\do{\oplus\useKV[GrphFermTrans]{NomMatrice}^{[##1]}}=}{}\matrixPrint[type=pmatrix]{MFT}}%
+				}%
+		}%
+}
+\fi
+
+%===MATRICES ET SYSTÈMES 3x3
+%%------SimplFrac nouvelle version
+\NewDocumentCommand\IntConvFrac{ s O{} m }{%
+	%*=moins sur le numérateur
+	%2=argument optionnel[d/t/dec=...]
+	%3=argument mandataire {calcul ou fraction}
+	\def\calculargument{\xintPRaw{\xintIrr{\xinteval{#3}}}}%on calcule et on transforme en A/B
+	\IfSubStr{\calculargument}{/}%on teste si le symbole / apparaît
+	{%si oui := fraction
+		\StrBefore{\calculargument}{/}[\numerateur]%on extrait le numérateur
+		\StrBehind{\calculargument}{/}[\denominateur]%on extrait le dénominateur
+		\ifblank{#2}%
+		{%
+			\IfBooleanTF{#1}%
+			{\ensuremath{\frac{\num{\numerateur}}{\num{\denominateur}}}}%
+			{%
+				\ifthenelse{\numerateur < 0}%
+				{\ensuremath{-\frac{\num{\fpeval{abs(\numerateur)}}}{\num{\denominateur}}}}%
+				{\ensuremath{\frac{\num{\numerateur}}{\num{\denominateur}}}}%
+			}%
+		}%
+		{}%si l'argument optionnel est vide
+		\IfStrEq{#2}{d}%
+		{%
+			\IfBooleanTF{#1}%
+			{\ensuremath{\dfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+			{%
+				\ifthenelse{\numerateur < 0}%
+				{\ensuremath{-\dfrac{\num{\fpeval{abs(\numerateur)}}}{\num{\denominateur}}}}%
+				{\ensuremath{\dfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+			}%
+		}%
+		{}%si l'argument optionnel est vide
+		\IfStrEq{#2}{t}%
+		{%
+			\IfBooleanTF{#1}%
+			{\ensuremath{\tfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+			{%
+				\ifthenelse{\numerateur < 0}%
+				{\ensuremath{-\tfrac{\num{\fpeval{abs(\numerateur)}}}{\num{\denominateur}}}}%
+				{\ensuremath{\tfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+			}%
+		}%
+		{}%si l'argument optionnel est vide
+		\IfStrEq{#2}{n}%
+		{%
+			\ensuremath{\nicefrac{\num{\numerateur}}{\num{\denominateur}}}
+		}%
+		{}%si l'argument optionnel est vide
+		\IfSubStr{#2}{dec}%on veut la forme décimale
+		{%
+			\IfSubStr{#2}{=}%si on rajoute une précision
+			{%
+				\StrBehind{#2}{=}[\precdecimal]%
+				\ensuremath{\num{\xintfloateval{round(#3,\precdecimal)}}}%
+			}%
+			{%
+				\ensuremath{\num{\xintfloateval{#3}}}%
+			}%
+		}%
+		{}%si l'argument optionnel est vide
+	}{%si non := entier
+		\num{\calculargument}%on affiche l'entier, avec le package siunitx
+	}%
+}
+
+%type=3x3
+\defKV[resolsysmatrix]{%
+	NomsMatrices=\def\ResolSysMatNames{#1},%
+	Inconnues=\edef\ResolSysMatUnkn{#1},%
+	NomInverse=\def\ResolSysMatInv{#1},%
+	NomSysteme=\def\ResolSysMatNameSys{#1},%
+	OptionNiceMatrix=\def\ResolSysMatOpt{#1}
+}
+\setKVdefault[resolsysmatrix]{%
+	NomsMatrices={A,X,B},%
+	NomInverse={A^{-1}},%
+	NomSysteme={},%
+	Inconnues=xyz,%
+	Brut=false,%
+	OptionNiceMatrix={1pt},%
+	Enonce=true,%
+	Dense=false
+}
+
+\NewDocumentCommand\ResolSystemeMatrices{ O{} D<>{} m O{#3} O{xyz} }{%
+	%1=clés
+	%2=option formatage conversion
+	%3=système {eq1,eq2,eq3} en langage xint
+	%4=sytème pour la macro \systeme
+	%5=inconnues pour \systeme
+	\useKVdefault[resolsysmatrix]%
+	\setKV[resolsysmatrix]{#1}%
+	%lectures des inconnues
+	\StrChar{\ResolSysMatUnkn}{1}[\tmpinconnuex]%
+	\StrChar{\ResolSysMatUnkn}{2}[\tmpinconnuey]%
+	\StrChar{\ResolSysMatUnkn}{3}[\tmpinconnuez]%
+	%lectures des noms de matrices
+	\setsepchar{,}%
+	\readlist*\TmpLstUnkb{\ResolSysMatNames}%
+	\itemtomacro\TmpLstUnkb[1]{\tmpnamematA}%
+	\itemtomacro\TmpLstUnkb[2]{\tmpnamematX}%
+	\itemtomacro\TmpLstUnkb[3]{\tmpnamematB}%
+	%lecture des équations
+	\readlist*\TmpLstEq{#3}%
+	\itemtomacro\TmpLstEq[1]\TmpEqA%
+	\itemtomacro\TmpLstEq[2]\TmpEqB%
+	\itemtomacro\TmpLstEq[3]\TmpEqC%
+	%extraction des coefficients
+	\StrCut{\TmpEqA}{=}{\tmpeqa}{\MatBA}%
+	\StrCut{\TmpEqB}{=}{\tmpeqb}{\MatBB}%
+	\StrCut{\TmpEqC}{=}{\tmpeqc}{\MatBC}%
+	%MatA (1,1)
+	\StrSubstitute{\tmpeqa}{\tmpinconnuex}{(1)}[\MatA]%
+	\StrSubstitute{\MatA}{\tmpinconnuey}{(0)}[\MatA]%
+	\StrSubstitute{\MatA}{\tmpinconnuez}{(0)}[\MatA]%
+	%MatB (1,2)
+	\StrSubstitute{\tmpeqa}{\tmpinconnuey}{(1)}[\MatB]%
+	\StrSubstitute{\MatB}{\tmpinconnuex}{(0)}[\MatB]%
+	\StrSubstitute{\MatB}{\tmpinconnuez}{(0)}[\MatB]%
+	%MatC (1,3)
+	\StrSubstitute{\tmpeqa}{\tmpinconnuez}{(1)}[\MatC]%
+	\StrSubstitute{\MatC}{\tmpinconnuex}{(0)}[\MatC]%
+	\StrSubstitute{\MatC}{\tmpinconnuey}{(0)}[\MatC]%
+	%MatD (2,1)
+	\StrSubstitute{\tmpeqb}{\tmpinconnuex}{(1)}[\MatD]%
+	\StrSubstitute{\MatD}{\tmpinconnuey}{(0)}[\MatD]%
+	\StrSubstitute{\MatD}{\tmpinconnuez}{(0)}[\MatD]%
+	%MatE (2,2)
+	\StrSubstitute{\tmpeqb}{\tmpinconnuey}{(1)}[\MatE]%
+	\StrSubstitute{\MatE}{\tmpinconnuex}{(0)}[\MatE]%
+	\StrSubstitute{\MatE}{\tmpinconnuez}{(0)}[\MatE]%
+	%MatF (2,3)
+	\StrSubstitute{\tmpeqb}{\tmpinconnuez}{(1)}[\MatF]%
+	\StrSubstitute{\MatF}{\tmpinconnuex}{(0)}[\MatF]%
+	\StrSubstitute{\MatF}{\tmpinconnuey}{(0)}[\MatF]%
+	%MatG (3,1)
+	\StrSubstitute{\tmpeqc}{\tmpinconnuex}{(1)}[\MatG]%
+	\StrSubstitute{\MatG}{\tmpinconnuey}{(0)}[\MatG]%
+	\StrSubstitute{\MatG}{\tmpinconnuez}{(0)}[\MatG]%
+	%MatH (3,2)
+	\StrSubstitute{\tmpeqc}{\tmpinconnuey}{(1)}[\MatH]%
+	\StrSubstitute{\MatH}{\tmpinconnuex}{(0)}[\MatH]%
+	\StrSubstitute{\MatH}{\tmpinconnuez}{(0)}[\MatH]%
+	%MatI (3,3)
+	\StrSubstitute{\tmpeqc}{\tmpinconnuez}{(1)}[\MatI]%
+	\StrSubstitute{\MatI}{\tmpinconnuex}{(0)}[\MatI]%
+	\StrSubstitute{\MatI}{\tmpinconnuey}{(0)}[\MatI]%
+	%déterminant
+	\def\DETMATRICE{\xinteval{(\MatA)*(\MatE)*(\MatI)+(\MatD)*(\MatH)*(\MatC)+(\MatB)*(\MatF)*(\MatG)-(\MatG)*(\MatE)*(\MatC)-(\MatD)*(\MatB)*(\MatI)-(\MatA)*(\MatH)*(\MatF)}}%
+	%inverse, à voir après pour le cas non inversible...
+	\xintifboolexpr{\DETMATRICE == 0}%
+		{}%
+		{%
+			\def\MatInvA{((\MatE)*(\MatI)-(\MatH)*(\MatF))/(\DETMATRICE)}%
+			\def\MatInvB{(-(\MatB)*(\MatI)+(\MatC)*(\MatH))/(\DETMATRICE)}%
+			\def\MatInvC{((\MatB)*(\MatF)-(\MatC)*(\MatE))/(\DETMATRICE)}%
+			\def\MatInvD{(-(\MatD)*(\MatI)+(\MatF)*(\MatG))/(\DETMATRICE)}%
+			\def\MatInvE{((\MatA)*(\MatI)-(\MatC)*(\MatG))/(\DETMATRICE)}%
+			\def\MatInvF{(-(\MatA)*(\MatF)+(\MatD)*(\MatC))/(\DETMATRICE)}%
+			\def\MatInvG{((\MatD)*(\MatH)-(\MatE)*(\MatG))/(\DETMATRICE)}%
+			\def\MatInvH{(-(\MatA)*(\MatH)+(\MatB)*(\MatG))/(\DETMATRICE)}%
+			\def\MatInvI{((\MatA)*(\MatE)-(\MatB)*(\MatD))/(\DETMATRICE)}%
+			%résultat
+			\def\MatResA{\IntConvFrac[#2]{(\MatInvA)*(\MatBA)+(\MatInvB)*(\MatBB)+(\MatInvC)*(\MatBC)}}%
+			\def\MatResB{\IntConvFrac[#2]{(\MatInvD)*(\MatBA)+(\MatInvE)*(\MatBB)+(\MatInvF)*(\MatBC)}}%
+			\def\MatResC{\IntConvFrac[#2]{(\MatInvG)*(\MatBA)+(\MatInvH)*(\MatBB)+(\MatInvI)*(\MatBC)}}%
+			\def\MatAffInvA{\IntConvFrac[#2]{\MatInvA}}%
+			\def\MatAffInvB{\IntConvFrac[#2]{\MatInvB}}%
+			\def\MatAffInvC{\IntConvFrac[#2]{\MatInvC}}%
+			\def\MatAffInvD{\IntConvFrac[#2]{\MatInvD}}%
+			\def\MatAffInvE{\IntConvFrac[#2]{\MatInvE}}%
+			\def\MatAffInvF{\IntConvFrac[#2]{\MatInvF}}%
+			\def\MatAffInvG{\IntConvFrac[#2]{\MatInvG}}%
+			\def\MatAffInvH{\IntConvFrac[#2]{\MatInvH}}%
+			\def\MatAffInvI{\IntConvFrac[#2]{\MatInvI}}%
+		}%
+	%affichage pour test
+	\def\MatAffA{\IntConvFrac[#2]{\MatA}}%
+	\def\MatAffB{\IntConvFrac[#2]{\MatB}}%
+	\def\MatAffC{\IntConvFrac[#2]{\MatC}}%
+	\def\MatAffD{\IntConvFrac[#2]{\MatD}}%
+	\def\MatAffE{\IntConvFrac[#2]{\MatE}}%
+	\def\MatAffF{\IntConvFrac[#2]{\MatF}}%
+	\def\MatAffG{\IntConvFrac[#2]{\MatG}}%
+	\def\MatAffH{\IntConvFrac[#2]{\MatH}}%
+	\def\MatAffI{\IntConvFrac[#2]{\MatI}}%
+	\def\MatAffBA{\IntConvFrac[#2]{\MatBA}}%
+	\def\MatAffBB{\IntConvFrac[#2]{\MatBB}}%
+	\def\MatAffBC{\IntConvFrac[#2]{\MatBC}}%
+	\ifboolKV[resolsysmatrix]{Brut}%
+		{%
+			\def\ResolDet{\IntConvFrac[#2]{(\MatA)*(\MatE)*(\MatI)+(\MatD)*(\MatH)*(\MatC)+(\MatB)*(\MatF)*(\MatG)-(\MatG)*(\MatE)*(\MatC)-(\MatD)*(\MatB)*(\MatI)-(\MatA)*(\MatH)*(\MatF)}}%
+			\def\ResolMatA{\begin{pNiceMatrix}[cell-space-limits=\ResolSysMatOpt] {\MatAffA}&{\MatAffB}&{\MatAffC} \\ {\MatAffD}&{\MatAffE}&{\MatAffF} \\ {\MatAffG}&{\MatAffH}&{\MatAffI} \end{pNiceMatrix}}%
+			\def\ResolMatX{\begin{pNiceMatrix}[cell-space-limits=\ResolSysMatOpt] \tmpinconnuex \\ \tmpinconnuey \\ \tmpinconnuez \end{pNiceMatrix}}%
+			\def\ResolMatB{\begin{pNiceMatrix}[cell-space-limits=\ResolSysMatOpt] {\MatAffBA} \\ {\MatAffBB} \\ {\MatAffBC} \end{pNiceMatrix}}%
+			\xintifboolexpr{\DETMATRICE == 0}%
+				{%
+					\def\ResolInvMatA{\text{La matrice n'est pas inversible.}}%
+				}%
+				{%
+					\def\ResolSolX{\IntConvFrac[#2]{(\MatInvA)*(\MatBA)+(\MatInvB)*(\MatBB)+(\MatInvC)*(\MatBC)}}%
+					\def\ResolSolY{\IntConvFrac[#2]{(\MatInvD)*(\MatBA)+(\MatInvE)*(\MatBB)+(\MatInvF)*(\MatBC)}}%
+					\def\ResolSolZ{\IntConvFrac[#2]{(\MatInvG)*(\MatBA)+(\MatInvH)*(\MatBB)+(\MatInvI)*(\MatBC)}}%
+					\def\ResolInvMatA{\begin{pNiceMatrix}[cell-space-limits=\ResolSysMatOpt] {\MatAffInvA}&{\MatAffInvB}&{\MatAffInvC} \\ {\MatAffInvD}&{\MatAffInvE}&{\MatAffInvF} \\ {\MatAffInvG}&{\MatAffInvH}&{\MatAffInvI} \end{pNiceMatrix}}%
+				}%
+		}%
+		{%
+			\ifboolKV[resolsysmatrix]{Enonce}%
+				{%
+					On considère le système $\IfEq{\ResolSysMatNameSys}{}{}{\ResolSysMatNameSys \text{ : }} \systeme[#5]{#4}$.\\
+				}%
+				{}%
+			Matriciellement, le système s'écrit sous la forme $\tmpnamematA\times \tmpnamematX = \tmpnamematB$ avec :%
+			\ifboolKV[resolsysmatrix]{Dense}%
+				{%
+					~$\tmpnamematA = \begin{pNiceMatrix}[cell-space-limits=\ResolSysMatOpt] {\MatAffA}&{\MatAffB}&{\MatAffC} \\ {\MatAffD}&{\MatAffE}&{\MatAffF} \\ {\MatAffG}&{\MatAffH}&{\MatAffI} \end{pNiceMatrix}$ ; $\tmpnamematX = \begin{pNiceMatrix}[cell-space-limits=\ResolSysMatOpt] \tmpinconnuex \\ \tmpinconnuey \\ \tmpinconnuez \end{pNiceMatrix}$ et $\tmpnamematB = \begin{pNiceMatrix}[cell-space-limits=\ResolSysMatOpt] {\MatAffBA} \\ {\MatAffBB} \\ {\MatAffBC} \end{pNiceMatrix}$.\\
+				}%
+				{%
+					\[%
+					\tmpnamematA = \begin{pNiceMatrix}[cell-space-limits=\ResolSysMatOpt] {\MatAffA}&{\MatAffB}&{\MatAffC} \\ {\MatAffD}&{\MatAffE}&{\MatAffF} \\ {\MatAffG}&{\MatAffH}&{\MatAffI} \end{pNiceMatrix}
+					\text{ ; }
+					\tmpnamematX = \begin{pNiceMatrix}[cell-space-limits=\ResolSysMatOpt] \tmpinconnuex \\ \tmpinconnuey \\ \tmpinconnuez \end{pNiceMatrix}
+					\text{ et }
+					\tmpnamematB = \begin{pNiceMatrix}[cell-space-limits=\ResolSysMatOpt] {\MatAffBA} \\ {\MatAffBB} \\ {\MatAffBC} \end{pNiceMatrix}
+					\]%
+				}%
+			\xintifboolexpr{\DETMATRICE == 0}%
+				{%
+					La matrice $\tmpnamematA$ n'est pas inversible, donc le système n'admet pas de solution (ou admet une unifinité de solutions).%
+				}%
+				{%
+					La matrice $\tmpnamematA$ est inversible, et :%
+					\ifboolKV[resolsysmatrix]{Dense}%
+						{%
+							~$\tmpnamematA\times \tmpnamematX = \tmpnamematB \implies \underbrace{\ResolSysMatInv \times \tmpnamematA}_{{=}I_3} \times \tmpnamematX = \ResolSysMatInv \times \tmpnamematB \implies \tmpnamematX=\ResolSysMatInv\times \tmpnamematB$.\\%
+						}%
+						{%
+							\[\tmpnamematA\times \tmpnamematX = \tmpnamematB \implies \underbrace{\ResolSysMatInv \times \tmpnamematA}_{{=}I_3} \times \tmpnamematX = \ResolSysMatInv \times \tmpnamematB \implies I_3 \times \tmpnamematX = \ResolSysMatInv\times \tmpnamematB \implies \tmpnamematX=\ResolSysMatInv\times \tmpnamematB.\]%
+						}%
+					La calculatrice nous donne $\tmpnamematX = \begin{pNiceMatrix}[cell-space-limits=\ResolSysMatOpt] {\MatResA} \\ {\MatResB} \\ {\MatResC} \end{pNiceMatrix}$. Ainsi on obtient $\tmpinconnuex=\MatResA$ et $\tmpinconnuey=\MatResB$ et $\tmpinconnuez=\MatResC$.%
+				}%
+		}%
+}
+
+%===PRESENTATION PRODUIT MATRICES
+\NewDocumentCommand\PresentProdMat{ s D<>{} m m m D<>{} }{%
+	\begin{tikzpicture}[inner sep=0pt,outer sep=0pt,#2]
+		\IfBooleanTF{#1}%
+			{%
+				\node (MatriceA) at (0,0) {{$\begin{pNiceMatrix}[#6] #3 \end{pNiceMatrix}$}} ;
+				\node[right=0pt of MatriceA,anchor=west] (MatriceAB) {{$\begin{pNiceMatrix}[#6] #5 \end{pNiceMatrix}$}} ;
+				\node[above=0pt of MatriceAB,anchor=south] (MatriceB) {{$\begin{pNiceMatrix}[#6] #4 \end{pNiceMatrix}$}} ;
+			}%
+			{%
+				\node (MatriceA) at (0,0) {{$\begin{pmatrix} #3 \end{pmatrix}$}} ;
+				\node[right=0pt of MatriceA,anchor=west] (MatriceAB) {{$\begin{pmatrix} #5 \end{pmatrix}$}} ;
+				\node[above=0pt of MatriceAB,anchor=south] (MatriceB) {{$\begin{pmatrix} #4 \end{pmatrix}$}} ;
+			}%
+	\end{tikzpicture}%
+}
+
+%===OPÉRATIONS POSÉES (comme PfL)
+\newlength{\siowidestcharwd}
+\newlength{\siocharwd}
+\newlength{\sioheightercharht}
+
+\defKV[sioposeoperation]{%
+	Base=\def\PoseOpeBase{#1},%
+	LimiteCapac=\def\PoseOpeLimit{#1},%
+	SymbDecal=\def\PoseOpeSymb{#1},%
+	Offset=\def\PoseOpeOffset{#1},%
+	CouleurRetenue=\def\PoseOpeColReten{#1}
+}
+
+\setKVdefault[sioposeoperation]{%
+	Base=dec,%
+	SymbDecal=.,%
+	Interm=true,%
+	Offset=6pt,%
+	AffEgal=true,%
+	LimiteCapac=0,%
+	CouleurRetenue=red,%
+	AffRetenues=true
+}
+
+\NewDocumentCommand\SioIntCalcMaxWidth{ m }{%
+	\StrLen{#1}[\tmplen]%
+	\setlength{\siowidestcharwd}{0pt}
+	\xintFor* ##1 in {\xintSeq{1}{\tmplen}}\do{%
+		\StrChar{#1}{##1}[\tmpchar]%
+		\settowidth{\siocharwd}{\tmpchar}%
+		\setlength{\siowidestcharwd}{\maxof{\siowidestcharwd}{\siocharwd}}%
+	}%
+}
+
+\NewDocumentCommand\SioIntCreateBoxNumbers{ O{c} m }{%
+	\IfStrEqCase{\PoseOpeBase}{%
+		{dec}{\SioIntCalcMaxWidth{0123456789}}%
+		{bin}{\SioIntCalcMaxWidth{01}}%
+		{hex}{\SioIntCalcMaxWidth{0123456789ABCDEF}}%
+	}%
+	\addtolength{\siowidestcharwd}{\PoseOpeOffset/2}%
+	\StrLen{#2}[\tmplennumber]%
+	\xintFor* ##1 in {\xintSeq{1}{\tmplennumber}}\do{%
+		\StrChar{#2}{##1}[\tmpchiff]%
+		\makebox[\the\siowidestcharwd][#1]{\tmpchiff}%
+	}%
+}
+
+\newcommand\SioAffRetenue[1]{%
+	\textcolor{\PoseOpeColReten}{\scalebox{0.5}[0.5]{#1}}%
+}
+
+\NewDocumentCommand\SioIntCreateBoxNumbersRetenue{ m }{%
+	\IfStrEqCase{\PoseOpeBase}{%
+		{dec}{\SioIntCalcMaxWidth{0123456789}}%
+		{bin}{\SioIntCalcMaxWidth{01}}%
+		{hex}{\SioIntCalcMaxWidth{0123456789ABCDEF}}%
+	}%
+	\addtolength{\siowidestcharwd}{\PoseOpeOffset/2}%
+	\StrLen{#1}[\tmplennumber]%
+	\xintFor* ##1 in {\xintSeq{1}{\tmplennumber}}\do{%
+		\StrChar{#1}{##1}[\tmpchiff]%
+		\IfEq{\tmpchiff}{X}%
+			{\makebox[\the\siowidestcharwd][c]{\textcolor{\PoseOpeColReten}{\scalebox{0.5}[0.5]{}}}}%
+			{\makebox[\the\siowidestcharwd][c]{\textcolor{\PoseOpeColReten}{\scalebox{0.5}[0.5]{\tmpchiff}}}}%
+	}%
+}
+
+\NewDocumentCommand\SioIntPoseAddition{ m m D<>{} }{%
+	\StrLen{#1}[\nbchiffA]%
+	%essai des retenues ??
+	\xdef\ListeRetenues{X}%
+	\xintFor* ##1 in {\xintSeq{1}{\nbchiffA}}\do{%
+		\StrRight{#1}{##1}[\tmpinterA]%
+		\StrRight{#2}{##1}[\tmpinterB]%
+		\IfStrEqCase{\PoseOpeBase}{%
+			{dec}{\xdef\rescalcrete{\xinteval{\tmpinterA+\tmpinterB}}}%
+			{bin}{\xdef\rescalcrete{\xintDecToBin{\xinteval{\xintBinToDec{\tmpinterA}+\xintBinToDec{\tmpinterB}}}}}%
+			{hex}{\xdef\rescalcrete{\xintDecToHex{\xinteval{\xintHexToDec{\tmpinterA}+\xintHexToDec{\tmpinterB}}}}}%
+		}%
+		\StrLen{\rescalcrete}[\tmpnbchiffresinter]%
+		\xintifboolexpr{\tmpnbchiffresinter > ##1}%
+			{%
+				\StrGobbleRight{\rescalcrete}{##1}[\tmpretenue]%
+				\xdef\ListeRetenues{\tmpretenue\ListeRetenues}%
+			}%
+			{%
+				\xintifboolexpr{##1 == \nbchiffA}{}{\xdef\ListeRetenues{X\ListeRetenues}}%
+			}%
+	}%
+	%suite
+	\IfStrEqCase{\PoseOpeBase}{%
+		{dec}{\xdef\rescalcbin{\xinteval{#1+#2}}}%
+		{bin}{\xdef\rescalcbin{\xintDecToBin{\xinteval{\xintBinToDec{#1}+\xintBinToDec{#2}}}}}%
+		{hex}{\xdef\rescalcbin{\xintDecToHex{\xinteval{\xintHexToDec{#1}+\xintHexToDec{#2}}}}}%
+	}%
+	\xintifboolexpr{\PoseOpeLimit > 0 }{\StrRight{\rescalcbin}{\PoseOpeLimit}[\rescalcbin]}{}%
+	%\ensuremath{\begin{array}{@{\,}r@{\hspace{\PoseOpeOffset}}r@{\,}}
+	\ensuremath{\begin{NiceArray}[#3]{@{\,}r@{\hspace{\PoseOpeOffset}}r@{\,}}
+		\ifboolKV[sioposeoperation]{AffRetenues}{\RowStyle[cell-space-limits=0pt]{} & \SioIntCreateBoxNumbersRetenue{\ListeRetenues} \\[-0.5\sioheightercharht]}{}
+		\RowStyle[nb-rows=*,cell-space-limits=1pt]{}  & \SioIntCreateBoxNumbers{#1} \\
+		+ & \SioIntCreateBoxNumbers{#2} \\
+		\hline
+		\ifboolKV[sioposeoperation]{AffEgal}{=}{} & \SioIntCreateBoxNumbers{\rescalcbin} \\
+	\end{NiceArray}}%
+	%\end{array}}%
+}
+
+\NewDocumentCommand\SioIntPoseSoustraction{ m m D<>{} }{%
+	\IfStrEqCase{\PoseOpeBase}{%
+		{dec}{\xdef\rescalcbin{\xinteval{#1-#2}}}%
+		{bin}{\xdef\rescalcbin{\xintDecToBin{\xinteval{\xintBinToDec{#1}-\xintBinToDec{#2}}}}}%
+		{hex}{\xdef\rescalcbin{\xintDecToHex{\xinteval{\xintHexToDec{#1}-\xintHexToDec{#2}}}}}%
+	}%
+	%bourrage de zéros pour les retenues
+	\StrLen{#1}[\lenA]\StrLen{#2}[\lenB]%
+	\xdef\BwithZeros{#2}%
+	\xintifboolexpr{ \lenA > \lenB }%
+		{%
+			\xintFor* ##1 in {\xintSeq{1}{\xinteval{\lenA-\lenB}}}\do{\xdef\BwithZeros{0\BwithZeros}}%
+		}%
+		{}%
+	%suite
+	\xintifboolexpr{\PoseOpeLimit > 0 }{\StrRight{\rescalcbin}{\PoseOpeLimit}[\rescalcbin]}{}%
+	%\ensuremath{\begin{array}{@{\,}r@{\hspace{\PoseOpeOffset}}r@{\,}}
+	\ifboolKV[sioposeoperation]{AffRetenues}{%
+	\ensuremath{\begin{NiceArray}[#3]{@{\,}r@{\hspace{\PoseOpeOffset/2}}r@{\,}}
+		\RowStyle[nb-rows=*,cell-space-limits=1pt]{}
+		& \IfStrEqCase{\PoseOpeBase}{%
+			{dec}{\SioIntCalcMaxWidth{0123456789}}%
+			{bin}{\SioIntCalcMaxWidth{01}}%
+			{hex}{\SioIntCalcMaxWidth{0123456789ABCDEF}}%
+		}%
+		\addtolength{\siowidestcharwd}{\PoseOpeOffset/2}%
+		\StrLen{#1}[\tmplennumber]%
+		\xintFor* ##1 in {\xintSeq{1}{\tmplennumber}}\do{%
+			\xdef\tmplenctr{\inteval{\tmplennumber-##1+1}}%
+			\StrChar{#1}{##1}[\tmpchiff]%
+			\StrRight{#1}{\tmplenctr}[\tmpA]%
+			\StrRight{\BwithZeros}{\tmplenctr}[\tmpB]%
+			\IfStrEqCase{\PoseOpeBase}{%
+				{dec}{\xdef\rescalctmp{\xinteval{\tmpA-\tmpB}}}%
+				{bin}{\xdef\rescalctmp{\xinteval{\xintBinToDec{\tmpA}-\xintBinToDec{\tmpB}}}}%
+				{hex}{\xdef\rescalctmp{\xinteval{\xintHexToDec{\tmpA}-\xintHexToDec{\tmpB}}}}%
+			}%
+			\xintifboolexpr{ \rescalctmp >= 0 }%
+				{\makebox[\the\siowidestcharwd][r]{\tmpchiff}}%
+				%{\makebox[\the\siowidestcharwd][r]{${}_{\textcolor{\PoseOpeColReten}{\scalebox{0.5}[0.5]{\text{1}}}}$\kern-0.1em\tmpchiff}}%
+				{\makebox[\the\siowidestcharwd][r]{\raisebox{-0.5\height}{\textcolor{\PoseOpeColReten}{\scalebox{0.5}[0.5]{\text{1}}}}\kern-0.1em\tmpchiff}}%
+		} \\
+		- & \IfStrEqCase{\PoseOpeBase}{%
+			{dec}{\SioIntCalcMaxWidth{0123456789}}%
+			{bin}{\SioIntCalcMaxWidth{01}}%
+			{hex}{\SioIntCalcMaxWidth{0123456789ABCDEF}}%
+		}%
+		\addtolength{\siowidestcharwd}{\PoseOpeOffset/2}%
+		\StrLen{#1}[\tmplennumber]%
+		\StrChar{#2}{\lenB}[\tmplastB]%
+		\xintFor* ##1 in {\xintSeq{1}{\xinteval{\tmplennumber-1}}}\do{%
+			\xdef\tmplenctr{\inteval{\tmplennumber-##1}}%
+			\StrChar{\BwithZeros}{##1}[\tmpchiff]%
+			\StrRight{#1}{\tmplenctr}[\tmpA]%
+			\StrRight{\BwithZeros}{\tmplenctr}[\tmpB]%
+			\IfStrEqCase{\PoseOpeBase}{%
+				{dec}{\xdef\rescalctmp{\xinteval{\tmpA-\tmpB}}}%
+				{bin}{\xdef\rescalctmp{\xinteval{\xintBinToDec{\tmpA}-\xintBinToDec{\tmpB}}}}%
+				{hex}{\xdef\rescalctmp{\xinteval{\xintHexToDec{\tmpA}-\xintHexToDec{\tmpB}}}}%
+			}%
+			\xintifboolexpr{ \rescalctmp >= 0 }%
+				{\makebox[\the\siowidestcharwd][r]{\xintifboolexpr{ ##1 <= \lenA-\lenB }{}{\tmpchiff}}}%
+				%{\makebox[\the\siowidestcharwd][r]{${}_{\textcolor{\PoseOpeColReten}{\scalebox{0.5}[0.5]{\text{1}}}}$\xintifboolexpr{ ##1 <= \lenA-\lenB }{}{\kern-0.1em\tmpchiff}}}%
+				{\makebox[\the\siowidestcharwd][r]{\raisebox{-0.5\height}{\textcolor{\PoseOpeColReten}{\scalebox{0.5}[0.5]{\text{1}}}}\xintifboolexpr{ ##1 <= \lenA-\lenB }{\kern0.25em}{\kern-0.1em\tmpchiff}}}%
+		}\makebox[\the\siowidestcharwd][r]{\tmplastB} \\
+		
+		%\SioIntCreateBoxNumbers{#2} \\
+		\hline
+		\ifboolKV[sioposeoperation]{AffEgal}{=}{} &\SioIntCreateBoxNumbers[r]{\rescalcbin} \\
+	\end{NiceArray}}%
+	}%
+	{%
+	\ensuremath{\begin{NiceArray}[#3]{@{\,}r@{\hspace{\PoseOpeOffset}}r@{\,}}
+		\RowStyle[nb-rows=*,cell-space-limits=1pt]{}
+		& \SioIntCreateBoxNumbers{#1} \\
+		- & \SioIntCreateBoxNumbers{#2} \\
+		\hline
+		\ifboolKV[sioposeoperation]{AffEgal}{=}{} & \SioIntCreateBoxNumbers{\rescalcbin} \\
+	\end{NiceArray}}%
+	}%
+	%\end{array}}%
+}
+
+\NewDocumentCommand\SioIntPoseMultiplication{ m m D<>{} }{%
+	\StrLen{#1}[\nbligninit]%
+	\StrLen{#2}[\nbligninter]%
+	\IfStrEqCase{\PoseOpeBase}{%
+		{dec}{\xdef\rescalcbin{\xinteval{#1*#2}}}%
+		{bin}{\xdef\rescalcbin{\xintDecToBin{\xinteval{\xintBinToDec{#1}*\xintBinToDec{#2}}}}}%
+		{hex}{\xdef\rescalcbin{\xintDecToHex{\xinteval{\xintHexToDec{#1}*\xintHexToDec{#2}}}}}%
+	}%
+	\xintifboolexpr{\PoseOpeLimit > 0 }{\StrRight{\rescalcbin}{\PoseOpeLimit}[\rescalcbin]}{}%
+	%\ensuremath{\begin{array}{@{\,}r@{\hspace{\PoseOpeOffset}}r@{\,}}
+	\ensuremath{\begin{NiceArray}[#3]{@{\,}r@{\hspace{\PoseOpeOffset}}r@{\,}}
+		\RowStyle[nb-rows=*,cell-space-limits=1pt]{}
+		& \SioIntCreateBoxNumbers{#1} \\
+		\times & \SioIntCreateBoxNumbers{#2} \\
+		\ifboolKV[sioposeoperation]{Interm}%
+			{%
+				\hline
+				\xintFor* ##1 in {\xintSeq{1}{\nbligninter}}\do{%
+					\xintifboolexpr{##1 == 1}{}{+}&
+					\xdef\tmpindice{\inteval{\nbligninter-##1+1}}\StrChar{#2}{\tmpindice}[\tmpchiff]\IfStrEqCase{\PoseOpeBase}{{dec}{\xdef\rescalcbininter{\xinteval{#1*\tmpchiff}}}{bin}{\xdef\rescalcbininter{\xintDecToBin{\xinteval{\xintBinToDec{#1}*\xintBinToDec{\tmpchiff}}}}}{hex}{\xdef\rescalcbininter{\xintDecToHex{\xinteval{\xintHexToDec{#1}*\xintHexToDec{\tmpchiff}}}}}}%
+					\IfEq{\tmpchiff}{0}%
+						{\xdef\rescalcbininter{}\xintFor* ##2 in {\xintSeq{1}{\nbligninit}}\do{\xdef\rescalcbininter{0\rescalcbininter}}%
+						}{}%
+					\xintifboolexpr{\PoseOpeLimit > 0 }{\StrRight{\rescalcbininter}{\PoseOpeLimit}[\rescalcbininter]}{}%
+					\SioIntCreateBoxNumbers{\rescalcbininter}
+					\xintifboolexpr{##1 == 1}{}{\xintFor* ##2 in {\xintSeq{1}{##1-1}}\do{\makebox[\the\siowidestcharwd][c]{\PoseOpeSymb}}}\\
+				}%
+			}%
+			{}%
+		\hline
+		\ifboolKV[sioposeoperation]{AffEgal}{=}{} & \SioIntCreateBoxNumbers{\rescalcbin} \\
+	\end{NiceArray}}%
+	%\end{array}}%
+}
+
+\NewDocumentCommand\OpeBinDecHex{ O{} m D<>{} }{%
+	\restoreKV[sioposeoperation]%
+	\setKV[sioposeoperation]{#1}%
+	\IfStrEqCase{\PoseOpeBase}{%
+		{dec}{\settoheight{\sioheightercharht}{\hbox{0123456789}}}%
+		{bin}{\settoheight{\sioheightercharht}{\hbox{01}}}%
+		{hex}{\settoheight{\sioheightercharht}{\hbox{0123456789ABCDEF}}}%
+	}%
+	\IfSubStr{#2}{+}%
+		{%
+			\StrCut{#2}{+}{\tmpcalcA}{\tmpcalcB}%
+			\SioIntPoseAddition{\tmpcalcA}{\tmpcalcB}<#3>
+		}%
+		{}%
+	\IfSubStr{#2}{-}%
+		{%
+			\StrCut{#2}{-}{\tmpcalcA}{\tmpcalcB}%
+			\SioIntPoseSoustraction{\tmpcalcA}{\tmpcalcB}<#3>
+		}%
+		{}%
+	\IfSubStr{#2}{*}%
+		{%
+			\StrCut{#2}{*}{\tmpcalcA}{\tmpcalcB}%
+			\SioIntPoseMultiplication{\tmpcalcA}{\tmpcalcB}<#3>
+		}%
+		{}%
+}
+
+%===TABLES EN BASE QQC
+\newlength{\wdthtblbase}
+\setlength{\wdthtblbase}{1.66em}
+
+\defKV[ConversionBaseBase]{%
+	Unite=\setlength{\wdthtblbase}{#1},%
+	Couleurs=\def\blbasecolors{#1},%
+	Police=\def\blbasefonte{#1}
+}
+
+\setKVdefault[ConversionBaseBase]{%
+	Unite=1.66em,%
+	Couleurs={cyan!25,lime!25},%
+	Police=\normalfont\normalsize,%
+	Dernier=false
+}
+
+\ExplSyntaxOn
+\NewExpandableDocumentCommand\ConversionBaseVersBase{ m m m }{%
+	%1 = nb
+	%2 = base dép
+	%3 = base arriv
+	\int_to_Base:nn {\int_from_base:nn {#2}{#1}}{#3}
+}
+\ExplSyntaxOff
+
+\NewDocumentCommand\TableBase{ O{} m m D<>{} }{%
+	%1 = options, %2 = base, %3 = opération (+ ou * ou ×)
+	\restoreKV[ConversionBaseBase]%
+	\setKV[ConversionBaseBase]{#1}%
+	\xdef\tmplastdigit{\inteval{#2-1}}%
+	\begin{tikzpicture}[x=\wdthtblbase,y=\wdthtblbase,line join=rect,line cap=rect,#4]
+		%inner sep
+		\tikzstyle{every node}=[inner sep=0pt,text depth=0pt]
+		%police
+		\tikzset{CasePolice/.style={font=\blbasefonte}}%
+		%couleurs
+		\IfEq{\blbasecolors}{}%
+		{%
+			\tikzset{CaseSign/.style={draw=none}}%
+			\tikzset{CaseDigit/.style={draw=none}}%
+			\tikzset{CaseDiag/.style={draw=none}}%
+		}%
+		{%
+			\setsepchar{,}%
+			\readlist*\btbColors{\blbasecolors}%
+			\itemtomacro\btbColors[1]\tmpcolsgn%
+			\itemtomacro\btbColors[2]\tmpcolsdigit%
+			\IfStrEq{\tmpcolsgn}{}{\tikzset{CaseSign/.style={draw=none}}}{\tikzset{CaseSign/.style={draw=none,fill=\tmpcolsgn}}}%
+			\IfStrEq{\tmpcolsdigit}{}{\tikzset{CaseDigit/.style={draw=none}}}{\tikzset{CaseDigit/.style={draw=none,fill=\tmpcolsdigit}}}%
+			\xintifboolexpr{\btbColorslen >= 3}%
+				{%
+					\itemtomacro\btbColors[3]\tmpcolsdiag%
+					\itemtomacro\btbColors[3]\tmpcolsdiag%
+					\tikzset{CaseDiag/.style={draw=none,fill=\tmpcolsdiag}}%
+				}%
+				{%
+					\tikzset{CaseDiag/.style={draw=none}}%
+				}%
+		}%
+		%1ère ligne & 1ère colonne
+		\draw[CaseSign] (0,0) rectangle++ (1,-1) node[CasePolice,midway] {\IfStrEqCase{#3}{{+}{+}{*}{×}{×}{×}}[+]} ;
+		\foreach \idigit in {0,...,\tmplastdigit}{%
+			\draw[CaseDigit] ({\idigit+1},0) rectangle++ (1,-1) node[CasePolice,midway] {\ConversionBaseVersBase{\idigit}{10}{#2}} ;
+			\draw[CaseDigit] (0,{-\idigit-1}) rectangle++ (1,-1) node[CasePolice,midway] {\ConversionBaseVersBase{\idigit}{10}{#2}} ;
+		}%
+		%les calculs jusqu'au dernier chiffre
+		\foreach \i in {0,...,\tmplastdigit}{%
+			\foreach \j in {0,...,\tmplastdigit}{%
+				\IfStrEqCase{#3}{%+ par défaut
+					{+}{\xdef\tmpcalcbase{\xinteval{\i+\j}}}%
+					{*}{\xdef\tmpcalcbase{\xinteval{\i*\j}}}%
+					{×}{\xdef\tmpcalcbase{\xinteval{\i*\j}}}%
+				}[\xdef\tmpcalcbase{\xinteval{\i+\j}}]%
+				\xintifboolexpr{\i == \j}%
+					{\draw[CaseDiag] ({\i+1},{-\j-1}) rectangle++ (1,-1) node[CasePolice,midway] {\ConversionBaseVersBase{\tmpcalcbase}{10}{#2}} ;}%
+					{\draw ({\i+1+0.5},{-\j-1-0.5}) node[CasePolice] {\ConversionBaseVersBase{\tmpcalcbase}{10}{#2}} ;}%
+			}%
+		}%
+		%les calculs avec '10' si Dernier=true
+		\ifboolKV[ConversionBaseBase]{Dernier}%
+			{%
+				\draw[CaseDigit] ({\tmplastdigit+2},0) rectangle++ (1,-1) node[CasePolice,midway] {\ConversionBaseVersBase{#2}{10}{#2}} ;
+				\draw[CaseDigit] (0,{-\tmplastdigit-2},0) rectangle++ (1,-1) node[CasePolice,midway] {\ConversionBaseVersBase{#2}{10}{#2}} ;
+				\foreach \i in {0,...,\tmplastdigit}{%
+					\IfStrEqCase{#3}{%
+						{+}{\xdef\tmpcalcbase{\xinteval{\i+(#2)}}}%
+						{*}{\xdef\tmpcalcbase{\xinteval{\i*(#2)}}}%
+						{×}{\xdef\tmpcalcbase{\xinteval{\i*(#2)}}}%
+					}[\xdef\tmpcalcbase{\xinteval{\i+(#2)}}]%
+					\draw ({\i+1+0.5},{-#2-1-0.5}) node[CasePolice] {\ConversionBaseVersBase{\tmpcalcbase}{10}{#2}} ;
+					\draw ({#2+1+0.5},{-\i-1-0.5}) node[CasePolice] {\ConversionBaseVersBase{\tmpcalcbase}{10}{#2}} ;
+				}%
+				\draw[CaseDiag] ({#2+1},{-(#2)-1}) rectangle++ (1,-1) node[CasePolice,midway] {\ConversionBaseVersBase{(#2)*(#2)}{10}{#2}} ;
+			}%
+			{}%
+		%la grille pour finir ^^
+		\ifboolKV[ConversionBaseBase]{Dernier}%
+			{%
+				\IfStrEqCase{#3}{{+}{\draw[xstep=1,ystep=1] (0,0) grid ({#2+1},{-1-(#2)}) ;}{*}{\draw[xstep=1,ystep=1] (0,0) grid ({#2+1+1},{-1-(#2)-1}) ;}{×}{\draw[xstep=1,ystep=1] (0,0) grid ({#2+1+1},{-1-(#2)-1}) ;}}
+			}%
+			{%
+				\draw[xstep=1,ystep=1] (0,0) grid ({#2+1},{-1-(#2)}) ;
+			}%
+	\end{tikzpicture}%
+}
+
+%===ÉCRITURES CHEMINS
+\NewDocumentCommand\EcritureChemin{ O{\,--\,} m }{%
+	\StrSubstitute{#2}{/}{#1}\relax%
+}
+
+%===GRILLES CCF
+\newcommand\tkzsquarebox{{\tikz\draw (0,0) rectangle++(0.9em,0.9em);}}
+
+\defKV[GrillesCCFSIO]{%
+	Session=\def\grccfsioannee{#1},%
+	PoliceManuscrite=\def\grpoliceccf{#1},%
+	Type=\def\grtypeccf{#1}
+}
+
+\setKVdefault[GrillesCCFSIO]{%
+	Session={\year},%
+	PoliceManuscrite={},%
+	Type={7-1}
+}
+
+\NewDocumentCommand\GrilleCCFSIO{ O{} m m m D<>{default} }{%
+	%1=clés
+	%2=candidat
+	%3=date
+	%4=résumé
+	%5=compétences
+	\restoreKV[GrillesCCFSIO]%
+	\setKV[GrillesCCFSIO]{#1}%
+	\IfStrEq{\grtypeccf}{7-1}%
+		{%
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]},row{1}={l},row{2-3}={c},cells={font=\sffamily\bfseries}}
+				\hline
+				BTS SERVICES INFORMATIQUES AUX ORGANISATIONS\hfill{}SESSION {\grccfsioannee}\hspace*{1cm} \\
+				ANNEXE 7-1 : Document de préparation au déroulement de la situation 1 \\
+				Épreuve E3 – Mathématiques pour l’informatique (CCF) \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\begin{tblr}{
+					vline{1,Z}={solid},%
+					vline{2}={3-4}{solid},%
+					width=\linewidth,
+					colspec={X[m]Q[7cm,m]},
+					hlines,stretch=1.25,
+					cells={font=\bfseries\sffamily},
+					rows={1cm},%
+					row{2}={t},%
+					row{4}={t}
+				}
+				\SetCell[c=2]{c}{SITUATION PROBLÈME} & \\
+				NOM et prénom : \textmd{\grpoliceccf #2} & \SetCell{l}{\phantom{BLABLA}OPTION SLAM\phantom{ISR}\raisebox{-0.1em}{\tkzsquarebox} \\ \phantom{BLABLA}OPTION SISR\phantom{LAM}\raisebox{-0.1em}{\tkzsquarebox}} \\
+				N° candidat : & N° commission \\
+				{Intitulé court de la situation proposée : \\~\\ \textmd{\grpoliceccf #4} \\} & {\\ Date : \textmd{\grpoliceccf #3}} \\
+				{Consignes\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\} & \\
+				{Documents ou composants fournis\\ \\ \textmd{\grpoliceccf Notice + Aide-mémoire + Clé USB}\\ \\ \\} & \\
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\textsf{\textit{Au cours de l’épreuve, la personne candidate est autorisée à utiliser les ressources électroniques disponibles dans le centre d’examen à l’exception de tout service d’échanges synchrones ou asynchrones avec un tiers. Elle est informée que l’ensemble des connexions réalisées peuvent faire l’objet d’un contrôle par la commission d’interrogation.}}
+			
+			\pagebreak
+		}%
+		{}%
+	\IfStrEq{\grtypeccf}{7-2}%
+		{%
+			\IfStrEq{#5}{default}%
+				{%
+					\def\compteccfA{}%
+					\def\compteccfB{}%
+					\def\compteccfC{}%
+					\def\compteccfD{}%
+				}%
+				{%
+					\setsepchar[.]{/}%
+					\readlist*\lstcompetccf{#5}%
+					\itemtomacro\lstcompetccf[1]\compteccfA%
+					\itemtomacro\lstcompetccf[2]\compteccfB%
+					\itemtomacro\lstcompetccf[3]\compteccfC%
+					\itemtomacro\lstcompetccf[4]\compteccfD%
+
+				}%
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]},row{1}={l},row{2-3}={c},cells={font=\sffamily\bfseries}}
+				\hline
+				BTS SERVICES INFORMATIQUES AUX ORGANISATIONS\hfill{}SESSION {\grccfsioannee}\hspace*{1cm} \\
+				ANNEXE 7-2 : Grille d’aide à l’évaluation de la situation 1 (recto) \\
+				Épreuve E3 – Mathématiques pour l’informatique (CCF) \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]Q[3.5cm,m]},cells={font=\sffamily\bfseries},stretch=1.25}
+				\hline
+				NOM et prénom : \textmd{\grpoliceccf #2} & N° commission\textsuperscript{\scriptsize 1} : \\
+				N° candidat : & \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{0.75cm}
+			
+			\noindent\begin{tblr}{
+					hlines,vlines,
+					width=\linewidth,colspec={X[0.625,m]X[0.375,m]},
+					cells={font=\sffamily},%
+					row{2}={1.25cm},%
+					row{X}={0.75cm}
+				}
+			\SetCell[c=2]{l}{\bfseries Intitulé court de la situation problème proposée :} & \\
+			\SetCell[c=2]{l}{\grpoliceccf #4} & \\
+			\textbf{Évaluation\textsuperscript{\footnotesize 2}} & \textbf{Critères d'évaluation} \\
+			\textbf{Maîtrise des connaissances (sur 8)} & \\
+			\textmd{-- \grpoliceccf \compteccfA} & \\
+			\textmd{-- \grpoliceccf \compteccfB} & \\
+			\textmd{-- \grpoliceccf \compteccfC} & \\
+			\textmd{-- \grpoliceccf \compteccfD} & \\
+			\textbf{Production commentée (sur 6)} & \\
+			\textmd{Efficacité et pertinence de la solution proposée} & \\
+			\textmd{Pertinence de la solution proposée} & \\
+			\textmd{Correction et cohérence de l’utilisation du formalisme retenu} & \\
+			\textmd{Cohérence de l’utilisation du formalisme retenu} & \\
+			\textmd{Lisibilité de la solution proposée} & \\
+			\textbf{Mise en \oe{}uvre commentée (sur 6)} & \\
+			\textmd{Qualité de la mise en \oe{}uvre} & \\
+			\textmd{Efficacité de l’implémentation} & \\
+			\textmd{Pertinence de l’utilisation des composants logiciels fournis} & \\
+			\textmd{Adéquation des tests de validation effectués} & \\
+			\textmd{Capacité à proposer des corrections pertinentes} & \\
+			\textbf{Note globale} & \SetCell{r}{\textbf{Note ~~~~/\,20}} \\
+			\SetCell[c=2]{l}{\textbf{Date :} {\grpoliceccf #3} \\ ~ \\ \textbf{Nom et signature de la commission d’évaluation :} \\ ~} & \\
+			\SetCell[c=2]{l}{\textbf{\textit{Joindre le document descriptif de la situation problème proposée.}}} & \\
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\textsf{\textbf{\textit{Cette partie est à l’usage exclusif de la commission d’interrogation et ne peut être communiquée à la personne candidate.}}}
+			
+			\vfill
+			
+			\par\noindent\rule{0.33\linewidth}{0.4pt}
+			
+			\noindent\textsf{\textsuperscript{\footnotesize 1}{\footnotesize Indiquer le nom du professeur responsable de l’évaluation.}}
+			
+			\noindent\textsf{\textsuperscript{\footnotesize 2}{\footnotesize Des appels (2 au maximum) permettent de s’assurer de la compréhension du problème et d’évaluer la communication orale et les capacités liées à l’usage des outils numériques.}}
+			
+			\vspace*{5mm}
+			
+			\pagebreak
+			
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]},row{1}={l},row{2-3}={c},cells={font=\sffamily\bfseries}}
+				\hline
+				BTS SERVICES INFORMATIQUES AUX ORGANISATIONS\hfill{}SESSION {\grccfsioannee}\hspace*{1cm} \\
+				ANNEXE 7-2 : Grille d’aide à l’évaluation de la situation 1 (verso) \\
+				Épreuve E3 – Mathématiques pour l’informatique (CCF) \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]Q[6cm,m]},cells={font=\sffamily\bfseries},stretch=1.25}
+				\hline
+				NOM et prénom : \textmd{\grpoliceccf #2} & Date de l'interrogation : \\
+				N° candidat : & \textmd{\grpoliceccf #3} \\ \hline
+			\end{tblr}
+			
+			\vspace*{0.75cm}
+			
+			\noindent\begin{tblr}{%
+					width=\linewidth,colspec={XQ[7cm]},cells={font=\bfseries\sffamily},
+					row{1}={m,j,1cm},
+					row{2}={m,7cm},
+					row{3}={m,j,1cm},
+					row{4}={m,4cm},
+					vline{1,Z}={solid},
+					vline{2}={Z}{solid},
+					stretch=1.25}
+				\hline
+				Appréciation globale & \\ \hline
+				~
+				\\ \hline 
+				Questionnement complémentaire éventuel & \\ \hline
+				~
+				\\ \hline
+				{\underline{Note sur 20 :}\\ \\ \\} & {Visa de la commission \\ \\ \\} \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\textsf{\textbf{Ce document d’évaluation peut être communiqué à la personne candidate, à sa demande, après délibération du jury.}}
+			
+			\pagebreak
+		}%
+		{}%
+	\IfStrEq{\grtypeccf}{7-3}%
+		{%
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]},row{1}={l},row{2-3}={c},cells={font=\sffamily\bfseries}}
+				\hline
+				BTS SERVICES INFORMATIQUES AUX ORGANISATIONS\hfill{}SESSION {\grccfsioannee}\hspace*{1cm} \\
+				ANNEXE 7-3 : Grille d’aide à l’évaluation de la situation 2 (recto) \\
+				Épreuve E3 – Mathématiques pour l’informatique (CCF) \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]Q[3.5cm,m]},cells={font=\sffamily\bfseries},stretch=1.25}
+				\hline
+				NOM et prénom : \textmd{\grpoliceccf #2} & N° commission\textsuperscript{\scriptsize 3} : \\
+				N° candidat : & \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{0.75cm}
+			
+			\noindent\begin{tblr}{%
+					hline{1}={solid},%
+					hline{3-Y}={solid},
+					hline{Z}={2-Z}{solid},
+					vline{1}={1-Y}{solid},
+					vline{2}={3-Z}{solid},
+					vline{Z}={solid},
+					width=\linewidth,colspec={X[0.525]X[0.475]},
+					cells={font=\sffamily},
+					row{1}={m,j},
+					row{2}={m,j,1.5cm},
+					row{3-Z}={m,j,1cm},stretch=1.25}
+				\textbf{Identification du sujet proposé :} & \\
+				\textmd{\grpoliceccf #4} & \\
+				\SetCell{c}{\textbf{Compétences}} & \SetCell{c}{\textbf{Appréciation du niveau d’acquisition\textsuperscript{\scriptsize 4}}} \\
+				Maîtrise des connaissances figurant au programme & \\
+				Pertinence des sources d’information mobilisées & \\
+				Adaptation de la stratégie choisie au problème à résoudre & \\
+				Efficacité dans la mise en \oe{}uvre de cette stratégie & \\
+				Rigueur et pertinence dans l’utilisation des savoir-faire figurant au programme de mathématiques & \\
+				Cohérence de l’argumentation employée & \\
+				Aptitude à analyser un résultat avec pertinence & \\
+				Qualité d’expression écrite ou orale & \\
+				& \SetCell{r}{\textbf{/\,20}} \\
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\textsf{\textbf{\textit{Cette partie est à l’usage exclusif de la commission d’interrogation et ne peut être communiquée à la personne candidate.}}}
+			
+			\vfill
+			
+			\par\noindent\rule{0.33\linewidth}{0.4pt}
+			
+			\noindent\textsf{\textsuperscript{\footnotesize 3}{\footnotesize Indiquer le nom du professeur responsable de l’évaluation.}}
+			
+			\noindent\textsf{\textsuperscript{\footnotesize 4}{\footnotesize Le professeur peut utiliser toute forme d’annotation lui permettant d’évaluer par compétences.}}
+			
+			\vspace*{5mm}
+			
+			\pagebreak
+			
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]},row{1}={l},row{2-3}={c},cells={font=\sffamily\bfseries}}
+				\hline
+				BTS SERVICES INFORMATIQUES AUX ORGANISATIONS\hfill{}SESSION {\grccfsioannee}\hspace*{1cm} \\
+				ANNEXE 7-3 : Grille d’aide à l’évaluation de la situation 2 (verso) \\
+				Épreuve E3 – Mathématiques pour l’informatique (CCF) \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]Q[6cm,m]},cells={font=\sffamily\bfseries},stretch=1.25}
+				\hline
+				NOM et prénom : \textmd{\grpoliceccf #2} & Date de l'interrogation : \\
+				N° candidat : & \textmd{\grpoliceccf #3} \\ \hline
+			\end{tblr}
+			
+			\vspace*{0.75cm}
+			
+			\noindent\begin{tblr}{%
+					width=\linewidth,colspec={XQ[7cm]},cells={font=\bfseries\sffamily},
+					row{1}={m,j,1cm},
+					row{2}={m,7cm},
+					row{3}={m,j,1cm},
+					row{4}={m,4cm},
+					vline{1,Z}={solid},
+					vline{2}={Z}{solid},
+					stretch=1.25}
+				\hline
+				Appréciation globale & \\ \hline
+				~
+				\\ \hline 
+				Questionnement complémentaire éventuel & \\ \hline
+				~
+				\\ \hline
+				{\underline{Note sur 20 :}\\ \\ \\} & {Visa de la commission \\ \\ \\} \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\textsf{\textbf{Ce document d’évaluation peut être communiqué à la personne candidate, à sa demande, après délibération du jury.}}
+			
+			\pagebreak
+		}%
+		{}%
+}
+
+\endinput

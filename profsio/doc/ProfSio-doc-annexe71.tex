@@ -1,0 +1,18 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: lualatex: {shell: no, synctex: no, interaction: batchmode}
+
+\documentclass[a4paper,french,12pt]{article}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{fontspec}
+\usepackage{ProfSio}
+\setsansfont{Fira Sans}[Scale=MatchLowercase]
+\newfontfamily\poltuto{QTSanDiego}
+\usepackage{babel}
+
+\begin{document}
+
+\pagestyle{empty}
+
+\GrilleCCFSIO[Session=2025,Type={7-1},PoliceManuscrite={\poltuto}]{LOVELACE Ada}{21 mai 2024}{Quelques propriétés de la suite de Syracuse}
+
+\end{document}

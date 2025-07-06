@@ -1,0 +1,609 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[english,11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{pynotebook}
+\usepackage{enumitem}
+\usepackage{soul}
+\usepackage{codehigh}
+\usepackage{multicol}
+\usepackage{fontawesome5}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+%\rhead{\sffamily\small\affloetalab[Legende]}
+\lfoot{\sffamily\small [pynotebook]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\usepackage{xspace}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+
+\def\TPversion{0.1.4}
+\def\TPdate{21/06/2025}
+
+\sethlcolor{lightgray!25}
+\NewDocumentCommand\ShowCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+
+\usepackage{babel}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{pynotebook}}\\
+				\\
+				{\LARGE Present a Jupyter notebook, with} \\
+				{\LARGE tcolorbox, and listings or piton/pyluatex.} \\
+				\\
+				{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{tabular}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
+\end{tabular}
+\end{center}
+
+\hrule
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+\hrule
+
+\vspace*{5mm}
+
+\vfill~
+
+\textit{\footnotesize Thanks to F. Pantigny for his package \textsf{piton} and his help.}\dotfill{\footnotesize\ttfamily\url{https://ctan.org/pkg/piton}}
+
+\textit{\footnotesize And thanks to Tobias Enderle for his package \textsf{pyluatex}.}\dotfill{\footnotesize\ttfamily\url{https://ctan.org/pkg/pyluatex}}
+
+\pagebreak
+
+\section{Samples, with listings}
+
+\begin{NotebookMarkdown}{\linewidth}
+{\Large\bfseries This is a test for a \textsf{Markdown} block.}
+
+It's possible to use \LaTeX{} formulas, like %
+\[
+\left\lbrace\begin{array}{l}
+	F_0 = 0\\
+	F_1 = 1 \\
+	F_{n+2} = F_{n+1} + F_n
+\end{array}\right.
+\]
+\end{NotebookMarkdown}
+
+\begin{NotebookRaw}{\linewidth}
+This is a sample block, with RAW output.
+
+Just to use all capacities of Jupyter notebook ;-)
+\end{NotebookRaw}
+
+\begin{NotebookIn}{\linewidth}
+def fibonacci_aux(n,a,b):
+	if n == 0 :
+		return a
+	elif n == 1 :
+		return b
+	else:
+		return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+	return fibonacci_aux(n,0,1)
+
+print([fibonacci_of(n) for n in range(10)])
+\end{NotebookIn}
+
+\begin{NotebookOut}{\linewidth}
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+\end{NotebookOut}
+
+\begin{NotebookRaw}{\linewidth}
+Now we’re going to work with lists.
+
+Just a little example with a prime numbers, in french.
+\end{NotebookRaw}
+
+\begin{NotebookIn}{\linewidth}
+def proc_exec() :
+	choix = "o"
+	while choix == "o" :
+		n = -1
+		while n <= 1 :
+			n = int(input("Saisir un entier n, supérieur à 2 : "))
+		if estpremier(n) == True :
+			print(f"{n} est premier.")
+		else :
+			print(f"{n} n'est pas premier.")
+		listeres = listenombrepremiers(n)
+		print(f"La liste des entiers premiers <= à {n} est {listeres}.")
+		print(f"Il y a donc {len(listeres)} entiers premiers <= à {n}.")
+		choix = input("Recommencer [o/n] ? ")
+\end{NotebookIn}
+
+\begin{NotebookIn}{\linewidth}
+proc_exec()
+\end{NotebookIn}
+
+\begin{NotebookConsole}{\linewidth}
+Saisir un entier n, supérieur à 2 : 14
+14 n'est pas premier.
+La liste des entiers premiers <= à 14 est [2, 3, 5, 7, 11, 13].
+Il y a donc 6 entiers premiers <= à 14.
+Recommencer [o/n] ? o
+Saisir un entier n, supérieur à 2 : 1
+Saisir un entier n, supérieur à 2 : -3
+Saisir un entier n, supérieur à 2 : 25
+25 n'est pas premier.
+La liste des entiers premiers <= à 25 est [2, 3, 5, 7, 11, 13, 17, 19, 23].
+Il y a donc 9 entiers premiers <= à 25.
+Recommencer [o/n] ? n
+\end{NotebookConsole}
+%\vspace*{5mm}
+%
+%\begin{center}
+%	With \ShowCode{piton} and \ShowCode{pyluatex} (with code execution, but with \hologo{LuaLaTeX} and \textsf{--shell-escape}) :
+%\end{center}
+%
+%\includegraphics[clip]{pynotebook-samples-pitonpyluatex.pdf}
+
+\pagebreak
+
+\section{History}
+
+\verb|v0.1.4|~:~~~~Enhancements with \textsf{piton}
+
+\verb|v0.1.3|~:~~~~Modification with \texttt{gobble} (for \textsf{piton})
+
+\verb|v0.1.2|~:~~~~Enhancements with \texttt{gobble} (for \textsf{piton})
+
+\verb|v0.1.1|~:~~~~New block \textsf{In/Out} with \textsf{piton/pyluatex} (tks to F. Pantigny)
+
+\verb|v0.1.0|~:~~~~Initial version
+
+\vspace*{15mm}
+
+\pagebreak
+
+\section{The package pynotebook}
+
+\subsection{Ideas}
+
+The idea is to provide environments to reproduce a Jupyter notebook :
+
+\begin{itemize}
+	\item with \textit{blocks} for \textsf{RAW} or \textsf{Markdown} ;
+	\item with \ShowCode{listings} and no limitation with compiler, but without code execution ;
+	\item with \ShowCode{piton} and \ShowCode{pyluatex} with \hologo{LuaLaTeX} and \textsf{--shell-escape}.
+\end{itemize}
+
+The documentation use \hologo{pdfLaTeX}, but examples with \hologo{LuaLaTeX} are given in an other doc.
+
+\subsection{Loading}
+
+The package loads within the preamble, with \ShowCode{\textbackslash usepackage\{pynotebook\}}.
+
+The loaded packages are \ShowCode{tcolorbox} (with \ShowCode{skins,breakable,listings}), \ShowCode{calc}, \ShowCode{xstring} and \ShowCode{iftex}.
+
+If \hologo{LuaLaTeX} is detected, \ShowCode{piton} is loaded (but there's an option to avoid the loading), whereas \ShowCode{pyluatex} needs to be manually loaded, due to the declaration of the executable.
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%with pdflatex
+\usepackage{pynotebook}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%with LuaLaTeX and piton
+\usepackage{pynotebook}
+\usepackage[options]{pyluatex}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%with LuaLaTeX but without piton capability
+\usepackage[nopiton]{pynotebook}
+\end{codehigh}
+
+\subsection{Global usage}
+
+In order to respect the left-alignment, the \textit{titles} \ShowCode{In [  ]} and \ShowCode{Out[  ]} can add a blank character, to avoid offset due to counter with two digits !
+
+\pagebreak
+
+\section{Common text blocks}
+
+\subsection{Intro}
+
+The different text blocks are given with their own output.
+
+The package provides environments :
+
+\begin{itemize}
+	\item for a \textsf{RAW} block, with \texttt{teletype} font ; for a \textsf{Mardown} block, with all \hologo{LaTeX} support ;
+	\item a version with \textsf{piton} is given, in order to align perfectly the blocks !
+\end{itemize}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{NotebookRaw}[options tcbox]{<width>}
+<code>
+\end{NotebookRaw}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{NotebookMarkdown}[options tcbox]{<width>}
+<code>
+\end{NotebookMarkdown}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{NotebookPitonRaw}[options tcbox]{<width>}
+<code>
+\end{NotebookPitonRaw}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{NotebookPitonMarkdown}[options tcbox]{<width>}
+<code>
+\end{NotebookPitonMarkdown}
+\end{codehigh}
+
+\subsection{Examples}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{NotebookMarkdown}{\linewidth}
+{\Large\bfseries This is a test for a \textsf{Markdown} block.}\\
+It's possible to use \LaTeX{} formulas, like %
+\[
+  \left\lbrace\begin{array}{l}
+    F_0 = 0\\
+    F_1 = 1 \\
+    F_{n+2} = F_{n+1} + F_n
+  \end{array}\right.
+\]
+\end{NotebookMarkdown}
+
+\begin{NotebookRaw}{\linewidth}
+This is a sample block, with RAW output.
+
+Just to use all capacities of Jupyter notebook ;-)
+\end{NotebookRaw}
+\end{codehigh}
+
+\begin{NotebookMarkdown}{\linewidth}
+{\Large\bfseries This is a test for a \textsf{Markdown} block.}\\
+It's possible to use \LaTeX{} formulas, like %
+\[
+	\left\lbrace\begin{array}{l}
+		F_0 = 0\\
+		F_1 = 1 \\
+		F_{n+2} = F_{n+1} + F_n
+	\end{array}\right.
+\]
+\end{NotebookMarkdown}
+
+\begin{NotebookRaw}{\linewidth}
+This is a sample block, with RAW output.
+
+Just to use all capacities of Jupyter notebook ;-)
+\end{NotebookRaw}
+
+\pagebreak
+
+\section{The code blocks, with listings}
+
+\subsection{Intro}
+
+With \ShowCode{listings}, the different blocks are given with their own output (no code execution).
+
+The package provides environments :
+
+\begin{itemize}
+	\item with \texttt{In~[...]} ;
+	\item with \texttt{Out[...]} ;
+	\item without \textit{header}, eg for a \textit{console execution}.
+\end{itemize}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{NotebookIn}(*)[options tcbox]{<width>}
+<code>
+\end{NotebookIn}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{NotebookOut}(*)[options tcbox]{<width>}
+<code>
+\end{NotebookOut}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{NotebookConsole}[options tcbox]{<width>}
+<code>
+\end{NotebookConsole}
+\end{codehigh}
+
+The starred versions removes the counter, and don't display it.
+
+The blocks with \textit{header} (\texttt{In/Out}) are automatically numbered, and the global style is fixed.
+
+\subsection{Examples}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{NotebookIn}{\linewidth}
+def fibonacci_aux(n,a,b):
+  if n == 0 :
+    return a
+  elif n == 1 :
+    return b
+  else:
+    return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+  return fibonacci_aux(n,0,1)
+
+[fibonacci_of(n) for n in range(10)]
+\end{NotebookIn}
+
+\begin{NotebookOut}{\linewidth}
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+\end{NotebookOut}
+
+\begin{NotebookConsole}{\linewidth}
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+\end{NotebookConsole}
+\end{codehigh}
+
+\pagebreak
+
+\begin{NotebookIn}{\linewidth}
+def fibonacci_aux(n,a,b):
+	if n == 0 :
+		return a
+	elif n == 1 :
+		return b
+	else:
+		return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+	return fibonacci_aux(n,0,1)
+
+[fibonacci_of(n) for n in range(10)]
+\end{NotebookIn}
+
+\begin{NotebookOut}{\linewidth}
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+\end{NotebookOut}
+
+\begin{NotebookConsole}{\linewidth}
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+\end{NotebookConsole}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{NotebookIn}*[flush right]{13cm}
+def fibonacci_aux(n,a,b):
+  if n == 0 :
+    return a
+  elif n == 1 :
+    return b
+  else:
+    return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+  return fibonacci_aux(n,0,1)
+
+[fibonacci_of(n) for n in range(10)]
+\end{NotebookIn}
+
+\begin{NotebookOut}*[flush right]{13cm}
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+\end{NotebookOut}
+
+\begin{NotebookConsole}[flush right]{13cm}
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+\end{NotebookConsole}
+\end{codehigh}
+
+\begin{NotebookIn}*[flush right]{13cm}
+def fibonacci_aux(n,a,b):
+	if n == 0 :
+		return a
+	elif n == 1 :
+		return b
+	else:
+		return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+	return fibonacci_aux(n,0,1)
+
+[fibonacci_of(n) for n in range(10)]
+\end{NotebookIn}
+
+\begin{NotebookOut}*[flush right]{13cm}
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+\end{NotebookOut}
+
+\begin{NotebookConsole}[flush right]{13cm}
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+\end{NotebookConsole}
+
+\pagebreak
+
+\section{The code blocks, with piton and pyluatex}
+
+\subsection{Intro}
+
+With \ShowCode{piton} and \ShowCode{pyluatex}, the different blocks are given with the code to be displayed (\texttt{In/Out}) or with the code to be executed (\textsf{Out} or \textsf{Console}).
+
+The package provides environments :
+
+\begin{itemize}
+	\item with \texttt{In~[...]} ;
+	\item with \texttt{Out[...]} ;
+	\item with \texttt{In[...]\&{}Out[...]} ;
+	\item without \textit{header}, eg for a \textit{console execution}.
+\end{itemize}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{NotebookPitonRaw}[options tcbox]{width}<gobble options>
+<code>
+\end{NotebookPitonRaw}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{NotebookPitonMarkdown}[options tcbox]{width}
+<code>
+\end{NotebookPitonMarkdown}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{NotebookPitonIn}(*)[options tcbox]{width}<gobble options>
+<code>
+\end{NotebookPitonIn}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{NotebookPitonOut}(*)[options tcbox]{width}<gobble options>
+<code>
+\end{NotebookPitonOut}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{NotebookPitonInOut}(*)[options tcbox]{width}<gobble options>
+<code>
+\end{NotebookPitonInOut}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{NotebookPitonConsole}[options tcbox]{width}<gobble options>
+<code>
+\end{NotebookPitonConsole}
+\end{codehigh}
+
+The starred versions removes the counter, and don't display it.
+
+The blocks with \textit{header} (\texttt{In/Out}) are automatically numbered, and the global style is fixed.
+
+\smallskip
+
+\texttt{gobble options} are given within \textsf{piton} syntax :
+
+\begin{itemize}
+	\item \texttt{auto-gobble} ;
+	\item \texttt{env-gobble} ;
+	\item \texttt{gobble=xx} ;
+	\item \texttt{tabs-auto-gobble} ;
+	\item a mix of them.
+\end{itemize}
+
+\subsection{Examples}
+
+Due to the necessary usage of \hologo{LuaLaTeX} and \textsf{--shell-escape}, examples are given in a separate file.
+
+\pagebreak
+
+\section{Some customization}
+
+\subsection{Ideas}
+
+The package provides macros, in order to :
+
+\begin{itemize}[itemsep=2pt]
+	\item configure the \textit{words} \texttt{In/Out} in \textsf{french} ;
+	\item configure the spacing before and after the boxes (\ShowCode{0.33\textbackslash baselineskip} by default).
+\end{itemize}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\SetJupyterLng{fr}           %set french words
+
+\SetJupyterParSkip{<length>} %modify space before/after (or default)
+
+\setcounter{JupyterIn}{<nb>} %modify the counter
+\end{codehigh}
+
+\subsection{Examples}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\SetJupyterLng{fr}
+\SetJupyterParSkip{\baselineskip}
+\setcounter{JupyterIn}{14}
+
+\begin{NotebookIn}{0.75\linewidth}
+def fibonacci_aux(n,a,b):
+  if n == 0 :
+    return a
+  elif n == 1 :
+    return b
+  else:
+    return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+  return fibonacci_aux(n,0,1)
+
+[fibonacci_of(n) for n in range(15)]
+\end{NotebookIn}
+
+\begin{NotebookOut}{0.75\linewidth}
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+\end{NotebookOut}
+\end{codehigh}
+
+\SetJupyterLng{fr}
+\SetJupyterParSkip{\baselineskip}
+\setcounter{JupyterIn}{14}
+
+\begin{NotebookIn}{0.75\linewidth}
+def fibonacci_aux(n,a,b):
+	if n == 0 :
+		return a
+	elif n == 1 :
+		return b
+	else:
+		return fibonacci_aux(n-1,b,a+b)
+
+def fibonacci_of(n):
+	return fibonacci_aux(n,0,1)
+
+[fibonacci_of(n) for n in range(10)]
+\end{NotebookIn}
+
+\begin{NotebookOut}{0.75\linewidth}
+[0, 1, 1, 2, 3, 5, 8, 13, 21, 34]
+\end{NotebookOut}
+
+\end{document}
