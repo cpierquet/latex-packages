@@ -1,0 +1,958 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{PixelArtTikz}
+\usepackage{couleurs-fr}
+\usepackage{fontawesome5}
+\usepackage{enumitem}
+\usepackage{tabularray}
+\usepackage{multicol}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [PixelArtTikz]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+
+%\usepackage{hvlogos}
+\usepackage{hologo}
+\usepackage{xspace}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+\newcommand\TableauDocumentation{%
+	\begin{tblr}{width=\linewidth,colspec={X[c]X[c]X[c]X[c]X[c]X[c]},cells={font=\sffamily}}
+		{\huge \LaTeX} & & & & &\\
+		& {\huge \hologo{pdfLaTeX}} & & & & \\
+		& & {\huge \hologo{LuaLaTeX}} & & & \\
+		& & & {\huge \TikZ} & & \\
+		& & & & {\huge \TeXLive} & \\
+		& & & & & {\huge \hologo{MiKTeX}} \\
+	\end{tblr}
+}
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=1.5cm]{geometry}
+\setlength{\parindent}{0pt}
+
+\def\TPversion{0.1.8}
+\def\TPdate{05/05/2025}
+\usepackage{minted2}
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{minted}
+\NewTCBListing{PresentationCode}{ O{blue} m }{%
+	sharp corners=downhill,enhanced,arc=12pt,skin=bicolor,%
+	colback=#1!1!white,colframe=#1!75!black,colbacklower=white,%
+	attach boxed title to top right={yshift=-\tcboxedtitleheight},title=Code \LaTeX,%
+	boxed title style={%
+		colframe=#1!75!black,colback=#1!15!white,%
+		,sharp corners=downhill,arc=12pt,%
+	},%
+	fonttitle=\color{#1!90!black}\itshape\ttfamily\footnotesize,%
+	listing engine=minted,minted style=colorful,
+	minted language=tex,minted options={tabsize=4,fontsize=\footnotesize,autogobble},
+	#2
+}
+\usepackage[english]{babel}
+\newcommand\Cle[1]{{\bfseries\sffamily\textlangle #1\textrangle}}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\vspace{2cm}
+
+\begin{center}
+	\begin{minipage}{0.75\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{PixelArtTikz [en]}}\\
+				\\
+				{\LARGE PixelArts, with Ti\textit{k}Z}, \\
+				\\
+				{\LARGE with solution and colors.} \\
+			\end{tabular}
+			
+			\medskip
+			
+			{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
+\end{tabular}
+\end{center}
+
+\vspace{0.25cm}
+
+{$\blacktriangleright$~~Commands to display PixelArts.}
+
+\smallskip
+
+{$\blacktriangleright$~~Environment to complete the PixelArt.}
+
+\smallskip
+
+\vspace{1cm}
+
+\begin{center}
+\begin{filecontents*}[overwrite]{test1.csv}
+-,-,-,-,-,-,4,4,4,4,-,-,-,-,-,-
+-,-,-,-,4,4,1,1,1,1,4,4,-,-,-,-
+-,-,-,4,1,1,1,1,1,1,1,1,4,-,-,-
+-,-,4,1,1,1,1,1,1,1,1,1,1,4,-,-
+-,-,4,1,1,1,1,1,1,1,1,1,1,4,-,-
+-,4,1,9,9,1,1,1,1,1,1,9,9,1,4,-
+-,4,9,9,9,9,4,4,4,4,9,9,9,9,4,-
+-,4,9,4,9,9,4,4,4,4,9,4,9,9,4,-
+-,4,1,9,9,9,4,4,4,4,9,9,9,1,4,-
+-,-,4,1,1,9,4,4,4,4,9,1,1,4,-,-
+-,-,4,1,1,1,4,4,4,4,1,1,1,4,-,-
+-,-,-,4,1,1,1,4,4,1,1,1,4,-,-,-
+-,-,4,3,1,1,1,1,1,1,1,1,3,4,-,-
+-,4,6,3,1,1,1,1,1,1,1,1,3,6,4,-
+-,4,6,6,1,1,1,1,1,1,1,1,6,6,4,-
+-,4,6,6,1,1,1,1,1,1,1,1,6,6,4,-
+-,4,6,4,1,1,1,4,4,1,1,1,4,6,4,-
+2,2,4,2,4,4,4,2,2,4,4,4,2,4,2,2
+2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+-,-,-,-,-,4,1,1,1,1,4,-,-,-,-,-
+-,-,-,-,-,-,4,1,1,4,-,-,-,-,-,-
+-,-,-,-,-,-,-,4,4,-,-,-,-,-,-,-
+\end{filecontents*}
+
+\PixlArtTikz[Codes=123469,Style=\ttfamily,Unit=0.35]{test1.csv}
+~~
+\PixlArtTikz[Codes=123469,Symbols={A,B,C,D,E,F},Symb,Style=\ttfamily,Unit=0.35]{test1.csv}
+~~
+\PixlArtTikz[Codes=123469,Colors={red,brown,yellow,black,blue,white},Correction,Unit=0.35]{test1.csv}
+\end{center}
+
+\vspace{0.5cm}
+
+%\hfill{}\textit{Merci aux membres du groupe \faFacebook{} du \og Coin \LaTeX{} \fg{} pour leur aide et leurs idées !}
+
+%\hfill{}\textit{Merci à Denis Bitouzé et à Patrick Bideault pour leurs retours et idées !}
+
+\vfill
+
+\hrule
+
+\medskip
+
+\TableauDocumentation
+
+\medskip
+
+\hrule
+
+\medskip
+
+\newpage
+
+\phantomsection
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\newpage
+
+\part{Introduction}
+
+\section{The package PixelArtTikz}
+
+\subsection{Introduction}
+
+The idea is to \textit{propose}, within a Ti\textit{k}Z environment, a macro to generate PixelArt.
+
+The data is \textit{read} from a \textsf{csv} file, already existing in the folder of the \textsf{tex} file, or created on-the-fly by \textsf{filecontents}.
+
+\medskip
+
+Some advices about the \textsf{cvs} file :
+
+\begin{itemize}
+	\item the \textsf{csv} file must use "," as separator;
+	\item empty cells are coded by "\texttt{-}".
+\end{itemize}
+
+\begin{PresentationCode}{listing only}
+\begin{filecontents*}{filename.csv}
+	A,B,C,D
+	A,B,D,C
+	B,A,C,D
+	B,A,D,C
+\end{filecontents*}
+\end{PresentationCode}
+
+While compiling, the file \textsf{filename.csv} will be created, and the option \Cle{[overwrite]} will propagate the modifications!
+
+\subsection{Loading of the package, and option}
+
+The package \textsf{csvsimple} is necessary in order to read the \textsf{csv} file.
+
+The package is available in two versions, one written in \hologo{LaTeX2e} and the other in \hologo{LaTeX3}. By default, \textsf{PixelArtTikz} loads the \hologo{LaTeX3} version, but an \textit{option} is available to work with the \hologo{LaTeX2e} version.
+
+\smallskip
+
+The option \Cle{[csvii]} forces the usage of the \hologo{LaTeX2e} version.
+
+\begin{PresentationCode}{listing only}
+\usepackage{PixelArtTikz}                     %package latex3
+%which loads
+%\RequirePackage{expl3}
+%\RequirePackage[l3]{csvsimple}
+
+\usepackage[csvii]{PixelArtTikz}              %package latex2
+%which loads
+%\RequirePackage[legacy]{csvsimple}
+\end{PresentationCode}
+
+\subsection{Used packages}
+
+It's fully compatible with usual \hologo{LaTeX} engines, such as \textsf{latex}, \textsf{pdflatex}, \textsf{lualatex} or \textsf{xelatex}.
+
+\medskip
+
+It loads the following packages and libraries:
+
+\begin{itemize}
+	\item \texttt{tikz}, \texttt{xintexpr} et \texttt{xinttools};
+	\item \texttt{xstring}, \texttt{xparse}, \texttt{simplekv} and \texttt{listofitems}.
+\end{itemize}
+
+\pagebreak
+
+\subsection{Macros and environment}
+
+There are two ways to create PixelArt:
+
+\begin{itemize}
+	\item with an independent macro;
+	\item with a Ti\textit{k}Z environment in order to add code afterwards.
+\end{itemize}
+
+\begin{PresentationCode}{listing only}
+%Independent macro
+\PixlArtTikz[keys]<options tikz>{file.csv}
+
+%Semi-independent macro, in a tiks environment
+\PixlArtTikz*[keys]{file.csv}
+
+%environment
+\begin{EnvPixlArtTikz}[keys]<options tikz>{file.csv}
+	%tikz code
+\end{EnvPixlArtTikz}
+\end{PresentationCode}
+
+\section{Colors}
+
+Concerning colors: the user can use all colors provided by loaded packages!
+
+\smallskip
+
+Without extra packages, the available colors are:
+
+\smallskip
+
+\begin{tblr}{width=\linewidth,colspec={*{10}{X[m,c]}},cells={font=\small\ttfamily}}
+	\SetCell{bg=magenta} magenta &
+	\SetCell{bg=cyan} cyan &
+	\SetCell{bg=blue,fg=white} blue &
+	\SetCell{bg=green} green &
+	\SetCell{bg=red} red &
+	\SetCell{bg=darkgray,fg=white} darkgray &
+	\SetCell{bg=olive,fg=white} olive &
+	\SetCell{bg=lime} lime &
+	\SetCell{bg=brown} brown &
+	\SetCell{bg=lightgray} lightgray \\
+	\SetCell{bg=white} white &
+	\SetCell{bg=gray,fg=white} gray &
+	\SetCell{bg=black,fg=white} black &
+	\SetCell{bg=yellow} yellow &
+	\SetCell{bg=violet,fg=white} violet &
+	\SetCell{bg=teal,fg=white} teal &
+	\SetCell{bg=purple,fg=white} purple &
+	\SetCell{bg=pink} pink &
+	\SetCell{bg=orange} orange & \\
+\end{tblr}
+
+\pagebreak
+
+\part{Macros and environment}
+
+\section{Main macro}
+
+\subsection{Example}
+
+The macro \texttt{\textbackslash PixlArtTikz} needs :
+
+\begin{itemize}
+	\item the file \textsf{csv};
+	\item the list (by a string) of codes used in the file \textsf{csv} (e.g.\ \texttt{234679} or \texttt{ABCDJK}\ldots);
+	\item the list of symbols (if needed) to print in the cells, e.g.\ \texttt{25,44,12} or \texttt{AA,AB,AC};
+	\item the list of colors (for the correction), same order as the codes.
+\end{itemize}
+
+We can begin by creating the file \textsf{csv}, directly within the \textsf{tex} code, or with a external file.
+
+\begin{PresentationCode}{}
+%creation of the csv
+\begin{filecontents*}[overwrite]{base.csv}
+	A,B,C,D
+	A,B,D,C
+	B,A,D,C
+	C,A,B,D
+\end{filecontents*}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%instructions and pixelarts
+\begin{center}
+	\begin{tblr}{colspec={*{4}{Q[1.25cm,c,m]}},hlines,vlines,rows={1.15em}}
+		\SetCell[c=4]{c} Instructions & & & \\
+		A & B & C & D \\
+		45 & 22 & 1 & 7 \\
+		Black & Green & Yellow & Red \\
+	\end{tblr}
+\end{center}
+
+\PixlArtTikz[Codes=ABCD,Style=\large\sffamily,Unit=0.85]{base.csv}
+~~
+\PixlArtTikz[Codes=ABCD,Symbols={45,22,1,7},Symb,Style=\large\sffamily,Unit=0.85]{base.csv}
+~~
+\PixlArtTikz[Codes=ABCD,Colors={black,green,yellow,red},Correction,Unit=0.85]{base.csv}
+~~
+\PixlArtTikz[Codes=ABCD,Colors={black,green,yellow,red},Correction,Border=false,Unit=0.85]{base.csv}
+\end{PresentationCode}
+
+\pagebreak
+
+\subsection{Options and keys}
+
+\begin{PresentationCode}{listing only}
+\PixlArtTikz[keys]<options tikz>{file.csv}
+\end{PresentationCode}
+
+The first argument, \textit{optional} and between \texttt{[...]} proposes the \textsf{keys}:
+
+\begin{itemize}
+	\item the key \Cle{Codes} with the \textit{string} of \textit{simple} codes of the \textsf{csv} file;
+	\item the key \Cle{Colors} with the \textit{list} of colors;
+	\item the key \Cle{Symbols} with the \textit{optional list} of alt.\ symbols for the cells;
+	\item the boolean \Cle{Correction} to color the PixelArt;\hfill{}default \textsf{false}
+	\item the boolean \Cle{Symb} to print the symbols;\hfill{}default \textsf{false}
+	\item the boolean \Cle{Border} to print borders of the cells;\hfill{}default \textsf{true}
+	\item the key \Cle{Style} to specifythe style of the text. \hfill{}default \textsf{\textbackslash scriptsize}
+\end{itemize}
+
+The second argument, \textit{optional} and between \texttt{<...>}, are Ti\textit{k}Z options to pass on to the environment which creates the PixelArt.
+
+\medskip
+
+The third argument, \textit{mandatory}, is the filename of the \textsf{csv}.
+
+
+\begin{PresentationCode}{}
+%creation of the csv
+\begin{filecontents*}[overwrite]{test1.csv}
+	-,-,-,-,-,-,4,4,4,4,-,-,-,-,-,-
+	-,-,-,-,4,4,1,1,1,1,4,4,-,-,-,-
+	-,-,-,4,1,1,1,1,1,1,1,1,4,-,-,-
+	-,-,4,1,1,1,1,1,1,1,1,1,1,4,-,-
+	-,-,4,1,1,1,1,1,1,1,1,1,1,4,-,-
+	-,4,1,9,9,1,1,1,1,1,1,9,9,1,4,-
+	-,4,9,9,9,9,4,4,4,4,9,9,9,9,4,-
+	-,4,9,4,9,9,4,4,4,4,9,4,9,9,4,-
+	-,4,1,9,9,9,4,4,4,4,9,9,9,1,4,-
+	-,-,4,1,1,9,4,4,4,4,9,1,1,4,-,-
+	-,-,4,1,1,1,4,4,4,4,1,1,1,4,-,-
+	-,-,-,4,1,1,1,4,4,1,1,1,4,-,-,-
+	-,-,4,3,1,1,1,1,1,1,1,1,3,4,-,-
+	-,4,6,3,1,1,1,1,1,1,1,1,3,6,4,-
+	-,4,6,6,1,1,1,1,1,1,1,1,6,6,4,-
+	-,4,6,6,1,1,1,1,1,1,1,1,6,6,4,-
+	-,4,6,4,1,1,1,4,4,1,1,1,4,6,4,-
+	2,2,4,2,4,4,4,2,2,4,4,4,2,4,2,2
+	2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+	2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2
+	-,-,-,-,-,4,1,1,1,1,4,-,-,-,-,-
+	-,-,-,-,-,-,4,1,1,4,-,-,-,-,-,-
+	-,-,-,-,-,-,-,4,4,-,-,-,-,-,-,-
+\end{filecontents*}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%simple codes
+%empty case with -
+\PixlArtTikz[Codes=123469,Style=\ttfamily,Unit=0.35]{test1.csv}
+~~
+\PixlArtTikz[Codes=123469,Colors={red,brown,yellow,black,blue,white},Correction,Unit=0.35]{test1.csv}
+~~
+\PixlArtTikz[Codes=123469,Colors={red,brown,yellow,black,blue,white},Correction,Unit=0.35,Border=false]{test1.csv}
+\end{PresentationCode}
+
+\pagebreak
+
+In the following example, the \textit{symbols} to print can't be used for the \textit{codes}, so we can use the keys \Cle{Symbols} and \Cle{Symb} to bypass this limitation.
+
+\begin{PresentationCode}{}
+%symbols associated to codes
+
+\begin{filecontents*}[overwrite]{cap.csv}
+	-,-,-,-,-,-,-,-,D,-,D,-,D,-,-,-,-,-,-,-,-,-
+	-,D,D,-,-,-,-,D,D,D,D,D,D,-,-,D,D,D,D,-,-,-
+	D,-,-,D,-,D,D,F,F,F,F,F,F,D,D,-,-,-,-,D,-,-
+	-,D,-,-,D,F,F,F,-,-,F,F,F,F,F,D,-,D,D,-,-,-
+	-,-,D,D,F,F,F,-,F,F,-,F,F,F,F,F,D,D,-,-,-,-
+	-,-,-,D,F,F,F,F,F,F,F,F,F,F,F,F,D,-,-,-,-,-
+	-,-,-,D,F,J,J,J,J,J,J,J,F,F,F,F,D,-,-,-,-,-
+	-,-,-,D,J,-,-,-,J,-,-,-,J,J,F,F,D,-,-,-,-,-
+	-,-,-,D,J,-,D,-,J,-,D,-,J,J,B,B,D,-,-,-,-,-
+	-,-,-,D,J,-,-,-,J,-,-,-,J,J,B,B,D,-,-,-,-,-
+	-,-,-,D,C,J,J,J,J,J,J,J,J,C,C,C,D,-,-,-,-,-
+	-,-,-,D,C,C,C,C,C,C,C,C,C,C,C,D,D,D,-,-,-,-
+	-,-,-,D,C,C,C,D,D,D,D,D,D,C,D,A,A,A,D,-,-,-
+	-,-,-,D,F,C,C,C,C,C,C,C,C,D,A,-,-,-,A,D,-,-
+	-,-,-,D,F,C,F,C,C,C,C,F,D,A,-,A,A,A,-,A,D,-
+	-,-,D,C,F,F,F,F,C,C,F,D,A,-,A,F,F,F,A,-,A,D
+	-,-,D,C,F,F,F,F,F,F,F,D,A,-,A,F,-,F,A,-,A,D
+	-,-,D,A,D,-,A,-,A,-,A,D,A,-,A,F,F,F,A,-,A,D
+	-,-,-,D,D,-,A,-,A,-,A,-,D,A,-,A,A,A,-,A,D,-
+	-,-,-,-,-,D,D,F,D,D,D,D,F,D,A,-,-,-,A,D,-,-
+	-,-,-,-,-,-,D,A,D,-,-,D,-,-,D,A,A,A,D,-,-,-
+	-,-,-,-,-,-,D,D,D,-,-,D,D,D,D,D,D,D,-,-,-,-
+\end{filecontents*}
+
+\PixlArtTikz[Codes=ABCDFJ,Symbols={1,2,3,4,6,10},Symb,Style=\tiny\sffamily,Unit=0.35]{cap.csv}
+~~
+\PixlArtTikz[Codes=ABCDFJ,Colors={red,brown,yellow,black,blue,gray},Correction,Unit=0.35]{cap.csv}
+\end{PresentationCode}
+
+\pagebreak
+
+\subsection{Symbols within list(s)}
+
+List of symbols can be given within list(s), picked randomly.
+
+\begin{PresentationCode}{}
+\begin{filecontents*}[overwrite]{testlist.csv}
+A,B,C,A
+A,B,B,C
+B,A,C,B
+C,A,B,C
+\end{filecontents*}
+
+\textbf{Notice : }
+
+Multiples of 5 : red\\
+Multiples of 3 : green\\
+Multiples of 2 : blue
+
+\PixlArtTikz[Codes=ABC,Symbols={5§25§35,3§9§21§27,2§4§8§14§16},Symb,Style=\large\sffamily,Unit=0.85]{testlist.csv}
+\hspace{5mm}
+\PixlArtTikz[Codes=ABC,Symbols={5§25§35,3§9§21§27,2§4§8§14§16},Symb,Style=\large\sffamily,Unit=0.85]{testlist.csv}
+\hspace{5mm}
+\PixlArtTikz[Codes=ABC,Colors={red,green,blue},Correction,Style=\large\sffamily,Unit=0.85]{testlist.csv}
+\end{PresentationCode}
+
+\pagebreak
+
+\subsection{Starred macro}
+
+The starred macro \texttt{\textbackslash PixlArtTikz*} is to be used within an already created environment. It can be useful for adding code after the PixelArt.
+
+\smallskip
+
+In this case:
+
+\begin{itemize}
+	\item the \textit{optional} argument between \texttt{<...>} is discarded;
+	\item the key \Cle{Unit} is discarded too (units can be configured in the environment!)
+\end{itemize}
+
+\begin{PresentationCode}{}
+\begin{center}
+	\begin{tikzpicture}[scale=0.5]
+		%grid to show positionning
+		\draw[very thin,gray,xstep=1,ystep=1] (0,0) grid (17,-24) ;
+		\foreach \x in {0,1,...,17} \draw[very thin,gray] (\x,-3pt)--(\x,3pt)%
+		node[above,font=\scriptsize\sffamily] {\x} ;
+		\foreach \y in {0,-1,...,-24} \draw[very thin,gray] (3pt,\y)--(-3pt,\y)%
+		node[left,font=\scriptsize\sffamily] {\y} ;
+		%le PixelArt
+		\PixlArtTikz*[Codes=123469,Colors={red,brown,yellow,black,blue,white},Correction]{test1.csv}
+		%added code
+		\filldraw[blue] (14,-1) circle[radius=1] ;
+		\filldraw[yellow] (14,-1) circle[radius=0.8] ;
+		\draw[green,very thick,<-,>=latex] (15,-1) to[bend left=30] (18,-2)%
+		node[right,font=\scriptsize\sffamily] {Code Ti\textit{k}Z} ;
+	\end{tikzpicture}
+\end{center}
+\end{PresentationCode}
+
+\pagebreak
+
+\section{PixelArt environment}
+
+\subsection{Usage}
+
+The package \textsf{PixelArtTikz} provides an environment to create a PixelArt and add code afterwards.
+
+\begin{itemize}
+	\item The environment is created within Ti\textit{k}Z and additional code is passed on to the Ti\textit{k}Z environment!
+	\item The additional code will be printed on top of the PixelArt!
+\end{itemize}
+
+\begin{PresentationCode}{listing only}
+\begin{EnvPixlArtTikz}[keys]<options tikz>{filename.csv}
+	%tikz code(s)
+\end{EnvPixlArtTikz}
+\end{PresentationCode}
+
+The first argument, \textit{optional} and between \texttt{[...]}, proposes the \textsf{keys}:
+
+\begin{itemize}
+	\item the key \Cle{Codes} with the \textit{string} of \textit{simple} codes of the \textsf{csv} file;
+	\item the key \Cle{Colors} with the \textit{list} of colors;
+	\item the key \Cle{Symbols} with the \textit{optional list} of alt.\ symbols for the cells;
+	\item the boolean \Cle{Correction} to color the PixelArt;\hfill{}default \textsf{false}
+	\item the boolean \Cle{Symb} to print the symbols;\hfill{}default \textsf{false}
+	\item the boolean \Cle{Border} to print borders of the cells;\hfill{}default \textsf{true}
+	\item the key \Cle{Style} to specifythe style of the text. \hfill{}default \textsf{\textbackslash scriptsize}
+\end{itemize}
+
+The second argument, \textit{optional} and between \texttt{<...>}, is for Ti\textit{k}Z options to be passed on to the environment which creates the PixelArt.
+
+\medskip
+
+The third argument, \textit{mandatory}, is the filename of the \textsf{csv}.
+
+\subsection{Example}
+
+The symbols are at the nodes $(c\,;\,-l)$ where $l$ and $c$ are the row and column  of the data in the \textsf{csv} file.
+
+\begin{PresentationCode}{}
+\begin{center}
+	\begin{EnvPixlArtTikz}%
+			[Codes=123469,Colors={red,brown,yellow,black,blue,white},Correction,Unit=0.25]
+			{test1.csv}
+		\filldraw[blue] (14,-1) circle[radius=1] ;
+		\filldraw[yellow] (14,-1) circle[radius=0.8] ;
+		\draw[green,very thick,<-,>=latex] (15,-1) to[bend left=30] (18,-2)%
+		node[right,font=\scriptsize\sffamily] {Ti\textit{k}Z code} ;
+	\end{EnvPixlArtTikz}
+\end{center}
+\end{PresentationCode}
+
+\newpage
+
+\section{Macro for \textit{mini-}PixelArt}
+
+\subsection{Idea}
+
+The idea is tu propose a macro to insert, without \textsf{csv} file, a small PixelArt with small colors list.
+
+\begin{PresentationCode}{listing only}
+	\MiniPixlArt[keys]{list of colors}
+\end{PresentationCode}
+
+The first argument, \textit{optional} and between \texttt{[...]} proposes the \textsf{keys }:
+
+\begin{itemize}
+	\item the key \Cle{Unit} for dimension of the cells ;\hfill{}default \textsf{0.25em},
+	\item the boolean \Cle{Border} to print a small border for the cells.\hfill{}default \textsf{false}
+\end{itemize}
+
+The second argument, \textit{mandatory} and between \texttt{\{...\}}, is the colors of the cells :
+
+\begin{itemize}
+	\item each color is \textit{coded} by a letter :
+	\begin{multicols}{5}
+		\begin{itemize}
+			\item \texttt{R : \textcolor{red}{red}}
+			\item \texttt{G : \textcolor{green}{green}}
+			\item \texttt{C : \textcolor{cyan}{blue}}
+			\item \texttt{Y : \textcolor{yellow}{yellow}}
+			\item \texttt{B : \textcolor{black}{black}}
+			\item \texttt{L : \textcolor{lightgray}{gray}}
+			\item \texttt{. : \colorbox{lightgray}{\textcolor{white}{white}}}
+			\item \texttt{M : \textcolor{brown}{maroon}}
+			\item \texttt{O : \textcolor{orange}{orange}}
+			\item \texttt{P : \textcolor{violet}{purple}}
+		\end{itemize}
+	\end{multicols}
+	\item each linebreak is done by \texttt{,} ;
+	\item the thickness of the borders are 10\,\% of the unit.
+\end{itemize}
+
+The last argument, \textit{optional} and between \texttt{<...>}, proposes options for the \textsf{tikz} environment.
+
+\subsection{Examples}
+
+\begin{PresentationCode}{}
+\MiniPixlArt{%
+	..RR..RR..,
+	.RRRRRRRR.,
+	RRRRRRRRRR,
+	RRRRRRRRRR,
+	RRRRRRRRRR,
+	.RRRRRRRR.,
+	..RRRRRR..,
+	...RRRR...,
+	....RR....
+}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+Inline, we can give \MiniPixlArt[Unit=5mm,Border]{BCGOYG,YLP.BR}<baseline=(current bounding box.center)>
+this miniPA.
+\end{PresentationCode}
+
+\newpage
+
+\section{Macro for cutting PixelArt}
+
+\subsection{Idea}
+
+The idea is to offer commands to create \textit{collaborative} PixelArts, to form a \textit{large} image from several small ones (of the same size).
+
+\smallskip
+
+{\footnotesize\faBomb} For practical reasons (related to the use of \texttt{filecontents}) the file \textsf{csv} must end with an empty line (it is created automatically via \texttt{filecontents}, and the code uses this specificity).
+
+\smallskip
+
+The available \Cle{keys} are exactly the same as those in classic displays.
+
+\subsection{Global usage}
+
+The argument \texttt{cutting} can be given in the form :
+%
+\begin{itemize}
+	\item \Cle{<number of block length>x<number of block col>} to specify the size of the blocks;
+	\item \Cle{<number of V blocks>+<number of H blocks>} to specify the number of blocks.
+\end{itemize}
+
+\begin{PresentationCode}{listing only}
+\CutPixlArtTikz(*)[keys]<tikz options>{file.csv}{cutting}
+%(*) := change layout formatting (A1 or 1.1)
+%1   := keys
+%2   := tikz options
+%3   := csv file
+%4   := block size (LxC) or block number (L+C)
+
+\HelpGridPixelArtTikz(*)[scale]{file.csv}{cutting}
+%(*) := change layout formatting (A1 or 1.1)
+%1   := scale of notice
+%2   := csv file
+%4   := block size (LxC) or block number (L+C)
+\end{PresentationCode}
+
+\begin{filecontents*}[overwrite]{PAkoala.csv}
+A,A,A,A,A,A,A,H,H,H,A,A,A,A,A,H,H,H,A,A,A,A,A,A,A,A,A,H,H,H,H,A,A,H,A,A,A,A,A,A
+A,A,A,A,A,A,A,A,H,A,A,A,A,A,A,H,H,A,A,A,A,A,A,A,A,A,A,H,A,A,A,A,A,H,A,A,A,A,A,A
+A,A,A,H,A,A,A,A,A,A,A,A,A,A,A,H,H,A,A,A,A,A,A,A,A,H,H,H,A,A,A,A,A,A,A,A,A,A,A,A
+A,A,A,A,A,A,A,B,E,E,E,E,A,A,A,A,A,A,A,A,A,A,A,H,H,H,A,B,B,E,E,E,E,B,A,A,A,A,A,H
+A,A,H,A,A,A,A,B,E,E,E,E,E,A,A,A,A,A,A,A,A,A,A,H,H,H,B,E,E,E,E,E,E,B,B,A,A,A,A,H
+A,A,H,A,A,B,B,E,C,C,C,C,C,E,B,B,B,E,E,E,E,E,E,B,B,B,E,C,C,C,C,C,C,E,B,B,H,H,A,A
+A,A,H,A,B,E,D,D,D,D,B,D,C,C,E,E,E,E,C,C,C,C,E,E,E,E,E,C,D,B,B,D,D,D,E,B,H,A,A,A
+A,A,A,A,B,E,D,D,F,F,D,B,D,C,C,E,C,C,C,C,C,C,C,C,E,C,C,D,B,D,D,F,F,D,E,B,A,A,A,H
+A,A,A,B,C,D,D,F,F,F,D,D,B,B,C,C,C,C,C,C,C,C,C,C,C,C,C,B,D,D,D,F,F,D,D,C,B,A,H,H
+A,A,A,B,C,D,F,F,F,F,F,D,D,D,C,C,C,C,C,C,C,C,C,C,C,C,C,D,D,F,F,F,F,F,D,C,B,A,H,H
+A,A,A,B,D,D,F,F,F,F,F,D,C,C,C,C,C,C,C,C,C,C,C,C,C,C,C,C,D,F,F,F,F,F,D,D,B,A,A,H
+A,A,A,B,D,D,G,F,F,F,F,D,C,C,B,B,B,C,C,B,B,C,C,B,B,B,C,C,D,F,F,F,F,G,D,D,B,A,A,A
+A,A,A,A,B,G,G,F,F,F,F,D,C,C,B,F,B,C,B,D,D,B,C,B,F,B,C,C,D,G,F,F,F,G,G,B,H,A,A,A
+A,A,A,A,A,B,G,G,G,F,G,D,C,C,C,B,B,C,B,D,D,B,C,B,B,C,C,C,D,G,G,F,G,G,B,H,H,H,A,A
+A,A,A,A,A,A,B,G,G,G,G,B,C,C,C,C,C,C,B,B,B,B,C,C,C,C,C,C,D,B,G,G,G,G,B,H,H,H,A,A
+A,A,A,A,A,A,A,B,B,B,B,B,C,C,C,C,C,C,B,B,B,B,C,C,C,C,C,C,D,B,B,B,B,B,A,A,H,H,A,A
+A,A,A,A,A,A,A,A,A,A,A,D,D,C,C,C,C,F,B,B,B,B,F,C,C,C,C,D,D,A,A,A,A,A,A,A,A,A,A,A
+A,A,A,A,A,A,A,A,A,A,A,B,D,D,C,C,C,F,F,B,B,F,F,C,C,C,D,D,B,A,A,A,A,A,A,A,A,A,A,A
+A,A,A,A,A,H,H,H,A,A,A,A,B,B,D,C,C,F,F,F,F,F,F,C,C,D,B,B,A,A,A,A,A,A,H,H,H,A,A,A
+A,A,A,A,H,H,H,H,A,A,A,A,B,B,D,D,D,G,G,G,G,G,G,D,D,D,D,B,A,A,A,A,A,A,A,H,H,H,A,A
+A,A,A,A,H,H,H,A,A,A,A,B,D,D,D,D,D,G,G,G,G,G,G,D,D,D,D,D,B,A,A,A,A,A,A,A,H,H,A,A
+A,A,A,H,A,A,A,A,A,A,B,C,D,D,D,G,G,G,D,D,D,D,G,G,G,D,D,D,C,B,A,H,H,A,A,A,A,H,A,A
+A,A,A,H,H,A,A,A,A,A,D,C,C,C,D,G,G,F,G,D,D,G,F,G,G,D,D,C,C,C,B,A,H,H,A,A,A,A,A,A
+A,A,A,A,A,H,H,H,H,B,D,D,C,C,D,G,G,F,F,F,F,F,F,G,G,D,D,C,C,D,B,A,A,H,H,A,A,A,A,A
+A,A,A,A,A,A,A,A,A,B,D,D,C,C,C,C,C,B,F,F,F,F,F,B,C,C,C,C,D,D,B,A,A,H,H,H,H,A,A,A
+A,A,A,H,H,A,A,A,A,B,D,D,C,C,C,C,C,C,B,F,F,F,B,C,C,C,C,C,D,D,B,A,A,A,A,H,H,A,A,A
+A,A,A,A,A,A,A,A,A,A,B,B,D,D,C,C,C,C,C,B,F,B,C,C,C,C,D,D,B,B,A,A,A,H,H,A,A,A,A,A
+A,A,A,A,A,A,A,A,A,A,B,B,B,D,D,C,C,C,C,B,F,B,C,C,C,C,D,B,B,B,A,A,A,H,H,A,A,A,A,A
+A,A,A,A,A,A,A,A,A,B,C,C,C,B,B,D,D,D,D,B,F,B,D,D,D,B,B,D,C,C,B,A,A,A,H,A,A,A,A,A
+A,A,A,A,A,A,A,A,B,C,C,C,C,C,D,B,B,B,F,F,F,F,B,B,B,D,D,C,C,C,C,B,A,A,A,A,A,A,H,H
+A,A,A,A,A,A,A,A,B,C,C,C,C,C,D,D,D,G,G,F,F,G,G,D,D,D,D,C,C,C,C,B,A,A,A,A,A,A,H,H
+A,A,A,A,A,A,A,I,B,D,C,C,C,C,C,C,C,G,G,F,F,G,G,C,C,C,C,C,C,C,D,B,I,A,A,A,A,A,A,A
+A,A,A,A,A,A,A,I,B,D,D,D,C,C,C,B,B,B,G,G,G,G,B,B,B,C,C,C,D,D,D,B,I,A,A,A,A,A,A,A
+A,A,A,A,A,H,A,I,I,B,D,D,D,D,D,C,C,C,B,D,D,B,C,C,C,C,D,D,D,B,B,I,I,A,A,A,A,A,A,A
+A,A,A,A,A,H,H,H,I,B,B,D,D,D,D,D,C,C,B,D,D,B,C,C,C,D,D,D,D,B,I,I,A,A,A,A,A,A,A,A
+A,A,H,H,H,A,A,A,I,I,I,B,B,B,D,B,B,B,B,B,B,B,B,B,B,D,B,B,B,I,I,I,A,A,A,A,A,A,H,A
+A,A,H,H,H,A,A,A,A,I,I,I,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,I,I,I,A,A,A,A,A,A,A,H,A
+H,H,A,H,H,A,A,A,A,A,A,I,I,I,I,I,I,I,I,I,I,I,I,I,I,I,I,I,I,I,A,A,A,A,A,A,A,A,A,A
+A,A,A,A,A,A,A,A,A,A,A,A,A,A,A,I,I,I,I,I,I,I,I,I,A,A,A,A,A,A,A,A,A,A,A,H,A,A,A,A
+A,A,A,A,A,A,A,A,A,A,A,A,H,H,A,A,A,A,A,A,A,A,A,A,A,A,A,A,A,A,A,A,A,A,H,H,A,A,A,A
+\end{filecontents*}
+
+\subsection{Example}
+
+\def\listcoulkoala%
+{VertForet,Noir,GrisClair,GrisFonce,Beige,Blanc,BleuClair,VertClair,Marron}
+
+\begin{PresentationCode}{listing only}
+\def\listcoulkoala%
+	{VertForet,Noir,GrisClair,GrisFonce,Beige,Blanc,BleuClair,VertClair,Marron}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%block with 8x8 size
+\HelpGridPixelArtTikz{PAkoala.csv}{8x8}
+~~
+\PixlArtTikz[Correction,Unit=0.125,Codes=ABCDEFGHI,Colors={\listcoulkoala},Grid=8x8]{PAkoala.csv}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%16 blocks (4L 4C)
+\HelpGridPixelArtTikz*[2]{PAkoala.csv}{4+4}
+~~
+\PixlArtTikz[Correction,Unit=0.2,Codes=ABCDEFGHI,Colors={\listcoulkoala},Grid=4+4]{PAkoala.csv}
+\end{PresentationCode}
+
+\newpage
+
+\begin{PresentationCode}{}
+%block with 8x8 size
+\CutPixlArtTikz[Unit=0.3,Codes=ABCDEFGHI]{PAkoala.csv}{8x8}
+\end{PresentationCode}
+
+\pagebreak
+
+\begin{PresentationCode}{}
+%16 blocks (4L 4C)
+\CutPixlArtTikz*[Unit=0.3,Codes=ABCDEFGHI,Correction,Colors={\listcoulkoala}]{PAkoala.csv}{4+4}
+\end{PresentationCode}
+
+\pagebreak
+
+\section{Anamorphic cylinder PixelArt}
+
+\subsection{Idea}
+
+The idea is to provide something to create PixelArt with the aim of using a cylindrical anamorphosis.
+
+On \url{https://www.youtube.com/watch?v=PT8KUozBg3I}, there is a video \textit{demonstration}, proposed by Jean-Yves Labouche.
+
+The overall operation is similar to that of the \textit{main} command, however there are some adjustments:
+
+\begin{itemize}
+	\item the possibility of giving the file \textsf{csv} in \textit{normal} or \textit{inverted} mode;
+	\item the dimensions (width \& middle) must be specified to produce the PixelArt;
+	\item the command is standalone (for the moment) so no addition(s) later.
+\end{itemize}
+
+\begin{PresentationCode}{listing only}
+\PixlArtTikzCylindric[keys]{file.csv}
+\end{PresentationCode}
+
+The files illustrating this paragraph are given below.
+
+\begin{PresentationCode}{}
+%version with inverted data
+\begin{filecontents*}[overwrite]{PAyoda.csv}
+E,E,E,A,A,E,A,A,E,D
+E,E,E,F,F,F,F,F,E,D
+E,E,E,F,F,C,F,F,E,D
+E,A,F,F,C,C,C,F,F,A
+E,A,F,F,C,C,C,F,F,A
+E,E,E,A,A,A,A,A,E,E
+E,E,E,A,A,A,A,A,E,E
+E,E,A,E,B,A,B,E,A,E
+E,A,A,A,A,A,A,A,A,A
+E,E,E,A,A,A,A,A,E,E
+\end{filecontents*}
+
+\PixlArtTikz[%
+	Codes=ABCDEF,
+	Colors={green,black,brown,white,brown!75!black,lightgray},
+	Correction,Unit=0.35]%
+	{PAyoda.csv}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%version with normal data
+\begin{filecontents*}{PAsorciere.csv}
+V,V,V,V,N,N,N,V,V,V
+V,V,V,N,N,N,N,N,V,V
+N,N,N,N,N,N,N,N,N,N
+V,V,V,G,G,G,O,O,V,V
+V,V,V,J,J,G,O,O,O,V
+V,V,G,N,J,G,O,O,O,V
+V,G,G,G,G,G,O,O,O,O
+V,V,N,N,N,G,O,O,O,O
+V,V,G,G,G,G,O,O,O,O
+V,V,V,V,N,N,O,O,O,O
+\end{filecontents*}
+
+\PixlArtTikz[%
+	Codes=VNGOJ,
+	Colors={purple!50,black,green,orange,yellow},
+	Correction,Unit=0.35]%
+	{PAsorciere.csv}
+\end{PresentationCode}
+
+\subsection{Keys and options}
+
+The first argument, \textit{optional} and between \texttt{[...]} offers \textsf{Keys} necessary for the command to function properly:
+
+\begin{itemize}
+	\item the key \Cle{Width} which defines the width (radius in cm) of the rendering;\hfill{}default \textsf{6}
+	\item the key \Cle{Center} which defines the width (radius in cm) of the \textit{middle};\hfill{}default \textsf{1.25}
+	\item the key \Cle{Codes} contains the \textit{string} of the \textit{simple} codes of the file \textsf{csv};
+	\item the key \Cle{Colors} which contains the \textit{list} of associated colors;
+	\item the key \Cle{Symbols} which contains the \textit{possible list} of alternative characters to display in the boxes;
+	\item the key \Cle{Style} which allows you to specify the style of characters. \hfill{}default \textsf{normalsize}
+	\item the Boolean key \Cle{Correction} which allows you to color the PixelArt;\hfill{}default \textsf{false}
+	\item the Boolean key \Cle{Symb} which allows you to display the \textit{alternative} characters;\hfill{}default \textsf{false}
+	\item the Boolean key \Cle{Solution} which displays the solution (with \textit{mirror} effect);\hfill{}default \textsf{false}
+	\item the Boolean key \Cle{Swap} which allows you to specify the data type (\Cle{true} := normal; \Cle{false} := inverted).
+	
+	\hfill{}default \textsf{false}
+\end{itemize}
+
+The second argument, \textit{mandatory}, is the name of the \textsf{csv} file to use.
+
+\pagebreak
+
+\subsection{Example with inverted data (Yoda)}
+
+In this paragraph, we use the data \texttt{PAyoda}, which corresponds to the \textit{inverted} layout, so the key \Cle{Swap} is not necessary.
+
+\begin{PresentationCode}{}
+%classic version
+\PixlArtTikzCylindric[Codes=ABCDEF,Style=\small\ttfamily]{PAyoda.csv}
+
+%version with 'symbols'
+\PixlArtTikzCylindric[Codes=ABCDEF,Symbols={1,2,3,4,5,6},Symb,Style=\small\ttfamily]{PAyoda.csv}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%Fix and solution
+\begin{tabular}{c}
+	\PixlArtTikzCylindric[%
+		Codes=ABCDEF,
+		Colors={green,black,brown,white,brown!75!black,lightgray},
+		Solution]%
+		{PAyoda.csv}
+	\\
+	\PixlArtTikzCylindric[%
+		Codes=ABCDEF,
+		Colors={green,black,brown,white,brown!75!black,lightgray},
+		Correction]%
+		{PAyoda.csv}
+\end{tabular}
+\end{PresentationCode}
+
+\pagebreak
+
+\subsection{Example with classic data (Witch)}
+
+In this paragraph, we use the data \texttt{PAsorciere}, which corresponds to the \textit{normal} layout, so the key \Cle{Swap} is necessary.
+
+\begin{PresentationCode}{}
+	%classic version
+	\PixlArtTikzCylindric[%
+	Width=4,Center=1,Codes=VNGOJ,
+	Colors={purple!50,black,green,orange,yellow},
+	Swap,Style=\ttfamily\scriptsize]%
+	{PAsorciere.csv}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%Correction and solution
+\begin{tabular}{c}
+	\PixlArtTikzCylindric[%
+		Width=4,Center=0.75,Codes=VNGOJ,
+		Colors={purple!50,black,green,orange,yellow},
+		Swap,Solution]%
+		{PAsorciere.csv}
+	\\
+	\PixlArtTikzCylindric[%
+		Width=4,Center=0.75,Codes=VNGOJ,
+		Colors={purple!50,black,green,orange,yellow},
+		Swap,Correction]%
+		{PAsorciere.csv}
+\end{tabular}
+\end{PresentationCode}
+
+\pagebreak
+
+\section{With datatool}
+
+\subsection{Macros}
+
+\begin{PresentationCode}{listing only}
+%reading of csv
+\readdtcsv{file.csv}{readname}
+
+%full pixelart (french keys for the moment...)
+\dtpixlarttikz[keys]{readname}
+
+%cut pixelart (french keys for the moment...)
+\dtpixlarttikzblock[clés]{readname}{LxC or L+C}{numblock}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%reading of csv (koala)
+\readdtcsv{PAkoala.csv}{DTkoala}
+
+%full pixelart
+\dtpixlarttikz[Correction,Unite=0.125,Codes=ABCDEFGHI,Couleurs={\listcoulkoala},Decoupage=8x8]{DTkoala}
+
+%cut pixelart (french keys for the moment...)
+\dtpixlarttikzblock[Unite=0.125,Correction,Codes=ABCDEFGHI,Couleurs={\listcoulkoala}]%
+	{DTkoala}{8x8}{1/1}
+\end{PresentationCode}
+
+\newpage
+
+\part{History}
+
+\verb|v0.1.8|~:~~~~Bugfix
+
+\verb|v0.1.7|~:~~~~Bugfix with 'cut'
+
+\verb|v0.1.6|~:~~~~Styles for lines + \textsf{datatool} for alternative version
+
+\verb|v0.1.5|~:~~~~Symbols can be given with list(s) + Enhancements of internal code
+
+\verb|v0.1.4|~:~~~~Anamorphic cylinder PixelArts
+
+\verb|v0.1.3|~:~~~~Cut PixelArts within several PixelArts
+
+\verb|v0.1.2|~:~~~~\textit{mini-}PixelArts
+
+\verb|v0.1.1|~:~~~~Bugfix with color
+
+\verb|v0.1.0|~:~~~~Initial version
+
+\end{document}

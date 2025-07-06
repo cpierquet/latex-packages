@@ -1,0 +1,980 @@
+% proflycee-tools-stats.tex
+% Copyright 2023-2025 Cédric Pierquet
+% Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+%3.12b	Amélioration des histogrammes
+%3.01a	Courbe ECC
+%2.6.8	Grille histogrammes non réguliers
+%2.6.7	Histogrammes
+
+%%------RegressionLinéaire
+%calcul des paramètres
+\defKV[coeffreglin]{%
+	NomCoeffa=\def\RegLinCoeffa{#1},%
+	NomCoeffb=\def\RegLinCoeffb{#1},%
+	NomCoeffr=\def\RegLinCoeffr{#1},%
+	NomCoeffrd=\def\RegLinCoeffrd{#1},%
+	NomXmin=\def\RegLinCoeffXmin{#1},%
+	NomXmax=\def\RegLinCoeffXmax{#1}
+}
+
+\setKVdefault[coeffreglin]{%
+	NomCoeffa=COEFFa,%
+	NomCoeffb=COEFFb,%
+	NomCoeffr=COEFFr,%
+	NomCoeffrd=COEFFrd,%
+	NomXmin=LXmin,%
+	NomXmax=LXmax
+}
+
+\newcommand\CalculsRegLin[3][]{%
+	\useKVdefault[coeffreglin]%
+	\setKV[coeffreglin]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%xmin et xmax
+	\expandafter\def\csname\RegLinCoeffXmin\endcsname{\fpeval{min(#2)}}%
+	\expandafter\def\csname\RegLinCoeffXmax\endcsname{\fpeval{max(#2)}}%
+	%listes des données
+	\def\xliste{#2}%
+	\def\yliste{#3}%
+	\setsepchar{,}%
+	\readlist*\LX{\xliste}%
+	\readlist*\LY{\yliste}%
+	%taille des listes
+	\def\LNB{\inteval{\LXlen}}%
+	%somme des LX et des LY OK
+	\xdef\LXSomme{0}%
+	\xdef\LYSomme{0}%
+	\foreach \i in {1,2,...,\LNB}{%
+		\xdef\LXSomme{\fpeval{\LXSomme+\LX[\i]}}%
+	}%
+	\foreach \i in {1,2,...,\LNB}{%
+		\xdef\LYSomme{\fpeval{\LYSomme+\LY[\i]}}%
+	}%
+	%moyenne des LX et des LY OK
+	\xdef\LXmoy{\fpeval{\LXSomme/\LNB}}%
+	\xdef\LYmoy{\fpeval{\LYSomme/\LNB}}%
+	%variance des LX et des LY OK
+	\xdef\LXvar{0}%
+	\foreach \i in {1,2,...,\LNB}{%
+		\xdef\LXvar{\fpeval{\LXvar+(\LX[\i]-\LXmoy)*(\LX[\i]-\LXmoy)}}%
+	}%
+	\xdef\LXvar{\fpeval{\LXvar/\LNB}}%
+	\xdef\LYvar{0}%
+	\foreach \i in {1,2,...,\LNB}{%
+		\xdef\LYvar{\fpeval{\LYvar+(\LY[\i]-\LYmoy)*(\LY[\i]-\LYmoy)}}%
+	}%
+	\xdef\LYvar{\fpeval{\LYvar/\LNB}}%
+	%covariance des XY OK
+	\xdef\LXYvar{0}%
+	\foreach \i in {1,2,...,\LNB}{%
+		\xdef\LXYvar{\fpeval{\LXYvar+(\LX[\i]-\LXmoy)*(\LY[\i]-\LYmoy)}}%
+	}%
+	\xdef\LXYvar{\fpeval{\LXYvar/\LNB}}%
+	%COEFFS OK
+	\expandafter\def\csname\RegLinCoeffa\endcsname{\fpeval{\LXYvar/\LXvar}}%
+	\expandafter\def\csname\RegLinCoeffb\endcsname{\fpeval{\LYmoy-\csname\RegLinCoeffa\endcsname*\LXmoy}}%
+	\expandafter\def\csname\RegLinCoeffr\endcsname{\fpeval{\LXYvar/sqrt(\LXvar*\LYvar)}}%
+	\expandafter\def\csname\RegLinCoeffrd\endcsname{\fpeval{\csname\RegLinCoeffr\endcsname*\csname\RegLinCoeffr\endcsname}}%
+}
+\NewCommandCopy\pflcalcreglin\CalculsRegLin
+
+\defKV[coeffregquad]{%
+	NomCoeffa=\def\RegQuadCoeffa{#1},%
+	NomCoeffb=\def\RegQuadCoeffb{#1},%
+	NomCoeffc=\def\RegQuadCoeffc{#1},%
+	NomXmin=\def\RegQuadCoeffXmin{#1},%
+	NomXmax=\def\RegQuadCoeffXmax{#1}
+}
+
+\setKVdefault[coeffregquad]{%
+	NomCoeffa=COEFFa,%
+	NomCoeffb=COEFFb,%
+	NomCoeffc=COEFFc,%
+	NomXmin=LXmin,%
+	NomXmax=LXmax
+}
+
+\newcommand\CalculsRegQuad[3][]{%
+	\useKVdefault[coeffregquad]%
+	\setKV[coeffregquad]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%xmin et xmax
+	\expandafter\def\csname\RegQuadCoeffXmin\endcsname{\xintfloateval{min(#2)}}%
+	\expandafter\def\csname\RegQuadCoeffXmax\endcsname{\xintfloateval{max(#2)}}%
+	%listes des données
+	\def\xliste{#2}%
+	\def\yliste{#3}%
+	\setsepchar{,}%
+	\readlist*\LX{\xliste}%
+	\readlist*\LY{\yliste}%
+	%taille des listes
+	\def\LNB{\inteval{\LXlen}}%
+	%somme importantes
+	\xdef\LXSomme{0}%
+	\xdef\LXCSomme{0}%
+	\xdef\LYSomme{0}%
+	\xdef\LXXSomme{0}%
+	\xdef\LXYSomme{0}%
+	\xdef\LXXCSomme{0}%
+	\xdef\LXCXCSomme{0}%
+	\xdef\LXCYSomme{0}%
+	%calculs
+	\foreach \i in {1,2,...,\LNB}{%
+		\xdef\LXSomme{\xintfloateval{\LXSomme+\LX[\i]}}%
+		\xdef\LXCSomme{\xintfloateval{\LXCSomme+(\LX[\i])^2}}%
+	}%
+	\foreach \i in {1,2,...,\LNB}{%
+		\xdef\LYSomme{\xintfloateval{\LYSomme+\LY[\i]}}%
+	}%
+	\xdef\LXmoy{\xintfloateval{\LXSomme/\LNB}}%
+	\xdef\LYmoy{\xintfloateval{\LYSomme/\LNB}}%
+	\xdef\LXCmoy{\xintfloateval{\LXCSomme/\LNB}}%
+	%calculs suites
+	\foreach \i in {1,2,...,\LNB}{%
+		\xdef\LXXSomme{\xintfloateval{\LXXSomme+(\LX[\i]-\LXmoy)^2}}%
+		\xdef\LXYSomme{\xintfloateval{\LXYSomme+(\LX[\i]-\LXmoy)*(\LY[\i]-\LYmoy)}}%
+		\xdef\LXXCSomme{\xintfloateval{\LXXCSomme+(\LX[\i]-\LXmoy)*((\LX[\i])*(\LX[\i])-\LXCmoy)}}%
+		\xdef\LXCXCSomme{\xintfloateval{\LXCXCSomme+((\LX[\i])^2-\LXCmoy)^2}}%
+		\xdef\LXCYSomme{\xintfloateval{\LXCYSomme+((\LX[\i])^2-\LXCmoy)*(\LY[\i]-\LYmoy)}}%
+	}%
+	%COEFFS OK
+	\expandafter\def\csname\RegQuadCoeffb\endcsname{\xintfloateval{(\LXYSomme*\LXCXCSomme-\LXCYSomme*\LXXCSomme)/(\LXXSomme*\LXCXCSomme-(\LXXCSomme)^2)}}%
+	\expandafter\def\csname\RegQuadCoeffa\endcsname{\xintfloateval{(\LXCYSomme*\LXXSomme-\LXYSomme*\LXXCSomme)/(\LXXSomme*\LXCXCSomme-(\LXXCSomme)^2)}}%
+	\expandafter\def\csname\RegQuadCoeffc\endcsname{\xintfloateval{\LYmoy-\csname\RegQuadCoeffb\endcsname*\LXmoy-\csname\RegQuadCoeffa\endcsname*\LXCmoy}}%
+}
+\NewCommandCopy\pflcalcregquad\CalculsRegQuad
+
+%pour un nuage en TiKz
+\defKV[nuagereglin]{%
+	Couleur=\def\RegLinNuageCouleur{#1},%
+	Taille=\def\RegLinNuageTaille{#1},
+	Ox=\def\RegLinNuageOx{#1},%
+	Oy=\def\RegLinNuageOy{#1},%
+}
+
+\setKVdefault[nuagereglin]{%
+	Couleur=teal,%
+	Taille=2pt,%
+	Ox=0,%
+	Oy=0
+}
+
+\newcommand\PointsRegLin[3][]{%
+	\useKVdefault[nuagereglin]%
+	\setKV[nuagereglin]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\def\xliste{#2}%
+	\def\yliste{#3}%
+	\setsepchar{,}%
+	\readlist*\LX{\xliste}%
+	\readlist*\LY{\yliste}%
+	%taille des listes
+	\def\LNB{\inteval{\LXlen}}%
+	\foreach \i in {1,2,...,\LNB} {\filldraw[\RegLinNuageCouleur] ({\LX[\i]-\RegLinNuageOx},{\LY[\i]-\RegLinNuageOy}) circle[radius=\RegLinNuageTaille] ;}%
+}
+
+\NewDocumentEnvironment{StatsTikz}{ O{} }
+{%
+	\begin{tikzpicture}[#1]
+	}%
+	{%
+	\end{tikzpicture}%
+}
+
+%%------BOITES MOUSTACHES
+\defKV[boiteamoustaches]{%
+	Couleur=\def\BaMCouleur{#1},%
+	Elevation=\def\BaMElevation{#1},%
+	Hauteur=\def\BaMHauteur{#1},%
+	Moyenne=\def\BaMMoyenne{#1},%
+	Epaisseur=\def\BaMEpaisseur{#1},%
+	Remplir=\def\BaMRemplissage{#1}
+}
+
+\setKVdefault[boiteamoustaches]{%
+	Couleur=black,%
+	Elevation=1,%
+	Hauteur=1,%
+	AffMoyenne=false,%
+	Epaisseur=thick,%
+	Pointilles=false,%
+	Valeurs=false,%
+	Remplir=white
+}
+
+\defKV[boiteamoustachesaxe]{%
+	Min=\def\BaMAxeMin{#1},%
+	Max=\def\BaMAxeMax{#1},%
+	Elargir=\def\BaMAxeElarg{#1},%
+	Epaisseur=\def\BaMAxeEpaisseur{#1},%
+	Valeurs=\def\BaMAxeValeurs{#1},%
+	LabelOx=\def\BaMAxeLabelOx{#1}
+}
+
+\setKVdefault[boiteamoustachesaxe]{%
+	Elargir=0.05,%
+	Epaisseur=thick,%
+	AffValeurs=false,%
+	LabelOx={}
+}
+
+\tikzset{valxboxplot/.style={below=3pt}}
+
+\newcommand\BoiteMoustachesAxe[1][]{
+	\useKVdefault[boiteamoustachesaxe]
+	\setKV[boiteamoustachesaxe]{#1}
+	\def\BaMaxelargeur{\fpeval{\BaMAxeMax-\BaMAxeMin}}
+	\def\BaMaxexmin{\fpeval{\BaMAxeMin-\BaMAxeElarg*\BaMaxelargeur}}
+	\def\BaMaxexmax{\fpeval{\BaMAxeMax+\BaMAxeElarg*\BaMaxelargeur}}
+	\draw[\BaMAxeEpaisseur,->,>=latex] (\BaMaxexmin,0) -- (\BaMaxexmax,0) ;
+	\IfEq{LabelOx}{}{}%
+		{%
+			\draw (\BaMaxexmax,0) node[right] {\BaMAxeLabelOx} ;
+		}%
+	\ifboolKV[boiteamoustachesaxe]{AffValeurs}
+		{\foreach \x in \BaMAxeValeurs \draw[\BaMAxeEpaisseur] (\x,3pt)--(\x,-3pt) node[valxboxplot] {\num{\x}} ;}
+		{}
+}
+
+\newcommand\BoiteMoustaches[2][]{
+	\useKVdefault[boiteamoustaches]
+	\setKV[boiteamoustaches]{#1}
+	\setsepchar[.]{/}%
+	\readlist*\BaMListeparams{#2}%
+	\itemtomacro\BaMListeparams[1]\BaMmin%
+	\itemtomacro\BaMListeparams[2]\BaMqu%
+	\itemtomacro\BaMListeparams[3]\BaMmed%
+	\itemtomacro\BaMListeparams[4]\BaMqt%
+	\itemtomacro\BaMListeparams[5]\BaMmax%
+	\draw[draw,\BaMEpaisseur,\BaMCouleur,fill=\BaMRemplissage] ({\BaMqu},{\BaMElevation-0.5*\BaMHauteur}) rectangle ({\BaMqt},{\BaMElevation+0.5*\BaMHauteur}) ;
+	\draw[\BaMEpaisseur,\BaMCouleur] (\BaMmin,{\BaMElevation-0.5*\BaMHauteur})--(\BaMmin,{\BaMElevation+0.5*\BaMHauteur}) (\BaMmax,{\BaMElevation-0.5*\BaMHauteur})--(\BaMmax,{\BaMElevation+0.5*\BaMHauteur}) (\BaMmed,{\BaMElevation-0.5*\BaMHauteur})--(\BaMmed,{\BaMElevation+0.5*\BaMHauteur});
+	\draw[\BaMEpaisseur,\BaMCouleur] ({\BaMmin},{\BaMElevation})--({\BaMqu},{\BaMElevation}) ({\BaMqt},{\BaMElevation})--({\BaMmax},{\BaMElevation}) ;
+	\ifboolKV[boiteamoustaches]{AffMoyenne}
+		{\filldraw[\BaMCouleur] ({\BaMMoyenne},{\BaMElevation}) circle[radius=2.5pt] ;}
+		{}
+	\ifboolKV[boiteamoustaches]{Pointilles}
+		{
+			\draw[\BaMEpaisseur,densely dashed] (\BaMmin,{\BaMElevation-0.5*\BaMHauteur}) -- (\BaMmin,0) ;
+			\draw[\BaMEpaisseur,densely dashed] (\BaMqu,{\BaMElevation-0.5*\BaMHauteur}) -- (\BaMqu,0) ;
+			\draw[\BaMEpaisseur,densely dashed] (\BaMmed,{\BaMElevation-0.5*\BaMHauteur}) -- (\BaMmed,0) ;
+			\draw[\BaMEpaisseur,densely dashed] (\BaMqt,{\BaMElevation-0.5*\BaMHauteur}) -- (\BaMqt,0) ;
+			\draw[\BaMEpaisseur,densely dashed] (\BaMmax,{\BaMElevation-0.5*\BaMHauteur}) -- (\BaMmax,0) ;
+		}
+		{}
+	\ifboolKV[boiteamoustaches]{Valeurs}
+		{
+			\filldraw (\BaMmin,0) circle[radius=2pt] node[below=4pt] {\num{\BaMmin}} ;
+			\filldraw (\BaMqu,0) circle[radius=2pt] node[below=4pt] {\num{\BaMqu}} ;
+			\filldraw (\BaMmed,0) circle[radius=2pt] node[below=4pt] {\num{\BaMmed}} ;
+			\filldraw (\BaMqt,0) circle[radius=2pt] node[below=4pt] {\num{\BaMqt}} ;
+			\filldraw (\BaMmax,0) circle[radius=2pt] node[below=4pt] {\num{\BaMmax}} ;
+		}
+		{}
+}
+\NewCommandCopy\pflboitemoustach\BoiteMoustaches
+
+%%------HISTOGRAMME
+\defKV[histostats]{%
+	ListeCouleurs=\def\HistoCouleurs{#1},%
+	Largeur=\def\HistoLargeur{#1},%
+	Hauteur=\def\HistoHauteur{#1},%
+	GradX=\def\HistoGradX{#1},%
+	GradY=\def\HistoGradY{#1},%
+	PosEffectifs=\def\HistoPosEff{#1},%
+	LabelX=\def\HistoLabelx{#1},%
+	LabelY=\def\HistoLabely{#1},%
+	ElargirX=\def\HistoElargirx{#1},%
+	ElargirY=\def\HistoElargiry{#1},%
+	PoliceAxes=\def\HistoFonte{#1},%
+	PoliceEffectifs=\def\HistoFonteEff{#1},%
+	Opacite=\def\HistoOpac{#1},%
+	DebutOx=\def\HistoDebX{#1},%
+	FinOx=\def\HistoFinX{#1},%
+	EpaisseurTraits=\def\HistoEptraits{#1},%
+	Grille=\def\HistoGrille{#1},%
+	ExtraGrilleY=\def\HistoExtraGridY{#1},%
+	PosLegende=\def\HistoPosLeg{#1}
+}
+
+\setKVdefault[histostats]{%
+	ListeCouleurs=orange,%
+	Largeur=10,%
+	Hauteur=5,%
+	GradX={},%
+	GradY={},%
+	AffEffectifs=true,%
+	PosEffectifs=milieu,%
+	ElargirX=5mm,%
+	ElargirY=5mm,%
+	LabelX={},%
+	LabelY={},%
+	PoliceAxes=\normalsize\normalfont,%
+	PoliceEffectifs=\normalsize\normalfont,%
+	AffBornes=false,%
+	Remplir=true,%
+	Opacite=0.5,%
+	GrilleV=true,%
+	DebutOx={},%
+	FinOx={},%
+	EpaisseurTraits=semithick,%
+	Grille={},%
+	ExtraGrilleY=0,%
+	PosLegende={}
+}
+
+%ajout style grille :-)
+\tikzset{stylegrillehisto/.style={line width=0.4pt,lightgray}}
+
+\NewDocumentCommand\Histogramme{ s O{} m }{%
+	\useKVdefault[histostats]%
+	\setKV[histostats]{#2}%
+	\setsepchar[.]{ ./}%
+	\readlist*\LISTDONNEES{#3}%
+	\IfEq{\HistoDebX}{}%on stocke le début de l'axe Ox si besoin
+		{\itemtomacro\LISTDONNEES[1,1]{\HistoDebX}}{}%
+	\IfEq{\HistoFinX}{}%on stocke la fin de l'axe Ox si besoin
+		{\itemtomacro\LISTDONNEES[-1,2]{\HistoFinX}}{}%
+	\setsepchar{,}%
+	\readlist*\LISTCOUL{\HistoCouleurs}%
+	%distinction suivant largeur classes
+	\IfBooleanTF{#1}%étoilé := classe d'amplitudes différentes
+		{%
+			\xdef\ListeHauteurs{\xintfloateval{(\LISTDONNEES[1,3])/(\LISTDONNEES[1,2]-\LISTDONNEES[1,1])}}%
+			\foreach \i in {2,...,\LISTDONNEESlen}%
+				{%
+					\xdef\ListeHauteurs{\ListeHauteurs,\xintfloateval{(\LISTDONNEES[\i,3])/(\LISTDONNEES[\i,2]-\LISTDONNEES[\i,1])}}%
+				}%
+			\IfEq{\HistoGrille}{}%on lit les infos de la grille PasX/UniteAire
+				{}%
+				{%
+					\StrCut{\HistoGrille}{/}{\HistoPasX}{\HistoUnAire}%
+					\def\HistoPasY{\xintfloateval{\HistoUnAire/\HistoPasX}}%
+				}%
+			\xdef\maxhauteurs{\xintfloateval{round(max(\ListeHauteurs),3)}}%
+			\IfEq{\HistoGrille}{}%
+				{%
+					\xdef\HistoUniteY{\xintfloateval{round(\HistoHauteur/max(\ListeHauteurs),3)}}%
+				}%
+				{%
+					\xdef\maxhauteurgrille{\xinteval{(floor((\maxhauteurs)/(\HistoPasY))+1+\HistoExtraGridY)*\HistoPasY}}%
+					\xdef\HistoUniteY{\xintfloateval{round((\HistoHauteur)/(\maxhauteurgrille),3)}}%
+				}%
+			\xdef\HistoUniteX{\xintfloateval{round(\HistoLargeur/(\HistoFinX-\HistoDebX),3)}}%
+			%fenêtre graphique
+			\begin{tikzpicture}[x=\HistoUniteX cm,y=\HistoUniteY cm]
+				%Essai de grille
+				\IfEq{\HistoGrille}{}%
+					{}%
+					{%
+						\draw[stylegrillehisto,xstep=\HistoPasX,ystep=\HistoPasY] ({\HistoDebX},0) grid ({\HistoFinX},{\xinteval{floor((\maxhauteurs)/(\HistoPasY))+1+\HistoExtraGridY}*\HistoPasY}) ;
+						\IfSubStr{\HistoPosLeg}{/}%
+							{%
+								\StrCut{\HistoPosLeg}{/}{\HistoPosLegX}{\HistoPosLegY}%
+								\draw[\HistoEptraits,fill=lightgray,fill opacity=\HistoOpac] ({\HistoDebX+(\HistoPosLegX)*(\HistoPasX)},{(\HistoPasY)*(\HistoPosLegY)}) rectangle++ ({\HistoPasX},{\HistoPasY}) ; %
+								\draw ({\HistoDebX+(\HistoPosLegX+1)*(\HistoPasX)},{(\HistoPasY)*(\HistoPosLegY+0.5)}) node[right,font=\HistoFonteEff] {\num{\HistoUnAire}} ;%
+							}%
+							{}%
+						%\draw ({\HistoDebX},{0}) node[below left] {\xinteval{floor((\maxhauteurs)/(\HistoPasY))+1}} ;
+						%\draw ({\HistoDebX},{\HistoPasY}) node[left] {\num{\HistoPasY}} ;
+						%\draw ({\HistoDebX},{\maxhauteurs}) node[left] {\num{\maxhauteurs}} ;
+						
+					}%
+				%rectangles
+				\foreach \i in {1,...,\LISTDONNEESlen}
+					{%
+						\xintifboolexpr{\LISTCOULlen == 1}%
+							{\def\couleurhisto{\HistoCouleurs}}%
+							{\itemtomacro\LISTCOUL[\i]{\couleurhisto}}%
+						\ifboolKV[histostats]{AffBornes}%à améliorer, càd à afficher uniquement si différent de la borne précédente...
+							{%
+								\xintifboolexpr{\i == 1}%
+									{%
+										\draw[\HistoEptraits] ({\LISTDONNEES[\i,1]},3pt)--++(0,-6pt) node[below,font=\HistoFonte] {\LISTDONNEES[\i,1]} ;
+										\draw[\HistoEptraits] ({\LISTDONNEES[\i,2]},3pt)--++(0,-6pt) node[below,font=\HistoFonte] {\LISTDONNEES[\i,2]} ;
+									}%
+									{%
+										\def\j{\inteval{\i-1}}%
+										\xintifboolexpr{ \LISTDONNEES[\i,1] == \LISTDONNEES[\j,2] }%
+											{}%
+											{%
+												\draw[\HistoEptraits] ({\LISTDONNEES[\i,1]},3pt)--++(0,-6pt) node[below,font=\HistoFonte] {\LISTDONNEES[\i,1]} ;
+											}%
+										\draw[\HistoEptraits] ({\LISTDONNEES[\i,2]},3pt)--++(0,-6pt) node[below,font=\HistoFonte] {\LISTDONNEES[\i,2]} ;
+									}%
+								%\draw[\HistoEptraits] ({\LISTDONNEES[\i,1]},3pt)--++(0,-6pt) node[below,font=\HistoFonte] {\LISTDONNEES[\i,1]} ;
+								%\draw[\HistoEptraits] ({\LISTDONNEES[\i,2]},3pt)--++(0,-6pt) node[below,font=\HistoFonte] {\LISTDONNEES[\i,2]} ;
+							}%
+							{}%
+						\ifboolKV[histostats]{Remplir}%
+							{%
+								\draw[\HistoEptraits,fill=\couleurhisto,fill opacity=\HistoOpac] ({\LISTDONNEES[\i,1]},0) rectangle ({\LISTDONNEES[\i,2]},{(\LISTDONNEES[\i,3])/(\LISTDONNEES[\i,2]-\LISTDONNEES[\i,1])}) ;
+							}%
+							{%
+								\draw[\HistoEptraits] ({\LISTDONNEES[\i,1]},0) rectangle ({\LISTDONNEES[\i,2]},{(\LISTDONNEES[\i,3])/(\LISTDONNEES[\i,2]-\LISTDONNEES[\i,1])}) ;
+							}%
+					}%
+				\foreach \x in \HistoGradX
+					{%
+						\draw[\HistoEptraits] (\x,3pt)--++(0,-6pt) node[below,font=\HistoFonte] {\num{\x}} ;
+					}%
+				\ifboolKV[histostats]{AffEffectifs}
+					{%
+						\IfStrEq{\HistoPosEff}{milieu}%
+							{%
+								\foreach \i in {1,...,\LISTDONNEESlen}
+									\draw ({0.5*\LISTDONNEES[\i,1]+0.5*\LISTDONNEES[\i,2]},{0.5*(\LISTDONNEES[\i,3])/(\LISTDONNEES[\i,2]-\LISTDONNEES[\i,1])}) node[font=\HistoFonteEff] {\num{\LISTDONNEES[\i,3]}} ;
+							}%
+							{}%
+						\IfStrEq{\HistoPosEff}{bas}%
+							{%
+								\foreach \i in {1,...,\LISTDONNEESlen}
+									\draw ({0.5*\LISTDONNEES[\i,1]+0.5*\LISTDONNEES[\i,2]},{0}) node[above,font=\HistoFonteEff] {\num{\LISTDONNEES[\i,3]}} ;
+							}%
+							{}%
+						\IfStrEq{\HistoPosEff}{haut}%
+							{%
+								\foreach \i in {1,...,\LISTDONNEESlen}
+									\draw ({0.5*\LISTDONNEES[\i,1]+0.5*\LISTDONNEES[\i,2]},{(\LISTDONNEES[\i,3])/(\LISTDONNEES[\i,2]-\LISTDONNEES[\i,1])}) node[below,font=\HistoFonteEff] {\num{\LISTDONNEES[\i,3]}} ;
+							}%
+							{}%
+						\IfStrEq{\HistoPosEff}{dessus}%
+							{%
+								\foreach \i in {1,...,\LISTDONNEESlen}
+									\draw ({0.5*\LISTDONNEES[\i,1]+0.5*\LISTDONNEES[\i,2]},{(\LISTDONNEES[\i,3])/(\LISTDONNEES[\i,2]-\LISTDONNEES[\i,1])}) node[above,font=\HistoFonteEff] {\num{\LISTDONNEES[\i,3]}} ;
+							}%
+							{}%
+					}%
+					{}%
+				\draw[\HistoEptraits,->,>=latex] ({\HistoDebX},0) -- ({\HistoFinX},0) --++ ({\HistoElargirx},0) node[right,font=\HistoFonte] {\HistoLabelx} ;
+			\end{tikzpicture}%
+		}%
+		{%
+			\xdef\ListeHauteurs{\LISTDONNEES[1,3]}%
+			\foreach \i in {2,...,\LISTDONNEESlen}%
+				{%
+					\xdef\ListeHauteurs{\ListeHauteurs,\LISTDONNEES[\i,3]}%
+				}%
+			\xdef\maxhauteurs{\xinteval{round(max(\ListeHauteurs),3)}}%
+			\xdef\HistoUniteY{\xinteval{round(\HistoHauteur/max(\ListeHauteurs),3)}}%
+			\xdef\HistoUniteX{\xinteval{round(\HistoLargeur/(\HistoFinX-\HistoDebX),3)}}%
+			%fenêtre graphique
+			\begin{tikzpicture}[x=\HistoUniteX cm,y=\HistoUniteY cm]
+				\ifboolKV[histostats]{GrilleV}%
+					{%
+						\foreach \y in \HistoGradY
+						{%
+							\draw[stylegrillehisto] ({\HistoDebX},\y) -- ({\HistoFinX},\y) --++ ({\HistoElargirx},0) ;
+						}%
+					}%
+					{}%
+				\foreach \i in {1,...,\LISTDONNEESlen}
+					{%
+						\xintifboolexpr{\LISTCOULlen == 1}%
+							{\def\couleurhisto{\HistoCouleurs}}%
+							{\itemtomacro\LISTCOUL[\i]{\couleurhisto}}%
+						\ifboolKV[histostats]{AffBornes}%
+							{%
+								\draw[\HistoEptraits] ({\LISTDONNEES[\i,1]},3pt)--++(0,-6pt) node[below,font=\HistoFonte] {\LISTDONNEES[\i,1]} ;
+								\draw[\HistoEptraits] ({\LISTDONNEES[\i,2]},3pt)--++(0,-6pt) node[below,font=\HistoFonte] {\LISTDONNEES[\i,2]} ;
+							}%
+							{}%
+						\ifboolKV[histostats]{Remplir}%
+						{%
+							\draw[\HistoEptraits,fill=\couleurhisto,fill opacity=\HistoOpac] ({\LISTDONNEES[\i,1]},0) rectangle ({\LISTDONNEES[\i,2]},{\LISTDONNEES[\i,3]}) ;
+						}%
+						{%
+							\draw[\HistoEptraits] ({\LISTDONNEES[\i,1]},0) rectangle ({\LISTDONNEES[\i,2]},{\LISTDONNEES[\i,3]}) ;
+						}%
+					}%
+				\foreach \x in \HistoGradX
+					{%
+						\draw[\HistoEptraits] (\x,3pt)--++(0,-6pt) node[below,font=\HistoFonte] {\num{\x}} ;
+					}%
+				\foreach \y in \HistoGradY
+					{%
+						\draw[\HistoEptraits] ($({\HistoDebX},\y)+(3pt,0)$) --++ (-6pt,0) node[left,font=\HistoFonte] {\num{\y}} ;
+					}%
+				\ifboolKV[histostats]{AffEffectifs}
+					{%
+						\IfStrEq{\HistoPosEff}{milieu}%
+							{%
+								\foreach \i in {1,...,\LISTDONNEESlen}
+									\draw ({0.5*\LISTDONNEES[\i,1]+0.5*\LISTDONNEES[\i,2]},{0.5*\LISTDONNEES[\i,3]}) node[font=\HistoFonteEff] {\num{\LISTDONNEES[\i,3]}} ;
+							}%
+							{}%
+						\IfStrEq{\HistoPosEff}{bas}%
+							{%
+								\foreach \i in {1,...,\LISTDONNEESlen}
+									\draw ({0.5*\LISTDONNEES[\i,1]+0.5*\LISTDONNEES[\i,2]},{0}) node[above,font=\HistoFonteEff] {\num{\LISTDONNEES[\i,3]}} ;
+							}%
+							{}%
+						\IfStrEq{\HistoPosEff}{haut}%
+							{%
+								\foreach \i in {1,...,\LISTDONNEESlen}
+									\draw ({0.5*\LISTDONNEES[\i,1]+0.5*\LISTDONNEES[\i,2]},{\LISTDONNEES[\i,3]}) node[below,font=\HistoFonteEff] {\num{\LISTDONNEES[\i,3]}} ;
+							}%
+							{}%
+						\IfStrEq{\HistoPosEff}{dessus}%
+							{%
+								\foreach \i in {1,...,\LISTDONNEESlen}
+									\draw ({0.5*\LISTDONNEES[\i,1]+0.5*\LISTDONNEES[\i,2]},{\LISTDONNEES[\i,3]}) node[above,font=\HistoFonteEff] {\num{\LISTDONNEES[\i,3]}} ;
+							}%
+							{}%
+					}%
+					{}%
+			\draw[\HistoEptraits,->,>=latex] ({\HistoDebX},0) -- ({\HistoFinX},0) --++ ({\HistoElargirx},0) node[right,font=\HistoFonte] {\HistoLabelx} ;
+			\draw[\HistoEptraits,->,>=latex] ({\HistoDebX},0) -- ({\HistoDebX},{\maxhauteurs}) --++ (0,{\HistoElargiry}) node[above,font=\HistoFonte] {\HistoLabely} ;
+		\end{tikzpicture}%
+		}%
+}
+\NewCommandCopy\pflhistogramme\Histogramme
+
+\NewDocumentCommand\HistogrammeTikz{ O{} m }{%
+	\useKVdefault[histostats]%
+	\setKV[histostats]{#1}%
+	\setsepchar[.]{ ./}%
+	\readlist*\LISTDONNEES{#2}%
+	\setsepchar{,}%
+	\readlist*\LISTCOUL{\HistoCouleurs}%
+	\foreach \i in {1,...,\LISTDONNEESlen}
+		{%
+			\xintifboolexpr{\LISTCOULlen == 1}%
+				{\def\couleurhisto{\HistoCouleurs}}%
+				{\itemtomacro\LISTCOUL[\i]{\couleurhisto}}%
+		\ifboolKV[histostats]{Remplir}%
+			{%
+				\draw[line width=1pt,fill=\couleurhisto,fill opacity=\HistoOpac] ({\LISTDONNEES[\i,1]-\axexOx},0) rectangle ({\LISTDONNEES[\i,2]-\axexOx},{\LISTDONNEES[\i,3]}) ;
+			}%
+			{%
+				\draw[line width=1pt] ({\LISTDONNEES[\i,1]-\axexOx},0) rectangle ({\LISTDONNEES[\i,2]-\axexOx},{\LISTDONNEES[\i,3]}) ;
+			}%
+		}%
+	\ifboolKV[histostats]{AffEffectifs}%
+		{%
+			\IfStrEq{\HistoPosEff}{milieu}%
+				{%
+					\foreach \i in {1,...,\LISTDONNEESlen}
+						\draw ({0.5*\LISTDONNEES[\i,1]+0.5*\LISTDONNEES[\i,2]-\axexOx},{0.5*\LISTDONNEES[\i,3]}) node[font=\HistoFonteEff] {\num{\LISTDONNEES[\i,3]}} ;
+				}%
+				{}%
+			\IfStrEq{\HistoPosEff}{bas}%
+				{%
+					\foreach \i in {1,...,\LISTDONNEESlen}
+						\draw ({0.5*\LISTDONNEES[\i,1]+0.5*\LISTDONNEES[\i,2]-\axexOx},{0}) node[above,font=\HistoFonteEff] {\num{\LISTDONNEES[\i,3]}} ;
+				}%
+				{}%
+			\IfStrEq{\HistoPosEff}{haut}%
+				{%
+					\foreach \i in {1,...,\LISTDONNEESlen}
+						\draw ({0.5*\LISTDONNEES[\i,1]+0.5*\LISTDONNEES[\i,2]-\axexOx},{\LISTDONNEES[\i,3]}) node[below,font=\HistoFonteEff] {\num{\LISTDONNEES[\i,3]}} ;
+				}%
+				{}%
+			\IfStrEq{\HistoPosEff}{dessus}%
+				{%
+					\foreach \i in {1,...,\LISTDONNEESlen}
+						\draw ({0.5*\LISTDONNEES[\i,1]+0.5*\LISTDONNEES[\i,2]-\axexOx},{\LISTDONNEES[\i,3]}) node[above,font=\HistoFonteEff] {\num{\LISTDONNEES[\i,3]}} ;
+				}%
+				{}%
+		}%
+		{}%
+}
+\NewCommandCopy\pflhistotikz\HistogrammeTikz
+
+%%----Courbe ECC
+%\usetikzlibrary{intersections}
+
+% \newcommand\recuptikzxy[3]{%
+	% \tikz@scan@one@point\pgfutil@firstofone#1\relax
+	% \edef#2{\the\pgf@x}%
+	% \edef#3{\the\pgf@y}%
+% }
+
+\makeatletter
+\defKV[courbeECC]{%
+	Largeur=\def\ecc@larg@graph{#1},%
+	Hauteur=\def\ecc@haut@graph{#1},%
+	PasX=\def\ecc@grille@x{#1},%
+	PasY=\def\ecc@grille@y{#1},%
+	Couleur=\def\ecc@coul@graph{#1},%
+	CouleursParams=\def\ecc@coul@params{#1},%
+	GraduationsX=\def\ecc@gradx@graph{#1},%
+	GraduationsY=\def\ecc@grady@graph{#1},%
+	PoliceAxes=\def\ecc@font@axes{#1},%
+	ElargirAxes=\def\ecc@elarg@axes{#1}
+}
+
+\setKVdefault[courbeECC]{%
+	Largeur=15,%
+	Hauteur=10,%
+	PasX=50,%
+	PasY=50,%
+	Couleur=blue,%
+	AffParams=true,%
+	CouleursParams={CouleurVertForet/red},%
+	GraduationsX={\DonneesXmin},%
+	GraduationsY={0},%
+	PoliceAxes=\normalsize\normalfont,%
+	ElargirOx=true,%
+	ElargirOy=true,%
+	ElargirAxes=3mm
+}
+
+\tikzset{traitsparamecc/.style={line width=1pt,densely dashed}}
+\tikzset{courbeecc/.style={line width=1pt}}
+\tikzset{gradsecc/.style={thick}}
+\tikzset{axesecc/.style={gradsecc,->,>=latex}}
+
+\NewDocumentCommand\CourbeECCStylesDefaut{ }{%
+	\tikzset{traitsparamecc/.style={line width=1pt,densely dashed}}
+	\tikzset{courbeecc/.style={line width=1pt}}
+	\tikzset{gradsecc/.style={thick}}
+	\tikzset{axesecc/.style={gradsecc,->,>=latex}}
+}
+
+\NewDocumentCommand\CourbeECC{ O{} m m }{%
+	\restoreKV[courbeECC]%
+	\setKV[courbeECC]{#1}%
+	\IfSubStr{\ecc@coul@params}{/}%
+		{%
+			\StrCut{\ecc@coul@params}{/}{\ecc@coul@quart}{\ecc@coul@med}%
+		}%
+		{%
+			\def\ecc@coul@quart{\ecc@coul@params}\def\ecc@coul@med{\ecc@coul@params}%
+		}%
+	\setsepchar{,}%
+	\readlist*\DataClass{#2}%
+	\readlist*\DataEff{#3}%
+	\xdef\DonneesECC{0}%
+	\xintFor* ##1 in {\xintSeq{1}{\DataEfflen}}\do{%
+		\xdef\DonneesTmp{0}
+		\xintFor* ##2 in {\xintSeq{1}{##1}}\do{%
+			\xdef\DonneesTmp{\xintfloateval{\DonneesTmp+\DataEff[##2]}}%
+		}%
+		\xdef\DonneesECC{\DonneesECC,\DonneesTmp}%
+	}%
+	\readlist*\DataECC\DonneesECC%
+	\itemtomacro\DataClass[1]\DonneesXmin%
+	\itemtomacro\DataClass[-1]\DonneesXmax%
+	\itemtomacro\DataECC[-1]\DonneesEffMax%
+	\xdef\UniteGraphiqueX{\xintfloateval{(\ecc@larg@graph)/(\DonneesXmax-\DonneesXmin)}}%
+	\xdef\UniteGraphiqueY{\xintfloateval{(\ecc@haut@graph)/(\DonneesEffMax)}}%
+	\xdef\DonneesListeECC{(\DataClass[1],\DataECC[1])}%
+	\xintFor* ##1 in {\xintSeq{2}{\DataECClen}}\do{%
+		\xdef\DonneesListeECC{\DonneesListeECC--(\DataClass[##1],\DataECC[##1])}%
+	}%
+		%paramètres par interpolation
+	\xintFor* ##1 in {\xintSeq{1}{\DataEfflen}}\do{%
+		\xdef\isuiv{\xinteval{##1+1}}%
+		\xintifboolexpr{\DataECC[##1] < (0.25*\DonneesEffMax) 'and' \DataECC[\isuiv] >= (0.25*\DonneesEffMax)}%
+			{%
+				\xdef\pentetmpECC{(\DataECC[\isuiv]-\DataECC[##1])/(\DataClass[\isuiv]-\DataClass[##1])}%OK
+				\xdef\ValPremQuartile{\xintfloateval{(0.25*\DonneesEffMax+\pentetmpECC*\DataClass[##1]-\DataECC[##1])/(\pentetmpECC)}}%
+			}%
+			{}%
+		\xintifboolexpr{\DataECC[##1] < (0.50*\DonneesEffMax) 'and' \DataECC[\isuiv] >= (0.50*\DonneesEffMax)}%
+			{%
+				\xdef\pentetmpECC{(\DataECC[\isuiv]-\DataECC[##1])/(\DataClass[\isuiv]-\DataClass[##1])}%OK
+				\xdef\ValMed{\xintfloateval{(0.50*\DonneesEffMax+\pentetmpECC*\DataClass[##1]-\DataECC[##1])/(\pentetmpECC)}}%
+			}%
+			{}%
+		\xintifboolexpr{\DataECC[##1] < (0.75*\DonneesEffMax) 'and' \DataECC[\isuiv] >= (0.75*\DonneesEffMax)}%
+			{%
+				\xdef\pentetmpECC{(\DataECC[\isuiv]-\DataECC[##1])/(\DataClass[\isuiv]-\DataClass[##1])}%OK
+				\xdef\ValTroisQuartile{\xintfloateval{(0.75*\DonneesEffMax+\pentetmpECC*\DataClass[##1]-\DataECC[##1])/(\pentetmpECC)}}%
+			}%
+			{}%
+	}%
+	%graphique
+	\begin{tikzpicture}[x=\UniteGraphiqueX cm,y=\UniteGraphiqueY cm]
+		\draw[xstep=\ecc@grille@x,ystep=\ecc@grille@y,thin,lightgray] (\DonneesXmin,0) grid (\DonneesXmax,\DonneesEffMax) ;
+		%modif axes avec pgffor :-(
+		\foreach \valx in \ecc@gradx@graph {%
+			\draw[gradsecc] (\valx,3pt)--++(0,-6pt) node[below,font=\ecc@font@axes] {\num{\valx}} ;
+		}
+		\foreach \valy in \ecc@grady@graph {%
+			\draw[gradsecc] ($({\DonneesXmin},\valy)+(3pt,0)$)--++(-6pt,0) node[left,font=\ecc@font@axes] {\num{\valy}} ;
+		}
+		\ifboolKV[courbeECC]{ElargirOx}%
+			{%
+				\draw[axesecc] (\DonneesXmin,0)--($(\DonneesXmax,0)+(\ecc@elarg@axes,0)$) ;
+			}%
+			{%
+				\draw[axesecc] (\DonneesXmin,0)--(\DonneesXmax,0) ;
+			}%
+		\ifboolKV[courbeECC]{ElargirOy}%
+			{%
+				\draw[axesecc] (\DonneesXmin,0)--($(\DonneesXmin,\DonneesEffMax)+(0,\ecc@elarg@axes)$) ;
+			}%
+			{%
+				\draw[axesecc] (\DonneesXmin,0)--(\DonneesXmin,\DonneesEffMax) ;
+			}%
+		\draw[courbeecc,\ecc@coul@graph] \DonneesListeECC ;
+		\xintFor* ##1 in {\xintSeq{1}{\DataECClen}}\do{%
+			\filldraw[\ecc@coul@graph] (\DataClass[##1],\DataECC[##1]) circle[radius=2pt] ;
+		}%
+		\ifboolKV[courbeECC]{AffParams}%
+			{%
+				\draw[traitsparamecc,\ecc@coul@quart] (\DonneesXmin,{0.25*\DonneesEffMax})--++({\DonneesXmax-\DonneesXmin},0);
+				\draw[traitsparamecc,\ecc@coul@med] (\DonneesXmin,{0.50*\DonneesEffMax})--++({\DonneesXmax-\DonneesXmin},0);
+				\draw[traitsparamecc,\ecc@coul@quart] (\DonneesXmin,{0.75*\DonneesEffMax})--++({\DonneesXmax-\DonneesXmin},0);
+				\draw[traitsparamecc,\ecc@coul@quart] (\ValPremQuartile,{0.25*\DonneesEffMax})--(\ValPremQuartile,0) ; \draw[\ecc@coul@quart,thick,fill=white] (\ValPremQuartile,{0.25*\DonneesEffMax}) circle[radius=2pt] ;
+				\draw[traitsparamecc,\ecc@coul@quart] (\ValTroisQuartile,{0.75*\DonneesEffMax})--(\ValTroisQuartile,0) ; \draw[\ecc@coul@quart,thick,fill=white] (\ValTroisQuartile,{0.75*\DonneesEffMax}) circle[radius=2pt] ;
+				\draw[traitsparamecc,\ecc@coul@med] (\ValMed,{0.5*\DonneesEffMax})--(\ValMed,0) ; \draw[\ecc@coul@med,thick,fill=white] (\ValMed,{0.5*\DonneesEffMax}) circle[radius=2pt] ;
+			}%
+			{}%
+	\end{tikzpicture}%
+	\CourbeECCStylesDefaut%
+}
+\NewCommandCopy\pflcourbeecc\CourbeECC
+
+\NewDocumentEnvironment{EnvCourbeECC}{ O{} m m }%
+{%
+	\restoreKV[courbeECC]%
+	\setKV[courbeECC]{#1}%
+	\IfSubStr{\ecc@coul@params}{/}%
+		{%
+			\StrCut{\ecc@coul@params}{/}{\ecc@coul@quart}{\ecc@coul@med}%
+		}%
+		{%
+			\def\ecc@coul@quart{\ecc@coul@params}%
+			\def\ecc@coul@med{\ecc@coul@params}%
+		}%
+	\setsepchar{,}%
+	\readlist*\DataClass{#2}%
+	\readlist*\DataEff{#3}%
+	\xdef\DonneesECC{0}%
+	\xintFor* ##1 in {\xintSeq{1}{\DataEfflen}}\do{%
+		\xdef\DonneesTmp{0}%
+		\xintFor* ##2 in {\xintSeq{1}{##1}}\do{%
+			\xdef\DonneesTmp{\xintfloateval{\DonneesTmp+\DataEff[##2]}}%
+		}%
+		\xdef\DonneesECC{\DonneesECC,\DonneesTmp}%
+	}%
+	\readlist*\DataECC\DonneesECC%
+	\itemtomacro\DataClass[1]\DonneesXmin%
+	\itemtomacro\DataClass[-1]\DonneesXmax%
+	\itemtomacro\DataECC[-1]\DonneesEffMax%
+	\xdef\UniteGraphiqueX{\xintfloateval{(\ecc@larg@graph)/(\DonneesXmax-\DonneesXmin)}}%
+	\xdef\UniteGraphiqueY{\xintfloateval{(\ecc@haut@graph)/(\DonneesEffMax)}}%
+	\xdef\DonneesListeECC{(\DataClass[1],\DataECC[1])}%
+	\xintFor* ##1 in {\xintSeq{2}{\DataECClen}}\do{%
+		\xdef\DonneesListeECC{\DonneesListeECC--(\DataClass[##1],\DataECC[##1])}%
+	}%
+	%paramètres par interpolation
+	\xintFor* ##1 in {\xintSeq{1}{\DataEfflen}}\do{%
+		\xdef\isuiv{\xinteval{##1+1}}%
+		\xintifboolexpr{\DataECC[##1] < (0.25*\DonneesEffMax) 'and' \DataECC[\isuiv] >= (0.25*\DonneesEffMax)}%
+			{%
+				\xdef\pentetmpECC{(\DataECC[\isuiv]-\DataECC[##1])/(\DataClass[\isuiv]-\DataClass[##1])}%OK
+				\xdef\ValPremQuartile{\xintfloateval{(0.25*\DonneesEffMax+\pentetmpECC*\DataClass[##1]-\DataECC[##1])/(\pentetmpECC)}}%
+			}%
+			{}%
+		\xintifboolexpr{\DataECC[##1] < (0.50*\DonneesEffMax) 'and' \DataECC[\isuiv] >= (0.50*\DonneesEffMax)}%
+			{%
+				\xdef\pentetmpECC{(\DataECC[\isuiv]-\DataECC[##1])/(\DataClass[\isuiv]-\DataClass[##1])}%OK
+				\xdef\ValMed{\xintfloateval{(0.50*\DonneesEffMax+\pentetmpECC*\DataClass[##1]-\DataECC[##1])/(\pentetmpECC)}}%
+			}%
+			{}%
+		\xintifboolexpr{\DataECC[##1] < (0.75*\DonneesEffMax) 'and' \DataECC[\isuiv] >= (0.75*\DonneesEffMax)}%
+			{%
+				\xdef\pentetmpECC{(\DataECC[\isuiv]-\DataECC[##1])/(\DataClass[\isuiv]-\DataClass[##1])}%OK
+				\xdef\ValTroisQuartile{\xintfloateval{(0.75*\DonneesEffMax+\pentetmpECC*\DataClass[##1]-\DataECC[##1])/(\pentetmpECC)}}%
+			}%
+			{}%
+	}%
+	%graphique
+	\begin{tikzpicture}[x=\UniteGraphiqueX cm,y=\UniteGraphiqueY cm]
+		\draw[xstep=\ecc@grille@x,ystep=\ecc@grille@y,thin,lightgray] (\DonneesXmin,0) grid (\DonneesXmax,\DonneesEffMax) ;
+		%modif axes avec pgffor :-(
+		\foreach \valx in \ecc@gradx@graph {%
+			\draw[gradsecc] (\valx,3pt)--++(0,-6pt) node[below,font=\ecc@font@axes] {\num{\valx}} ;
+		}
+		\foreach \valy in \ecc@grady@graph {%
+			\draw[gradsecc] ($({\DonneesXmin},\valy)+(3pt,0)$)--++(-6pt,0) node[left,font=\ecc@font@axes] {\num{\valy}} ;
+		}
+		\ifboolKV[courbeECC]{ElargirOx}%
+			{%
+				\draw[axesecc] (\DonneesXmin,0)--($(\DonneesXmax,0)+(\ecc@elarg@axes,0)$) ;
+			}%
+			{%
+				\draw[axesecc] (\DonneesXmin,0)--(\DonneesXmax,0) ;
+			}%
+		\ifboolKV[courbeECC]{ElargirOy}%
+			{%
+				\draw[axesecc] (\DonneesXmin,0)--($(\DonneesXmin,\DonneesEffMax)+(0,\ecc@elarg@axes)$) ;
+			}%
+			{%
+				\draw[axesecc] (\DonneesXmin,0)--(\DonneesXmin,\DonneesEffMax) ;
+			}%
+		\draw[courbeecc,\ecc@coul@graph] \DonneesListeECC ;
+		\xintFor* ##1 in {\xintSeq{1}{\DataECClen}}\do{%
+			\filldraw[\ecc@coul@graph] (\DataClass[##1],\DataECC[##1]) circle[radius=2pt] ;
+		}%
+		\ifboolKV[courbeECC]{AffParams}%
+			{%
+				\draw[traitsparamecc,\ecc@coul@quart] (\DonneesXmin,{0.25*\DonneesEffMax})--++({\DonneesXmax-\DonneesXmin},0);
+				\draw[traitsparamecc,\ecc@coul@med] (\DonneesXmin,{0.50*\DonneesEffMax})--++({\DonneesXmax-\DonneesXmin},0);
+				\draw[traitsparamecc,\ecc@coul@quart] (\DonneesXmin,{0.75*\DonneesEffMax})--++({\DonneesXmax-\DonneesXmin},0);
+				\draw[traitsparamecc,\ecc@coul@quart] (\ValPremQuartile,{0.25*\DonneesEffMax})--(\ValPremQuartile,0) ; \draw[\ecc@coul@quart,thick,fill=white] (\ValPremQuartile,{0.25*\DonneesEffMax}) circle[radius=2pt] ;
+				\draw[traitsparamecc,\ecc@coul@quart] (\ValTroisQuartile,{0.75*\DonneesEffMax})--(\ValTroisQuartile,0) ; \draw[\ecc@coul@quart,thick,fill=white] (\ValTroisQuartile,{0.75*\DonneesEffMax}) circle[radius=2pt] ;
+				\draw[traitsparamecc,\ecc@coul@med] (\ValMed,{0.5*\DonneesEffMax})--(\ValMed,0) ; \draw[\ecc@coul@med,thick,fill=white] (\ValMed,{0.5*\DonneesEffMax}) circle[radius=2pt] ;
+			}%
+			{}%
+		% \path[name intersections={of=CourbeECC and Quartile1,by=Q1}];
+		% \path[name intersections={of=CourbeECC and Mediane,by=Q2}];
+		% \path[name intersections={of=CourbeECC and Quartile3,by=Q3}];
+		% \recuptikzxy{(Q1)}{\xqun}{\yqun}%
+		% \xdef\ValPremQuartile{\xintfloateval{(0.03515*\fpeval{\xqun})/\UniteGraphiqueX}}%
+		% \recuptikzxy{(Q2)}{\xmediane}{\ymediane}
+		% \xdef\ValMed{\xintfloateval{(0.03515*\fpeval{\xmediane})/\UniteGraphiqueX}}%
+		% \recuptikzxy{(Q3)}{\xqtrois}{\yqtrois}%
+		% \xdef\ValTroisQuartile{\xintfloateval{(0.03515*\fpeval{\xqtrois})/\UniteGraphiqueX}}%
+}%
+{%
+	\end{tikzpicture}%
+	\CourbeECCStylesDefaut%
+}
+\makeatother
+
+%détermination 'simple' des paramètres
+\NewDocumentCommand\MedianeQuartilesECC{ m m }{%
+	%lecture des listes
+	\setsepchar{,}%
+	\readlist*\DataClass{#1}%
+	\readlist*\DataEff{#2}%
+	%création etlecture de la liste des ECC
+	\xdef\DonneesECC{0}%
+	\xintFor* ##1 in {\xintSeq{1}{\DataEfflen}}\do{%
+		\xdef\DonneesTmp{0}%
+		\xintFor* ##2 in {\xintSeq{1}{##1}}\do{%
+			\xdef\DonneesTmp{\xintfloateval{\DonneesTmp+\DataEff[##2]}}%
+		}%
+		\xdef\DonneesECC{\DonneesECC,\DonneesTmp}%
+	}%
+	\readlist*\DataECC\DonneesECC%
+	%effectif total + nb
+	\itemtomacro\DataECC[-1]\DonneesEffMax%
+	%détermination de Q1, par balayage + par interpolation
+	\xintFor* ##1 in {\xintSeq{1}{\DataEfflen}}\do{%
+		\xdef\isuiv{\xinteval{##1+1}}%
+		\xintifboolexpr{\DataECC[##1] < (0.25*\DonneesEffMax) 'and' \DataECC[\isuiv] >= (0.25*\DonneesEffMax)}%
+			{%
+				\xdef\pentetmpECC{(\DataECC[\isuiv]-\DataECC[##1])/(\DataClass[\isuiv]-\DataClass[##1])}%OK
+				\xdef\ValPremQuartile{\xintfloateval{(0.25*\DonneesEffMax+\pentetmpECC*\DataClass[##1]-\DataECC[##1])/(\pentetmpECC)}}%
+			}%
+			{}%
+		\xintifboolexpr{\DataECC[##1] < (0.50*\DonneesEffMax) 'and' \DataECC[\isuiv] >= (0.50*\DonneesEffMax)}%
+			{%
+				\xdef\pentetmpECC{(\DataECC[\isuiv]-\DataECC[##1])/(\DataClass[\isuiv]-\DataClass[##1])}%OK
+				\xdef\ValMed{\xintfloateval{(0.50*\DonneesEffMax+\pentetmpECC*\DataClass[##1]-\DataECC[##1])/(\pentetmpECC)}}%
+			}%
+			{}%
+		\xintifboolexpr{\DataECC[##1] < (0.75*\DonneesEffMax) 'and' \DataECC[\isuiv] >= (0.75*\DonneesEffMax)}%
+			{%
+				\xdef\pentetmpECC{(\DataECC[\isuiv]-\DataECC[##1])/(\DataClass[\isuiv]-\DataClass[##1])}%OK
+				\xdef\ValTroisQuartile{\xintfloateval{(0.75*\DonneesEffMax+\pentetmpECC*\DataClass[##1]-\DataECC[##1])/(\pentetmpECC)}}%
+			}%
+			{}%
+	}%
+}
+
+%====Paramètres statistiques (stockage/affichage, sans rédaction)
+\NewDocumentCommand\DeterminerParamStats{ s m O{\monmin} O{\monquartileun} O{\mamediane} O{\monquartiletrois} O{\monmax} }{%
+	%traitement de la liste, *=effectifs
+	\IfBooleanTF{#1}%
+		{%
+			\setsepchar[.]{,./}%
+			\readlist*\listeTdonneesregroup{#2}%
+			\def\TMPLST{}%
+			\foreach \i in {1,...,\listeTdonneesregrouplen}{%
+				\itemtomacro\listeTdonneesregroup[\i,1]\myelt%
+				\itemtomacro\listeTdonneesregroup[\i,2]\mynbelt%
+				\foreach \j in {1,...,\mynbelt}{%
+					\xintifboolexpr{ \i*\j == 1}%
+						{%
+							\xdef\TMPLST{\myelt}%
+						}%
+						{%
+							\xdef\TMPLST{\TMPLST,\myelt}%
+						}%
+				}%
+			}%
+		}%
+		{%
+			\xdef\TMPLST{#2}%
+			\sortasclist{\TMPLST}%
+		}%
+	\definemylist{\TMPLST}{\listeTdonneesregroup}%
+	\lenofdeflist{listeTdonneesregroup}[\nbdonnees]%
+	%médiane
+	\xintifboolexpr{ \xintiiRem{\nbdonnees}{2} == 0 }%
+		{%
+			\xdef\tmpranga{\xintfloateval{\nbdonnees/2}}%\tmpranga
+			\xdef\tmprangb{\xintfloateval{\nbdonnees/2+1}}%\tmprangb
+			\getvaluefromdeflist{listeTdonneesregroup}{\tmpranga}[\myvala]%
+			\getvaluefromdeflist{listeTdonneesregroup}{\tmprangb}[\myvalb]%
+			\xdef#5{\xintfloateval{(\myvala+\myvalb)/2}}%
+		}%
+		{%
+			\xdef\tmprang{\xintfloateval{(\nbdonnees+1)/2}}%
+			\getvaluefromdeflist{listeTdonneesregroup}{\tmprang}[#5]%
+		}%
+	%quartileun
+	\xdef\tmprangqa{\xintfloateval{ceil(0.25*\nbdonnees)}}%\tmpranga
+	\getvaluefromdeflist{listeTdonneesregroup}{\tmprangqa}[#4]%
+	%quartiletrois
+	\xdef\tmprangqc{\xintfloateval{ceil(0.75*\nbdonnees)}}%\tmpranga
+	\getvaluefromdeflist{listeTdonneesregroup}{\tmprangqc}[#6]%
+	%min/max
+	\minoflist{\TMPLST}[#3]%
+	\maxoflist{\TMPLST}[#7]%
+	%moyenne
+	\meanofdeflist{listeTdonneesregroup}[\mamoyenne]%
+	%écart-type
+	\xdef\monecarttype{0}%
+	\foreach \i in {1,...,\nbdonnees}{%
+			\getvaluefromdeflist{listeTdonneesregroup}{\i}[\myval]%
+			\xdef\monecarttype{\xintfloateval{\monecarttype+(\myval-\mamoyenne)^2}}%
+	}%
+	\xdef\monecarttype{\xintfloateval{sqrt(\monecarttype/\nbdonnees)}}%
+}
+\NewCommandCopy\pflparamstats\DeterminerParamStats
+
+\NewDocumentCommand\DeterminerMoyEctype{ s m O{\mamoyenne} O{\monecarttype} }{%
+	%traitement de la liste, *=effectifs
+	\IfBooleanTF{#1}%
+		{%
+			\setsepchar[.]{,./}%
+			\readlist*\listeTdonneesregroup{#2}%
+			\def\TMPLST{}%
+			\foreach \i in {1,...,\listeTdonneesregrouplen}{%
+				\itemtomacro\listeTdonneesregroup[\i,1]\myelt%
+				\itemtomacro\listeTdonneesregroup[\i,2]\mynbelt%
+				\foreach \j in {1,...,\mynbelt}{%
+					\xintifboolexpr{ \i*\j == 1}%
+						{%
+							\xdef\TMPLST{\myelt}%
+						}%
+						{%
+							\xdef\TMPLST{\TMPLST,\myelt}%
+						}%
+				}%
+			}%
+		}%
+		{%
+			\xdef\TMPLST{#2}%
+			\sortasclist{\TMPLST}%
+		}%
+	\definemylist{\TMPLST}{\listeTdonneesregroup}%
+	\lenofdeflist{listeTdonneesregroup}[\nbdonnees]%
+	%moyenne
+	\meanofdeflist{listeTdonneesregroup}[#3]%
+	%écart-type
+	\xdef#4{0}%
+	\foreach \i in {1,...,\nbdonnees}{%
+			\getvaluefromdeflist{listeTdonneesregroup}{\i}[\myval]%
+			\xdef#4{\xintfloateval{#4+(\myval-\mamoyenne)^2}}%
+	}%
+	\xdef#4{\xintfloateval{sqrt(#4/\nbdonnees)}}%
+}
+\NewCommandCopy\pflmoyectype\DeterminerMoyEctype
+
+\endinput

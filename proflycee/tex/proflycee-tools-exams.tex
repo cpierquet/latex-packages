@@ -1,0 +1,152 @@
+% proflycee-tools-stats.tex
+% Copyright 2024  Cédric Pierquet
+% Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+%3.03d	Page de garde Type BAC
+
+%====PAGE GARDE [BAC]
+\defKV[EnteteSujetBac]{DernierePage=\def\packlastpage{#1},NbExos=\def\packnbexos{#1},Serie=\def\packfiliere{#1}}
+\setKVdefault[EnteteSujetBac]{%
+	Police=\normalfont,%
+	Serie={GÉNÉRAL},%
+	Matiere=MATHÉMATIQUES,%
+	Filiere={SCIENCES ET TECHNOLOGIES DE L’INDUSTRIE ET DU DÉVELOPPEMENT DURABLE},%
+	Session={SESSION \the\year},%
+	AffSession=true,%
+	Jour={Jour 1},%
+	AffJour=true,%
+	Duree=4 heures,%
+	ModeExamen=true,%
+	DernierePage=lastpage,%
+	Justification=true,%
+	TraceRecherche=true,%
+	Clarte=true,%
+	NbExos=4,%
+	Traiter=false,%
+	EspaceAvant=1cm,%
+	LargeurPar={0.85\linewidth}
+}
+
+\NewDocumentCommand\PageGardeSujetBac{ O{} }{%
+	\restoreKV[EnteteSujetBac]%
+	\setKV[EnteteSujetBac]{#1}%
+	\useKV[EnteteSujetBac]{Police}{%
+	\vspace*{\useKV[EnteteSujetBac]{EspaceAvant}}
+	
+	\begin{center}
+		{\Huge BACCALAURÉAT~%
+		\IfSubStr{\packfiliere}{GÉN}{GÉNÉRAL}{}%
+		\IfSubStr{\packfiliere}{GEN}{GÉNÉRAL}{}%
+		\IfSubStr{\packfiliere}{TECHNO}{TECHNOLOGIQUE}{}%
+		\IfSubStr{\packfiliere}{PRO}{PROFESSIONNEL}{}%
+		}%
+		\IfSubStr{\packfiliere}{PRO}%
+			{}%
+			{%
+				\vspace*{10mm}
+				
+				{\Large ÉPREUVE D’ENSEIGNEMENT DE SPÉCIALITÉ}%
+			}%
+		
+		\ifboolKV[EnteteSujetBac]{AffSession}%
+			{%
+				\vspace*{10mm}
+				
+				{\Large\bfseries\useKV[EnteteSujetBac]{Session}}%
+			}%
+			{}%
+		\IfSubStr{\packfiliere}{TECHNO}%
+			{%
+				\vspace*{10mm}
+				
+				\begin{minipage}{\useKV[EnteteSujetBac]{LargeurPar}}
+					\centering
+					\linespread{1.2}\LARGE\bfseries\useKV[EnteteSujetBac]{Filiere}
+				\end{minipage}%
+			}%
+			{}%
+		\IfSubStr{\packfiliere}{PRO}%
+			{%
+				\vspace*{10mm}
+				
+				\begin{minipage}{\useKV[EnteteSujetBac]{LargeurPar}}
+					\centering
+					\linespread{1.2}\LARGE\bfseries\useKV[EnteteSujetBac]{Filiere}
+				\end{minipage}%
+			}%
+			{}%
+		\vspace*{15mm}
+		
+		{\LARGE\bfseries \useKV[EnteteSujetBac]{Matiere}}
+		
+		\ifboolKV[EnteteSujetBac]{AffJour}%
+			{%
+				\vspace*{15mm}
+				
+				{\Large\bfseries \useKV[EnteteSujetBac]{Jour}}%
+			}%
+			{}%
+		
+		\vspace*{15mm}
+		
+		Durée de l’épreuve : \textbf{\useKV[EnteteSujetBac]{Duree}}%
+		
+		\vspace*{15mm}
+		
+		\ifboolKV[EnteteSujetBac]{ModeExamen}%
+			{%
+				\textit{L’usage de la calculatrice avec mode examen actif est autorisé.}
+				
+				\medskip
+				
+				\textit{L’usage de la calculatrice sans mémoire « type collège » est autorisé.}
+			}%
+			{%
+				\textit{L’usage de la calculatrice avec ou sans mode examen est autorisé.}
+			}%
+		\vspace*{10mm}
+		
+		Dès que ce sujet vous est remis, assurez-vous qu’il est complet.
+		
+		\smallskip
+		
+		Ce sujet comporte \IfStrEqCase{\packlastpage}{{lastpage}{\pageref{LastPage}}{zref}{\zpageref{LastPage}}}[\packlastpage]\ pages numérotées de 1/\IfStrEqCase{\packlastpage}{{lastpage}{\pageref{LastPage}}{zref}{\zpageref{LastPage}}}[\packlastpage]\ à \IfStrEqCase{\packlastpage}{{lastpage}{\pageref{LastPage}}{zref}{\zpageref{LastPage}}}[\packlastpage]/\IfStrEqCase{\packlastpage}{{lastpage}{\pageref{LastPage}}{zref}{\zpageref{LastPage}}}[\packlastpage].
+	\end{center}
+	%
+	\begin{center}
+		\parbox{\useKV[EnteteSujetBac]{LargeurPar}}{%
+		\ifboolKV[EnteteSujetBac]{Justification}%
+			{%
+				\vspace*{10mm}
+				
+				\noindent\textbf{Sauf mention contraire, toute réponse devra être justifiée.}
+			}%
+			{}%
+		\ifboolKV[EnteteSujetBac]{Traiter}%
+			{%
+				\vspace*{5mm}
+				
+				\noindent\textbf{Le candidat doit traiter les \IfStrEqCase{\packnbexos}{{2}{deux}{3}{trois}{4}{quatre}{5}{cinq}{6}{six}{7}{sept}}\ exercices proposés.}
+			}%
+			{}%
+		\ifboolKV[EnteteSujetBac]{TraceRecherche}%
+			{%
+				\vspace*{10mm}
+				
+				\noindent\textit{Le candidat est invité à faire figurer sur la copie toute trace de recherche, même incomplète ou non fructueuse, qu’il aura développée.}
+			}%
+			{}%
+		\ifboolKV[EnteteSujetBac]{Clarte}%
+			{%
+				\vspace*{2mm}
+				
+				\noindent\textit{La qualité de la rédaction, la clarté et la précision des raisonnements seront prises en compte dans l’appréciation de la copie. Les traces de recherche, même incomplètes ou infructueuses seront valorisées.}
+			}%
+			{}%
+		}%
+	\end{center}%
+	}%
+	\pagebreak
+}
+
+\endinput

@@ -1,0 +1,741 @@
+% proflycee-tools-listings.tex
+% Copyright 2023-2024  Cédric Pierquet
+% Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+%3.01f	Suppression Terminal (doublon avec sim-os-menus)
+%3.01d	Ajout des commentaires en PseudoCode (via #)
+%3.00g	Amélioration marge gauche PseudoCode
+%2.7.5	Ajout de clés pour PythonLst + Couleurs optionnelles pour PseudoCode
+%2.7.3	Correction de la couleur des bordures
+%2.5.8	Styles alternatifs + Modification marges
+
+\RequirePackage{iftex}
+
+%%------STYLE PYTHON LST
+\ifluatex
+\tcbuselibrary{listings}
+\lstdefinelanguage{langnat}{%
+	keywords={},
+	inputencoding=utf8,
+	comment=[l]{}}
+\lstdefinestyle{PLpython}{%
+	language          = python,
+	inputencoding     = utf8,
+	basicstyle        = \ttfamily\footnotesize,
+	keywordstyle      = \color{CouleurVertForet},
+	keywordstyle      = [2]\color{magenta},
+	commentstyle      = \color{gray}\itshape,
+	stringstyle       = \color{red!75},
+	numberstyle       = \scriptsize\ttfamily\color{darkgray},
+	aboveskip         = 0pt,
+	belowskip         = 0pt,
+	tabsize           = 4,
+	showstringspaces  = false,
+	columns           = fullflexible,
+	keepspaces        = true,
+	breaklines        = true,
+	breakatwhitespace = true
+}
+\else
+\tcbuselibrary{listingsutf8}
+\lstdefinelanguage{langnat}{%
+	keywords={},
+	inputencoding=utf8/latin1,
+	comment=[l]{}}
+\lstdefinestyle{PLpython}{%
+	language          = python,
+	inputencoding     = utf8/latin1,
+	basicstyle        = \ttfamily\footnotesize,
+	keywordstyle      = \color{CouleurVertForet},
+	keywordstyle      = [2]\color{magenta},
+	commentstyle      = \color{gray}\itshape,
+	stringstyle       = \color{red!75},
+	numberstyle       = \scriptsize\ttfamily\color{darkgray},
+	aboveskip         = 0pt,
+	belowskip         = 0pt,
+	tabsize           = 4,
+	showstringspaces  = false,
+	columns           = fullflexible,
+	keepspaces        = true,
+	breaklines        = true,
+	breakatwhitespace = true
+}
+\fi
+
+%%------PYTHONLISTINGS
+%v1
+\tcbset{stylepythonlst/.style={%
+	enhanced,boxrule=1.25pt,%
+	left=0.6em,
+	sharp corners=downhill,arc=12pt,
+	before skip=0.5\baselineskip,after skip=0.5\baselineskip,%
+	top=\baselineskip,bottom=1mm,right=5mm,
+	attach boxed title to top right={yshift=-\tcboxedtitleheight},
+	boxed title style={
+		size=small,colback=CouleurVertForet!25,boxrule=1.25pt,
+		colframe=CouleurVertForet,boxsep=1.25pt,
+		sharp corners=downhill,
+		arc=12pt,
+		top=2pt,bottom=1pt,left=6pt,right=6pt
+	},
+	colframe=CouleurVertForet,colback=CouleurVertForet!5,%
+	fonttitle=\color{CouleurVertForet}\itshape\ttfamily\footnotesize,
+	title={\scriptsize\faPython}\:Code Python\vphantom{p},
+	watermark text={\faPython},watermark opacity=0.175,watermark zoom=0.50,
+	listing only,listing engine=listings,%
+	}
+}
+
+\tcbset{stylepythonlstnolineos/.style={%
+	stylepythonlst,
+	listing options={style=PLpython,xleftmargin=0pt,numbers=none}
+	}
+}
+
+\tcbset{stylepythonlstlineos/.style={%
+	stylepythonlst,
+	listing options={style=PLpython,xleftmargin=\PythonCodeXLeft,numbers=left}
+	}
+}
+
+\newlength{\PythonCodeXLeft}
+\setlength{\PythonCodeXLeft}{14pt}
+
+%test v3 avec simplekv
+\defKV[CodePythonLst]{%
+	Largeur=\def\CodePythonLstLarg{#1},%
+	PremLigne=\def\CodePythonLstFirstLine{#1},
+	EspaceNum=\setlength{\PythonCodeXLeft}{#1}
+}
+
+\setKVdefault[CodePythonLst]{%
+	Largeur=\linewidth,%
+	PremLigne=1,%
+	EspaceNum=14pt
+}
+
+\NewDocumentEnvironment{CodePythonLst}{ s O{} m }%nouvelle version avec clés listings
+{%
+	\useKVdefault[CodePythonLst]%
+	\setKV[CodePythonLst]{#2}% on paramètres les nouvelles clés et on les simplifie
+	\IfBooleanTF{#1}%
+		{%
+			\tcblisting{stylepythonlst,listing options={style=PLpython,xleftmargin=0pt,numbers=none},width=\CodePythonLstLarg,#3}
+		}%
+		{%
+			\tcblisting{stylepythonlst,listing options={style=PLpython,xleftmargin=\PythonCodeXLeft,numbers=left,firstnumber=\CodePythonLstFirstLine},width=\CodePythonLstLarg,#3}
+		}%
+}%
+{%
+	\endtcblisting%
+}
+
+%\NewTCBListing{CodePythonLst}{ s O{\linewidth} m !D<>{1} }{% * off pour numéros de lignes + {largeur} + <options tcbox>
+%	enhanced,boxrule=1.25pt,%
+%	left=0.6em,
+%	sharp corners=downhill,arc=12pt,
+%	before skip=0.5\baselineskip,after skip=0.5\baselineskip,%
+%	top=\baselineskip,bottom=1mm,right=5mm,
+%	attach boxed title to top right={yshift=-\tcboxedtitleheight},
+%	boxed title style={
+%		size=small,colback=CouleurVertForet!25,boxrule=1.25pt,
+%		colframe=CouleurVertForet,boxsep=1.25pt,
+%		sharp corners=downhill,
+%		arc=12pt,
+%		top=2pt,bottom=1pt,left=6pt,right=6pt
+%	},
+%	colframe=CouleurVertForet,colback=CouleurVertForet!5,%
+%	fonttitle=\color{CouleurVertForet}\itshape\ttfamily\footnotesize,
+%	title={\scriptsize\faPython}\:Code Python\vphantom{p},
+%	watermark text={\faPython},watermark opacity=0.175,watermark zoom=0.50,
+%	listing only,listing engine=listings,
+%	\IfBooleanTF{#1}{stylepythonlstnolineos}{stylepythonlstlineos},
+%	width=#2,#3
+%}
+
+\NewTCBInputListing{\CodePythonLstFichier}{ s O{\linewidth} m m }{
+	\IfBooleanTF{#1}{stylepythonlstnolineos}{stylepythonlstlineos},
+	width=#2,#3,
+	listing file={#4}
+}
+
+%v2
+\tcbset{StylPythonB/.style={%
+	enhanced,boxrule=0.75pt,colframe=darkgray!50!black,%
+	sharp corners,top=0mm,bottom=0mm,left=0.2em,right=5mm,%
+	before skip=0.5\baselineskip,after skip=0.5\baselineskip,%
+	colback=white,
+	fontupper=\footnotesize,fontlower=\footnotesize,%
+	listing only,listing engine=listings,%
+	watermark text={\faPython},watermark opacity=0.25,watermark zoom=0.50,%
+	title={{\scriptsize\faCode} Code Python},
+	lefttitle=0.4em,
+	fonttitle=\bfseries\footnotesize\sffamily,colbacktitle=darkgray!50!black
+	}
+}
+
+\tcbset{StylPythonBno/.style={%
+	StylPythonB,
+	listing options={style=PLpython,xleftmargin=0pt,numbers=none}
+	}
+}
+
+\tcbset{StylPythonByes/.style={%
+	StylPythonB,
+	listing options={style=PLpython,xleftmargin=16pt,numbers=left},%
+	underlay={%
+		\begin{tcbclipinterior}
+			\draw[draw=none,fill=lightgray!25] (interior.south west) rectangle ([xshift=1.3em]interior.north west) ;
+		\end{tcbclipinterior}%
+		}
+	}
+}
+
+\NewDocumentEnvironment{CodePythonLstAlt}{ s O{} m }%nouvelle version avec clés listings
+{%
+	\useKVdefault[CodePythonLst]%
+	\setKV[CodePythonLst]{#2}% on paramètres les nouvelles clés et on les simplifie
+	\IfBooleanTF{#1}%
+	{%
+		\tcblisting{StylPythonB,
+			listing options={style=PLpython,xleftmargin=0pt,numbers=none},width=\CodePythonLstLarg,#3}
+	}%
+	{%
+		\tcblisting{StylPythonB,
+			listing options={style=PLpython,xleftmargin=\PythonCodeXLeft,numbers=left,firstnumber=\CodePythonLstFirstLine},%
+			underlay={%
+				\begin{tcbclipinterior}
+					\draw[draw=none,fill=lightgray!25] (interior.south west) rectangle ([xshift=1.3em]interior.north west) ;
+				\end{tcbclipinterior}%
+			},
+			width=\CodePythonLstLarg,#3}
+	}%
+}%
+{%
+	\endtcblisting%
+}
+
+\NewTCBInputListing{\CodePythonLstFichierAlt}{ s O{\linewidth} m m }{
+	\IfBooleanTF{#1}{StylPythonBno}{StylPythonByes},
+	width=#2,#3,
+	listing file={#4}
+}
+
+% \NewDocumentEnvironment{CodePythonLstFichierAlt}{ s O{\linewidth} m m  }%nouvelle version avec option listings
+% {%
+	% \IfBooleanTF{#1}%
+		% {%
+			% \tcblisting{StylPythonB,listing options={style=PLpython,xleftmargin=0pt,numbers=none},width=#2,#3,listing file={#4}}
+		% }%
+		% {%
+			% \tcblisting{StylPythonB,
+			% listing options={style=PLpython,xleftmargin=16pt,numbers=left},%
+			% underlay={%
+				% \begin{tcbclipinterior}
+					% \draw[draw=none,fill=lightgray!25] (interior.south west) rectangle ([xshift=1.3em]interior.north west) ;
+				% \end{tcbclipinterior}%
+			% },
+			% width=#2,#3,listing file={#4}}
+		% }%
+% }%
+% {%
+	% \endtcblisting%
+% }
+
+%%------PSEUDOCODE
+%language pseudocode listings
+\lstdefinestyle{pseudocodePL}{%
+	language         = langnat,
+	basicstyle       = \footnotesize\ttfamily,
+	numberstyle      = \scriptsize\ttfamily\color{gray},
+	%keywordstyle     = \bfseries,
+	%stringstyle      = \color{red!75},
+	keepspaces       = true,
+	tabsize          = 4,
+	numbersep        = 10pt,
+	xleftmargin      = \PseudoCodeXLeft,
+	numbers          = left,
+	morestring       = [b]",
+	showstringspaces = false,
+	escapeinside     = {(*}{*)},
+	commentstyle     = \itshape\color{gray},
+	morecomment      = [l][commentstyle]{\#}
+}
+
+\lstdefinestyle{pseudocodenoPL}{%
+	language         = langnat,
+	basicstyle       = \footnotesize\ttfamily,
+	numberstyle      = \scriptsize\ttfamily\color{gray},
+	%keywordstyle     = \bfseries,
+	%stringstyle      = \color{red!75},
+	keepspaces       = true,
+	tabsize          = 4,
+	numbersep        = 10pt,
+	numbers          = none,
+	showstringspaces = false,
+	morestring       = [b]",
+	escapeinside     = {(*}{*)},
+	commentstyle     = \itshape\color{gray},
+	morecomment      = [l][commentstyle]{\#}
+}
+
+\newlength{\PseudoCodeXLeft}
+\setlength{\PseudoCodeXLeft}{14pt}
+
+\defKV[CodePseudoCodeLst]{%
+	Largeur=\def\CodePseudoCodeLstLarg{#1},%
+	PremLigne=\def\CodePseudoCodeLstFirstLine{#1},%
+	EspaceNum=\setlength{\PseudoCodeXLeft}{#1}
+}
+
+\setKVdefault[CodePseudoCodeLst]{%
+	Largeur=\linewidth,%
+	PremLigne=1,%
+	Couleur=false,%
+	EspaceNum=14pt
+}
+
+%style tcbox pseudocode avec bannière hautdroite
+\tcbset{stylepseudocodePL/.style={%
+	enhanced,boxrule=1.25pt,sharp corners=downhill,arc=12pt,
+	before skip=0.5\baselineskip,after skip=0.5\baselineskip,leftupper=10pt,top=\baselineskip,bottom=1mm,rightupper=5mm,%
+	attach boxed title to top right={yshift=-\tcboxedtitleheight},
+	boxed title style={
+		size=small,colback=gray!25,boxrule=1.25pt,
+		colframe=darkgray,boxsep=1.25pt,
+		sharp corners=downhill,
+		arc=12pt,
+		top=2pt,bottom=1pt,left=6pt,right=6pt
+	},
+	fonttitle=\color{darkgray}\ttfamily\footnotesize,
+	title={\scriptsize\faFileCode}\:\textit{Pseudo-Code}\vphantom{p},
+	watermark text={\faCode},watermark opacity=0.175,watermark zoom=0.50,
+	}
+}
+
+\ifluatex
+	\newcommand\algomathttPL[1]{\symtt{#1}}
+\else
+	\newcommand\algomathttPL[1]{\mathtt{#1}}
+\fi
+
+\NewDocumentEnvironment{PseudoCode}{ s O{} m }%nouvelle version avec clés listings
+{%
+	\useKVdefault[CodePseudoCodeLst]%
+	\setKV[CodePseudoCodeLst]{#2}% on paramètres les nouvelles clés et on les simplifie
+	%en fonction de la couleur ??
+	\ifboolKV[CodePseudoCodeLst]{Couleur}%
+		{%
+			\tcblisting{width=\CodePseudoCodeLstLarg,#3,
+				stylepseudocodePL,
+				listing only,listing engine=listings,
+				listing options={
+					style=\IfBooleanTF{#1}{pseudocodenoPL}{pseudocodePL},%version étoilée sans numéro de lignes
+					aboveskip=0pt,belowskip=0pt,
+					columns=fullflexible,firstnumber=\CodePseudoCodeLstFirstLine,%
+					stringstyle=\color{MotsClesPseudoCodeChaine},
+					classoffset=0,%
+					keywords={Algorithme,Pour,Fonction,Début,Paramètre,Parametre,Debut,allant,Fin,Si,alors,Sinon,SinonSi,FinSi,FinPour,FinTantQue,TantQue,Variable,Variables},%
+					keywordstyle=\color{MotsClesPseudoCodeA},%
+					classoffset=1,%
+					morekeywords={Afficher,Retourner,Saisir},%
+					keywordstyle=\color{MotsClesPseudoCodeB},%
+					literate={é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1% 
+					{ú}{{\'u}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1%
+					{è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1%
+					{À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1%
+					{ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1%
+					{Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1%
+					{â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1%
+					{Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1%
+					{œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1%
+					{ű}{{\H{u}}}1 {Ű}{{\H{U}}}1 {ő}{{\H{o}}}1 {Ő}{{\H{O}}}1%
+					{ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1%
+					{€}{{\texteuro}}1 {£}{{\pounds}}1%
+					{=}{\textleftarrow}1 {==}{=}1%
+					{*}{$\algomathttPL{\times}$}{1}%
+			}}
+		}%
+		{%
+			\tcblisting{width=\CodePseudoCodeLstLarg,#3,
+				stylepseudocodePL,
+				listing only,listing engine=listings,
+				listing options={
+					style=\IfBooleanTF{#1}{pseudocodenoPL}{pseudocodePL},%version étoilée sans numéro de lignes
+					aboveskip=0pt,belowskip=0pt,
+					columns=fullflexible,firstnumber=\CodePseudoCodeLstFirstLine,%
+					literate={é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1% 
+					{ú}{{\'u}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1%
+					{è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1%
+					{À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1%
+					{ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1%
+					{Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1%
+					{â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1%
+					{Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1%
+					{œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1%
+					{ű}{{\H{u}}}1 {Ű}{{\H{U}}}1 {ő}{{\H{o}}}1 {Ő}{{\H{O}}}1%
+					{ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1%
+					{€}{{\texteuro}}1 {£}{{\pounds}}1%
+					{=}{\textleftarrow}1 {==}{=}1%
+					{*}{$\algomathttPL{\times}$}{1}%
+			}}
+		}%
+}%
+{%
+	\endtcblisting%
+}
+
+% \DeclareTCBListing{PseudoCode}{ s O{12cm} m D<>{} }{% étoilée sans numéro, [taille] puis {option tcbox} puis <options listings>...
+	% width=#2,#3,
+	% stylepseudocodePL,
+	% listing only,listing engine=listings,
+	% listing options={
+		% style=\IfBooleanTF{#1}{pseudocodenoPL}{pseudocodePL},%version étoilée sans numéro de lignes
+		% aboveskip=0pt,belowskip=0pt,
+		% columns=fullflexible,#4,%
+		% literate={é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1% 
+		% {ú}{{\'u}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1%
+		% {è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1%
+		% {À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1%
+		% {ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1%
+		% {Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1%
+		% {â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1%
+		% {Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1%
+		% {œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1%
+		% {ű}{{\H{u}}}1 {Ű}{{\H{U}}}1 {ő}{{\H{o}}}1 {Ő}{{\H{O}}}1%
+		% {ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1%
+		% {€}{{\texteuro}}1 {£}{{\pounds}}1%
+		% {=}{\textleftarrow}1 {==}{=}1%
+		% {*}{$\algomathttPL{\times}$}{1}%
+	% }
+% }
+
+%style tcbox pseudocode v2
+\lstdefinestyle{pseudocodePLalt}{%
+	language         = langnat,
+	basicstyle       = \footnotesize\ttfamily,
+	numberstyle      = \scriptsize\ttfamily\color{gray},
+	%keywordstyle     = \bfseries,
+	%stringstyle      = \color{red!75},
+	keepspaces       = true,
+	tabsize          = 4,
+	xleftmargin      = \PseudoCodeXLeft,
+	numbers          = left,
+	morestring       = [b]",
+	showstringspaces = false,
+	escapeinside     = {(*}{*)},
+	commentstyle     = \itshape\color{gray},
+	morecomment      = [l][commentstyle]{\#}
+}
+
+\lstdefinestyle{pseudocodenoPLalt}{%
+	language         = langnat,
+	basicstyle       = \footnotesize\ttfamily,
+	numberstyle      = \scriptsize\ttfamily\color{gray},
+	%keywordstyle     = \bfseries,
+	%stringstyle      = \color{red!75},
+	keepspaces       = true,
+	tabsize          = 4,
+	numbers          = none,
+	showstringspaces = false,
+	morestring       = [b]",
+	escapeinside     = {(*}{*)},
+	commentstyle     = \itshape\color{gray},
+	morecomment      = [l][commentstyle]{\#}
+}
+
+\tcbset{stylepseudocodePLalt/.style={%
+	enhanced,boxrule=0.75pt,colframe=darkgray!50!black,%
+	sharp corners,top=0mm,bottom=0mm,left=0.4em,right=5mm,%
+	before skip=0.5\baselineskip,after skip=0.5\baselineskip,%
+	colback=white,
+	fontupper=\footnotesize,fontlower=\footnotesize,%
+	listing only,listing engine=listings,%
+	watermark text={\faCode},watermark opacity=0.25,watermark zoom=0.50,%
+	title={{\scriptsize\faCode} PseudoCode},
+	lefttitle=0.4em,
+	fonttitle=\bfseries\footnotesize\sffamily,colbacktitle=darkgray!50!black
+	}
+}
+
+\tcbset{stylepseudocodePLaltlines/.style={%
+	underlay={%
+		\begin{tcbclipinterior}
+			\filldraw[lightgray!25] (interior.south west) rectangle ([xshift=1.3em]interior.north west) ;
+		\end{tcbclipinterior}%
+		}
+	}
+}
+
+\NewDocumentEnvironment{PseudoCodeAlt}{ s O{} m }%nouvelle version avec clés listings
+{%
+	\useKVdefault[CodePseudoCodeLst]%
+	\setKV[CodePseudoCodeLst]{#2}% on paramètres les nouvelles clés et on les simplifie
+	%différence ssuivant [Couleur]
+	\ifboolKV[CodePseudoCodeLst]{Couleur}%
+	{%
+		\tcblisting{width=\CodePseudoCodeLstLarg,#3,
+			stylepseudocodePLalt,
+			listing only,listing engine=listings,
+			\IfBooleanTF{#1}{}{stylepseudocodePLaltlines},
+			listing options={
+				style=\IfBooleanTF{#1}{pseudocodenoPLalt}{pseudocodePLalt},%version étoilée sans numéro de lignes
+				aboveskip=2pt,belowskip=2pt,
+				columns=fullflexible,firstnumber=\CodePseudoCodeLstFirstLine,
+				stringstyle=\color{MotsClesPseudoCodeChaine},
+				classoffset=0,%
+				keywords={Algorithme,Pour,Fonction,Debut,Début,Paramètre,Parametre,allant,Fin,Si,alors,Sinon,SinonSi,FinSi,FinPour,FinTantQue,TantQue,Variable,Variables},%
+				keywordstyle=\color{MotsClesPseudoCodeA},%
+				classoffset=1,%
+				morekeywords={Afficher,Retourner,Saisir},%
+				keywordstyle=\color{MotsClesPseudoCodeB},%
+				literate={é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1% 
+				{ú}{{\'u}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1%
+				{è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1%
+				{À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1%
+				{ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1%
+				{Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1%
+				{â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1%
+				{Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1%
+				{œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1%
+				{ű}{{\H{u}}}1 {Ű}{{\H{U}}}1 {ő}{{\H{o}}}1 {Ő}{{\H{O}}}1%
+				{ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1%
+				{€}{{\texteuro}}1 {£}{{\pounds}}1%
+				{=}{\textleftarrow}1 {==}{=}1%
+				{*}{$\algomathttPL{\times}$}{1}%
+		}}
+	}%
+	{%
+		\tcblisting{width=\CodePseudoCodeLstLarg,#3,
+			stylepseudocodePLalt,
+			listing only,listing engine=listings,
+			\IfBooleanTF{#1}{}{stylepseudocodePLaltlines},
+			listing options={
+				style=\IfBooleanTF{#1}{pseudocodenoPLalt}{pseudocodePLalt},%version étoilée sans numéro de lignes
+				aboveskip=2pt,belowskip=2pt,
+				columns=fullflexible,firstnumber=\CodePseudoCodeLstFirstLine,
+				literate={é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1% 
+				{ú}{{\'u}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1%
+				{è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1%
+				{À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1%
+				{ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1%
+				{Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1%
+				{â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1%
+				{Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1%
+				{œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1%
+				{ű}{{\H{u}}}1 {Ű}{{\H{U}}}1 {ő}{{\H{o}}}1 {Ő}{{\H{O}}}1%
+				{ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1%
+				{€}{{\texteuro}}1 {£}{{\pounds}}1%
+				{=}{\textleftarrow}1 {==}{=}1%
+				{*}{$\algomathttPL{\times}$}{1}%
+		}}
+	}%
+}%
+{%
+	\endtcblisting%
+}
+
+% \DeclareTCBListing{PseudoCodeAlt}{ s O{12cm} m D<>{} }{% étoilée sans numéro, [taille] puis {option tcbox} puis <options listings>...
+	% width=#2,#3,
+	% stylepseudocodePLalt,
+	% listing only,listing engine=listings,
+	% \IfBooleanTF{#1}{}{stylepseudocodePLaltlines},
+	% listing options={
+		% style=\IfBooleanTF{#1}{pseudocodenoPLalt}{pseudocodePLalt},%version étoilée sans numéro de lignes
+		% aboveskip=2pt,belowskip=2pt,
+		% columns=fullflexible,#4,
+		% literate={é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1% 
+		% {ú}{{\'u}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1%
+		% {è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1%
+		% {À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1%
+		% {ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1%
+		% {Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1%
+		% {â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1%
+		% {Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1%
+		% {œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1%
+		% {ű}{{\H{u}}}1 {Ű}{{\H{U}}}1 {ő}{{\H{o}}}1 {Ő}{{\H{O}}}1%
+		% {ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1%
+		% {€}{{\texteuro}}1 {£}{{\pounds}}1%
+		% {=}{\textleftarrow}1 {==}{=}1%
+		% {*}{$\algomathttPL{\times}$}{1}%
+	% }
+% }
+
+%%------PRESENTATIONDECODES CLASSIQUES
+\tcbset{stylecodetex/.style={%
+	enhanced,boxrule=0.75pt,colframe=teal!50!black,%
+	sharp corners,top=1mm,bottom=1mm,left=1mm,right=1mm,middle=1mm,%
+	before skip=0.5\baselineskip,after skip=0.5\baselineskip,%
+	skin=bicolor,colback=teal!10,colbacklower=white,
+	fontupper=\footnotesize,fontlower=\footnotesize,%
+	listing engine=listings,%
+	%watermark text={\faCode},watermark opacity=0.25,watermark zoom=0.50,%
+	title={{\scriptsize\faCode} Code \LaTeX},
+	lefttitle=1mm,
+	fonttitle=\bfseries\footnotesize\sffamily,colbacktitle=teal!75!black
+	}
+}
+
+\NewTCBListing{PresCodeLaTeX}{ m }{stylecodetex,listing options={style=tcblatex,basicstyle=\footnotesize\ttfamily,keywordstyle=\bfseries\color{blue},tabsize=2},#1}
+
+\NewTCBListing{PresentationCode}{ O{CouleurVertForet} m }{%
+	sharp corners=downhill,enhanced,arc=12pt,skin=bicolor,%
+	colback=#1!5!white,colframe=#1!75!black,colbacklower=white,%
+	attach boxed title to top right={yshift=-\tcboxedtitleheight},title=Code \LaTeX,%
+	boxed title style={%
+		colframe=#1!75!black,colback=#1!15!white,%
+		,sharp corners=downhill,arc=12pt,%
+	},%
+	fonttitle=\color{#1!90!black}\itshape\ttfamily\footnotesize,%
+	listing options={%
+		style=tcblatex,basicstyle=\footnotesize\ttfamily,%
+		keywordstyle=\bfseries\color{blue},tabsize=2,%
+	},%
+	#2
+}
+
+%%%------FakeTerm
+%%couleurs (inspirées par termsim !)
+%\definecolor{PLmpurple}{RGB}{48,10,36}
+%\definecolor{PLmgray}{RGB}{70,72,67}
+%\definecolor{PLogray}{RGB}{148,147,141}
+%\definecolor{PLoorange}{RGB}{233,101,56}
+%\definecolor{PLterminal}{RGB}{80,78,70}
+%\definecolor{PLlinux}{RGB}{0,39,51}
+%\definecolor{PLwinblue}{HTML}{1883D7}
+%\definecolor{PLosxgray}{HTML}{D8D6D9}
+%
+%%WINDOWS
+%\tcbset{PLfaketermwin/.style={%
+%		enhanced,boxrule=1pt,sharp corners,before skip=12pt,after skip=12pt,%
+%		colframe=PLwinblue,colback=black,colbacktitle=white,colupper=white,coltitle=black,%
+%		titlerule=0.4pt,left=2pt,top=2pt,bottom=2pt,right=2pt,middle=2pt,%
+%		fonttitle=\bfseries\small\sffamily
+%	}
+%}
+%
+%\setKVdefault[fakeTERMwin]{Titre={Terminal Windows}}
+%
+%\newcommand\PLcommandeswin{%
+%	\begin{tikzpicture}[thick,scale=0.66]
+%		\draw (0,0)--(1em,0) ; \draw (2em,0) rectangle (3em,1em) ; \draw (4em,1em)--(5em,0) (4em,0)--(5em,1em) ;
+%	\end{tikzpicture}%
+%}
+%
+%\newcommand\termwintitre[1][]{%
+%	\restoreKV[fakeTERMwin]
+%	\setKV[fakeTERMwin]{#1}
+%	\begin{tblr}{colsep=0pt,rowsep=0pt,width=\linewidth,colspec={X[l]r}}
+%		{\footnotesize\faTerminal}~~\useKV[fakeTERMwin]{Titre} & \PLcommandeswin \\ %
+%	\end{tblr}
+%}
+%
+%\DeclareTCBListing{TerminalWin}{ O{\linewidth} m !O{} }{%<taille> puis {Titre=...} puis [option]
+%	PLfaketermwin,title={\termwintitre[#2]},%
+%	listing only,listing engine=listings,%
+%	listing options={style=tcblatex,language={},basicstyle=\footnotesize\ttfamily},%
+%	width=#1,#3
+%}
+%
+%%LINUX
+%\newcommand{\PLUbuntuWhite}{%
+%	\begin{tikzpicture}[thick,anchor=base,baseline]
+%		\filldraw[PLmgray] (0,0.25em) circle[radius=0.5em] ;
+%	\end{tikzpicture}%
+%}
+%\newcommand{\PLUbuntuMin}{%
+%	\begin{tikzpicture}[thick,anchor=base,baseline]
+%		\filldraw[color=PLogray!50!white] (0,0.25em) circle[radius=0.5em];
+%		\draw[PLterminal](-0.35em,0.25em)--(0.35em,0.25em);
+%	\end{tikzpicture}%
+%}
+%\newcommand{\PLUbuntuClose}{%
+%	\begin{tikzpicture}[thick,anchor=base,baseline]
+%		\filldraw[color=PLoorange!70!white] (0,0.25em) circle[radius=0.5em];
+%		\draw[PLterminal] (-0.32em,-0.07em)--(0.32em,0.57em);
+%		\draw[PLterminal] (-0.32em,0.57em)--(0.32em,-0.07em);
+%	\end{tikzpicture}%
+%}
+%\newcommand{\PLUbuntuMax}{%
+%	\begin{tikzpicture}[thick,anchor=base,baseline]
+%		\filldraw[color=PLogray!50!white] (0,0.25em) circle[radius=0.5em];
+%		\draw[PLterminal] (-0.32em,0.5em) rectangle (0.32em,0);
+%	\end{tikzpicture}%
+%}
+%
+%\tcbset{PLtermlinux/.style={%
+%		enhanced,boxrule=1pt,arc=4pt,before skip=12pt,after skip=12pt,%
+%		colframe=PLmgray,colback=PLmpurple,colbacktitle=PLmgray,colupper=white,coltitle=white,%
+%		titlerule=0.4pt,left=2pt,top=2pt,bottom=2pt,right=2pt,middle=2pt,%
+%		fonttitle=\bfseries\small\sffamily
+%	}
+%}
+%
+%\setKVdefault[fakeTERMnux]{Titre={Terminal UNiX}}
+%
+%\newcommand\termnuxtitre[1][]{%
+%	\restoreKV[fakeTERMnux]
+%	\setKV[fakeTERMnux]{#1}
+%	\begin{tblr}{colsep=0pt,rowsep=0pt,width=\linewidth,colspec={lX[c]r}}
+%		\PLUbuntuWhite~~\PLUbuntuWhite~~\PLUbuntuWhite & \vphantom{p}\useKV[fakeTERMnux]{Titre} & \PLUbuntuMin~~\PLUbuntuMax~~\PLUbuntuClose \\
+%	\end{tblr}
+%}
+%
+%\DeclareTCBListing{TerminalUnix}{ O{\linewidth} m !O{} }{%<taille> puis {Titre=...} puis [option]
+%	PLtermlinux,title={\termnuxtitre[#2]},%
+%	listing only,listing engine=listings,%
+%	listing options={style=tcblatex,language={},basicstyle=\footnotesize\ttfamily},%
+%	width=#1,#3
+%}
+%
+%%OSX
+%\tcbset{PLfaketermosx/.style={%
+%	enhanced,boxrule=1pt,arc=6pt,before skip=12pt,after skip=12pt,%
+%	colframe=PLosxgray,colback=lightgray!15,colbacktitle=PLosxgray,colupper=black,coltitle=black,%
+%	titlerule=0.4pt,left=2pt,top=2pt,bottom=2pt,right=2pt,middle=2pt,%
+%	fonttitle=\bfseries\small\sffamily
+%	}
+%}
+%
+%\newcommand{\PLOSXRed}{%
+%	\begin{tikzpicture}[thick,anchor=base,baseline]
+%		\filldraw[red] (0,0.25em) circle[radius=0.45em] ;
+%	\end{tikzpicture}%
+%}
+%
+%\newcommand{\PLOSXOrange}{%
+%	\begin{tikzpicture}[thick,anchor=base,baseline]
+%		\filldraw[orange] (0,0.25em) circle[radius=0.45em] ;
+%	\end{tikzpicture}%
+%}
+%
+%\newcommand{\PLOSXgreen}{%
+%	\begin{tikzpicture}[thick,anchor=base,baseline]
+%		\filldraw[CouleurVertForet] (0,0.25em) circle[radius=0.45em] ;
+%	\end{tikzpicture}%
+%}
+%
+%\newcommand{\PLOSXLG}{%
+%	\begin{tikzpicture}[thick,anchor=base,baseline]
+%		\filldraw[PLosxgray] (0,0.25em) circle[radius=0.45em] ;
+%	\end{tikzpicture}%
+%}
+%
+%\setKVdefault[fakeTERMosx]{titre={Terminal OSX}}
+%
+%\newcommand\termosxtitre[1][]{%
+%	\restoreKV[fakeTERMosx]
+%	\setKV[fakeTERMosx]{#1}
+%	\begin{tblr}{colsep=0pt,rowsep=0pt,width=\linewidth,colspec={lX[c]r}}
+%		\PLOSXRed~\PLOSXOrange~\PLOSXgreen & \vphantom{p}\useKV[fakeTERMosx]{Titre} & \PLOSXLG~\PLOSXLG~\PLOSXLG \\
+%	\end{tblr}
+%}
+%
+%\DeclareTCBListing{TerminalOSX}{ O{\linewidth} m !O{} }{%<taille> puis {Titre=...} puis [option]
+%	PLfaketermosx,title={\termosxtitre[#2]},%
+%	listing only,listing engine=listings,%
+%	listing options={style=tcblatex,language={},basicstyle=\footnotesize\ttfamily},%
+%	width=#1,#3
+%}
+
+\endinput

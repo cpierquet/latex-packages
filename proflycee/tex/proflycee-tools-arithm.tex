@@ -1,0 +1,2088 @@
+% proflycee-tools-arithm.tex
+% Copyright 2023-2025 Cédric Pierquet
+% Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\RequirePackage{ifthen}
+\RequirePackage{etoolbox}
+\RequirePackage{modulus}
+
+%%-----Nombres premiers (code venant de la documentation de xint :-))
+\NewDocumentCommand\pflboolestpremier{ m }{%
+	\ifnumodd{#1}%
+		{%
+			\ifnumless{#1}{8}%
+				{%
+					\ifnumequal{#1}{1}{0}{1}%
+				}%le cas 3,5,7 qui sont premiers
+				{%
+					\if\xintiloop[3+2]%
+						\ifnum#1<\numexpr\xintiloopindex*\xintiloopindex\relax%
+							\expandafter\xintbreakiloopanddo\expandafter1\expandafter.%
+						\fi%
+							\ifnum#1=\numexpr(#1/\xintiloopindex)*\xintiloopindex\relax%
+						\else
+							\repeat 00\expandafter0%
+					\else%
+						\expandafter1%
+					\fi%
+				}%
+		}%fin de la partie impaire
+		{%
+			\ifnumequal{#1}{2}{1}{0}%
+		}%partie paire
+}%
+
+\NewDocumentCommand\pflestpremier{ O{est premier} O{n'est pas premier} m }{%
+	\num{#3} \xintifboolexpr{\pflboolestpremier{#3} == 1}{#1}{#2}\relax%
+}%
+
+%%------Décomposition, adaptée de pfc
+\NewDocumentCommand\pfldecompnb{ s m }{%
+	\xdef\tmpcalc{\xinteval{#2}}%
+	\xdef\tmparg{}%
+	\newcount\pflanp\newcount\pflbnp\newcount\pflcnp%
+	\newcount\pflpileb\newcount\pflexposant%
+	\pflexposant=0\relax%
+	\pflanp=\tmpcalc\relax%
+	\pflbnp=2\relax%
+	\pflpileb=2\relax%
+	\ensuremath{%
+	\whiledo{\the\pflanp > 1}{%
+		\modulo{\the\pflanp}{\the\pflbnp}%
+		\ifnum\remainder=0\relax%
+		\pflcnp=\numexpr\pflanp/\pflbnp\relax%
+		\pflexposant=\numexpr\pflexposant+1\relax%
+		\pflanp=\pflcnp\relax%
+		\else%
+		\ifnum\pflexposant>0\relax%
+			\IfBooleanTF{#1}%
+				{%
+					\xdef\tmparg{\tmparg\num{\the\pflpileb}^{\the\pflexposant}\times}%
+				}%
+				{%
+					\ifnum\pflexposant=1\relax%
+						\xdef\tmparg{\tmparg\num{\the\pflpileb}\times}%
+					\else%
+						\xdef\tmparg{\tmparg\num{\the\pflpileb}^{\the\pflexposant}\times}%
+					\fi%
+				}%
+		\fi%
+		\pflbnp=\numexpr\pflbnp+1\relax%
+		\pflpileb=\pflbnp\relax%
+		\pflexposant=0\relax%
+		\fi%
+	}%
+	\IfBooleanTF{#1}%
+		{%
+			\xdef\tmparg{\tmparg\num{\the\pflpileb}^{\the\pflexposant}}%
+		}%
+		{%
+			\ifnum\pflexposant=1\relax%
+				\xdef\tmparg{\tmparg\num{\the\pflpileb}}%
+			\else%
+				\xdef\tmparg{\tmparg\num{\the\pflpileb}^{\the\pflexposant}}%
+			\fi%
+		}%
+	\tmparg\relax%
+	}%
+}
+
+
+%%------ConversionsBases
+%dec->bin avec blocs de 4 chiffres
+\setKVdefault[CONVDECBIN]{%
+	AffBase=true
+}
+\NewDocumentCommand\ConversionDecBin{ s O{} m }{%
+	\useKVdefault[CONVDECBIN]
+	\setKV[CONVDECBIN]{#2}% on paramètres les nouvelles clés et on les simplifie
+	\def\resbrut{\xintDecToBin{#3}}%
+	\StrLen{\resbrut}[\nbchiffres]%
+	\def\nbgrp{\fpeval{4*ceil(\nbchiffres/4,0)}}%
+	\IfBooleanTF{#1}%
+		{\num{#3}\ifboolKV[CONVDECBIN]{AffBase}{_{10}}{}=\num[digit-group-size=4]{\resbrut}\ifboolKV[CONVDECBIN]{AffBase}{_{2}}{}}%
+		{\num{#3}\ifboolKV[CONVDECBIN]{AffBase}{_{10}}{}=\num[digit-group-size=4,minimum-integer-digits=\nbgrp]{\resbrut}\ifboolKV[CONVDECBIN]{AffBase}{_{2}}{}}%
+}
+\NewCommandCopy\pflconvdecbin\ConversionDecBin
+
+\setKVdefault[CONVBINHEX]{%
+	%Epaisseur=0.75pt,%
+	AffBase=true,%
+	Details=true
+}
+%bourrage de 0 avant
+\ExplSyntaxOn
+\NewExpandableDocumentCommand{\PLstrzeros}{m}
+{
+	\int_compare:nT { #1 > 0 }
+	{
+		0 \prg_replicate:nn { #1 - 1 } { 0 }
+	}
+}
+\ExplSyntaxOff
+
+
+%la conversion complète
+\newcommand\ConversionBinHex[2][]{%
+	\useKVdefault[CONVBINHEX]%
+	\setKV[CONVBINHEX]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\def\chbrut{#2}%
+	\StrLen{\chbrut}[\nbchiffres]%nb de chiffres du binaire
+	\xdef\nbgrp{\fpeval{4*ceil(\nbchiffres/4,0)}} %nb de chiffres avec blocs de 4
+	\xdef\nbblocs{\fpeval{\nbgrp/4}} %nb de blocs
+	%on rajoute des zeros si besoin := OK
+	\xdef\resinter{\chbrut}%
+	\num[digit-group-size=4]{\chbrut}\ifboolKV[CONVBINHEX]{AffBase}{_{2}}{}=%
+	\ifboolKV[CONVBINHEX]{Details}{%
+	\ifnum\nbchiffres<\nbgrp%
+		\xdef\nbz{\inteval{\nbgrp-\nbchiffres}}%
+		\xdef\resinter{\PLstrzeros{\nbz}\chbrut}%
+		\num[digit-group-size=4,minimum-integer-digits=\nbgrp]{\resinter}=%
+	\fi%
+	%découpage par blocs et conversion en hexa := OK
+	\newcount\cpt%
+	\cpt0%
+	\loop\ifnum \cpt<\nbblocs%
+		\def\iinit{\fpeval{4*\cpt+1}}%
+		\def\ifinal{\fpeval{4*(\cpt+1)}}%
+		\StrMid{\resinter}{\iinit}{\ifinal}[\blocinter]%
+		{\underbracket{\blocinter}_{\xintBinToHex{\blocinter}}\,}%
+		\advance\cpt by 1%
+	\repeat%
+	\!=%
+	}%
+	{}%
+	\xintBinToHex{\chbrut}\ifboolKV[CONVBINHEX]{AffBase}{_{16}}{}%
+}
+\NewCommandCopy\pflconvbinhex\ConversionBinHex
+
+%hexa-bin par bloc de 4
+\setKVdefault[CONVHEXBIN]{%
+	%Epaisseur=0.75pt,
+	AffBase=true,%
+	Details=true
+}
+
+\newcommand\ConvHexBinBloc[1]{%
+	\def\binbrut{\xintHexToBin{#1}}%
+	\StrLen{\binbrut}[\nbchiffresbinbrut]%nb
+	\PLstrzeros{\xinteval{4-\nbchiffresbinbrut}}{\binbrut}%
+}
+
+\newcommand\ConversionHexBin[2][]{%
+	\useKVdefault[CONVHEXBIN]%
+	\setKV[CONVHEXBIN]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%\def\thicktraitshexbin{\useKV[CONVHEXBIN]{Epaisseur}}%
+	\ifboolKV[CONVHEXBIN]{AffBase}{#2_{16}=}{#2=}%
+	\StrLen{#2}[\nbchiffreshex]%nb
+	\ifboolKV[CONVHEXBIN]{Details}%
+	{%
+		\foreach \i in {1,...,\nbchiffreshex}{%
+			\StrChar{#2}{\i}[\tmpcharhex]%
+			{\underbracket{\ConvHexBinBloc{\tmpcharhex}}_{\tmpcharhex}\,}
+		}%
+		\ifboolKV[CONVHEXBIN]{AffBase}{{}_{2}}{}%
+	}%
+	{%
+		\foreach \i in {1,...,\nbchiffreshex}{%
+			\StrChar{#2}{\i}[\tmpcharhex]%
+			\ConvHexBinBloc{\tmpcharhex}\,%
+		}%
+		\!\ifboolKV[CONVHEXBIN]{AffBase}{{}_{2}}{}%
+	}%
+}
+\NewCommandCopy\pflconvhexbin\ConversionHexBin
+
+
+%hexa/bin->dec avec écriture polynomiale
+\defKV[CONVTODEC]{%
+	BaseDep=\def\basedepart{#1}
+}
+\setKVdefault[CONVTODEC]{%
+	BaseDep=2,%
+	AffBase=true,%
+	Details=true,%
+	Zeros=true
+}
+
+\ExplSyntaxOn
+\newcommand\convertbasetobasedix[2]{%
+	\int_from_base:nn {#1}{#2}
+}
+\ExplSyntaxOff
+
+\newcommand\ConversionVersDec[2][]{%
+	\useKVdefault[CONVTODEC]
+	\setKV[CONVTODEC]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\def\nbdepart{#2}%
+	\StrLen{\nbdepart}[\nbchiffres]%
+	\StrChar{\nbdepart}{1}[\chiffre]%
+	%si on est en base 16
+	\xintifboolexpr{\basedepart == 16}%
+	{%
+		\nbdepart\ifboolKV[CONVTODEC]{AffBase}{_{\basedepart}}{} =%
+		\ifboolKV[CONVTODEC]{Details}{%
+			\xintHexToDec{\chiffre}\times\basedepart^{\inteval{\nbchiffres-1}}%
+			\newcount\cpt%
+			\cpt2%
+			\loop\ifnum \cpt<\inteval{\nbchiffres+1}%
+				\def\puiss{\inteval{\nbchiffres-\cpt}}%
+				\StrChar{\nbdepart}{\cpt}[\chiffre]%
+				\ifboolKV[CONVTODEC]{Zeros}%
+					{%
+						+\xintHexToDec{\chiffre}\times\basedepart^{\puiss}%
+					}%
+					{%
+						\ifnum\xintHexToDec{\chiffre} > 0%
+							+\xintHexToDec{\chiffre}\times\basedepart^{\puiss}%
+						\fi%
+					}%
+				\advance\cpt by 1%
+			\repeat%
+			=%
+			}%
+			{}%
+		\num{\xintHexToDec{\nbdepart}}\ifboolKV[CONVTODEC]{AffBase}{_{10}}{}%
+	}%
+	{}%
+	\xintifboolexpr{\basedepart == 2}%
+	{%
+		\num[digit-group-size=4]{\nbdepart}\ifboolKV[CONVTODEC]{AffBase}{_{\basedepart}}{} =%
+		\ifboolKV[CONVTODEC]{Details}{%
+			\chiffre\times\basedepart^{\inteval{\nbchiffres-1}}%
+			\newcount\cpt%
+			\cpt2%
+			\loop\ifnum \cpt<\inteval{\nbchiffres+1}%
+				\def\puiss{\inteval{\nbchiffres-\cpt}}%
+				\StrChar{\nbdepart}{\cpt}[\chiffre]%
+				\ifboolKV[CONVTODEC]{Zeros}%
+				{%
+					+\chiffre\times\basedepart^{\puiss}%
+				}%
+				{%
+					\ifnum\chiffre > 0%
+						+\chiffre\times\basedepart^{\puiss}%
+					\fi%
+				}%
+			\advance\cpt by 1%
+			\repeat%
+			=%
+			}%
+			{}%
+		\num{\xintBinToDec{\nbdepart}}\ifboolKV[CONVTODEC]{AffBase}{_{10}}{}%
+	}%
+	{}%
+}
+\NewCommandCopy\pflconvversdec\ConversionVersDec
+
+\newcommand\ConversionBaseDix[3][]{%1=options,%2=nb,%3=basedep ??
+	\useKVdefault[CONVTODEC]
+	\setKV[CONVTODEC]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\def\NBdepart{#2}%
+	\def\basedepart{#3}%
+	\StrLen{\NBdepart}[\nbchiffres]%
+	\StrChar{\NBdepart}{1}[\chiffre]%
+	\NBdepart\ifboolKV[CONVTODEC]{AffBase}{_{\basedepart}}{} =%
+	\ifboolKV[CONVTODEC]{Details}{%
+		\xintHexToDec{\chiffre}\times\basedepart^{\inteval{\nbchiffres-1}}%
+		\newcount\cpt%
+		\cpt2%
+		\loop\ifnum \cpt<\inteval{\nbchiffres+1}%
+			\def\puiss{\inteval{\nbchiffres-\cpt}}%
+			\StrChar{\NBdepart}{\cpt}[\chiffre]%
+			\ifboolKV[CONVTODEC]{Zeros}%
+				{%
+					+\xintHexToDec{\chiffre}\times\basedepart^{\puiss}%
+				}%
+				{%
+					\ifnum\xintHexToDec{\chiffre} > 0%
+						+\xintHexToDec{\chiffre}\times\basedepart^{\puiss}%
+					\fi%
+				}%
+			\advance\cpt by 1%
+		\repeat%
+		=%
+		}%
+		{}%
+	\num{\convertbasetobasedix{#2}{#3}}\ifboolKV[CONVTODEC]{AffBase}{_{10}}{}%
+}
+\NewCommandCopy\pflconvdix\ConversionBaseDix
+
+%%------CONVFROMDEC
+\newcommand\PLnoeud[2]{\tikz[remember picture,baseline=(#1.base)]\node[shape=rectangle,inner sep=0pt](#1){#2};}
+\ExplSyntaxOn
+\newcommand\convertbasedixtobase[2]{%
+	\int_to_Base:nn {#1}{#2}
+}
+\ExplSyntaxOff
+
+\defKV[convfromten]{%
+	Couleur=\def\PLConvCouleur{#1},%
+	DecalH=\def\PLConvDecalH{#1},%
+	DecalV=\def\PLConvDecalV{#1},%
+	Noeud=\def\PLConvNoeud{#1}
+}
+
+\setKVdefault[convfromten]{%
+	Couleur=red,%
+	DecalH=2pt,%
+	DecalV=3pt,%
+	Rect=true,%
+	Noeud=EEE,%
+	CouleurRes=false
+}
+
+\newcommand\ConversionDepuisBaseDix[3][]{%
+	\useKVdefault[convfromten]%
+	\setKV[convfromten]{#1}%
+	\xdef\ValRes{\xintDecToHex{#2}}%
+	\xdef\ValA{#2}\xdef\ValB{#3}%
+	\xdef\ValTMP{#2}%
+	\xdef\ValMU{\inteval{#3-1}}%
+	\ensuremath{%
+		\left\lbrace\begin{array}{@{\,}r@{\;=\;}l@{\;+\;}r}
+			%1ere division
+			\xdef\ValQ{\fpeval{trunc(\ValTMP/(#3),0)}}\xdef\ValR{\fpeval{\ValTMP-(#3)*\ValQ}}
+			\num{\ValTMP}\uppercase{&}\num{\ValB}\times\num{\ValQ}\uppercase{&}\PLnoeud{\PLConvNoeud1}{\num{\ValR}}%
+			\xdef\ValTMP{\ValQ}%
+			\whiledo {\ValTMP > \ValMU}%
+			{%
+				\xdef\ValQ{\fpeval{trunc(\ValTMP/(#3),0)}}\xdef\ValR{\fpeval{\ValTMP-(#3)*\ValQ}}%
+				\\ \num{\ValTMP}\uppercase{&}\num{\ValB}\times\num{\ValQ}\uppercase{&}\num{\ValR}
+				\xdef\ValTMP{\ValQ}%
+			}
+			%dernière
+			\xdef\ValQ{\fpeval{trunc(\ValTMP/(#3),0)}}\xdef\ValR{\fpeval{\ValTMP-(#3)*\ValQ}}%
+			\\ \num{\ValTMP}\uppercase{&}\num{\ValB}\times\num{\ValQ}\uppercase{&}\PLnoeud{\PLConvNoeud2}{\num{\ValR}}%
+		\end{array} \right| \Rightarrow \num{#2}_{10}=\ifboolKV[convfromten]{CouleurRes}{\mathcolor{\PLConvCouleur}{\convertbasedixtobase{#2}{#3}_{#3}}}{\convertbasedixtobase{#2}{#3}_{#3}}}%
+	\ifboolKV[convfromten]{Rect}%
+	{%
+		\IfSubStr{\PLConvDecalH}{/}%
+			{\StrCut{\PLConvDecalH}{/}{\PLConvDecalHg}{\PLConvDecalHd}}%
+			{\def\PLConvDecalHg{\PLConvDecalH}\def\PLConvDecalHd{\PLConvDecalH}}%
+		\begin{tikzpicture}
+			\draw[overlay,rounded corners=4pt,\PLConvCouleur,thick] ($(\PLConvNoeud1.north west)+(-\PLConvDecalHg,\PLConvDecalV)$) rectangle ($(\PLConvNoeud2.south east)+(\PLConvDecalHd,-\PLConvDecalV)$) ;
+			\draw[overlay,rounded corners=4pt,\PLConvCouleur,thick,->,>=latex] ($(\PLConvNoeud2.east)+(\PLConvDecalHd,0)$)--++(0,{0.75\baselineskip}) ;
+		\end{tikzpicture}%
+	}{}%
+}
+\NewCommandCopy\pflconvdepuisdix\ConversionDepuisBaseDix
+
+%%------PRESPGCD
+\DeclareMathOperator{\PLpgcd}{PGCD}
+\defKV[prespgcd]{%
+	Couleur=\def\PLPGCDCouleur{#1},%
+	DecalRect=\def\PLPGCDDecal{#1},%
+	Noeud=\def\PLPGCDNoeud{#1}
+}
+
+\setKVdefault[prespgcd]{%
+	Couleur=red,%
+	DecalRect=2pt,%
+	Rectangle=true,%
+	Noeud=FFF,%
+	CouleurResultat=false,%
+	AfficheConclusion=true,%
+	AfficheDelimiteurs=true
+}
+
+\RequirePackage{xintgcd}
+
+\newcommand\PresentationPGCD[3][]{%
+	\useKVdefault[prespgcd]%
+	\setKV[prespgcd]{#1}%
+	\xdef\respgcd{\xinteval{gcd(#2,#3)}}
+	\xdef\ValA{#2}\xdef\ValB{#3}%on stocke les valeurs du départ
+	\ensuremath{%
+		\ifboolKV[prespgcd]{AfficheDelimiteurs}%
+		{\left\lbrace}%
+		{}%
+		\begin{array}{@{\,}r@{\;=\;}l@{\;+\;}r}
+			%1ère division
+			\xdef\ValQ{\fpeval{trunc((\ValA)/(\ValB),0)}}\xdef\ValR{\fpeval{\ValA-(\ValB)*(\ValQ)}}%
+			\num{\ValA}\uppercase{&}\num{\ValB}\times\num{\ValQ}\uppercase{&}%
+			\xintifboolexpr{\ValR == \respgcd}%
+			{\PLnoeud{\PLPGCDNoeud1}{\num{\ValR}}}%noeud si c'est le pgcd
+			{\num{\ValR}}%
+			\xdef\ValA{\ValB}\xdef\ValB{\ValR}%nouvelles valeurs
+			\whiledo {\ValR > 0}%
+			{%
+				\xdef\ValQ{\fpeval{trunc((\ValA)/(\ValB),0)}}\xdef\ValR{\fpeval{\ValA-(\ValB)*(\ValQ)}}%
+				\\%
+				\num{\ValA}\uppercase{&}\num{\ValB}\times\num{\ValQ}\uppercase{&}%
+				\xintifboolexpr{\ValR == \respgcd}%
+				{\PLnoeud{\PLPGCDNoeud1}{\num{\ValR}}}%noeud si c'est le pgcd
+				{\num{\ValR}}%
+				\xdef\ValA{\ValB}\xdef\ValB{\ValR}%nouvelles valeurs
+			}%
+		\end{array}%
+		\ifboolKV[prespgcd]{AfficheDelimiteurs}%
+		{\right|}%
+		{}%
+		\ifboolKV[prespgcd]{AfficheConclusion}%
+		{%
+			\Rightarrow \PLpgcd\left(\num{#2};\num{#3}\right)=\ifboolKV[prespgcd]{CouleurResultat}{\mathcolor{\PLPGCDCouleur}{\num{\respgcd}}}{\num{\respgcd}}%
+		}%
+		{}%
+	}%
+	\ifboolKV[prespgcd]{Rectangle}%
+	{%
+		\begin{tikzpicture}
+			\draw[overlay,rounded corners=4pt,\PLPGCDCouleur,thick] ($(\PLPGCDNoeud1.north west)+(-\PLPGCDDecal,\PLPGCDDecal)$) rectangle ($(\PLPGCDNoeud1.south east)+(\PLPGCDDecal,-\PLPGCDDecal)$) ;
+		\end{tikzpicture}%
+	}{}%
+}
+\NewCommandCopy\pflprespgcd\PresentationPGCD
+
+%%===égalité de Bezout
+\NewDocumentCommand\AffCoeffBezout{ m }{%
+	\xintifboolexpr{#1 < 0}%
+		{\left( \num{#1} \right)}%
+		{\num{#1}}%
+}
+\NewDocumentCommand\EgaliteBezout{ O{black} m m }{%
+	\xintAssign{\xintBezout{#2}{#3}}\to\TmpU\TmpV\TmpD%
+	\ensuremath{\num{#2} \times \mathcolor{#1}{\AffCoeffBezout{\TmpU}} + \AffCoeffBezout{#3} \times \mathcolor{#1}{\AffCoeffBezout{\TmpV}} = \num{\TmpD}}%
+}
+\NewCommandCopy\pflbezout\EgaliteBezout
+
+%%===Équations diophantiennes
+\makeatletter
+\if@loadcancel
+	\RequirePackage[thicklines]{cancel}%comme PfC
+\fi
+\makeatother
+
+\NewDocumentCommand\AffCoeffDioph{ m }{%
+	\xintifboolexpr{#1 < 0}%
+		{\left( \num{#1} \right)}%
+		{\num{#1}}%
+}
+\NewDocumentCommand\AffCoeffDiophSign{ m }{%
+	\xintifboolexpr{#1 < 0}%
+		{\num{#1}}%
+		{+\num{#1}}%
+}
+
+\defKV[eqdioph]{%
+	Lettre=\def\LettreSolEDioph{#1},%
+	Couleur=\def\CouleurSolEDioph{#1},%
+	Inconnues=\def\InconnuesSolEDioph{#1},%
+	Entier=\def\KKK{#1}
+}
+
+\setKVdefault[eqdioph]{%
+	Lettre=E,%
+	Couleur=black,%
+	Inconnues=x/y,%
+	Entier=k,%
+	Cadres=false,%
+	PresPGCD=true
+}
+
+\NewDocumentCommand\EquationDiophantienne{ O{} m }{%v2 avec équation en "dur"
+	\useKVdefault[eqdioph]%
+	\setKV[eqdioph]{#1}%
+	\setlength{\parindent}{0pt}%
+	%extractions des paramètres
+	\StrBefore[1]{\InconnuesSolEDioph}{/}[\XXX]%
+	\StrBehind[1]{\InconnuesSolEDioph}{/}[\YYY]%
+	\StrBefore{#2}{\XXX}[\AA]%
+	\StrBetween{#2}{\XXX}{\YYY}[\BB]%
+	\StrBehind{#2}{=}[\CC]%
+	\IfStrEq{\AA}{}%
+		{\def\AA{1}}{}%
+	\IfStrEq{\AA}{-}%
+		{\def\AA{-1}}{}%
+	\StrLen{\BB}[\lgtB]%
+	\xintifboolexpr{ \lgtB > 1 }%+b ou -b
+		{%
+			\StrDel{\BB}{+}[\BB]%
+		}%
+		{%
+			\IfStrEq{\BB}{-}%
+				{\def\BB{-1}}{}%
+			\IfStrEq{\BB}{+}%
+				{\def\BB{1}}{}%
+		}%
+	%Calcul du PGCD
+	\xdef\PGCDD{\xinteval{gcd(\AA,\BB)}}%
+	On cherche à résoudre l'équation diophantienne :\[ \num{\AA}\XXX + \AffCoeffDioph{\BB}\YYY=\num{\CC} \xintifboolexpr{ \PGCDD == 1 'or' \xintiiRem{\CC}{\PGCDD} != 0 }{\qquad (\LettreSolEDioph)}{} \]%
+	\ifboolKV[eqdioph]{PresPGCD}%
+		{D'après l'algorithme d'Euclide : \PresentationPGCD[Rectangle=false]{\xinteval{abs(\AA)}}{\xinteval{abs(\BB)}}.}%
+		{Le PGCD de \num{\AA} et de \num{\BB} vaut \num{\PGCDD}.}%
+	\par\smallskip
+	\xintifboolexpr{ \xintiiRem{\CC}{\PGCDD} == 0 }%solutions obligatoires
+		{%
+			\xintifboolexpr{ \PGCDD == 1}%
+				{%
+					Les entiers \num{\xinteval{abs(\AA)}} et \num{\xinteval{abs(\BB)}} sont premiers entre eux, donc l'équation $(\LettreSolEDioph)$ admet une infinité de solutions.\par
+					\xdef\AAA{\AA}\xdef\BBB{\BB}\xdef\CCC{\CC}%
+				}%
+				{%
+					Le PGCD de \num{\AA} et \num{\BB} divise \num{\CC}, donc on peut simplifier l'équation diophantienne par \num{\PGCDD}.%
+					\xdef\AAA{\xintiieval{\AA/\PGCDD}}\xdef\BBB{\xintiieval{\BB/\PGCDD}}\xdef\CCC{\xintiieval{\CC/\PGCDD}}%
+					%
+					\[ \num{\AA}\XXX+\AffCoeffDioph{\BB}\YYY=\num{\CC} \underset{\div\num{\PGCDD}}{\Longleftrightarrow} \num{\AAA}\XXX+\AffCoeffDioph{\BBB}\YYY=\num{\CCC} \qquad (\LettreSolEDioph) \]%
+					Les entiers \num{\AAA} et \num{\BBB} sont premiers entre eux, donc l'équation $(\LettreSolEDioph)$ admet une infinité de solutions.\par
+				}%
+			\xintAssign{\xintBezout{\AAA}{\BBB}}\to\TmpU\TmpV\TmpD
+			%
+			On détermine une solution particulière de $(E)$ : \[ \num{\AAA} \times \mathcolor{\CouleurSolEDioph}{\AffCoeffBezout{\TmpU}} + \AffCoeffBezout{\BBB} \times \mathcolor{\CouleurSolEDioph}{\AffCoeffBezout{\TmpV}} = \num{\TmpD}
+			\xintifboolexpr{ \CCC != 1}%
+				{%
+					\underset{\times\AffCoeffDioph{\CCC}}{\implies}
+					\num{\AAA} \times \mathcolor{\CouleurSolEDioph}{\AffCoeffDioph{\xinteval{\TmpU*\CCC}}} + \AffCoeffBezout{\BBB} \times \mathcolor{\CouleurSolEDioph}{\AffCoeffDioph{\xinteval{\TmpV*\CCC}}} = \num{\CCC}
+				}%
+				{}%
+				\qquad ({\LettreSolEDioph}_0)
+			 \]%
+			%
+			Par soustraction :
+			%
+			\[%
+			{\renewcommand\arraystretch{1.25}%
+				\begin{array}{ @{\,} c @{\,} c @{\;\times\;} c @{\;+\;} c @{\;\times\;} c @{\;=\;} c }
+					& \num{\AAA} & \XXX & \AffCoeffDioph{\BBB} & \YYY & \num{\CCC} \\
+					-~~~~~ & \num{\AAA} & \mathcolor{\CouleurSolEDioph}{\AffCoeffDioph{\xinteval{\TmpU*\CCC}}} & \AffCoeffDioph{\BBB} & \mathcolor{\CouleurSolEDioph}{\AffCoeffDioph{\xinteval{\TmpV*\CCC}}} & \num{\CCC} \\ \hline
+					& \num{\AAA} & \left( \XXX \mathcolor{\CouleurSolEDioph}{\AffCoeffDiophSign{\xinteval{-\TmpU*\CCC}}} \right)& \AffCoeffDioph{\BBB} & \left( \YYY \mathcolor{\CouleurSolEDioph}{\AffCoeffDiophSign{\xinteval{-\TmpV*\CCC}}} \right) & 0\\
+				\end{array}}
+			\]%
+			\def\TmpPartieA{\XXX \mathcolor{\CouleurSolEDioph}{\AffCoeffDiophSign{\xinteval{-\TmpU*\CCC}}}}%
+			\def\TmpPartieB{\YYY \mathcolor{\CouleurSolEDioph}{\AffCoeffDiophSign{\xinteval{-\TmpV*\CCC}}}}%
+			%
+			On en déduit que $\num{\AAA} \times \underbrace{\left( \TmpPartieA \right)}_{\text{entier}} = \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$, et donc que $\num{\AAA} \mid \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$.\par\smallskip
+			Or \num{\xinteval{abs(\AAA)}} et \num{\xinteval{abs(\BBB)}} sont premiers entre eux, donc d'après le théorème de Gauss, on a $\num{\AAA} \mid \TmpPartieB$.\par
+			Il existe donc un entier $\KKK$ tel que $\TmpPartieB = \num{\AAA} \times \KKK$, ce qui donne 
+			$\ifboolKV[eqdioph]{Cadres}
+				{\boxed{\YYY = \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}}
+				{\YYY = \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}
+			$.\par
+			En remplaçant, on obtient :
+			%
+			\begin{align*}
+				\num{\AAA} \times \left( \TmpPartieA \right) = \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right) & \implies \num{\AAA} \times \left( \TmpPartieA \right) = \num{\xinteval{-\BBB}} \times \big( \underbrace{\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}} \AffCoeffDiophSign{\AAA}\KKK}_{\mathclap{\YYY}}  \mathcolor{\CouleurSolEDioph}{\AffCoeffDiophSign{\xinteval{-\CCC*\TmpV}}} \big) \\
+				& \implies \num{\AAA} \times \left( \TmpPartieA \right) = \num{\xinteval{-\BBB}} \times \left( \num{\AAA}\KKK \right) \\
+				& \implies \TmpPartieA = \num{\xinteval{-\BBB}}\KKK \\
+				& \implies \ifboolKV[eqdioph]{Cadres}
+					{\boxed{\XXX = \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK}}
+					{\XXX = \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK}
+			\end{align*}
+			%
+			Ainsi, si $\XXX$ et $\YYY$ sont solutions de $(\LettreSolEDioph)$, alors il existe un entier $\KKK$ tel que ${\XXX=\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK}$ et ${\YYY=\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}$.\par\medskip
+			Réciproquement, soit $\KKK$ un entier quelconque :
+			%
+			\begin{align*}
+				\num{\AAA} \times \left( \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK \right) + \AffCoeffDioph{\BBB} \times  \left( \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK \right) & = \num{\AAA} \times \mathcolor{\CouleurSolEDioph}{\AffCoeffDioph{\xinteval{\CCC*\TmpU}}} + \cancel{\AffCoeffDioph{\AAA} \times \AffCoeffDioph{\xinteval{-\BBB}} \KKK} + \AffCoeffDioph{\BBB} \times \mathcolor{\CouleurSolEDioph}{\AffCoeffDioph{\xinteval{\CCC*\TmpV}}} +  \cancel{\AffCoeffDioph{\BBB} \times \AffCoeffDioph{\AAA} \KKK} \\
+				& = \underbrace{\num{\AAA} \times \mathcolor{\CouleurSolEDioph}{\AffCoeffDioph{\xinteval{\CCC*\TmpU}}} +  \AffCoeffDioph{\BBB} \times \mathcolor{\CouleurSolEDioph}{\AffCoeffDioph{\xinteval{\CCC*\TmpV}}}}_{=\,\num{\CCC} \text{ d'après } ({\LettreSolEDioph}_0)} \\
+				& = \num{\CCC}
+			\end{align*}
+			%
+			On en déduit que $\left(\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK \mathpunct{}; \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK \right)$ est solution de $(\LettreSolEDioph)$.\par\medskip
+			En conclusion, les solutions de $(E)$ sont donc les couples $\left(\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK \mathpunct{}; \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}} \AffCoeffDiophSign{\AAA}\KKK \right)$, avec $\KKK$ un entier relatif.
+		}%
+		{%
+			Le PGCD de \num{\AA} et \num{\BB} ne divise pas \num{\CC}, donc l'équation $(\LettreSolEDioph)$ n'admet aucune solution.
+		}%
+}
+\NewCommandCopy\pflequadioph\EquationDiophantienne
+
+%liste diviseurs
+\setKVdefault[listdiv]{%
+	AffNom=true
+}
+\NewDocumentCommand\ListeDiviseurs{ s O{} m }{%
+	\useKVdefault[listdiv]%
+	\setKV[listdiv]{#2}%
+	\xdef\tmplistdiv{1}%
+	\xdef\argcal{\xinteval{#3}}%
+	\xintFor* ##1 in {\xintSeq{2}{\argcal}}\do{%
+		\xintifboolexpr{ \xintiiRem{\argcal}{##1} == 0 }%
+		{%
+			\xdef\tmplistdiv{\tmplistdiv /\num{##1}}%
+		}%
+		{}%
+	}%
+	\ensuremath{\ifboolKV[listdiv]{AffNom}{\IfBooleanTF{#1}{\mathscr{D}}{\mathcal{D}}_{\num{\argcal}}=}{}\EcritureEnsemble[\strut]{\tmplistdiv}}%
+}
+\NewCommandCopy\pfllistediv\ListeDiviseurs
+
+%arbre diviseurs
+\defKV[arbrediviseurs]{%
+	EspaceNiveau=\def\TmpEspNiv{#1},%
+	EspaceFeuille=\def\TMpEspFeuille{#1},%
+	CouleurDetails=\def\TmpCoulDetails{#1},%
+	Echelle=\def\TmpEchelle{#1}
+}
+
+\setKVdefault[arbrediviseurs]{%
+	EspaceNiveau=2.25,%
+	EspaceFeuille=0.66,%
+	Details=true,%
+	CouleurDetails=red,%
+	Echelle=1,%
+	Fleches=true
+}
+
+\NewDocumentCommand\ArbreDiviseurs{ O{} D<>{} m }{%
+	\useKVdefault[arbrediviseurs]%
+	\setKV[arbrediviseurs]{#1}%
+	% test avec CPoulain ^^
+	\xdef\tmpcalc{\xinteval{#3}}%
+	\xdef\tmparg{}%
+	\newcount\anp\newcount\bnp\newcount\cnp%
+	\newcount\pileb\newcount\exposant%
+	\exposant=0\relax%
+	\anp=\tmpcalc\relax%
+	\bnp=2\relax%
+	\pileb=2\relax%
+	\whiledo{\the\anp > 1}{%
+		\modulo{\the\anp}{\the\bnp}%
+		\ifnum\remainder=0\relax%
+		\cnp=\numexpr\anp/\bnp\relax%
+		\exposant=\numexpr\exposant+1\relax%
+		\anp=\cnp\relax%
+		\else%
+		\ifnum\exposant>0\relax%
+		\xdef\tmparg{\tmparg\the\pileb,\the\exposant*}%
+		%\expandafter\UpdatetoksCPier\Foo\nil%
+		\fi%
+		\bnp=\numexpr\bnp+1\relax%
+		\pileb=\bnp\relax%
+		\exposant=0\relax%
+		\fi%
+	}%
+	\xdef\tmparg{\tmparg\the\bnp,{\the\exposant}}%
+	%\expandafter\UpdatetoksCPier\the\bnp,{\the\exposant}\nil%
+	% \xdef\argnum{\xinteval{#2}}%
+	% \def\decompotmp{\DecompoPremierExposant{#2}}%
+	\setsepchar{*/,}%
+	\xdef\Foo{\tmparg}%
+	\readlist*\readcaractdiv{\Foo}%
+	% fin test CPoulain ^^
+	\xdef\arbredivnbdivprem{\readcaractdivlen}%nombre diviseurs permiers
+	\xdef\arbredivnbdiv{1}%
+	\xintFor* ##1 in {\xintSeq{1}{\arbredivnbdivprem}}\do{\xdef\arbredivnbdiv{\xinteval{\arbredivnbdiv*(\readcaractdiv[##1,2]+1)}}}%nombre diviseurs
+	\def\HauteurTotale{\xinteval{\arbredivnbdiv-1}}%
+	\ifboolKV[arbrediviseurs]{Fleches}%
+	{\tikzstyle{flechearbrediv} = [line width=\fpeval{\TmpEchelle*0.6}pt,->,>=latex]}%
+	{\tikzstyle{flechearbrediv} = [line width=\fpeval{\TmpEchelle*0.6}pt]}%
+	\begin{tikzpicture}[scale=\TmpEchelle,every node/.style={scale=\TmpEchelle},#2]
+		% grille d'aide
+		% \draw[xstep=\TmpEspNiv,ystep=\TMpEspFeuille,thin,lightgray] (0,{(-\arbredivnbdiv+1)*\TMpEspFeuille}) grid ({\arbredivnbdivprem*\TmpEspNiv},0) ;
+		% dernier niveau OK
+		\xdef\nbsommets{\arbredivnbdiv}%
+		\xintFor* ##1 in {\xintSeq{1}{\nbsommets}}\do%
+		{%
+			\itemtomacro\readcaractdiv[\arbredivnbdivprem,2]\tmppuiss%
+			\xdef\tmpdiv{\xinteval{\tmppuiss+1}}%
+			\node[outer sep=0pt] (N-\arbredivnbdivprem-##1) at ({\arbredivnbdivprem*\TmpEspNiv},{-(##1-1)*\TMpEspFeuille}) {$\num{\readcaractdiv[\arbredivnbdivprem,1]}^{\xinteval{\xintiiRem{\xinteval{##1-1}}{\tmpdiv}}}$} ;%
+		}
+		% niveaux suivants, en descendant
+		\xintFor* ##2 in {\xintSeq{\arbredivnbdivprem-1}{1}}\do%
+		{%
+			\xdef\nbsommets{\xintieval{\nbsommets/(\readcaractdiv[##2+1,2]+1)}}%
+			\xdef\espacementsommets{\xinteval{\arbredivnbdiv/(\nbsommets)}}%
+			\xdef\OffsetNiveau{\xintieval{(\HauteurTotale-(\nbsommets-1)*\espacementsommets)}}%
+			\xintFor* ##3 in {\xintSeq{1}{\nbsommets}}\do%
+			{%
+				\itemtomacro\readcaractdiv[##2,2]\tmppuiss%
+				\xdef\tmpdiv{\xinteval{\tmppuiss+1}}%
+				\node[outer sep=0pt] (N-##2-##3) at ({##2*\TmpEspNiv},{(-(##3-1)*\espacementsommets-0.5*\OffsetNiveau)*\TMpEspFeuille}) {$\num{\readcaractdiv[##2,1]}^{\xinteval{\xintiiRem{\xinteval{##3-1}}{\tmpdiv}}}$} ;
+			}%
+		}%
+		% racine
+		\coordinate (Racine) at ({0},{-0.5*(\arbredivnbdiv-1)*(\TMpEspFeuille)}) ;
+		% \draw (Racine) node {$\Omega$} ;
+		% les flèches, qui partent de la racine
+		\xintFor* ##4 in {\xintSeq{1}{\xinteval{\readcaractdiv[1,2]+1}}}\do%
+		{%
+			\draw[flechearbrediv] (Racine) -- (N-1-##4) ;
+		}%
+		% les flèches successives
+		\foreach \nivdep in {1,...,\xinteval{\arbredivnbdivprem-1}}%
+		{%
+			\xdef\nbsommetsniv{1}%
+			\foreach \i in {1,...,\nivdep}{\xdef\nbsommetsniv{\xinteval{\nbsommetsniv*(\readcaractdiv[\i,2]+1)}}}%calcul du nombre de sommets de départ
+			% boucle sur sommets de départ
+			\foreach \numsom in {1,...,\nbsommetsniv}%
+			{%
+				\xdef\nivplusun{\xinteval{\nivdep+1}}%
+				\foreach \nbsousbranches in {1,...,\xinteval{\readcaractdiv[\nivplusun,2]+1}}%
+				{%
+					\xdef\sumsomarriv{\xinteval{ (\readcaractdiv[\nivplusun,2]+1)*(\numsom-1) + \nbsousbranches }}%
+					\draw[flechearbrediv] (N-\nivdep-\numsom) -- (N-\nivplusun-\sumsomarriv) ;
+				}
+			}%
+		}%
+		\ifboolKV[arbrediviseurs]{Details}%
+		{%
+			% essai de génération des calculs := ouaiissssss
+			\foreach \i in {1,...,\arbredivnbdiv}{%
+				\xdef\resdiv{1}%
+				% on extrait la premiere puissance := on obtient la répartition ?
+				\itemtomacro\readcaractdiv[-1,2]\tmppuiss\xdef\tmpdiv{\xinteval{(\tmppuiss+1)}}%
+				% création de la liste des puissances !!
+				\xdef\calculdiviseur{\num{\readcaractdiv[-1,1]}^{\xinteval{\xintiiRem{\xinteval{\i-1}}{\tmpdiv}}}}%
+				\xdef\resdiv{\xinteval{\resdiv*(\readcaractdiv[-1,1])^(\xinteval{\xintiiRem{\xinteval{\i-1}}{\tmpdiv}})}}%
+				% on complète avec les autres parties ??
+				\foreach \nbprem in {2,...,\arbredivnbdivprem}{%
+					% il reste à stocker les produits des puissances, en descendant... erf.....
+					\xdef\tmppuisscumul{1}%
+					\foreach \k in {1,...,\xinteval{\nbprem-1}}{%
+						\itemtomacro\readcaractdiv[-\k,2]\tmppuissrepet%
+						\xdef\tmppuisscumul{\xinteval{\tmppuisscumul*(\tmppuissrepet+1)}}%
+					}%
+					\itemtomacro\readcaractdiv[-\nbprem,2]\tmppuiss%
+					\xdef\tmpdivniv{\xinteval{(\tmppuiss+1)}}%
+					% \xdef\tmpdiv{\xinteval{(\tmppuissrepet+1)}}%
+					\xdef\calculdiviseur{\num{\readcaractdiv[-\nbprem,1]}^{\xinteval{\xintiiRem{\xintieval{trunc((\i-1)/(\tmppuisscumul),0)}}{\tmpdivniv}}}\times\calculdiviseur}%
+					\xdef\resdiv{\xinteval{\resdiv*(\readcaractdiv[-\nbprem,1])^(\xinteval{\xintiiRem{\xintieval{trunc((\i-1)/(\tmppuisscumul),0)}}{\tmpdivniv}})}}%
+				}%
+				\draw ([xshift=1cm]N-\arbredivnbdivprem-\i) node[right,\TmpCoulDetails] {$\calculdiviseur=\num{\resdiv}$} ;
+			}%
+		}{}%
+	\end{tikzpicture}%
+}
+\NewCommandCopy\pflarbrediv\ArbreDiviseurs
+
+%somme des chiffres
+\ifthenelse{\isundefined{\SommeChiffres}}%
+	{%
+		\NewDocumentCommand\SommeChiffres{ m }{%
+			\StrLen{#1}[\nbchiffres]%
+			\xdef\tmpres{0}%
+			\foreach \i in {1,...,\nbchiffres}{\StrChar{#1}{\i}[\tmpchf]\xdef\tmpres{\xinteval{\tmpres+\tmpchf}}}%
+			\ensuremath{\num{\tmpres}}%
+		}
+	}%
+	{%
+		\RenewDocumentCommand\SommeChiffres{ m }{%
+			\StrLen{#1}[\nbchiffres]%
+			\xdef\tmpres{0}%
+			\foreach \i in {1,...,\nbchiffres}{\StrChar{#1}{\i}[\tmpchf]\xdef\tmpres{\xinteval{\tmpres+\tmpchf}}}%
+			\ensuremath{\num{\tmpres}}%
+		}
+	}%
+\NewCommandCopy\pflsomchiff\SommeChiffres
+
+%====CHIFFREMENTS !!
+\xdef\aLPHaBeTMajusc{ABCDEFGHIJKLMNOPQRSTUVWXYZ}
+\xdef\aLPHaBeTminusc{abcdefghijklmnopqrstuvwxyz}
+
+\NewDocumentCommand\InverseModulo{ s m m }{%
+	\xdef\PGCDD{\xinteval{gcd(#2,#3)}}%
+	\xdef\resinvmod{#2{} n'est pas inversible modulo #3.}%
+	\xintFor* ##1 in {\xintSeq{1}{#3}}\do{\xintifboolexpr{\xintiiRem{\xinteval{#2*##1}}{#3} == 1}{\xdef\resinvmod{##1}}{}}%
+	\IfBooleanTF{#1}%
+		{%
+			On a $\text{PGCD}(#2;#3)=\num{\PGCDD}$.~%
+			\xintifboolexpr{\PGCDD != 1}%
+				{Le PGCD étant différent de 1, on en déduit que #2 n'est pas inversible modulo #3.\relax}%
+				{Le PGCD étant égal à 1, on en déduit que #2 admet un inverse modulo #3.\\De plus on a $#2 \times \resinvmod = \xinteval{#2*\resinvmod} \equiv \xintiirem{\xinteval{#2*\resinvmod}}{#3}\:[#3]$, donc \resinvmod\ est l'inverse de #2 modulo #3.\relax}%
+		}%
+		{}%
+}
+\NewCommandCopy\pflinvmod\InverseModulo
+
+\defKV[chiffaffine]{a=\xdef\tmpcoeffa{#1},b=\xdef\tmpcoeffb{#1},modulo=\xdef\tmpmodulo{#1}}
+\setKVdefault[chiffaffine]{a=3,b=12,Dechiffr=false,modulo=26}
+
+\NewDocumentCommand\ChiffrementAffine{ O{} m }{%
+	\restoreKV[chiffaffine]%
+	\setKV[chiffaffine]{#1}%
+	%pgcd stocké
+	\xdef\PGCDD{\xinteval{gcd(\tmpcoeffa,\tmpmodulo)}}%
+	\StrLen{#2}[\tmpnbcaract]%
+	\ifboolKV[chiffaffine]{Dechiffr}%
+	{%
+		\xdef\resinvmod{0}%
+		\xintFor* ##1 in {\xintSeq{1}{\tmpmodulo}}\do{%
+			\xintifboolexpr{\xintiiRem{\xinteval{(\tmpcoeffa)*(##1)}}{\tmpmodulo} == 1}%
+			{\xdef\resinvmod{##1}}{}%
+		}%
+	}{}%
+	\foreach \i in {1,...,\tmpnbcaract}{%
+		\StrChar{#2}{\i}[\tmpchar]%
+		\IfStrEq{\tmpchar}{ }%
+			{~}%
+			{%
+				%majuscule minuscule
+				\IfSubStr{\aLPHaBeTMajusc}{\tmpchar}%
+					{%
+						\StrPosition{\aLPHaBeTMajusc}{\tmpchar}[\tmpcoeffx]%
+					}%
+					{%
+						\StrPosition{\aLPHaBeTminusc}{\tmpchar}[\tmpcoeffx]%
+					}%
+				\xdef\tmpcoeffx{\xinteval{\tmpcoeffx-1}}%
+				\ifboolKV[chiffaffine]{Dechiffr}%
+					{%
+						\xintifboolexpr{\PGCDD == 1}%
+							{%
+								\xdef\tmpres{\xintiiRem{\xinteval{(\resinvmod)*(\tmpcoeffx)-(\resinvmod)*(\tmpcoeffb)}}{\tmpmodulo}}%
+								\xdef\tmpres{\xinteval{\tmpres+1}}%
+								\IfSubStr{\aLPHaBeTMajusc}{\tmpchar}%
+									{%
+										\StrChar{\aLPHaBeTMajusc}{\tmpres}%
+									}%
+									{%
+										\StrChar{\aLPHaBeTminusc}{\tmpres}%
+									}%
+							}%
+							{}%
+					}%
+					{%
+						\xdef\tmpres{\xintiiRem{\xinteval{\tmpcoeffa*\tmpcoeffx+\tmpcoeffb}}{\tmpmodulo}}%
+						\xdef\tmpres{\xinteval{\tmpres+1}}%
+						\IfSubStr{\aLPHaBeTMajusc}{\tmpchar}%
+							{%
+								\StrChar{\aLPHaBeTMajusc}{\tmpres}%
+							}%
+							{%
+								\StrChar{\aLPHaBeTminusc}{\tmpres}%
+							}%
+					}%
+			}%
+	}%
+	\ifboolKV[chiffaffine]{Dechiffr}%
+	{\xintifboolexpr{\PGCDD != 1}{Le message ne peut pas être déchiffré car $\text{PGCD}(\tmpcoeffa;\tmpmodulo)\neq1$ !\relax}{}}%
+	{}%
+}
+\NewCommandCopy\pflchiffraff\ChiffrementAffine
+
+\defKV[chiffhill]{Matrice=\xdef\tmpcoeffmat{#1},Modulo=\xdef\tmpmodulo{#1}}
+\setKVdefault[chiffhill]{Matrice={1,2,3,5},Dechiffr=false,modulo=26}
+
+\NewDocumentCommand\ChiffrementHill{ O{} m }{%
+	\restoreKV[chiffhill]%
+	\setKV[chiffhill]{#1}%
+	%passage de la châine en nb pair
+	\StrLen{#2}[\tmpnbcar]%
+	\xintifboolexpr{\xintiirem{\tmpnbcar}{2} == 1}{\xdef\tmpchaine{#2A}}{\xdef\tmpchaine{#2}}%
+	\StrLen{\tmpchaine}[\tmpnbblocs]%
+	\xdef\tmpnbblocs{\xintieval{\tmpnbblocs/2}}%
+	%extraction des coeffs de la matrice + déterminant
+	\setsepchar{,}%
+	\readlist*\coeffmathill{\tmpcoeffmat}%
+	\itemtomacro\coeffmathill[1]{\tmpcoeffa}%
+	\itemtomacro\coeffmathill[2]{\tmpcoeffb}%
+	\itemtomacro\coeffmathill[3]{\tmpcoeffc}%
+	\itemtomacro\coeffmathill[4]{\tmpcoeffd}%
+	\xdef\detmathill{\xintieval{(\tmpcoeffa)*(\tmpcoeffd)-(\tmpcoeffb)*(\tmpcoeffc)}}%
+	%chiffrement / déchiffrement
+	\ifboolKV[chiffhill]{Dechiffr}%
+	{%
+		%le cas où la matrice n'est pas inversible
+		\xintifboolexpr{\detmathill == 0}%
+		{%
+			La matrice $\begin{pmatrix} \tmpcoeffa & \tmpcoeffb \\ \tmpcoeffc & \tmpcoeffd \end{pmatrix}$ n'est pas inversible, donc pas de déchiffrement possible !\relax
+		}%
+		{%
+			%inversibilité du déterminant
+			\xdef\resinvmod{0}%
+			\xintFor* ##1 in {\xintSeq{1}{\tmpmodulo}}\do{%
+				\xintifboolexpr{\xintiiRem{\xinteval{(\detmathill)*(##1)}}{\tmpmodulo} == 1}%
+				{\xdef\resinvmod{##1}}{}%
+			}%
+			\xintifboolexpr{\resinvmod == 0}%si det non inversible modulo
+			{%
+				Le déterminant de la matrice $\begin{pmatrix} \tmpcoeffa & \tmpcoeffb \\ \tmpcoeffc & \tmpcoeffd \end{pmatrix}$ (qui vaut $\detmathill$) n'est pas inversible modulo \tmpmodulo, donc pas de déchiffrement !\relax
+			}%
+			{%
+				%on peut déchiffrer !!
+				\foreach \i in {1,...,\tmpnbblocs}{%
+					\xdef\tmpindicea{\xintieval{2*(\i-1)+1}}\xdef\tmpindiceb{\xintieval{2*(\i)}}%
+					\StrChar{\tmpchaine}{\tmpindicea}[\tmpchara]%
+					\IfSubStr{\aLPHaBeTMajusc}{\tmpchara}%
+					{%
+						\StrPosition{\aLPHaBeTMajusc}{\tmpchara}[\tmpcoeffx]%
+					}%
+					{%
+						\StrPosition{\aLPHaBeTminusc}{\tmpchara}[\tmpcoeffx]%
+					}%
+					\xdef\tmpcoeffx{\xintieval{\tmpcoeffx-1}}%
+					\StrChar{\tmpchaine}{\tmpindiceb}[\tmpcharb]%
+					\IfSubStr{\aLPHaBeTMajusc}{\tmpcharb}%
+					{%
+						\StrPosition{\aLPHaBeTMajusc}{\tmpcharb}[\tmpcoeffy]%
+					}%
+					{%
+						\StrPosition{\aLPHaBeTminusc}{\tmpcharb}[\tmpcoeffy]%
+					}%
+					\xdef\tmpcoeffy{\xintieval{\tmpcoeffy-1}}%
+					%1ère lettre
+					\xdef\tmpresa{\xintiiRem{\xintieval{(\resinvmod)*(\tmpcoeffd)*(\tmpcoeffx)-(\resinvmod)*(\tmpcoeffb)*(\tmpcoeffy)}}{\tmpmodulo}}%
+					\xdef\tmpresa{\xinteval{\tmpresa+1}}%
+					%2ème lettre
+					\xdef\tmpresb{\xintiiRem{\xintieval{-(\resinvmod)*(\tmpcoeffc)*(\tmpcoeffx)+(\resinvmod)*(\tmpcoeffa)*(\tmpcoeffy)}}{\tmpmodulo}}%
+					\xdef\tmpresb{\xinteval{\tmpresb+1}}%
+					%affichage des deux caractères
+					\IfSubStr{\aLPHaBeTMajusc}{\tmpchara}%
+					{%
+						\StrChar{\aLPHaBeTMajusc}{\tmpresa}%
+					}%
+					{%
+						\StrChar{\aLPHaBeTminusc}{\tmpresa}%
+					}%
+					\IfSubStr{\aLPHaBeTMajusc}{\tmpcharb}%
+					{%
+						\StrChar{\aLPHaBeTMajusc}{\tmpresb}%
+					}%
+					{%
+						\StrChar{\aLPHaBeTminusc}{\tmpresb}%
+					}%
+				}%
+			}%
+		}%
+	}%
+	{%
+		\foreach \i in {1,...,\tmpnbblocs}{%
+			\xdef\tmpindicea{\xintieval{2*(\i-1)+1}}\xdef\tmpindiceb{\xintieval{2*(\i)}}%
+			\StrChar{\tmpchaine}{\tmpindicea}[\tmpchara]%
+			\IfSubStr{\aLPHaBeTMajusc}{\tmpchara}%
+			{%
+				\StrPosition{\aLPHaBeTMajusc}{\tmpchara}[\tmpcoeffx]%
+			}%
+			{%
+				\StrPosition{\aLPHaBeTminusc}{\tmpchara}[\tmpcoeffx]%
+			}%
+			\xdef\tmpcoeffx{\xintieval{\tmpcoeffx-1}}%
+			\StrChar{\tmpchaine}{\tmpindiceb}[\tmpcharb]%
+			\IfSubStr{\aLPHaBeTMajusc}{\tmpcharb}%
+			{%
+				\StrPosition{\aLPHaBeTMajusc}{\tmpcharb}[\tmpcoeffy]%
+			}%
+			{%
+				\StrPosition{\aLPHaBeTminusc}{\tmpcharb}[\tmpcoeffy]%
+			}%
+			\xdef\tmpcoeffy{\xintieval{\tmpcoeffy-1}}%
+			%1ère lettre
+			\xdef\tmpresa{\xintiiRem{\xintieval{(\tmpcoeffa)*(\tmpcoeffx)+(\tmpcoeffb)*(\tmpcoeffy)}}{\tmpmodulo}}%
+			\xdef\tmpresa{\xinteval{\tmpresa+1}}%
+			%2ème lettre
+			\xdef\tmpresb{\xintiiRem{\xintieval{(\tmpcoeffc)*(\tmpcoeffx)+(\tmpcoeffd)*(\tmpcoeffy)}}{\tmpmodulo}}%
+			\xdef\tmpresb{\xinteval{\tmpresb+1}}%
+			%affichage des deux caractères
+			\IfSubStr{\aLPHaBeTMajusc}{\tmpchara}%
+			{%
+				\StrChar{\aLPHaBeTMajusc}{\tmpresa}%
+			}%
+			{%
+				\StrChar{\aLPHaBeTminusc}{\tmpresa}%
+			}%
+			\IfSubStr{\aLPHaBeTMajusc}{\tmpcharb}%
+			{%
+				\StrChar{\aLPHaBeTMajusc}{\tmpresb}%
+			}%
+			{%
+				\StrChar{\aLPHaBeTminusc}{\tmpresb}%
+			}%
+		}%
+	}%
+}
+\NewCommandCopy\pflchiffrhill\ChiffrementHill
+
+\defKV[chiffcesar]{Decal=\xdef\tmpdecalcesar{#1}}
+\setKVdefault[chiffcesar]{Decal=5,Dechiffr=false}
+
+\NewDocumentCommand\ChiffrementCesar{ O{} m }{%
+	\restoreKV[chiffcesar]%
+	\setKV[chiffcesar]{#1}%
+	\StrLen{#2}[\tmpnbcaract]%
+	\foreach \i in {1,...,\tmpnbcaract}{%
+		\StrChar{#2}{\i}[\tmpchar]%
+		%majuscule minuscule
+		\IfStrEq{\tmpchar}{ }%
+			{~}%
+			{%
+				\IfSubStr{\aLPHaBeTMajusc}{\tmpchar}%
+					{%
+						\StrPosition{\aLPHaBeTMajusc}{\tmpchar}[\tmpcoeffx]%
+					}%
+					{%
+						\StrPosition{\aLPHaBeTminusc}{\tmpchar}[\tmpcoeffx]%
+					}%
+				\ifboolKV[chiffcesar]{Dechiffr}%
+					{\xdef\tmpcoeffx{\xintiirem{\xinteval{\tmpcoeffx-\tmpdecalcesar}}{26}}}%
+					{\xdef\tmpcoeffx{\xintiirem{\xinteval{\tmpcoeffx+\tmpdecalcesar}}{26}}}%
+				\IfSubStr{\aLPHaBeTMajusc}{\tmpchar}%
+					{%
+						\StrChar{\aLPHaBeTMajusc}{\tmpcoeffx}%
+					}%
+					{%
+						\StrChar{\aLPHaBeTminusc}{\tmpcoeffx}%
+					}%
+			}%
+	}%
+}
+\NewCommandCopy\pflchiffrcesar\ChiffrementCesar
+
+%====DIV EUCL (OK), 2 versions, mises à jour ;-)
+\setKVdefault[diveucl]{%
+	Quotient=true,%
+	Reste=true,%
+	Vide=false,%
+	Pointilles=\ldots
+}
+\NewDocumentCommand\DivEucl{ s O{} m m }{%
+	\restoreKV[diveucl]%
+	\setKV[diveucl]{#2}%
+	\ifboolKV[diveucl]{Vide}%
+		{%
+			\setKV[diveucl]{Quotient=false,Reste=false}%
+		}%
+		{}%
+	\xdef\tmpAA{\xinteval{#3}}\xdef\tmpBB{\xinteval{#4}}%
+	\xdef\tmpQuotient{\xintiiQuo{\tmpAA}{\tmpBB}}\xdef\tmpReste{\xintiiRem{\tmpAA}{\tmpBB}}%
+	\ensuremath{\num{\xinteval{#3}}=\num{\xinteval{#4}}\times\ifboolKV[diveucl]{Quotient}{\xintifboolexpr{\tmpQuotient < 0}{(\num{\tmpQuotient})}{\num{\tmpQuotient}}}{\useKV[diveucl]{Pointilles}}+\ifboolKV[diveucl]{Reste}{\num{\tmpReste}}{\useKV[diveucl]{Pointilles}}}%
+	\IfBooleanT{#1}{~avec $0 \leqslant \num{\xintiiRem{\tmpAA}{\tmpBB}} < \xintifboolexpr{\tmpBB < 0}{\lvert\num{\xinteval{#4}}\rvert}{\num{\xinteval{#4}}}$}%
+}
+\NewCommandCopy\pfldiveucl\DivEucl
+
+\NewDocumentCommand\DivisionEucl{ m m }{%
+	\xdef\tmpAA{\xinteval{#1}}\xdef\tmpBB{\xinteval{#2}}%
+	\xdef\tmpQuotient{\xintiiQuo{\tmpAA}{\tmpBB}}\xdef\tmpReste{\xintiiRem{\tmpAA}{\tmpBB}}%
+	\ensuremath{\num{\tmpBB}\times\xintifboolexpr{\tmpQuotient < 0}{(\num{\tmpQuotient})}{\num{\tmpQuotient}}+\num{\xintiiRem{\tmpAA}{\tmpBB}}}
+}
+\NewCommandCopy\pflpresdiveucl\DivisionEucl
+
+%====ADDITIONS POSÉES ?
+\newlength{\colspecbinadd}
+\setlength{\colspecbinadd}{2pt}
+
+\NewDocumentCommand\PosRetenue{ O{red} m }{%
+	%\tmptextcircled[#1]{#2}%
+	\textcolor{#1}{\scalebox{\addbinposescret}[\addbinposescret]{#2}}%
+}
+
+\defKV[AddBinaire]{%
+	CouleurRetenue=\def\addbinposecol{#1},%
+	Espacement=\setlength{\colspecbinadd}{#1},%
+	Police=\def\addbinposefont{#1},%
+	EchelleRetenue=\def\addbinposescret{#1},%
+	Base=\def\addbinposebase{#1}
+}
+
+\setKVdefault[AddBinaire]{%
+	CouleurRetenue=red,%
+	Espacement=2pt,%
+	Police=\normalsize\normalfont,%
+	EchelleRetenue=0.4,%
+	Base=dec,%
+	Egal=true
+}
+
+\NewDocumentCommand\PoseAddition{ O{} m m }{%
+	\restoreKV[AddBinaire]%
+	\setKV[AddBinaire]{#1}%
+	%le résultat
+	\IfStrEq{\addbinposebase}{dec}%
+		{\xdef\tmpresultat{\xinteval{#2+#3}}}%
+		{}%
+	\IfStrEq{\addbinposebase}{bin}%
+		{\xdef\tmpresultat{\xintDecToBin{\xinteval{\xintBinToDec{#2}+\xintBinToDec{#3}}}}}%
+		{}%
+	\IfStrEq{\addbinposebase}{hex}%
+		{\xdef\tmpresultat{\xintDecToHex{\xinteval{\xintHexToDec{#2}+\xintHexToDec{#3}}}}}%
+		{}%
+	%\xdef\tmpresultat{\xintDecToBin{\xinteval{\xintBinToDec{#2}+\xintBinToDec{#3}}}}%
+	%les calculs
+	\StrLen{#2}[\longueurA]\StrLen{#3}[\longueurB]\StrLen{\tmpresultat}[\longueurC]%
+	\xdef\longueurMax{\xinteval{max(\longueurA,\longueurB,\longueurC)}}%\longueurMax
+	%le tableau
+	\xintifboolexpr{\longueurB > \longueurA}%
+		{%
+			\xdef\ArgLigneHaut{#3}\xdef\ArgLigneBas{#2}%
+			\xdef\addposeehaut{#3}\xdef\addposeebas{#2}%
+		}%
+		{%
+			\xdef\ArgLigneHaut{#2}\xdef\ArgLigneBas{#3}%
+			\xdef\addposeehaut{#2}\xdef\addposeebas{#3}%
+		}%
+	%création de la ligne du haut
+	\StrLen{\ArgLigneHaut}[\LgHaut]%
+	\StrChar{\ArgLigneHaut}{\LgHaut}[\LigneBinAdd]%
+	\foreach \i in {1,...,\inteval{\LgHaut-1}}%
+		{%
+			\xdef\tmpcoeff{\xinteval{\LgHaut-\i}}%
+			\StrChar{\ArgLigneHaut}{\tmpcoeff}[\TmpHaut]%
+			\xdef\LigneBinAdd{\TmpHaut & \LigneBinAdd}%
+		}%
+	\xintifboolexpr{\longueurMax > \LgHaut}%
+		{%
+			\foreach \i in {1,...,\inteval{\longueurMax-\LgHaut}}%
+				{\xdef\LigneBinAdd{& \LigneBinAdd}}%
+		}%
+		{}%
+	%création de la ligne du bas
+	\StrLen{\ArgLigneBas}[\LgBas]%
+	\StrChar{\ArgLigneBas}{\LgBas}[\LigneBinAddB]%
+	\foreach \i in {1,...,\inteval{\LgBas-1}}%
+		{%
+			\xdef\tmpcoeff{\xinteval{\LgBas-\i}}%
+			\StrChar{\ArgLigneBas}{\tmpcoeff}[\TmpBas]%
+			\xdef\LigneBinAddB{\TmpBas & \LigneBinAddB}%
+		}%
+	\xintifboolexpr{\longueurMax > \LgBas}%
+		{%
+			\foreach \i in {1,...,\inteval{\longueurMax-\LgBas}}%
+			{\xdef\LigneBinAddB{& \LigneBinAddB}}%
+		}%
+		{}%
+	%création de la ligne du résultat
+	\StrLen{\tmpresultat}[\LgRes]%
+	\StrChar{\tmpresultat}{\LgRes}[\LigneBinRes]%
+	\foreach \i in {1,...,\inteval{\LgRes-1}}%
+		{%
+			\xdef\tmpcoeff{\xinteval{\LgRes-\i}}%
+			\StrChar{\tmpresultat}{\tmpcoeff}[\TmpRes]%
+			\xdef\LigneBinRes{\TmpRes & \LigneBinRes}%
+		}%
+	%création des retenues...
+	\xdef\ArgBasZeros{\ArgLigneBas}%
+	\xintifboolexpr{\LgHaut > \LgBas}%
+		{%
+			\foreach \i in {1,...,\inteval{\LgHaut-\LgBas}}%
+			{\xdef\ArgBasZeros{0\ArgBasZeros}}%
+		}%
+		{}%
+	%\ArgBasZeros\par
+	\xdef\listeretenues{0}%
+	\xdef\longueurmax{\xinteval{max(\longueurA,\longueurB)}}%\longueurMax
+	\foreach \i in {1,...,\longueurmax}%
+		{%
+			\setsepchar{,}%
+			\readlist*\lstretenues{\listeretenues}%
+			\xdef\tmpcoeff{\xinteval{\longueurmax-\i+1}}%
+			\itemtomacro\lstretenues[-\i]{\TmPNbR}%
+			\StrChar{\ArgLigneHaut}{\tmpcoeff}[\TmPNbH]%
+			\StrChar{\ArgBasZeros}{\tmpcoeff}[\TmPNbB]%
+			%cas de la base
+			\IfStrEq{\addbinposebase}{dec}%
+				{\xdef\tmpresultat{\xinteval{\TmPNbR+\TmPNbH+\TmPNbB}}}%
+				{}%
+			\IfStrEq{\addbinposebase}{bin}%
+				{\xdef\tmpresultat{\xintDecToBin{\xinteval{\xintBinToDec{\TmPNbR}+\xintBinToDec{\TmPNbH}+\xintBinToDec{\TmPNbB}}}}}%
+				{}%
+			\IfStrEq{\addbinposebase}{hex}%
+				{\xdef\tmpresultat{\xintDecToHex{\xinteval{\xintHexToDec{\TmPNbR}+\xintHexToDec{\TmPNbH}+\xintHexToDec{\TmPNbB}}}}}%
+				{}%
+			%suite
+			%\xdef\tmpresultat{\xintDecToBin{\xinteval{\xintBinToDec{\TmPNbR}+\xintBinToDec{\TmPNbH}+\xintBinToDec{\TmPNbB}}}}%
+			\StrLen{\tmpresultat}[\LgRetenue]%
+			\xintifboolexpr{\LgRetenue == 1}%si on met une retenue...
+				{%
+					\xdef\listeretenues{0,\listeretenues}%
+				}%
+				{%
+					\StrGobbleRight{\tmpresultat}{1}[\tmpretenue]%
+					\xdef\listeretenues{\tmpretenue,\listeretenues}%
+				}%
+		}%
+	%On compte le nombre de zéros dans la ligne des retenues
+	\StrCount{\listeretenues}{0}[\nbretenues]%\listeretenues\par\nbretenues\par%
+	\setsepchar{,}%
+	\readlist*\lstretenues{\listeretenues}%
+	%\showitems*{\lstretenues}\par
+	\xdef\LigneBinAddRet{\xintifboolexpr{\lstretenues[-1] == 0}{}{\PosRetenue[\addbinposecol]{\lstretenues[-1]}}}%
+	\foreach \i in {2,...,\longueurMax}%
+		{%
+			\xdef\LigneBinAddRet{\xintifboolexpr{\lstretenues[-\i] == 0}{}{\PosRetenue[\addbinposecol]{\lstretenues[-\i]}} & \LigneBinAddRet}%
+		}%
+	%et on passe au tableau
+	\xdef\longueurcasesope{\xinteval{\longueurMax-1}}%
+	\xdef\longueurtotale{\xinteval{\longueurMax+1}}%
+	\setlength{\tabcolsep}{\colspecbinadd}%
+	%\begin{tabular}{@{\hskip0.5\colspecbinadd}c@{\hskip0.5\colspecbinadd}*{\longueurcasesope}{c@{\hskip\colspecbinadd}}c@{\hskip0.5\colspecbinadd}}
+	\begin{NiceTabular}{c*{\longueurMax}{c}}
+		\xintifboolexpr{\nbretenues > \longueurmax}{}{\RowStyle[cell-space-limits=1pt]{\addbinposefont} & \LigneBinAddRet \\}
+		\RowStyle[nb-rows=*,cell-space-limits=2pt]{\addbinposefont}
+		&\LigneBinAdd \\
+		+&\LigneBinAddB \\
+		\hline 
+		\ifboolKV[AddBinaire]{Egal}{=}{}&\LigneBinRes \\
+	\end{NiceTabular}
+	%\end{tabular}%
+}
+\NewCommandCopy\pflposadd\PoseAddition
+
+\ifluatex
+
+\RequirePackage{lualinalg}
+
+\defKV[addbinlua]{%
+	CouleurRetenue=\def\addbinluacol{#1},%
+	Espacement=\def\addbinluaspace{#1},%
+	Police=\def\addbinluafonte{#1},%
+	Base=\def\addbinluabase{#1},%
+	EchelleRetenue=\def\addbinluascret{#1}
+}
+
+\setKVdefault[addbinlua]{%
+	CouleurRetenue=red,%
+	Espacement=2pt,%
+	Police=\normalsize\normalfont,%
+	Egal=true,%
+	Base=dec,%
+	EchelleRetenue=0.4
+}
+
+\NewDocumentCommand\SommeElementsMatriceBin{ m m m m O{\poseretenue} }{%
+	%1=matrice
+	%2=colonne
+	%3=ligne début
+	%4=ligne arrivée
+	\xdef\tmpsomme{0}%
+	\foreach \lig in {#3,...,#4}{%
+		\xdef\tmpsomme{\xinteval{\tmpsomme+\xintBinToDec{\matrixGetElement{#1}{\lig}{#2}}}}%calcul intermédiaire en binaire
+	}%
+	\xdef#5{\xintDecToBin{\tmpsomme}}%
+}
+
+\NewDocumentCommand\SommeElementsMatriceDec{ m m m m O{\poseretenue} }{%
+	%1=matrice
+	%2=colonne
+	%3=ligne début
+	%4=ligne arrivée
+	\xdef\tmpsomme{0}%
+	\foreach \lig in {#3,...,#4}{%
+		\xdef\tmpsomme{\xinteval{\tmpsomme+\matrixGetElement{#1}{\lig}{#2}}}%calcul intermédiaire en binaire
+	}%
+	\xdef#5{\tmpsomme}%
+}
+
+\NewDocumentCommand\PoseAdditionLua{ O{} m }{%
+	\restoreKV[addbinlua]%
+	\setKV[addbinlua]{#1}%
+	\setsepchar{+}%
+	\readlist*\addbinlstoper{#2}%
+	\xdef\nboperandes{\addbinlstoperlen}%
+	\xdef\nboperandesmat{\xinteval{\addbinlstoperlen+1}}%
+	%le résultat du calcul en binaire
+	\xdef\tmpres{0}%
+	\foreach \i in {1,...,\addbinlstoperlen}{%
+		\itemtomacro\addbinlstoper[\i]{\tmpinteroper}%
+		\IfStrEq{\addbinluabase}{dec}%
+			{\xdef\tmpres{\xinteval{\tmpres+\tmpinteroper}}}%
+			{}%
+		\IfStrEq{\addbinluabase}{bin}%
+			{\xdef\tmpres{\xinteval{\tmpres+\xintBinToDec{\tmpinteroper}}}}%
+			{}%
+		%\xdef\tmpres{\xinteval{\tmpres+\xintBinToDec{\tmpinteroper}}}%
+	}%
+	\IfStrEq{\addbinluabase}{dec}%
+		{\xdef\tmpresultat{\tmpres}}%
+		{}%
+	\IfStrEq{\addbinluabase}{bin}%
+		{\xdef\tmpresultat{\xintDecToBin{\tmpres}}}%
+		{}%
+	%\xdef\tmpresultat{\xintDecToBin{\tmpres}}%\tmpresultat%
+	\StrLen{\tmpresultat}[\nbtotalchiffresres]%\nbtotalchiffresres%
+	\xdef\nblignesmatriceintertmp{\xinteval{1+\nboperandes}}%
+	\xdef\nblignesmatricetmp{\xinteval{2+\nboperandes}}%
+	\matrixNew{MATINTER}{\nblignesmatricetmp,\nbtotalchiffresres,'zero'}%
+	%création des lignes intermédiaires
+	\foreach \nblig [count=\xi] in {2,...,\nblignesmatriceintertmp}{%
+		\itemtomacro\addbinlstoper[\xi]{\tmpinteroper}%on extrait l'opérande
+		\StrLen{\tmpinteroper}[\nbchiiffres]%on extrait son nb de chiffres
+		\xdef\tmpoffset{\xinteval{\nbtotalchiffresres-\nbchiiffres+1}}%on calcule la position du 1er chiffre
+		\foreach \poschar [count=\xii] in {\tmpoffset,...,\nbtotalchiffresres}{%
+			\StrChar{\tmpinteroper}{\xii}[\tmpcoeffaddbin]%
+			\matrixSetElement{MATINTER}{\nblig}{\poschar}{\tmpcoeffaddbin}%
+		}%
+	}%
+	%création de la ligne résultat
+	\foreach \j in {1,...,\nbtotalchiffresres}{%
+		\StrChar{\tmpresultat}{\j}[\tmpcoeffaddbin]%
+		\matrixSetElement{MATINTER}{\nblignesmatricetmp}{\j}{\tmpcoeffaddbin}%
+	}%
+	%gestion des retenues, de la droite vers la gauche
+	\foreach \nbcol in {\nbtotalchiffresres,...,2}{%
+		\IfStrEq{\addbinluabase}{dec}%
+			{\SommeElementsMatriceDec{MATINTER}{\nbcol}{1}{\nboperandesmat}[\poseretenue]}%
+			{}%
+		\IfStrEq{\addbinluabase}{bin}%
+			{\SommeElementsMatriceBin{MATINTER}{\nbcol}{1}{\nboperandesmat}[\poseretenue]}%
+			{}%
+		%\SommeElementsMatriceBin{MATINTER}{\nbcol}{1}{\nboperandesmat}[\poseretenue]%
+		\xdef\nbcolmun{\xinteval{\nbcol-1}}%
+		\StrLen{\poseretenue}[\nbchiffresretenue]%
+		\xintifboolexpr{\nbchiffresretenue > 1}%
+			{\StrGobbleRight{\poseretenue}{1}[\RETENUE]}%
+			{\xdef\RETENUE{\poseretenue}}%
+		\matrixSetElement{MATINTER}{1}{\nbcolmun}{\RETENUE}%
+	}%
+	%ligne des retenues pour savoir si il y en a !
+	\matrixSubmatrix{MATINTERRETENUE}{MATINTER}{1}{1}{1}{\nbtotalchiffresres}%
+	%création de la ligne des retenues
+	\xdef\LigneBinAddRet{}%
+	\foreach \i in {1,...,\nbtotalchiffresres}{%
+		\xintifboolexpr{\matrixGetElement{MATINTER}{1}{\i} == 0}%
+			{\xdef\LigneBinAddRet{\LigneBinAddRet &}}%
+			{\xdef\LigneBinAddRet{\LigneBinAddRet & \textcolor{\addbinluacol}{\scalebox{\addbinluascret}[\addbinluascret]{\matrixGetElement{MATINTER}{1}{\i}}}}}%
+	}%
+	%création des lignes intermédiaires
+	\xdef\LignesOperande{}%
+	\foreach \i in {1,...,\nboperandes}{%
+		\xdef\xxi{\xinteval{\i+1}}%
+		\itemtomacro\addbinlstoper[\i]{\tmpinteroper}%on extrait l'opérande
+		\StrLen{\tmpinteroper}[\nbchiiffres]%on extrait son nb de chiffres
+		\xdef\tmpoffset{\xinteval{\nbtotalchiffresres-\nbchiiffres}}%on calcule le nombre de cases vides
+		\xintifboolexpr{\i == 1}{}{\xdef\LignesOperande{\LignesOperande + }}%
+		\xintifboolexpr{\tmpoffset == 0}%
+			{}%
+			{
+				\foreach \k in {1,...,\tmpoffset}{%
+					\xdef\LignesOperande{\LignesOperande &}%
+				}%
+			}%
+		\foreach \j in {\inteval{\tmpoffset+1},...,\nbtotalchiffresres}{%
+			\xdef\LignesOperande{\LignesOperande & \matrixGetElement{MATINTER}{\xxi}{\j}}%
+		}%
+		\xdef\LignesOperande{\LignesOperande \\}%
+	}%
+	%et le tableau !!
+	\setlength{\tabcolsep}{\addbinluaspace}%
+	\begin{NiceTabular}{c*{\nbtotalchiffresres}{c}}
+		\xintifboolexpr{\matrixNormOne{MATINTERRETENUE} == 0}{}{\RowStyle[cell-space-limits=1pt]{\addbinluafonte} \LigneBinAddRet \\}
+		\RowStyle[nb-rows=*,cell-space-limits=2pt]{\addbinluafonte}
+		\LignesOperande
+		\hline
+		\ifboolKV[addbinlua]{Egal}{=}{} \xintFor* ##1 in {\xintSeq{1}{\nbtotalchiffresres}}\do{& \matrixGetElement{MATINTER}{\nblignesmatricetmp}{##1}} \\
+	\end{NiceTabular}%
+	%\(\matrixPrint{MATINTER}\)
+}
+\NewCommandCopy\pflposaddlua\PoseAdditionLua
+
+\fi
+
+%====RESTE MODULO
+\NewDocumentCommand\ResteMod{ s m m }{%
+	%étoilé := version négative;#2=nb;#3=base
+	\IfBooleanTF{#1}%
+		{\num{\xintiieval{irem(#2,#3)-(#3)}}}%
+		{\num{\xintiieval{irem(#2,#3)}}}%
+}
+\NewCommandCopy\pflrestemod\ResteMod
+
+\NewDocumentCommand\QuoMod{ m m }{%
+	\num{\xintiieval{iquo(#1,#2)}}%
+}
+\NewCommandCopy\pflquomod\QuoMod
+
+%====OPÉRATIONS POSÉES 2/10/16 MULTICOMPILATEUR ?
+\RequirePackage{calc}
+
+\newlength{\widestcharwd}
+\newlength{\charwd}
+\newlength{\heightercharht}
+
+\defKV[poseoperation]{%
+	Base=\def\PoseOpeBase{#1},%
+	LimiteCapac=\def\PoseOpeLimit{#1},%
+	SymbDecal=\def\PoseOpeSymb{#1},%
+	Offset=\def\PoseOpeOffset{#1},%
+	CouleurRetenue=\def\PoseOpeColReten{#1}
+}
+
+\setKVdefault[poseoperation]{%
+	Base=dec,%
+	SymbDecal=.,%
+	Interm=true,%
+	Offset=6pt,%
+	AffEgal=true,%
+	LimiteCapac=0,%
+	CouleurRetenue=red,%
+	AffRetenues=true
+}
+
+\NewDocumentCommand\IntCalcMaxWidth{ m }{%
+	\StrLen{#1}[\tmplen]%
+	\setlength{\widestcharwd}{0pt}
+	\xintFor* ##1 in {\xintSeq{1}{\tmplen}}\do{%
+		\StrChar{#1}{##1}[\tmpchar]%
+		\settowidth{\charwd}{\tmpchar}%
+		\setlength{\widestcharwd}{\maxof{\widestcharwd}{\charwd}}%
+	}%
+}
+
+\NewDocumentCommand\IntCreateBoxNumbers{ O{c} m }{%
+	\IfStrEqCase{\PoseOpeBase}{%
+		{dec}{\IntCalcMaxWidth{0123456789}}%
+		{bin}{\IntCalcMaxWidth{01}}%
+		{hex}{\IntCalcMaxWidth{0123456789ABCDEF}}%
+	}%
+	\addtolength{\widestcharwd}{\PoseOpeOffset/2}%
+	\StrLen{#2}[\tmplennumber]%
+	\xintFor* ##1 in {\xintSeq{1}{\tmplennumber}}\do{%
+		\StrChar{#2}{##1}[\tmpchiff]%
+		\makebox[\the\widestcharwd][#1]{\tmpchiff}%
+	}%
+}
+
+\newcommand\AffRetenue[1]{%
+	\textcolor{\PoseOpeColReten}{\scalebox{0.5}[0.5]{#1}}%
+}
+
+\NewDocumentCommand\IntCreateBoxNumbersRetenue{ m }{%
+	\IfStrEqCase{\PoseOpeBase}{%
+		{dec}{\IntCalcMaxWidth{0123456789}}%
+		{bin}{\IntCalcMaxWidth{01}}%
+		{hex}{\IntCalcMaxWidth{0123456789ABCDEF}}%
+	}%
+	\addtolength{\widestcharwd}{\PoseOpeOffset/2}%
+	\StrLen{#1}[\tmplennumber]%
+	\xintFor* ##1 in {\xintSeq{1}{\tmplennumber}}\do{%
+		\StrChar{#1}{##1}[\tmpchiff]%
+		\IfEq{\tmpchiff}{X}%
+			{\makebox[\the\widestcharwd][c]{\textcolor{\PoseOpeColReten}{\scalebox{0.5}[0.5]{}}}}%
+			{\makebox[\the\widestcharwd][c]{\textcolor{\PoseOpeColReten}{\scalebox{0.5}[0.5]{\tmpchiff}}}}%
+	}%
+}
+
+\NewDocumentCommand\IntPoseAddition{ m m D<>{} }{%
+	\StrLen{#1}[\nbchiffA]%
+	%essai des retenues ??
+	\xdef\ListeRetenues{X}%
+	\xintFor* ##1 in {\xintSeq{1}{\nbchiffA}}\do{%
+		\StrRight{#1}{##1}[\tmpinterA]%
+		\StrRight{#2}{##1}[\tmpinterB]%
+		\IfStrEqCase{\PoseOpeBase}{%
+			{dec}{\xdef\rescalcrete{\xinteval{\tmpinterA+\tmpinterB}}}%
+			{bin}{\xdef\rescalcrete{\xintDecToBin{\xinteval{\xintBinToDec{\tmpinterA}+\xintBinToDec{\tmpinterB}}}}}%
+			{hex}{\xdef\rescalcrete{\xintDecToHex{\xinteval{\xintHexToDec{\tmpinterA}+\xintHexToDec{\tmpinterB}}}}}%
+		}%
+		\StrLen{\rescalcrete}[\tmpnbchiffresinter]%
+		\xintifboolexpr{\tmpnbchiffresinter > ##1}%
+			{%
+				\StrGobbleRight{\rescalcrete}{##1}[\tmpretenue]%
+				\xdef\ListeRetenues{\tmpretenue\ListeRetenues}%
+			}%
+			{%
+				\xintifboolexpr{##1 == \nbchiffA}{}{\xdef\ListeRetenues{X\ListeRetenues}}%
+			}%
+	}%
+	%suite
+	\IfStrEqCase{\PoseOpeBase}{%
+		{dec}{\xdef\rescalcbin{\xinteval{#1+#2}}}%
+		{bin}{\xdef\rescalcbin{\xintDecToBin{\xinteval{\xintBinToDec{#1}+\xintBinToDec{#2}}}}}%
+		{hex}{\xdef\rescalcbin{\xintDecToHex{\xinteval{\xintHexToDec{#1}+\xintHexToDec{#2}}}}}%
+	}%
+	\xintifboolexpr{\PoseOpeLimit > 0 }{\StrRight{\rescalcbin}{\PoseOpeLimit}[\rescalcbin]}{}%
+	%\ensuremath{\begin{array}{@{\,}r@{\hspace{\PoseOpeOffset}}r@{\,}}
+	\ensuremath{\begin{NiceArray}[#3]{@{\,}r@{\hspace{\PoseOpeOffset}}r@{\,}}
+		\ifboolKV[poseoperation]{AffRetenues}{\RowStyle[cell-space-limits=0pt]{} & \IntCreateBoxNumbersRetenue{\ListeRetenues} \\[-0.5\heightercharht]}{}
+		\RowStyle[nb-rows=*,cell-space-limits=1pt]{}  & \IntCreateBoxNumbers{#1} \\
+		+ & \IntCreateBoxNumbers{#2} \\
+		\hline
+		\ifboolKV[poseoperation]{AffEgal}{=}{} & \IntCreateBoxNumbers{\rescalcbin} \\
+	\end{NiceArray}}%
+	%\end{array}}%
+}
+
+\NewDocumentCommand\IntPoseSoustraction{ m m D<>{} }{%
+	\IfStrEqCase{\PoseOpeBase}{%
+		{dec}{\xdef\rescalcbin{\xinteval{#1-#2}}}%
+		{bin}{\xdef\rescalcbin{\xintDecToBin{\xinteval{\xintBinToDec{#1}-\xintBinToDec{#2}}}}}%
+		{hex}{\xdef\rescalcbin{\xintDecToHex{\xinteval{\xintHexToDec{#1}-\xintHexToDec{#2}}}}}%
+	}%
+	%bourrage de zéros pour les retenues
+	\StrLen{#1}[\lenA]\StrLen{#2}[\lenB]%
+	\xdef\BwithZeros{#2}%
+	\xintifboolexpr{ \lenA > \lenB }%
+		{%
+			\xintFor* ##1 in {\xintSeq{1}{\xinteval{\lenA-\lenB}}}\do{\xdef\BwithZeros{0\BwithZeros}}%
+		}%
+		{}%
+	%suite
+	\xintifboolexpr{\PoseOpeLimit > 0 }{\StrRight{\rescalcbin}{\PoseOpeLimit}[\rescalcbin]}{}%
+	%\ensuremath{\begin{array}{@{\,}r@{\hspace{\PoseOpeOffset}}r@{\,}}
+	\ifboolKV[poseoperation]{AffRetenues}{%
+	\ensuremath{\begin{NiceArray}[#3]{@{\,}r@{\hspace{\PoseOpeOffset/2}}r@{\,}}
+		\RowStyle[nb-rows=*,cell-space-limits=1pt]{}
+		& \IfStrEqCase{\PoseOpeBase}{%
+			{dec}{\IntCalcMaxWidth{0123456789}}%
+			{bin}{\IntCalcMaxWidth{01}}%
+			{hex}{\IntCalcMaxWidth{0123456789ABCDEF}}%
+		}%
+		\addtolength{\widestcharwd}{\PoseOpeOffset/2}%
+		\StrLen{#1}[\tmplennumber]%
+		\xintFor* ##1 in {\xintSeq{1}{\tmplennumber}}\do{%
+			\xdef\tmplenctr{\inteval{\tmplennumber-##1+1}}%
+			\StrChar{#1}{##1}[\tmpchiff]%
+			\StrRight{#1}{\tmplenctr}[\tmpA]%
+			\StrRight{\BwithZeros}{\tmplenctr}[\tmpB]%
+			\IfStrEqCase{\PoseOpeBase}{%
+				{dec}{\xdef\rescalctmp{\xinteval{\tmpA-\tmpB}}}%
+				{bin}{\xdef\rescalctmp{\xinteval{\xintBinToDec{\tmpA}-\xintBinToDec{\tmpB}}}}%
+				{hex}{\xdef\rescalctmp{\xinteval{\xintHexToDec{\tmpA}-\xintHexToDec{\tmpB}}}}%
+			}%
+			\xintifboolexpr{ \rescalctmp >= 0 }%
+				{\makebox[\the\widestcharwd][r]{\tmpchiff}}%
+				%{\makebox[\the\widestcharwd][r]{${}_{\textcolor{\PoseOpeColReten}{\scalebox{0.5}[0.5]{\text{1}}}}$\kern-0.1em\tmpchiff}}%
+				{\makebox[\the\widestcharwd][r]{\raisebox{-0.5\height}{\textcolor{\PoseOpeColReten}{\scalebox{0.5}[0.5]{\text{1}}}}\kern-0.1em\tmpchiff}}%
+		} \\
+		- & \IfStrEqCase{\PoseOpeBase}{%
+			{dec}{\IntCalcMaxWidth{0123456789}}%
+			{bin}{\IntCalcMaxWidth{01}}%
+			{hex}{\IntCalcMaxWidth{0123456789ABCDEF}}%
+		}%
+		\addtolength{\widestcharwd}{\PoseOpeOffset/2}%
+		\StrLen{#1}[\tmplennumber]%
+		\StrChar{#2}{\lenB}[\tmplastB]%
+		\xintFor* ##1 in {\xintSeq{1}{\xinteval{\tmplennumber-1}}}\do{%
+			\xdef\tmplenctr{\inteval{\tmplennumber-##1}}%
+			\StrChar{\BwithZeros}{##1}[\tmpchiff]%
+			\StrRight{#1}{\tmplenctr}[\tmpA]%
+			\StrRight{\BwithZeros}{\tmplenctr}[\tmpB]%
+			\IfStrEqCase{\PoseOpeBase}{%
+				{dec}{\xdef\rescalctmp{\xinteval{\tmpA-\tmpB}}}%
+				{bin}{\xdef\rescalctmp{\xinteval{\xintBinToDec{\tmpA}-\xintBinToDec{\tmpB}}}}%
+				{hex}{\xdef\rescalctmp{\xinteval{\xintHexToDec{\tmpA}-\xintHexToDec{\tmpB}}}}%
+			}%
+			\xintifboolexpr{ \rescalctmp >= 0 }%
+				{\makebox[\the\widestcharwd][r]{\xintifboolexpr{ ##1 <= \lenA-\lenB }{}{\tmpchiff}}}%
+				%{\makebox[\the\widestcharwd][r]{${}_{\textcolor{\PoseOpeColReten}{\scalebox{0.5}[0.5]{\text{1}}}}$\xintifboolexpr{ ##1 <= \lenA-\lenB }{}{\kern-0.1em\tmpchiff}}}%
+				{\makebox[\the\widestcharwd][r]{\raisebox{-0.5\height}{\textcolor{\PoseOpeColReten}{\scalebox{0.5}[0.5]{\text{1}}}}\xintifboolexpr{ ##1 <= \lenA-\lenB }{\kern0.25em}{\kern-0.1em\tmpchiff}}}%
+		}\makebox[\the\widestcharwd][r]{\tmplastB} \\
+		
+		%\IntCreateBoxNumbers{#2} \\
+		\hline
+		\ifboolKV[poseoperation]{AffEgal}{=}{} &\IntCreateBoxNumbers[r]{\rescalcbin} \\
+	\end{NiceArray}}%
+	}%
+	{%
+	\ensuremath{\begin{NiceArray}[#3]{@{\,}r@{\hspace{\PoseOpeOffset}}r@{\,}}
+		\RowStyle[nb-rows=*,cell-space-limits=1pt]{}
+		& \IntCreateBoxNumbers{#1} \\
+		- & \IntCreateBoxNumbers{#2} \\
+		\hline
+		\ifboolKV[poseoperation]{AffEgal}{=}{} & \IntCreateBoxNumbers{\rescalcbin} \\
+	\end{NiceArray}}%
+	}%
+	%\end{array}}%
+}
+
+\NewDocumentCommand\IntPoseMultiplication{ m m D<>{} }{%
+	\StrLen{#1}[\nbligninit]%
+	\StrLen{#2}[\nbligninter]%
+	\IfStrEqCase{\PoseOpeBase}{%
+		{dec}{\xdef\rescalcbin{\xinteval{#1*#2}}}%
+		{bin}{\xdef\rescalcbin{\xintDecToBin{\xinteval{\xintBinToDec{#1}*\xintBinToDec{#2}}}}}%
+		{hex}{\xdef\rescalcbin{\xintDecToHex{\xinteval{\xintHexToDec{#1}*\xintHexToDec{#2}}}}}%
+	}%
+	\xintifboolexpr{\PoseOpeLimit > 0 }{\StrRight{\rescalcbin}{\PoseOpeLimit}[\rescalcbin]}{}%
+	%\ensuremath{\begin{array}{@{\,}r@{\hspace{\PoseOpeOffset}}r@{\,}}
+	\ensuremath{\begin{NiceArray}[#3]{@{\,}r@{\hspace{\PoseOpeOffset}}r@{\,}}
+		\RowStyle[nb-rows=*,cell-space-limits=1pt]{}
+		& \IntCreateBoxNumbers{#1} \\
+		\times & \IntCreateBoxNumbers{#2} \\
+		\ifboolKV[poseoperation]{Interm}%
+			{%
+				\hline
+				\xintFor* ##1 in {\xintSeq{1}{\nbligninter}}\do{%
+					\xintifboolexpr{##1 == 1}{}{+}&
+					\xdef\tmpindice{\inteval{\nbligninter-##1+1}}\StrChar{#2}{\tmpindice}[\tmpchiff]\IfStrEqCase{\PoseOpeBase}{{dec}{\xdef\rescalcbininter{\xinteval{#1*\tmpchiff}}}{bin}{\xdef\rescalcbininter{\xintDecToBin{\xinteval{\xintBinToDec{#1}*\xintBinToDec{\tmpchiff}}}}}{hex}{\xdef\rescalcbininter{\xintDecToHex{\xinteval{\xintHexToDec{#1}*\xintHexToDec{\tmpchiff}}}}}}%
+					\IfEq{\tmpchiff}{0}%
+						{\xdef\rescalcbininter{}\xintFor* ##2 in {\xintSeq{1}{\nbligninit}}\do{\xdef\rescalcbininter{0\rescalcbininter}}%
+						}{}%
+					\xintifboolexpr{\PoseOpeLimit > 0 }{\StrRight{\rescalcbininter}{\PoseOpeLimit}[\rescalcbininter]}{}%
+					\IntCreateBoxNumbers{\rescalcbininter}
+					\xintifboolexpr{##1 == 1}{}{\xintFor* ##2 in {\xintSeq{1}{##1-1}}\do{\makebox[\the\widestcharwd][c]{\PoseOpeSymb}}}\\
+				}%
+			}%
+			{}%
+		\hline
+		\ifboolKV[poseoperation]{AffEgal}{=}{} & \IntCreateBoxNumbers{\rescalcbin} \\
+	\end{NiceArray}}%
+	%\end{array}}%
+}
+
+\NewDocumentCommand\OperationPosee{ O{} m D<>{} }{%
+	\restoreKV[poseoperation]%
+	\setKV[poseoperation]{#1}%
+	\IfStrEqCase{\PoseOpeBase}{%
+		{dec}{\settoheight{\heightercharht}{\hbox{0123456789}}}%
+		{bin}{\settoheight{\heightercharht}{\hbox{01}}}%
+		{hex}{\settoheight{\heightercharht}{\hbox{0123456789ABCDEF}}}%
+	}%
+	\IfSubStr{#2}{+}%
+		{%
+			\StrCut{#2}{+}{\tmpcalcA}{\tmpcalcB}%
+			\IntPoseAddition{\tmpcalcA}{\tmpcalcB}<#3>
+		}%
+		{}%
+	\IfSubStr{#2}{-}%
+		{%
+			\StrCut{#2}{-}{\tmpcalcA}{\tmpcalcB}%
+			\IntPoseSoustraction{\tmpcalcA}{\tmpcalcB}<#3>
+		}%
+		{}%
+	\IfSubStr{#2}{*}%
+		{%
+			\StrCut{#2}{*}{\tmpcalcA}{\tmpcalcB}%
+			\IntPoseMultiplication{\tmpcalcA}{\tmpcalcB}<#3>
+		}%
+		{}%
+}
+\NewCommandCopy\pflopeposee\OperationPosee
+
+%====FACTORIELLE
+\defKV[calcfactorielle]{ChSignif=\def\factochfsign{#1},Sens=\def\factochfsens{#1}}
+\setKVdefault[calcfactorielle]{%
+	Complet=false,%
+	Enonce=false,%
+	Partiel=false,%
+	Grand=false,%
+	ChSignif=9,%
+	Espace=\mkern1.5mu\relax,%
+	Sens=m
+}
+
+\NewDocumentCommand\Factorielle{ s O{} m }{%
+	\restoreKV[calcfactorielle]%
+	\setKV[calcfactorielle]{#2}%
+	\ifboolKV[calcfactorielle]{Grand}%
+		{%
+			\xdef\tmpres{\xintfloateval[\factochfsign]{factorial(#3)}}%
+		}%
+		{%
+			\xdef\tmpres{\xinteval{factorial(#3)}}%
+		}%
+	\ensuremath{%
+		\ifboolKV[calcfactorielle]{Enonce}%
+			{%
+				\IfBooleanTF{#1}{#3\useKV[calcfactorielle]{Espace}!}{\num{#3}\useKV[calcfactorielle]{Espace}!}=
+			}%
+			{}%
+		\ifboolKV[calcfactorielle]{Partiel}%
+			{%
+				\IfBooleanTF{#1}%
+					{%
+						\IfStrEqCase{\factochfsens}{%
+							{m}{1 \times 2 \times \ldots \times \xinteval{#3-1} \times #3 \ifboolKV[calcfactorielle]{Grand}{\approx}{=}}%
+							{d}{#3 \times \xinteval{#3-1} \times \ldots \times 2 \times 1 \ifboolKV[calcfactorielle]{Grand}{\approx}{=}}%
+						}%
+					}%
+					{%
+						\IfStrEqCase{\factochfsens}{%
+							{m}{1 \times 2 \times \ldots \times \num{\xinteval{#3-1}} \times \num{#3} \ifboolKV[calcfactorielle]{Grand}{\approx}{=}}%
+							{d}{\num{#3} \times \num{\xinteval{#3-1}} \times \ldots \times 2 \times 1 \ifboolKV[calcfactorielle]{Grand}{\approx}{=}}%
+						}%
+					}%
+			}%
+			{}%
+		\ifboolKV[calcfactorielle]{Complet}%
+			{%
+				\IfBooleanTF{#1}%
+					{%
+						\IfStrEq{\factochfsens}{m}%
+							{%
+								1 \xintFor* ##1 in {\xintSeq{2}{#3}}\do{\times ##1} \ifboolKV[calcfactorielle]{Grand}{\approx}{=}
+							}%
+							{%
+								\xintFor* ##1 in {\xintSeq{#3}{2}}\do{##1 \times} 1 \ifboolKV[calcfactorielle]{Grand}{\approx}{=}
+							}%
+					}%
+					{%
+						\IfStrEq{\factochfsens}{m}%
+							{%
+								1 \xintFor* ##1 in {\xintSeq{2}{#3}}\do{\times \num{##1}} \ifboolKV[calcfactorielle]{Grand}{\approx}{=}
+							}%
+							{%
+								\xintFor* ##1 in {\xintSeq{#3}{2}}\do{\num{##1} \times} 1 \ifboolKV[calcfactorielle]{Grand}{\approx}{=}
+							}%
+					}%
+			}%
+			{}%
+		\IfBooleanTF{#1}%
+			{%
+				\tmpres%
+			}%
+			{%
+				\ifboolKV[calcfactorielle]{Grand}%
+					{%
+						\num[exponent-mode=scientific]{\tmpres}%
+					}%
+					{%
+						\num{\tmpres}%
+					}%
+			}%
+	}%
+}
+\NewCommandCopy\pflfacto\Factorielle
+
+\NewDocumentCommand\Primorielle{ s O{} m }{%
+	\restoreKV[calcfactorielle]%
+	\setKV[calcfactorielle]{#2}%
+	\def\tmpres{1}%
+	\xintFor* ##1 in {\xintSeq{1}{#3}}\do{%
+		\pgfmathisprime{##1}\ifnum\pgfmathresult=1\xdef\tmpres{\xinteval{\tmpres*##1}}\fi%
+	}%
+	\ifboolKV[calcfactorielle]{Grand}%
+		{%
+			\xdef\tmpres{\xintfloateval[\factochfsign]{\tmpres}}%
+		}%
+		{}%
+	\ensuremath{%
+		\ifboolKV[calcfactorielle]{Enonce}%
+			{%
+				\IfBooleanTF{#1}{#3\#}{\num{#3}\#}=
+			}%
+			{}%
+		\ifboolKV[calcfactorielle]{Complet}%
+			{%
+				\IfBooleanTF{#1}%
+					{%
+						\IfStrEq{\factochfsens}{m}%
+							{%
+								2 \xintFor* ##1 in {\xintSeq{3}{#3}}\do{\pgfmathisprime{##1}\ifnum\pgfmathresult=1\times##1\fi} \ifboolKV[calcfactorielle]{Grand}{\approx}{=}
+							}%
+							{%
+								\xintFor* ##1 in {\xintSeq{#3}{3}}\do{\pgfmathisprime{##1}\ifnum\pgfmathresult=1##1\times\fi} 2 \ifboolKV[calcfactorielle]{Grand}{\approx}{=}
+							}%
+					}%
+					{%
+						\IfStrEq{\factochfsens}{m}%
+							{%
+								2 \xintFor* ##1 in {\xintSeq{3}{#3}}\do{\pgfmathisprime{##1}\ifnum\pgfmathresult=1\times\num{##1}\fi} \ifboolKV[calcfactorielle]{Grand}{\approx}{=}
+							}%
+							{%
+								\xintFor* ##1 in {\xintSeq{#3}{3}}\do{\pgfmathisprime{##1}\ifnum\pgfmathresult=1\num{##1}\times\fi} 2 \ifboolKV[calcfactorielle]{Grand}{\approx}{=}
+							}%
+					}%
+			}%
+			{}%
+		\IfBooleanTF{#1}%
+			{%
+				\tmpres%
+			}%
+			{%
+				\ifboolKV[calcfactorielle]{Grand}%
+					{%
+						\num[exponent-mode=scientific]{\tmpres}%
+					}%
+					{%
+						\num{\tmpres}%
+					}%
+			}%
+	}%
+}
+\NewCommandCopy\pflprimor\Primorielle
+
+\NewDocumentCommand\DoubleFactorielle{ s O{} m }{%
+	\restoreKV[calcfactorielle]%
+	\setKV[calcfactorielle]{#2}%
+	\def\tmpres{1}%	
+	\xintFor* ##1 in {\xintSeq{1}{#3}}\do{%
+		\xintifboolexpr{\xintiiOdd{#3} == \xintiiOdd{##1} 'or' \xintiiEven{#3} == \xintiiEven{##1}}%
+			{%
+				\xdef\tmpres{\xinteval{\tmpres*##1}}%
+			}%
+			{}%
+	}%
+	\ifboolKV[calcfactorielle]{Grand}%
+	{%
+		\xdef\tmpres{\xintfloateval[\factochfsign]{\tmpres}}%
+	}%
+	{}%
+	\ensuremath{%
+		\ifboolKV[calcfactorielle]{Enonce}%
+		{%
+			\IfBooleanTF{#1}{#3\useKV[calcfactorielle]{Espace}!!}{\num{#3}\useKV[calcfactorielle]{Espace}!!}=
+		}%
+		{}%
+		\ifboolKV[calcfactorielle]{Complet}%
+		{%
+			\IfBooleanTF{#1}%
+			{%
+				\IfStrEq{\factochfsens}{m}%
+					{%
+						\xintifboolexpr{\xintiiOdd{#3} == 1}%
+							{%
+								1 \xintFor* ##1 in {\xintSeq{3}{#3}}\do{%
+									\xintifboolexpr{\xintiiOdd{##1} == 1}{\times##1}{}%
+								}%
+							}%
+							{%
+								2 \xintFor* ##1 in {\xintSeq{3}{#3}}\do{%
+									\xintifboolexpr{\xintiiOdd{##1} != 1}{\times##1}{}%
+								}%
+							}%
+						\ifboolKV[calcfactorielle]{Grand}{\approx}{=}%
+					}%
+					{%
+						\xintifboolexpr{\xintiiOdd{#3} == 1}%
+						{%
+							\xintFor* ##1 in {\xintSeq{#3}{3}}\do{%
+								\xintifboolexpr{\xintiiOdd{##1} == 1}{##1\times}{}%
+							}1%
+						}%
+						{%
+							\xintFor* ##1 in {\xintSeq{#3}{3}}\do{%
+								\xintifboolexpr{\xintiiOdd{##1} != 1}{##1\times}{}%
+							}2%
+						}%
+						\ifboolKV[calcfactorielle]{Grand}{\approx}{=}%
+					}%
+			}%
+			{%
+				\IfStrEq{\factochfsens}{m}%
+				{%
+					\xintifboolexpr{\xintiiOdd{#3} == 1}%
+					{%
+						1 \xintFor* ##1 in {\xintSeq{3}{#3}}\do{%
+							\xintifboolexpr{\xintiiOdd{##1} == 1}{\times\num{##1}}{}%
+						}%
+					}%
+					{%
+						2 \xintFor* ##1 in {\xintSeq{3}{#3}}\do{%
+							\xintifboolexpr{\xintiiOdd{##1} != 1}{\times\num{##1}}{}%
+						}%
+					}%
+					\ifboolKV[calcfactorielle]{Grand}{\approx}{=}%
+				}%
+				{%
+					\xintifboolexpr{\xintiiOdd{#3} == 1}%
+					{%
+						\xintFor* ##1 in {\xintSeq{#3}{3}}\do{%
+							\xintifboolexpr{\xintiiOdd{##1} == 1}{\num{##1}\times}{}%
+						}1%
+					}%
+					{%
+						\xintFor* ##1 in {\xintSeq{#3}{3}}\do{%
+							\xintifboolexpr{\xintiiOdd{##1} != 1}{\num{##1}\times}{}%
+						}2%
+					}%
+					\ifboolKV[calcfactorielle]{Grand}{\approx}{=}%
+				}%
+			}%
+		}%
+		{}%
+		\IfBooleanTF{#1}%
+		{%
+			\tmpres%
+		}%
+		{%
+			\ifboolKV[calcfactorielle]{Grand}%
+			{%
+				\num[exponent-mode=scientific]{\tmpres}%
+			}%
+			{%
+				\num{\tmpres}%
+			}%
+		}%
+	}%
+}
+\NewCommandCopy\pfldblefacto\DoubleFactorielle
+
+\NewDocumentCommand\HyperFactorielle{ s O{} m }{%
+	\restoreKV[calcfactorielle]%
+	\setKV[calcfactorielle]{#2}%
+	\def\tmpres{1}%
+	\xintFor* ##1 in {\xintSeq{2}{#3}}\do{\xdef\tmpres{\xinteval{\tmpres*(##1)^(##1)}}}%
+	\ifboolKV[calcfactorielle]{Grand}%
+		{%
+			\xdef\tmpres{\xintfloateval[\factochfsign]{\tmpres}}%
+		}%
+		{}%
+	\ensuremath{%
+		\ifboolKV[calcfactorielle]{Enonce}%
+			{%
+				\IfBooleanTF{#1}{\text{H}(#3)}{\text{H}(\rm{#3})}=
+			}%
+			{}%
+		\ifboolKV[calcfactorielle]{Partiel}%
+			{%
+				\IfBooleanTF{#1}%
+					{%
+						\IfStrEqCase{\factochfsens}{%
+							{m}{1^1 \times 2^2 \times \ldots \times \xinteval{#3-1}^{\xinteval{#3-1}} \times #3^{#3} \ifboolKV[calcfactorielle]{Grand}{\approx}{=}}%
+							{d}{#3^{#3} \times \xinteval{#3-1}^{\xinteval{#3-1}} \times \ldots \times 2^2 \times 1^1 \ifboolKV[calcfactorielle]{Grand}{\approx}{=}}%
+						}%
+					}%
+					{%
+						\IfStrEqCase{\factochfsens}{%
+							{m}{1 \times 2 \times \ldots \times \num{\xinteval{#3-1}}^{\num{\xinteval{#3-1}}} \times \num{#3}^{\num{#3}} \ifboolKV[calcfactorielle]{Grand}{\approx}{=}}%
+							{d}{\num{#3}^{\num{#3}} \times \num{\xinteval{#3-1}}^{\num{\xinteval{#3-1}}} \times \ldots \times 2^2 \times 1^1 \ifboolKV[calcfactorielle]{Grand}{\approx}{=}}%
+						}%
+					}%
+			}%
+			{}%
+		\ifboolKV[calcfactorielle]{Complet}%
+			{%
+				\IfBooleanTF{#1}%
+					{%
+						\IfStrEq{\factochfsens}{m}%
+							{%
+								1^1 \xintFor* ##1 in {\xintSeq{2}{#3}}\do{\times ##1^{##1}} \ifboolKV[calcfactorielle]{Grand}{\approx}{=}
+							}%
+							{%
+								\xintFor* ##1 in {\xintSeq{#3}{2}}\do{##1^{##1} \times} 1^1 \ifboolKV[calcfactorielle]{Grand}{\approx}{=}
+							}%
+					}%
+					{%
+						\IfStrEq{\factochfsens}{m}%
+							{%
+								1^1 \xintFor* ##1 in {\xintSeq{2}{#3}}\do{\times \num{##1}^{\num{##1}}} \ifboolKV[calcfactorielle]{Grand}{\approx}{=}
+							}%
+							{%
+								\xintFor* ##1 in {\xintSeq{#3}{2}}\do{\num{##1}^{\num{##1}} \times} 1^1 \ifboolKV[calcfactorielle]{Grand}{\approx}{=}
+							}%
+					}%
+			}%
+			{}%
+		\IfBooleanTF{#1}%
+			{%
+				\tmpres%
+			}%
+			{%
+				\ifboolKV[calcfactorielle]{Grand}%
+					{%
+						\num[exponent-mode=scientific]{\tmpres}%
+					}%
+					{%
+						\num{\tmpres}%
+					}%
+			}%
+	}%
+}
+\NewCommandCopy\pflhyperfacto\HyperFactorielle
+
+\NewDocumentCommand\SuperFactorielle{ s O{} m }{%
+	\restoreKV[calcfactorielle]%
+	\setKV[calcfactorielle]{#2}%
+	\def\tmpres{1}%
+	\xintFor* ##1 in {\xintSeq{2}{#3}}\do{\xdef\tmpres{\xinteval{\tmpres*factorial(##1)}}}%
+	\ifboolKV[calcfactorielle]{Grand}%
+		{%
+			\xdef\tmpres{\xintfloateval[\factochfsign]{\tmpres}}%
+		}%
+		{}%
+	\ensuremath{%
+		\ifboolKV[calcfactorielle]{Enonce}%
+			{%
+				\IfBooleanTF{#1}{\text{sf}(#3)}{\text{sf}(\num{#3})}=
+			}%
+			{}%
+		\ifboolKV[calcfactorielle]{Partiel}%
+			{%
+				\IfBooleanTF{#1}%
+					{%
+						\IfStrEqCase{\factochfsens}{%
+							{m}{1\useKV[calcfactorielle]{Espace}! \times 2\useKV[calcfactorielle]{Espace}! \times \ldots \times \xinteval{#3-1}\useKV[calcfactorielle]{Espace}! \times #3\useKV[calcfactorielle]{Espace}! \ifboolKV[calcfactorielle]{Grand}{\approx}{=}}%
+							{d}{#3\useKV[calcfactorielle]{Espace}! \times \xinteval{#3-1}\useKV[calcfactorielle]{Espace}! \times \ldots \times 2\useKV[calcfactorielle]{Espace}! \times 1\useKV[calcfactorielle]{Espace}! \ifboolKV[calcfactorielle]{Grand}{\approx}{=}}%
+						}%
+					}%
+					{%
+						\IfStrEqCase{\factochfsens}{%
+							{m}{1\useKV[calcfactorielle]{Espace}! \times 2\useKV[calcfactorielle]{Espace}! \times \ldots \times \num{\xinteval{#3-1}}\useKV[calcfactorielle]{Espace}! \times \num{#3}\useKV[calcfactorielle]{Espace}! \ifboolKV[calcfactorielle]{Grand}{\approx}{=}}%
+							{d}{\num{#3}\useKV[calcfactorielle]{Espace}! \times \num{\xinteval{#3-1}}\useKV[calcfactorielle]{Espace}! \times \ldots \times 2\useKV[calcfactorielle]{Espace}! \times 1\useKV[calcfactorielle]{Espace}! \ifboolKV[calcfactorielle]{Grand}{\approx}{=}}%
+						}%
+					}%
+			}%
+			{}%
+		\ifboolKV[calcfactorielle]{Complet}%
+			{%
+				\IfBooleanTF{#1}%
+					{%
+						\IfStrEq{\factochfsens}{m}%
+							{%
+								1\useKV[calcfactorielle]{Espace}! \xintFor* ##1 in {\xintSeq{2}{#3}}\do{\times ##1\useKV[calcfactorielle]{Espace}!} \ifboolKV[calcfactorielle]{Grand}{\approx}{=}
+							}%
+							{%
+								\xintFor* ##1 in {\xintSeq{#3}{2}}\do{##1\useKV[calcfactorielle]{Espace}! \times} 1\useKV[calcfactorielle]{Espace}! \ifboolKV[calcfactorielle]{Grand}{\approx}{=}
+							}%
+					}%
+					{%
+						\IfStrEq{\factochfsens}{m}%
+							{%
+								1\useKV[calcfactorielle]{Espace}! \xintFor* ##1 in {\xintSeq{2}{#3}}\do{\times \num{##1}\useKV[calcfactorielle]{Espace}!} \ifboolKV[calcfactorielle]{Grand}{\approx}{=}
+							}%
+							{%
+								\xintFor* ##1 in {\xintSeq{#3}{2}}\do{\num{##1}\useKV[calcfactorielle]{Espace}! \times} 1\useKV[calcfactorielle]{Espace}! \ifboolKV[calcfactorielle]{Grand}{\approx}{=}
+							}%
+					}%
+			}%
+			{}%
+		\IfBooleanTF{#1}%
+			{%
+				\tmpres%
+			}%
+			{%
+				\ifboolKV[calcfactorielle]{Grand}%
+					{%
+						\num[exponent-mode=scientific]{\tmpres}%
+					}%
+					{%
+						\num{\tmpres}%
+					}%
+			}%
+	}%
+}
+\NewCommandCopy\pflsuperfacto\SuperFactorielle
+
+%====CONVERSIONS ENTRE BASES
+\ExplSyntaxOn
+%commande interne (stockage ou non)
+\NewDocumentCommand\pflbasetobase{ m m m }{%
+	%1=init
+	%2=fin
+	%3=nb
+	\ifnum#2=10%
+		\int_from_base:nn {#3}{#1}%
+	\else%
+		\int_to_Base:nn {\int_from_base:nn {#3}{#1}}{#2}%
+	\fi%
+}
+
+\NewDocumentCommand\tmpresconvbases{ m m m O{\tmpconvres} }{%
+	%1=init
+	%2=fin
+	%3=nb
+	\ifnum#2=10%
+		\xdef#4{\int_from_base:nn {#3}{#1}}%
+	\else%
+		\xdef#4{\int_to_Base:nn {\int_from_base:nn {#3}{#1}}{#2}}%
+	\fi%
+}
+\ExplSyntaxOff
+
+%commande interne split adaptée de https://tex.stackexchange.com/questions/171007/split-a-character-string-n-by-n // unbonpetit // CC BY-SA 3.0
+\NewDocumentCommand\tmpStrSplit{ O{\,} m m O{\tmpsplitres} }{%
+	%1=espace / %2=nb caract / %3=chaîne / %4=macro de stockage
+	\xdef\splitstring{#3}\let\splitresult\empty%
+	\loop%
+		\StrLen\splitstring[\tempa]%
+		\StrSplit\splitstring{\number\numexpr\tempa-#2}\splitstring\tempb%
+		\xdef\splitresult{\unless\ifx\splitstring\empty#1\fi\tempb\splitresult}%
+		\unless\ifx\splitstring\empty%
+	\repeat%
+	\xdef#4{\splitresult}%
+}
+
+\NewDocumentCommand\ConversionEntreBases{ s O{\,} m m }{%
+	%calculs internes
+	\StrCut{#3}{->}{\tmpbaseinit}{\tmpbasefin}%
+	\tmpresconvbases{\tmpbaseinit}{\tmpbasefin}{#4}%\tmpconvres
+	%affichage
+	\ensuremath{%
+		\ifnum\tmpbaseinit=2%
+			\tmpStrSplit{4}{#4}%
+			{\tmpsplitres}\IfBooleanT{#1}{_{\tmpbaseinit}}%
+		\else%
+			{#4}\IfBooleanT{#1}{_{\tmpbaseinit}}%
+		\fi%
+		=%
+		\ifnum\tmpbasefin=2%
+			\tmpStrSplit[#2]{4}{\tmpconvres}%
+			{\tmpsplitres}\IfBooleanT{#1}{_{\tmpbasefin}}%
+		\else%
+			{\tmpconvres}\IfBooleanT{#1}{_{\tmpbasefin}}%
+		\fi%
+	}%
+}
+\NewCommandCopy\pflconvbases\ConversionEntreBases
+
+\endinput

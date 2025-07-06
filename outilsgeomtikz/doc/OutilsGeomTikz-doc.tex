@@ -1,0 +1,969 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[french,a4paper,11pt]{article}
+\usepackage[margin=2cm,includefoot]{geometry}
+\def\TPversion{0.1.6}
+\def\TPdate{29 août 2024}
+\usepackage{amssymb}
+\usepackage[table,svgnames]{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+%\usepackage[bold-style=ISO,math-style=french]{concmath-otf}
+%\usepackage[bold-style=ISO,math-style=french]{unicode-math}
+%\setmainfont{TeX Gyre Schola}
+%\setmathfont{TeX Gyre Schola Math}
+\usepackage{OutilsGeomTikz}
+\usepackage{awesomebox}
+\usepackage{fontawesome5}
+\usepackage{footnote}
+\makesavenoteenv{tabular}
+\usepackage{enumitem}
+\usepackage{tabularray}
+\usepackage{multicol}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{siunitx}
+\sisetup{locale=FR,output-decimal-marker={,},group-minimum-digits=4}
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [OutilsGeomTikz]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+\newcommand\TableauDocumentation{%
+	\begin{tblr}{width=\linewidth,colspec={X[c]X[c]X[c]X[c]X[c]X[c]},cells={font=\sffamily}}
+		{\large \LaTeX} & {\large \hologo{pdfLaTeX}} & {\large \hologo{LuaLaTeX}} & {\large \TikZ} & {\large \TeXLive} & {\large \hologo{MiKTeX}} \\
+	\end{tblr}
+}
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\setlength{\parindent}{0pt}
+\definecolor{LightGray}{gray}{0.9}
+
+\usepackage[french]{babel}
+\AddThinSpaceBeforeFootnotes
+\FrenchFootnotes
+
+\usepackage[most]{tcolorbox}
+\usetikzlibrary{calc}
+\tcbuselibrary{minted}
+\NewTCBListing{PresentationCode}{ O{blue} m }{%
+	sharp corners=downhill,enhanced,arc=12pt,skin=bicolor,%
+	colback=#1!1!white,colframe=#1!75!black,colbacklower=white,%
+	attach boxed title to top right={yshift=-\tcboxedtitleheight},title=Code \LaTeX,%
+	boxed title style={%
+		colframe=#1!75!black,colback=#1!15!white,%
+		,sharp corners=downhill,arc=12pt,%
+	},%
+	top=\baselineskip,%
+	fonttitle=\color{#1!90!black}\itshape\ttfamily\footnotesize,%
+	listing engine=minted,minted style=colorful,
+	minted language=tex,minted options={tabsize=2,fontsize=\small,autogobble,breaklines=true},
+	#2
+}
+
+\tcbset{vignettes/.style={%
+	nobeforeafter,box align=base,boxsep=0pt,enhanced,sharp corners=all,rounded corners=southeast,%
+	boxrule=0.75pt,left=7pt,right=1pt,top=0pt,bottom=0.25pt,%
+	}
+}
+
+\tcbset{vignetteMaJ/.style={%
+	fontupper={\vphantom{pf}\footnotesize\ttfamily},
+	vignettes,colframe=ForestGreen!50!black,coltitle=white,colback=ForestGreen!25,%
+	overlay={\begin{tcbclipinterior}%
+			\fill[fill=ForestGreen!75]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{Black}{\scalebox{0.85}[0.75]{\textbf{MàJ}}}}} ($(interior.north west)+(5pt,0pt)$);%
+	\end{tcbclipinterior}}
+	}
+}
+
+\newcommand\Cle[1]{{\bfseries\sffamily\textlangle #1\textrangle}}
+\newcommand\cmaj[1]{\tcbox[vignetteMaJ]{#1}\xspace}
+
+\newcommand\affichegrille[4]{%
+	\draw[xstep=1,ystep=1,lightgray] (#1,#3) grid (#2,#4) ;
+	\foreach \x in {#1,\inteval{1+#1},...,#2} {\draw[lightgray] (\x,#4)--++(0,3pt) node[font=\scriptsize,above] {$\x$} ;}
+	\foreach \y in {#3,\inteval{1+#3},...,#4} {\draw[lightgray] (#1,\y)--++(-3pt,0) node[font=\scriptsize,left] {$\y$} ;}
+}
+\newcommand\pointsutiles[1]{%
+	\foreach \point in {#1} {\draw[thick,fill=red] \point circle[radius=3pt] ;}
+}
+
+\begin{document}
+
+\setlength{\aweboxleftmargin}{0.07\linewidth}
+\setlength{\aweboxcontentwidth}{0.93\linewidth}
+\setlength{\aweboxvskip}{8pt}
+
+\thispagestyle{empty}
+
+\vspace{2cm}
+
+\begin{center}
+	\begin{minipage}{0.75\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{OutilsGeomTikz [fr]}}\\
+				\\
+				{\LARGE Des outils géométriques, } \\
+				\\
+				{\LARGE en Ti\textit{k}Z}. \\
+			\end{tabular}
+			
+			\bigskip
+			
+			{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://github.com/cpierquet/OutilsGeomTikz}}
+\end{tabular}
+\end{center}
+
+\vspace{0.25cm}
+
+{$\blacktriangleright$~~Des outils géométriques, personnalisables, en Ti\textit{k}Z.}
+
+\smallskip
+
+{$\blacktriangleright$~~Une règle, un rapporteur, une équerre, une réquerre, un rappéquerre, un crayon, un compas.}
+
+\vspace{0.5cm}
+
+\hfill
+\begin{tikzpicture}
+	\tkzRegle[Fond,AfficheValeurs,Longueur=15,Rotation=-20,Echelle=0.5,CouleurFond=blue]
+	\tkzEquerre
+	[Fond,AfficheValeurs,Longueur=12,Origine={(-20:4)},Rotation=-20,CouleurFond=red,Echelle=0.5]
+	\tkzCrayon[Couleur=ForestGreen,Origine={(-20:4)},Rotation=30,Echelle=0.5]
+	\draw (10,-5)--++(20:5) (10,-5)--++(50:5) ;
+	\tkzRapporteur[Fond,CouleurFond=purple,Origine={(10,-5)},Echelle=0.5,Rotation=20]
+	\tkzRappEquerre[Fond,Origine={(8,1)},Rotation=90,CouleurFond=ForestGreen,Echelle=0.5]
+	\tkzCrayon[Couleur=yellow,Origine={(8,-1)},Rotation=20,Echelle=0.5]
+	\coordinate (AA) at ($(10,-5)+(50:{0.5*3.75})$) ;
+	\tkzCrayon[Couleur=orange,Origine={AA},Rotation=-20,Echelle=0.5]
+	\tkzRequerre[Fond,AfficheValeurs,CouleurFond=yellow,Origine={(3,-3)},Rotation=-30,Echelle=0.5]
+	\tkzCrayon[Couleur=gray,Origine={(3,-3)},Rotation=-98,Echelle=0.5]
+	%compas
+	\coordinate (FG) at (0,1) ; \coordinate (FH) at (2,1.5) ;
+	\tkzCompas[LongueurBranches=3,EchelleCrayon=0.75]{FG}{FH}
+	\tkzRapporteur[Complet,Echelle=0.5,Origine={(13,3.25)},Rotation=25,Fond,CouleurFond=orange]
+\end{tikzpicture}\hfill~
+
+\smallskip
+
+\vfill
+
+\hfill\textit{Merci à Arnaud et Cyril pour leurs retours et idées !!}
+
+\vfill
+
+\hrule
+
+\medskip
+
+\TableauDocumentation
+
+\medskip
+
+\hrule
+
+\medskip
+
+\newpage
+
+\phantomsection
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vfill
+
+\part{Historique}
+
+\verb|v0.1.6 : |Correction d'un bug avec une compilation en \textsf{pdflatex} + Améliorations pour les rotations des labels
+
+\verb|v0.1.5 : |Modification de la graduation intérieure pour les rapporteurs 180°
+
+\verb|v0.1.4 : |Possibilité de positionner certains outils avec deux points (angle calculé automatiquement)
+
+\verb|v0.1.3 : |Ajout du \textit{pourcenteur}
+
+\verb|v0.1.2 : |Ajout de la \textit{règle-repère}
+
+\verb|v0.1.1 : |Correction d'un bug avec une ancienne syntaxe \textsf{[join=...]}
+
+\verb|v0.1.0 : |Version initiale.
+
+\vspace{1cm}
+
+\newpage
+
+\part{Introduction}
+
+\section{Le package OutilsGeomTikz}
+
+\subsection{Introduction}
+
+\begin{noteblock}
+Le package \textsf{OutilsGeomTikz} \textit{propose} des éléments graphiques, en langage \TikZ, pour présenter des outils de construction classiques et personnalisables :
+
+\begin{itemize}
+	\item un crayon ;
+	\item une règle graduée ;
+	\item une équerre graduée (30/60) ;
+	\item un rapporteur (180 ou 360) ;
+	\item un pourcenteur ;
+	\item une réquerre graduée ;
+	\item une \og règle-repère \fg{} graduée ;
+	\item une \og rappéquerre \fg{} graduée ;
+	\item un compas.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{noteblock}
+
+\begin{cautionblock}
+Certaines idées et \textit{donc} certains \textit{morceaux} de codes proviennent de Stéphane Pasquet\footnotemark\footnotetext{\url{https://tex.stackexchange.com/questions/147389/symbols-of-pencil-ruler-and-compass}} sur un fil de discussion en ligne.
+\end{cautionblock}
+
+\subsection{Chargement du package, packages utilisés}
+
+\begin{importantblock}
+Le package se charge, dans le préambule, de manière classique.
+
+Pas d'\textit{option} pour le package, qui ne nécessite que \textit{peu} de dépendances !
+\end{importantblock}
+
+\begin{PresentationCode}{listing only}
+\usepackage{OutilsGeomTikz}
+\end{PresentationCode}
+
+\begin{noteblock}
+\textsf{OutilsGeomTikz} charge les packages et librairies suivants :
+
+\begin{itemize}
+	\item \texttt{tikz}, \texttt{pgffor}, \texttt{simplekv}, \texttt{nicefrac} et \texttt{xstring} ;
+	\item \texttt{\textit{tikz}.calc}, \texttt{\textit{tikz}.positioning}.
+\end{itemize}
+
+Il est compatible avec les compilations usuelles en \textsf{latex}, \textsf{pdflatex}, \textsf{lualatex} ou \textsf{xelatex}.
+\end{noteblock}
+
+\subsection{Autres solutions}
+
+\begin{noteblock}
+D'autres solutions existent pour présenter des outils géométriques, notamment \textsf{pst-geometrictools}\footnotemark\footnotetext{disponible sur le CTAN : \url{https://ctan.org/pkg/pst-geometrictools}.} (avec du code \PSTricks) ou \textsf{tkz-tools}\footnotemark\footnotetext{disponible sur son site : \url{https://www.mathweb.fr/euclide/les-packages-personnels-latex-stephane-pasquet/}.}, dont \textsf{OutilsGeomTikz} reprend quelques éléments de base  !
+
+\smallskip
+
+L'utilisateur utilisera la solution la mieux adaptée pour ses besoins !
+\end{noteblock}
+
+\pagebreak
+
+\section{Philosophie du package}
+
+\subsection{Fonctionnement global}
+
+\begin{tipblock}
+Les différents outils disponibles ont \textit{grosso-modo} le même mode de fonctionnement :
+
+\begin{itemize}
+	\item le \textit{nom} de la commande est sous la forme \texttt{\textbackslash tkz<Outil>} ;
+	\item les outils ont été créés, en \TikZ, avec comme unité de base le centimètre ;
+	\item pour certains outils, des dimensions minimales sont requises pour un aspect acceptable ;
+	\item les options personnalisables sont (sauf exceptions) :
+	\begin{itemize}
+		\item la \textit{taille}, l'\textit{échelle} globale ou l'\textit{échelle} des éventuels labels ;
+		\item les \textit{couleurs}, le \textit{fond} (couleur et opacité) ;
+		\item la position (\textit{placement} et/ou \textit{rotation}) ;
+		\item un \textit{placement automatique} avec la données de 2 points.
+	\end{itemize}
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\subsection{Liste des commandes}
+
+\begin{cautionblock}
+Les outils disponibles sont à insérer dans un environnement \TikZ, et pour le moment il existe :
+\begin{itemize}
+	\item \texttt{\textbackslash tkzRegle} et \texttt{\textbackslash tkzRegleRepere} ;
+	\item \texttt{\textbackslash tkzEquerre} et \texttt{\textbackslash tkzRequerre} ;
+	\item \texttt{\textbackslash tkzRapporteur} et \texttt{\textbackslash tkzPourcenteur} ;
+	\item \texttt{\textbackslash tkzRappequerre} ;
+	\item \texttt{\textbackslash tkzCompas} ;
+	\item \texttt{\textbackslash tkzCrayon}.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{cautionblock}
+
+\begin{PresentationCode}{listing only}
+\tkzRegle[clés]
+\tkzEquerre[clés]
+\tkzRapporteur[clés]
+\tkzPourcenteur[clés]
+\tkzRequerre[clés]
+\tkzRappEquerre[clés]
+\tkzRegleRepere[clés]
+\tkzCrayon[clés]
+\tkzCompas[clés]{pointe}{mine}
+\end{PresentationCode}
+
+\subsection{Utilisation d'unités et/ou de rotations}
+
+\begin{tipblock}
+Les outils ont été créés avec unité de base de 1~cm, afin que les graduations soient \textit{en taille réelle}.
+
+\smallskip
+
+Il est toutefois possible de modifier les unités de l'environnement \TikZ, dans ce cas les graduations des outils ne seront plus forcément en adéquation avec les unités choisies.
+
+\smallskip
+
+Ce choix est donc à \textit{réserver} dans l'optique de faire des petits schémas pour illustrer des positions d'outils.
+
+\smallskip
+
+Du fait des rotations effectuées par le code pour correctement placer les objets et les graduations, il est conseillé (même si cela devrait fonctionner) de ne pas trop spécifier de rotation globale pour l'environnement \texttt{tikzpicture}\ldots
+\end{tipblock}
+
+\pagebreak
+
+\part{Les outils}
+
+\section{Le crayon}
+
+\subsection{La commande}
+
+\begin{cautionblock}
+Le package propose l'outil \textsf{Crayon}.
+
+La forme générale du crayon est \textit{fixée}, mais le crayon peut être \textit{personnalisé}.
+\end{cautionblock}
+
+\begin{PresentationCode}{tikz lower}
+\tkzCrayon
+\end{PresentationCode}
+
+\subsection{Clés et options}
+
+\begin{tipblock}
+Quelques \Cle{clés} de personnalisation sont disponibles :
+
+\begin{itemize}
+	\item \Cle{Longueur} pour la taille, en cm, du crayon ;\hfill~(défaut : \Cle{5} et mini \Cle{2.5})
+	\item \Cle{Origine} pour le placer le crayon (au niveau du $0$) ;\hfill~(défaut : \Cle{\{(0,0)\}})
+	\item \Cle{Rotation} pour pivoter le crayon (au niveau de la mine) ;\hfill~(défaut : \Cle{0})
+	\item \Cle{Echelle} pour l'échelle globale le crayon ;\hfill~(défaut : \Cle{1})
+	\item \Cle{Couleur} pour la couleur du crayon.\hfill~(défaut : \Cle{red})
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{noteblock}
+Pour des exemples de personnalisation, une grille ainsi que les points \textit{support} seront rajoutés.
+
+\smallskip
+
+Toutes les \Cle{clés} ne seront pas présentées de manière indépendante, mais parfois elles seront \textit{cumulées} pour éviter de surcharger la sortie.
+\end{noteblock}
+
+\begin{PresentationCode}{listing only}
+%environnement tikz
+\tkzCrayon[Origine={(-3,-2)},Echelle=0.75,Rotation=45,Couleur=DarkBlue]
+\tkzCrayon[Origine={(1,-4)},Longueur=10,Rotation=-30,Couleur=Green]
+\tkzCrayon[Origine={(-3,3)},Echelle=1.25,Rotation=195,Couleur=orange]
+\end{PresentationCode}
+
+\begin{PresentationCode}{text only}
+\begin{tikzpicture}
+	\affichegrille{-7}{7}{-5}{5}
+	\pointsutiles{(-3,-2),(1,-4),(-3,3)}
+	\tkzCrayon[Origine={(-3,-2)},Echelle=0.75,Rotation=45,Couleur=DarkBlue]
+	\tkzCrayon[Origine={(1,-4)},Longueur=10,Rotation=-30,Couleur=Green]
+	\tkzCrayon[Origine={(-3,3)},Echelle=1.25,Rotation=195,Couleur=orange]
+\end{tikzpicture}
+\end{PresentationCode}
+
+\pagebreak
+
+\section{La règle graduée}
+
+\subsection{La commande}
+
+\begin{cautionblock}
+Le package propose l'outil \textsf{Règle graduée}.
+
+La forme générale de la règle est \textit{fixée}, mais la règle peut être \textit{personnalisée}.
+\end{cautionblock}
+
+\begin{PresentationCode}{tikz lower}
+\tkzRegle
+\end{PresentationCode}
+
+\subsection{Clés et options}
+
+\begin{tipblock}
+Quelques \Cle{clés} de personnalisation sont disponibles :
+
+\begin{itemize}
+	\item \Cle{Longueur} pour la taille, en cm, de la règle ;\hfill~(défaut : \Cle{12} et mini \Cle{3})
+	\item \Cle{Largeur} pour la largeur, en cm, de la règle ;\hfill~(défaut : \Cle{1.5} et mini \Cle{1.25})
+	\item \Cle{Origine} pour le placer la règle (au niveau du $0$) ;\hfill~(défaut : \Cle{\{(0,0)\}})
+	\item \Cle{Rotation} pour pivoter la règle (au niveau du $0$) ;\hfill~(défaut : \Cle{0})
+	\item \Cle{Echelle} pour l'échelle globale de la règle ;\hfill~(défaut : \Cle{1})
+	\item \Cle{Couleur} pour la couleur des éléments de la règle ;\hfill~(défaut : \Cle{black})
+	\item le booléen \Cle{Fond} pour afficher une couleur de fond pour la règle ;\hfill~(défaut : \Cle{false})
+	\item \Cle{CouleurFond} pour la couleur du fond de la règle ;\hfill~(défaut : \Cle{black})
+	\item \Cle{Opacite} pour régler l'opacité du fond de la règle ;\hfill~(défaut : \Cle{0.5})
+	\item le booléen \Cle{AfficheValeurs} pour afficher les valeurs des graduations ;\hfill~(défaut : \Cle{true})
+	\item \Cle{EchelleValeurs} pour l'échelle (relative) des valeurs ;\hfill~(défaut : \Cle{0.8})
+	\item \Cle{PosVal} pour spécifier la position (haut, milieu, etc) des valeurs, parmi \Cle{h/m/b/hb}.
+	
+	\hfill~(défaut : \Cle{m})
+\end{itemize}
+
+À noter que pour la clé \Cle{Rotation}, il est possible de préciser un deuxième point, et dans ce cas la clé sera précisée sous la forme \Cle{Rotation=auto/pt}. Dans \textbf{ce cas}, les points \textit{support} \textbf{devront} avoir été déclarés au préalable !
+\end{tipblock}
+
+\begin{noteblock}
+Pour des exemples de personnalisation, une grille ainsi que les points \textit{support} seront rajoutés.
+
+\smallskip
+
+Toutes les \Cle{clés} ne seront pas présentées de manière indépendante, mais parfois elles seront \textit{cumulées} pour éviter de surcharger la sortie.
+\end{noteblock}
+
+\begin{PresentationCode}{listing only}
+%environnement tikz
+\coordinate (K) at (1,-3) ;
+\coordinate (C) at (6,-8) ;
+\tkzRegle[Fond,CouleurFond=red]
+\tkzRegle[Longueur=13,Largeur=2,Rotation=auto/C,Couleur=ForestGreen, Origine=K,Fond,PosVal=hb]
+\tkzRegle[Largeur=1.25,Longueur=9,Couleur=blue,Rotation=20,Origine={(0,3)}, AfficheValeurs=false]
+\end{PresentationCode}
+
+\begin{PresentationCode}{text only}
+\begin{tikzpicture}
+	\affichegrille{-1}{13}{-14}{7}
+	\coordinate (K) at (1,-3) ;
+	\coordinate (C) at (6,-8) ;
+	\pointsutiles{(0,0),(1,-3),(0,3),(6,-8)}
+	\tkzRegle[Fond,CouleurFond=red]
+	\tkzRegle[Longueur=13,Largeur=2,Rotation=auto/C,Couleur=ForestGreen, Origine=K,Fond,PosVal=hb]
+	\tkzRegle[Largeur=1.25,Longueur=9,Couleur=blue,Rotation=20,Origine={(0,3)},AfficheValeurs=false]
+\end{tikzpicture}
+\end{PresentationCode}
+
+\pagebreak
+
+\section{La règle-repère}
+
+\subsection{La commande}
+
+\begin{cautionblock}
+Le package propose l'outil \textsf{Règle repère}.
+
+La forme générale de la règle-repère est \textit{fixée}, mais la règle-repère peut être \textit{personnalisée}.
+\end{cautionblock}
+
+\begin{PresentationCode}{tikz lower}
+\tkzRegleRepere
+\end{PresentationCode}
+
+\subsection{Clés et options}
+%
+\begin{tipblock}
+Quelques \Cle{clés} de personnalisation sont disponibles :
+
+\begin{itemize}
+	\item \Cle{Longueur} pour la taille (\textit{paire}), en cm, de la règle-repère ;\hfill~(défaut : \Cle{12} et mini \Cle{4})
+	\item \Cle{Largeur} pour la largeur, en cm, de la règle-repère ;\hfill~(défaut : \Cle{4} et mini \Cle{4})
+	\item \Cle{Origine} pour le placer la règle-repère (au niveau du $0$) ;\hfill~(défaut : \Cle{\{(0,0)\}})
+	\item \Cle{Rotation} pour pivoter la règle-repère (au niveau du $0$) ;\hfill~(défaut : \Cle{0})
+	\item \Cle{Echelle} pour l'échelle globale de la règle-repère ;\hfill~(défaut : \Cle{1})
+	\item \Cle{Couleur} pour la couleur des éléments de la règle-repère ;\hfill~(défaut : \Cle{black})
+	\item le booléen \Cle{Fond} pour afficher une couleur de fond pour la règle-repère ;
+	
+	\hfill~(défaut : \Cle{false})
+	\item \Cle{CouleurFond} pour la couleur du fond de la règle-repère ;\hfill~(défaut : \Cle{black})
+	\item \Cle{Opacite} pour régler l'opacité du fond de la règle-repère ;\hfill~(défaut : \Cle{0.5})
+	\item le booléen \Cle{AfficheValeurs} pour afficher les valeurs des graduations ;\hfill~(défaut : \Cle{true})
+	\item \Cle{EchelleValeurs} pour l'échelle (relative) des valeurs ;\hfill~(défaut : \Cle{0.8})
+	\item le booléen \Cle{Retourne} pour \textit{inverser la position des graduations}.
+	
+	\hfill~(défaut : \Cle{false})
+\end{itemize}
+
+À noter que pour la clé \Cle{Rotation}, il est possible de préciser un deuxième point, et dans ce cas la clé sera précisée sous la forme \Cle{Rotation=auto/pt}. Dans \textbf{ce cas}, les points \textit{support} \textbf{devront} avoir été déclarés au préalable !
+\end{tipblock}
+
+\begin{noteblock}
+Pour des exemples de personnalisation, une grille ainsi que les points \textit{support} seront rajoutés.
+
+\smallskip
+
+Toutes les \Cle{clés} ne seront pas présentées de manière indépendante, mais parfois elles seront \textit{cumulées} pour éviter de surcharger la sortie.
+\end{noteblock}
+
+\begin{PresentationCode}{listing only}
+%environnement tikz
+\coordinate (U) at (1,-5) ;
+\coordinate (V) at (9,-7) ;
+\tkzRegleRepere[Fond,CouleurFond=red]
+\tkzRegleRepere[Longueur=8,Rotation=auto/V,Couleur=ForestGreen, Origine=U,Fond,AfficheValeurs=false]
+\tkzRegleRepere[Longueur=18,Echelle=0.5,Couleur=blue,Rotation=20, Origine={(3,3.25)},Retourne]
+\end{PresentationCode}
+
+\begin{PresentationCode}{text only}
+\begin{tikzpicture}
+	\affichegrille{-1}{13}{-11}{7}
+	\coordinate (U) at (1,-5) ;
+	\coordinate (V) at (9,-7) ;
+	\pointsutiles{(0,0),(1,-5),(3,3.25),(9,-7)}
+	\tkzRegleRepere[Fond,CouleurFond=red]
+	\tkzRegleRepere[Longueur=8,Rotation=auto/V,Couleur=ForestGreen, Origine=U,Fond,AfficheValeurs=false]
+	\tkzRegleRepere[Longueur=18,Echelle=0.5,Couleur=blue,Rotation=20,Origine={(3,3.25)},Retourne]
+\end{tikzpicture}
+\end{PresentationCode}
+
+\pagebreak
+
+\section{L'équerre}
+
+\subsection{La commande}
+
+\begin{cautionblock}
+Le package propose l'outil \textsf{Équerre}.
+
+La forme générale de l'équerre (angles 60/30) est \textit{fixée}, mais l'équerre peut être \textit{personnalisée}.
+\end{cautionblock}
+
+\begin{PresentationCode}{tikz lower}
+\tkzEquerre
+\end{PresentationCode}
+
+\subsection{Clés et options}
+
+\begin{tipblock}
+Quelques \Cle{clés} de personnalisation sont disponibles :
+
+\begin{itemize}
+	\item \Cle{Longueur} pour la longueur, en cm, de l'équerre ;\hfill~(défaut : \Cle{10} et mini \Cle{4.5})
+	\item \Cle{Origine} pour le placer l'équerre (au niveau du coin) ;\hfill~(défaut : \Cle{\{(0,0)\}})
+	\item \Cle{Rotation} pour pivoter l'équerre (au niveau du coin) ;\hfill~(défaut : \Cle{0})
+	\item \Cle{Echelle} pour l'échelle globale de l'équerre ;\hfill~(défaut : \Cle{1})
+	\item \Cle{EchelleValeurs} pour l'échelle (relative) des valeurs ;\hfill~(défaut : \Cle{0.8})
+	\item \Cle{Couleur} pour la couleur des éléments de l'équerre ;\hfill~(défaut : \Cle{black})
+	\item le booléen \Cle{Fond} pour afficher une couleur de fond pour l'équerre ;\hfill~(défaut : \Cle{false})
+	\item \Cle{CouleurFond} pour la couleur du fond de l'équerre ;\hfill~(défaut : \Cle{black})
+	\item \Cle{Opacite} pour régler l'opacité du fond de l'équerre ;\hfill~(défaut : \Cle{0.5})
+	\item le booléen \Cle{PetitCote} dans le cas d'un placement par deux points. \hfill~(défaut \Cle{false})
+\end{itemize}
+
+À noter que pour la clé \Cle{Rotation}, il est possible de préciser un deuxième point, et dans ce cas la clé sera précisée sous la forme \Cle{Rotation=auto/pt}. Dans \textbf{ce cas}, les points \textit{support} \textbf{devront} avoir été déclarés au préalable !
+
+Le booléen \Cle{PetitCote} permet de forcer le placement de l'équerre sur le petit côté.
+\end{tipblock}
+
+\begin{PresentationCode}{listing only}
+%environnement tikz
+\coordinate (P) at (8,6) ;
+\coordinate (Q) at (11,10) ;
+\tkzEquerre[Fond]
+\tkzEquerre[Echelle=0.61,Origine=P,Couleur=DarkBlue,Rotation=auto/Q]
+\tkzEquerre[Longueur=10,Origine={(2.5,-1)},Couleur=red,Rotation=-105]
+\end{PresentationCode}
+
+\begin{PresentationCode}{text only}
+\begin{tikzpicture}
+	\affichegrille{-1}{13}{-7}{11}
+	\coordinate (P) at (8,6) ;
+	\coordinate (Q) at (11,10) ;
+	\pointsutiles{(0,0),(8,6),(2.5,-1),(11,10)}
+	\tkzEquerre[Fond]
+	\tkzEquerre[Echelle=0.61,Origine=P,Couleur=DarkBlue,Rotation=auto/Q]
+	\tkzEquerre[Longueur=10,Origine={(2.5,-1)},Couleur=red,Rotation=-105]
+\end{tikzpicture}
+\end{PresentationCode}
+
+\pagebreak
+
+\section{Les rapporteurs (180 \&{} 360)}
+
+\subsection{La commande}
+
+\begin{cautionblock}
+Le package propose l'outil \textsf{Rapporteur}.
+
+La forme générale du rapporteur (largeur $7,5$~cm) est \textit{fixée}, mais le rapporteur peut être \textit{personnalisé}.
+\end{cautionblock}
+
+\begin{PresentationCode}{tikz lower}
+\tkzRapporteur
+\end{PresentationCode}
+
+\begin{PresentationCode}{tikz lower}
+\tkzRapporteur[Complet]
+\end{PresentationCode}
+
+\subsection{Clés et options}
+
+\begin{tipblock}
+Quelques \Cle{clés} de personnalisation sont disponibles :
+
+\begin{itemize}
+	\item le booléen \Cle{Complet} pour afficher la version \og 360 \fg{};\hfill~(défaut : \Cle{false})
+	\item \Cle{Origine} pour le placer le rapporteur (au niveau du \textit{centre}) ;\hfill~(défaut : \Cle{\{(0,0)\}})
+	\item \Cle{Rotation} pour pivoter le rapporteur (au niveau du \textit{centre}) ;\hfill~(défaut : \Cle{0})
+	\item \Cle{Echelle} pour l'échelle globale du rapporteur ;\hfill~(défaut : \Cle{1})
+	\item \Cle{Couleur} pour la couleur des éléments du rapporteur ;\hfill~(défaut : \Cle{black})
+	\item le booléen \Cle{Fond} pour afficher une couleur de fond ;\hfill~(défaut : \Cle{false})
+	\item \Cle{CouleurFond} pour la couleur du fond du rapporteur ;\hfill~(défaut : \Cle{black})
+	\item \Cle{Opacite} pour régler l'opacité du fond du rapporteur ;\hfill~(défaut : \Cle{0.5})
+	\item le booléen \Cle{GraduationsInt} pour afficher les grad. int. (mode 180) ; \hfill~(défaut : \Cle{false})
+	\item le booléen \Cle{AfficheAngles} pour afficher les valeurs des angles.\hfill~(défaut : \Cle{true})
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{PresentationCode}{listing only}
+%environnement tikz
+\tkzRapporteur[Fond,CouleurFond=purple,GraduationsInt]
+\tkzRapporteur[Origine={(-2,-3)},Rotation=-45,Couleur=ForestGreen,Echelle=0.5]
+\tkzRapporteur[Complet,Origine={(8,-3)},Rotation=30,Couleur=DarkBlue, Echelle=0.75]
+\tkzRapporteur[Origine={(7,1)},Rotation=15,Couleur=orange, Echelle=0.75,AfficheAngles=false]
+\tkzRapporteur[Complet,Origine={(8,-3)},Rotation=30,Couleur=DarkBlue, Echelle=0.75]
+\tkzRapporteur[Complet,Origine={(2,-4)},Rotation=-90,Couleur=red, Echelle=0.5,AfficheAngles=false,Fond,CouleurFond=yellow]
+\end{PresentationCode}
+
+\begin{PresentationCode}{text only}
+\begin{tikzpicture}
+	\affichegrille{-4}{11}{-6}{4}
+	\pointsutiles{(0,0),(-2,-3),(8,-3),(7,1),(2,-4)}
+	\tkzRapporteur[Fond,CouleurFond=purple,GraduationsInt]
+	\tkzRapporteur[Origine={(-2,-3)},Rotation=-45,Couleur=ForestGreen,Echelle=0.5]
+	\tkzRapporteur[Complet,Origine={(8,-3)},Rotation=30,Couleur=DarkBlue, Echelle=0.75]
+	\tkzRapporteur[Origine={(7,1)},Rotation=15,Couleur=orange, Echelle=0.75,AfficheAngles=false]
+	\tkzRapporteur[Complet,Origine={(8,-3)},Rotation=30,Couleur=DarkBlue, Echelle=0.75]
+	\tkzRapporteur[Complet,Origine={(2,-4)},Rotation=-90,Couleur=red,Echelle=0.5,AfficheAngles=false,Fond,CouleurFond=yellow]
+\end{tikzpicture}
+\end{PresentationCode}
+
+\pagebreak
+
+\pagebreak
+
+\section{Le pourcenteur}
+
+\subsection{La commande}
+
+\begin{cautionblock}
+Le package propose l'outil \textsf{Pourcenteur}.
+
+La forme générale du rapporteur (largeur $6$~cm) est \textit{fixée}, mais le pourcenteur peut être \textit{personnalisé}.
+\end{cautionblock}
+
+\begin{PresentationCode}{tikz lower}
+\tkzPourcenteur
+\end{PresentationCode}
+
+\subsection{Clés et options}
+
+\begin{tipblock}
+Quelques \Cle{clés} de personnalisation sont disponibles :
+
+\begin{itemize}
+	\item \Cle{Origine} pour le placer le pourcenteur (au niveau du \textit{centre}) ;\hfill~(défaut : \Cle{\{(0,0)\}})
+	\item \Cle{Rotation} pour pivoter le pourcenteur (au niveau du \textit{centre}) ;\hfill~(défaut : \Cle{0})
+	\item \Cle{Echelle} pour l'échelle globale du pourcenteur ;\hfill~(défaut : \Cle{1})
+	\item \Cle{Couleur} pour la couleur des éléments du pourcenteur ;\hfill~(défaut : \Cle{black})
+	\item le booléen \Cle{Fond} pour afficher une couleur de fond ;\hfill~(défaut : \Cle{false})
+	\item \Cle{CouleurFond} pour la couleur du fond du pourcenteur ;\hfill~(défaut : \Cle{black})
+	\item \Cle{Opacite} pour régler l'opacité du fond du pourcenteur ;\hfill~(défaut : \Cle{0.5})
+	\item le booléen \Cle{Decoration} pour afficher les \textit{décorations d'intérieur} ; \hfill~(défaut : \Cle{true})
+	\item le booléen \Cle{AfficheValeurs} pour afficher les valeurs des pourcentages.\hfill~(défaut : \Cle{true})
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\pagebreak
+
+\begin{PresentationCode}{listing only}
+%environnement tikz
+\tkzPourcenteur[Fond,CouleurFond=purple]
+\tkzPourcenteur[Origine={(7,1)},Rotation=-45,Couleur=ForestGreen,Echelle=0.75]
+\tkzPourcenteur[Decoration=false,AfficheValeurs=false,Origine={(9,-4)},Rotation=30, Couleur=DarkBlue,Fond,CouleurFond=DarkBlue,Echelle=0.66]
+\tkzPourcenteur[Origine={(3,-4)},Rotation=90,Couleur=orange,Fond,CouleurFond=orange, Echelle=0.33]
+\end{PresentationCode}
+
+\begin{PresentationCode}{text only}
+\begin{tikzpicture}
+	\affichegrille{-4}{11}{-7}{4}
+	\pointsutiles{(0,0),(7,1),(9,-4)}
+	\tkzPourcenteur[Fond,CouleurFond=purple]
+	\tkzPourcenteur[Origine={(7,1)},Rotation=-45,Couleur=ForestGreen,Echelle=0.75]
+	\tkzPourcenteur[Decoration=false,AfficheValeurs=false,Origine={(9,-4)},Rotation=30,Couleur=DarkBlue, Fond,CouleurFond=DarkBlue,Echelle=0.66]
+	\tkzPourcenteur[Origine={(3,-4)},Rotation=90,Couleur=orange, Fond,CouleurFond=orange,Echelle=0.33]
+\end{tikzpicture}
+\end{PresentationCode}
+
+\pagebreak
+
+\section{La réquerre}
+
+\subsection{La commande}
+
+\begin{cautionblock}
+Le package propose l'outil \textsf{Réquerre}.
+
+La forme générale de la réquerre est \textit{fixée}, mais la réquerre peut être \textit{personnalisée}.
+\end{cautionblock}
+
+\begin{PresentationCode}{tikz lower}
+\tkzRequerre
+\end{PresentationCode}
+
+\subsection{Clés et options}
+
+\begin{tipblock}
+Quelques \Cle{clés} de personnalisation sont disponibles :
+
+\begin{itemize}
+	\item \Cle{Longueur} pour la taille, en cm, de la réquerre ;\hfill~(défaut : \Cle{12} et mini \Cle{6})
+	\item \Cle{Largeur} pour la largeur, en cm, la réquerre ;\hfill~(défaut : \Cle{3} et mini \Cle{1.5})
+	\item \Cle{Origine} pour le placer la réquerre (au niveau du \textit{centre}) ;\hfill~(défaut : \Cle{\{(0,0)\}})
+	\item \Cle{Rotation} pour pivoter la réquerre (au niveau du coin) ;\hfill~(défaut : \Cle{0})
+	\item \Cle{Echelle} pour l'échelle globale de la réquerre ;\hfill~(défaut : \Cle{1})
+	\item \Cle{Couleur} pour la couleur des éléments de la réquerre ;\hfill~(défaut : \Cle{black})
+	\item le booléen \Cle{Fond} pour afficher une couleur de fond pour la réquerre ;\hfill~(défaut : \Cle{false})
+	\item \Cle{CouleurFond} pour la couleur du fond de la réquerre ;\hfill~(défaut : \Cle{black})
+	\item \Cle{Opacite} pour régler l'opacité du fond de la réquerre ;\hfill~(défaut : \Cle{0.5})
+	\item le booléen \Cle{AfficheValeurs} pour afficher les valeurs des graduations ;\hfill~(défaut : \Cle{true})
+	\item \Cle{EchelleValeurs} pour l'échelle (relative) des valeurs.\hfill~(défaut : \Cle{0.8})
+\end{itemize}
+
+À noter que pour la clé \Cle{Rotation}, il est possible de préciser un deuxième point, et dans ce cas la clé sera précisée sous la forme \Cle{Rotation=auto/pt}. Dans \textbf{ce cas}, les points \textit{support} \textbf{devront} avoir été déclarés au préalable !
+\end{tipblock}
+
+\begin{PresentationCode}{listing only}
+%environnement tikz
+\coordinate (F) at (1,-5) ;
+\coordinate (G) at (4,-4) ;
+\tkzRequerre[Fond,CouleurFond=yellow]
+\tkzRequerre[Echelle=0.5,Origine={(-5,-6)},Rotation=-80,Couleur=ForestGreen, Longueur=10,Largeur=3.5,AfficheValeurs=false]
+\tkzRequerre[Origine=F,Rotation=auto/G,Couleur=DarkBlue, Longueur=9,Largeur=2.75]
+\end{PresentationCode}
+
+\begin{PresentationCode}{text only}
+\begin{tikzpicture}
+	\coordinate (F) at (1,-5) ;
+	\coordinate (G) at (4,-4) ;
+	\affichegrille{-8}{7}{-9}{1}
+	\pointsutiles{(0,0),(-5,-6),(1,-5),(4,-4)}
+	\tkzRequerre[Fond,CouleurFond=yellow]
+	\tkzRequerre[Echelle=0.5,Origine={(-5,-6)},Rotation=-80,Couleur=ForestGreen, Longueur=10,Largeur=3.5,AfficheValeurs=false]
+	\tkzRequerre[Origine=F,Rotation=auto/G,Couleur=DarkBlue, Longueur=9,Largeur=2.75]
+\end{tikzpicture}
+\end{PresentationCode}
+
+\pagebreak
+
+\section{La \og rappéquerre \fg}
+
+\subsection{La commande}
+
+\begin{cautionblock}
+Le package propose l'outil \textsf{RappÉquerre}.
+
+La forme générale de la rappéquerre est \textit{fixée}, mais la rappéquerre peut être \textit{personnalisée}.
+\end{cautionblock}
+
+\begin{PresentationCode}{tikz lower}
+\tkzRappEquerre
+\end{PresentationCode}
+
+\subsection{Clés et options}
+
+\begin{tipblock}
+Quelques \Cle{clés} de personnalisation sont disponibles :
+
+\begin{itemize}
+	\item \Cle{Largeur} pour la (demie-)largeur, en cm, de la rappéquerre ;\hfill~(défaut : \Cle{6} et mini \Cle{3})
+	\item \Cle{Origine} pour le placer la rappéquerre (au niveau du coin) ;\hfill~(défaut : \Cle{\{(0,0)\}})
+	\item \Cle{Rotation} pour pivoter la rappéquerre (au niveau du coin) ;\hfill~(défaut : \Cle{0})
+	\item \Cle{Echelle} pour l'échelle globale de la rappéquerre ;\hfill~(défaut : \Cle{1})
+	\item \Cle{EchelleValeurs} pour l'échelle des valeurs ;\hfill~(défaut : \Cle{1})
+	\item \Cle{Couleur} pour la couleur des éléments de la rappéquerre ;\hfill~(défaut : \Cle{black})
+	\item le booléen \Cle{Fond} pour afficher une couleur de fond pour la rappéquerre ;\hfill~(défaut : \Cle{false})
+	\item \Cle{CouleurFond} pour la couleur du fond de la rappéquerre ;
+	
+	\hfill~(défaut : \Cle{black})
+	\item \Cle{Opacite} pour régler l'opacité du fond de la rappéquerre ;\hfill~(défaut : \Cle{0.5})
+	\item le booléen \Cle{AfficheAngles} pour afficher les valeurs des angles ;\hfill~(défaut : \Cle{true})
+	\item le booléen \Cle{AfficheValeurs} pour afficher les valeurs des graduations.\hfill~(défaut : \Cle{true})
+\end{itemize}
+
+À noter que pour la clé \Cle{Rotation}, il est possible de préciser un deuxième point, et dans ce cas la clé sera précisée sous la forme \Cle{Rotation=auto/pt}. Dans \textbf{ce cas}, les points \textit{support} \textbf{devront} avoir été déclarés au préalable !
+\end{tipblock}
+
+\begin{PresentationCode}{listing only}
+%environnement tikz
+\coordinate (S) at (2,-10) ;
+\coordinate (T) at (0,-10.5) ;
+\tkzRappEquerre[Fond,Ombre]
+\tkzRappEquerre[Origine={(-5,-9)},Rotation=150,Couleur=ForestGreen,Echelle=0.5,Ombre]
+\tkzRappEquerre[Origine=S,Rotation=auto/T,Couleur=DarkBlue, Largeur=4,Fond,AfficheValeurs=false,AfficheAngles=false,CouleurFond=DarkBlue]
+\end{PresentationCode}
+
+\begin{PresentationCode}{text only}
+\begin{tikzpicture}
+	\affichegrille{-8}{7}{-11}{1}
+	\coordinate (S) at (2,-10) ;
+	\coordinate (T) at (0,-10.5) ;
+	\pointsutiles{(0,0),(-5,-9),(2,-10),(0,-10.5)}
+	\tkzRappEquerre[Fond,Ombre]
+	\tkzRappEquerre[Origine={(-5,-9)},Rotation=150,Couleur=ForestGreen,Echelle=0.5,Ombre]
+	\tkzRappEquerre[Origine=S,Rotation=auto/T,Couleur=DarkBlue, Largeur=4,Fond,AfficheValeurs=false,AfficheAngles=false,CouleurFond=DarkBlue]
+\end{tikzpicture}
+\end{PresentationCode}
+
+\pagebreak
+
+\section{Le compas}
+
+\subsection{La commande}
+
+\begin{cautionblock}
+Le package propose l'outil \textsf{Compas}.
+
+L'aspect général du compas est \textit{fixé}, mais le compas peut être \textit{personnalisé}.
+\end{cautionblock}
+
+\begin{PresentationCode}{tikz lower}
+\coordinate (A) at (0,0) ;
+\coordinate (B) at (2.5,0) ;
+\tkzCompas{A}{B}
+\end{PresentationCode}
+
+\subsection{Arguments, clés et options}
+
+\begin{tipblock}
+Les deux arguments \textit{obligatoires} sont les \textbf{nœuds} de la pointe et de la mine du compas, donnés par exemple grâce aux commandes \texttt{\textbackslash coordinate} ou \texttt{\textbackslash node}.
+
+\medskip
+
+Quelques \Cle{clés} de personnalisation sont disponibles :
+
+\begin{itemize}
+	\item le booléen \Cle{AfficheCrayon} pour afficher le crayon ;\hfill~(défaut : \Cle{true})
+	\item \Cle{EchelleCrayon} pour l'échelle du crayon ;\hfill~(défaut : \Cle{1})
+	\item \Cle{CouleurCrayon} pour la couleur du crayon ;\hfill~(défaut : \Cle{red})
+	\item \Cle{LongueurCrayon} pour la longueur du crayon ;\hfill~(défaut : \Cle{5})
+	\item \Cle{LongueurBranches} pour la taille des branches du compas ;\hfill~(défaut : \Cle{6})
+	\item le booléen \Cle{CouleurCompas} pour la couleur du compas ;\hfill~(défaut : \Cle{gray})
+	\item le booléen \Cle{Retourne} pour forcer le retournement \og horizontal \fg{} du compas ;
+	
+	\hfill~(défaut : \Cle{false})
+	\item \Cle{Echelle} pour l'échelle du compas (à utiliser avec précaution\ldots) ;\hfill~(défaut : \Cle{1})
+	\item \Cle{UniteTikz} (à utiliser avec précaution\ldots) pour spécifier une unité, par défaut elle est calculée (et stockée) en interne ;
+	
+	\hfill~(défaut : \Cle{\textbackslash TmpUniteX})
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{PresentationCode}{listing only}
+%environnement tikz
+\tkzCompas{A}{B}
+\tkzCompas[LongueurBranches=4,CouleurCrayon=blue]{C}{D}
+\tkzCompas[LongueurBranches=3,CouleurCrayon=orange,Retourne, LongueurCrayon=3,CouleurCompas=black]{F}{E}
+\tkzCompas[LongueurBranches=3,CouleurCrayon=Green, LongueurCrayon=3,CouleurCompas=purple]{F}{E}
+\tkzCompas[Echelle=0.75,Retourne,CouleurCrayon=cyan,CouleurCompas=pink]{G}{H}
+\end{PresentationCode}
+
+\begin{PresentationCode}{text only}
+\begin{tikzpicture}
+	\affichegrille{-6}{9}{-6}{7}
+	\pointsutiles{(0,0),(2,1),(-4,-5),(-1,-5),(5,-2),(8,-3),(8.5,6),(8.5,2.5)}
+	\coordinate (A) at (0,0) ; \draw (A) node[below] {A} ;
+	\coordinate (B) at (2,1) ; \draw (B) node[below] {B} ;
+	\coordinate (C) at (-4,-5) ; \draw (C) node[below] {C} ;
+	\coordinate (D) at (-1,-5) ; \draw (D) node[below] {D} ;
+	\coordinate (E) at (5,-2) ; \draw (E) node[left] {E} ;
+	\coordinate (F) at (8,-3) ; \draw (F) node[right] {F} ;
+	\coordinate (G) at (8.5,6) ; \draw (G) node[right] {G} ;
+	\coordinate (H) at (8.5,2.5) ; \draw (H) node[right] {H} ;
+	\tkzCompas{A}{B}
+	\tkzCompas[LongueurBranches=4,CouleurCrayon=blue]{C}{D}
+	\tkzCompas[LongueurBranches=3,CouleurCrayon=orange,Retourne, LongueurCrayon=3,CouleurCompas=black]{F}{E}
+	\tkzCompas[LongueurBranches=3,CouleurCrayon=Green, LongueurCrayon=3,CouleurCompas=purple]{F}{E}
+	\tkzCompas[Echelle=0.75,Retourne,CouleurCrayon=cyan,CouleurCompas=pink]{G}{H}
+\end{tikzpicture}
+\end{PresentationCode}
+
+\pagebreak
+
+\part{Exemple}
+
+\begin{PresentationCode}{listing only}
+\tkzRegle[Fond,AfficheValeurs,Longueur=15,Rotation=-20,Echelle=0.5,CouleurFond=blue]
+\tkzEquerre[Fond,AfficheValeurs,Longueur=12,Origine={(-20:4)}, Rotation=-20,CouleurFond=red,Echelle=0.5]
+\tkzCrayon[Couleur=ForestGreen,Origine={(-20:4)},Rotation=30,Echelle=0.5]
+\draw (10,-5)--++(20:5) (10,-5)--++(50:5) ;
+\tkzRapporteur[Fond,CouleurFond=purple,Origine={(10,-5)},Echelle=0.5,Rotation=20]
+\tkzRappEquerre[Fond,Origine={(9,1)},Rotation=90,CouleurFond=ForestGreen,Echelle=0.5]
+\tkzCrayon[Couleur=yellow,Origine={(9,-1)},Rotation=20,Echelle=0.5]
+\coordinate (AA) at ($(10,-5)+(50:{0.5*3.75})$) ;
+\tkzCrayon[Couleur=orange,Origine={AA},Rotation=-20,Echelle=0.5,Longueur=6]
+\tkzRequerre[Fond,AfficheValeurs,CouleurFond=yellow,Origine={(3,-3.5)}, Rotation=-30,Echelle=0.5]
+\tkzCrayon[Couleur=gray,Origine={(3,-3)},Rotation=-98,Echelle=0.5]
+\tkzRegleRepere[Fond,CouleurFond=yellow,AfficheValeurs=false,Echelle=0.5, Origine={(1,5)},Longueur=8]
+\coordinate (FG) at (-1,1) ; \coordinate (FH) at (1,1.5) ;
+\tkzCompas[LongueurBranches=3,LongueurCrayon=2]{FG}{FH}
+\end{PresentationCode}
+
+\begin{PresentationCode}{text only}
+\begin{tikzpicture}[scale=0.9]
+	\affichegrille{-2}{13}{-8}{5}
+	%\pointsutiles{(0,0),(2,1),(-4,-5),(-1,-5),(5,-2),(8,-3),(8.5,6),(8.5,2.5)}
+	\tkzRegle[Fond,Longueur=8,Rotation=-20,CouleurFond=blue]
+	\tkzEquerre
+	[Fond,Longueur=7,Origine={(-20:4)},Rotation=-20,CouleurFond=red]
+	\tkzCrayon[Couleur=ForestGreen,Origine={(-20:4)},Rotation=30,Longueur=3]
+	\draw (10,-5)--++(20:3) (10,-5)--++(50:3) ;
+	\tkzRapporteur[Fond,CouleurFond=purple,Origine={(10,-5)},Echelle=0.5,Rotation=20]
+	\tkzRappEquerre[Fond,Origine={(9,1)},Rotation=90,CouleurFond=ForestGreen,Largeur=4]
+	\tkzCrayon[Couleur=yellow,Origine={(9,-1)},Rotation=20,Longueur=3]
+	\coordinate (AA) at ($(10,-5)+(50:{0.5*3.75})$) ;
+	\tkzCrayon[Couleur=orange,Origine={AA},Rotation=-20,Longueur=6,Echelle=0.5]
+	\tkzRequerre[Fond,AfficheValeurs,CouleurFond=yellow,Origine={(3,-3.5)},Rotation=-30,Longueur=7,Largeur=2.5]
+	\tkzCrayon[Couleur=gray,Origine={(3,-3.5)},Rotation=-98,Longueur=3]
+	\tkzRegleRepere[Fond,CouleurFond=yellow,AfficheValeurs=false,Echelle=0.5,Origine={(1,5)},Longueur=8]
+	\tkzCrayon[Couleur=pink,Origine={(2,3)},Rotation=-135,Longueur=2.75]
+	%compas
+	\coordinate (FG) at (-1,1) ; \coordinate (FH) at (1,1.5) ;
+	\tkzCompas[LongueurBranches=3,LongueurCrayon=2]{FG}{FH}
+\end{tikzpicture}
+\end{PresentationCode}
+\end{document}

@@ -1,0 +1,827 @@
+% Author.........: C. Pierquet
+% licence........: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{OutilsGeomTikz}[2024/08/29 v0.1.6 Outils geometriques en TikZ]
+% 0.1.6		Correction de bugs avec pdflatex + amélioration de la gestion des rotations/échelles des labels (tks Cyril I. ^^)
+% 0.1.5		Modification de la graduation intérieure pour les rapporteurs 180°
+% 0.1.4		Possibilité de positionner les outils avec deux points (angle calculé automatiquement)
+% 0.1.3		Ajout du pourcenteur
+% 0.1.2		Ajout de la règle-repère
+% 0.1.1		Correction d'un bug avec une ancienne syntaxe [join=...]
+% 0.1.0		Version initiale
+
+%------Packages utiles
+\RequirePackage{tikz,pgffor}
+\RequirePackage{simplekv}
+\RequirePackage{xstring}
+\RequirePackage{nicefrac}
+%\RequirePackage{tkz-euclide}
+%librairies tikz
+\usetikzlibrary{calc,positioning}
+
+%--------Crayon
+% inspiration(s) de https://tex.stackexchange.com/questions/147389/symbols-of-pencil-ruler-and-compass
+\defKV[CrayonGeom]{%
+	Echelle=\def\PENechelle{#1},%
+	Longueur=\def\PENlongueur{#1},%
+	Couleur=\def\PENcouleur{#1},%
+	Origine=\def\PENposOrigin{#1},%
+	Rotation=\def\PENangle{#1}
+}
+
+\setKVdefault[CrayonGeom]{%
+	Echelle=1,%
+	Couleur=red,%
+	Longueur=5,%
+	Origine={(0,0)},%
+	Rotation=0
+}
+
+\NewDocumentCommand\tkzCrayon{ O{} }{%
+	\useKVdefault[CrayonGeom]%
+	\setKV[CrayonGeom]{#1}%
+	\xdef\PENlongueur{\fpeval{max(2.5,\PENlongueur)}}%valeurs mini
+	\begin{scope}[shift={(\PENposOrigin)},rotate=\PENangle,scale=\PENechelle]
+		\fill[\PENcouleur!75] (-0.2,{\PENlongueur-0.3}) -- (0.2,{\PENlongueur-0.3}) -- (0.2,0.8) --(0.1,0.65) -- (0,0.8) -- (-0.1,0.66) -- (-0.2,0.8) -- cycle;
+		\draw[color=white,line width={\PENechelle*1pt}] (0,{\PENlongueur-0.3}) -- (0,0.6);
+		\fill[black] (-0.2,{\PENlongueur-0.6}) -- (0,{\PENlongueur-0.65}) -- (0.2,{\PENlongueur-0.6}) -- (0.2,{\PENlongueur-0.12}) arc(30:150:0.23);
+		\fill[brown!40] (-0.2,0.8) -- (0,0) node[coordinate,pos=0.7] (a) {} -- (0.2,0.8) node[coordinate,pos=0.3] (b) {} -- (0.1,0.65) -- (0,0.8) -- (-0.1,0.66) -- cycle;
+		\fill[\PENcouleur] (a) -- (0,0) -- (b) -- cycle ;
+	\end{scope}
+}
+
+%--------Règle (OK)
+\defKV[RegleGeom]{%
+	Echelle=\def\REGLechelle{#1},%
+	Longueur=\def\REGLlongueur{#1},%
+	Largeur=\def\REGLlargeur{#1},%
+	Couleur=\def\REGLcouleur{#1},%
+	CouleurFond=\def\REGLcouleurfond{#1},%
+	Origine=\xdef\REGLposOrigin{#1},%
+	Rotation=\def\REGLangle{#1},%
+	Opacite=\def\REGLopac{#1},%
+	PosVal=\def\REGLposval{#1},%
+	EchelleValeurs=\def\REGLechlabel{#1}
+}
+
+\setKVdefault[RegleGeom]{%
+	Echelle=1,%
+	Couleur=black,%
+	CouleurFond=black,%
+	Longueur=12,%
+	Largeur=1.5,%
+	Origine={(0,0)},%
+	Rotation=0,%
+	AfficheValeurs=true,%
+	Fond=false,%
+	Opacite=0.5,%
+	PosVal=m,%
+	EchelleValeurs=0.8
+}
+
+\NewDocumentCommand{\tkzRegle}{ O{} }{%
+	\useKVdefault[RegleGeom]%
+	\setKV[RegleGeom]{#1}%
+	\IfSubStr{\REGLangle}{auto/}%
+		{%
+			\StrBehind{\REGLangle}{/}[\tmppointdeux]%
+			\pgfmathanglebetweenpoints{\pgfpointanchor{\REGLposOrigin}{center}}{\pgfpointanchor{\tmppointdeux}{center}}%
+			\edef\REGLangle{\pgfmathresult}%
+		}{}%
+	\xdef\REGLlongueur{\fpeval{max(3,\REGLlongueur)}}%valeurs mini
+	\xdef\REGLlargeur{\fpeval{max(1.5,\REGLlargeur)}}
+	\begin{scope}[shift={(\REGLposOrigin)},rotate=\REGLangle,scale=\REGLechelle,transform shape]
+		\ifboolKV[RegleGeom]{Fond}
+			{%
+				\begin{scope}
+					\fill[draw=none,fill=\REGLcouleurfond!10!white,fill opacity=\REGLopac,even odd rule] (-0.375,0)--({\REGLlongueur+0.375},0) to[bend left=15] ({\REGLlongueur+0.375},{-\REGLlargeur}) -- (-0.375,{-\REGLlargeur}) to[bend left=15] (-0.375,0) (0.5,{-0.5*\REGLlargeur}) circle[radius={0.125*\REGLlargeur}] ;
+				\end{scope}
+			}%
+			{}
+		%bord et trou
+		\draw[semithick,\REGLcouleur] (-0.375,0)--({\REGLlongueur+0.375},0) to[bend left=15] ({\REGLlongueur+0.375},{-\REGLlargeur}) -- (-0.375,{-\REGLlargeur}) to[bend left=15] (-0.375,0) (0.5,{-0.5*\REGLlargeur}) circle[radius={0.125*\REGLlargeur}] ;
+		\foreach \x in {0,0.1,...,\REGLlongueur} {\draw[\REGLcouleur] (\x,0)--++(0,-0.25) (\x,{-\REGLlargeur})--++(0,0.25) ;}
+		\foreach \x in {0,0.5,...,\REGLlongueur} {\draw[\REGLcouleur] (\x,0)--++(0,-0.375) (\x,{-\REGLlargeur})--++(0,0.375) ;}
+		\foreach \x in {0,1,...,\REGLlongueur} {\draw[\REGLcouleur] (\x,0)--++(0,-0.5) (\x,{-\REGLlargeur})--++(0,0.5) ;}
+		\ifboolKV[RegleGeom]{AfficheValeurs}%
+			{%
+				\IfSubStr{\REGLposval}{h}
+					{\foreach \i in {0,1,...,\REGLlongueur} {\draw[\REGLcouleur] (\i,{-0.5}) node[inner sep=1pt,outer sep=1pt,scale={\REGLechlabel},font=\small,below] {$\i$} ;}}
+					{}
+				\IfSubStr{\REGLposval}{m}
+					{\foreach \i in {0,1,...,\REGLlongueur} {\draw[\REGLcouleur] (\i,{-0.5*\REGLlargeur}) node[inner sep=1pt,outer sep=1pt,scale={\REGLechlabel},font=\small] {$\i$} ;}}
+					{}
+				\IfSubStr{\REGLposval}{b}
+					{\foreach \i in {0,1,...,\REGLlongueur} {\draw[\REGLcouleur] (\i,{-\REGLlargeur+0.5}) node[inner sep=1pt,outer sep=1pt,scale={\REGLechlabel},font=\small,above] {\rotatebox{180}{$\fpeval{trunc(\REGLlongueur)-\i}$}} ;}}
+					{}
+			}%
+			{}%
+	\end{scope}
+}
+
+%--------Règle-Repère (OK)
+\defKV[RegleRepereGeom]{%
+	Echelle=\def\REGLREPechelle{#1},%
+	Longueur=\def\REGLREPlongueur{#1},%
+	Largeur=\def\REGLREPlargeur{#1},%
+	Couleur=\def\REGLREPcouleur{#1},%
+	CouleurFond=\def\REGLREPcouleurfond{#1},%
+	Origine=\def\REGLREPposOrigin{#1},%
+	Rotation=\def\REGLREPangle{#1},%
+	Opacite=\def\REGLREPopac{#1},%
+	EchelleValeurs=\def\REGLREPechlabel{#1}
+}
+
+\setKVdefault[RegleRepereGeom]{%
+	Echelle=1,%
+	Couleur=black,%
+	CouleurFond=black,%
+	Longueur=12,%
+	Largeur=4,%
+	Origine={(0,0)},%
+	Rotation=0,%
+	AfficheValeurs=true,%
+	Fond=false,%
+	Opacite=0.5,%
+	Retourne=false,%
+	EchelleValeurs=0.8
+}
+
+\NewDocumentCommand{\tkzRegleRepere}{ O{} }{%
+	\useKVdefault[RegleRepereGeom]%
+	\setKV[RegleRepereGeom]{#1}%
+	\xdef\REGLREPlongueur{\fpeval{max(4,2*round(0.5*\REGLREPlongueur,0))}}%valeurs mini
+	\xdef\REGLREPlargeur{\fpeval{max(4,round(\REGLREPlargeur,0))}}%
+	\IfSubStr{\REGLREPangle}{auto/}%
+		{%
+			\StrBehind{\REGLREPangle}{/}[\tmppointdeux]%
+			\pgfmathanglebetweenpoints{\pgfpointanchor{\REGLREPposOrigin}{center}}{\pgfpointanchor{\tmppointdeux}{center}}%
+			\edef\REGLREPangle{\pgfmathresult}%
+		}{}%
+	\begin{scope}[shift={(\REGLREPposOrigin)},rotate=\REGLREPangle,scale=\REGLREPechelle,transform shape]
+		%bases de la règle-repère
+		\ifboolKV[RegleRepereGeom]{Fond}%
+			{\draw[draw=none,fill=\REGLREPcouleurfond!10!white,fill opacity=\REGLREPopac,rounded corners] (-0.5,0) rectangle++ ({\REGLREPlongueur+1},{-\REGLREPlargeur}) ;}%
+			{}%
+		\draw[semithick,draw=\REGLREPcouleur,rounded corners] (-0.5,0) rectangle++ ({\REGLREPlongueur+1},{-\REGLREPlargeur}) ;
+			\clip (-0.5,0) rectangle++ ({\REGLREPlongueur+1},{-\REGLREPlargeur}) ;
+			\draw[\REGLREPcouleur,densely dotted,xstep=0.2,ystep=0.2] ({-0.5},{-\REGLREPlargeur+1}) grid ({\REGLREPlongueur+1},{-1}) ;
+			\draw[\REGLREPcouleur] ({-0.5},{-\REGLREPlargeur+1}) grid ({\REGLREPlongueur+1},{-1}) ;
+		%graduations
+		\foreach \x in {0,0.1,...,\REGLREPlongueur}
+			{\draw[\REGLREPcouleur] (\x,0)--++(0,-0.25) (\x,{-\REGLREPlargeur})--++(0,0.25) ;}
+		\foreach \x in {0,0.5,...,\REGLREPlongueur}
+			{\draw[\REGLREPcouleur] (\x,0)--++(0,-0.375) (\x,{-\REGLREPlargeur})--++(0,0.375) ;}
+		\foreach \x in {0,1,...,\REGLREPlongueur}
+			{\draw[\REGLREPcouleur] (\x,0)--++(0,-0.5) (\x,{-\REGLREPlargeur})--++(0,0.5) ;}
+		%valeurs
+		\ifboolKV[RegleRepereGeom]{AfficheValeurs}%
+			{%
+				\ifboolKV[RegleRepereGeom]{Retourne}%
+					{%
+						{\foreach \i in {0,1,...,\REGLREPlongueur} {\draw[\REGLREPcouleur] (\i,{-0.5}) node[inner sep=1pt,outer sep=1pt,scale={\REGLREPechlabel},font=\small,below] {$\fpeval{-trunc(0.5*\REGLREPlongueur)+\i}$} ;}}
+						{\foreach \i in {0,1,...,\REGLREPlongueur} {\draw[\REGLREPcouleur] (\i,{-\REGLREPlargeur+0.5}) node[inner sep=1pt,outer sep=1pt,scale={\REGLREPechlabel},font=\small,above] {\rotatebox{180}{$\inteval{\REGLREPlongueur-\i}$}} ;}}
+					}%
+					{%
+						{\foreach \i in {0,1,...,\REGLREPlongueur} {\draw[\REGLREPcouleur] (\i,{-0.5}) node[inner sep=1pt,outer sep=1pt,scale={\REGLREPechlabel},font=\small,below] {$\i$} ;}}
+						{\foreach \i in {0,1,...,\REGLREPlongueur} {\draw[\REGLREPcouleur] (\i,{-\REGLREPlargeur+0.5}) node[inner sep=1pt,outer sep=1pt,scale={\REGLREPechlabel},font=\small,above] {\rotatebox{180}{$\fpeval{trunc(0.5*\REGLREPlongueur)-\i}$}} ;}}
+					}%
+			}
+			{}%
+	\end{scope}
+}
+
+%--------Réquerre (OK)
+\defKV[RequerreGeom]{%
+	Echelle=\def\REQechelle{#1},%
+	Longueur=\def\REQlongueur{#1},%
+	Largeur=\def\REQlargeur{#1},%
+	Couleur=\def\REQcouleur{#1},%
+	CouleurFond=\def\REQcouleurfond{#1},%
+	Origine=\def\REQposOrigin{#1},%
+	Rotation=\def\REQangle{#1},%
+	Opacite=\def\REQopac{#1},%
+	EchelleValeurs=\def\REQechlabel{#1}
+}
+
+\setKVdefault[RequerreGeom]{%
+	Echelle=1,%
+	Couleur=black,%
+	CouleurFond=black,%
+	Longueur=12,%
+	Largeur=3,%
+	Origine={(0,0)},%
+	Rotation=0,%
+	AfficheValeurs=true,%
+	Fond=false,%
+	Opacite=0.5,%
+	EchelleValeurs=0.8
+}
+
+\NewDocumentCommand{\tkzRequerre}{ O{} }{%
+	\useKVdefault[RequerreGeom]%
+	\setKV[RequerreGeom]{#1}%
+	\xdef\REQlongueur{\fpeval{max(6,\REQlongueur)}}%valeurs mini
+	\xdef\REQlargeur{\fpeval{max(1.5,\REQlargeur)}}%
+	\IfSubStr{\REQangle}{auto/}%
+		{%
+			\StrBehind{\REQangle}{/}[\tmppointdeux]%
+			\pgfmathanglebetweenpoints{\pgfpointanchor{\REQposOrigin}{center}}{\pgfpointanchor{\tmppointdeux}{center}}%
+			\edef\REQangle{\pgfmathresult}%
+		}{}%
+	\begin{scope}[shift={(\REQposOrigin)},rotate=\REQangle,scale=\REQechelle,transform shape]
+		\ifboolKV[RequerreGeom]{Fond}
+			{
+				\fill[draw=none,rounded corners,fill=\REQcouleurfond!10!white,fill opacity=\REQopac] ({-\REQlongueur*0.5},0) rectangle ({\REQlongueur*0.5},{-\REQlargeur}) ;
+			}
+			{}
+		\draw[semithick,\REQcouleur,rounded corners] ({-\REQlongueur*0.5},0) rectangle ({\REQlongueur*0.5},{-\REQlargeur}) ;
+		\draw[\REQcouleur] (0,-1)--(0,-\REQlargeur) ;
+		\foreach \x in {0,0.1,...,\fpeval{0.5*\REQlongueur-0.5}} {\draw[\REQcouleur] (\x,0)--(\x,-0.25) (-\x,0)--(-\x,-0.25) ;}
+		\foreach \x in {0,0.5,...,\fpeval{0.5*\REQlongueur-0.5}} {\draw[\REQcouleur] (\x,0)--(\x,-0.375) (-\x,0)--(-\x,-0.375) ;}
+		\foreach \x in {0,1,...,\fpeval{0.5*\REQlongueur-0.5}} {\draw[\REQcouleur] (\x,0)--(\x,-0.5) (-\x,0)--(-\x,-0.5) ;}
+		\foreach \x in {0.7,0.8,...,\REQlargeur} {\draw[\REQcouleur] (-2.65,-\x)--(-2.35,-\x) (2.65,-\x)--(2.35,-\x) ;}
+		\foreach \x in {1,1.5,...,\REQlargeur} {\draw[\REQcouleur] (-2.8,-\x)--(-2.2,-\x) (2.2,-\x)--(2.8,-\x) ;}
+		\begin{scope}
+			\clip ({-\REQlongueur*0.5},0) rectangle ({\REQlongueur*0.5},{-\REQlargeur}) ;
+			\draw[\REQcouleur] (0,-1) rectangle++ (0.2,-0.2) (0,-2) rectangle++ (-0.2,0.2) ;
+			\foreach \x in {1,2,...,\fpeval{\REQlargeur-0.25}} {\draw[\REQcouleur] ({-\REQlongueur*0.5},-\x)--({\REQlongueur*0.5},-\x) ;}
+		\end{scope}
+		\ifboolKV[RequerreGeom]{AfficheValeurs}%
+			{%
+				\draw[\REQcouleur] (0,-0.5) node[inner sep=1pt,outer sep=1pt,scale={\REQechlabel},font=\small,below] {$0$} ;
+				\foreach \i in {1,2,...,\fpeval{0.5*\REQlongueur-0.5}}{%
+					\draw[\REQcouleur] (\i,-0.5) node[inner sep=1pt,outer sep=1pt,scale={\REQechlabel},font=\small,below] {$\i$} ;
+					\draw[\REQcouleur] (-\i,-0.5) node[inner sep=1pt,outer sep=1pt,scale={\REQechlabel},font=\small,below] {$-\i$} ;}
+			}%
+			{}%
+	\end{scope}
+}
+
+%--------Équerre (OK)
+\defKV[EquerreGeom]{%
+	Echelle=\def\EQechelle{#1},%
+	Longueur=\def\EQlongueur{#1},%
+	Couleur=\def\EQcouleur{#1},%
+	CouleurFond=\def\EQcouleurfond{#1},%
+	Origine=\def\EQposOrigin{#1},%
+	Rotation=\def\EQangle{#1},%
+	Opacite=\def\EQopac{#1},%
+	EchelleValeurs=\def\EQechlabel{#1}
+}
+
+\setKVdefault[EquerreGeom]{%
+	Echelle=1,%
+	Couleur=black,%
+	CouleurFond=black,%
+	Longueur=10,%
+	Origine={(0,0)},%
+	Rotation=0,%
+	AfficheValeurs=true,%
+	Fond=false,%
+	Opacite=0.5,%
+	PetitCote=false,%
+	EchelleValeurs=0.8
+}
+
+\NewDocumentCommand{\tkzEquerre}{ O{} }{%
+	\useKVdefault[EquerreGeom]%
+	\setKV[EquerreGeom]{#1}%
+	\xdef\EQlongueur{\fpeval{max(4.5,\EQlongueur)}}%valeurs mini
+	\def\EQlargeur{\fpeval{\EQlongueur*tand(30)}}%
+	\IfSubStr{\EQangle}{auto/}%
+		{%
+			\StrBehind{\EQangle}{/}[\tmppointdeux]%
+			\pgfmathanglebetweenpoints{\pgfpointanchor{\EQposOrigin}{center}}{\pgfpointanchor{\tmppointdeux}{center}}%
+			\ifboolKV[EquerreGeom]{PetitCote}%
+				{%
+					\edef\EQangle{\pgfmathresult}%
+				}%
+				{%
+					\edef\EQangle{\fpeval{\pgfmathresult-90}}%
+				}%
+		}{}%
+	\begin{scope}[shift={(\EQposOrigin)},rotate=\EQangle,scale=\EQechelle,transform shape]
+		\ifboolKV[EquerreGeom]{Fond}
+			{%
+				\begin{scope} %diff extérieur-intérieur
+					\fill[draw=none,fill=\EQcouleurfond!10!white,fill opacity=\EQopac,even odd rule]
+						(0,0) -- ({\EQlargeur},0) -- (0,{\EQlongueur}) -- cycle
+						({1},{1}) -- ({\EQlargeur-sqrt(3)},{1}) -- ({1},{\EQlongueur-(2+sqrt(3))}) -- cycle ;
+				\end{scope}
+			}%
+			{}
+		\draw[semithick,\EQcouleur] (0,0) -- ({\EQlargeur},0) -- (0,{\EQlongueur}) -- cycle ; %contour extérieur
+		\draw[semithick,\EQcouleur] ({1},{1}) -- ({\EQlargeur-sqrt(3)},{1}) -- ({1},{\EQlongueur-(2+sqrt(3))}) -- cycle ; %contour intérieur
+		%graduations
+		\begin{scope}
+			\clip (0,0) -- ({\EQlargeur},0) -- (0,{\EQlongueur}) -- cycle ;
+			\draw[\EQcouleur] (0.1,0)--(0.1,0.075) (0.2,0)--(0.2,0.15) ;
+			\foreach \x in {0.3,0.4,...,\fpeval{0.925*\EQlargeur}} {\draw[\EQcouleur] (\x,0)--(\x,0.2) ;}
+			\foreach \x in {0.5,1,...,\fpeval{0.925*\EQlargeur}} {\draw[\EQcouleur] (\x,0)--(\x,0.3) ;}
+			\foreach \x in {0,1,...,\fpeval{0.925*\EQlargeur}} {\draw[\EQcouleur] (\x,0)--(\x,0.4) ;}
+			\draw[\EQcouleur] (0,0.1)--(0.075,0.1) (0,0.2)--(0.15,0.2) ;
+			\foreach \y in {0.3,0.4,...,\fpeval{0.925*\EQlongueur}} {\draw[\EQcouleur] (0,\y)--(0.2,\y) ;}
+			\foreach \y in {0.5,1,...,\fpeval{0.925*\EQlongueur}} {\draw[\EQcouleur] (0,\y)--(0.3,\y) ;}
+			\foreach \y in {0,1,...,\fpeval{0.925*\EQlongueur}} {\draw[\EQcouleur] (0,\y)--(0.4,\y) ;}
+			\ifboolKV[EquerreGeom]{AfficheValeurs}%
+				{%
+					\foreach \i in {1,2,...,\fpeval{0.9*\EQlongueur-1}}{%
+						\draw[\EQcouleur] (0.4,\i) node[inner sep=1pt,outer sep=1pt,scale={\EQechlabel},font=\small,right] {\rotatebox{90}{$\i$}} ;
+					}%
+					\foreach \i in {1,2,...,\fpeval{0.9*\EQlargeur-0.5}}{%
+						\draw[\EQcouleur] (\i,0.4) node[inner sep=1pt,outer sep=1pt,scale={\EQechlabel},font=\small,above] {\rotatebox{180}{$\i$}} ;
+					}%
+				}%
+				{}%
+			\end{scope}
+	\end{scope}
+}
+
+%--------Rapporteur (OK)
+\defKV[RapporteurGeom]{%
+	Echelle=\def\RAPPechelle{#1},%
+	EchelleAngle=\def\RAPPechangle{#1},%
+	Couleur=\def\RAPPcouleur{#1},%
+	CouleurFond=\def\RAPPcouleurfond{#1},%
+	Origine=\def\RAPPposOrigin{#1},%
+	Rotation=\def\RAPPangle{#1},%
+	Opacite=\def\RAPPopac{#1},%
+	EchelleValeurs=\def\RAPPechlabel{#1}
+}
+
+\setKVdefault[RapporteurGeom]{%
+	Echelle=1,%
+	EchelleAngle=1,%
+	Couleur=black,%
+	CouleurFond=black,%
+	Origine={(0,0)},%
+	Rotation=0,%
+	AfficheAngles=true,%
+	Fond=false,%
+	Opacite=0.5,%
+	Complet=false,%
+	GraduationsInt=false,%
+	EchelleValeurs=0.8
+}
+
+\NewDocumentCommand{\tkzRapporteur}{ O{} }{%
+	\useKVdefault[RapporteurGeom]%
+	\setKV[RapporteurGeom]{#1}%
+	\begin{scope}[shift={(\RAPPposOrigin)},rotate=\RAPPangle,scale=\RAPPechelle,transform shape]
+		\ifboolKV[RapporteurGeom]{Complet}
+			{
+			%fond
+				\ifboolKV[RapporteurGeom]{Fond}
+					{%
+						\fill[draw=none,fill=\RAPPcouleurfond!10!white,fill opacity=\RAPPopac] (0,0) circle[radius=3.75] ;
+					}%
+					{}
+				%rectangles
+				\foreach \i in {30,45,60}
+					{\draw[densely dotted,\RAPPcouleur] (\i:2.5) rectangle ({180+\i}:2.5) ;}
+				%extérieur et intérieur
+				\draw[semithick,\RAPPcouleur] (0,0) circle[radius=3.75] ;
+				\draw[semithick,\RAPPcouleur] (0,0) circle[radius=2.5] ;
+				\draw[semithick,\RAPPcouleur] (-2.5,0) -- (2.5,0) ;
+				\draw[semithick,\RAPPcouleur] (0,-2.5) -- (0,2.5) ;
+				%grad degrés
+				\foreach \i in {0,1,...,360} {\draw[\RAPPcouleur] (\i:3.75)--(\i:3.55) ;}
+				\foreach \i in {0,5,...,360} {\draw[\RAPPcouleur] (\i:3.75)--(\i:3.45) ;}
+				\foreach \i in {0,10,...,360} {\draw[\RAPPcouleur] (\i:3.75)--(\i:3.35) ;}
+				%grad radians
+				\foreach \i in {0,30,45,60,90,120,135,150,180,210,225,240,270,300,315,330} {\draw[\RAPPcouleur] (\i:2.5)--(\i:2.65) (\i:2.9)--(\i:3.1) ;}
+				%valeurs si booléen
+				\ifboolKV[RapporteurGeom]{AfficheAngles}
+					{%
+						\draw[\RAPPcouleur] (0:2.75) node[rotate=90,scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$0$} ;
+						\draw[\RAPPcouleur] (180:3.25) node[rotate=90,scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$\pm 180$} ;
+						\draw[\RAPPcouleur] (180:2.75) node[rotate=90,scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$\pm \pi$} ;
+						\foreach \i in {0,10,...,170}
+							{\draw[\RAPPcouleur] (\i:3.25) node[rotate={\i-90},scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$\i$} ;}
+						\draw[\RAPPcouleur] (30:2.75) node[rotate={30-90},scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$\nicefrac{\pi}{6}$} ;
+						\draw[\RAPPcouleur] (45:2.75) node[rotate={45-90},scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$\nicefrac{\pi}{4}$} ;
+						\draw[\RAPPcouleur] (60:2.75) node[rotate={60-90},scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$\nicefrac{\pi}{3}$} ;
+						\draw[\RAPPcouleur] (90:2.75) node[rotate={90-90},scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$\nicefrac{\pi}{2}$} ;
+						\draw[\RAPPcouleur] (120:2.75) node[rotate={120-90},scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$\nicefrac{2\pi}{3}$} ;
+						\draw[\RAPPcouleur] (135:2.75) node[rotate={135-90},scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$\nicefrac{3\pi}{4}$} ;
+						\draw[\RAPPcouleur] (150:2.75) node[rotate={150-90},scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$\nicefrac{5\pi}{6}$} ;
+						\foreach \i in {10,20,...,170}
+							{\draw[\RAPPcouleur] ({-\i}:3.25) node[rotate={270-\i},scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$-\i$} ;}
+						\draw[\RAPPcouleur] (-30:2.75) node[rotate={270-30},scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$\nicefrac{-\pi}{6}$} ;
+						\draw[\RAPPcouleur] (-45:2.75) node[rotate={270-45},scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$\nicefrac{-\pi}{4}$} ;
+						\draw[\RAPPcouleur] (-60:2.75) node[rotate={270-60},scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$\nicefrac{-\pi}{3}$} ;
+						\draw[\RAPPcouleur] (-90:2.75) node[rotate={270-90},scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$\nicefrac{-\pi}{2}$} ;
+						\draw[\RAPPcouleur] (-120:2.75) node[rotate={270-120},scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$\nicefrac{-2\pi}{3}$} ;
+						\draw[\RAPPcouleur] (-135:2.75) node[rotate={270-135},scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$\nicefrac{-3\pi}{4}$} ;
+						\draw[\RAPPcouleur] (-150:2.75) node[rotate={270-150},scale=\fpeval{\RAPPechlabel*\RAPPechangle},font=\tiny] {$\nicefrac{-5\pi}{6}$} ;
+					}{}
+			}
+			{
+				%fond
+				\ifboolKV[RapporteurGeom]{Fond}
+					{%
+						\begin{scope}
+							\fill[draw=none,fill=\RAPPcouleurfond!10!white,fill opacity=\RAPPopac,even odd rule]
+								(-3.75,-0.75) -- (3.75,-0.75) -- (3.75,0) arc (0:180:3.75) -- cycle
+								(0.5,0) arc (0:180:0.5) -- (-2.25,0) arc (180:0:2.25) -- cycle ;
+						\end{scope}
+					}%
+					{}
+				%extérieur et intérieur
+				\draw[semithick,\RAPPcouleur] (-3.75,-0.75) -- (3.75,-0.75) -- (3.75,0) arc (0:180:3.75) -- cycle ;
+				\draw[semithick,\RAPPcouleur] (0.5,0) arc (0:180:0.5) -- (-2.25,0) arc (180:0:2.25) -- cycle  ;
+				%croix
+				\draw[semithick,\RAPPcouleur] (-0.2,0)--(0.2,0) (0,-0.2)--(0,0.2) ;
+				%grad ext
+				\foreach \i in {0,1,...,180} {\draw[\RAPPcouleur] (\i:3.75)--(\i:3.55) ;}
+				\foreach \i in {0,5,...,180} {\draw[\RAPPcouleur] (\i:3.75)--(\i:3.45) ;}
+				\foreach \i in {0,10,...,180} {\draw[\RAPPcouleur] (\i:3.75)--(\i:3.35) ;}
+				%grad int
+				\ifboolKV[RapporteurGeom]{GraduationsInt}%
+					{%
+						\foreach \i in {0,1,...,180} {\draw[\RAPPcouleur] (\i:2.25)--(\i:2.4) ;}
+						\foreach \i in {0,5,...,180} {\draw[\RAPPcouleur] (\i:2.25)--(\i:2.475) ;}
+						\foreach \i in {0,10,...,180} {\draw[\RAPPcouleur] (\i:2.25)--(\i:2.55) ;}
+					}%
+					{%
+						\foreach \i in {0,5,...,180} {\draw[\RAPPcouleur] (\i:2.25)--(\i:2.45) ;}
+						\foreach \i in {0,10,...,180} {\draw[\RAPPcouleur] (\i:2.25)--(\i:2.55) ;}
+					}%
+				%valeurs si booléen
+				\ifboolKV[RapporteurGeom]{AfficheAngles}
+					{%
+						\foreach \i in {0,10,...,180}
+							{\draw[\RAPPcouleur] (\i:3.2) node[rotate={\i-90},scale=\fpeval{\RAPPechangle},font=\tiny] {\i} ;}
+						\foreach \i in {0,10,...,180}
+							{\draw[\RAPPcouleur] (\i:2.7) node[rotate={\i-90},scale=\fpeval{\RAPPechangle},font=\tiny] {\inteval{180-\i}} ;}
+					}{}
+			}
+	\end{scope}
+}
+
+\defKV[Pourcenteur]{%
+	Echelle=\def\POURCechelle{#1},%
+	EchelleAngle=\def\POURCechangle{#1},%
+	Couleur=\def\POURCcouleur{#1},%
+	CouleurFond=\def\POURCcouleurfond{#1},%
+	Origine=\def\POURCposOrigin{#1},%
+	Rotation=\def\POURCangle{#1},%
+	Opacite=\def\POURCopac{#1},%
+	EchelleValeurs=\def\POURCechlabel{#1}
+}
+
+\setKVdefault[Pourcenteur]{%
+	Echelle=1,%
+	EchelleAngle=1,%
+	Couleur=black,%
+	CouleurFond=black,%
+	Origine={(0,0)},%
+	Rotation=0,%
+	AfficheValeurs=true,%
+	Fond=false,%
+	Opacite=0.5,%
+	Decoration=true,%
+	EchelleValeurs=0.8
+}
+
+\NewDocumentCommand{\tkzPourcenteur}{ O{} }{%
+	\useKVdefault[Pourcenteur]%
+	\setKV[Pourcenteur]{#1}%
+	\begin{scope}[shift={(\POURCposOrigin)},rotate=\POURCangle,scale=\POURCechelle,transform shape]
+	\ifboolKV[Pourcenteur]{Fond}
+		{%
+			\fill[draw=none,fill=\POURCcouleurfond!10!white,fill opacity=\POURCopac] (0,0) circle[radius=3] ;
+		}%
+		{}%
+		\draw[\POURCcouleur,semithick] (0,0) circle[radius=3] ;
+		\draw[\POURCcouleur,semithick] ({-0.15*3},0)--({0.15*3},0) (0,{-0.15*3})--(0,{0.15*3}) ;
+		\foreach \pct in {0,1,...,199}
+			{\draw[\POURCcouleur,thin] ({0.5*\pct*3.6}:{3})--({0.5*\pct*3.6}:{3-0.2}) ;}
+		\foreach \pct in {0,10,...,90}{%
+			\draw[\POURCcouleur,thin] ({(\pct+1)*3.6}:{3})--({(\pct+1)*3.6}:{3-0.35}) ;
+			\filldraw[\POURCcouleur] ({(\pct+1)*3.6}:{3-0.35}) circle[fill=\POURCcouleur,radius=0.75pt] ;
+			\draw[\POURCcouleur,thin] ({(\pct+2)*3.6}:{3})--({(\pct+2)*3.6}:{3-0.35}) ;
+			\filldraw[\POURCcouleur] ({(\pct+2)*3.6}:{3-0.35}) circle[fill=\POURCcouleur,radius=0.75pt] ;
+			\draw[\POURCcouleur,thin] ({(\pct+3)*3.6}:{3})--({(\pct+3)*3.6}:{3-0.35}) ;
+			\filldraw[\POURCcouleur] ({(\pct+3)*3.6}:{3-0.35}) circle[fill=\POURCcouleur,radius=0.75pt] ;
+			\draw[\POURCcouleur,thin] ({(\pct+4)*3.6}:{3})--({(\pct+4)*3.6}:{3-0.35}) ;
+			\filldraw[\POURCcouleur] ({(\pct+4)*3.6}:{3-0.35}) circle[fill=\POURCcouleur,radius=0.75pt] ;
+			\draw[\POURCcouleur,thin] ({(\pct+6)*3.6}:{3})--({(\pct+6)*3.6}:{3-0.35}) ;
+			\filldraw[\POURCcouleur] ({(\pct+6)*3.6}:{3-0.35}) circle[fill=\POURCcouleur,radius=0.75pt] ;
+			\draw[\POURCcouleur,thin] ({(\pct+7)*3.6}:{3})--({(\pct+7)*3.6}:{3-0.35}) ;
+			\filldraw[\POURCcouleur] ({(\pct+7)*3.6}:{3-0.35}) circle[fill=\POURCcouleur,radius=0.75pt] ;
+			\draw[\POURCcouleur,thin] ({(\pct+8)*3.6}:{3})--({(\pct+8)*3.6}:{3-0.35}) ;
+			\filldraw[\POURCcouleur] ({(\pct+8)*3.6}:{3-0.35}) circle[fill=\POURCcouleur,radius=0.75pt] ;
+			\draw[\POURCcouleur,thin] ({(\pct+9)*3.6}:{3})--({(\pct+9)*3.6}:{3-0.35}) ;
+			\filldraw[\POURCcouleur] ({(\pct+9)*3.6}:{3-0.35}) circle[fill=\POURCcouleur,radius=0.75pt] ;
+		}
+		\foreach \pct in {5,10,15,20,30,35,40,45,55,60,65,70,80,85,90,95}{%
+			\draw[\POURCcouleur,semithick] ({\pct*3.6}:{3})--({\pct*3.6}:{3-0.5}) ;
+			\ifboolKV[Pourcenteur]{AfficheValeurs}
+				{\draw ({-\pct*3.6+90}:{3-0.6}) node[\POURCcouleur,rotate={-3.6*\pct},scale=\fpeval{\POURCechlabel*\POURCechangle},font=\tiny] {\pct\,\%} ;}{}
+		}
+		\foreach \pct in {0,25,50,75}{%
+			\draw[\POURCcouleur,semithick] ({\pct*3.6}:{3})--({\pct*3.6}:{3-0.5}) ;
+			\ifboolKV[Pourcenteur]{AfficheValeurs}
+				{%
+					\draw ({-\pct*3.6+90}:{3-0.61}) node[\POURCcouleur,rotate={-3.6*\pct},scale=\fpeval{\POURCechlabel*\POURCechangle},font=\scriptsize\bfseries] {\pct\,\%} ;
+					\draw ({-\pct*3.6+90}:{2+0.15}) node[\POURCcouleur,rotate={-3.6*\pct},scale=\fpeval{\POURCechlabel*\POURCechangle},font=\tiny\bfseries] {\pct\,\%} ;
+				}{}%
+		}
+		\draw[\POURCcouleur,semithick] (0,1)--(0,2) (1.6,0)--(2,0) (0,-1.6)--(0,-2) (-1.6,0)--(-2,0) ;
+		\ifboolKV[Pourcenteur]{Decoration}
+			{%
+				\foreach \arccc in {0.8,0.9,...,1.9} {\draw[\POURCcouleur] (0,\arccc) arc (90:47:\arccc) ;}
+			}%
+			{}%
+	\end{scope}
+}
+
+%--------RappÉquerre (OK)
+\defKV[RapporteurEquerreGeom]{%
+	Echelle=\def\RAPPEQechelle{#1},%
+	Largeur=\def\RAPPEQlargeur{#1},%
+	EchelleValeurs=\def\RAPPEQechangle{#1},%
+	Couleur=\def\RAPPEQcouleur{#1},%
+	CouleurFond=\def\RAPPEQcouleurfond{#1},%
+	Origine=\def\RAPPEQposOrigin{#1},%
+	Rotation=\def\RAPPEQangle{#1},%
+	Opacite=\def\RAPPEQopac{#1},%
+}
+
+\setKVdefault[RapporteurEquerreGeom]{%
+	Echelle=1,%
+	Largeur=6,%
+	EchelleValeurs=1,%
+	Couleur=black,%
+	CouleurFond=black,%
+	Origine={(0,0)},%
+	Rotation=0,%
+	AfficheAngles=true,%
+	AfficheValeurs=true,%
+	Ombre=false,%
+	Fond=false,%
+	Opacite=0.5
+}
+
+\NewDocumentCommand{\tkzRappEquerre}{ O{} }{%
+	\useKVdefault[RapporteurEquerreGeom]%
+	\setKV[RapporteurEquerreGeom]{#1}%
+	\xdef\RAPPEQlargeur{\fpeval{max(3,\RAPPEQlargeur)}}%valeurs mini
+	\IfSubStr{\RAPPEQangle}{auto/}%
+		{%
+			\StrBehind{\RAPPEQangle}{/}[\tmppointdeux]%
+			\pgfmathanglebetweenpoints{\pgfpointanchor{\RAPPEQposOrigin}{center}}{\pgfpointanchor{\tmppointdeux}{center}}%
+			\edef\RAPPEQangle{\pgfmathresult}%
+		}{}%
+	\begin{scope}[shift={(\RAPPEQposOrigin)},rotate=\RAPPEQangle,scale=\RAPPEQechelle,transform shape]
+		%fond
+		\ifboolKV[RapporteurEquerreGeom]{Fond}
+			{%
+				\begin{scope}
+					\fill[draw=none,fill=\RAPPEQcouleurfond!10!white,fill opacity=\RAPPopac,even odd rule] (-\RAPPEQlargeur,0) -- (\RAPPEQlargeur,0) -- (0,-\RAPPEQlargeur) -- cycle ;
+				\end{scope}
+			}%
+			{}
+		\ifboolKV[RapporteurEquerreGeom]{Ombre}%
+			{%
+				\filldraw[draw=none,fill=\RAPPEQcouleur!25,opacity=\RAPPopac] (-175:{0.65*\RAPPEQlargeur}) arc (-175:-5:{0.65*\RAPPEQlargeur}) -- (-5:{0.625*\RAPPEQlargeur}) arc (-5:-175:{0.625*\RAPPEQlargeur}) -- cycle ;%
+			}{}%
+		%extérieur
+		\draw[semithick,\RAPPEQcouleur] (-\RAPPEQlargeur,0) -- (\RAPPEQlargeur,0) -- (0,-\RAPPEQlargeur) -- cycle ;
+		\foreach \x in {0,0.1,...,\fpeval{\RAPPEQlargeur-1}}
+			{\draw[\RAPPEQcouleur] ({\x},0)--({\x},-0.125) ({-\x},0)--({-\x},-0.125) ;}
+		\foreach \x in {0,0.5,...,\fpeval{\RAPPEQlargeur-1}}
+			{\draw[\RAPPEQcouleur] ({\x},0)--({\x},-0.1875) ({-\x},0)--({-\x},-0.1875) ;}
+		\foreach \x in {0,1,...,\fpeval{\RAPPEQlargeur-1}}
+			{\draw[\RAPPEQcouleur] ({\x},0)--({\x},-0.25) ({-\x},0)--({-\x},-0.25) ;}
+		%grad ext
+		\foreach \i in {5,6,...,175}
+			{\draw[\RAPPEQcouleur] ({-\i}:{0.5625*\RAPPEQlargeur})--++({-\i}:{0.02*\RAPPEQlargeur}) ;}
+		\foreach \i in {5,10,...,175}
+			{\draw[\RAPPEQcouleur] ({-\i}:{0.5625*\RAPPEQlargeur})--++({-\i}:{0.035*\RAPPEQlargeur}) ;}
+		%angles intérieurs
+		\ifboolKV[RapporteurEquerreGeom]{AfficheAngles}
+			{%
+				\foreach \i in {10,20,...,170}
+					{\draw[\RAPPEQcouleur] ({-\i}:{0.6125*\RAPPEQlargeur}) node[rotate={90-\i},scale=\fpeval{\RAPPEQlargeur/8*\RAPPEQechangle},font=\tiny] {\i} ;}
+				%angles "extérieurs"
+				\foreach \i in {10,20,...,170}
+					{\draw[\RAPPEQcouleur] ({-\i}:{0.6375*\RAPPEQlargeur}) node[rotate={90-\i},scale=\fpeval{\RAPPEQlargeur/8*\RAPPEQechangle},font=\tiny] {\inteval{180-\i}} ;}
+			}%
+			{}%
+		\ifboolKV[RapporteurEquerreGeom]{AfficheValeurs}
+			{%
+				\foreach \i in {-1,0,1}
+					{\draw[\RAPPEQcouleur] ({\i},-0.375) node[scale=\fpeval{\RAPPEQechangle},font=\tiny] {$\i$} ;}
+			}%
+			{}%
+		%tracés intérieurs
+		\draw[\RAPPEQcouleur,dash pattern=on 15 off 4] (0,0)--(-135:{0.5625*\RAPPEQlargeur}) ;
+		\draw[\RAPPEQcouleur,dash pattern=on 15 off 4] (0,0)--(-45:{0.5625*\RAPPEQlargeur}) ;
+		\draw[\RAPPEQcouleur] (0,-0.5)--(0,{-0.51*\RAPPEQlargeur}) ;
+		\foreach \i in {0.4,0.5,...,\fpeval{0.51*\RAPPEQlargeur-0.5}}
+			{\draw[\RAPPEQcouleur] ({0.2625*\RAPPEQlargeur},{-\i})--++(0.2,0) ;}
+		\foreach \i in {0.4,0.5,...,\fpeval{0.51*\RAPPEQlargeur-0.5}}
+			{\draw[\RAPPEQcouleur] ({-0.2625*\RAPPEQlargeur},{-\i})--++(-0.2,0) ;}
+		\begin{scope}
+			\clip (-180:{0.55*\RAPPEQlargeur}) arc (-180:0:{0.55*\RAPPEQlargeur}) -- cycle ;
+			\foreach \i in {-0.5,-1,...,\fpeval{-0.55*\RAPPEQlargeur}}
+				{\draw[\RAPPEQcouleur] (0.2,\i)--({0.2375*\RAPPEQlargeur},\i) ({0.3125*\RAPPEQlargeur},\i)--({0.55*\RAPPEQlargeur},\i) ;}
+			\foreach \i in {-0.5,-1,...,\fpeval{-0.55*\RAPPEQlargeur}}
+				{\draw[\RAPPEQcouleur] (-0.2,\i)--({-0.2375*\RAPPEQlargeur},\i) ({-0.3125*\RAPPEQlargeur},\i)--({-0.55*\RAPPEQlargeur},\i) ;}
+		\end{scope}
+		%traits obliques extérieurs
+		\begin{scope}
+			\clip (-\RAPPEQlargeur,0) -- (\RAPPEQlargeur,0) -- (0,-\RAPPEQlargeur) -- cycle ;
+			\foreach \i in {10,20,...,170}
+				{\draw[\RAPPEQcouleur] ({-\i}:{0.65*\RAPPEQlargeur})--++({-\i}:3) ;}
+			\foreach \i in {10,20,...,170}
+				{\draw[\RAPPEQcouleur] ({-\i}:{0.65*\RAPPEQlargeur})--++({-\i}:3) ;}
+		\end{scope}
+		\begin{scope}
+			\clip (-\RAPPEQlargeur,0) -- (\RAPPEQlargeur,0) -- (0,-\RAPPEQlargeur) -- cycle ;
+			\def\cliptmp{\fpeval{min(0.15,0.0571*\RAPPEQlargeur)}}
+			\clip (0,-\RAPPEQlargeur)--++(135:\cliptmp)--++(\RAPPEQlargeur,\RAPPEQlargeur)--++(-45:\cliptmp)--cycle ;
+			\foreach \i in {1,2,...,89} 
+				{\draw[\RAPPEQcouleur] ({\RAPPEQlargeur/(1+tan(\i))},{-\RAPPEQlargeur*tan(\i)/(1+tan(\i))}) --++ ({180-\i}:{abs(-0.3*\i/90+0.15)+0.15}) ;}
+		\end{scope}
+		\begin{scope}
+			\clip (-\RAPPEQlargeur,0) -- (\RAPPEQlargeur,0) -- (0,-\RAPPEQlargeur) -- cycle ;
+			\def\cliptmp{\fpeval{min(0.25,0.0571*\RAPPEQlargeur)}}
+			\clip (0,-\RAPPEQlargeur)--++(135:\cliptmp)--++(\RAPPEQlargeur,\RAPPEQlargeur)--++(-45:\cliptmp)--cycle ;
+			\foreach \i in {5,10,...,85} 
+				{\draw[\RAPPEQcouleur] ({\RAPPEQlargeur/(1+tan(\i))},{-\RAPPEQlargeur*tan(\i)/(1+tan(\i))}) --++ ({180-\i}:{abs(-0.5*\i/90+0.25)+0.25}) ;}
+		\end{scope}
+		\begin{scope}
+			\clip (-\RAPPEQlargeur,0) -- (\RAPPEQlargeur,0) -- (0,-\RAPPEQlargeur) -- cycle ;
+			\def\cliptmp{\fpeval{min(0.15,0.0571*\RAPPEQlargeur)}}
+			\clip (0,-\RAPPEQlargeur)--++(45:\cliptmp)--++(-\RAPPEQlargeur,\RAPPEQlargeur)--++(-135:\cliptmp)--cycle ;
+			\foreach \i in {1,2,...,89} 
+				{\draw[\RAPPEQcouleur] ({-\RAPPEQlargeur/(1+tan(\i))},{-\RAPPEQlargeur*tan(\i)/(1+tan(\i))}) --++ ({\i}:{abs(-0.3*\i/90+0.15)+0.15}) ;}
+		\end{scope}
+		\begin{scope}
+			\clip (-\RAPPEQlargeur,0) -- (\RAPPEQlargeur,0) -- (0,-\RAPPEQlargeur) -- cycle ;
+			\def\cliptmp{\fpeval{min(0.25,0.0571*\RAPPEQlargeur)}}
+			\clip (0,-\RAPPEQlargeur)--++(45:\cliptmp)--++(-\RAPPEQlargeur,\RAPPEQlargeur)--++(-135:\cliptmp)--cycle ;
+			\foreach \i in {5,10,...,85} 
+				{\draw[\RAPPEQcouleur] ({-\RAPPEQlargeur/(1+tan(\i))},{-\RAPPEQlargeur*tan(\i)/(1+tan(\i))}) --++ ({\i}:{abs(-0.5*\i/90+0.25)+0.25}) ;}
+		\end{scope}
+	\end{scope}
+}
+
+%--------Compas
+% inspiration(s) de https://tex.stackexchange.com/questions/147389/symbols-of-pencil-ruler-and-compass
+% Angle entre l'horizontale et 2 noeuds (#1 & #2), résultat dans \MonAngleTmp
+\newcommand{\NodeTmpAngle}[2]{%
+	\pgfmathanglebetweenpoints%
+	{\pgfpointanchor{#1}{center}}%
+	{\pgfpointanchor{#2}{center}}%
+	\global\let\MonAngleTmp\pgfmathresult%
+}
+% Distance entre 2 noeuds (#1 & #2), résultat dans \MaLongueurTmp
+\makeatletter
+\newcommand{\NodeTmpDist}[2]{%
+	\pgfpointdiff{\pgfpointanchor{#1}{center}}{\pgfpointanchor{#2}{center}}%
+	\pgf@xa=\pgf@x
+	\pgf@ya=\pgf@y
+	% to convert from pt to cm   
+	\pgfmathparse{veclen(\pgf@xa,\pgf@ya)/28.45274}%
+	\global\let\MaLongueurTmp\pgfmathresult%
+}
+\makeatother
+% Récupération de l'unité x (cf https://tex.stackexchange.com/questions/424785/tikz-get-current-unit-length-of-x-coordinate)
+\def\recupunitexencm{
+	\path let \p{x}=(1,0), \n{xlencm}={scalar(veclen(\x{x},\y{x})/1cm)}
+	in \pgfextra{\xdef\TmpUniteX{\n{xlencm}}};
+}
+
+\defKV[CompasGeom]{%
+	Echelle=\def\COMPASechelle{#1},%
+	EchelleCrayon=\def\COMPASechellecrayon{#1},%
+	LongueurBranches=\def\COMPASLLB{#1},%
+	LongueurCrayon=\def\COMPASLLC{#1},%
+	CouleurCompas=\def\COMPAScouleur{#1},%
+	CouleurCrayon=\def\COMPAScouleurcrayon{#1},%
+	UniteTikz=\def\COMPASunittikz{#1}
+}
+
+\setKVdefault[CompasGeom]{%
+	Echelle=1,%
+	EchelleCrayon=1,%
+	LongueurBranches=6,%
+	LongueurCrayon=5,%
+	CouleurCrayon=red,%
+	CouleurCompas=gray,%
+	UniteTikz=\TmpUniteX,%
+	AfficheCrayon=true,%
+	Retourne=false
+}
+
+\NewDocumentCommand{\tkzCompas}{ s O{} m m }{%étoilée en gardant la distance entre extrémités
+	\IfBooleanTF{#1}{}{\NodeTmpDist{#3}{#4}}%
+	\useKVdefault[CompasGeom]%
+	\setKV[CompasGeom]{#2}%
+	%calculs intermédiaires
+	\recupunitexencm
+	\NodeTmpAngle{#3}{#4}%
+	\pgfmathsetmacro{\AngleCP}{asin(\MaLongueurTmp/(\COMPASunittikz*\COMPASechelle*2*\COMPASLLB))}
+	%retour aux affaires
+	\ifboolKV[CompasGeom]{Retourne}
+		{\def\CoeffYscale{-1}}{\def\CoeffYscale{1}}
+	\begin{scope}[shift=(#3),scale=\COMPASechelle]
+		\begin{scope}[line join=round,rotate=\MonAngleTmp,yscale=\CoeffYscale,shift=(270-\AngleCP:-\COMPASLLB)]
+			% branche pointe sèche
+			\draw[rotate=-\AngleCP,fill=\COMPAScouleur!80] (0,0)--(0,-\COMPASLLB)--(-.2,-\COMPASLLB+.8)--(-.2,0)--cycle ;
+			\draw[rotate=-\AngleCP,fill=\COMPAScouleur!05] (0,-\COMPASLLB+.8)--(0,-\COMPASLLB)--(-.2,-\COMPASLLB+.8)--cycle ;
+			% branche crayon
+			\draw[rotate=\AngleCP,fill=\COMPAScouleur!80] (0,0)--(0,-\COMPASLLB)--(.2,-\COMPASLLB+.8)--(.2,0)--cycle ;
+			\begin{scope}[rotate=\AngleCP,shift={(0,-\COMPASLLB)}]
+				\ifboolKV[CompasGeom]{AfficheCrayon}
+					{\tkzCrayon[Echelle={\COMPASechellecrayon*0.75},Longueur={\COMPASLLC/0.75},Rotation=-15,Couleur=\COMPAScouleurcrayon]}{}
+				\draw[fill=gray!25] (\COMPASLLB/30,\COMPASLLB/5) circle (\COMPASLLB/36) ;
+				\fill[\COMPAScouleur!5] (\COMPASLLB/30,\COMPASLLB/5) -- ++(30:\COMPASLLB/36) arc (30:45:\COMPASLLB/36) -- cycle ;
+				\fill[\COMPAScouleur!5] (\COMPASLLB/30,\COMPASLLB/5) -- ++(210:\COMPASLLB/36) arc (210:225:\COMPASLLB/36) ;
+				\draw (\COMPASLLB/30,\COMPASLLB/5) circle (\COMPASLLB/36) ;
+				\filldraw (\COMPASLLB/30,\COMPASLLB/5) circle (.02) ;
+			\end{scope}
+			% haut du compas
+			\draw[fill=\COMPAScouleur!80] (-.1,0) rectangle (.1,.85) ;
+			\draw[fill=gray!25] (0,0) circle (.25) ;
+			\fill[gray!5] (0,0) -- (30:.25) arc (30:45:.25) -- cycle ;
+			\fill[gray!5,rotate=180] (0,0) -- (30:.25) arc (30:45:.25) -- cycle ;
+			\draw (0,0) circle (.25) ;
+			\filldraw (0,0) circle (.05) ;
+		\end{scope}
+	\end{scope}
+}
+
+%--------MiniÉquerre
+\defKV[MiniEquerreGeom]{%
+	Echelle=\def\MiniEQechelle{#1},%
+	Couleur=\def\MiniEQcouleur{#1},%
+	Origine=\def\MiniEQposOrigin{#1},%
+	Rotation=\def\MiniEQangle{#1}
+}
+
+\setKVdefault[MiniEquerreGeom]{%
+	Echelle=1,%
+	Couleur=black,%
+	Origine={(0,0)},%
+	Rotation=0,%
+	Ombre=true
+}
+
+\NewDocumentCommand{\tkzMiniEquerre}{ O{} }{%
+	\useKVdefault[MiniEquerreGeom]%
+	\setKV[MiniEquerreGeom]{#1}%
+	\begin{scope}[shift={(\MiniEQposOrigin)},rotate=\MiniEQangle,scale=\MiniEQechelle]
+		\ifboolKV[MiniEquerreGeom]{Ombre}%
+			{%
+			\begin{scope}
+				\clip (0,0)--(1,0)--(0,1.8)--cycle;
+				\filldraw[draw=none,fill=\MiniEQcouleur!10] (0,0) rectangle (1,2.5pt);
+				\filldraw[draw=none,fill=\MiniEQcouleur!10] (0,0) rectangle (2.5pt,2);
+				\end{scope}
+			}{}%
+		\draw[semithick,\MiniEQcouleur] (0,0)--(1,0)--(0,1.8)--cycle;
+		\draw[semithick,\MiniEQcouleur] (0.2,0.2)--(0.65,0.2)--(0.2,1)--cycle;
+		\foreach \x in {0,0.1,...,1} {\draw[\MiniEQcouleur] (\x,0)--++(0,1.5pt) ;}
+		\foreach \x in {0,0.5} {\draw[\MiniEQcouleur] (\x,0)--++(0,2pt) ;}
+		\foreach \y in {0,0.1,...,1.7} {\draw[\MiniEQcouleur] (0,\y)--++(1.5pt,0) ;}
+		\foreach \y in {0,0.5,1,1.5} {\draw[\MiniEQcouleur] (0,\y)--++(2pt,0) ;}
+	\end{scope}
+}
+
+%--------MiniRègle
+\defKV[MiniRegleGeom]{%
+	Echelle=\def\MiniREGLechelle{#1},%
+	Couleur=\def\MiniREGLcouleur{#1},%
+	Origine=\def\MiniREGLposOrigin{#1},%
+	Rotation=\def\MiniREGLangle{#1}
+}
+
+\setKVdefault[MiniRegleGeom]{%
+	Echelle=1,%
+	Couleur=black,%
+	Origine={(0,0)},%
+	Rotation=0,%
+	Ombre=true
+}
+
+\NewDocumentCommand{\tkzMiniRegle}{ O{} }{%
+	\useKVdefault[MiniRegleGeom]%
+	\setKV[MiniRegleGeom]{#1}%
+	\begin{scope}[shift={(\MiniREGLposOrigin)},rotate=\MiniREGLangle,scale=\MiniREGLechelle]
+		\ifboolKV[MiniRegleGeom]{Ombre}%
+			{\filldraw[draw=none,fill=\MiniREGLcouleur!10] (0,0) rectangle (2,-2.5pt) ;}{}%
+		\draw[semithick,\MiniREGLcouleur] (0,0)--(2,0)--(2,-0.3)--(0,-0.3)--cycle ;
+		\draw[semithick,\MiniREGLcouleur] (0.35,-0.185) circle[radius=0.05] ;
+		\foreach \y in {0,0.1,...,2} {\draw[\MiniREGLcouleur] (\y,0)--++(0,-1.5pt) ;}
+		\foreach \y in {0,0.5,...,2} {\draw[\MiniREGLcouleur] (\y,0)--++(0,-2pt) ;}
+	\end{scope}
+}
+
+\endinput

@@ -1,0 +1,158 @@
+% proflycee-tools-cliparts.tex
+% Copyright 2024-205 Cédric Pierquet
+% Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+% logos from CC0/MIT opencliparts/svgrepo (users Firkin & Juhele & qubodup & TzeenieWheenie & jetxee & Twitter & Darius Dan)
+
+%====DIMENSIONS
+\newlength{\tmpcharacterheightinline}
+\newlength{\tmpcharacterdepthinline}
+
+%====MACRO PRINCIPALE
+\NewDocumentCommand\InsererClipart{ s O{} m }{%
+	\IfBooleanTF{#1}%
+		{%
+			\IfFileExists{pfl-#3.pdf}{\includegraphics[#2]{pfl-#3.pdf}}{}%
+		}%
+		{%
+			\settototalheight{\tmpcharacterheightinline}{\hbox{AZERTYUIOPQSDFGHJKLMWXCVBNazertyuiopqsdfghjklmwxcvbn}}%
+			\settodepth{\tmpcharacterdepthinline}{\hbox{AZERTYUIOPQSDFGHJKLMWXCVBNazertyuiopqsdfghjklmwxcvbn}}%
+			\IfFileExists{pfl-#3.pdf}{\raisebox{-\tmpcharacterdepthinline}{\includegraphics[height=\tmpcharacterheightinline]{pfl-#3.pdf}}}{}%
+		}%
+}
+\NewCommandCopy\pflclipart\InsererClipart
+
+%====ALIASES
+\NewDocumentCommand\pflimgcoupeb{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{bronze-cup}}%
+		{\InsererClipart{bronze-cup}}%
+}
+
+\NewDocumentCommand\pflimgmedb{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{bronze-medal}}%
+		{\InsererClipart{bronze-medal}}%
+}
+
+\NewDocumentCommand\pflimgmedbp{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{bronze-medal-flat}}%
+		{\InsererClipart{bronze-medal-flat}}%
+}
+
+\NewDocumentCommand\pflimgverif{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{checked}}%
+		{\InsererClipart{checked}}%
+}
+
+\NewDocumentCommand\pflimgnonverif{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{crossed}}%
+		{\InsererClipart{crossed}}%
+}
+
+\NewDocumentCommand\pflimgcoupeo{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{gold-cup}}%
+		{\InsererClipart{gold-cup}}%
+}
+
+\NewDocumentCommand\pflimgmedo{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{gold-medal}}%
+		{\InsererClipart{gold-medal}}%
+}
+
+\NewDocumentCommand\pflimgmedop{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{gold-medal-flat}}%
+		{\InsererClipart{gold-medal-flat}}%
+}
+
+\NewDocumentCommand\pflimgsouris{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{mouse}}%
+		{\InsererClipart{mouse}}%
+}
+
+\NewDocumentCommand\pflimgsourisg{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{mouse-left}}%
+		{\InsererClipart{mouse-left}}%
+}
+
+\NewDocumentCommand\pflimgsourisc{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{mouse-center}}%
+		{\InsererClipart{mouse-center}}%
+}
+
+\NewDocumentCommand\pflimgsourisd{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{mouse-right}}%
+		{\InsererClipart{mouse-right}}%
+}
+
+\NewDocumentCommand\pflimgko{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{notok}}%
+		{\InsererClipart{notok}}%
+}
+
+\NewDocumentCommand\pflimgok{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{ok}}%
+		{\InsererClipart{ok}}%
+}
+
+\NewDocumentCommand\pflimgcoupea{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{silver-cup}}%
+		{\InsererClipart{silver-cup}}%
+}
+
+\NewDocumentCommand\pflimgmeda{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{silver-medal}}%
+		{\InsererClipart{silver-medal}}%
+}
+
+\NewDocumentCommand\pflimgmedap{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{silver-medal-flat}}%
+		{\InsererClipart{silver-medal-flat}}%
+}
+
+\NewDocumentCommand\pflimgcible{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{bullseye-3d}}%
+		{\InsererClipart{bullseye-3d}}%
+}
+
+\NewDocumentCommand\pflimgflechette{ s O{} }{%
+	\IfBooleanTF{#1}%
+		{\InsererClipart*[#2]{bullseye-dart}}%
+		{\InsererClipart{bullseye-dart}}%
+}
+
+%====NOCALC
+\newlength{\tmptotalheightcurrenttxt}
+\setlength{\tmptotalheightcurrenttxt}{1em}
+\newlength{\tmptotaldepthcurrenttxt}
+\setlength{\tmptotaldepthcurrenttxt}{0.1em}
+
+\NewDocumentCommand\pflnocalc{ s O{black} }{%
+	\settototalheight{\tmptotalheightcurrenttxt}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+	\settodepth{\tmptotaldepthcurrenttxt}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+	\IfBooleanTF{#1}{}{\hspace*{-0.05\tmptotalheightcurrenttxt}}%
+	\raisebox{-\tmptotaldepthcurrenttxt}{%
+		{\begin{tikzpicture}[line width={0.1\tmptotalheightcurrenttxt}]
+				\node[#2,inner sep=0pt,scale=0.8,outer sep=0pt] (TMPPP) at (0,0) {\faCalculator} ;
+				\draw[#2,line cap=round] (TMPPP.north east)--(TMPPP.south west) ;
+		\end{tikzpicture}}%
+	}%
+	\IfBooleanTF{#1}{}{\hspace*{-0.05\tmptotalheightcurrenttxt}}%
+}
+
+\endinput

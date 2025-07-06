@@ -1,0 +1,950 @@
+% proflycee-tools-graphiques.tex
+% Copyright 2023-2024  Cédric Pierquet
+% Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+%%------SPLINES
+%commande utile pour extraire des infos d'une liste
+\newcommand\extractcoeff[2]{%1=liste,2=numero
+	\setsepchar{§}%
+	\readlist*\lcoeffs{#1}
+	\ifnum \lcoeffslen=1
+		\def\COEFFA{#1}
+		\def\COEFFB{#1}
+	\else
+		\itemtomacro\lcoeffs[#2]\COEFF
+		\IfSubStr{\COEFF}{/}%
+			{\StrCut{\COEFF}{/}{\COEFFA}{\COEFFB}}%
+			{\def\COEFFA{\COEFF}\def\COEFFB{\COEFF}}
+	\fi
+}
+
+%points de discontinuité
+\defKV[ptdiscont]{%
+	Epaisseur=\def\discontepaisseur{#1},%
+	Couleur=\def\discontcouleur{#1},%
+	Pos=\def\discontpos{#1},%
+	Echelle=\def\discontechelle{#1},%
+	Type=\def\disconttype{#1}
+}
+
+\setKVdefault[ptdiscont]{%
+	Epaisseur=1.25pt,%
+	Couleur=red,%
+	Pos=D,%
+	Echelle=1,%
+	Type=par
+}
+
+\NewDocumentCommand\PtsDiscontinuite{ O{} m }{%
+	\restoreKV[ptdiscont]
+	\setKV[ptdiscont]{#1}%
+	\setsepchar[.]{§./}%
+	\readlist*\SPLlisteDiscont{#2}%
+	\def\SPLlisteDiscontNb{\SPLlisteDiscontlen}%
+	\foreach \i in {1,...,\SPLlisteDiscontNb}{%
+		\begin{scope}[shift={(\SPLlisteDiscont[\i,1],\SPLlisteDiscont[\i,2])},rotate={atan \SPLlisteDiscont[\i,3]},scale=\discontechelle]
+			\IfStrEq{\disconttype}{rond}%
+				{%
+					\draw[fill=white,line width=\discontepaisseur,draw=\discontcouleur] (0,0) circle[radius=3pt] ;
+				}{}%
+			\IfStrEq{\discontpos}{D}%
+				{%
+					\IfStrEq{\disconttype}{par}%
+						{%
+							\draw[line width=\discontepaisseur,\discontcouleur] (0,0) to[out=90,in=170] (4pt,5pt) ;
+							\draw[line width=\discontepaisseur,\discontcouleur] (0,0) to[out=-90,in=-170] (4pt,-5pt) ;
+						}{}%
+					\IfStrEq{\disconttype}{demirond}%
+						{%
+							\draw[line width=\discontepaisseur,\discontcouleur] (0,0) to[out=90,in=180] (3pt,3pt) ;
+							\draw[line width=\discontepaisseur,\discontcouleur] (0,0) to[out=-90,in=180] (3pt,-3pt) ;
+						}{}%
+					\IfStrEq{\disconttype}{cro}%
+						{%
+							\draw[line width=\discontepaisseur,\discontcouleur] (0,0) |- (4pt,5pt) ;
+							\draw[line width=\discontepaisseur,\discontcouleur] (0,0) |- (4pt,-5pt) ;
+						}{}%
+				}%
+				{%
+					\IfStrEq{\disconttype}{par}%
+						{%
+							\draw[line width=\discontepaisseur,\discontcouleur] (0,0) to[out=90,in=-10] (-4pt,5pt) ;
+							\draw[line width=\discontepaisseur,\discontcouleur] (0,0) to[out=-90,in=10] (-4pt,-5pt) ;
+						}{}%
+					\IfStrEq{\disconttype}{demirond}%
+						{%
+							\draw[line width=\discontepaisseur,\discontcouleur] (0,0) to[out=90,in=0] (-3pt,3pt) ;
+							\draw[line width=\discontepaisseur,\discontcouleur] (0,0) to[out=-90,in=0] (-3pt,-3pt) ;
+						}{}%
+					\IfStrEq{\disconttype}{cro}%
+						{%
+							\draw[line width=\discontepaisseur,\discontcouleur] (0,0) |- (-4pt,5pt) ;
+							\draw[line width=\discontepaisseur,\discontcouleur] (0,0) |- (-4pt,-5pt) ;
+						}{}%
+				}%
+		\end{scope}
+	}%
+}
+
+%générer les splines
+\defKV[genspline]{%
+	NumDebut=\def\tmpsplinenumdeb{#1},%
+	NumFin=\def\tmpsplinenumfin{#1}
+}
+
+\setKVdefault[genspline]{%
+	NumDebut=1,%
+	NumFin=dernier
+}
+
+\NewDocumentCommand\GenereSplineTikz{ D<>{} m O{\CourbeSplineTikz} }{%
+	%1=liste
+	%2=num point début
+	%3=num point fin
+	\restoreKV[genspline]%
+	\setKV[genspline]{#1}%
+	\setsepchar[.]{§./}%
+	\readlist*\SPLlistepoints{#2}%
+	%les données
+	\xintifboolexpr{\tmpsplinenumdeb < 1}{\def\tmpsplinenumdeb{1}}{}%
+	\IfStrEq{\tmpsplinenumfin}{dernier}{\def\tmpsplinenumfin{\SPLlistepointslen}}{}%
+	\xintifboolexpr{\tmpsplinenumfin > \SPLlistepointslen}{\def\tmpsplinenumfin{\SPLlistepointslen}}{}%
+	\extractcoeff{\SPLcoeffs}{\tmpsplinenumdeb}%
+	%nb de calculs
+	\def\SPLnbsplines{\inteval{\tmpsplinenumfin-1}}%
+	%extraction des coordonnées
+	\itemtomacro\SPLlistepoints[\tmpsplinenumdeb,1]\xa%
+	\itemtomacro\SPLlistepoints[\tmpsplinenumdeb,2]\ya%
+	\itemtomacro\SPLlistepoints[\tmpsplinenumdeb,3]\fprimea%
+	\itemtomacro\SPLlistepoints[\tmpsplinenumdeb,1]\xb%
+	\itemtomacro\SPLlistepoints[\tmpsplinenumdeb,2]\yb%
+	\itemtomacro\SPLlistepoints[\tmpsplinenumdeb,3]\fprimeb%
+	\xdef#3{(\xa,\ya) ..controls +({atan \fprimea}:{(\xb-(\xa))/(\COEFFA)}) and +({-180 + atan \fprimeb}:{(\xb-(\xa))/(\COEFFA)}).. (\xb,\yb)}%
+	\foreach \i in {\tmpsplinenumdeb,...,\SPLnbsplines}{%
+		%extraction des coeffs de compensation
+		\extractcoeff{\SPLcoeffs}{\i}%
+		\def\j{\inteval{\i+1}}%
+		\itemtomacro\SPLlistepoints[\i,1]\xa%
+		\itemtomacro\SPLlistepoints[\i,2]\ya%
+		\itemtomacro\SPLlistepoints[\i,3]\fprimea%
+		\itemtomacro\SPLlistepoints[\j,1]\xb%
+		\itemtomacro\SPLlistepoints[\j,2]\yb%
+		\itemtomacro\SPLlistepoints[\j,3]\fprimeb%
+		\xdef#3{#3 ..controls +({atan \fprimea}:{(\xb-(\xa))/(\COEFFA)}) and +({-180 + atan \fprimeb}:{(\xb-(\xa))/(\COEFFB)}).. (\xb,\yb)}%
+	}%
+}
+
+%splines en tikz avec ..controls
+\defKV[spline]{%
+	Epaisseur=\def\SPLepaisseur{#1},%
+	Couleur=\def\SPLcouleur{#1},%
+	Coeffs=\def\SPLcoeffs{#1},%
+	CouleurPoints=\def\SPLcouleurpoints{#1},%
+	TaillePoints=\def\SPLtaillepoints{#1},%
+	Style=\def\SPLstyle{#1}
+}
+
+\setKVdefault[spline]{%
+	Epaisseur=1.25pt,%
+	Couleur=red,%
+	Coeffs=3,%
+	CouleurPoints=black,%
+	TaillePoints=2pt,%
+	AffPoints=false,%
+	Style={}
+}
+
+\NewDocumentCommand\SplineTikz{ O{} m }{%
+%\newcommand\SplineTikz[2][]{%
+	\restoreKV[spline]
+	\setKV[spline]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%on lit la liste des points/nbderivés et on stocke dans \listepoints
+	\setsepchar[.]{§./}%
+	\readlist*\SPLlistepoints{#2}%
+	\def\SPLnbsplines{\inteval{\SPLlistepointslen-1}}%
+	%si uniquement deux points, pas de boucle...
+	\ifnum \SPLlistepointslen=2
+		%extraction des coeffs de compensation
+		\extractcoeff{\SPLcoeffs}{1}%
+		%extraction des coordonnées
+		\itemtomacro\SPLlistepoints[1,1]\xa
+		\itemtomacro\SPLlistepoints[1,2]\ya
+		\itemtomacro\SPLlistepoints[1,3]\fprimea
+		\itemtomacro\SPLlistepoints[2,1]\xb
+		\itemtomacro\SPLlistepoints[2,2]\yb
+		\itemtomacro\SPLlistepoints[2,3]\fprimeb
+		\draw[line width=\SPLepaisseur,\SPLcouleur,\SPLstyle] (\xa,\ya) ..controls +({atan \fprimea}:{(\xb-(\xa))/(\COEFFA)}) and +({-180 + atan \fprimeb}:{(\xb-(\xa))/(\COEFFA)}).. (\xb,\yb) ;%
+	%sinon on construit bout par bout !
+	\else
+		\foreach \i in {1,2,...,\SPLnbsplines}{
+			%extraction des coeffs de compensation
+			\extractcoeff{\SPLcoeffs}{\i}
+			\def\j{\inteval{\i+1}}
+			\itemtomacro\SPLlistepoints[\i,1]\xa
+			\itemtomacro\SPLlistepoints[\i,2]\ya
+			\itemtomacro\SPLlistepoints[\i,3]\fprimea
+			\itemtomacro\SPLlistepoints[\j,1]\xb
+			\itemtomacro\SPLlistepoints[\j,2]\yb
+			\itemtomacro\SPLlistepoints[\j,3]\fprimeb
+			\draw[line width=\SPLepaisseur,\SPLcouleur,\SPLstyle] (\xa,\ya) ..controls +({atan \fprimea}:{(\xb-(\xa))/(\COEFFA)}) and +({-180 + atan \fprimeb}:{(\xb-(\xa))/(\COEFFB)}).. (\xb,\yb) ;%
+		}
+	\fi
+	\ifboolKV[spline]{AffPoints}%on affiche les points de contrôle
+	{%
+		\foreach \i in {1,2,...,\SPLlistepointslen}{%
+			\itemtomacro\SPLlistepoints[\i,1]\xa
+			\itemtomacro\SPLlistepoints[\i,2]\ya
+			\filldraw[\SPLcouleurpoints] (\xa,\ya) circle[radius=\SPLtaillepoints] ;%
+		}
+	}
+	{}
+}
+
+%tangente(s) en TikZ, avec point/dérivée ou liste points/dérivées
+\defKV[tgte]{%
+	Epaisseur=\def\TGTepaisseur{#1},%
+	Couleur=\def\TGTcouleur{#1},%
+	xl=\def\TGTXL{#1},%
+	xr=\def\TGTXR{#1},%
+	Style=\def\TGTstyle{#1},%
+	Point=\def\TGTnumpt{#1}
+}
+
+\setKVdefault[tgte]{
+	Epaisseur=1.25pt,%
+	Couleur=red,%
+	xl=0.5,xr=0.5,%
+	Style={},%
+	Point=1
+}
+
+\newcommand\TangenteTikz[2][]{%
+	\restoreKV[tgte]%
+	\setKV[tgte]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\setsepchar[.]{§./}%
+	\readlist*\TGTlistepoints{#2}%
+	\itemtomacro\TGTlistepoints[\TGTnumpt,1]\xa
+	\itemtomacro\TGTlistepoints[\TGTnumpt,2]\ya
+	\itemtomacro\TGTlistepoints[\TGTnumpt,3]\fprimea
+	\def\TGTDEB{\fpeval{\xa-(\TGTXL)}}\def\TGTFIN{\fpeval{\xa+\TGTXR}}%
+	\draw[line width=\TGTepaisseur,\TGTcouleur,domain=\TGTDEB:\TGTFIN,\TGTstyle] plot (\x,{\fprimea*(\x-(\xa))+\ya}) ;%
+}
+
+%%------STATS2VAR
+%variables directement dans tikzpicture
+\tikzset{%
+	Ox/.store in=\axexOx,Ox/.default=0,Ox=0,%essai
+	Oy/.store in=\axeyOy,Oy/.default=0,Oy=0,%essai
+	xmin/.store in=\xmin,xmin/.default=-5,xmin=-5,
+	xmax/.store in=\xmax,xmax/.default=5,xmax=5,
+	ymin/.store in=\ymin,ymin/.default=-5,ymin=-5,
+	ymax/.store in=\ymax,ymax/.default=5,ymax=5,
+	xgrille/.store in=\xgrille,xgrille/.default=1,xgrille=1,
+	xgrilles/.store in=\xgrilles,xgrilles/.default=0.5,xgrilles=0.5,
+	ygrille/.store in=\ygrille,ygrille/.default=1,ygrille=1,
+	ygrilles/.store in=\ygrilles,ygrilles/.default=0.5,ygrilles=0.5,
+	xunit/.store in=\xunit,xunit/.default=1,xunit=1,
+	yunit/.store in=\yunit,yunit/.default=1,yunit=1
+}
+
+%style point croix
+\tikzset{pics/PLdotcross/.style args={#1/#2}{
+		code={
+			\draw[line width={0.5*#1},rotate=#2] (-#1,0) -- (#1,0);
+			\draw[line width={0.5*#1},rotate=#2] (0,-#1) -- (0, #1);
+		}
+	},
+	pics/PLdotcross/.default={4pt/0}
+}
+
+%affichage d'un label en radians
+\NewDocumentCommand\AffAngleRadian{ s m }{%étoilée en dfrac
+	\IfStrEq{#2}{0}%cas où l'argument vaut 0
+		{\def\restmp{0}}%
+		{%
+			\StrDel{#2}{*}[\restmpsansmoins]%
+			\StrSubstitute{\restmpsansmoins}{pi}{\pi}[\restmppi]%
+			\IfSubStr{#2}{/}%
+			{%
+				\StrCut{\restmppi}{/}\tmpnum\tmpdenom%
+				\IfSubStr{\tmpnum}{-}
+				{%
+					\StrDel{\tmpnum}{-}[\restmppinum]%
+					\IfBooleanTF{#1}
+						{\def\restmp{-\dfrac{\restmppinum}{\tmpdenom}}}
+						{\def\restmp{-\frac{\restmppinum}{\tmpdenom}}}
+				}%
+				{%
+					\IfBooleanTF{#1}
+						{\def\restmp{\dfrac{\tmpnum}{\tmpdenom}}}
+						{\def\restmp{\frac{\tmpnum}{\tmpdenom}}}
+				}%
+			}%
+			{%
+				\def\restmp{\restmppi}%
+			}%
+		}%
+	\restmp%
+}
+
+%axeOx
+\defKV[PLaxextkz]{%
+	Epaisseur=\def\axexwidth{#1},%
+	Police=\def\axexfont{#1},%
+	HautGrad=\def\axextickwidth{#1},%
+	PosGrad=\def\axexposlabel{#1}
+}
+
+\setKVdefault[PLaxextkz]{%
+	Epaisseur=1pt,%
+	Police=\normalsize\normalfont,%
+	PosGrad=below,%
+	HautGrad=4pt,%
+	AffGrad=true,%
+	AffOrigine=true,%
+	Annee=false,%
+	Dfrac=false,%
+	Trigo=false
+}
+
+\DeclareDocumentCommand\AxexTikz{ O{} m }{%
+	\restoreKV[PLaxextkz]
+	\setKV[PLaxextkz]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%récupération des tickwidth H/B
+	\IfSubStr{\axextickwidth}{/}
+		{\StrCut{\axextickwidth}{/}{\axextickwidthA}{\axextickwidthB}}
+		{\def\axextickwidthA{\axextickwidth}\def\axextickwidthB{\axextickwidth}}
+	%====test====
+	\IfEq{#2}{auto}%
+		{%
+			\xdef\tmprangexvalues{\xintfloateval{seq(i,i=\xmin..[\xgrille]..\xmax)}}\StrDel{\tmprangexvalues}{ }[\tmprangexvalues]%
+			\setKV[PLaxextkz]{Trigo=false}%
+		}%
+		{%
+			\xdef\tmprangexvalues{#2}%
+		}%
+	%====fintest=
+	%en fonction de Trigo ou non
+	\ifboolKV[PLaxextkz]{Trigo}
+		{%
+			\foreach \x in \tmprangexvalues {%
+				\draw[line width=\axexwidth] ({\x-\axexOx},{\axextickwidthA}) -- ({\x-\axexOx},{-\axextickwidthB})%
+				\ifboolKV[PLaxextkz]{AffGrad}%on affiche les graduations
+				{%
+					node[\axexposlabel,font=\axexfont] {\ifboolKV[PLaxextkz]{Dfrac}{$\AffAngleRadian*{\x}$}{$\AffAngleRadian{\x}$}}
+				}%
+				{}%
+				;}%
+		}%
+		{%
+			\foreach \x in \tmprangexvalues {%
+				\draw[line width=\axexwidth] ({\x-\axexOx},{\axextickwidthA}) -- ({\x-\axexOx},{-\axextickwidthB})%
+				\ifboolKV[PLaxextkz]{AffGrad}%on affiche les graduations
+				{%
+					\ifboolKV[PLaxextkz]{AffOrigine}%si on demande d'afficher l'origine
+					{node[\axexposlabel,font=\axexfont] 
+						{\ifboolKV[PLaxextkz]{Annee}%
+							{\num[group-digits=none]{\x}}%
+							{\num[text-family-to-math=true,text-series-to-math=true]{\x}}%
+						}%
+					}%
+					{\xintifboolexpr{\x==\axexOx}{}{node[\axexposlabel,font=\axexfont] {\ifboolKV[PLaxextkz]{Annee}%
+								{\num[group-digits=none]{\x}}%
+								{\num[text-family-to-math=true,text-series-to-math=true]{\x}}%
+							}%
+						}%
+					}%
+				}%
+				{}%
+				;}
+		}
+	
+}
+
+%axeOy
+\defKV[PLaxeytkz]{%
+	Epaisseur=\def\axeywidth{#1},%
+	Police=\def\axeyfont{#1},%
+	HautGrad=\def\axeytickwidth{#1},%
+	PosGrad=\def\axeyposlabel{#1}
+}
+
+\setKVdefault[PLaxeytkz]{%
+	Epaisseur=1pt,%
+	Police=\normalsize\normalfont,%
+	PosGrad=left,%
+	HautGrad=4pt,%
+	AffGrad=true,%
+	AffOrigine=true,%
+	Annee=false,%
+	Frac=false
+}
+
+\DeclareDocumentCommand\AxeyTikz{ O{} m }{%
+	\restoreKV[PLaxeytkz]
+	\setKV[PLaxeytkz]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\IfSubStr{\axeytickwidth}{/}
+		{\StrCut{\axeytickwidth}{/}{\axeytickwidthA}{\axeytickwidthB}}
+		{\def\axeytickwidthA{\axeytickwidth}\def\axeytickwidthB{\axeytickwidth}}
+	%====test====
+	\IfEq{#2}{auto}%
+		{%
+			\xdef\tmprangeyvalues{\xintfloateval{seq(i,i=\ymin..[\ygrille]..\ymax)}}\StrDel{\tmprangeyvalues}{ }[\tmprangeyvalues]%
+		}%
+		{%
+			\xdef\tmprangeyvalues{#2}%
+		}%
+	%====fintest=
+	
+	\ifboolKV[PLaxeytkz]{Frac}%
+		{%
+			\ifboolKV[PLaxeytkz]{AffGrad}%on affiche les graduations
+				{%
+					\foreach \y in \tmprangeyvalues
+						{\draw[line width=\axeywidth] ({\axeytickwidthA},{\y-\axeyOy}) -- ({-\axeytickwidthB},{\y-\axeyOy}) %
+						\xintifboolexpr{\y==\axeyOy}{}{node[\axeyposlabel,font=\axeyfont] {\ConversionFraction{\y}}} ;}
+				}%
+				{%
+					\foreach \y in \tmprangeyvalues
+						{\draw[line width=\axeywidth] ({\axeytickwidthA},{\y-\axeyOy}) -- ({-\axeytickwidthB},{\y-\axeyOy}) ;}
+				}%
+		}%
+		{%
+			\foreach \y in \tmprangeyvalues {%
+				\draw[line width=\axeywidth] ({\axeytickwidthA},{\y-\axeyOy}) -- ({-\axeytickwidthB},{\y-\axeyOy})%
+				\ifboolKV[PLaxeytkz]{AffGrad}%on affiche les graduations
+					{%
+						\ifboolKV[PLaxeytkz]{AffOrigine}%si on demande d'afficher l'origine
+							{node[\axeyposlabel,font=\axeyfont] 
+								{%
+									\ifboolKV[PLaxeytkz]{Annee}%
+										{\num[group-digits=none]{\y}}%
+										{\num[text-family-to-math=true,text-series-to-math=true]{\y}}%
+								}%
+							}
+							{\xintifboolexpr{\y==\axeyOy}{}{node[\axeyposlabel,font=\axeyfont] {\ifboolKV[PLaxeytkz]{Annee}%
+								{\num[group-digits=none]{\y}}%
+								{\num[text-family-to-math=true,text-series-to-math=true]{\y}}%
+							}
+						}
+						}%
+					}%
+					{}
+				;}
+		}%
+}
+
+%axesOxoy
+\DeclareDocumentCommand\AxexyTikz{ O{} O{} m m }{%
+	\AxexTikz[#1]{#3}
+	\AxeyTikz[#2]{#4}
+}
+
+%axes
+\defKV[PLaxestkz]{%
+	Epaisseur=\def\axeswidth{#1},%
+	Police=\def\axesfont{#1},%
+	Labelx=\def\axeslabelx{#1},%
+	Labely=\def\axeslabely{#1},%
+	PosLabelx=\def\axesposlabelx{#1},%
+	PosLabely=\def\axesposlabely{#1},%
+	EchelleFleche=\def\axesechellefleche{#1},%
+	TypeFleche=\def\axestypefleche{#1},%
+	AffLabel=\def\axesafflabel{#1},%
+	ElargirOx=\def\axeselargx{#1},%
+	ElargirOy=\def\axeselargy{#1}
+}
+
+\setKVdefault[PLaxestkz]{%
+	Epaisseur=1pt,%
+	Police=\normalsize\normalfont,%
+	Labelx=$x$,%
+	Labely=$y$,%
+	AffLabel=z,%
+	PosLabelx=right,%
+	PosLabely=above,%
+	EchelleFleche=1,%
+	TypeFleche=latex,%
+	ElargirOx=0/0.05,%
+	ElargirOy=0/0.05
+}
+
+\DeclareDocumentCommand\AxesTikz{ O{} }{%
+	\restoreKV[PLaxestkz]
+	\setKV[PLaxestkz]{#1}%
+	%les petits élargissements
+	\IfSubStr{\axeselargx}{/}
+		{\StrCut{\axeselargx}{/}{\axeselargxG}{\axeselargxD}}
+		{\def\axeselargxG{\axeselargx}\def\axeselargxD{\axeselargx}}
+	\def\axesenlargxG{\fpeval{\axeselargxG*(\xmax-\xmin)}}
+	\def\axesenlargxD{\fpeval{\axeselargxD*(\xmax-\xmin)}}
+	\IfSubStr{\axeselargy}{/}
+		{\StrCut{\axeselargy}{/}{\axeselargyG}{\axeselargyD}}
+		{\def\axeselargyG{\axeselargy}\def\axeselargyD{\axeselargy}}
+	\def\axesenlargyG{\fpeval{\axeselargyG*(\ymax-\ymin)}}
+	\def\axesenlargyD{\fpeval{\axeselargyD*(\ymax-\ymin)}}
+	%on affiche les deux axes
+	\draw[line width=\axeswidth,-{\axestypefleche[scale=\axesechellefleche]}] ({\xmin-\axexOx-\axesenlargxG},0) -- ({\xmax-\axexOx+\axesenlargxD},0) ;
+	\draw[line width=\axeswidth,-{\axestypefleche[scale=\axesechellefleche]}] (0,{\ymin-\axeyOy-\axesenlargyG}) -- (0,{\ymax-\axeyOy+\axesenlargyD}) ;
+	%les labels éventuels
+	\IfSubStr{\axesafflabel}{x}%
+		{\draw ({\xmax-\axexOx+\axesenlargxD},0) node[\axesposlabelx,font=\axesfont] {\axeslabelx} ;}
+		{}
+	\IfSubStr{\axesafflabel}{y}%
+		{\draw (0,{\ymax-\axeyOy+\axesenlargyD}) node[\axesposlabely,font=\axesfont] {\axeslabely} ;}
+		{}
+}
+
+%fenêtre clippée
+\newcommand\FenetreTikz{%
+	\clip ({\xmin-\axexOx},{\ymin-\axeyOy}) rectangle ({\xmax-\axexOx},{\ymax-\axeyOy}) ;
+}
+
+%origine
+\defKV[PLaxesorig]{%
+	Police=\def\axesorfont{#1},%
+	Pos=\def\axesorpos{#1},%
+	Decal=\def\axesordecal{#1},%
+	Valeur=\def\axesorval{#1}
+}
+
+\setKVdefault[PLaxesorig]{%
+	Police=\normalsize\normalfont,%
+	Pos={below left},%
+	Decal=2pt,%
+	Valeur=0
+}
+
+\DeclareDocumentCommand\OrigineTikz{ O{} }{%
+	\restoreKV[PLaxesorig]%
+	\setKV[PLaxesorig]{#1}%
+	\draw (0,0) node[\axesorpos=\axesordecal,font=\axesorfont] {\axesorval} ;
+}
+
+%grilles
+\setKVdefault[PLgrillestkz]{%
+	Affp=true,%
+	Affs=true,%
+	Dernier=false
+}
+
+\DeclareDocumentCommand\GrilleTikz{ O{} O{thin,lightgray} O{ultra thin,lightgray} }{%
+	\restoreKV[PLgrillestkz]
+	\setKV[PLgrillestkz]{#1}%
+	\ifboolKV[PLgrillestkz]{Affs}
+		{\draw[xstep=\xgrilles,ystep=\ygrilles,#3] ({\xmin-\axexOx},{\ymin-\axeyOy}) grid ({\xmax-\axexOx},{\ymax-\axeyOy});}
+		{}
+	\ifboolKV[PLgrillestkz]{Affp}
+		{\draw[xstep=\xgrille,ystep=\ygrille,#2] ({\xmin-\axexOx},{\ymin-\axeyOy}) grid ({\xmax-\axexOx},{\ymax-\axeyOy});}
+		{}
+	\ifboolKV[PLgrillestkz]{Dernier}
+		{%
+			\draw[#2] ({\xmin-\axexOx},{\ymax-\axeyOy}) -- ({\xmax-\axexOx},{\ymax-\axeyOy});%
+			\draw[#2] ({\xmax-\axexOx},{\ymin-\axeyOy}) -- ({\xmax-\axexOx},{\ymax-\axeyOy});%
+			}
+		{}
+}
+
+%point(s) avec changement origines
+\defKV[PLpts]{%
+	Taille=\def\ptstaille{#1},%
+	Couleur=\def\ptscouleur{#1},%
+	Style=\def\ptsstyle{#1}
+}
+
+\setKVdefault[PLpts]{%
+	Taille=2pt,%
+	Couleur=blue,%
+	Style=o
+}
+
+\newcommand\PLnuagepoints[2][]{%
+	\restoreKV[PLpts]
+	\setKV[PLpts]{#1}%
+	\setsepchar{§}%
+	\readlist\listepointsaffiches{#2}
+	\foreachitem\point\in\listepointsaffiches{%
+		\StrBetween{\point}{(}{,}[\XPT]
+		\StrBetween{\point}{,}{)}[\YPT]
+		\IfStrEq{\ptsstyle}{o}%
+			{\filldraw[\ptscouleur] ({\XPT-\axexOx},{\YPT-\axeyOy}) circle[radius=\ptstaille] ;}
+			{}
+		\IfStrEq{\ptsstyle}{x}%
+			{\draw[\ptscouleur] ({\XPT-\axexOx},{\YPT-\axeyOy}) pic {PLdotcross=\ptstaille/45} ;}
+			{}
+		\IfStrEq{\ptsstyle}{+}%
+			{\draw[\ptscouleur] ({\XPT-\axexOx},{\YPT-\axeyOy}) pic {PLdotcross=\ptstaille/0} ;}
+			{}
+	}
+}
+
+\newcommand\NuagePointsTikz[3][]{%
+	\restoreKV[PLpts]
+	\setKV[PLpts]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\def\xliste{#2}
+	\def\yliste{#3}
+	\setsepchar{,}%
+	\readlist*\LX{\xliste}
+	\readlist*\LY{\yliste}
+	%taille des listes
+	\def\LNB{\inteval{\LXlen}}
+	\foreach \i in {1,2,...,\LNB} {
+		\IfStrEq{\ptsstyle}{o}%
+			{
+				\IfSubStr{\ptscouleur}{/}
+				{\StrCut{\ptscouleur}{/}{\ptscouleurA}{\ptscouleurB}\draw[thick,\ptscouleurA,fill=\ptscouleurB] ({\LX[\i]-\axexOx},{\LY[\i]-\axeyOy}) circle[radius=\ptstaille] ;}
+				{\draw[\ptscouleur,fill=\ptscouleur] ({\LX[\i]-\axexOx},{\LY[\i]-\axeyOy}) circle[radius=\ptstaille] ;}
+			}
+			{}
+		\IfStrEq{\ptsstyle}{x}%
+			{\draw[\ptscouleur] ({\LX[\i]-\axexOx},{\LY[\i]-\axeyOy}) pic {PLdotcross=\ptstaille/45} ;}
+			{}
+		\IfStrEq{\ptsstyle}{+}%
+			{\draw[\ptscouleur] ({\LX[\i]-\axexOx},{\LY[\i]-\axeyOy}) pic {PLdotcross=\ptstaille/0} ;}
+			{}
+	}
+}
+
+\defKV[PLptmoy]{%
+	Police=\def\ptmoyfont{#1},%
+	Taille=\def\ptmoytaille{#1},%
+	Couleur=\def\ptmoycouleur{#1},%
+	Style=\def\ptmoystyle{#1},%
+	xg=\def\ptmoyx{#1},%
+	yg=\def\ptmoyy{#1},%
+	Nom=\def\ptmoynom{#1},%
+	Pos=\def\ptmoypos{#1},%
+	Decal=\def\ptmoydecal{#1}%
+}
+
+\setKVdefault[PLptmoy]{%
+	Police=\normalsize\normalfont,%
+	Taille=4pt,%
+	Couleur=red,%
+	Style=x,%
+	xg=\LXmoy,%
+	yg=\LYmoy,%
+	Nom=G,%
+	Pos=above,%
+	Decal=0pt,%
+	AffNom=true
+}
+
+\newcommand\PointMoyenTikz[1][]{%
+	\restoreKV[PLptmoy]
+	\setKV[PLptmoy]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\IfStrEq{\ptmoystyle}{o}%
+		{
+			\IfSubStr{\ptmoycouleur}{/}
+			{\StrCut{\ptmoycouleur}{/}{\ptmoycouleurA}{\ptmoycouleurB}\draw[thick,\ptmoycouleurA,fill=\ptmoycouleurB] ({\ptmoyx-\axexOx},{\ptmoyy-\axeyOy}) circle[radius=\ptmoytaille] ;}
+			{\draw[\ptmoycouleur,fill=\ptmoycouleur] ({\ptmoyx-\axexOx},{\ptmoyy-\axeyOy}) circle[radius=\ptmoytaille] ;}
+		}
+		{}
+	\IfStrEq{\ptmoystyle}{x}%
+		{\draw[\ptmoycouleur] ({\ptmoyx-\axexOx},{\ptmoyy-\axeyOy}) pic {PLdotcross=\ptmoytaille/45} ;}
+		{}
+	\IfStrEq{\ptmoystyle}{+}%
+		{\draw[\ptmoycouleur] ({\ptmoyx-\axexOx},{\ptmoyy-\axeyOy}) pic {PLdotcross=\ptmoytaille/0} ;}
+		{}
+	\ifboolKV[PLptmoy]{AffNom}
+		{\draw ({\ptmoyx-\axexOx},{\ptmoyy-\axeyOy}) node[\ptmoypos={\ptmoytaille+\ptmoydecal},font=\ptmoyfont] {\ptmoynom} ;}
+		{}
+	
+}
+
+%courbe via xint
+\NewDocumentCommand\CourbeTikzXint{ O{} m m }{%
+	%1 = options tikz du \draw
+	%2 = formule xint
+	%3 = début...[pas]...fin
+	\draw[#1] plot[smooth] coordinates {%
+		\xintthecoords\xintfloatexpr
+		seq((x,#2),x=#3)
+		\relax
+	};
+}
+
+%courbe ?
+\newcommand\CourbeTikz[3][]{%
+	\setsepchar{:}%
+	\readlist\PLdomaine{#3}
+	\itemtomacro\PLdomaine[1]\PLDm
+	\itemtomacro\PLdomaine[2]\PLDM
+	\saveexpandmode\noexpandarg
+	\StrSubstitute{#2}{\x}{(\x+\axexOx)}[\fctdecx]
+	\restoreexpandmode % restore the previous mode
+	\draw[#1] plot[domain={\PLDm-\axexOx}:{\PLDM-\axexOx}] (\x,{\fctdecx-\axeyOy}) ;
+}
+
+\setKVdefault[PLsimplewindow]{%
+	Axes=true,%
+	Grille=true,%
+}
+
+\DeclareDocumentCommand\FenetreSimpleTikz{ O{} D(){} D<>{} m D<>{} m }{%
+	\restoreKV[PLsimplewindow]%
+	\setKV[PLsimplewindow]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\ifboolKV[PLsimplewindow]{Grille}%
+		{\GrilleTikz}%
+		{}%
+	\ifboolKV[PLsimplewindow]{Axes}%
+		{\AxesTikz[#2]%
+		 \AxexTikz[#3]{#4}
+		 \AxeyTikz[#5]{#6}}%
+		{}%
+}
+
+\NewDocumentCommand\DeclareFonctionTikz{ O{f} m }{%nom_fonction+langage tikz
+	\tikzset{declare function={#1(\x)=#2;}}
+}
+
+\NewDocumentCommand\DeclareFonctionTikzXint{ O{f} m }{%nom_fonction+langage xint
+	\xintdeffloatfunc #1(x) := #2 ;%
+}
+
+%====INTERVALLES TIKZ
+\usetikzlibrary{decorations.pathmorphing,decorations.pathreplacing}
+
+\defKV[repinterv]{%
+	Unite=\def\RepIntervUnit{#1},%
+	Largeur=\def\RepIntervLarg{#1},%
+	Graduations=\def\RepIntervGrad{#1},%,
+	GraduationsAlt=\def\RepIntervGradPrim{#1},%
+	HautGrad=\def\RepIntervHautGrad{#1},%
+	Valeurs=\def\RepIntervVal{#1}
+}
+\setKVdefault[repinterv]{%
+	xmin=-8,xmax=8,%
+	Elargir=0.05,Unite=auto,Largeur=12,EpTrait=0.8pt,%
+	Graduations={},%
+	GraduationsAlt={},%
+	HautGrad=7pt,Hauteur=16pt,Coeff=1.1,Valeurs={},%
+	Police={\normalsize\normalfont}
+}
+
+\NewDocumentEnvironment{RepIntervalles}{ O{} D<>{} }%
+{%
+	\restoreKV[repinterv]%
+	\setKV[repinterv]{#1}%
+	\IfStrEq{\RepIntervUnit}{auto}%
+	{\def\RepIntervUnitX{\fpeval{round((\useKV[repinterv]{Largeur})/(\useKV[repinterv]{xmax}-\useKV[repinterv]{xmin}),3)}}}%
+	{\def\RepIntervUnitX{\RepIntervUnit}}%
+	\xdef\AxeXminInterv{\fpeval{\useKV[repinterv]{xmin}-(\useKV[repinterv]{Elargir})*(\useKV[repinterv]{xmax}-\useKV[repinterv]{xmin})}}%
+	\xdef\AxeXmaxInterv{\fpeval{\useKV[repinterv]{xmax}+(\useKV[repinterv]{Elargir})*(\useKV[repinterv]{xmax}-\useKV[repinterv]{xmin})}}%
+	\begin{tikzpicture}[x=\RepIntervUnitX cm,#2]
+		\draw[line width={\useKV[repinterv]{EpTrait}},->,>=latex] ({\AxeXminInterv},0) -- ({\AxeXmaxInterv},0) ;
+		\IfStrEq{\RepIntervGrad}{}%
+			{}%
+			{
+				\foreach \i in \RepIntervGrad {\draw[line width={\useKV[repinterv]{EpTrait}}] ({\i},{0.5*\RepIntervHautGrad})--++(0,{-\RepIntervHautGrad}) ;}
+			}%
+		\IfStrEq{\RepIntervGradPrim}{}%
+			{}%
+			{
+				\foreach \i in \RepIntervGradPrim {\draw[line width={\useKV[repinterv]{EpTrait}}] ({\i},{0.75*\RepIntervHautGrad})--++(0,{-1.5*\RepIntervHautGrad}) ;}
+			}%
+		\IfStrEq{\RepIntervVal}{}%
+			{}%
+			{
+				\foreach \i in \RepIntervVal {\draw ({\i},{-0.5*\useKV[repinterv]{Hauteur}}) node[inner sep={1.5*\useKV[repinterv]{EpTrait}},below,font={\useKV[repinterv]{Police}}] {\num{\i}} ;}
+			}%
+	}%
+	{%
+	\end{tikzpicture}%
+}
+
+\NewDocumentCommand\PlaceValeursAxe{ m }{%
+	\setsepchar{,/§}%
+	\readlist*\ValsAxeIV{#1}%
+	\foreach \i in {1,...,\ValsAxeIVlen} {\draw ({\ValsAxeIV[\i,1]},{-0.5*\useKV[repinterv]{Hauteur}}) node[inner sep={1.5*\useKV[repinterv]{EpTrait}},below,font={\useKV[repinterv]{Police}}] {\ValsAxeIV[\i,2]} ;}
+}
+
+\defKV[tkzinterv]{%
+	Type=\def\IntervType{#1},%
+	Decor=\def\IntervStyle{#1},%
+	PosValeurs=\def\IntervPosValeurs{#1},%
+	Offset=\def\IntervOffset{#1}
+}
+\setKVdefault[tkzinterv]{%
+	Couleur=red,%
+	Type=FF,%
+	NiveauV=0,%
+	Decor={},%
+	AffValeurs=false,%
+	PosValeurs=above,%
+	NumInf=true,%
+	NumSup=true,%
+	Offset=0pt
+}
+
+\NewDocumentCommand\tkzIntervalle{ O{} m O{#2} m O{#4} }{%1=options,2=min,3=labelmin,4=max,5=labelmax
+	\restoreKV[tkzinterv]%
+	\setKV[tkzinterv]{#1}%
+	%transformations min/max
+	\IfStrEq{#2}{*}{\def\ValMinInterv{\AxeXminInterv}}{\def\ValMinInterv{#2}}%
+	\IfStrEq{#4}{*}{\def\ValMaxInterv{\AxeXmaxInterv}}{\def\ValMaxInterv{#4}}%
+	\begin{scope}[yshift={\useKV[repinterv]{Coeff}*\useKV[tkzinterv]{NiveauV}*\useKV[repinterv]{Hauteur}+\IntervOffset}]
+		%segment
+		\draw[line width={2*\useKV[repinterv]{EpTrait}},{\useKV[tkzinterv]{Couleur}}] ({\ValMinInterv},0)--({\ValMaxInterv},0) ;
+		%style fond
+		\IfStrEq{\IntervStyle}{fond}%
+		{%
+			
+			\filldraw[draw=none,fill={\useKV[tkzinterv]{Couleur}},fill opacity=0.25] ({\ValMinInterv},{-0.425*\useKV[repinterv]{Hauteur}}) rectangle ({\ValMaxInterv},{0.425*\useKV[repinterv]{Hauteur}}) ;
+		}{}%
+		\IfStrEq{\IntervStyle}{zigzag}%
+		{%
+			\draw[line width={1.25*\useKV[repinterv]{EpTrait}},{\useKV[tkzinterv]{Couleur}},decorate,decoration={zigzag,segment length=5mm,amplitude={0.425*\useKV[repinterv]{Hauteur}}}] ({\ValMinInterv},0)--({\ValMaxInterv},0) ;
+		}{}%
+		\IfSubStr{\IntervStyle}{hach}%
+		{%
+			\IfSubStr{\IntervStyle}{/}%
+			{\StrBehind{\IntervStyle}{/}[\IntervHachAngle]}
+			{\def\IntervHachAngle{60}}%
+			\begin{scope}
+				\clip ({\ValMinInterv},{-0.5*\useKV[repinterv]{Hauteur}}) rectangle ({\ValMaxInterv},{0.5*\useKV[repinterv]{Hauteur}}) ;
+				\draw[line width={1.25*\useKV[repinterv]{EpTrait}},{\useKV[tkzinterv]{Couleur}},decorate,decoration={border,segment length=2.5mm,angle=\IntervHachAngle,amplitude={0.425*\useKV[repinterv]{Hauteur}}}] ({\AxeXminInterv},0)--({\AxeXmaxInterv},0) ;
+				\draw[line width={1.25*\useKV[repinterv]{EpTrait}},{\useKV[tkzinterv]{Couleur}},decorate,decoration={border,segment length=2.5mm,angle=\IntervHachAngle,amplitude={-0.425*\useKV[repinterv]{Hauteur}}}] ({\AxeXminInterv},0)--({\AxeXmaxInterv},0) ;
+			\end{scope}
+		}{}%
+		%bord gauche
+		\IfStrEq{#2}{*}%
+		{}%
+		{%
+			\ifboolKV[tkzinterv]{AffValeurs}%
+				{%
+					\IfSubStr{\IntervPosValeurs}{above}
+						{%
+							\draw ({\ValMinInterv},{0.5*\useKV[repinterv]{Hauteur}}) node[inner sep={3*\useKV[repinterv]{EpTrait}},\IntervPosValeurs,text={\useKV[tkzinterv]{Couleur}},font={\useKV[repinterv]{Police}}] {\ifboolKV[tkzinterv]{NumInf}{\num{#2}}{#3}} ;
+						}{}%
+					\IfSubStr{\IntervPosValeurs}{below}
+						{%
+							\draw ({\ValMinInterv},{-0.5*\useKV[repinterv]{Hauteur}}) node[inner sep={3*\useKV[repinterv]{EpTrait}},\IntervPosValeurs,text={\useKV[tkzinterv]{Couleur}},font={\useKV[repinterv]{Police}}] {\ifboolKV[tkzinterv]{NumInf}{\num{#2}}{#3}} ;
+						}{}%
+				}{}%
+			\IfBeginWith{\IntervType}{O}%
+			{%
+				\draw[line width={2*\useKV[repinterv]{EpTrait}},{\useKV[tkzinterv]{Couleur}}] ({\ValMinInterv},0)|-++ ({-0.2*\useKV[repinterv]{Hauteur}},{0.5*\useKV[repinterv]{Hauteur}}) ;
+				\draw[line width={2*\useKV[repinterv]{EpTrait}},{\useKV[tkzinterv]{Couleur}}] ({\ValMinInterv},0)|-++ ({-0.2*\useKV[repinterv]{Hauteur}},{-0.5*\useKV[repinterv]{Hauteur}}) ;
+			}%
+			{%
+				\draw[line width={2*\useKV[repinterv]{EpTrait}},{\useKV[tkzinterv]{Couleur}}] ({\ValMinInterv},0)|-++ ({0.2*\useKV[repinterv]{Hauteur}},{0.5*\useKV[repinterv]{Hauteur}}) ;
+				\draw[line width={2*\useKV[repinterv]{EpTrait}},{\useKV[tkzinterv]{Couleur}}] ({\ValMinInterv},0)|-++ ({0.2*\useKV[repinterv]{Hauteur}},{-0.5*\useKV[repinterv]{Hauteur}}) ;
+			}%
+		}%
+		\IfStrEq{#4}{*}%
+		{}%
+		{%
+			\ifboolKV[tkzinterv]{AffValeurs}%
+				{%
+					\IfSubStr{\IntervPosValeurs}{above}
+						{%
+							\draw ({\ValMaxInterv},{0.5*\useKV[repinterv]{Hauteur}}) node[inner sep={3*\useKV[repinterv]{EpTrait}},\IntervPosValeurs,text={\useKV[tkzinterv]{Couleur}},font={\useKV[repinterv]{Police}}] {\ifboolKV[tkzinterv]{NumSup}{\num{#4}}{#5}} ;
+						}{}%
+					\IfSubStr{\IntervPosValeurs}{below}
+						{%
+							\draw ({\ValMaxInterv},{-0.5*\useKV[repinterv]{Hauteur}}) node[inner sep={3*\useKV[repinterv]{EpTrait}},\IntervPosValeurs,text={\useKV[tkzinterv]{Couleur}},font={\useKV[repinterv]{Police}}] {\ifboolKV[tkzinterv]{NumSup}{\num{#4}}{#5}} ;
+						}{}%
+				}{}%
+			\IfEndWith{\IntervType}{O}%
+			{%
+				\draw[line width={2*\useKV[repinterv]{EpTrait}},{\useKV[tkzinterv]{Couleur}}] ({\ValMaxInterv},0)|-++ ({0.2*\useKV[repinterv]{Hauteur}},{0.5*\useKV[repinterv]{Hauteur}}) ;
+				\draw[line width={2*\useKV[repinterv]{EpTrait}},{\useKV[tkzinterv]{Couleur}}] ({\ValMaxInterv},0)|-++ ({0.2*\useKV[repinterv]{Hauteur}},{-0.5*\useKV[repinterv]{Hauteur}}) ;
+			}%
+			{%
+				\draw[line width={2*\useKV[repinterv]{EpTrait}},{\useKV[tkzinterv]{Couleur}}] ({\ValMaxInterv},0)|-++ ({-0.2*\useKV[repinterv]{Hauteur}},{0.5*\useKV[repinterv]{Hauteur}}) ;
+				\draw[line width={2*\useKV[repinterv]{EpTrait}},{\useKV[tkzinterv]{Couleur}}] ({\ValMaxInterv},0)|-++ ({-0.2*\useKV[repinterv]{Hauteur}},{-0.5*\useKV[repinterv]{Hauteur}}) ;
+			}%
+		}%
+	\end{scope}%
+}
+
+%====Intégrale TikZ
+\defKV[IntegrDomainTikz]{%
+	Epaisseur=\def\intgdomtikzthick{#1},%
+	Couleurs=\def\intgdomtikzcolors{#1},%
+	Style=\def\intgdomtikzstyle{#1},%
+	Opacite=\def\intgdomtikzopac{#1},%
+	Samples=\def\intgdomtikzsamples{#1},%
+	Hachures=\def\intgdomtikzhatch{#1},%
+	Type=\def\intgdomtikztype{#1},%
+	Pas=\def\intgdomtikzstep{#1},%
+	Jonction=\def\intgdomtikzjoin{#1}
+}
+\setKVdefault[IntegrDomainTikz]{%
+	Epaisseur=1pt,%
+	Couleurs={gray/teal},%
+	Style=remplissage,%
+	Opacite=0.5,%
+	Samples=250,%
+	Hachures={north west lines},%
+	Type=dessous,%
+	Pas=0.1,%
+	Jonction=bevel
+}
+
+\NewDocumentCommand\IntegraleTikz{ O{} D<>{} m O{0} m m }{%
+	%1 = clés
+	%2 = options particulières tikz
+	%3 = fonction, en tikz
+	%4 = fonction n°2 éventuelle
+	%de #5 à #6
+	\restoreKV[IntegrDomainTikz]% revenir au valeurs par défaut
+	\setKV[IntegrDomainTikz]{#1}% lit les arguments optionnels
+	\StrCut{\intgdomtikzcolors}{/}{\intgcolbord}{\intcolhach}%
+	\IfStrEq{\intgcolbord}{}{\xdef\intgcolbord{none}}{}%
+	\IfStrEq{\intgdomtikzstyle}{hachures}%
+		{%
+			\tikzset{integraletikzstyle/.style={line width=\intgdomtikzthick,draw=\intgcolbord,pattern=\intgdomtikzhatch,pattern color=\intcolhach,line join=\intgdomtikzjoin}}
+		}%
+		{}%
+	\IfStrEq{\intgdomtikzstyle}{remplissage}%
+		{%
+			\tikzset{integraletikzstyle/.style={line width=\intgdomtikzthick,draw=\intgcolbord,fill=\intcolhach,fill opacity=\intgdomtikzopac,line join=\intgdomtikzjoin}}
+		}%
+		{}%
+	\IfStrEq{\intgdomtikztype}{dessous}%
+		{%
+			\draw[integraletikzstyle,#2] (#5,0) -- plot[samples=\intgdomtikzsamples,domain=#5:#6] (\x,{#3}) --(#6,0) -- cycle ;
+		}%
+		{}%
+	\IfStrEq{\intgdomtikztype}{entre}%
+		{%
+			\draw[integraletikzstyle,#2] plot[samples=\intgdomtikzsamples,domain=#5:#6] (\x,{#3}) -- plot[samples=\intgdomtikzsamples,domain=#6:#5] (\x,{#4}) -- cycle ;
+		}%
+		{}%
+}
+
+\NewDocumentCommand\IntegraleTikzXint{ O{} D<>{} m O{0} m m }{%
+	%1 = clés
+	%2 = options particulières tikz
+	%3 = fonction, en tikz
+	%4 = fonction n°2 éventuelle
+	%de #5 à #6
+	\restoreKV[IntegrDomainTikz]% revenir au valeurs par défaut
+	\setKV[IntegrDomainTikz]{#1}% lit les arguments optionnels
+	\StrCut{\intgdomtikzcolors}{/}{\intgcolbord}{\intcolhach}%
+	\IfStrEq{\intgcolbord}{}{\xdef\intgcolbord{none}}{}%
+	\IfStrEq{\intgdomtikzstyle}{hachures}%
+		{%
+			\tikzset{integraletikzstyle/.style={line width=\intgdomtikzthick,draw=\intgcolbord,pattern=\intgdomtikzhatch,pattern color=\intcolhach,line join=\intgdomtikzjoin}}
+		}%
+		{}%
+	\IfStrEq{\intgdomtikzstyle}{remplissage}%
+		{%
+			\tikzset{integraletikzstyle/.style={line width=\intgdomtikzthick,draw=\intgcolbord,fill=\intcolhach,fill opacity=\intgdomtikzopac,line join=\intgdomtikzjoin}}
+		}%
+		{}%
+	\IfStrEq{\intgdomtikztype}{dessous}%
+		{%
+			\draw[integraletikzstyle,#2] (#5,0) -- plot[smooth] coordinates {\xintthecoords\xintfloatexpr seq((x,#3),x=#5..[\intgdomtikzstep]..#6)\relax} -- (#6,0) -- cycle ;
+		}%
+		{}%
+	\IfStrEq{\intgdomtikztype}{entre}%
+		{%
+			\draw[integraletikzstyle,#2] plot[smooth] coordinates {\xintthecoords\xintfloatexpr seq((x,#3),x=#5..[\intgdomtikzstep]..#6)\relax} -- plot[smooth] coordinates {\xintthecoords\xintfloatexpr seq((x,#4),x=#6..[-\intgdomtikzstep]..#5)\relax} -- cycle ;
+		}%
+		{}%
+}
+
+\endinput

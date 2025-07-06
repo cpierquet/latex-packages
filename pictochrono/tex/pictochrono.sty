@@ -1,0 +1,114 @@
+% Author        : C. Pierquet
+% licence       : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{pictochrono}[2025/06/25 0.1.1 Inline chronometer, made with tikz]
+
+%====HISTORY
+% v 0.1.1	Strut option
+% v 0.1.0	Initial version
+
+%====BASE
+\RequirePackage{tikz}
+\usetikzlibrary{calc}
+\RequirePackage{calc}
+\RequirePackage{simplekv}
+\RequirePackage{xstring}
+\RequirePackage{etoolbox}
+
+%====DIMENSIONS
+\newlength{\tmp@chrono@hauteur@totale}
+\newlength{\tmp@chrono@profondeur}
+\newlength{\tmp@chrono@offset}
+
+%====KEYS
+\defKV[chronotikz]{Color=\def\colchrono{#1},Height=\def\hautchrono{#1},Delta=\def\deltachrono{#1},ColTime=\def\coltimechrono{#1},Offset=\def\raisechrono{#1},Strut=\def\strutchrono{#1}}
+\setKVdefault[chronotikz]{Color=black,Height=auto,Delta=5,ColTime=lightgray,Offset=auto,Strut=qB}
+
+%====INTERNAL MACRO
+\newcommand\tmp@chrono@draw{%
+	\draw[\colchrono,line width={\echellechronotraits\tmp@chrono@hauteur@totale}] (0,0) circle[radius=1] ;
+	%rules
+	\filldraw[line width={\echellechronotraits\tmp@chrono@hauteur@totale},\colchrono,rounded corners={\echellechronoarrondis\tmp@chrono@hauteur@totale}] (65:1)--(65:1.15)--(57.5:1.15)--(57.5:1)--cycle ;
+	\filldraw[line width={\echellechronotraits\tmp@chrono@hauteur@totale},\colchrono,rounded corners={\echellechronoarrondis\tmp@chrono@hauteur@totale}] (115:1)--(115:1.15)--(122.5:1.15)--(122.5:1)--cycle ;
+	\filldraw[line width={\echellechronotraits\tmp@chrono@hauteur@totale},\colchrono,line join=round,rounded corners={\echellechronoarrondis\tmp@chrono@hauteur@totale}] (-0.1,1)--++(0,0.2)-|++(-0.15,0.15)--++(0.5,0)|-++(-0.15,-0.15)--++(0,-0.2)--cycle ;
+}
+
+%====MAIN MACRO
+\NewDocumentCommand\pictochrono{ O{} m D<>{} }{%1:=options,2=durée,3=baseline tikz
+	\restoreKV[chronotikz]%
+	\setKV[chronotikz]{#1}%
+	%calcul des dimensions
+	\def\echellechronotraits{0.037}%
+	\def\echellechronoarrondis{0.003}%
+	\IfStrEqCase{\deltachrono}{%
+		{10}{\def\tmp@gen@traits{90,150,210,270,330,30}}%
+		{15}{\def\tmp@gen@traits{0,90,180,270}}%
+		{20}{\def\tmp@gen@traits{90,210,330}}%
+		{30}{\def\tmp@gen@traits{90,270}}%
+	}%
+		[\def\tmp@gen@traits{0,30,60,90,120,150,180,210,240,270,300,330}]%
+	%option tikz
+	\ifstrempty{#3}%
+		{%
+			\tikzset{chronoalign/.style={}}%
+		}%
+		{%
+			\IfStrEqCase{#3}{%
+				{vcenter}{\tikzset{chronoalign/.style={baseline=(current bounding box.center)}}}%
+				{vtop}{\tikzset{chronoalign/.style={baseline=(current bounding box.north)}}}%
+				{vbottom}{\tikzset{chronoalign/.style={baseline=(current bounding box.south)}}}%
+			}%
+				[\tikzset{chronoalign/.style={}}]%
+		}%
+	%hauteur auto ou non
+	\IfStrEq{\hautchrono}{auto}%
+		{%
+			\settototalheight{\tmp@chrono@hauteur@totale}{\hbox{\strutchrono}}%
+			\settodepth{\tmp@chrono@profondeur}{\hbox{\strutchrono}}%
+			\IfStrEq{\raisechrono}{auto}%
+				{%
+					\setlength{\tmp@chrono@offset}{-\tmp@chrono@profondeur}%
+				}%
+				{%
+					\setlength{\tmp@chrono@offset}{-\raisechrono}%
+				}%
+			%envt
+			\raisebox{\tmp@chrono@offset}{%
+				\begin{tikzpicture}[x={0.4125\tmp@chrono@hauteur@totale},y={0.4125\tmp@chrono@hauteur@totale},transform shape,chronoalign]
+					%time
+					\IfEq{#2}{}{}{\filldraw[rounded corners={\echellechronoarrondis\tmp@chrono@hauteur@totale},\coltimechrono,draw=none] (0,0)--({90-6*(#2)}:0.9) arc ({90-6*(#2)}:90:0.9)--cycle ;}%
+					%rules
+					\IfStrEq{\deltachrono}{0}%
+						{}%
+						{\foreach \i in \tmp@gen@traits {\draw[\colchrono,line width={\echellechronotraits\tmp@chrono@hauteur@totale}] (\i:0.6)--(\i:0.85);}}%
+					%clock
+					\tmp@chrono@draw
+				\end{tikzpicture}%
+			}%
+		}%
+		{%
+			\IfStrEq{\raisechrono}{auto}%
+				{%
+					\setlength{\tmp@chrono@offset}{0pt}%
+				}%
+				{%
+					\setlength{\tmp@chrono@offset}{\raisechrono}%
+				}%
+			\setlength{\tmp@chrono@hauteur@totale}{\hautchrono}%
+			\raisebox{\tmp@chrono@offset}{%
+				\begin{tikzpicture}[x={0.4125\tmp@chrono@hauteur@totale},y={0.4125\tmp@chrono@hauteur@totale},transform shape,chronoalign]
+					%time
+					\IfEq{#2}{}{}{\filldraw[rounded corners={\echellechronoarrondis\tmp@chrono@hauteur@totale},\coltimechrono,draw=none] (0,0)--({90-6*(#2)}:0.9) arc ({90-6*(#2)}:90:0.9)--cycle ;}%
+					%rules
+					\IfStrEq{\deltachrono}{0}%
+						{}%
+						{\foreach \i in \tmp@gen@traits {\draw[\colchrono,line width={\echellechronotraits\tmp@chrono@hauteur@totale}] (\i:0.6)--(\i:0.85);}}%
+					%clock
+					\tmp@chrono@draw
+				\end{tikzpicture}%
+			}%
+		}%
+}
+
+\endinput

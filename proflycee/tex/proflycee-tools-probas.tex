@@ -1,0 +1,1820 @@
+% proflycee-tools-probas.tex
+% Copyright 2023-2025 Cédric Pierquet
+% Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+% CC BY-SA 3.0 (from Mark Wibrow)
+
+%%------LOISPROBAS
+%calculs "simples"
+\newcommand\CalcBinomP[3]{%npk
+	\xintFloatToDecimal{\xintfloateval{binomial(#1,#3)*(#2)^(#3)*(1-(#2))^((#1)-(#3))}}
+}
+\newcommand\CalcBinomC[4]{%npab
+	\def\BorneInf{#3}\def\BorneSup{#4}%
+	\ifthenelse{\equal{#3}{*}}%
+		{\def\BorneInf{0}}%
+		{}%
+	\ifthenelse{\equal{#4}{*}}%
+		{\def\BorneSup{#1}}%
+		{}%
+	\xintFloatToDecimal{\xintfloateval{add(binomial(#1,i)*(#2)^i*(1-(#2))^((#1)-i), i=\BorneInf..\BorneSup)}}%
+}
+\newcommand\CalcGeomP[2]{%pk
+	\xintFloatToDecimal{\xintfloateval{(1-(#1))^((#2)-1)*(#1)}}%
+}
+\newcommand\CalcGeomC[3]{%pab
+	\def\BorneInf{#2}\def\BorneSup{#3}%
+	\ifthenelse{\equal{#2}{*}}%
+		{\def\BorneInf{1}}%
+		{}%
+	\ifthenelse{\equal{#3}{*}}%
+		{\def\BorneSup{\fpeval{trunc(1/(#1)*10,0)}}}%
+		{}%
+	\xintFloatToDecimal{\xintfloateval{add((1-(#1))^(i-1)*(#1), i=\BorneInf..\BorneSup)}}%
+}
+\newcommand\CalcHypergeomP[4]{%Nnmk
+	\xintFloatToDecimal{\xintfloateval{binomial(#3,#4)*binomial(#1-(#3),#2-(#4))/binomial(#1,#2)}}%
+}
+\newcommand\CalcHypergeomC[5]{%Nnmab
+	\def\BorneInf{#4}\def\BorneSup{#5}%
+	\ifthenelse{\equal{#4}{*}}%
+		{\def\BorneInf{0}}%
+		{}%
+	\ifthenelse{\equal{#5}{*}}%
+		{\def\BorneSup{#1}}%
+		{}%
+	\xintFloatToDecimal{\xintfloateval{add(binomial(#3,i)*binomial(#1-(#3),(#2)-i)/binomial(#1,#2), i=\BorneInf..\BorneSup)}}%
+}
+\newcommand\CalcPoissP[2]{%lk
+	\xintFloatToDecimal{\xintfloateval{exp(-(#1))*(#1)^(#2)/factorial(#2)}}%
+}
+\newcommand\CalcPoissC[3]{%lab
+	\def\BorneInf{#2}\def\BorneSup{#3}%
+	\ifthenelse{\equal{#2}{*}}%
+		{\def\BorneInf{0}}%
+		{}%
+	\ifthenelse{\equal{#3}{*}}%
+		{\def\BorneSup{10*#1}}%
+		{}%
+	\xintFloatToDecimal{\xintfloateval{add(exp(-(#1))*(#1)^i/factorial(i), i=\BorneInf..\BorneSup)}}%
+}
+%utiles idée de https://tex.stackexchange.com/questions/355574/im-searching-for-a-table-with-cdf-of-standard-normal-distribution
+\xintdeffloatvar a_1,a_2,a_3,a_4,a_5,a_6 :=
+0.0705230784,0.0422820123,0.0092705272,0.0001520143,0.0002765672,0.0000430638;
+\xintdeffloatvar rac2inv := sqrt(2)/2 ;
+\xintdeffloatfunc erfc(x) := % uniquement pour x positif
+((((((a_6*x+a_5)*x+a_4)*x+a_3)*x+a_2)*x+a_1)*x+1)**-16 ; % fin de définition de erfc(x)
+\xintdeffloatfunc Phi(z) := (z>=0)?{1 - 0.5 * erfc(rac2inv * z)}{0.5 * erfc(-rac2inv * z)};
+
+\newcommand\CalcNormC[4]{%msab
+	%def des bornes de l'intervalle suivant l'absence de a ou de b...
+	\def\BorneInf{#3}\def\BorneSup{#4}%
+	\ifthenelse{\equal{#3}{*}}%
+		{\def\BorneInf{#4-10*(#2)}}%
+		{}%
+	\ifthenelse{\equal{#4}{*}}%
+		{\def\BorneSup{#3+10*(#2)}}%
+		{}%
+	\xintFloatToDecimal{\xintfloateval{Phi((\BorneSup-(#1))/(#2))-Phi((\BorneInf-(#1))/(#2))}}%
+}
+%calculs "simples" fiabilite
+\newcommand\CalcExpoC[3]{%lab
+	\def\BorneInf{#2}\def\BorneSup{#3}
+	\ifthenelse{\equal{#2}{*}}%
+		{\def\BorneInf{0}}%
+		{}%
+	\ifthenelse{\equal{#3}{*}}%
+		{\def\BorneSup{100/(#1)}}%
+		{}%
+	\xintFloatToDecimal{\xintfloateval{exp(-(#1)*(\BorneInf))-exp(-(#1)*(\BorneSup))}}%
+}
+
+%calculs formatés
+\NewDocumentCommand{\BinomP}{ s O{3} m m m }{%*=sci,2=prec,3=n,4=p,5=k
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(binomial(#3,#5)*(#4)^(#5)*(1-(#4))^((#3)-(#5)),#2)}}}%
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round(binomial(#3,#5)*(#4)^(#5)*(1-(#4))^(#3-(#5)),#2)}}}%
+	}%
+}
+\NewCommandCopy\pflbinomp\BinomP
+
+\NewDocumentCommand{\BinomC}{ s O{3} m m m m }{%*=sci,2=prec,3=n,4=p,5=a,6=b
+	\def\BorneInf{#5}\def\BorneSup{#6}%
+	\ifthenelse{\equal{#5}{*}}%
+		{\def\BorneInf{0}}%
+		{}%
+	\ifthenelse{\equal{#6}{*}}%
+		{\def\BorneSup{#3}}%
+		{}%
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(add(binomial(#3,i)*(#4)^i*(1-(#4))^(#3-i), i=\BorneInf..\BorneSup),#2)}}}%
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round(add(binomial(#3,i)*(#4)^i*(1-(#4))^(#3-i), i=\BorneInf..\BorneSup),#2)}}}%
+	}%
+}
+\NewCommandCopy\pflbinomc\BinomC
+
+\NewDocumentCommand{\GeomP}{ s O{3} m m }{%*=sci,2=prec,3=p,4=k
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round((1-(#3))^(#4-1)*(#3),#2)}}}%
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round((1-(#3))^(#4-1)*(#3),#2)}}}%
+	}%
+}
+\NewCommandCopy\pflgeomp\GeomP
+
+\NewDocumentCommand{\GeomC}{ s O{3} m m m }{%*=sci,2=prec,3=p,4=a,5=b
+	\def\BorneInf{#4}\def\BorneSup{#5}%
+	\ifthenelse{\equal{#4}{*}}%
+		{\def\BorneInf{1}}%
+		{}%
+	\ifthenelse{\equal{#5}{*}}%
+		{\def\BorneSup{\fpeval{trunc(1/#3*10,0)}}}%
+		{}%
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(add((1-(#3))^(i-1)*(#3), i=\BorneInf..\BorneSup),#2)}}}%
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round(add((1-(#3))^(i-1)*(#3), i=\BorneInf..\BorneSup),#2)}}}%
+	}
+}
+\NewCommandCopy\pflgeomc\GeomC
+
+\NewDocumentCommand{\HypergeomP}{ s O{3} m m m m }{%*=sci,2=prec,3=N,4=n,5=m,6=k
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(binomial(#5,#6)*binomial(#3-(#5),#4-(#6))/binomial(#3,#4),#2)}}}%
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round(binomial(#5,#6)*binomial(#3-(#5),#4-(#6))/binomial(#3,#4),#2)}}}%
+	}
+}
+\NewCommandCopy\pflhypergeomp\HypergeomP
+
+\NewDocumentCommand{\HypergeomC}{ s O{3} m m m m m }{%*=sci,2=prec,3=N,4=n,5=m,6=a,7=b
+	\def\BorneInf{#6}\def\BorneSup{#7}%
+	\ifthenelse{\equal{#6}{*}}%
+		{\def\BorneInf{0}}%
+		{}%
+	\ifthenelse{\equal{#7}{*}}%
+		{\def\BorneSup{#3}}%
+		{}%
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(add(binomial(#5,i)*binomial(#3-(#5),#4-i)/binomial(#3,#4), i=\BorneInf..\BorneSup),#2)}}}%
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round(add(binomial(#5,i)*binomial(#3-(#5),#4-i)/binomial(#3,#4), i=\BorneInf..\BorneSup),#2)}}}
+	}%
+}
+\NewCommandCopy\pflhypergeomc\HypergeomC
+
+\NewDocumentCommand{\PoissonP}{ s O{3} m m }{%*=sci,2=prec,3=lbda,4=k
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(exp(-(#3))*(#3)^(#4)/factorial(#4),#2)}}}%
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round(exp(-(#3))*(#3)^(#4)/factorial(#4),#2)}}}%
+	}%
+}
+\NewCommandCopy\pflpoissonp\PoissonP
+
+\NewDocumentCommand{\PoissonC}{ s O{3} m m m }{%*=ing,2=prec,3=lbda,4=a,5=b
+	\def\BorneInf{#4}\def\BorneSup{#5}%
+	\ifthenelse{\equal{#4}{*}}%
+		{\def\BorneInf{0}}%
+		{}%
+	\ifthenelse{\equal{#5}{*}}%
+		{\def\BorneSup{10*#3}}%
+		{}%
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(add(exp(-(#3))*(#3)^i/factorial(i), i=\BorneInf..\BorneSup),#2)}}}%
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round(add(exp(-(#3))*(#3)^i/factorial(i), i=\BorneInf..\BorneSup),#2)}}}%
+	}%
+}
+\NewCommandCopy\pflpoissonc\PoissonC
+
+\NewDocumentCommand{\NormaleC}{ s O{3} m m m m }{%
+	%*=ing,2=prec,3=mu,4=sigma,5=a,6=b
+	%def des bornes de l'intervalle suivant l'absence de a ou de b...
+	\def\BorneInf{#5}\def\BorneSup{#6}%
+	\ifthenelse{\equal{#5}{*}}%
+		{\def\BorneInf{#6-10*#4}}%
+		{}%
+	\ifthenelse{\equal{#6}{*}}%
+		{\def\BorneSup{#5+10*#4}}%
+		{}%
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(Phi((\BorneSup-(#3))/(#4))-Phi((\BorneInf-(#3))/(#4)),#2)}}}%
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round(Phi((\BorneSup-(#3))/(#4))-Phi((\BorneInf-(#3))/(#4)),#2)}}}%
+	}%
+}
+\NewCommandCopy\pflnormalec\NormaleC
+
+\NewDocumentCommand{\ExpoC}{ s O{3} m m m }{%*=ing,2=prec,3=lbda,4=a,5=b
+	\def\BorneInf{#4}\def\BorneSup{#5}%
+	\ifthenelse{\equal{#4}{*}}%
+		{\def\BorneInf{0}}%
+		{}%
+	\ifthenelse{\equal{#5}{*}}%
+		{\def\BorneSup{100/#3}}%
+		{}%
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(exp(-(#3)*(\BorneInf))-exp(-(#3)*(\BorneSup)),#2)}}}%
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintFloatToDecimal{\xintfloateval{round(exp(-(#3)*(\BorneInf))-exp(-(#3)*(\BorneSup)),#2)}}}}
+	}%
+}
+\NewCommandCopy\pflexpoc\ExpoC
+
+%%------ARBRESPROBAS
+\NewDocumentCommand\numdots{}{\vphantom{0,5}\ldots}
+
+\defKV[PLTIKZARBRE]{%
+	Unite=\def\PLAPunite{#1},%
+	EspaceNiveau=\def\PLAPespniv{#1},%
+	EspaceFeuille=\def\PLAPespfeuille{#1},%
+	Type=\def\PLAPtype{#1},%
+	Police=\def\PLAPfont{#1},%
+	PoliceProbas=\def\PLAPfontproba{#1},%
+	StyleTrait=\def\PLAPtypetrait{#1},%
+	EpaisseurTrait=\def\PLAPeptrait{#1},%
+	PositionProbas=\def\PLAPposprob{#1},%
+	CouleurFond=\def\PLAPcolback{#1},%
+	CouleurTraits=\def\PLAPcolarc{#1},%
+	CouleurProbas=\def\PLAPcolprobas{#1},%
+	CouleurNoeuds=\def\PLAPcolnoeuds{#1},%
+	Racine=\def\PLAPracine{#1}
+}
+
+\setKVdefault[PLTIKZARBRE]{%
+	Unite=1cm,%
+	EspaceNiveau=3.25,%
+	EspaceFeuille=1,%
+	Type=2x2,%
+	Police=\normalfont\normalsize,%
+	PoliceProbas=\normalfont\small,%
+	InclineProbas=true,%
+	Fleche=false,%
+	StyleTrait={},%
+	EpaisseurTrait=semithick,%
+	PositionProbas={},%
+	CouleurFond=white,%
+	CouleurTraits=black,%
+	CouleurProbas=black,%
+	CouleurNoeuds=black,%
+	Racine={}
+}
+
+\NewDocumentCommand\IntPlaceProbasArbre{ m m m m m }{%
+	%1=nœud initial
+	%2=nœud final
+	%3=positionlistofitems
+	%4=probaslistofitems
+	%5=auto
+	\IfStrEqCase{\PLAPposprob}{%
+		{}{\draw[PLfleche] (#1)--(#2) node[probas,PLetiquette,{#3},fill=\PLAPcolback] {{#4}} ;}%PositionProbas vide = on lit
+		{auto}{\draw[PLfleche] (#1)--(#2) node[probas,PLetiquette,#5] {{#4}} ;}%
+		{dessus}{\draw[PLfleche] (#1)--(#2) node[probas,PLetiquette,above=1pt] {{#4}} ;}%
+		{dessous}{\draw[PLfleche] (#1)--(#2) node[probas,PLetiquette,below=1pt] {{#4}} ;}%
+		{sur}{\draw[PLfleche] (#1)--(#2) node[probas,PLetiquette,fill=\PLAPcolback] {{#4}} ;}%
+	}%
+}
+
+\NewDocumentCommand\ArbreProbasTikz{ O{} D<>{} m }{%1=options,2=libellés
+	\useKVdefault[PLTIKZARBRE]%
+	\setKV[PLTIKZARBRE]{#1}%
+	\setsepchar[.]{,./}%
+	\readlist*\PLARBREDONNES{#3}%
+	\begin{tikzpicture}[x=\PLAPunite,y=\PLAPunite,#2]
+		%styles
+		\tikzstyle{noeud} = [font=\PLAPfont,text=\PLAPcolnoeuds]
+		\tikzstyle{probas}= [font=\PLAPfontproba,text=\PLAPcolprobas]
+		\ifboolKV[PLTIKZARBRE]{InclineProbas}
+			{\tikzstyle{PLetiquette}=[pos=0.525,sloped,inner sep=2pt,outer sep=2pt,rectangle]}
+			{\tikzstyle{PLetiquette}=[pos=0.525,inner sep=2pt,outer sep=2pt,rectangle]}
+		\ifboolKV[PLTIKZARBRE]{Fleche}
+			{\tikzstyle{PLfleche}=[->,>=latex,\PLAPtypetrait,\PLAPeptrait,\PLAPcolarc]}
+			{\tikzstyle{PLfleche}=[\PLAPtypetrait,\PLAPeptrait,\PLAPcolarc]}
+		%arbre2x2
+		\IfEq{\PLAPtype}{2x2}
+		{%
+			\IfEq{\PLAPracine}{}%
+				{%
+					\coordinate (R) at ({0*\PLAPespniv},{-1.5*\PLAPespfeuille}) ;
+				}%
+				{%
+					\node[noeud] (R) at ({0*\PLAPespniv},{-1.5*\PLAPespfeuille}) {\PLAPracine};
+				}%
+			\node[noeud] (A11) at ({1*\PLAPespniv},{-0.5*\PLAPespfeuille}) {\PLARBREDONNES[1,1]};
+			\node[noeud] (A21) at ({2*\PLAPespniv},{-0*\PLAPespfeuille}) {\PLARBREDONNES[2,1]};
+			\node[noeud] (A22) at ({2*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[3,1]};
+			\node[noeud] (A12) at ({1*\PLAPespniv},{-2.5*\PLAPespfeuille}) {\PLARBREDONNES[4,1]};
+			\node[noeud] (A23) at ({2*\PLAPespniv},{-2*\PLAPespfeuille}) {\PLARBREDONNES[5,1]};
+			\node[noeud] (A24) at ({2*\PLAPespniv},{-3*\PLAPespfeuille}) {\PLARBREDONNES[6,1]};
+			\ifstrempty{\PLARBREDONNES[1,2]}
+				{\draw[PLfleche] (R)--(A11) ;}
+				{%
+					\IntPlaceProbasArbre{R}{A11}{\PLARBREDONNES[1,3]}{\PLARBREDONNES[1,2]}{above=1pt}
+					%\draw[PLfleche] (R)--(A11) node[probas,PLetiquette,{\PLARBREDONNES[1,3]}] {{\PLARBREDONNES[1,2]}} ;%
+				}%
+			\ifstrempty{\PLARBREDONNES[2,2]}
+				{\draw[PLfleche] (A11)--(A21) ;}
+				{%
+					\IntPlaceProbasArbre{A11}{A21}{\PLARBREDONNES[2,3]}{\PLARBREDONNES[2,2]}{above=1pt}
+					%\draw[PLfleche] (A11)--(A21) node[probas,PLetiquette,{\PLARBREDONNES[2,3]}] {{\PLARBREDONNES[2,2]}} ;%
+				}%
+			\ifstrempty{\PLARBREDONNES[3,2]}
+				{\draw[PLfleche] (A11)--(A22) ;}
+				{%
+					\IntPlaceProbasArbre{A11}{A22}{\PLARBREDONNES[3,3]}{\PLARBREDONNES[3,2]}{below=1pt}
+					%\draw[PLfleche] (A11)--(A22) node[probas,PLetiquette,{\PLARBREDONNES[3,3]}] {{\PLARBREDONNES[3,2]}} ;
+				}%
+			\ifstrempty{\PLARBREDONNES[4,2]}
+				{\draw[PLfleche] (R)--(A12) ;}
+				{%
+					\IntPlaceProbasArbre{R}{A12}{\PLARBREDONNES[4,3]}{\PLARBREDONNES[4,2]}{below=1pt}
+					%\draw[PLfleche] (R)--(A12) node[probas,PLetiquette,{\PLARBREDONNES[4,3]}] {{\PLARBREDONNES[4,2]}} ;%
+				}%
+			\ifstrempty{\PLARBREDONNES[5,2]}
+				{\draw[PLfleche] (A12)--(A23) ;}
+				{%
+					\IntPlaceProbasArbre{A12}{A23}{\PLARBREDONNES[5,3]}{\PLARBREDONNES[5,2]}{above=1pt}
+					%\draw[PLfleche] (A12)--(A23) node[probas,PLetiquette,{\PLARBREDONNES[5,3]}] {{\PLARBREDONNES[5,2]}} ;%
+				}%
+			\ifstrempty{\PLARBREDONNES[6,2]}
+				{\draw[PLfleche] (A12)--(A24) ;}
+				{%
+					\IntPlaceProbasArbre{A12}{A24}{\PLARBREDONNES[6,3]}{\PLARBREDONNES[6,2]}{below=1pt}
+					%\draw[PLfleche] (A12)--(A24) node[probas,PLetiquette,{\PLARBREDONNES[6,3]}] {{\PLARBREDONNES[6,2]}} ;%
+				}%
+		}{}
+		%arbre3x2
+		\IfEq{\PLAPtype}{3x2}
+		{%
+			%sommets
+			\IfEq{\PLAPracine}{}%
+				{%
+					\coordinate (R) at ({0*\PLAPespniv},{-2.5*\PLAPespfeuille}) ;
+				}%
+				{%
+					\node[noeud] (R)  at ({0*\PLAPespniv},{-2.5*\PLAPespfeuille}) {\PLAPracine};
+				}%
+			%\coordinate (R) at ({0*\PLAPespniv},{-2.5*\PLAPespfeuille}) ;
+			\node[noeud] (A11) at ({1*\PLAPespniv},{-0.5*\PLAPespfeuille}) {\PLARBREDONNES[1,1]};
+			\node[noeud] (A21) at ({2*\PLAPespniv},{-0*\PLAPespfeuille}) {\PLARBREDONNES[2,1]};
+			\node[noeud] (A22) at ({2*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[3,1]};
+			\node[noeud] (A12) at ({1*\PLAPespniv},{-2.5*\PLAPespfeuille}) {\PLARBREDONNES[4,1]};
+			\node[noeud] (A23) at ({2*\PLAPespniv},{-2*\PLAPespfeuille}) {\PLARBREDONNES[5,1]};
+			\node[noeud] (A24) at ({2*\PLAPespniv},{-3*\PLAPespfeuille}) {\PLARBREDONNES[6,1]};
+			\node[noeud] (A13) at ({1*\PLAPespniv},{-4.5*\PLAPespfeuille}) {\PLARBREDONNES[7,1]};
+			\node[noeud] (A25) at ({2*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[8,1]};
+			\node[noeud] (A26) at ({2*\PLAPespniv},{-5*\PLAPespfeuille}) {\PLARBREDONNES[9,1]};
+			%branches
+			\ifstrempty{\PLARBREDONNES[1,2]}
+				{\draw[PLfleche] (R)--(A11) ;}
+				{%
+					\IntPlaceProbasArbre{R}{A11}{\PLARBREDONNES[1,3]}{\PLARBREDONNES[1,2]}{above=1pt}
+					%\draw[PLfleche] (R)--(A11) node[probas,PLetiquette,{\PLARBREDONNES[1,3]}] {{\PLARBREDONNES[1,2]}} ;%
+				}%
+			\ifstrempty{\PLARBREDONNES[2,2]}
+				{\draw[PLfleche] (A11)--(A21) ;}
+				{%
+					\IntPlaceProbasArbre{A11}{A21}{\PLARBREDONNES[2,3]}{\PLARBREDONNES[2,2]}{above=1pt}
+					%\draw[PLfleche] (A11)--(A21) node[probas,PLetiquette,{\PLARBREDONNES[2,3]}] {{\PLARBREDONNES[2,2]}} ;
+				}%
+			\ifstrempty{\PLARBREDONNES[3,2]}
+				{\draw[PLfleche] (A11)--(A22) ;}
+				{
+					\IntPlaceProbasArbre{A11}{A22}{\PLARBREDONNES[3,3]}{\PLARBREDONNES[3,2]}{below=1pt}
+					%\draw[PLfleche] (A11)--(A22) node[probas,PLetiquette,{\PLARBREDONNES[3,3]}] {{\PLARBREDONNES[3,2]}} ;%
+				}
+			\ifstrempty{\PLARBREDONNES[4,2]}
+				{\draw[PLfleche] (R)--(A12) ;}
+				{
+					\IntPlaceProbasArbre{R}{A12}{\PLARBREDONNES[4,3]}{\PLARBREDONNES[4,2]}{above=-1pt}
+					%\draw[PLfleche] (R)--(A12) node[probas,PLetiquette,{\PLARBREDONNES[4,3]}] {{\PLARBREDONNES[4,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[5,2]}
+				{\draw[PLfleche] (A12)--(A23) ;}
+				{
+					\IntPlaceProbasArbre{A12}{A23}{\PLARBREDONNES[5,3]}{\PLARBREDONNES[5,2]}{above=1pt}
+					%\draw[PLfleche] (A12)--(A23) node[probas,PLetiquette,{\PLARBREDONNES[5,3]}] {{\PLARBREDONNES[5,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[6,2]}
+				{\draw[PLfleche] (A12)--(A24) ;}
+				{
+					\IntPlaceProbasArbre{A12}{A24}{\PLARBREDONNES[6,3]}{\PLARBREDONNES[6,2]}{below=1pt}
+					%\draw[PLfleche] (A12)--(A24) node[probas,PLetiquette,{\PLARBREDONNES[6,3]}] {{\PLARBREDONNES[6,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[7,2]}
+				{\draw[PLfleche] (R)--(A13) ;}
+				{
+					\IntPlaceProbasArbre{R}{A13}{\PLARBREDONNES[7,3]}{\PLARBREDONNES[7,2]}{below=1pt}
+					%\draw[PLfleche] (R)--(A13) node[probas,PLetiquette,{\PLARBREDONNES[7,3]}] {{\PLARBREDONNES[7,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[8,2]}
+				{\draw[PLfleche] (A13)--(A25) ;}
+				{
+					\IntPlaceProbasArbre{A13}{A25}{\PLARBREDONNES[8,3]}{\PLARBREDONNES[8,2]}{above=1pt}
+					%\draw[PLfleche] (A13)--(A25) node[probas,PLetiquette,{\PLARBREDONNES[8,3]}] {{\PLARBREDONNES[8,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[9,2]}
+				{\draw[PLfleche] (A13)--(A26) ;}
+				{
+					\IntPlaceProbasArbre{A13}{A26}{\PLARBREDONNES[9,3]}{\PLARBREDONNES[9,2]}{below=1pt}
+					%\draw[PLfleche] (A13)--(A26) node[probas,PLetiquette,{\PLARBREDONNES[9,3]}] {{\PLARBREDONNES[9,2]}} ;
+				}
+		}{}
+		%arbre2x3
+		\IfEq{\PLAPtype}{2x3}
+		{%
+			%sommets
+			\IfEq{\PLAPracine}{}%
+				{%
+					\coordinate (R) at ({0*\PLAPespniv},{-2.5*\PLAPespfeuille}) ;
+				}%
+				{%
+					\node[noeud] (R)  at ({0*\PLAPespniv},{-2.5*\PLAPespfeuille}) {\PLAPracine};
+				}%
+			%\coordinate (R) at ({0*\PLAPespniv},{-2.5*\PLAPespfeuille}) ;
+			\node[noeud] (A11) at ({1*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[1,1]};
+			\node[noeud] (A12) at ({1*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[5,1]};
+			\node[noeud] (A21) at ({2*\PLAPespniv},{-0*\PLAPespfeuille}) {\PLARBREDONNES[2,1]};
+			\node[noeud] (A22) at ({2*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[3,1]};
+			\node[noeud] (A23) at ({2*\PLAPespniv},{-2*\PLAPespfeuille}) {\PLARBREDONNES[4,1]};
+			\node[noeud] (A24) at ({2*\PLAPespniv},{-3*\PLAPespfeuille}) {\PLARBREDONNES[6,1]};
+			\node[noeud] (A25) at ({2*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[7,1]};
+			\node[noeud] (A26) at ({2*\PLAPespniv},{-5*\PLAPespfeuille}) {\PLARBREDONNES[8,1]};
+			%branches
+			\ifstrempty{\PLARBREDONNES[1,2]}
+				{\draw[PLfleche] (R)--(A11) ;}
+				{
+					\IntPlaceProbasArbre{R}{A11}{\PLARBREDONNES[1,3]}{\PLARBREDONNES[1,2]}{above=1pt}
+					%\draw[PLfleche] (R)--(A11) node[probas,PLetiquette,{\PLARBREDONNES[1,3]}] {{\PLARBREDONNES[1,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[5,2]}
+				{\draw[PLfleche] (R)--(A12) ;}
+				{
+					\IntPlaceProbasArbre{R}{A12}{\PLARBREDONNES[5,3]}{\PLARBREDONNES[5,2]}{below=1pt}
+					%\draw[PLfleche] (R)--(A12) node[probas,PLetiquette,{\PLARBREDONNES[5,3]}] {{\PLARBREDONNES[5,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[2,2]}
+				{\draw[PLfleche] (A11)--(A21) ;}
+				{
+					\IntPlaceProbasArbre{A11}{A21}{\PLARBREDONNES[2,3]}{\PLARBREDONNES[2,2]}{above=1pt}
+					%\draw[PLfleche] (A11)--(A21) node[probas,PLetiquette,{\PLARBREDONNES[2,3]}] {{\PLARBREDONNES[2,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[3,2]}
+				{\draw[PLfleche] (A11)--(A22) ;}
+				{
+					\IntPlaceProbasArbre{A11}{A22}{\PLARBREDONNES[3,3]}{\PLARBREDONNES[3,2]}{above=-1pt}
+					%\draw[PLfleche] (A11)--(A22) node[probas,PLetiquette,{\PLARBREDONNES[3,3]}] {{\PLARBREDONNES[3,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[4,2]}
+				{\draw[PLfleche] (A11)--(A23) ;}
+				{
+					\IntPlaceProbasArbre{A11}{A23}{\PLARBREDONNES[4,3]}{\PLARBREDONNES[4,2]}{below=1pt}
+					%\draw[PLfleche] (A11)--(A23) node[probas,PLetiquette,{\PLARBREDONNES[4,3]}] {{\PLARBREDONNES[4,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[6,2]}
+				{\draw[PLfleche] (A12)--(A24) ;}
+				{
+					\IntPlaceProbasArbre{A12}{A24}{\PLARBREDONNES[6,3]}{\PLARBREDONNES[6,2]}{above=1pt}
+					%\draw[PLfleche] (A12)--(A24) node[probas,PLetiquette,{\PLARBREDONNES[6,3]}] {{\PLARBREDONNES[6,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[7,2]}
+				{\draw[PLfleche] (A12)--(A25) ;}
+				{
+					\IntPlaceProbasArbre{A12}{A25}{\PLARBREDONNES[7,3]}{\PLARBREDONNES[7,2]}{above=-1pt}
+					%\draw[PLfleche] (A12)--(A25) node[probas,PLetiquette,{\PLARBREDONNES[7,3]}] {{\PLARBREDONNES[7,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[8,2]}
+				{\draw[PLfleche] (A12)--(A26) ;}
+				{
+					\IntPlaceProbasArbre{A12}{A26}{\PLARBREDONNES[8,3]}{\PLARBREDONNES[8,2]}{below=1pt}
+					%\draw[PLfleche] (A12)--(A26) node[probas,PLetiquette,{\PLARBREDONNES[8,3]}] {{\PLARBREDONNES[8,2]}} ;
+				}
+		}{}
+		%arbre2x3
+		\IfEq{\PLAPtype}{3x3}
+		{%
+			%sommets
+			\IfEq{\PLAPracine}{}%
+				{%
+					\coordinate (R) at ({0*\PLAPespniv},{-4*\PLAPespfeuille}) ;
+				}%
+				{%
+					\node[noeud] (R)  at ({0*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLAPracine};
+				}%
+			%\coordinate (R) at ({0*\PLAPespniv},{-4*\PLAPespfeuille}) ;
+			\node[noeud] (A11) at ({1*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[1,1]};
+			\node[noeud] (A12) at ({1*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[5,1]};
+			\node[noeud] (A13) at ({1*\PLAPespniv},{-7*\PLAPespfeuille}) {\PLARBREDONNES[9,1]};
+			\node[noeud] (A21) at ({2*\PLAPespniv},{-0*\PLAPespfeuille}) {\PLARBREDONNES[2,1]};
+			\node[noeud] (A22) at ({2*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[3,1]};
+			\node[noeud] (A23) at ({2*\PLAPespniv},{-2*\PLAPespfeuille}) {\PLARBREDONNES[4,1]};
+			\node[noeud] (A24) at ({2*\PLAPespniv},{-3*\PLAPespfeuille}) {\PLARBREDONNES[6,1]};
+			\node[noeud] (A25) at ({2*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[7,1]};
+			\node[noeud] (A26) at ({2*\PLAPespniv},{-5*\PLAPespfeuille}) {\PLARBREDONNES[8,1]};
+			\node[noeud] (A27) at ({2*\PLAPespniv},{-6*\PLAPespfeuille}) {\PLARBREDONNES[10,1]};
+			\node[noeud] (A28) at ({2*\PLAPespniv},{-7*\PLAPespfeuille}) {\PLARBREDONNES[11,1]};
+			\node[noeud] (A29) at ({2*\PLAPespniv},{-8*\PLAPespfeuille}) {\PLARBREDONNES[12,1]};
+			%branches
+			\ifstrempty{\PLARBREDONNES[1,2]}
+				{\draw[PLfleche] (R)--(A11) ;}
+				{
+					\IntPlaceProbasArbre{R}{A11}{\PLARBREDONNES[1,3]}{\PLARBREDONNES[1,2]}{above=1pt}
+					%\draw[PLfleche] (R)--(A11) node[probas,PLetiquette,{\PLARBREDONNES[1,3]}] {{\PLARBREDONNES[1,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[5,2]}
+				{\draw[PLfleche] (R)--(A12) ;}
+				{
+					\IntPlaceProbasArbre{R}{A12}{\PLARBREDONNES[5,3]}{\PLARBREDONNES[5,2]}{above=-1pt}
+					%\draw[PLfleche] (R)--(A12) node[probas,PLetiquette,{\PLARBREDONNES[5,3]}] {{\PLARBREDONNES[5,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[9,2]}
+				{\draw[PLfleche] (R)--(A13) ;}
+				{
+					\IntPlaceProbasArbre{R}{A13}{\PLARBREDONNES[9,3]}{\PLARBREDONNES[9,2]}{below=1pt}
+					%\draw[PLfleche] (R)--(A13) node[probas,PLetiquette,{\PLARBREDONNES[9,3]}] {{\PLARBREDONNES[9,2]}} ;
+				}
+			%N2
+			\ifstrempty{\PLARBREDONNES[2,2]}
+				{\draw[PLfleche] (A11)--(A21) ;}
+				{
+					\IntPlaceProbasArbre{A11}{A21}{\PLARBREDONNES[2,3]}{\PLARBREDONNES[2,2]}{above=1pt}
+					%\draw[PLfleche] (A11)--(A21) node[probas,PLetiquette,{\PLARBREDONNES[2,3]}] {{\PLARBREDONNES[2,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[3,2]}
+				{\draw[PLfleche] (A11)--(A22) ;}
+				{
+					\IntPlaceProbasArbre{A11}{A22}{\PLARBREDONNES[3,3]}{\PLARBREDONNES[3,2]}{above=-1pt}
+					%\draw[PLfleche] (A11)--(A22) node[probas,PLetiquette,{\PLARBREDONNES[3,3]}] {{\PLARBREDONNES[3,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[4,2]}
+				{\draw[PLfleche] (A11)--(A23) ;}
+				{
+					\IntPlaceProbasArbre{A11}{A23}{\PLARBREDONNES[4,3]}{\PLARBREDONNES[4,2]}{below=1pt}
+					%\draw[PLfleche] (A11)--(A23) node[probas,PLetiquette,{\PLARBREDONNES[4,3]}] {{\PLARBREDONNES[4,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[6,2]}
+				{\draw[PLfleche] (A12)--(A24) ;}
+				{
+					\IntPlaceProbasArbre{A12}{A24}{\PLARBREDONNES[6,3]}{\PLARBREDONNES[6,2]}{above=1pt}
+					%\draw[PLfleche] (A12)--(A24) node[probas,PLetiquette,{\PLARBREDONNES[6,3]}] {{\PLARBREDONNES[6,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[7,2]}
+				{\draw[PLfleche] (A12)--(A25) ;}
+				{
+					\IntPlaceProbasArbre{A12}{A25}{\PLARBREDONNES[7,3]}{\PLARBREDONNES[7,2]}{above=-1pt}
+					%\draw[PLfleche] (A12)--(A25) node[probas,PLetiquette,{\PLARBREDONNES[7,3]}] {{\PLARBREDONNES[7,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[8,2]}
+				{\draw[PLfleche] (A12)--(A26) ;}
+				{
+					\IntPlaceProbasArbre{A12}{A26}{\PLARBREDONNES[8,3]}{\PLARBREDONNES[8,2]}{below=1pt}
+					%\draw[PLfleche] (A12)--(A26) node[probas,PLetiquette,{\PLARBREDONNES[8,3]}] {{\PLARBREDONNES[8,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[10,2]}
+				{\draw[PLfleche] (A13)--(A27) ;}
+				{
+					\IntPlaceProbasArbre{A13}{A27}{\PLARBREDONNES[10,3]}{\PLARBREDONNES[10,2]}{above=1pt}
+					%\draw[PLfleche] (A13)--(A27) node[probas,PLetiquette,{\PLARBREDONNES[10,3]}] {{\PLARBREDONNES[10,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[11,2]}
+				{\draw[PLfleche] (A13)--(A28) ;}
+				{
+					\IntPlaceProbasArbre{A13}{A28}{\PLARBREDONNES[11,3]}{\PLARBREDONNES[11,2]}{above=-1pt}
+					%\draw[PLfleche] (A13)--(A28) node[probas,PLetiquette,{\PLARBREDONNES[11,3]}] {{\PLARBREDONNES[11,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[12,2]}
+				{\draw[PLfleche] (A13)--(A29) ;}
+				{
+					\IntPlaceProbasArbre{A13}{A29}{\PLARBREDONNES[12,3]}{\PLARBREDONNES[12,2]}{below=1pt}
+					%\draw[PLfleche] (A13)--(A29) node[probas,PLetiquette,{\PLARBREDONNES[12,3]}] {{\PLARBREDONNES[12,2]}} ;
+				}
+		}{}
+	\end{tikzpicture}
+}
+\NewCommandCopy\pflarbreprobas\ArbreProbasTikz
+
+\NewDocumentEnvironment{EnvArbreProbasTikz}{ O{} D<>{} m }%1=options,2=libellés
+{
+	\useKVdefault[PLTIKZARBRE]
+	\setKV[PLTIKZARBRE]{#1}
+	\setsepchar[.]{,./}%
+	\readlist*\PLARBREDONNES{#3}
+	\begin{tikzpicture}[x=\PLAPunite,y=\PLAPunite,#2]
+		%styles
+		\tikzstyle{noeud} = [font=\PLAPfont,text=\PLAPcolnoeuds]
+		\tikzstyle{probas}= [font=\PLAPfontproba,text=\PLAPcolprobas]
+		\ifboolKV[PLTIKZARBRE]{InclineProbas}
+			{\tikzstyle{PLetiquette}=[pos=0.525,sloped,inner sep=2pt,outer sep=2pt,rectangle]}
+			{\tikzstyle{PLetiquette}=[pos=0.525,inner sep=2pt,outer sep=2pt,rectangle]}
+		\ifboolKV[PLTIKZARBRE]{Fleche}
+			{\tikzstyle{PLfleche}=[->,>=latex,\PLAPtypetrait,\PLAPeptrait,\PLAPcolarc]}
+			{\tikzstyle{PLfleche}=[\PLAPtypetrait,\PLAPeptrait,\PLAPcolarc]}
+		%arbre2x2
+		\IfEq{\PLAPtype}{2x2}
+		{%
+			\IfEq{\PLAPracine}{}%
+				{%
+					\coordinate (R) at ({0*\PLAPespniv},{-1.5*\PLAPespfeuille}) ;
+				}%
+				{%
+					\node[noeud] (R)  at ({0*\PLAPespniv},{-1.5*\PLAPespfeuille}) {\PLAPracine};
+				}%
+			%\coordinate (R) at ({0*\PLAPespniv},{-1.5*\PLAPespfeuille}) ;
+			\node[noeud] (A11) at ({1*\PLAPespniv},{-0.5*\PLAPespfeuille}) {\PLARBREDONNES[1,1]};
+			\node[noeud] (A21) at ({2*\PLAPespniv},{-0*\PLAPespfeuille}) {\PLARBREDONNES[2,1]};
+			\node[noeud] (A22) at ({2*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[3,1]};
+			\node[noeud] (A12) at ({1*\PLAPespniv},{-2.5*\PLAPespfeuille}) {\PLARBREDONNES[4,1]};
+			\node[noeud] (A23) at ({2*\PLAPespniv},{-2*\PLAPespfeuille}) {\PLARBREDONNES[5,1]};
+			\node[noeud] (A24) at ({2*\PLAPespniv},{-3*\PLAPespfeuille}) {\PLARBREDONNES[6,1]};
+			\ifstrempty{\PLARBREDONNES[1,2]}
+				{\draw[PLfleche] (R)--(A11) ;}
+				{%
+					\IntPlaceProbasArbre{R}{A11}{\PLARBREDONNES[1,3]}{\PLARBREDONNES[1,2]}{above=1pt}
+					%\draw[PLfleche] (R)--(A11) node[probas,PLetiquette,{\PLARBREDONNES[1,3]}] {{\PLARBREDONNES[1,2]}} ;%
+				}%
+			\ifstrempty{\PLARBREDONNES[2,2]}
+				{\draw[PLfleche] (A11)--(A21) ;}
+				{%
+					\IntPlaceProbasArbre{A11}{A21}{\PLARBREDONNES[2,3]}{\PLARBREDONNES[2,2]}{above=1pt}
+					%\draw[PLfleche] (A11)--(A21) node[probas,PLetiquette,{\PLARBREDONNES[2,3]}] {{\PLARBREDONNES[2,2]}} ;%
+				}%
+			\ifstrempty{\PLARBREDONNES[3,2]}
+				{\draw[PLfleche] (A11)--(A22) ;}
+				{%
+					\IntPlaceProbasArbre{A11}{A22}{\PLARBREDONNES[3,3]}{\PLARBREDONNES[3,2]}{below=1pt}
+					%\draw[PLfleche] (A11)--(A22) node[probas,PLetiquette,{\PLARBREDONNES[3,3]}] {{\PLARBREDONNES[3,2]}} ;
+				}%
+			\ifstrempty{\PLARBREDONNES[4,2]}
+				{\draw[PLfleche] (R)--(A12) ;}
+				{%
+					\IntPlaceProbasArbre{R}{A12}{\PLARBREDONNES[4,3]}{\PLARBREDONNES[4,2]}{below=1pt}
+					%\draw[PLfleche] (R)--(A12) node[probas,PLetiquette,{\PLARBREDONNES[4,3]}] {{\PLARBREDONNES[4,2]}} ;%
+				}%
+			\ifstrempty{\PLARBREDONNES[5,2]}
+				{\draw[PLfleche] (A12)--(A23) ;}
+				{%
+					\IntPlaceProbasArbre{A12}{A23}{\PLARBREDONNES[5,3]}{\PLARBREDONNES[5,2]}{above=1pt}
+					%\draw[PLfleche] (A12)--(A23) node[probas,PLetiquette,{\PLARBREDONNES[5,3]}] {{\PLARBREDONNES[5,2]}} ;%
+				}%
+			\ifstrempty{\PLARBREDONNES[6,2]}
+				{\draw[PLfleche] (A12)--(A24) ;}
+				{%
+					\IntPlaceProbasArbre{A12}{A24}{\PLARBREDONNES[6,3]}{\PLARBREDONNES[6,2]}{below=1pt}
+					%\draw[PLfleche] (A12)--(A24) node[probas,PLetiquette,{\PLARBREDONNES[6,3]}] {{\PLARBREDONNES[6,2]}} ;%
+				}%
+		}{}
+		%arbre3x2
+		\IfEq{\PLAPtype}{3x2}
+		{%
+			%sommets
+			\IfEq{\PLAPracine}{}%
+				{%
+					\coordinate (R) at ({0*\PLAPespniv},{-2.5*\PLAPespfeuille}) ;
+				}%
+				{%
+					\node[noeud] (R)  at ({0*\PLAPespniv},{-2.5*\PLAPespfeuille}) {\PLAPracine};
+				}%
+			%\coordinate (R) at ({0*\PLAPespniv},{-2.5*\PLAPespfeuille}) ;
+			\node[noeud] (A11) at ({1*\PLAPespniv},{-0.5*\PLAPespfeuille}) {\PLARBREDONNES[1,1]};
+			\node[noeud] (A21) at ({2*\PLAPespniv},{-0*\PLAPespfeuille}) {\PLARBREDONNES[2,1]};
+			\node[noeud] (A22) at ({2*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[3,1]};
+			\node[noeud] (A12) at ({1*\PLAPespniv},{-2.5*\PLAPespfeuille}) {\PLARBREDONNES[4,1]};
+			\node[noeud] (A23) at ({2*\PLAPespniv},{-2*\PLAPespfeuille}) {\PLARBREDONNES[5,1]};
+			\node[noeud] (A24) at ({2*\PLAPespniv},{-3*\PLAPespfeuille}) {\PLARBREDONNES[6,1]};
+			\node[noeud] (A13) at ({1*\PLAPespniv},{-4.5*\PLAPespfeuille}) {\PLARBREDONNES[7,1]};
+			\node[noeud] (A25) at ({2*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[8,1]};
+			\node[noeud] (A26) at ({2*\PLAPespniv},{-5*\PLAPespfeuille}) {\PLARBREDONNES[9,1]};
+			%branches
+			\ifstrempty{\PLARBREDONNES[1,2]}
+				{\draw[PLfleche] (R)--(A11) ;}
+				{%
+					\IntPlaceProbasArbre{R}{A11}{\PLARBREDONNES[1,3]}{\PLARBREDONNES[1,2]}{above=1pt}
+					%\draw[PLfleche] (R)--(A11) node[probas,PLetiquette,{\PLARBREDONNES[1,3]}] {{\PLARBREDONNES[1,2]}} ;%
+				}%
+			\ifstrempty{\PLARBREDONNES[2,2]}
+				{\draw[PLfleche] (A11)--(A21) ;}
+				{%
+					\IntPlaceProbasArbre{A11}{A21}{\PLARBREDONNES[2,3]}{\PLARBREDONNES[2,2]}{above=1pt}
+					%\draw[PLfleche] (A11)--(A21) node[probas,PLetiquette,{\PLARBREDONNES[2,3]}] {{\PLARBREDONNES[2,2]}} ;
+				}%
+			\ifstrempty{\PLARBREDONNES[3,2]}
+				{\draw[PLfleche] (A11)--(A22) ;}
+				{
+					\IntPlaceProbasArbre{A11}{A22}{\PLARBREDONNES[3,3]}{\PLARBREDONNES[3,2]}{below=1pt}
+					%\draw[PLfleche] (A11)--(A22) node[probas,PLetiquette,{\PLARBREDONNES[3,3]}] {{\PLARBREDONNES[3,2]}} ;%
+				}
+			\ifstrempty{\PLARBREDONNES[4,2]}
+				{\draw[PLfleche] (R)--(A12) ;}
+				{
+					\IntPlaceProbasArbre{R}{A12}{\PLARBREDONNES[4,3]}{\PLARBREDONNES[4,2]}{above=-1pt}
+					%\draw[PLfleche] (R)--(A12) node[probas,PLetiquette,{\PLARBREDONNES[4,3]}] {{\PLARBREDONNES[4,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[5,2]}
+				{\draw[PLfleche] (A12)--(A23) ;}
+				{
+					\IntPlaceProbasArbre{A12}{A23}{\PLARBREDONNES[5,3]}{\PLARBREDONNES[5,2]}{above=1pt}
+					%\draw[PLfleche] (A12)--(A23) node[probas,PLetiquette,{\PLARBREDONNES[5,3]}] {{\PLARBREDONNES[5,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[6,2]}
+				{\draw[PLfleche] (A12)--(A24) ;}
+				{
+					\IntPlaceProbasArbre{A12}{A24}{\PLARBREDONNES[6,3]}{\PLARBREDONNES[6,2]}{below=1pt}
+					%\draw[PLfleche] (A12)--(A24) node[probas,PLetiquette,{\PLARBREDONNES[6,3]}] {{\PLARBREDONNES[6,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[7,2]}
+				{\draw[PLfleche] (R)--(A13) ;}
+				{
+					\IntPlaceProbasArbre{R}{A13}{\PLARBREDONNES[7,3]}{\PLARBREDONNES[7,2]}{below=1pt}
+					%\draw[PLfleche] (R)--(A13) node[probas,PLetiquette,{\PLARBREDONNES[7,3]}] {{\PLARBREDONNES[7,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[8,2]}
+				{\draw[PLfleche] (A13)--(A25) ;}
+				{
+					\IntPlaceProbasArbre{A13}{A25}{\PLARBREDONNES[8,3]}{\PLARBREDONNES[8,2]}{above=1pt}
+					%\draw[PLfleche] (A13)--(A25) node[probas,PLetiquette,{\PLARBREDONNES[8,3]}] {{\PLARBREDONNES[8,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[9,2]}
+				{\draw[PLfleche] (A13)--(A26) ;}
+				{
+					\IntPlaceProbasArbre{A13}{A26}{\PLARBREDONNES[9,3]}{\PLARBREDONNES[9,2]}{below=1pt}
+					%\draw[PLfleche] (A13)--(A26) node[probas,PLetiquette,{\PLARBREDONNES[9,3]}] {{\PLARBREDONNES[9,2]}} ;
+				}
+		}{}
+		%arbre2x3
+		\IfEq{\PLAPtype}{2x3}
+		{%
+			%sommets
+			\IfEq{\PLAPracine}{}%
+				{%
+					\coordinate (R) at ({0*\PLAPespniv},{-2.5*\PLAPespfeuille}) ;
+				}%
+				{%
+					\node[noeud] (R)  at ({0*\PLAPespniv},{-2.5*\PLAPespfeuille}) {\PLAPracine};
+				}%
+			%\coordinate (R) at ({0*\PLAPespniv},{-2.5*\PLAPespfeuille}) ;
+			\node[noeud] (A11) at ({1*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[1,1]};
+			\node[noeud] (A12) at ({1*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[5,1]};
+			\node[noeud] (A21) at ({2*\PLAPespniv},{-0*\PLAPespfeuille}) {\PLARBREDONNES[2,1]};
+			\node[noeud] (A22) at ({2*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[3,1]};
+			\node[noeud] (A23) at ({2*\PLAPespniv},{-2*\PLAPespfeuille}) {\PLARBREDONNES[4,1]};
+			\node[noeud] (A24) at ({2*\PLAPespniv},{-3*\PLAPespfeuille}) {\PLARBREDONNES[6,1]};
+			\node[noeud] (A25) at ({2*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[7,1]};
+			\node[noeud] (A26) at ({2*\PLAPespniv},{-5*\PLAPespfeuille}) {\PLARBREDONNES[8,1]};
+			%branches
+			\ifstrempty{\PLARBREDONNES[1,2]}
+				{\draw[PLfleche] (R)--(A11) ;}
+				{
+					\IntPlaceProbasArbre{R}{A11}{\PLARBREDONNES[1,3]}{\PLARBREDONNES[1,2]}{above=1pt}
+					%\draw[PLfleche] (R)--(A11) node[probas,PLetiquette,{\PLARBREDONNES[1,3]}] {{\PLARBREDONNES[1,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[5,2]}
+				{\draw[PLfleche] (R)--(A12) ;}
+				{
+					\IntPlaceProbasArbre{R}{A12}{\PLARBREDONNES[5,3]}{\PLARBREDONNES[5,2]}{below=1pt}
+					%\draw[PLfleche] (R)--(A12) node[probas,PLetiquette,{\PLARBREDONNES[5,3]}] {{\PLARBREDONNES[5,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[2,2]}
+				{\draw[PLfleche] (A11)--(A21) ;}
+				{
+					\IntPlaceProbasArbre{A11}{A21}{\PLARBREDONNES[2,3]}{\PLARBREDONNES[2,2]}{above=1pt}
+					%\draw[PLfleche] (A11)--(A21) node[probas,PLetiquette,{\PLARBREDONNES[2,3]}] {{\PLARBREDONNES[2,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[3,2]}
+				{\draw[PLfleche] (A11)--(A22) ;}
+				{
+					\IntPlaceProbasArbre{A11}{A22}{\PLARBREDONNES[3,3]}{\PLARBREDONNES[3,2]}{above=-1pt}
+					%\draw[PLfleche] (A11)--(A22) node[probas,PLetiquette,{\PLARBREDONNES[3,3]}] {{\PLARBREDONNES[3,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[4,2]}
+				{\draw[PLfleche] (A11)--(A23) ;}
+				{
+					\IntPlaceProbasArbre{A11}{A23}{\PLARBREDONNES[4,3]}{\PLARBREDONNES[4,2]}{below=1pt}
+					%\draw[PLfleche] (A11)--(A23) node[probas,PLetiquette,{\PLARBREDONNES[4,3]}] {{\PLARBREDONNES[4,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[6,2]}
+				{\draw[PLfleche] (A12)--(A24) ;}
+				{
+					\IntPlaceProbasArbre{A12}{A24}{\PLARBREDONNES[6,3]}{\PLARBREDONNES[6,2]}{above=1pt}
+					%\draw[PLfleche] (A12)--(A24) node[probas,PLetiquette,{\PLARBREDONNES[6,3]}] {{\PLARBREDONNES[6,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[7,2]}
+				{\draw[PLfleche] (A12)--(A25) ;}
+				{
+					\IntPlaceProbasArbre{A12}{A25}{\PLARBREDONNES[7,3]}{\PLARBREDONNES[7,2]}{above=-1pt}
+					%\draw[PLfleche] (A12)--(A25) node[probas,PLetiquette,{\PLARBREDONNES[7,3]}] {{\PLARBREDONNES[7,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[8,2]}
+				{\draw[PLfleche] (A12)--(A26) ;}
+				{
+					\IntPlaceProbasArbre{A12}{A26}{\PLARBREDONNES[8,3]}{\PLARBREDONNES[8,2]}{below=1pt}
+					%\draw[PLfleche] (A12)--(A26) node[probas,PLetiquette,{\PLARBREDONNES[8,3]}] {{\PLARBREDONNES[8,2]}} ;
+				}
+		}{}
+		%arbre2x3
+		\IfEq{\PLAPtype}{3x3}
+		{%
+			%sommets
+			\IfEq{\PLAPracine}{}%
+				{%
+					\coordinate (R) at ({0*\PLAPespniv},{-4*\PLAPespfeuille}) ;
+				}%
+				{%
+					\node[noeud] (R) at ({0*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLAPracine};
+				}%
+			%\coordinate (R) at ({0*\PLAPespniv},{-4*\PLAPespfeuille}) ;
+			\node[noeud] (A11) at ({1*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[1,1]};
+			\node[noeud] (A12) at ({1*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[5,1]};
+			\node[noeud] (A13) at ({1*\PLAPespniv},{-7*\PLAPespfeuille}) {\PLARBREDONNES[9,1]};
+			\node[noeud] (A21) at ({2*\PLAPespniv},{-0*\PLAPespfeuille}) {\PLARBREDONNES[2,1]};
+			\node[noeud] (A22) at ({2*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[3,1]};
+			\node[noeud] (A23) at ({2*\PLAPespniv},{-2*\PLAPespfeuille}) {\PLARBREDONNES[4,1]};
+			\node[noeud] (A24) at ({2*\PLAPespniv},{-3*\PLAPespfeuille}) {\PLARBREDONNES[6,1]};
+			\node[noeud] (A25) at ({2*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[7,1]};
+			\node[noeud] (A26) at ({2*\PLAPespniv},{-5*\PLAPespfeuille}) {\PLARBREDONNES[8,1]};
+			\node[noeud] (A27) at ({2*\PLAPespniv},{-6*\PLAPespfeuille}) {\PLARBREDONNES[10,1]};
+			\node[noeud] (A28) at ({2*\PLAPespniv},{-7*\PLAPespfeuille}) {\PLARBREDONNES[11,1]};
+			\node[noeud] (A29) at ({2*\PLAPespniv},{-8*\PLAPespfeuille}) {\PLARBREDONNES[12,1]};
+			%branches
+			\ifstrempty{\PLARBREDONNES[1,2]}
+				{\draw[PLfleche] (R)--(A11) ;}
+				{
+					\IntPlaceProbasArbre{R}{A11}{\PLARBREDONNES[1,3]}{\PLARBREDONNES[1,2]}{above=1pt}
+					%\draw[PLfleche] (R)--(A11) node[probas,PLetiquette,{\PLARBREDONNES[1,3]}] {{\PLARBREDONNES[1,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[5,2]}
+				{\draw[PLfleche] (R)--(A12) ;}
+				{
+					\IntPlaceProbasArbre{R}{A12}{\PLARBREDONNES[5,3]}{\PLARBREDONNES[5,2]}{above=-1pt}
+					%\draw[PLfleche] (R)--(A12) node[probas,PLetiquette,{\PLARBREDONNES[5,3]}] {{\PLARBREDONNES[5,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[9,2]}
+				{\draw[PLfleche] (R)--(A13) ;}
+				{
+					\IntPlaceProbasArbre{R}{A13}{\PLARBREDONNES[9,3]}{\PLARBREDONNES[9,2]}{below=1pt}
+					%\draw[PLfleche] (R)--(A13) node[probas,PLetiquette,{\PLARBREDONNES[9,3]}] {{\PLARBREDONNES[9,2]}} ;
+				}
+			%N2
+			\ifstrempty{\PLARBREDONNES[2,2]}
+				{\draw[PLfleche] (A11)--(A21) ;}
+				{
+					\IntPlaceProbasArbre{A11}{A21}{\PLARBREDONNES[2,3]}{\PLARBREDONNES[2,2]}{above=1pt}
+					%\draw[PLfleche] (A11)--(A21) node[probas,PLetiquette,{\PLARBREDONNES[2,3]}] {{\PLARBREDONNES[2,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[3,2]}
+				{\draw[PLfleche] (A11)--(A22) ;}
+				{
+					\IntPlaceProbasArbre{A11}{A22}{\PLARBREDONNES[3,3]}{\PLARBREDONNES[3,2]}{above=-1pt}
+					%\draw[PLfleche] (A11)--(A22) node[probas,PLetiquette,{\PLARBREDONNES[3,3]}] {{\PLARBREDONNES[3,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[4,2]}
+				{\draw[PLfleche] (A11)--(A23) ;}
+				{
+					\IntPlaceProbasArbre{A11}{A23}{\PLARBREDONNES[4,3]}{\PLARBREDONNES[4,2]}{below=1pt}
+					%\draw[PLfleche] (A11)--(A23) node[probas,PLetiquette,{\PLARBREDONNES[4,3]}] {{\PLARBREDONNES[4,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[6,2]}
+				{\draw[PLfleche] (A12)--(A24) ;}
+				{
+					\IntPlaceProbasArbre{A12}{A24}{\PLARBREDONNES[6,3]}{\PLARBREDONNES[6,2]}{above=1pt}
+					%\draw[PLfleche] (A12)--(A24) node[probas,PLetiquette,{\PLARBREDONNES[6,3]}] {{\PLARBREDONNES[6,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[7,2]}
+				{\draw[PLfleche] (A12)--(A25) ;}
+				{
+					\IntPlaceProbasArbre{A12}{A25}{\PLARBREDONNES[7,3]}{\PLARBREDONNES[7,2]}{above=-1pt}
+					%\draw[PLfleche] (A12)--(A25) node[probas,PLetiquette,{\PLARBREDONNES[7,3]}] {{\PLARBREDONNES[7,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[8,2]}
+				{\draw[PLfleche] (A12)--(A26) ;}
+				{
+					\IntPlaceProbasArbre{A12}{A26}{\PLARBREDONNES[8,3]}{\PLARBREDONNES[8,2]}{below=1pt}
+					%\draw[PLfleche] (A12)--(A26) node[probas,PLetiquette,{\PLARBREDONNES[8,3]}] {{\PLARBREDONNES[8,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[10,2]}
+				{\draw[PLfleche] (A13)--(A27) ;}
+				{
+					\IntPlaceProbasArbre{A13}{A27}{\PLARBREDONNES[10,3]}{\PLARBREDONNES[10,2]}{above=1pt}
+					%\draw[PLfleche] (A13)--(A27) node[probas,PLetiquette,{\PLARBREDONNES[10,3]}] {{\PLARBREDONNES[10,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[11,2]}
+				{\draw[PLfleche] (A13)--(A28) ;}
+				{
+					\IntPlaceProbasArbre{A13}{A28}{\PLARBREDONNES[11,3]}{\PLARBREDONNES[11,2]}{above=-1pt}
+					%\draw[PLfleche] (A13)--(A28) node[probas,PLetiquette,{\PLARBREDONNES[11,3]}] {{\PLARBREDONNES[11,2]}} ;
+				}
+			\ifstrempty{\PLARBREDONNES[12,2]}
+				{\draw[PLfleche] (A13)--(A29) ;}
+				{
+					\IntPlaceProbasArbre{A13}{A29}{\PLARBREDONNES[12,3]}{\PLARBREDONNES[12,2]}{below=1pt}
+					%\draw[PLfleche] (A13)--(A29) node[probas,PLetiquette,{\PLARBREDONNES[12,3]}] {{\PLARBREDONNES[12,2]}} ;
+				}
+		}{}
+}
+{
+	\end{tikzpicture}
+}
+
+%%------SCHEMASPROBAS
+%densites utiles
+\def\densnorm#1{1/(sqrt(2*pi))*exp(-0.5*(#1*#1))}
+\def\densexpo#1{exp(-#1)}
+
+\defKV[GRPHPROBCONTINUES]{%
+	CouleurAire=\def\GRPHPROBcoulsurf{#1},%
+	CouleurCourbe=\def\GRPHPROBcoulcbe{#1},%
+	Largeur=\def\GRPHPROBlarg{#1},%
+	Hauteur=\def\GRPHPROBhauteur{#1}
+}
+
+\setKVdefault[GRPHPROBCONTINUES]{%
+	CouleurAire=lightgray,%
+	CouleurCourbe=red,%
+	Largeur=2,%
+	Hauteur=1,%
+	AfficheM=true,%
+	AfficheCadre=true
+}
+
+\NewDocumentCommand\LoiNormaleGraphe{ O{} D<>{} m m m m }{%1=options,2=optionstikz,3=m,4=s,5=a,6=b
+	%simplekv
+	\useKVdefault[GRPHPROBCONTINUES]%
+	\setKV[GRPHPROBCONTINUES]{#1}%
+	%unites
+	\def\UNITEX{\fpeval{\GRPHPROBlarg/8}}\def\UNITEY{\fpeval{\GRPHPROBhauteur/0.5}}%
+	%bornes
+	\def\BorneInf{\fpeval{(#5-#3)/#4}}\def\BorneSup{\fpeval{(#6-#3)/#4}}%
+	\ifthenelse{\equal{#5}{*}}{\def\BorneInf{-4}}{}%
+	\ifthenelse{\equal{#6}{*}}{\def\BorneSup{4}}{}%
+	%tikzpicture
+	\begin{tikzpicture}[x=\UNITEX cm,y=\UNITEY cm,#2]
+		\ifboolKV[GRPHPROBCONTINUES]{AfficheM}%
+			{\draw (0,-0.0375) node[font=\tiny,scale={2*\UNITEX}] {#3} ;}
+			{}
+		\ifboolKV[GRPHPROBCONTINUES]{AfficheCadre}%
+			{\draw[gray] (-4,-0.075) rectangle (4,0.425) ;}
+			{}
+		\clip (-4,-0.075) rectangle (4,0.425) ;
+		\draw[black,semithick,fill=\GRPHPROBcoulsurf] ({\BorneInf},0) -- plot [domain={\BorneInf}:{\BorneSup},samples=100] (\x,{\densnorm{\x}}) -- ({\BorneSup},0) -- cycle;
+		\draw[thick,->,>=latex] (-4,0)--(4,0) ;
+		\draw[thick,densely dotted] (0,0)--(0,0.39894) ;
+		\draw[thick,domain=-4:4,samples=100,\GRPHPROBcoulcbe] plot (\x,{\densnorm{\x}}) ;
+	\end{tikzpicture}%
+}
+\NewCommandCopy\pflnormgraph\LoiNormaleGraphe
+
+\NewDocumentCommand\LoiExpoGraphe{ O{} D<>{} m m m }{%1=options,2=optionstikz,3=l,4=a,5=b
+	%simplekv
+	\useKVdefault[GRPHPROBCONTINUES]%
+	\setKV[GRPHPROBCONTINUES]{#1}%
+	%unites
+	\def\UNITEX{\fpeval{\GRPHPROBlarg/4}}\def\UNITEY{\fpeval{\GRPHPROBhauteur/1}}%
+	\def\MOYENNE{\fpeval{trunc(1/#3,0)}}%
+	%bornes
+	\def\BorneInf{\fpeval{#3*#4}}\def\BorneSup{\fpeval{#3*#5}}%
+	\ifthenelse{\equal{#4}{*}}{\def\BorneInf{0}}{}%
+	\ifthenelse{\equal{#5}{*}}{\def\BorneSup{4}}{}%
+	%tikzpicture
+	\begin{tikzpicture}[x=\UNITEX cm,y=\UNITEY cm,#2]
+		\ifboolKV[GRPHPROBCONTINUES]{AfficheCadre}%
+			{\draw[gray] (-0.2,-0.15) rectangle (3.8,0.85) ;}
+			{}
+		\clip (-0.2,-0.15) rectangle (3.8,0.85) ;
+		\draw[black,semithick,fill=\GRPHPROBcoulsurf] ({\BorneInf},0) -- plot [domain={\BorneInf}:{\BorneSup},samples=100] (\x,{0.7*\densexpo{\x}}) -- ({\BorneSup},0) -- cycle;
+		\ifboolKV[GRPHPROBCONTINUES]{AfficheM}%
+			{\draw (1,-0.075) node[font=\tiny,scale={\UNITEX}] {\MOYENNE} ;
+			\draw[thick,densely dotted] (1,0)--(1,{0.7*\densexpo{1}}) ;}
+			{}
+		\draw[thick,->,>=latex] (-0.2,0)--(3.8,0) ;
+		\draw[thick,->,>=latex] (0,-0.15)--(0,0.85) ;
+		\draw[thick,domain=0:3.8,samples=100,\GRPHPROBcoulcbe] plot (\x,{0.7*\densexpo{\x}}) ;
+	\end{tikzpicture}%
+}
+\NewCommandCopy\pflexpograph\LoiExpoGraphe
+
+%%------aNp/Cnp
+\NewDocumentCommand\CalculAnp{ m m }{%avec et pour xint, p/n
+	pfactorial(#2-#1,#2)
+}
+\NewCommandCopy\pflcalcanp\CalculAnp
+
+\NewDocumentCommand\CalculCnp{ m m }{%avec et pour xint, p/n
+	binomial(#2,#1)
+}
+\NewCommandCopy\pflcalccnp\CalculCnp
+
+\setKVdefault[anpCnp]{%
+	Formule=false,%
+	Notation=false,%
+	NotationAncien=false
+}
+\NewDocumentCommand\Arrangement{ s O{} m m }{%p/n
+	\useKVdefault[anpCnp]%
+	\setKV[anpCnp]{#2}%
+	\ifboolKV[anpCnp]{Notation}{A_{#4}^{#3}=}{}%
+	\ifboolKV[anpCnp]{Formule}{\frac{#4!}{\inteval{#4-#3}!}=}{}%
+	\IfBooleanTF{#1}%
+		{\xinteval{\CalculAnp{#3}{#4}}}%non formaté
+		{\num{\xinteval{\CalculAnp{#3}{#4}}}}%formaté
+}
+\NewCommandCopy\pflarrang\Arrangement
+
+\NewDocumentCommand\Combinaison{ s O{} m m }{%p/n
+	\useKVdefault[anpCnp]%
+	\setKV[anpCnp]{#2}%
+	\ifboolKV[anpCnp]{Notation}{\binom{#4}{#3} =}{}%
+	\ifboolKV[anpCnp]{NotationAncien}{C_{#4}^{#3}=}{}%
+	\ifboolKV[anpCnp]{Formule}{\frac{#4!}{#3! \times \inteval{#4-#3}!}=}{}%
+	\IfBooleanTF{#1}%
+		{\xinteval{\CalculCnp{#3}{#4}}}%non formaté
+		{\num{\xinteval{\CalculCnp{#3}{#4}}}}%formaté
+}
+\NewCommandCopy\pflcombin\Combinaison
+
+%%------Fonction de répartition
+\NewDocumentCommand\CrochetFctRepart{ m m }{
+	\draw[red,\FctRepartThickness] ({#1 + 0.1}, {#2 + 0.025}) -- (#1,#2 + 0.025) -- (#1,#2 - 0.025) -- ({#1 + 0.1}, {#2 - 0.025});
+}
+
+\defKV[fctrepart]{%
+	Couleur=\def\FctRepartColor{#1},%
+	Epaisseur=\def\FctRepartThickness{#1},%
+	Extremite=\def\FctRepartExtremite{#1}
+}
+
+\setKVdefault[fctrepart]{%
+	Couleur=red,%
+	Epaisseur=thick,%
+	Pointilles=true,%
+	Extremite=crochet
+}
+
+\NewDocumentCommand\FonctionRepartTikz{ O{} m }{%
+	\restoreKV[fctrepart]%
+	\setKV[fctrepart]{#1}%
+	\setsepchar[.]{/.,}%
+	\readlist*\ListeFonctRepart{#2}%
+	\def\NbPortions{\ListeFonctRepartlen}
+	\foreach \i in {1,2,...,\ListeFonctRepartlen}
+		{%
+			\IfStrEq{\ListeFonctRepart[\i,2]}{*}%
+				{%
+					\def\valxdeb{\xmin}%
+				}%
+				{%
+					\itemtomacro\ListeFonctRepart[\i,2]\valxdeb%
+					\IfStrEq{\FctRepartExtremite}{crochet}%
+						{
+							\CrochetFctRepart{\ListeFonctRepart[\i,2]}{\ListeFonctRepart[\i,1]}%
+						}{}%
+					\IfStrEq{\FctRepartExtremite}{point}%
+						{
+							\filldraw[\FctRepartColor] ({\valxdeb},{\ListeFonctRepart[\i,1]}) circle[radius=1.5pt] ;%
+						}{}%
+				}%
+			\IfStrEq{\ListeFonctRepart[\i,3]}{*}%
+				{%
+					\def\valxfin{\xmax}%
+				}%
+				{%
+					\itemtomacro\ListeFonctRepart[\i,3]\valxfin%
+					\IfStrEq{\FctRepartExtremite}{crochet}%
+						{
+							\CrochetFctRepart{\ListeFonctRepart[\i,3]}{\ListeFonctRepart[\i,1]}%
+						}{}%
+					\IfStrEq{\FctRepartExtremite}{point}%
+						{
+							\draw[\FctRepartColor,fill=white] ({\valxfin},{\ListeFonctRepart[\i,1]}) circle[radius=1.5pt] ;%
+						}{}%
+				}%
+			\ifboolKV[fctrepart]{Pointilles}%
+				{%
+					\xintifboolexpr{\valxdeb * \valxfin > 0 'and' \valxdeb > 0}%
+						{%
+							\draw[semithick,dashed] (0,{\ListeFonctRepart[\i,1]})--({\valxdeb},{\ListeFonctRepart[\i,1]}) ;%
+						}{}%
+					\xintifboolexpr{\valxdeb * \valxfin > 0 'and' \valxdeb < 0}%
+						{%
+							\draw[semithick,dashed] (0,{\ListeFonctRepart[\i,1]})--({\valxfin},{\ListeFonctRepart[\i,1]}) ;%
+						}{}%
+				}{}%
+			\draw[\FctRepartThickness,\FctRepartColor] ({\valxdeb},{\ListeFonctRepart[\i,1]})--({\valxfin},{\ListeFonctRepart[\i,1]}) ;%
+		}%
+}
+
+%===BINOMIALE
+\defKV[HistoBinom]{%
+	Largeur=\def\GraphBinomLarg{#1},%
+	Hauteur=\def\GraphBinomHaut{#1},%
+	PasX=\def\GraphBinomPasX{#1},%
+	PasY=\def\GraphBinomPasY{#1},%
+	Plage=\def\GraphBinomPlage{#1},%
+	CouleurPlage=\def\GraphBimomColPlage{#1},%
+	Epaisseur=\def\GraphBinomThick{#1},%
+	ClipX=\def\GraphBinomXminmax{#1},%
+	Police=\def\GraphBinomFonte{#1},%
+	CouleurNormale=\def\GraphBinomColNorm{#1}
+}
+\setKVdefault[HistoBinom]{%
+	Largeur=10,%
+	Hauteur=5,%
+	PasX=5,%
+	PasY=0.01,%
+	Plage={},%
+	CouleurPlage=teal!50,%
+	Epaisseur=0.8pt,
+	ClipX={},%
+	Police=\normalfont\normalsize,%
+	AffNormale=false,%
+	CouleurNormale=red
+}
+
+\NewDocumentCommand\HistogrammeBinomiale{ O{} D<>{} m m }{%
+	\restoreKV[HistoBinom]%
+	\setKV[HistoBinom]{#1}
+	\def\GraphBinomN{#3}%
+	\def\GraphBinomP{#4}%
+	\IfStrEq{\GraphBinomXminmax}{}%
+	{%
+		\xdef\GraphBinomXmin{0}%
+		\xdef\GraphBinomXmax{\GraphBinomN}%
+	}%
+	{%
+		\StrCut{\GraphBinomXminmax}{-}{\GraphBinomXmin}{\GraphBinomXmax}%
+		\IfStrEq{\GraphBinomXmin}{*}{\xdef\GraphBinomXmin{0}}{}%
+		\IfStrEq{\GraphBinomXmax}{*}{\xdef\GraphBinomXmax{\GraphBinomN}}{}%
+	}%
+	\IfStrEq{\GraphBinomPlage}{}%
+	{}%
+	{%
+		\StrCut{\GraphBinomPlage}{-}{\GraphBinomColorMin}{\GraphBinomColorMax}%
+		\IfStrEq{\GraphBinomColorMin}{*}{\xdef\GraphBinomColorMin{\GraphBinomXmin}}{}%
+		\IfStrEq{\GraphBinomColorMax}{*}{\xdef\GraphBinomColorMax{\GraphBinomXmax}}{}%
+	}%
+	%test d'unités
+	\xdef\GraphBinomXunit{\xintfloateval{round((\GraphBinomLarg)/(\GraphBinomXmax-\GraphBinomXmin+1),3)}}%
+	\xdef\grphbinommedA{\xintfloateval{trunc(\GraphBinomN*\GraphBinomP,0)}}%
+	\xdef\grphbinommedB{\xintfloateval{\grphbinommedA+1}}%
+	\xdef\GraphBinomYmaxA{\xintfloateval{binomial(\GraphBinomN,\grphbinommedA)*(\GraphBinomP)^(\grphbinommedA)*(1-(\GraphBinomP))^((\GraphBinomN)-(\grphbinommedA))}}%
+	\xdef\GraphBinomYmaxB{\xintfloateval{binomial(\GraphBinomN,\grphbinommedB)*(\GraphBinomP)^(\grphbinommedB)*(1-(\GraphBinomP))^((\GraphBinomN)-(\grphbinommedB))}}%
+	\xdef\GraphBinomMaxY{\xintfloateval{1.1*max(\GraphBinomYmaxA,\GraphBinomYmaxB)}}%
+	\xdef\GraphBinomNbPrecision{\xinteval{abs(ilog10(\GraphBinomMaxY))+1}}%
+	\xdef\GraphBinomYunit{\xintfloateval{round((\GraphBinomHaut)/(max(\GraphBinomYmaxA,\GraphBinomYmaxB)),3)}}%
+	\begin{tikzpicture}[x=\GraphBinomXunit cm,y=\GraphBinomYunit cm,#2]
+		%coloriage éventuel
+		\IfStrEq{\GraphBinomPlage}{}%
+		{}%
+		{%
+			\xintFor* ##1 in {\xintSeq{\GraphBinomColorMin}{\GraphBinomColorMax}}\do{%
+				\xdef\tmpYYY{\xintfloateval{binomial(\GraphBinomN,##1)*(\GraphBinomP)^(##1)*(1-(\GraphBinomP))^((\GraphBinomN)-(##1))}}%
+				\draw[draw=none,fill=\GraphBimomColPlage,fill opacity=0.5] ({##1-0.5},0) rectangle++ (1,{\tmpYYY}) ;
+			}%
+		}%
+		%axes
+		\draw[line width=\GraphBinomThick,->,>=latex] ({\GraphBinomXmin-0.5},0)--({\GraphBinomXmax+1},0) ;
+		\draw[line width=\GraphBinomThick,->,>=latex] ({\GraphBinomXmin-0.5},0)--({\GraphBinomXmin-0.5},{1.1*(\GraphBinomHaut)/(\GraphBinomYunit)}) ;
+		\foreach \x in {\GraphBinomXmin,\inteval{\GraphBinomXmin+\GraphBinomPasX},...,\GraphBinomXmax}{%
+			\draw[line width=\GraphBinomThick] (\x,2pt)--++(0,-4pt) node[below,font=\GraphBinomFonte] {\num{\x}} ;
+		}%
+		\xdef\GraphBinomNbPrecisionAxeY{\xinteval{abs(ilog10(\GraphBinomPasY))+1}}%
+		\foreach \y in {0,\GraphBinomPasY,...,\GraphBinomMaxY}{%
+			\draw[line width=\GraphBinomThick] ($({\GraphBinomXmin-0.5},\y)+(2pt,0)$)--++(-4pt,0) node[left,font=\GraphBinomFonte] {\num{\xintfloateval{round(\y,\GraphBinomNbPrecisionAxeY)}}} ;
+		}%
+		%tracé
+		\xintFor* ##1 in {\xintSeq{\GraphBinomXmin}{\GraphBinomXmax}}\do{%
+			\xdef\tmpYYY{\xintfloateval{binomial(\GraphBinomN,##1)*(\GraphBinomP)^(##1)*(1-(\GraphBinomP))^((\GraphBinomN)-(##1))}}%
+			\draw[line width=\GraphBinomThick] ({##1-0.5},0) rectangle++ (1,{\tmpYYY}) ;
+		}
+		\ifboolKV[HistoBinom]{AffNormale}%
+			{%
+				\xdef\MinNormHistoBinom{\xintfloateval{{\GraphBinomXmin-0.5}}}%
+				\xdef\MaxNormHistoBinom{\xintfloateval{{\GraphBinomXmax+0.5}}}%
+				\TraceLoiNormale*[line width={1.25*\GraphBinomThick},\GraphBinomColNorm]<\MinNormHistoBinom..[0.1]..\MaxNormHistoBinom>{#3}{#4}
+			}%
+			{}%
+	\end{tikzpicture}
+}
+\NewCommandCopy\pflhistobinom\HistogrammeBinomiale
+
+\NewDocumentEnvironment{HistoBinomiale}{ O{} D<>{} m m }%
+{%
+	\restoreKV[HistoBinom]%
+	\setKV[HistoBinom]{#1}
+	\def\GraphBinomN{#3}%
+	\def\GraphBinomP{#4}%
+	\IfStrEq{\GraphBinomXminmax}{}%
+	{%
+		\xdef\GraphBinomXmin{0}%
+		\xdef\GraphBinomXmax{\GraphBinomN}%
+	}%
+	{%
+		\StrCut{\GraphBinomXminmax}{-}{\GraphBinomXmin}{\GraphBinomXmax}%
+		\IfStrEq{\GraphBinomXmin}{*}{\xdef\GraphBinomXmin{0}}{}%
+		\IfStrEq{\GraphBinomXmax}{*}{\xdef\GraphBinomXmax{\GraphBinomN}}{}%
+	}%
+	\IfStrEq{\GraphBinomPlage}{}%
+	{}%
+	{%
+		\StrCut{\GraphBinomPlage}{-}{\GraphBinomColorMin}{\GraphBinomColorMax}%
+		\IfStrEq{\GraphBinomColorMin}{*}{\xdef\GraphBinomColorMin{\GraphBinomXmin}}{}%
+		\IfStrEq{\GraphBinomColorMax}{*}{\xdef\GraphBinomColorMax{\GraphBinomXmax}}{}%
+	}%
+	%test d'unités
+	\xdef\GraphBinomXunit{\xintfloateval{round((\GraphBinomLarg)/(\GraphBinomXmax-\GraphBinomXmin+1),3)}}%
+	\xdef\grphbinommedA{\xintfloateval{trunc(\GraphBinomN*\GraphBinomP,0)}}%
+	\xdef\grphbinommedB{\xintfloateval{\grphbinommedA+1}}%
+	\xdef\GraphBinomYmaxA{\xintfloateval{binomial(\GraphBinomN,\grphbinommedA)*(\GraphBinomP)^(\grphbinommedA)*(1-(\GraphBinomP))^((\GraphBinomN)-(\grphbinommedA))}}%
+	\xdef\GraphBinomYmaxB{\xintfloateval{binomial(\GraphBinomN,\grphbinommedB)*(\GraphBinomP)^(\grphbinommedB)*(1-(\GraphBinomP))^((\GraphBinomN)-(\grphbinommedB))}}%
+	\xdef\GraphBinomMaxY{\xintfloateval{1.1*max(\GraphBinomYmaxA,\GraphBinomYmaxB)}}%
+	\xdef\GraphBinomNbPrecision{\xinteval{abs(ilog10(\GraphBinomMaxY))+1}}%
+	\xdef\GraphBinomYunit{\xintfloateval{round((\GraphBinomHaut)/(max(\GraphBinomYmaxA,\GraphBinomYmaxB)),3)}}%
+	\begin{tikzpicture}[x=\GraphBinomXunit cm,y=\GraphBinomYunit cm,#2]
+		%coloriage éventuel
+		\IfStrEq{\GraphBinomPlage}{}%
+		{}%
+		{%
+			\xintFor* ##1 in {\xintSeq{\GraphBinomColorMin}{\GraphBinomColorMax}}\do{%
+				\xdef\tmpYYY{\xintfloateval{binomial(\GraphBinomN,##1)*(\GraphBinomP)^(##1)*(1-(\GraphBinomP))^((\GraphBinomN)-(##1))}}%
+				\draw[draw=none,fill=\GraphBimomColPlage,fill opacity=0.5] ({##1-0.5},0) rectangle++ (1,{\tmpYYY}) ;
+			}%
+		}%
+		%axes
+		\draw[line width=\GraphBinomThick,->,>=latex] ({\GraphBinomXmin-0.5},0)--({\GraphBinomXmax+1},0) ;
+		\draw[line width=\GraphBinomThick,->,>=latex] ({\GraphBinomXmin-0.5},0)--({\GraphBinomXmin-0.5},{1.1*(\GraphBinomHaut)/(\GraphBinomYunit)}) ;
+		\foreach \x in {\GraphBinomXmin,\inteval{\GraphBinomXmin+\GraphBinomPasX},...,\GraphBinomXmax}{%
+			\draw[line width=\GraphBinomThick] (\x,2pt)--++(0,-4pt) node[below,font=\GraphBinomFonte] {\num{\x}} ;
+		}%
+		\xdef\GraphBinomNbPrecisionAxeY{\xinteval{abs(ilog10(\GraphBinomPasY))+1}}%
+		\foreach \y in {0,\GraphBinomPasY,...,\GraphBinomMaxY}{%
+			\draw[line width=\GraphBinomThick] ($({\GraphBinomXmin-0.5},\y)+(2pt,0)$)--++(-4pt,0) node[left,font=\GraphBinomFonte] {\num{\xintfloateval{round(\y,\GraphBinomNbPrecisionAxeY)}}} ;
+		}%
+		%tracé
+		\xintFor* ##1 in {\xintSeq{\GraphBinomXmin}{\GraphBinomXmax}}\do{%
+			\xdef\tmpYYY{\xintfloateval{binomial(\GraphBinomN,##1)*(\GraphBinomP)^(##1)*(1-(\GraphBinomP))^((\GraphBinomN)-(##1))}}%
+			\draw[line width=\GraphBinomThick] ({##1-0.5},0) rectangle++ (1,{\tmpYYY}) ;
+		}
+		%loi normale ?
+		\ifboolKV[HistoBinom]{AffNormale}%
+			{%
+				\xdef\MinNormHistoBinom{\xintfloateval{{\GraphBinomXmin-0.5}}}%
+				\xdef\MaxNormHistoBinom{\xintfloateval{{\GraphBinomXmax+0.5}}}%
+				\TraceLoiNormale*[line width={1.25*\GraphBinomThick},\GraphBinomColNorm]<\MinNormHistoBinom..[0.1]..\MaxNormHistoBinom>{#3}{#4}
+			}%
+			{}%
+	}%
+	{%
+	\end{tikzpicture}
+}
+
+\xintdeffloatfunc fctreploinorm(x,mu,sigma):=1/(sigma*sqrt(2*Pi))*exp(-1/2*((x-mu)/sigma)^2);
+
+\NewDocumentCommand\TraceLoiNormale{ s O{} D<>{} m m }{%
+	\IfBooleanTF{#1}%
+	{%
+		\draw[#2] plot[smooth] coordinates {%
+			\xintthecoords\xintfloatexpr
+			seq((x,fctreploinorm(x,#4*#5,sqrt(#4*#5*(1-#5)))),x=#3)
+			\relax
+		};
+	}%
+	{%
+		\draw[#2] plot[smooth] coordinates {%
+			\xintthecoords\xintfloatexpr
+			seq((x,fctreploinorm(x,#4,#5)),x=#3)
+			\relax
+		};
+	}%
+}
+
+%====ARBRES CHOIX
+\RequirePackage{commalists-tools}
+
+\tikzset{arbrechoixaretes/.style={semithick}}
+\tikzset{arbrechoixsommets/.style={circle,draw=none,inner sep=1pt}}
+\tikzset{arbrechoixresultats/.style={rectangle,draw,inner sep=1.5pt}}
+\tikzset{arbrechoixnotices/.style={inner sep=1pt,font=\small\ttfamily,midway,below=\fpeval{0.75*\LISTECHOIXinterfeuille}cm,}}
+\tikzset{arbrechoixdeconotices/.style={semithick,decoration={brace,mirror,raise=\fpeval{0.25*\LISTECHOIXechelle*\LISTECHOIXinterfeuille}cm,amplitude=\fpeval{0.5*\LISTECHOIXechelle*\LISTECHOIXinterfeuille}cm},decorate}}
+
+%https://tex.stackexchange.com/questions/73173/how-to-change-the-item-separator-in-tikz-foreach-command/174135#174135
+%Mark Wibrow := CC BY-SA 3.0
+\makeatletter
+\let\pgffor@dotsscanend@original=\pgffor@dotsscanend
+\def\PGFFOR@PARAMDELIM#1{%
+	\def\pgffor@emptyvalues{#1 \pgffor@stop#1}%
+	\def\pgffor@normal@list##1{%
+		\def\pgffor@values{##1#1 \pgffor@stop#1}%
+		\ifx\pgffor@values\pgffor@emptyvalues
+		\def\pgffor@values{\pgffor@stop#1}%
+		\fi%
+		\let\pgffor@body=\pgfutil@empty%
+		\global\pgffor@continuetrue%
+		\pgffor@collectbody}%
+	\def\pgffor@scanround(##1)##2#1{\def\pgffor@value{(##1)##2}\pgffor@scanned}%
+	\def\pgffor@scanone##1#1{\def\pgffor@value{##1}\pgffor@scanned}%
+	\def\pgffor@dotsscanend##1#1{\pgffor@dotsscanend@original##1,}%
+}
+
+\pgfkeys{/pgf/foreach/separator/.code=\PGFFOR@PARAMDELIM{#1}}
+\makeatother
+
+\defKV[arbrechoix]{%
+	EspaceNiveaux=\def\LISTECHOIXinterniv{#1},%
+	EspaceFeuilles=\def\LISTECHOIXinterfeuille{#1},%
+	Echelle=\def\LISTECHOIXechelle{#1},%
+	Repet=\def\LISTECHOIXrepet{#1},%
+	Notice=\def\LISTECHOIXnotice{#1},%
+	CouleursNiveaux=\def\LISTECHOIXcoulniv{#1},%
+	SepResultats=\def\LISTECHOIXsepres{#1}
+}
+
+\setKVdefault[arbrechoix]{%
+	EspaceNiveaux=2.25,%
+	EspaceFeuilles=0.5,%
+	Echelle=1,%
+	Repet={},%
+	Notice={},%
+	TraitsNotice=false,%
+	CouleursNiveaux=black,%
+	AffResultats=false,%
+	SepResultats={}
+}
+
+\NewDocumentCommand\ArbreChoix{ O{} D<>{} m }{%
+	\restoreKV[arbrechoix]%
+	\setKV[arbrechoix]{#1}%
+	\def\LISTECHOIX{#3}%
+	\IfEq{\LISTECHOIXrepet}{}%
+		{}%
+		{%
+			\foreach \i in {2,...,\LISTECHOIXrepet}{%
+				\xdef\LISTECHOIX{\LISTECHOIX,#3}%
+			}%
+		}%
+	%données utiles
+	\setsepchar[.]{,./}%
+	\readlist*\TRLISTECHOIX{\LISTECHOIX}%
+	%les couleurs...
+	\IfSubStr{\LISTECHOIXcoulniv}{,}%
+		{%
+			\setsepchar{,}%
+			\readlist*\TRLISTECHOIXCOUL{\LISTECHOIXcoulniv}%
+		}%
+		{%
+			\xdef\tmplistcouleurs{\LISTECHOIXcoulniv}%
+			\foreach \i in {2,...,\TRLISTECHOIXlen}{%
+				\xdef\tmplistcouleurs{\tmplistcouleurs,\LISTECHOIXcoulniv}%
+			}%
+			\setsepchar{,}%
+			\readlist*\TRLISTECHOIXCOUL{\tmplistcouleurs}%
+		}%
+	%la figure
+	\begin{tikzpicture}[scale=\LISTECHOIXechelle,transform shape,#2]
+		%création de la liste des étapes intermédiaires
+		\def\tmpnbchoix{1}
+		\def\tmpnbchoixniv{1}
+		\def\tmplistnbchoix{1}
+		\foreach \i in {1,...,\TRLISTECHOIXlen}{%
+			\itemtomacro\TRLISTECHOIX[\i]\tmptrlistchoix%
+			\setsepchar[.]{/}%
+			\readlist*\TRLISTECHOIXTMP{\tmptrlistchoix}%
+			\xdef\tmpnbchoix{\xinteval{\tmpnbchoix*\TRLISTECHOIXTMPlen}}%
+			\xdef\tmpnbchoixniv{\tmpnbchoixniv,\TRLISTECHOIXTMPlen}%nb choix par niveau
+			\xdef\tmplistnbchoix{\tmplistnbchoix,\tmpnbchoix}%nb choix petit à petit
+		}%
+		%données utiles tout le temps
+		\getvaluefromlist{\tmplistnbchoix}{-1}[\nbeltstotal]%
+		%découpage horizontal
+		\ifboolKV[arbrechoix]{TraitsNotice}%
+			{%
+				\foreach \i in {1,...,\TRLISTECHOIXlen}{%
+					\draw[semithick,lightgray!50,densely dashed] ({\i*\LISTECHOIXinterniv},0) --++ (0,{\nbeltstotal*\LISTECHOIXinterfeuille}) ;
+				}%
+			}%
+			{}%
+		%boucle décroissante (OK !!)
+		\foreach \TTT in {\TRLISTECHOIXlen,...,1}{%
+			%\xdef\invTTT{\xinteval{\TRLISTECHOIXlen-\TTT+1}}%
+			\getvaluefromlist{\tmplistnbchoix}{\numexpr\TTT+1\relax}[\nbelts]%
+			\xdef\espchoiceV{\xintfloateval{(\nbeltstotal)/\nbelts}}%
+			\xdef\offsetchoiceV{\xintfloateval{0.5*\LISTECHOIXinterfeuille*(\nbeltstotal-(\nbelts-1)*\espchoiceV)}}%
+			\getvaluefromlist{\tmplistnbchoix}{\TTT}[\nbeltsavant]%
+			\xdef\tmpmodchoix{\xintieval{\nbelts/\nbeltsavant}}%
+			\foreach \i in {1,...,\nbelts}{%
+				\xdef\tmpii{\xinteval{\xintiiRem{\xinteval{\i-1}}{\tmpmodchoix}+1}}%
+				\node[arbrechoixsommets,text={\TRLISTECHOIXCOUL[\TTT]}] (N-\TTT-\i) at ({(\TTT)*\LISTECHOIXinterniv},{\offsetchoiceV+(\nbelts-\i)*\LISTECHOIXinterfeuille*\espchoiceV}) {\TRLISTECHOIX[\TTT,\tmpii]} ;
+			}
+			\ifnum\TTT=\TRLISTECHOIXlen%
+			\coordinate (N-0-1) at ({0*\LISTECHOIXinterniv},{\offsetchoiceV+0.5*(\nbeltstotal-1)*\LISTECHOIXinterfeuille} );
+			\fi
+		}
+		%les flèches
+		\foreach \j in {1,...,\TRLISTECHOIXlen}{%
+			\getvaluefromlist{\tmplistnbchoix}{\j}[\nbnoeuds]%nb nœuds de départ
+			\getvaluefromlist{\tmpnbchoixniv}{\numexpr\j+1\relax}[\nbfleches]%nb flèche par nœud
+			\foreach \i in {1,...,\nbnoeuds}{%
+				\foreach \k in {1,...,\nbfleches}{%
+					\xdef\tmpk{\xinteval{(\i-1)*(\nbfleches)+\k}}
+					\draw[arbrechoixaretes,color={\TRLISTECHOIXCOUL[\j]}] (N-\the\numexpr\j-1\relax-\i) -- (N-\j-\tmpk) ;
+				}
+			}
+		}
+		%notice
+		\IfEq{\LISTECHOIXnotice}{}%
+			{}%
+			{%
+				\foreach \notice [count=\i] in \LISTECHOIXnotice
+				{%
+					\draw[arbrechoixdeconotices] ({(\i-1)*\LISTECHOIXinterniv},0) -- ({(\i)*\LISTECHOIXinterniv},0) node[arbrechoixnotices] {\notice} ;
+				}%
+			}%
+		%listerésultats
+		\ifboolKV[arbrechoix]{AffResultats}%
+			{%
+				\xdef\malistedecombis{}%
+				\ifnum\TRLISTECHOIXlen=2%
+					\itemtomacro\TRLISTECHOIX[1]\myfirsttmp%
+					\itemtomacro\TRLISTECHOIX[2]\mysecondtmp%
+					\foreach \i [separator=/] in \myfirsttmp {%
+						\foreach \j [separator=/] in \mysecondtmp {
+							\xdef\malistedecombis{\malistedecombis,\i\LISTECHOIXsepres\j}%
+						}%
+					}%
+				\fi
+				\ifnum\TRLISTECHOIXlen=3%
+					\itemtomacro\TRLISTECHOIX[1]\myfirsttmp%
+					\itemtomacro\TRLISTECHOIX[2]\mysecondtmp%
+					\itemtomacro\TRLISTECHOIX[3]\mythirdtmp%
+					\foreach \i [separator=/] in \myfirsttmp {%
+						\foreach \j [separator=/] in \mysecondtmp {
+							\foreach \k [separator=/] in \mythirdtmp {
+								\xdef\malistedecombis{\malistedecombis,\i\LISTECHOIXsepres\j\LISTECHOIXsepres\k}%
+							}%
+						}%
+					}%
+				\fi
+				\ifnum\TRLISTECHOIXlen=4%
+					\itemtomacro\TRLISTECHOIX[1]\myfirsttmp%
+					\itemtomacro\TRLISTECHOIX[2]\mysecondtmp%
+					\itemtomacro\TRLISTECHOIX[3]\mythirdtmp%
+					\itemtomacro\TRLISTECHOIX[4]\myfourthtmp%
+					\foreach \i [separator=/] in \myfirsttmp {%
+						\foreach \j [separator=/] in \mysecondtmp {
+							\foreach \k [separator=/] in \mythirdtmp {
+								\foreach \l [separator=/] in \myfourthtmp {
+									\xdef\malistedecombis{\malistedecombis,\i\LISTECHOIXsepres\j\LISTECHOIXsepres\k\LISTECHOIXsepres\l}%
+								}%
+							}%
+						}%
+					}%
+				\fi
+				\ifnum\TRLISTECHOIXlen=5%
+					\itemtomacro\TRLISTECHOIX[1]\myfirsttmp%
+					\itemtomacro\TRLISTECHOIX[2]\mysecondtmp%
+					\itemtomacro\TRLISTECHOIX[3]\mythirdtmp%
+					\itemtomacro\TRLISTECHOIX[4]\myfourthtmp%
+					\itemtomacro\TRLISTECHOIX[5]\myfifthtmp%
+					\foreach \i [separator=/] in \myfirsttmp {%
+						\foreach \j [separator=/] in \mysecondtmp {
+							\foreach \k [separator=/] in \mythirdtmp {
+								\foreach \l [separator=/] in \myfourthtmp {
+									\foreach \m [separator=/] in \myfifthtmp {
+										\xdef\malistedecombis{\malistedecombis,\i\LISTECHOIXsepres\j\LISTECHOIXsepres\k\LISTECHOIXsepres\l\LISTECHOIXsepres\m}%
+									}%
+								}%
+							}%
+						}%
+					}%
+				\fi
+				\foreach \i in {1,...,\nbeltstotal}{%
+					\xdef\j{\xinteval{\i+1}}%
+					\draw (N-\TRLISTECHOIXlen-\i) node[arbrechoixresultats,right=\fpeval{0.5*\LISTECHOIXechelle*\LISTECHOIXinterniv}cm] {\getvaluefromlist*\malistedecombis{\j}} ;
+				}
+			}%
+			{}%
+	\end{tikzpicture}%
+}
+\NewCommandCopy\pflarbrechoix\ArbreChoix
+
+\NewDocumentCommand\IntNoeudArbreSansRemise{ m m m }{%
+	\node[arbrechoixsommets,text={\TRLISTECHOIXCOUL[#1]}] (T-#1-#2) at (N-#1-#2) {\TRLISTECHOIX[#3]} ;
+}
+\NewDocumentCommand\IntAreteArbreSansRemise{ m m }{%
+	\draw[arbrechoixaretes] (T-#1) -- (T-#2) ;
+}
+
+\NewDocumentCommand\ArbreChoixSansRemise{ O{} D<>{} m }{%
+	\restoreKV[arbrechoix]%
+	\setKV[arbrechoix]{#1}%
+	\def\LISTECHOIX{#3}%
+	%couleurs
+	\setsepchar{,}%
+	\readlist*\TRLISTECHOIX{\LISTECHOIX}%
+	\IfSubStr{\LISTECHOIXcoulniv}{,}%
+		{%
+			\setsepchar{,}%
+			\readlist*\TRLISTECHOIXCOUL{\LISTECHOIXcoulniv}%
+		}%
+		{%
+			\xdef\tmplistcouleurs{\LISTECHOIXcoulniv}%
+			\foreach \i in {2,...,\TRLISTECHOIXlen}{%
+				\xdef\tmplistcouleurs{\tmplistcouleurs,\LISTECHOIXcoulniv}%
+			}%
+			\setsepchar{,}%
+			\readlist*\TRLISTECHOIXCOUL{\tmplistcouleurs}%
+		}%
+	%figure
+	\begin{tikzpicture}[scale=\LISTECHOIXechelle,transform shape,#2]
+		%création de la liste des étapes intermédiaires (OK)
+		\def\tmpnbchoixniv{\TRLISTECHOIXlen}%
+		\def\tmplistnbchoix{1,\TRLISTECHOIXlen}%
+		\def\tmplistnbchoixfact{\TRLISTECHOIXlen}%
+		\foreach \i in {1,...,\xinteval{\TRLISTECHOIXlen-1}}{%
+			\xdef\tmpnbchoix{\xinteval{\TRLISTECHOIXlen-\i}}%
+			\xdef\tmpnbchoixniv{\tmpnbchoixniv,\tmpnbchoix}%nb nœuds par niveau
+			\xdef\tmplistnbchoixfact{\xinteval{\tmplistnbchoixfact*(\TRLISTECHOIXlen-\i)}}%
+			\xdef\tmplistnbchoix{\tmplistnbchoix,\tmplistnbchoixfact}%nb choix petit à petit
+		}
+		%données utiles tout le temps
+		\getvaluefromlist{\tmplistnbchoix}{-1}[\nbeltstotal]%
+		\ifboolKV[arbrechoix]{TraitsNotice}%
+		%notice découpage
+			{%
+				\foreach \i in {1,...,\TRLISTECHOIXlen}{%
+					\draw[semithick,lightgray!50,densely dashed] ({\i*\LISTECHOIXinterniv},0) --++ (0,{\nbeltstotal*\LISTECHOIXinterfeuille}) ;
+				}%
+			}%
+			{}%
+		%boucle décroissante pour la création des nœuds
+		\foreach \TTT in {\TRLISTECHOIXlen,...,1}{%
+			\getvaluefromlist{\tmplistnbchoix}{\numexpr\TTT+1\relax}[\nbelts]%
+			\xdef\espchoiceV{\xintfloateval{(\nbeltstotal)/\nbelts}}%
+			\xdef\offsetchoiceV{\xintfloateval{0.5*\LISTECHOIXinterfeuille*(\nbeltstotal-(\nbelts-1)*\espchoiceV)}}%
+			\foreach \i in {1,...,\nbelts}{%
+				\coordinate (N-\TTT-\i) at ({(\TTT)*\LISTECHOIXinterniv},{\offsetchoiceV+(\nbelts-\i)*\LISTECHOIXinterfeuille*\espchoiceV});
+			}
+			\ifnum\TTT=\TRLISTECHOIXlen%
+			\coordinate (T-0-1) at ({0*\LISTECHOIXinterniv},{\offsetchoiceV+0.5*(\nbeltstotal-1)*\LISTECHOIXinterfeuille} );
+			\fi
+		}
+		%les sommets et les flèches ??
+		\ifnum\TRLISTECHOIXlen=4%
+			%N1
+			\IntNoeudArbreSansRemise{1}{1}{1}
+			\IntNoeudArbreSansRemise{1}{2}{2}
+			\IntNoeudArbreSansRemise{1}{3}{3}
+			\IntNoeudArbreSansRemise{1}{4}{4}
+			\IntAreteArbreSansRemise{0-1}{1-1}
+			\IntAreteArbreSansRemise{0-1}{1-2}
+			\IntAreteArbreSansRemise{0-1}{1-3}
+			\IntAreteArbreSansRemise{0-1}{1-4}
+			%N2
+			\IntNoeudArbreSansRemise{2}{1}{2}
+			\IntNoeudArbreSansRemise{2}{2}{3}
+			\IntNoeudArbreSansRemise{2}{3}{4}
+			\IntNoeudArbreSansRemise{2}{4}{1}
+			\IntNoeudArbreSansRemise{2}{5}{3}
+			\IntNoeudArbreSansRemise{2}{6}{4}
+			\IntNoeudArbreSansRemise{2}{7}{1}
+			\IntNoeudArbreSansRemise{2}{8}{2}
+			\IntNoeudArbreSansRemise{2}{9}{4}
+			\IntNoeudArbreSansRemise{2}{10}{1}
+			\IntNoeudArbreSansRemise{2}{11}{2}
+			\IntNoeudArbreSansRemise{2}{12}{3}
+			\IntAreteArbreSansRemise{1-1}{2-1}
+			\IntAreteArbreSansRemise{1-1}{2-2}
+			\IntAreteArbreSansRemise{1-1}{2-3}
+			\IntAreteArbreSansRemise{1-2}{2-4}
+			\IntAreteArbreSansRemise{1-2}{2-5}
+			\IntAreteArbreSansRemise{1-2}{2-6}
+			\IntAreteArbreSansRemise{1-3}{2-7}
+			\IntAreteArbreSansRemise{1-3}{2-8}
+			\IntAreteArbreSansRemise{1-3}{2-9}
+			\IntAreteArbreSansRemise{1-4}{2-10}
+			\IntAreteArbreSansRemise{1-4}{2-11}
+			\IntAreteArbreSansRemise{1-4}{2-12}
+			%N3
+			\IntNoeudArbreSansRemise{3}{1}{3}
+			\IntNoeudArbreSansRemise{3}{2}{4}
+			\IntNoeudArbreSansRemise{3}{3}{2}
+			\IntNoeudArbreSansRemise{3}{4}{4}
+			\IntNoeudArbreSansRemise{3}{5}{2}
+			\IntNoeudArbreSansRemise{3}{6}{3}
+			\IntNoeudArbreSansRemise{3}{7}{3}
+			\IntNoeudArbreSansRemise{3}{8}{4}
+			\IntNoeudArbreSansRemise{3}{9}{1}
+			\IntNoeudArbreSansRemise{3}{10}{4}
+			\IntNoeudArbreSansRemise{3}{11}{1}
+			\IntNoeudArbreSansRemise{3}{12}{3}
+			\IntNoeudArbreSansRemise{3}{13}{2}
+			\IntNoeudArbreSansRemise{3}{14}{4}
+			\IntNoeudArbreSansRemise{3}{15}{1}
+			\IntNoeudArbreSansRemise{3}{16}{4}
+			\IntNoeudArbreSansRemise{3}{17}{1}
+			\IntNoeudArbreSansRemise{3}{18}{2}
+			\IntNoeudArbreSansRemise{3}{19}{2}
+			\IntNoeudArbreSansRemise{3}{20}{3}
+			\IntNoeudArbreSansRemise{3}{21}{1}
+			\IntNoeudArbreSansRemise{3}{22}{3}
+			\IntNoeudArbreSansRemise{3}{23}{1}
+			\IntNoeudArbreSansRemise{3}{24}{2}
+			\IntAreteArbreSansRemise{2-1}{3-1}
+			\IntAreteArbreSansRemise{2-1}{3-2}
+			\IntAreteArbreSansRemise{2-2}{3-3}
+			\IntAreteArbreSansRemise{2-2}{3-4}
+			\IntAreteArbreSansRemise{2-3}{3-5}
+			\IntAreteArbreSansRemise{2-3}{3-6}
+			\IntAreteArbreSansRemise{2-4}{3-7}
+			\IntAreteArbreSansRemise{2-4}{3-8}
+			\IntAreteArbreSansRemise{2-5}{3-9}
+			\IntAreteArbreSansRemise{2-5}{3-10}
+			\IntAreteArbreSansRemise{2-6}{3-11}
+			\IntAreteArbreSansRemise{2-6}{3-12}
+			\IntAreteArbreSansRemise{2-7}{3-13}
+			\IntAreteArbreSansRemise{2-7}{3-14}
+			\IntAreteArbreSansRemise{2-8}{3-15}
+			\IntAreteArbreSansRemise{2-8}{3-16}
+			\IntAreteArbreSansRemise{2-9}{3-17}
+			\IntAreteArbreSansRemise{2-9}{3-18}
+			\IntAreteArbreSansRemise{2-10}{3-19}
+			\IntAreteArbreSansRemise{2-10}{3-20}
+			\IntAreteArbreSansRemise{2-11}{3-21}
+			\IntAreteArbreSansRemise{2-11}{3-22}
+			\IntAreteArbreSansRemise{2-12}{3-23}
+			\IntAreteArbreSansRemise{2-12}{3-24}
+			%N4
+			\IntNoeudArbreSansRemise{4}{1}{4}
+			\IntNoeudArbreSansRemise{4}{2}{3}
+			\IntNoeudArbreSansRemise{4}{3}{4}
+			\IntNoeudArbreSansRemise{4}{4}{2}
+			\IntNoeudArbreSansRemise{4}{5}{3}
+			\IntNoeudArbreSansRemise{4}{6}{2}
+			\IntNoeudArbreSansRemise{4}{7}{4}
+			\IntNoeudArbreSansRemise{4}{8}{3}
+			\IntNoeudArbreSansRemise{4}{9}{4}
+			\IntNoeudArbreSansRemise{4}{10}{1}
+			\IntNoeudArbreSansRemise{4}{11}{3}
+			\IntNoeudArbreSansRemise{4}{12}{1}
+			\IntNoeudArbreSansRemise{4}{13}{4}
+			\IntNoeudArbreSansRemise{4}{14}{2}
+			\IntNoeudArbreSansRemise{4}{15}{4}
+			\IntNoeudArbreSansRemise{4}{16}{1}
+			\IntNoeudArbreSansRemise{4}{17}{2}
+			\IntNoeudArbreSansRemise{4}{18}{1}
+			\IntNoeudArbreSansRemise{4}{19}{3}
+			\IntNoeudArbreSansRemise{4}{20}{2}
+			\IntNoeudArbreSansRemise{4}{21}{3}
+			\IntNoeudArbreSansRemise{4}{22}{1}
+			\IntNoeudArbreSansRemise{4}{23}{2}
+			\IntNoeudArbreSansRemise{4}{24}{1}
+			\IntAreteArbreSansRemise{3-1}{4-1}
+			\IntAreteArbreSansRemise{3-2}{4-2}
+			\IntAreteArbreSansRemise{3-3}{4-3}
+			\IntAreteArbreSansRemise{3-4}{4-4}
+			\IntAreteArbreSansRemise{3-5}{4-5}
+			\IntAreteArbreSansRemise{3-6}{4-6}
+			\IntAreteArbreSansRemise{3-7}{4-7}
+			\IntAreteArbreSansRemise{3-8}{4-8}
+			\IntAreteArbreSansRemise{3-9}{4-9}
+			\IntAreteArbreSansRemise{3-10}{4-10}
+			\IntAreteArbreSansRemise{3-11}{4-11}
+			\IntAreteArbreSansRemise{3-12}{4-12}
+			\IntAreteArbreSansRemise{3-13}{4-13}
+			\IntAreteArbreSansRemise{3-14}{4-14}
+			\IntAreteArbreSansRemise{3-15}{4-15}
+			\IntAreteArbreSansRemise{3-16}{4-16}
+			\IntAreteArbreSansRemise{3-17}{4-17}
+			\IntAreteArbreSansRemise{3-18}{4-18}
+			\IntAreteArbreSansRemise{3-19}{4-19}
+			\IntAreteArbreSansRemise{3-20}{4-20}
+			\IntAreteArbreSansRemise{3-21}{4-21}
+			\IntAreteArbreSansRemise{3-22}{4-22}
+			\IntAreteArbreSansRemise{3-23}{4-23}
+			\IntAreteArbreSansRemise{3-24}{4-24}
+		\fi
+		\ifnum\TRLISTECHOIXlen=3%
+			%N1
+			\IntNoeudArbreSansRemise{1}{1}{1}
+			\IntNoeudArbreSansRemise{1}{2}{2}
+			\IntNoeudArbreSansRemise{1}{3}{3}
+			\IntAreteArbreSansRemise{0-1}{1-1}
+			\IntAreteArbreSansRemise{0-1}{1-2}
+			\IntAreteArbreSansRemise{0-1}{1-3}
+			%N2
+			\IntNoeudArbreSansRemise{2}{1}{2}
+			\IntNoeudArbreSansRemise{2}{2}{3}
+			\IntNoeudArbreSansRemise{2}{3}{1}
+			\IntNoeudArbreSansRemise{2}{4}{3}
+			\IntNoeudArbreSansRemise{2}{5}{1}
+			\IntNoeudArbreSansRemise{2}{6}{2}
+			\IntAreteArbreSansRemise{1-1}{2-1}
+			\IntAreteArbreSansRemise{1-1}{2-2}
+			\IntAreteArbreSansRemise{1-2}{2-3}
+			\IntAreteArbreSansRemise{1-2}{2-4}
+			\IntAreteArbreSansRemise{1-3}{2-5}
+			\IntAreteArbreSansRemise{1-3}{2-6}
+			%N3
+			\IntNoeudArbreSansRemise{3}{1}{3}
+			\IntNoeudArbreSansRemise{3}{2}{2}
+			\IntNoeudArbreSansRemise{3}{3}{3}
+			\IntNoeudArbreSansRemise{3}{4}{1}
+			\IntNoeudArbreSansRemise{3}{5}{2}
+			\IntNoeudArbreSansRemise{3}{6}{1}
+			\IntAreteArbreSansRemise{2-1}{3-1}
+			\IntAreteArbreSansRemise{2-2}{3-2}
+			\IntAreteArbreSansRemise{2-3}{3-3}
+			\IntAreteArbreSansRemise{2-4}{3-4}
+			\IntAreteArbreSansRemise{2-5}{3-5}
+			\IntAreteArbreSansRemise{2-6}{3-6}
+		\fi
+		\ifnum\TRLISTECHOIXlen=2%
+			%N1
+			\IntNoeudArbreSansRemise{1}{1}{1}
+			\IntNoeudArbreSansRemise{1}{2}{2}
+			\IntAreteArbreSansRemise{0-1}{1-1}
+			\IntAreteArbreSansRemise{0-1}{1-2}
+			%N2
+			\IntNoeudArbreSansRemise{2}{1}{2}
+			\IntNoeudArbreSansRemise{2}{2}{1}
+			\IntAreteArbreSansRemise{1-1}{2-1}
+			\IntAreteArbreSansRemise{1-2}{2-2}
+		\fi
+		%notice
+		\IfEq{\LISTECHOIXnotice}{}%
+			{}%
+			{%
+				\foreach \notice [count=\i] in \LISTECHOIXnotice
+				{%
+					\draw[arbrechoixdeconotices] ({(\i-1)*\LISTECHOIXinterniv},0) -- ({(\i)*\LISTECHOIXinterniv},0) node[arbrechoixnotices] {\notice} ;
+				}
+			}%
+		%listerésultats
+		\ifboolKV[arbrechoix]{AffResultats}%
+			{%
+				\GeneratePermutations[\LISTECHOIXsepres]{#3}[\mylistofpermut]%on génère les permutations !
+				\foreach \i in {1,...,\nbeltstotal}{%
+					\draw (N-\TRLISTECHOIXlen-\i) node[arbrechoixresultats,right=\fpeval{0.5*\LISTECHOIXechelle*\LISTECHOIXinterniv}cm] {\getvaluefromlist*\mylistofpermut{\i}} ;
+				}
+			}%
+			{}%
+	\end{tikzpicture}%
+}
+\NewCommandCopy\pflarbrechoixssremise\ArbreChoixSansRemise
+
+\def\tmplistpermuttwo{{1,2},{2,1}}
+\def\tmplistpermutthree{{1,2,3},{1,3,2},{2,1,3},{2,3,1},{3,1,2},{3,2,1}}
+\def\tmplistpermutfour{{1,2,3,4},{1,2,4,3},{1,3,2,4},{1,3,4,2},{1,4,2,3},{1,4,3,2},{2,1,3,4},{2,1,4,3},{2,3,1,4},{2,3,4,1},{2,4,1,3},{2,4,3,1},{3,1,2,4},{3,1,4,2},{3,2,1,4},{3,2,4,1},{3,4,1,2},{3,4,2,1},{4,1,2,3},{4,1,3,2},{4,2,1,3},{4,2,3,1},{4,3,1,2},{4,3,2,1}}
+
+\NewDocumentCommand\GeneratePermutations{ O{-} m O{\mylistofpermut} }{%
+	\lenoflist{#2}[\resmylen]%
+	\ifnum\resmylen=2%
+		\xdef\tmplistindex{\tmplistpermuttwo}%
+	\fi%
+	\ifnum\resmylen=3%
+		\xdef\tmplistindex{\tmplistpermutthree}%
+	\fi%
+	\ifnum\resmylen=4%
+		\xdef\tmplistindex{\tmplistpermutfour}%
+	\fi%
+	\lenoflist{\tmplistindex}[\resmylenindex]%
+	\xdef\tmpstringperm{}%
+	\xdef#3{}%
+	\foreach \i in {1,...,\resmylenindex}{%
+		\getvaluefromlist{\tmplistindex}{\i}[\mytmplst]%
+		\lenoflist{\mytmplst}[\resmylentmptmp]%
+		\foreach \j [count=\iii] in \mytmplst {%
+			\ifnum\iii=1%
+				\xdef\tmpstringperm{\getvaluefromlist*{#2}{\j}}%
+			\else%
+				\xdef\tmpstringperm{\tmpstringperm#1\getvaluefromlist*{#2}{\j}}%
+			\fi%
+		}%
+		\ifnum\i=1%
+			\xdef#3{\tmpstringperm}%
+		\else%
+			\xdef#3{#3,\tmpstringperm}%
+		\fi%
+	}%
+}
+
+\endinput

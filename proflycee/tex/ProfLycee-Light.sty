@@ -1,0 +1,456 @@
+% Author.............: C. Pierquet
+% licence............: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+% licence cliparts...: CC0 from openclipart or svgrepo
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ProfLycee-Light}[2025/06/26 1.01d Aide pour l'utilisation de LaTeX en lycee]
+%1.01d	Style grille histo + améliorations de qques codes + binôme Newton + corrections de bugs (nouveaux codes 'piton')
+%1.01c	Ajout de deux cliparts (bullseye) + Ajout de cliparts 'zone bac'
+%1.01b	Bugfix
+%1.01a	Compatibiité fa5/6 + nouvelle clé pour SolutionSeuil + Styles piton (Onglet & Carbon)
+%1.00f	Correction d'un bug avec des espacements non voulus
+%1.00e	Option [noncancel] pour ne pas charger cancel avec thicklines + option [compat] pour 'maximiser' les options utiles + améliorations dans le code
+%1.00d	Option [nonsiunitxfr] + bugfix avec tabularray
+%1.00c	Ajout d'aliases en \pfl....
+%1.00b	Changement du préfixage de certaines commandes + \logo calculatrice interdite
+%1.00a	Refonte du fonctionnement
+
+%%=====Option(s)
+\newif\if@xcolor \@xcolorfalse
+\newif\if@build \@buildfalse
+\newif\if@loadamssymb \@loadamssymbtrue
+\newif\if@loadsiunitxfr \@loadsiunitxfrtrue
+\newif\if@warningsoff \@warningsofffalse
+\newif\if@loadtikzbabel \@loadtikzbabeltrue
+\newif\if@loadcancel \@loadcanceltrue
+\newif\if@compatmax \@compatmaxfalse
+\newif\if@fafive \@fafivetrue
+\newif\if@fasix \@fasixfalse
+\newif\if@fafivesix \@fafivesixfalse
+
+\DeclareOption{xcolor}{\@xcolortrue}%
+\DeclareOption{build}{\@buildtrue}%
+\DeclareOption{nonsiunitxfr}{\@loadsiunitxfrfalse}%
+\DeclareOption{noncancel}{\@loadcancelfalse}%
+\DeclareOption{nonamssymb}{\@loadamssymbfalse}%
+\DeclareOption{warningsoff}{\@warningsofftrue}%
+\DeclareOption{nontikzbabel}{\@loadtikzbabelfalse}%
+\DeclareOption{compat}{\@compatmaxtrue}%
+\DeclareOption{nonfa}{\@fafivefalse\@fasixfalse\@fafivesixfalse}
+\DeclareOption{fa6}{\@fafivefalse\@fafivesixfalse\@fasixtrue}
+\DeclareOption{fa5fa6}{\@fafivefalse\@fasixfalse\@fafivesixtrue}
+
+\DeclareOption*{}
+\ProcessOptions\relax
+
+\if@compatmax
+	\@warningsofftrue
+	\@loadamssymbfalse
+	%\newcommand{\DoNotLoadEpstopdf}{}
+\fi
+
+%%=====Mathtools (la base)
+\RequirePackage{mathtools}
+
+%%=====Packages utiles et indispensables
+\if@loadamssymb
+	\RequirePackage{amssymb}
+\fi
+\if@warningsoff
+	\PassOptionsToPackage{warnings-off={mathtools-colon,mathtools-overbracket}}{unicode-math}
+\fi
+\if@xcolor
+	\RequirePackage[table,svgnames]{xcolor}%Gestion des couleurs
+\fi
+\RequirePackage{iftex}
+\RequirePackage{tikz}
+\usetikzlibrary{calc}
+\usetikzlibrary{decorations,decorations.pathreplacing,decorations.markings,arrows,arrows.meta,shapes.geometric,decorations.pathmorphing}
+\if@loadtikzbabel
+	\usetikzlibrary{babel}
+\fi
+\RequirePackage{ifthen}
+\RequirePackage{xstring}
+\RequirePackage{xintexpr}
+\RequirePackage{xintbinhex}
+\RequirePackage{xinttools}
+\RequirePackage{randomlist}
+\RequirePackage{simplekv}
+\RequirePackage{listofitems}
+\RequirePackage{tkz-tab}
+\RequirePackage{tabularray}
+\RequirePackage{settobox}
+\RequirePackage{hologo}
+\RequirePackage{fancyvrb}
+\RequirePackage{nicefrac}
+\RequirePackage{siunitx}
+\if@loadsiunitxfr
+	\sisetup{%
+		locale=FR,output-decimal-marker={,},%
+		mode=match,propagate-math-font=true,%
+		reset-math-version=false,reset-text-family=false,%
+		reset-text-series=false,reset-text-shape=false,%
+		text-family-to-math=true,text-series-to-math=true,%
+		group-minimum-digits=4%
+	}%
+\fi
+\if@fafive
+	\RequirePackage{fontawesome5}
+	\def\pflfacog{\faIcon{cog}}
+\fi
+\if@fasix
+	\RequirePackage{fontawesome6}
+	\def\pflfacog{\faIcon{gear}}
+\fi
+\if@fafivesix
+	\RequirePackage[fa5alias]{fontawesome6}
+	\def\pflfacog{\faIcon{gear}}
+\fi
+%\RequirePackage{fontawesome5}
+\RequirePackage{tcolorbox}%
+\tcbuselibrary{breakable,fitting,skins,listings,listingsutf8,hooks}
+
+%%=====COULEURS PERSO
+\definecolor{CouleurVertForet}{HTML}{1F8B36} %ForestGreen
+\colorlet{MotsClesPseudoCodeA}{blue!75}
+\colorlet{MotsClesPseudoCodeB}{green!50!black}
+\colorlet{MotsClesPseudoCodeChaine}{red!75}
+
+%%=====COMMANDES DE BASES xint/siunitx
+\NewDocumentCommand\pflnum{ s D<>{} O{} m }{%version consolidée
+	%1 := version étoilée pour arrondi (normal) / - avant la fraction éventuelle
+	\IfEq{#2}{}%argument <> vide := entier/décimal -> checked
+		{%
+			\IfBooleanTF{#1}%
+				{%
+					\IfEq{#3}{}{\num{\xintfloateval{#4}}}{\num{\xintfloateval{round(#4,#3)}}}%
+				}%
+				{%
+					\num{\xintiieval{#4}}%
+				}%
+		}%
+		{}%
+	\IfEq{#2}{frac}%argument <frac> := fraction -> checked
+		{%
+			\IfBooleanTF{#1}%
+				{%
+					\pflnumfrac*[#3]{#4}%
+				}%
+				{%
+					\pflnumfrac[#3]{#4}%
+				}%
+		}%
+		{}%
+	\IfEq{#2}{rad}%argument <rad> := angle radian -> checked (juste le - devant...)
+		{%
+			\IfBooleanTF{#1}%
+				{%
+					\pflnumrad*[#3]{#4}%
+				}%
+				{%
+					\pflnumrad[#3]{#4}%
+				}%
+		}%
+		{}%
+	\IfEq{#2}{rac}%
+		{%
+			\pflnumsqrt[#3]{#4}%
+		}%
+		{}%
+	\IfEq{#2}{annee}%
+		{%
+			\IfBooleanTF{#1}%
+				{%
+					\IfEq{#3}{}{\num[digit-group-size=5]{\xintfloateval{#4}}}{\num[digit-group-size=5]{\xintfloateval{round(#4,#3)}}}%
+				}%
+				{%
+					\num[digit-group-size=5]{\xintiieval{#4}}%
+				}%
+		}%
+		{}%
+}
+
+\DeclareDocumentCommand\pflnumsqrt{ O{} m }{% argument mandataire {calcul ou fraction}
+	\xdef\calculargument{\xintIrr{\xinteval{#2}}}%
+	\xintifboolexpr{\calculargument == 1}%
+	{%
+		\ensuremath{1}%
+	}%
+	{%
+		\IfEndWith{\calculargument}{/1}%
+		{%si c'est un entier !
+			\xdef\calculargument{\xintiieval{#2}}%
+			\xdef\ExtractRacStop{\xintiFloor{\xintfloateval{sqrt(\calculargument)}}}%
+			\xintFor* ##1 in {\xintSeq{1}{\ExtractRacStop}}\do{%
+				\xintifboolexpr{ \xintiiRem{\calculargument}{\xintiieval{##1*##1}} == 0}%si le carré divise
+				{\xdef\ExtractRacID{##1}}%
+				{}%
+			}%
+			\xdef\ExtracReste{\xintiieval{\calculargument/(\ExtractRacID*\ExtractRacID)}}%
+			\ensuremath{\xintifboolexpr{\ExtractRacID == 1 && \ExtracReste == 1}%
+				{1}%
+				{ \xintifboolexpr{\ExtractRacID == 1}{}{\num{\xintiieval{\ExtractRacID}}}%
+					\xintifboolexpr{\ExtracReste == 1}{}{\sqrt{\num{\ExtracReste}}} }%
+			}%
+	}%
+	{%on va mettre sous forme a\sqrt(d)/b := buggue avec des millièmes...
+		\StrBefore{\calculargument}{/}[\numerateur]%on extrait le numérateur
+		\StrBehind{\calculargument}{/}[\denominateur]%on extrait le dénominateur
+		\xdef\ExtractRacNNum{\xintiieval{\numerateur*\denominateur}}%
+		\xdef\ExtractRacStop{\xintiFloor{\xintfloateval{sqrt(\ExtractRacNNum)}}}%
+		\xintFor* ##1 in {\xintSeq{1}{\ExtractRacStop}}\do{%
+			\xintifboolexpr{ \xintiiRem{\ExtractRacNNum}{\xintiieval{##1*##1}} == 0}%si le carré divise
+			{\xdef\ExtractRacID{##1}}%
+			{}
+		}%
+		\xdef\ExtractRacGCD{\xintiiGCD{\ExtractRacID}{\denominateur}}%
+		\xdef\RacNumSimpl{\xintiieval{\ExtractRacID/\ExtractRacGCD}}%simpl num
+		\xdef\RacDenomSimpl{\xintiieval{\denominateur/\ExtractRacGCD}}%
+		\xdef\RacRacSimpl{\xintiieval{\ExtractRacNNum/(\ExtractRacID*\ExtractRacID)}}%
+		\IfEq{#1}{}%fraction classique
+			{%
+				\ensuremath{\frac{%
+						\xintifboolexpr{\RacNumSimpl == 1 && \RacRacSimpl == 1}%
+						{1}%
+						{ \xintifboolexpr{\RacNumSimpl == 1}{}{\RacNumSimpl} \xintifboolexpr{\RacRacSimpl == 1}{}{\sqrt{\num{\RacRacSimpl}}} }%
+					}%
+					{ \RacDenomSimpl }}%
+			}%
+			{}%
+		\IfEq{#1}{d}%dfraction
+			{%
+				\ensuremath{\dfrac{%
+						\xintifboolexpr{\RacNumSimpl == 1 && \RacRacSimpl == 1}%
+						{1}%
+						{ \xintifboolexpr{\RacNumSimpl == 1}{}{\RacNumSimpl} \xintifboolexpr{\RacRacSimpl == 1}{}{\sqrt{\num{\RacRacSimpl}}} }%
+					}%
+					{ \RacDenomSimpl }}%
+			}%
+			{}%
+		\IfEq{#1}{n}%nfraction
+			{%
+				\ensuremath{\nicefrac{%
+						\xintifboolexpr{\RacNumSimpl == 1 && \RacRacSimpl == 1}%
+						{1}%
+						{ \xintifboolexpr{\RacNumSimpl == 1}{}{\RacNumSimpl} \xintifboolexpr{\RacRacSimpl == 1}{}{\sqrt{\num{\RacRacSimpl}}} }%
+					}%
+					{ \RacDenomSimpl }}%
+			}%
+			{}%
+	}%
+}%
+}
+
+\NewDocumentCommand\pflnumfrac{ s O{} m }{%patch xinttotexfrac
+	%*=moins sur le numérateur
+	%2=argument.optionnel[d/t/dec=...]
+	%3=argument mandataire {calcul ou fraction}
+	\xdef\calculargument{\xintPRaw{\xintIrr{\xinteval{#3}}}}%on calcule et on transforme en A/B
+	\IfSubStr{\calculargument}{/}%on teste si le symbole / apparaît
+		{%si oui := fraction
+			\StrBefore{\calculargument}{/}[\numerateur]%on extrait le numérateur
+			\StrBehind{\calculargument}{/}[\denominateur]%on extrait le dénominateur
+			\ifblank{#2}%
+				{%
+					\IfBooleanTF{#1}%
+						{\ensuremath{\frac{\num{\numerateur}}{\num{\denominateur}}}}%
+						{%
+							\ifthenelse{\numerateur < 0}%
+								{\ensuremath{-\frac{\num{\fpeval{abs(\numerateur)}}}{\num{\denominateur}}}}%
+								{\ensuremath{\frac{\num{\numerateur}}{\num{\denominateur}}}}%
+						}%
+				}%
+				{}%si l'argument optionnel est vide
+			\IfStrEq{#2}{d}%
+				{%
+					\IfBooleanTF{#1}%
+						{\ensuremath{\dfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+						{%
+							\ifthenelse{\numerateur < 0}%
+								{\ensuremath{-\dfrac{\num{\fpeval{abs(\numerateur)}}}{\num{\denominateur}}}}%
+								{\ensuremath{\dfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+						}%
+				}%
+				{}%si l'argument optionnel est vide
+			\IfStrEq{#2}{t}%
+				{%
+					\IfBooleanTF{#1}%
+						{\ensuremath{\tfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+						{%
+							\ifthenelse{\numerateur < 0}%
+								{\ensuremath{-\tfrac{\num{\fpeval{abs(\numerateur)}}}{\num{\denominateur}}}}%
+								{\ensuremath{\tfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+						}%
+				}%
+				{}%si l'argument optionnel est vide
+			\IfStrEq{#2}{n}%
+				{%
+					{\ensuremath{\nicefrac{\num{\numerateur}}{\num{\denominateur}}}}%
+				}%
+				{}%si l'argument optionnel est vide
+			\IfSubStr{#2}{dec}%on veut la forme décimale
+				{%
+					\IfSubStr{#2}{=}%si on rajoute une précision
+						{%
+							\StrBehind{#2}{=}[\precdecimal]%
+							\ensuremath{\num{\xintfloateval{round(#3,\precdecimal)}}}%
+						}%
+						{%
+							\ensuremath{\num{\xintfloateval{#3}}}%
+						}%
+				}%
+				{}%si l'argument optionnel est vide
+		}%
+		{%si non := entier
+			\num{\calculargument}%on affiche l'entier, avec le package siunitx
+		}%
+}
+
+\NewDocumentCommand\pflnumrad{ s O{} m }{%
+	%1 = options
+	%2 = angle sous la forme a*pi/b
+	\StrDel{#3}{pi}[\MPargument]%
+	\IfBeginWith{#3}{pi}%
+		{\StrSubstitute{#3}{pi}{1}[\MPargument]}%
+		{}%
+	\IfBeginWith{#3}{-pi}%
+		{\StrSubstitute{#3}{pi}{1}[\MPargument]}%
+		{}%
+	%on conserve les données initiales
+	\IfSubStr{\MPargument}{/}%on coupe numérateur/dénominateur
+		{\StrCut{\MPargument}{/}\MPnumerateurinit\MPdenominateurinit}%
+		{\xdef\MPnumerateurinit{\MPargument}\xdef\MPdenominateurinit{1}}%
+	%on affiche le début, avant simplification
+	\IfStrEq{#2}{d}%
+		{%
+			\ensuremath{%
+			\xintifboolexpr{\MPdenominateurinit == 1}%
+				{%
+					\xintifboolexpr{\MPnumerateurinit == 1}{\pi}{}%
+					\xintifboolexpr{\MPnumerateurinit == -1}{-\pi}{}%
+					\xintifboolexpr{\xinteval{abs(\MPnumerateurinit) != 1}}{\num{\MPnumerateurinit}\pi}{}%
+				}%
+				{%
+					\displaystyle\IfBooleanT{#1}{-}\frac{%
+						\xintifboolexpr{\MPnumerateurinit == 1}{\pi}{}%
+						\xintifboolexpr{\MPnumerateurinit == -1}{\IfBooleanTF{#1}{}{-}\pi}{}
+						\xintifboolexpr{\xinteval{abs(\MPnumerateurinit) != 1}}{\num{ \IfBooleanTF{#1}{\xinteval{abs(\MPnumerateurinit)}}{\MPnumerateurinit} }\pi}{}%
+					}%
+					{%
+						\num{\MPdenominateurinit}%
+					}%
+				}%
+			}%
+		}%
+		{}%
+	\IfStrEq{#2}{t}%
+		{%
+			\ensuremath{%
+			\xintifboolexpr{\MPdenominateurinit == 1}%
+				{%
+					\xintifboolexpr{\MPnumerateurinit == 1}{\pi}{}%
+					\xintifboolexpr{\MPnumerateurinit == -1}{-\pi}{}%
+					\xintifboolexpr{\xinteval{abs(\MPnumerateurinit) != 1}}{\num{\MPnumerateurinit}\pi}{}%
+				}%
+				{%
+					\IfBooleanT{#1}{-}\tfrac{%
+						\xintifboolexpr{\MPnumerateurinit == 1}{\pi}{}%
+						\xintifboolexpr{\MPnumerateurinit == -1}{-\pi}{}
+						\xintifboolexpr{\xinteval{abs(\MPnumerateurinit) != 1}}{\num{ \IfBooleanTF{#1}{\xinteval{abs(\MPnumerateurinit)}}{\MPnumerateurinit} }\pi}{}%
+					}%
+					{%
+						\num{\MPdenominateurinit}%
+					}%
+				}%
+			}%
+		}%
+		{}%
+	\IfStrEq{#2}{}%
+		{%
+			\ensuremath{%
+			\xintifboolexpr{\MPdenominateurinit == 1}%
+				{%
+					\xintifboolexpr{\MPnumerateurinit == 1}{\pi}{}%
+					\xintifboolexpr{\MPnumerateurinit == -1}{-\pi}{}%
+					\xintifboolexpr{\xinteval{abs(\MPnumerateurinit) != 1}}{\num{\MPnumerateurinit}\pi}{}%
+				}%
+				{%
+					\IfBooleanT{#1}{-}\frac{%
+						\xintifboolexpr{\MPnumerateurinit == 1}{\pi}{}%
+						\xintifboolexpr{\MPnumerateurinit == -1}{-\pi}{}
+						\xintifboolexpr{\xinteval{abs(\MPnumerateurinit) != 1}}{\num{ \IfBooleanTF{#1}{\xinteval{abs(\MPnumerateurinit)}}{\MPnumerateurinit} }\pi}{}%
+					}%
+					{%
+						\num{\MPdenominateurinit}%
+					}%
+				}%
+			}%
+		}%
+		{}%
+	\IfStrEq{#2}{n}%
+		{%
+			\ensuremath{%
+			\xintifboolexpr{\MPdenominateurinit == 1}%
+				{%
+					\xintifboolexpr{\MPnumerateurinit == 1}{\pi}{}%
+					\xintifboolexpr{\MPnumerateurinit == -1}{-\pi}{}%
+					\xintifboolexpr{\xinteval{abs(\MPnumerateurinit) != 1}}{\num{\MPnumerateurinit}\pi}{}%
+				}%
+				{%
+					\nicefrac{%
+						\xintifboolexpr{\MPnumerateurinit == 1}{\pi}{}%
+						\xintifboolexpr{\MPnumerateurinit == -1}{-\pi}{}
+						\xintifboolexpr{\xinteval{abs(\MPnumerateurinit) != 1}}{\num{\MPnumerateurinit}\pi}{}%
+					}%
+					{%
+						\num{\MPdenominateurinit}%
+					}%
+				}%
+			}%
+		}%
+		{}%
+}
+
+%%=====LIBRAIRIES/BIBIOTHÈQUES
+\newcommand\useproflyclib[1]{%ajout d'une commande "librairie" pour charger des modules
+	\IfSubStr{#1}{most}%
+	{%
+		\input{proflycee-tools-analyse.tex}
+		\input{proflycee-tools-graphiques.tex}
+		\input{proflycee-tools-listings.tex}
+		\input{proflycee-tools-trigo.tex}
+		\input{proflycee-tools-probas.tex}
+		\input{proflycee-tools-stats.tex}
+		\input{proflycee-tools-arithm.tex}
+		\input{proflycee-tools-aleatoire.tex}
+		\input{proflycee-tools-suites.tex}
+		\input{proflycee-tools-cliparts.tex}
+		\RequirePackage{ProfLycee-Pictosbac}
+	}%
+	{%
+		\IfSubStr{#1}{analyse}{\input{proflycee-tools-analyse.tex}}{}%
+		\IfSubStr{#1}{graphiques}{\input{proflycee-tools-graphiques.tex}}{}%
+		\IfSubStr{#1}{listings}{\input{proflycee-tools-listings.tex}}{}%
+		\IfSubStr{#1}{trigo}{\input{proflycee-tools-trigo.tex}}{}%
+		\IfSubStr{#1}{probas}{\input{proflycee-tools-probas.tex}}{}%
+		\IfSubStr{#1}{stats}{\input{proflycee-tools-stats.tex}}{}%
+		\IfSubStr{#1}{arithm}{\input{proflycee-tools-arithm.tex}}{}%
+		\IfSubStr{#1}{aleatoire}{\input{proflycee-tools-aleatoire.tex}}{}%
+		\IfSubStr{#1}{suites}{\input{proflycee-tools-suites.tex}}{}%
+		\IfSubStr{#1}{geom}{\input{proflycee-tools-geom.tex}}{}%
+		\IfSubStr{#1}{cliparts}{\input{proflycee-tools-cliparts.tex}}{}%
+		\IfSubStr{#1}{pictosbac}{\RequirePackage{ProfLycee-Pictosbac}}{}%
+	}%
+	\IfSubStr{#1}{piton}{\input{proflycee-tools-piton.tex}}{}%
+	\IfSubStr{#1}{espace}{\input{proflycee-tools-espace.tex}}{}%
+	\IfSubStr{#1}{ecritures}{\input{proflycee-tools-ecritures.tex}}{}%
+	\IfSubStr{#1}{complexes}{\input{proflycee-tools-complexes.tex}}{}%
+	\IfSubStr{#1}{recreat}{\input{proflycee-tools-recreat.tex}}{}%
+	\IfSubStr{#1}{competences}{\input{proflycee-tools-competences.tex}}{}%
+	\IfSubStr{#1}{exams}{\input{proflycee-tools-exams.tex}}{}%
+	\IfSubStr{#1}{cas}{\RequirePackage{FenetreCas}}{}%
+	\IfSubStr{#1}{tikz2d}{\RequirePackage{tikz2d-fr}}{}%
+	\IfSubStr{#1}{tikz3d}{\RequirePackage{tikz3d-fr}}{}%
+}
+
+\endinput

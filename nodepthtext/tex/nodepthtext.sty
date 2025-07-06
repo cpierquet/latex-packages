@@ -1,0 +1,42 @@
+% Author        : C. Pierquet
+% licence       : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{nodepthtext}[2024/11/11 0.1.0 Raise small texts for "no depth" letters]
+
+%====HISTORIQUE
+% v 0.1.0	Initial version
+
+%====BASE
+\RequirePackage{xstring}
+\RequirePackage{calc}
+\RequirePackage{graphicx}
+
+%====DIMs & Useful
+\newlength\depthletter
+\newlength\depthsampleletter
+\newcount\cptraiseletter
+\def\sampleslettersnodepth{azertuiosdhklmwxcvbnAZERTYUIOPSDFGHJKLMWXCVBN}
+
+%====INT MACRO
+\NewDocumentCommand\raiseletter{ O{0.8} m m }{%
+	\settodepth{\depthletter}{\hbox{#3}}%
+	\ifdim\depthletter>#2%
+		\raisebox{\dimexpr#1\depthletter-#2\relax}{\resizebox{\width}{#1\height}{#3}}%
+	\else%
+		{#3}%
+	\fi%
+}
+
+%====MAIN MACRO
+\NewDocumentCommand\nodepth{ O{0.8} m }{%
+	\settodepth{\depthsampleletter}{\hbox{\sampleslettersnodepth}}%
+	\StrLen{#2}[\tmplenword]%
+	\cptraiseletter0%
+	\loop\ifnum\cptraiseletter<\tmplenword%
+		\advance\cptraiseletter by 1%
+		\raiseletter[#1]{\depthsampleletter}{\StrChar{#2}{\the\cptraiseletter}}%
+	\repeat%
+}
+
+\endinput

@@ -1,0 +1,77 @@
+% !TeX TXS-program:compile = txs:///lualatex
+
+\documentclass[a5paper,french,11pt]{article}
+\usepackage[margin=1cm]{geometry}
+\usepackage{fontspec}
+\newfontfamily\BelleAllureFin{BelleAllureCM-Fin.otf} %belleallure
+\newfontfamily\BelleAllureGras{BelleAllureCM-Gros.otf} %belleallure
+\usepackage{PapierGurvan}
+\usepackage{codehigh}
+\usepackage{babel}
+\setlength{\parindent}{0pt}
+
+
+\begin{document}
+
+\part*{Utilisation du papier Gurvan avec la police BelleAllure, en feuille A5}
+
+{\scriptsize \begin{codehigh}
+\documentclass[a5paper,11pt]{article}
+\usepackage{fontspec}
+%polices diponibles sur https://www.dafont.com/fr/belle-allure.font
+\newfontfamily\BelleAllureFin{BelleAllureCM-Fin.otf} %belleallureFin
+\newfontfamily\BelleAllureGras{BelleAllureCM-Gros.otf} %belleallureGras
+\usepackage{PapierGurvan}
+...
+\end{codehigh}}
+
+{\scriptsize \begin{codehigh}
+%avec un interligne de 3mm, échelle de 1.925 en 11pt
+
+\begin{PleinePageGurvan}[Papier=A5,Marges=2/2]
+    \filldraw[teal] (GurvanOrigine) circle[radius=4pt] ;
+    \LigneGurvan[Echelle=1.925]{\BelleAllureGras une petite feuille\ldots}
+    \ParagrapheGurvan[Ligne=2,Echelle=1.925]{\BelleAllureGras On peut essayer 
+        avec une dictée, rien de bien méchant. Il était une fois une petite 
+        princesse nommée Pauline, et un gentil dragon nommé Antoine.}
+\end{PleinePageGurvan}
+
+\pagebreak
+
+%avec un interligne de 2.5mm, échelle de 1.625 en 11pt
+
+\begin{PleinePageGurvan}[Interligne=2.5,Papier=A5,Marges=2/2]
+    \LigneGurvan[Echelle=1.625,Ligne=4]{\BelleAllureGras une petite feuille\ldots}
+\end{PleinePageGurvan}
+
+\pagebreak
+
+%avec un interligne de 2mm, échelle de 1.3 en 11pt
+
+\begin{PleinePageGurvan}[Interligne=2,Papier=A5,Marges=2/2]
+    \LigneGurvan[Echelle=1.3,Ligne=7]{\BelleAllureGras une petite feuille\ldots}
+\end{PleinePageGurvan}
+\end{codehigh}}
+
+\pagebreak
+
+\begin{PleinePageGurvan}[Papier=A5,Marges=2/2]
+	\filldraw[teal] (GurvanOrigine) circle[radius=4pt] ;
+	\LigneGurvan[Echelle=1.925]{\BelleAllureGras une petite feuille\ldots}
+	\ParagrapheGurvan[Ligne=2,Echelle=1.925]{\BelleAllureGras On peut essayer avec une dictée, rien de bien méchant. Il était une fois une petite princesse nommée Pauline, et un gentil dragon nommé Antoine.}
+\end{PleinePageGurvan}
+
+\pagebreak
+
+\begin{PleinePageGurvan}[Interligne=2.5,Papier=A5,Marges=2/2]
+	\LigneGurvan[Echelle=1.625,Ligne=4]{\BelleAllureGras une petite feuille\ldots}
+\end{PleinePageGurvan}
+
+\pagebreak
+
+\begin{PleinePageGurvan}[Interligne=2,Papier=A5,Marges=2/2]
+	\LigneGurvan[Echelle=1.3,Ligne=7]{\BelleAllureGras une petite feuille\ldots}
+\end{PleinePageGurvan}
+
+
+\end{document}

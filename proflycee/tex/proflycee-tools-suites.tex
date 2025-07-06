@@ -1,0 +1,212 @@
+% proflycee-tools-suites.tex
+% Copyright 2023-2025 Cédric Pierquet
+% Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+%%------CabWeb
+\defKV[webrecurr]{%
+	Fct=\def\PLRecurfct{#1},%
+	Nom=\def\PLRecurnom{#1},%
+	No=\def\PLRecurno{#1},%
+	Nb=\def\PLRecurnb{#1},%
+	Uno=\def\PLRecuruno{#1},%
+	PosLabel=\def\PLRecurposlab{#1},%
+	DecalLabel=\def\PLRecuroffset{#1},%
+	TailleLabel=\def\PLRecurlabelsize{#1}
+}
+
+\setKVdefault[webrecurr]{%
+	No=0,%
+	Nom=u,%
+	Nb=5,%
+	AffTermes=true,%
+	PosLabel=below,%
+	DecalLabel=6pt,%
+	TailleLabel=\small
+}
+
+\NewDocumentCommand\ToileRecurrence{ O{} O{thick,color=magenta} O{dotted} }{
+	%<clés> + <style cabweb> + <style supplémentaire pointillés>
+	\useKVdefault[webrecurr]%
+	\setKV[webrecurr]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\foreach \i [remember=\i as \x (initially \PLRecuruno)] in {1,...,\PLRecurnb}{%
+		\def\y{\fpeval{\PLRecurfct}}
+		%test de la position courbe / bissectrice ?
+		\ifnum \i=1
+			\newdimen \X
+			\newdimen \Y
+			\X = \x pt
+			\Y = \y pt
+			\ifdim \Y < \X
+				\draw[#2] (\x,\y)--(\y,\y) ;
+			\else
+				\draw[#2] (\x,\x)--(\x,\y)--(\y,\y) ;
+			\fi
+		\else
+			\draw[#2] (\x,\x)--(\x,\y)--(\y,\y) ;
+		\fi
+		\ifboolKV[webrecurr]{AffTermes}
+			{\def\indice{\fpeval{\i+\PLRecurno-1}}
+		 \draw[#2,#3] (\x,\y)--(\x,0) node[\PLRecurposlab=\PLRecuroffset,font=\PLRecurlabelsize]{$\PLRecurnom_\indice$};}
+			{}
+		\def\i{\fpeval{\y}}%
+	}
+}
+\NewCommandCopy\pfltoilerecurr\ToileRecurrence
+
+%%------CALCSRECUR
+\NewDocumentCommand\CalculInterneTermeRecurrence{ m m m m }{%pas forcément utile
+	\xintdeffloatfunc varfctrecur(x) := #1 ;%
+	\xdef\vartmp{#3}%
+	\IfEq{#4}{\inteval{#2+1}}%
+	{\xdef\vartmp{\xintfloateval{varfctrecur(\vartmp)}}}%
+	{%
+		\foreach \i in {1,2,...,\inteval{#4-(#2)}}%
+		{\xdef\vartmp{\xintfloateval{varfctrecur(\vartmp)}}}%
+	}%
+	\xintFloatToDecimal{\vartmp}%
+}
+
+\newcount\CompteurSeuil%
+\NewDocumentCommand\CalculSeuil{ m m m m m }{%N0 / UN0 / fct / sgn / seuil := en interne
+	\xintdeffloatfunc varfct(x) := #3 ;%
+	\xdef\vartmp{\fpeval{#2}}%
+	\CompteurSeuil=#1%
+	%symbole de comparaison inversé et boucle
+	\IfEq{#4}{>}%
+		{%
+			\whiledo{\xintLtorEq{\vartmp}{#5} = 1}%
+				{%
+					\xdef\vartmp{\xintfloateval{varfct(\vartmp)}}%
+					\CompteurSeuil=\numexpr\CompteurSeuil+1%
+				}%
+		}{}%
+	\IfEq{#4}{<}%
+		{%
+			\whiledo{\xintGtorEq{\vartmp}{#5} = 1}%
+				{%
+					\xdef\vartmp{\xintfloateval{varfct(\vartmp)}}%
+					\CompteurSeuil=\numexpr\CompteurSeuil+1%
+				}%
+		}{}%
+	\IfEq{#4}{>=}%
+		{%
+			\whiledo{\xintLt{\vartmp}{#5} = 1}%
+				{%
+					\xdef\vartmp{\xintfloateval{varfct(\vartmp)}}%
+					\CompteurSeuil=\numexpr\CompteurSeuil+1%
+				}%
+		}{}%
+	\IfEq{#4}{<=}%
+		{%
+			\whiledo{\xintGt{\vartmp}{#5} = 1}%
+				{%
+					\xdef\vartmp{\xintfloateval{varfct(\vartmp)}}%
+					\CompteurSeuil=\numexpr\CompteurSeuil+1%
+				}%
+		}{}%
+}
+\NewCommandCopy\pflcalcseuil\CalculSeuil
+
+\defKV[calculsuiterecur]{%
+	No=\def\SRninit{#1},%
+	UNo=\def\SRuninit{#1},%
+	Precision=\def\SRprec{#1},%
+	N=\def\SRnfinal{#1}
+	%Format=\def\SRformat{#1},%
+	%OptionFrac=\def\SRoptfrac{#1}
+}
+
+\setKVdefault[calculsuiterecur]{%
+	Precision=3
+	%Format=Arrondi,%
+	%OptionFrac={}
+}
+
+\NewDocumentCommand\CalculTermeRecurrence{ O{} m }{%attention avec les calculs en exact :-(
+	\useKVdefault[calculsuiterecur]%
+	\setKV[calculsuiterecur]{#1}%
+	\xintdeffloatfunc varfct(x) := #2 ;%
+	\xdef\vartmp{\fpeval{\SRuninit}}%
+	\IfEq{\SRnfinal}{\inteval{\SRninit+1}}%
+		{\xdef\vartmp{\xintfloateval{varfct(\vartmp)}}}%
+		{%
+			\foreach \i in {1,2,...,\inteval{\SRnfinal-\SRninit}}%
+				{\xdef\vartmp{\xintfloateval{varfct(\vartmp)}}}%
+		}%
+	%\num[minimum-decimal-digits=\SRprec]{\xintfloateval{round(\vartmp,\SRprec)}}%
+	\num{\xintfloateval{round(\vartmp,\SRprec)}}%
+	%\IfStrEq{\SRformat}{Fraction}{\ConversionFraction[\SRoptfrac]{\xinteval{\vartmp}}}{}%
+	%\IfStrEq{\SRformat}{Brut}{\xinteval{\vartmp}}{}%
+	%\IfStrEq{\SRformat}{Decimal}{\num{\xintfloateval{\vartmp}}}{}%
+	%\IfStrEq{\SRformat}{BrutDecimal}{\xintFloatToDecimal{\vartmp}}{}%
+}
+\NewCommandCopy\pflcalcrecurr\CalculTermeRecurrence
+
+\defKV[suiteseuil]{%
+	No=\def\SEUILindiceinit{#1},%
+	UNo=\def\SEUILtermeinit{#1},%
+	NomSuite=\def\SEUILnomsuite{#1},%
+	%SolN=\def\SEUILn{#1},%
+	Precision=\def\SEUILprec{#1},%
+	Stretch=\def\SEUILstretch{#1},%
+	Sens=\def\SEUILsens{#1}
+}
+
+\setKVdefault[suiteseuil]{%
+	NomSuite=u,%
+	Precision=3,%
+	Stretch=1.15,%
+	Balayage=false,%
+	Calculatrice=false,%
+	Majuscule=true,%
+	Sens={>},%
+	Exact=false,%
+	ExactB=false,%
+	Conclusion=true,%
+	Simple=false
+}
+
+\newcommand\SolutionSeuil[3][]{%1=options + %2 = fonction + %3 = seuil
+	\useKVdefault[suiteseuil]%
+	\setKV[suiteseuil]{#1}%
+	%on détermine le seuil, directement et on stocke les bascules !!!
+	\CalculSeuil{\SEUILindiceinit}{\SEUILtermeinit}{#2}{\SEUILsens}{#3}%
+	\def\SEUILn{\inteval{\the\CompteurSeuil}}%
+	\def\SEUILnmu{\inteval{\the\CompteurSeuil-1}}%
+	%formatage de la sortie des signes
+	\IfEq{\SEUILsens}{>}%
+		{\def\SensDeb{\leqslant}\def\SensFin{>}}%
+		{}%
+	\IfEq{\SEUILsens}{<}%
+		{\def\SensDeb{\geqslant}\def\SensFin{<}}%
+		{}%
+	\IfEq{\SEUILsens}{>=}%
+		{\def\SensDeb{<}\def\SensFin{\geqslant}}%
+		{}%
+	\IfEq{\SEUILsens}{<=}%
+		{\def\SensDeb{>}\def\SensFin{\leqslant}}%
+		{}%
+	%formatage
+	\ifboolKV[suiteseuil]{Balayage}{\ifboolKV[suiteseuil]{Majuscule}{P}{p}ar balayage, on obtient }{}%
+	\ifboolKV[suiteseuil]{Calculatrice}{\ifboolKV[suiteseuil]{Majuscule}{P}{p}ar calculatrice, on obtient }{}%
+	\ifboolKV[suiteseuil]{Simple}%
+		{%
+			\ensuremath{\SEUILnomsuite_{\SEUILnmu} \ifboolKV[suiteseuil]{Exact}{=}{\approx} \CalculTermeRecurrence[Precision=\SEUILprec,No=\SEUILindiceinit,UNo=\SEUILtermeinit,N=\SEUILnmu]{#2} \SensDeb\num{#3}}%
+			\text{~et~}%
+			\ensuremath{\SEUILnomsuite_{\SEUILn} \ifboolKV[suiteseuil]{ExactB}{=}{\approx} \CalculTermeRecurrence[Precision=\SEUILprec,No=\SEUILindiceinit,UNo=\SEUILtermeinit,N=\SEUILn]{#2} \SensFin\num{#3}}%
+		}%
+		{%
+			\ensuremath{%
+				\left\lbrace \begin{tblr}{stretch=\SEUILstretch,colsep=1pt,colspec={rll}}%
+					\SEUILnomsuite_{\SEUILnmu} &\ifboolKV[suiteseuil]{Exact}{=}{\approx} \CalculTermeRecurrence[Precision=\SEUILprec,No=\SEUILindiceinit,UNo=\SEUILtermeinit,N=\SEUILnmu]{#2} & \SensDeb\num{#3} \: \\ %
+					\SEUILnomsuite_{\SEUILn} &\ifboolKV[suiteseuil]{ExactB}{=}{\approx} \CalculTermeRecurrence[Precision=\SEUILprec,No=\SEUILindiceinit,UNo=\SEUILtermeinit,N=\SEUILn]{#2} & \SensFin\num{#3} \: %
+				\end{tblr}%
+				\ifboolKV[suiteseuil]{Conclusion}%
+					{\right| \Rightarrow n \geqslant \SEUILn}%
+					{\right.}%
+			}%
+		}%
+}
+\NewCommandCopy\pflsolseuil\SolutionSeuil
+
+\endinput

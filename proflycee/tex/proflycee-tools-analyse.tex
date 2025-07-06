@@ -1,0 +1,1029 @@
+% proflycee-tools-analyse.tex
+% Copyright 2023-2025 Cédric Pierquet
+% Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+%Correction d'un bug sur la raacine carrée... le cas où ça fait 1 !
+
+%%------SimplFrac nouvelle version
+\NewDocumentCommand\ConversionFraction{ s O{} m }{%
+	%*=moins sur le numérateur
+	%2=argument.optionnel[d/t/dec=...]
+	%3=argument mandataire {calcul ou fraction}
+	\def\calculargument{\xintPRaw{\xintIrr{\xinteval{#3}}}}%on calcule et on transforme en A/B
+	\IfSubStr{\calculargument}{/}%on teste si le symbole / apparaît
+	{%si oui := fraction
+		\StrBefore{\calculargument}{/}[\numerateur]%on extrait le numérateur
+		\StrBehind{\calculargument}{/}[\denominateur]%on extrait le dénominateur
+		\ifblank{#2}%
+		{%
+			\IfBooleanTF{#1}%
+			{\ensuremath{\frac{\num{\numerateur}}{\num{\denominateur}}}}%
+			{%
+				\ifthenelse{\numerateur < 0}%
+					{\ensuremath{-\frac{\num{\fpeval{abs(\numerateur)}}}{\num{\denominateur}}}}%
+					{\ensuremath{\frac{\num{\numerateur}}{\num{\denominateur}}}}%
+			}%
+		}%
+		{}%si l'argument optionnel est vide
+		\IfStrEq{#2}{d}%
+		{%
+			\IfBooleanTF{#1}%
+			{\ensuremath{\dfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+			{%
+				\ifthenelse{\numerateur < 0}%
+					{\ensuremath{-\dfrac{\num{\fpeval{abs(\numerateur)}}}{\num{\denominateur}}}}%
+					{\ensuremath{\dfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+			}%
+		}%
+		{}%si l'argument optionnel est vide
+		\IfStrEq{#2}{t}%
+		{%
+			\IfBooleanTF{#1}%
+			{\ensuremath{\tfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+			{%
+				\ifthenelse{\numerateur < 0}%
+					{\ensuremath{-\tfrac{\num{\fpeval{abs(\numerateur)}}}{\num{\denominateur}}}}%
+					{\ensuremath{\tfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+			}%
+		}%
+		{}%si l'argument optionnel est vide
+		\IfStrEq{#2}{n}%
+		{%
+			%\IfBooleanTF{#1}%
+			{\ensuremath{\nicefrac{\num{\numerateur}}{\num{\denominateur}}}}%
+			%{%
+			%	\ifthenelse{\numerateur < 0}%
+			%		{\ensuremath{-\nicefrac{\num{\fpeval{abs(\numerateur)}}}{\num{\denominateur}}}}%
+			%		{\ensuremath{\nicefrac{\num{\numerateur}}{\num{\denominateur}}}}%
+			%}%
+		}%
+		{}%si l'argument optionnel est vide
+		\IfSubStr{#2}{dec}%on veut la forme décimale
+		{%
+			\IfSubStr{#2}{=}%si on rajoute une précision
+				{%
+					\StrBehind{#2}{=}[\precdecimal]%
+					\ensuremath{\num{\xintfloateval{round(#3,\precdecimal)}}}%
+				}%
+				{%
+					\ensuremath{\num{\xintfloateval{#3}}}%
+				}%
+		}%
+		{}%si l'argument optionnel est vide
+	}{%si non := entier
+		\num{\calculargument}%on affiche l'entier, avec le package siunitx
+	}%
+}
+
+%%------AideTds
+\defKV[aidetds]{%
+	Code=\def\tdsparam{#1},%
+	Couleur=\def\tdscouleur{#1},%
+	Racines=\def\tdsracine{#1},%
+	Largeur=\def\tdslarg{#1},%
+	Hauteur=\def\tdshaut{#1}
+}
+
+\setKVdefault[aidetds]{%
+	Code=da+,
+	Couleur=red,%
+	Largeur=2,%
+	Hauteur=1,%
+	Cadre=true,%
+	Racines=2
+}
+
+\NewDocumentCommand\schematdsaff{ s m m m m }{%pour les droites (interne)
+	% * = étoilée -> a négatif
+	% #2 = couleur
+	% #3 = largeur
+	% #4 = hauteur
+	% #5 = racine
+	\IfBooleanTF{#1}%si étoile := droite qui descend
+		{%
+			\def\possgnavant{above right}\def\possgnapres{below left}\def\sgnavant{\strut+}\def\sgnapres{\strut-}%
+			\draw[thick,#2] ({-0.5*#3},{0.5*#4})--({0.5*#3},{-0.5*#4});
+		}
+		{%
+			\def\possgnavant{below right}\def\possgnapres{above left}\def\sgnavant{\strut-}\def\sgnapres{\strut+}%
+			\draw[thick,#2] ({-0.5*#3},{-0.5*#4})--({0.5*#3},{0.5*#4});
+		}
+	\draw[#2] ({-0.5*#3},0) node[inner sep=0pt,\possgnavant=1pt,font=\scriptsize] {\textcircled{$\sgnavant$}};
+	\draw[#2] ({0.5*#3},0) node[inner sep=0pt,\possgnapres=1pt,font=\scriptsize] {\textcircled{$\sgnapres$}};
+	\draw[#2] (0,0) node[inner sep=0pt,above=3pt,font=\scriptsize] {$\strut#5$} ;
+	\filldraw[#2] (0,0) circle[radius=2pt] ;
+}
+
+\NewDocumentCommand\schematdsexpo{ s m m m }{%pour les expos (interne)
+	% * = étoilée -> a négatif
+	% #2 = couleur
+	% #3 = largeur
+	% #4 = hauteur
+	\IfBooleanTF{#1}%si étoile := expo 'décroissante'
+		{%
+			\draw[thick,#2] ({-0.45*#3},{0.5*#4}) to[out=-75,in=179] ({0.5*#3},{-0.325*#4});
+		}
+		{%sinon := expo 'croissante'
+			\draw[thick,#2] ({-0.5*#3},{-0.325*#4}) to[out=1,in=-105] ({0.5*#3},{0.5*#4});
+		}
+	\draw[#2] ({0},{0}) node[inner sep=0pt,above=0pt,font=\scriptsize] {\textcircled{$+$}};.
+}
+
+\NewDocumentCommand\schematdsexposol{ s m m m o }{%pour les expos avec solution (interne)
+	% * = étoilée -> a négatif
+	% #2 = couleur
+	% #3 = largeur
+	% #4 = hauteur
+	% #5 = racine
+	\IfBooleanTF{#1}%si étoile := expo 'décroissante'
+		{%
+			\draw[thick,#2] ({-0.35*#3},{0.5*#4}) to[out=-75,in=179] ($({0.5*#3},{-0.325*#4})+(2mm,0)$) ;
+			\filldraw[#2] ({-0.1925*#3},0) circle[radius=2pt] ;
+			\draw[#2] ({0.5*#3},{-0.1625*#4}) node[inner sep=0pt,left=2pt,font=\scriptsize] {\textcircled{$-$}} ;
+			\draw[#2] ({-0.5*#3},{0.25*#4}) node[inner sep=0pt,right=1pt,font=\scriptsize] {\textcircled{$+$}} ;
+			\draw[#2] ({-0.1925*#3},0) node[inner sep=0pt,below left=1pt,font=\scriptsize] {$\strut#5$} ;
+		}
+		{%sinon := expo 'croissante'
+			\draw[thick,#2] ({-0.5*#3},{-0.325*#4}) to[out=1,in=-105] ({0.35*#3},{0.5*#4});
+			\filldraw[#2] ({0.1925*#3},0) circle[radius=2pt] ;
+			\draw[#2] ({0.5*#3},{0.25*#4}) node[inner sep=0pt,left=1pt,font=\scriptsize] {\textcircled{$+$}} ;
+			\draw[#2] ({-0.5*#3},{-0.1625*#4}) node[inner sep=0pt,right=2pt,font=\scriptsize] {\textcircled{$-$}} ;
+			\draw[#2] ({0.1925*#3},0) node[inner sep=0pt,above left=1pt,font=\scriptsize] {$\strut#5$} ;
+		}
+}
+
+\NewDocumentCommand\schematdslnsol{ s m m m o }{%pour les ln avec solution (interne)
+	% * = étoilée -> a négatif
+	% #2 = couleur
+	% #3 = largeur
+	% #4 = hauteur
+	% #5 = racine
+	\IfBooleanTF{#1}%si étoile := ln 'décroissante'
+		{%
+			%\draw[thick,#2] ({-0.35*#3},{0.5*#4}) to[out=75,in=179] ($({0.5*#3},{0.325*#4})+(2mm,0)$) ;
+			%\filldraw[#2] ({-0.1925*#3},0) circle[radius=2pt] ;
+			%\draw[#2] ({-0.5*#3},{-0.25*#4}) node[inner sep=0pt,right=1pt,font=\scriptsize] {\textcircled{$-$}} ;
+			%\draw[#2] ({0.5*#3},{0.5*0.325*#4}) node[inner sep=0pt,left=1pt,font=\scriptsize] {\textcircled{$+$}} ;
+			%\draw[thick,#2] ({-0.35*#3},{0.5*#4}) to[out=-75,in=179] ($({0.5*#3},{-0.325*#4})+(2mm,0)$) ;
+			%\filldraw[#2] ({-0.1925*#3},0) circle[radius=2pt] ;
+			%\draw[#2] ({0.5*#3},{-0.1625*#4}) node[inner sep=0pt,left=2pt,font=\scriptsize] {\textcircled{$-$}} ;
+			%\draw[#2] ({-0.5*#3},{0.25*#4}) node[inner sep=0pt,right=1pt,font=\scriptsize] {\textcircled{$+$}} ;
+		}
+		{%sinon := ln 'croissante'
+			\draw[thick,#2] ({-0.35*#3},{-0.5*#4}) to[out=75,in=-175] ($({0.5*#3},{0.45*#4})+(2mm,0)$) ;
+			\filldraw[#2] ({-0.1975*#3},0) circle[radius=2pt] ;
+			\draw[#2] ({-0.5*#3},{-0.25*#4}) node[inner sep=0pt,right=1pt,font=\scriptsize] {\textcircled{$-$}} ;
+			\draw[#2] ({0.5*#3},{0.5*0.425*#4}) node[inner sep=0pt,left=1pt,font=\scriptsize] {\textcircled{$+$}} ;
+			\draw[#2] ({-0.1925*#3},0) node[inner sep=0pt,above left=1pt,font=\scriptsize] {$\strut#5$} ;
+		}
+}
+
+\NewDocumentCommand\schematdsparab{ m m m m m o }{%pour les paraboles (interne)
+	% #1 = signe de a (1 ou -1) ?
+	% #2 = couleur
+	% #3 = largeur
+	% #4 = hauteur
+	% #5 = nb racine
+	% #6 = liste racines (option)
+	\xintifboolexpr{ #1 > 0 'and' #5 == 2 } %a>0 et delta>0
+	{%
+		\saveexpandmode\expandarg
+		\StrCut{#6}{/}{\xun}{\xdeux}
+		\restoreexpandmode
+		\draw[thick,#2] ({-0.375*#3},{0.5*#4}) parabola bend (0,{-0.5*#4}) ({0.375*#3},{0.5*#4}) ;
+		\draw[#2] ({-0.5*#3},0) node[above right=1pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut+$}};
+		\draw[#2] ({0.5*#3},0) node[above left=1pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut+$}};
+		\draw[#2] (0,0) node[below=1pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut-$}};
+		\filldraw[#2] ({0.2625*#3},0) circle[radius=2pt] node[below right=1pt,inner sep=0pt,font=\scriptsize] {$\strut\xdeux$};
+		\filldraw[#2] ({-0.2625*#3},0) circle[radius=2pt] node[below left=1pt,inner sep=0pt,font=\scriptsize] {$\strut\xun$};%
+	}
+	{}
+	\xintifboolexpr{ #1 < 0 'and' #5 == 2 } %a<0 et delta>0
+	{%
+		\saveexpandmode\expandarg
+		\StrCut{#6}{/}{\xun}{\xdeux}
+		\restoreexpandmode
+		\draw[thick,#2] ({-0.375*#3},{-0.5*#4}) parabola bend (0,{0.5*#4}) ({0.375*#3},{-0.5*#4}) ;
+		\draw[#2] ({-0.5*#3},0) node[below right=1pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut-$}};
+		\draw[#2] ({0.5*#3},0) node[below left=1pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut-$}};
+		\draw[#2] (0,0) node[above=1pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut+$}};
+		\filldraw[#2] ({0.2625*#3},0) circle[radius=2pt] node[above right=1pt,inner sep=0pt,font=\scriptsize] {$\strut\xdeux$};
+		\filldraw[#2] ({-0.2625*#3},0) circle[radius=2pt] node[above left=1pt,inner sep=0pt,font=\scriptsize] {$\strut\xun$};%
+	}
+	{}
+	\xintifboolexpr{ #1 > 0 'and' #5 == 1 } %a>0 et delta=0
+	{%
+		\draw[thick,#2] ({-0.375*#3},{0.5*#4}) parabola bend (0,0) ({0.375*#3},{0.5*#4}) ;
+		\filldraw[#2] (0,0) circle[radius=2pt] node[below=3pt,inner sep=1pt,font=\scriptsize] {$#6$};
+		\draw[#2] (0,0) node[above=3pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut+$}};
+	}
+	{}
+	\xintifboolexpr{ #1 < 0 'and' #5 == 1 } %a>0 et delta=0
+	{%
+		\draw[thick,#2] ({-0.375*#3},{-0.5*#4}) parabola bend (0,0) ({0.375*#3},{-0.5*#4}) ;
+		\filldraw[#2] (0,0) circle[radius=2pt] node[above=3pt,inner sep=0pt,font=\scriptsize] {$#6$};
+		\draw[#2] (0,0) node[below=3pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut-$}};
+	}
+	{}
+	\xintifboolexpr{ #1 > 0 'and' #5 == 0 } %a>0 et delta<0
+	{%
+		\draw[thick,#2] ({-0.375*#3},{0.5*#4}) parabola bend (0,{0.075*#4}) ({0.375*#3},{0.5*#4}) ;
+		\draw[#2] (0,{0.075*#4}) node[above=2pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut+$}};
+	}
+	{}
+	\xintifboolexpr{ #1 < 0 'and' #5 == 0 } %a>0 et delta<0
+	{%
+		\draw[thick,#2] ({-0.375*#3},{-0.5*#4}) parabola bend (0,{-0.075*#4}) ({0.375*#3},{-0.5*#4}) ;
+		\draw[#2] (0,{-0.075*#4}) node[below=2pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut-$}};
+	}
+	{}
+}
+
+\NewDocumentCommand\MiniSchemaSignes{ s O{} D<>{} }{%
+	\useKVdefault[aidetds]%
+	\setKV[aidetds]{#2}%
+	%simplification des codes
+	\IfEq{\tdsparam}{da+}{\def\xcode{1}\def\xcodehautaxe{0}}{}%
+	\IfEq{\tdsparam}{da-}{\def\xcode{-1}\def\xcodehautaxe{0}}{}%
+	\IfEq{\tdsparam}{pa+d+}{\def\xcode{12}\def\xcodehautaxe{0}}{}%
+	\IfEq{\tdsparam}{pa-d+}{\def\xcode{-12}\def\xcodehautaxe{0}}{}%
+	\IfEq{\tdsparam}{pa+d0}{\def\xcode{11}\def\xcodehautaxe{0}}{}%
+	\IfEq{\tdsparam}{pa-d0}{\def\xcode{-11}\def\xcodehautaxe{0}}{}%
+	\IfEq{\tdsparam}{pa+d-}{\def\xcode{10}\def\xcodehautaxe{0}}{}%
+	\IfEq{\tdsparam}{pa-d-}{\def\xcode{-10}\def\xcodehautaxe{0}}{}%
+	\IfEq{\tdsparam}{expo+}{\def\xcode{20}\def\xcodehautaxe{-0.35}}{}%
+	\IfEq{\tdsparam}{expo-}{\def\xcode{-20}\def\xcodehautaxe{-0.35}}{}%
+	\IfEq{\tdsparam}{exposol+}{\def\xcode{30}\def\xcodehautaxe{0}}{}%
+	\IfEq{\tdsparam}{exposol-}{\def\xcode{-30}\def\xcodehautaxe{0}}{}%
+	\IfEq{\tdsparam}{lnsol+}{\def\xcode{40}\def\xcodehautaxe{0}}{}%
+	%\IfEq{\tdsparam}{lnsol-}{\def\xcode{-40}\def\xcodehautaxe{0}}{}
+	%si commande étoilée := commande autonome
+	\IfBooleanTF{#1}%
+		{\begin{tikzpicture}[#3,>=latex]}{}%
+	%cadre si booléen true
+	\ifboolKV[aidetds]{Cadre}%
+		{\draw[lightgray] ({-0.5*\tdslarg},{-0.5*\tdshaut}) rectangle ({0.55*\tdslarg},{0.5*\tdshaut}) ;}%
+		{}%
+	%restriction de la petite fenêtre
+	\clip ({-0.5*\tdslarg},{-0.5*\tdshaut}) rectangle ({0.55*\tdslarg},{0.5*\tdshaut}) ;
+	%axe (Ox)
+	\draw[semithick,->,>=latex] ({-0.5*\tdslarg},{\xcodehautaxe*(\tdshaut)})--({0.55*\tdslarg},{\xcodehautaxe*(\tdshaut)});
+	%1er degré a+ code = 1
+	\ifnum\xcode=1
+		\schematdsaff{\tdscouleur}{\tdslarg}{\tdshaut}{\tdsracine}
+	\fi
+	%1er degré a- code = -1
+	\ifnum\xcode=-1
+		\schematdsaff*{\tdscouleur}{\tdslarg}{\tdshaut}{\tdsracine}
+	\fi
+	%2d degré a+delta+ code = 12
+	\ifnum\xcode=12
+		\schematdsparab{1}{\tdscouleur}{\tdslarg}{\tdshaut}{2}[\tdsracine]
+	\fi
+	%2d degré a-delta+ code = -12
+	\ifnum\xcode=-12
+		\schematdsparab{-1}{\tdscouleur}{\tdslarg}{\tdshaut}{2}[\tdsracine]
+	\fi
+	%2d degré a+delta0 code = 11
+	\ifnum\xcode=11
+		\schematdsparab{1}{\tdscouleur}{\tdslarg}{\tdshaut}{1}[\tdsracine]
+	\fi
+	%2d degré a-delta0 code = -11
+	\ifnum\xcode=-11
+		\schematdsparab{-1}{\tdscouleur}{\tdslarg}{\tdshaut}{1}[\tdsracine]
+	\fi
+	%2d degré a+delta- code = 10
+	\ifnum\xcode=10
+		\schematdsparab{1}{\tdscouleur}{\tdslarg}{\tdshaut}{0}
+	\fi
+	%2d degré a-delta- code = -10
+	\ifnum\xcode=-10
+		\schematdsparab{-1}{\tdscouleur}{\tdslarg}{\tdshaut}{0}
+	\fi
+	%expo croissante code = 20
+	\ifnum\xcode=20
+		\schematdsexpo{\tdscouleur}{\tdslarg}{\tdshaut}
+	\fi
+	%expo décroissante code = -20
+	\ifnum\xcode=-20
+		\schematdsexpo*{\tdscouleur}{\tdslarg}{\tdshaut}
+	\fi
+	%expo avec solution (croissante) code = 30
+	\ifnum\xcode=30
+		\schematdsexposol{\tdscouleur}{\tdslarg}{\tdshaut}[\tdsracine]
+	\fi
+	%expo avec solution (décroissante) code = -30
+	\ifnum\xcode=-30
+		\schematdsexposol*{\tdscouleur}{\tdslarg}{\tdshaut}[\tdsracine]
+	\fi
+	%ln avec solution (croissante) code = 40
+	\ifnum\xcode=40
+		\schematdslnsol{\tdscouleur}{\tdslarg}{\tdshaut}[\tdsracine]
+	\fi
+	%ln avec solution (décroissante) code = -40
+	%\ifnum\xcode=-40
+	%	\schematdslnsol*{\tdscouleur}{\tdslarg}{\tdshaut}[\tdsracine]
+	%\fi
+	\IfBooleanTF{#1}%
+		{\end{tikzpicture}}{}%
+}
+\NewCommandCopy\pflschemasignes\MiniSchemaSignes
+
+%pour l'interaction avec tkz-tab
+\defKV[aidetdstkz]{%
+	Echelle=\def\tdstkzscale{#1},%
+	Decal=\def\tdstkzoffset{#1}
+}
+
+\setKVdefault[aidetdstkz]{%
+	Echelle=1,%
+	Decal=1.25
+}
+
+\NewDocumentCommand\MiniSchemaSignesTkzTab{ o m O{0.85} O{1.5} }{%
+	%#1 = codeaidetikz
+	%#2 = numligne
+	%#3 = échelle
+	%#4 = décalage
+	%\shorthandoff{:}\shorthandoff{!} %bizzzzzzzzare
+	%\NoAutoSpacing
+	\coordinate (ZZZ) at ($(T2#2)!.5!(T2\the\numexpr#2+1\relax)$) ;
+	%\shorthandon{:}\shorthandon{!}
+	\path (ZZZ.east) + (#4,0) pic[right,scale=#3,every node/.style={scale=#3}] {code={\MiniSchemaSignes[#1]}} ;
+}
+\NewCommandCopy\pflschemasignestkztab\MiniSchemaSignesTkzTab
+
+%%------TVISOLUTION
+\defKV[dichoto]{%
+	NomFct=\def\DHTnomfct{#1},%
+	va=\def\DHTva{#1},%
+	vb=\def\DHTvb{#1},%
+	Precision=\def\DHTprec{#1},%
+	NomSol=\def\DHTnomsol{#1},%
+	Stretch=\def\DHTstretch{#1}
+}
+
+\setKVdefault[dichoto]{%
+	NomFct=f,%
+	Precision=2,%
+	NomSol=\alpha,%
+	Stretch=1.15,%
+	Balayage=false,%
+	Calculatrice=false,%
+	Majuscule=true
+}
+
+\newcommand\SolutionTVI[3][]{%
+	\useKVdefault[dichoto]%
+	\setKV[dichoto]{#1}%
+	\xintdeffloatfunc varfct(x) := #2 ;%
+	\ifboolKV[dichoto]{Balayage}{\ifboolKV[dichoto]{Majuscule}{P}{p}ar balayage, on obtient }{}%
+	\ifboolKV[dichoto]{Calculatrice}{\ifboolKV[dichoto]{Majuscule}{P}{p}ar calculatrice, on obtient }{}%
+	\ensuremath{%
+		\left\lbrace \begin{tblr}{stretch=\DHTstretch,colsep=1pt,colspec={rll}}%
+			{\DHTnomfct}{\left( \num{\DHTva} \right)} &\approx \num[minimum-decimal-digits=\DHTprec]{\xintFloatToDecimal{\xintfloateval{round(varfct(\DHTva),\DHTprec)}}} & \xintifGt{\xintfloateval{varfct(\DHTva)-#3}}{0}{> \num{#3}}{< \num{#3}} \: \\ %
+			{\DHTnomfct}{\left( \num{\DHTvb} \right)} &\approx \num[minimum-decimal-digits=\DHTprec]{\xintFloatToDecimal{\xintfloateval{round(varfct(\DHTvb),\DHTprec)}}} & \xintifGt{\xintfloateval{varfct(\DHTvb)-#3}}{0}{> \num{#3}}{< \num{#3}} \:%
+		\end{tblr}%
+		\right|%
+		\Rightarrow%
+		\num{\DHTva} < \DHTnomsol < \num{\DHTvb}%
+	}%
+}
+\NewCommandCopy\pflsoltvi\SolutionTVI
+
+%%------SIMPLIFRACINES
+\DeclareDocumentCommand\SimplificationRacine{ m }{% argument mandataire {calcul ou fraction}
+	\xdef\calculargument{\xintIrr{\xinteval{#1}}}%
+	\xintifboolexpr{\calculargument == 1}%
+		{%
+			\ensuremath{1}%
+		}%
+		{%
+			\IfEndWith{\calculargument}{/1}%
+			{%si c'est un entier !
+				\xdef\calculargument{\xintiieval{#1}}%
+				\xdef\ExtractRacStop{\xintiFloor{\xintfloateval{sqrt(\calculargument)}}}%
+				\xintFor* ##1 in {\xintSeq{1}{\ExtractRacStop}}\do{%
+					\xintifboolexpr{ \xintiiRem{\calculargument}{\xintiieval{##1*##1}} == 0}%si le carré divise
+					{\xdef\ExtractRacID{##1}}%
+					{}%
+				}%
+				\xdef\ExtracReste{\xintiieval{\calculargument/(\ExtractRacID*\ExtractRacID)}}%
+				\ensuremath{\xintifboolexpr{\ExtractRacID == 1 && \ExtracReste == 1}%
+					{1}%
+					{ \xintifboolexpr{\ExtractRacID == 1}{}{\num{\xintiieval{\ExtractRacID}}}%
+						\xintifboolexpr{\ExtracReste == 1}{}{\sqrt{\num{\ExtracReste}}} }}%
+				%			}%
+				}%
+				{%on va mettre sous forme a\sqrt(d)/b := buggue avec des millièmes...
+			\StrBefore{\calculargument}{/}[\numerateur]%on extrait le numérateur
+			\StrBehind{\calculargument}{/}[\denominateur]%on extrait le dénominateur
+			\xdef\ExtractRacNNum{\xintiieval{\numerateur*\denominateur}}%
+			\xdef\ExtractRacStop{\xintiFloor{\xintfloateval{sqrt(\ExtractRacNNum)}}}%
+			\xintFor* ##1 in {\xintSeq{1}{\ExtractRacStop}}\do{%
+				\xintifboolexpr{ \xintiiRem{\ExtractRacNNum}{\xintiieval{##1*##1}} == 0}%si le carré divise
+				{\xdef\ExtractRacID{##1}}%
+				{}
+			}%
+			\xdef\ExtractRacGCD{\xintiiGCD{\ExtractRacID}{\denominateur}}%
+			\xdef\RacNumSimpl{\xintiieval{\ExtractRacID/\ExtractRacGCD}}%simpl num
+			\xdef\RacDenomSimpl{\xintiieval{\denominateur/\ExtractRacGCD}}%
+			\xdef\RacRacSimpl{\xintiieval{\ExtractRacNNum/(\ExtractRacID*\ExtractRacID)}}%
+			\ensuremath{\frac{%
+					\xintifboolexpr{\RacNumSimpl == 1 && \RacRacSimpl == 1}%
+					{1}%
+					{ \xintifboolexpr{\RacNumSimpl == 1}{}{\RacNumSimpl} \xintifboolexpr{\RacRacSimpl == 1}{}{\sqrt{\num{\RacRacSimpl}}} }%
+				}%
+				{ \RacDenomSimpl }}%
+				}%
+		}%
+}
+
+%%------DICHOTOMIE
+\defKV[SolDichoto]{%
+	Precision=\xdef\DICHOTOstep{#1},%
+	Intervalle=\xdef\DICHOTOinterv{#1},%
+	Variable=\xdef\DICHOTOvar{#1}
+}
+
+\setKVdefault[SolDichoto]{%
+	Precision=2,%
+	Variable=x,%
+	Intervalle={0:10}
+}
+
+\NewDocumentCommand\ResolutionApprochee{ O{} m O{masolution} }{%1=options,2=equation,3=macro
+	\useKVdefault[SolDichoto]%
+	%extraction fonction + valeur
+	\setKV[SolDichoto]{#1}%
+	\IfSubStr{#2}{=}%on coupe mmb gauche / mmb droit
+		{\StrCut{#2}{=}{\SolDiFCT}{\SolDiVal}}%
+		{\xdef\SolDiFCT{#2}\xdef\SolDiVal{0}}%
+	%création des variables temporaires
+	\xintdeffloatfunc dichotovarfct(\DICHOTOvar) := \SolDiFCT ;%
+	\StrCut{\DICHOTOinterv}{:}{\varvala}{\varvalb}%
+	\xdef\varstep{\fpeval{10**(-\DICHOTOstep-1)}}%un chiffre en plus :-)
+	%boucles
+	\whiledo{\xintGt{\xintfloateval{\varvalb-\varvala-\varstep}}{0} = 1}%
+	{%
+		\xdef\varvalm{\xintfloateval{(\varvala+\varvalb)*0.5}}%
+		\xintifboolexpr{\xintGt{\xintfloateval{(dichotovarfct(\varvala)-\SolDiVal)*(dichotovarfct(\varvalm)-\SolDiVal)}}{0}==1}%
+			{\xdef\varvala{\fpeval{\varvalm}}}%
+			{\xdef\varvalb{\fpeval{\varvalm}}}%
+	}%
+	\xdef\varvalm{\xintfloateval{(\varvala+\varvalb)*0.5}}%
+	\xdef\vartmpmd{\fpeval{floor(\varvalm,\DICHOTOstep)}}%
+	\xdef\vartmpme{\fpeval{\vartmpmd+10**(-\DICHOTOstep)}}%
+	%les variables créées
+	\expandafter\def\csname#3d\endcsname{\fpeval{\vartmpmd}}%
+	\expandafter\def\csname#3e\endcsname{\fpeval{\vartmpme}}%
+	%valeur approchée
+	\expandafter\def\csname#3a\endcsname{\fpeval{round(\varvalm,\DICHOTOstep)}}%
+}
+\NewCommandCopy\pflresolapproch\ResolutionApprochee
+
+%==taux acroissement==
+\defKV[tauxaccroiss]{%
+	Precision=\def\TauxAccroisPrec{#1},%
+	Signe=\def\TauxAccroisEqual{#1},%
+	NomFct=\def\TauxAccroisFct{#1}
+}
+
+\setKVdefault[tauxaccroiss]{%
+	Precision=3,%
+	AffFormule=false,%
+	Displaystyle=true,%
+	ResultatBrut=false,%
+	Signe={\approx},%
+	NomFct=f
+}
+
+\NewDocumentCommand\TauxAccroissement{ O{} m m m }{%opts+fct+pt+h
+	\useKVdefault[tauxaccroiss]%
+	\setKV[tauxaccroiss]{#1}%
+	\xintdeffloatfunc varfct(x) := #2 ;%
+	\def\TmpRes{\xintfloateval{(varfct(#3+#4)-varfct(#3))/(#4)}}%
+	\ifboolKV[methodeintegr]{ResultatBrut}%
+		{\TmpRes}%
+		{%
+			\ifboolKV[tauxaccroiss]{AffFormule}%
+				{%
+					\ifboolKV[tauxaccroiss]{Displaystyle}{\displaystyle}{}%
+					\frac{\TauxAccroisFct(\num{\xinteval{#3+#4}})-\TauxAccroisFct(\num{#3})}{\num{#4}} \TauxAccroisEqual}%
+				{}%
+			\num{\xintfloateval{round(\TmpRes,\TauxAccroisPrec)}}%
+		}%
+}
+\NewCommandCopy\pfltxaccroiss\TauxAccroissement
+
+%==approx intégrale==
+\defKV[methodeintegr]{%
+	Precision=\def\MethIntegrPrec{#1},%
+	NbSubDiv=\def\MethIntegrNb{#1},%
+	Methode=\def\MethIntegrType{#1},%
+	Signe=\def\MethIntegrEqual{#1},%
+	Expr=\def\MethIntegrFct{#1},%
+	Variable=\def\MethIntegrVar{#1}
+}
+
+\setKVdefault[methodeintegr]{%
+	Precision=3,%
+	NbSubDiv=10,%
+	Methode=Simpson,%
+	ResultatBrut=false,%
+	AffFormule=false,%
+	Signe={\approx},%
+	Expr=f(x),%
+	Variable=x
+}
+
+\NewDocumentCommand\IntegraleApprochee{ O{} m m m }{%opts+fct+a+b
+	\useKVdefault[methodeintegr]%
+	\setKV[methodeintegr]{#1}%
+	\xintdeffloatfunc varfct(x) := #2 ;%
+	\def\TmpNmU{\xinteval{\MethIntegrNb-1}}%
+	\IfEq{\MethIntegrType}{RectanglesGauche}%
+		{%
+			\def\TmpRes{\xintfloateval{(#4-#3)/\MethIntegrNb*add(varfct(#3+i*(#4-(#3))/\MethIntegrNb), i=0..\TmpNmU)}}%
+				}%
+		{}%
+	\IfEq{\MethIntegrType}{RectanglesMilieu}%
+		{%
+			\def\TmpRes{\xintfloateval{(#4-#3)/\MethIntegrNb*add(varfct(#3+(i+0.5)*(#4-(#3))/\MethIntegrNb), i=0..\TmpNmU)}}%
+					}%
+		{}%
+	\IfEq{\MethIntegrType}{RectanglesDroite}%
+		{%
+			\def\TmpRes{\xintfloateval{(#4-#3)/\MethIntegrNb*add(varfct(#3+i*(#4-(#3))/\MethIntegrNb), i=1..\MethIntegrNb)}}%
+				}%
+		{}%
+	\IfEq{\MethIntegrType}{Trapezes}%
+		{%
+			\def\TmpRes{\xintfloateval{(#4-#3)/\MethIntegrNb*add(0.5*varfct(#3+i*(#4-(#3))/\MethIntegrNb)+0.5*varfct(#3+(i+1)*(#4-(#3))/\MethIntegrNb), i=0..\TmpNmU)}}%
+				}%
+		{}%
+	\IfEq{\MethIntegrType}{Simpson}%
+		{%
+			\def\TmpRes{\xintfloateval{(#4-#3)/(6*\MethIntegrNb)*(2*add(varfct(#3+i*(#4-(#3))/\MethIntegrNb), i=1..\TmpNmU)+varfct(#3)+varfct(#4)+4*add(varfct(#3+(i+0.5)*(#4-(#3))/\MethIntegrNb), i=0..\TmpNmU))}}%
+				}%
+		{}%
+	\ifboolKV[methodeintegr]{ResultatBrut}%
+		{\TmpRes}%
+		{%
+			\ifboolKV[methodeintegr]{AffFormule}%
+				{%
+					\int_{#3}^{#4} \MethIntegrFct\,\text{d}\MethIntegrVar\MethIntegrEqual%
+				}%
+				{}%
+			\num{\xintfloateval{round(\TmpRes,\MethIntegrPrec)}}
+		}%
+}
+\NewCommandCopy\pflintegrapproch\IntegraleApprochee
+
+%===intégrale 'brute'
+\NewDocumentCommand\CalcIntegrale{ s O{} D<>{50} m m m }{%
+	\xintdeffloatfunc varfct(x) := #4 ;%
+	\def\TmpNmU{\xinteval{(#3)-1}}%
+	\def\TmpRes{\xintfloateval{((#6)-(#5))/(6*(#3))*(2*add(varfct((#5)+i*((#6)-(#5))/(#3)),i=1..\TmpNmU)+varfct(#5)+varfct(#6)+4*add(varfct((#5)+(i+0.5)*((#6)-(#5))/(#3)), i=0..\TmpNmU))}}%
+	\IfStrEq{#2}{}%
+		{%
+			\IfBooleanTF{#1}{\num{\TmpRes}}{\TmpRes}%
+		}%
+		{%
+			\IfBooleanTF{#1}{\num{\xintfloateval{round(\TmpRes,#2)}}}{\xintfloateval{round(\TmpRes,#2)}}%
+		}%
+	\relax
+}
+\NewCommandCopy\pflvalintegr\CalcIntegrale
+
+%===val moy 'brute'
+\NewDocumentCommand\ValeurMoyenneIntg{ s O{} D<>{50} m m m }{%
+	\xintdeffloatfunc varfct(x) := #4 ;%
+	\def\TmpNmU{\xinteval{(#3)-1}}%
+	\def\TmpRes{\xintfloateval{(1)/(6*(#3))*(2*add(varfct(#5+i*(#6-(#5))/(#3)),i=1..\TmpNmU)+varfct(#5)+varfct(#6)+4*add(varfct(#5+(i+0.5)*(#6-(#5))/(#3)), i=0..\TmpNmU))}}%
+	\IfStrEq{#2}{}%
+		{%
+			\IfBooleanTF{#1}{\num{\TmpRes}}{\TmpRes}%
+		}%
+		{%
+			\IfBooleanTF{#1}{\num{\xintfloateval{round(\TmpRes,#2)}}}{\xintfloateval{round(\TmpRes,#2)}}%
+		}%
+	\relax
+}
+\NewCommandCopy\pflvalmoyintegr\ValeurMoyenneIntg
+
+%==intégrale tikz==
+
+\defKV[methodeintegrtkz]{%
+	Couleur=\def\MethIntegrTkzCol{#1},%
+	CouleurRemplissage=\def\MethIntegrTkzColOpak{#1},%
+	NbSubDiv=\def\MethIntegrTkzNb{#1},%
+	Methode=\def\MethIntegrTkzType{#1},%
+	Opacite=\def\MethIntegrTkzOpak{#1},%
+	Epaisseur=\def\MethIntegrTkzThick{#1}
+}
+
+\setKVdefault[methodeintegrtkz]{%
+	Couleur=red,%
+	NbSubDiv=10,%
+	Methode=RectanglesGauche,%
+	Remplir=true,%
+	CouleurRemplissage={\MethIntegrTkzCol!25},%
+	Opacite=0.25,%
+	Epaisseur=semithick
+}
+
+\tikzset{figureintegr/.style={\MethIntegrTkzThick,\MethIntegrTkzCol,fill=\MethIntegrTkzColOpak,fill opacity=\MethIntegrTkzOpak}}%
+
+\NewDocumentCommand\IntegraleApprocheeTikz{ O{} m m m }{%opts+nom_fct+a+b
+	\useKVdefault[methodeintegrtkz]%
+	\setKV[methodeintegrtkz]{#1}%
+	\def\TmpH{(#4-#3)/\MethIntegrTkzNb}%
+	%rectangles gauches
+	\IfEq{\MethIntegrTkzType}{RectanglesGauche}%
+		{%
+			\foreach \i in {0,...,\inteval{\MethIntegrTkzNb-1}}%
+				\draw[figureintegr] ({#3+\i*\TmpH},{0}) rectangle++ ({\TmpH},{#2(#3+\i*\TmpH)}) ;
+		}%
+		{}%
+	\IfEq{\MethIntegrTkzType}{RectanglesDroite}%
+		{%
+			\foreach \i in {0,...,\inteval{\MethIntegrTkzNb-1}}%
+				\draw[figureintegr] ({#3+\i*\TmpH},{0}) rectangle++ ({\TmpH},{#2(#3+(\i+1)*\TmpH)}) ;
+		}%
+		{}%
+	\IfEq{\MethIntegrTkzType}{RectanglesMilieu}%
+		{%
+			\foreach \i in {0,...,\inteval{\MethIntegrTkzNb-1}}%
+				\draw[figureintegr] ({#3+\i*\TmpH},{0}) rectangle++ ({\TmpH},{#2(#3+(\i+0.5)*\TmpH)}) ;
+		}%
+		{}%
+	\IfEq{\MethIntegrTkzType}{Trapezes}%
+		{%
+			\foreach \i in {0,...,\inteval{\MethIntegrTkzNb-1}}%
+				\draw[figureintegr] ({#3+\i*\TmpH},{0}) -- ({#3+\i*\TmpH},{#2(#3+\i*\TmpH)}) -- ({#3+(\i+1)*\TmpH},{#2(#3+(\i+1)*\TmpH)}) -- ({#3+(\i+1)*\TmpH},{0}) -- cycle ;
+		}%
+		{}%
+}
+\NewCommandCopy\pflintegrapprochtikz\IntegraleApprocheeTikz
+
+%==fonction affine==
+\NewDocumentCommand\AffCoeffFAm{ O{d} m }{%
+	\xintifboolexpr{#2 == 0}{}{}%
+	\xintifboolexpr{#2 == 1}{x}{}%
+	\xintifboolexpr{#2 == -1}{-x}{}%
+	\xintifboolexpr{#2 != 0 'and' #2 !=1 'and' #2 != -1}{\ConversionFraction[#1]{#2} x}{}%
+}
+
+\NewDocumentCommand\AffCoeffFAp{ O{d} m }{%
+	\xintifboolexpr{#2 == 0}%
+		{}%
+		{%
+			\xintifboolexpr{#2 > 0}{+\ConversionFraction[#1]{#2}}{\ConversionFraction[#1]{#2}}%
+		}%
+}
+
+\NewDocumentCommand\AffCoeffFloatPa{ O{d} m }{%
+	\IfDecimal{#2}%
+		{%
+			\xintifboolexpr{#2 < 0}%
+				{\left(\num{#2}\right)}%
+				{\num{#2}}%
+		}%
+		{%
+			\xintifboolexpr{#2 < 0}%
+				{\left(\ConversionFraction[#1]{#2}\right)}%
+				{\ConversionFraction[#1]{#2}}%
+		}%
+}
+
+\NewDocumentCommand\AffCoeffFloat{ O{d} m }{%
+	\IfDecimal{#2}%
+		{%
+			{\num{#2}}%
+		}%
+		{%
+			{\ConversionFraction[#1]{#2}}%
+		}%
+}
+
+\NewDocumentCommand\AffCoeffPa{ O{d} m }{%
+	\xintifboolexpr{#2 < 0}%
+		{\left(\ConversionFraction[#1]{#2}\right)}%
+		{\ConversionFraction[#1]{#2}}%
+}
+
+\NewDocumentCommand\EquationReduite{ O{d} m}{%
+	\setsepchar[*]{,*/}%
+	\readlist*\ListePoints{#2}%
+	%Les cas particuliers
+	\xintifboolexpr{\ListePoints[2,2] == \ListePoints[1,2] 'and' \ListePoints[2,3] == \ListePoints[1,3] }%
+		{%
+			Les deux points donnés sont identiques, donc pas de droite\ldots%
+		}%
+		{}%
+	\xintifboolexpr{\ListePoints[2,2] == \ListePoints[1,2] 'and' \ListePoints[2,3] != \ListePoints[1,3] }%
+		{%
+			Étant donné que $x_{\ListePoints[1,1]} = x_{\ListePoints[2,1]}$, la droite $(\ListePoints[1,1]\ListePoints[2,1])$ est verticale, dont une équation est $x=\ConversionFraction[#1]{\ListePoints[1,2]}$.
+		}%
+		{}%
+	\xintifboolexpr{\ListePoints[2,2] != \ListePoints[1,2] 'and' \ListePoints[2,3] == \ListePoints[1,3] }%
+		{%
+			Étant donné que $y_{\ListePoints[1,1]} = y_{\ListePoints[2,1]}$, la droite $(\ListePoints[1,1]\ListePoints[2,1])$ est horizontale, dont une équation est $y=\ConversionFraction[#1]{\ListePoints[1,3]}$.
+		}%
+		{}%
+	\xintifboolexpr{\ListePoints[2,2] != \ListePoints[1,2] 'and' \ListePoints[2,3] != \ListePoints[1,3] }%
+		{%
+			\itemtomacro\ListePoints[1,1]\NomA%
+			\itemtomacro\ListePoints[2,1]\NomB%
+			\itemtomacro\ListePoints[1,2]\xA%
+			\itemtomacro\ListePoints[1,3]\yA%
+			\itemtomacro\ListePoints[2,2]\xB%
+			\itemtomacro\ListePoints[2,3]\yB%
+			\xdef\CoeffDirBrut{\xinteval{(\yB-(\yA))/(\xB-(\xA))}}%
+			\xdef\OrdoOrigBrut{\xinteval{\yB-(\CoeffDirBrut*(\xB))}}%
+			\xdef\CoeffDirConv{\ConversionFraction{(\yB-(\yA))/(\xB-(\xA))}}%
+			\xdef\OrdoOrigConv{\ConversionFraction{\yB-(\CoeffDirBrut*(\xB))}}%
+			Afin de déterminer l'équation réduite d'une droite passant par les points $\NomA$ et $\NomB$, on doit d'abord déterminer le coefficient directeur $m$ :
+			\[m=\frac{y_\NomB-y_\NomA}{x_\NomB-x_\NomA}=
+			\frac{\AffCoeffFloat[]{\yB}-\AffCoeffFloatPa[]{\yA}}{\AffCoeffFloat[]{\xB}-\AffCoeffFloatPa[]{\xA}}=
+			\frac{\ConversionFraction{\xinteval{\yB-(\yA)}}}{\ConversionFraction{\xinteval{\xB-(\xA)}}}=
+			\ConversionFraction{\CoeffDirBrut}\]%
+			%
+			L'équation réduite de la droite est donc de la forme $(\NomA\NomB)$ : $y=\AffCoeffFAm[#1]{\CoeffDirBrut}+p$.\par
+			%
+			Il faut enfin déterminer l'ordonnée à l'origine $p$.\par
+			%
+			On sait que la droite passe par le point $\NomA$, donc les coordonnées $\NomA\left(\AffCoeffFloat[]{\xA};\AffCoeffFloat[]{\yA}\right)$ vérifient l'équation. On a alors :
+			%
+			\[y_\NomA=\ConversionFraction{\CoeffDirBrut} \times x_\NomA+p
+			\implies 
+			\AffCoeffFloat[#1]{\yA} = \ConversionFraction{\CoeffDirBrut} \times \AffCoeffFloatPa[#1]{\xA} + p \implies p = \AffCoeffFloat[#1]{\yA} - \left(\ConversionFraction{\CoeffDirBrut} \times \AffCoeffFloatPa{\xA}\right) \implies p = \OrdoOrigConv\]
+			%
+			Donc l'équation réduite de $(\NomA\NomB)$ est $y=\AffCoeffFAm[#1]{\CoeffDirBrut} \AffCoeffFAp[#1]{\OrdoOrigBrut}$.
+		}%
+		{}%
+}
+\NewCommandCopy\pfleqreduite\EquationReduite
+
+%====FRACTION PÉRIODIQUE
+\defKV[FracPeriod]{Inconnue=\def\FracPerVar{#1}}
+\setKVdefault[FracPeriod]{Enonce=true,d=true,Inconnue=x,Solution=false,Brut=true,Simple=false}
+
+\makeatletter
+\NewDocumentCommand\FractionPeriode{ O{} m m }{%on verra pour la mise en forme après...
+	%clés
+	\restoreKV[FracPeriod]% revenir au valeurs par défaut
+	\setKV[FracPeriod]{#1}% lit les arguments optionnels
+	%vmode ?
+	\ifvmode\leavevmode\fi%
+	%les variables utiles
+	\IfEndWith{#2}{.}%
+		{%
+			\StrBefore{#2}{.}[\tmp@avt]%
+			\xdef\tmp@apr{0}%
+			\xdef\tmp@len@apr{0}%
+		}%
+		{%
+			\StrCut{#2}{.}{\tmp@avt}{\tmp@apr}%
+			\StrLen{\tmp@apr}[\tmp@len@apr]%
+		}%
+	\StrLen{#3}[\tmp@len@per]%
+	%raccourcis
+	\IfEndWith{#2}{.}%
+		{%
+			\xdef\tmp@enonce{\num{\tmp@avt}{,}\overline{#3}}%
+		}%
+		{%
+			\xdef\tmp@enonce{\num{#2}\overline{#3}}%
+		}%
+	%calculs
+	\xdef\tmp@num@brut{\xintieval{10**(\tmp@len@per+\tmp@len@apr)*\tmp@avt+10**(\tmp@len@per)*\tmp@apr-10**(\tmp@len@apr)*\tmp@avt+(#3)-\tmp@apr}}%
+	\xdef\tmp@denom@brut{\xintieval{10**(\tmp@len@per+\tmp@len@apr)-10**(\tmp@len@apr)}}%
+	\xdef\tmp@pgcd{\xinteval{gcd(\tmp@num@brut,\tmp@denom@brut)}}%
+	%résolution OK
+	\ifboolKV[FracPeriod]{Solution}%
+		{%
+			%phrase d'accroche
+			\xintifboolexpr{\tmp@len@apr == 0}%
+				{%
+					\noindent On note $\FracPerVar=\tmp@enonce$.\par
+					\noindent La première égalité est donc \[\boxed{\FracPerVar=\tmp@enonce} \quad (1)\]
+				}%
+				{%
+					\noindent On note $\FracPerVar=\tmp@enonce$.\par
+				}%
+			\xintifboolexpr{\tmp@len@apr == 0}%
+				{}%
+				{%
+					\noindent On \textit{ramène} la période près de la virgule en multipliant par $10^{\tmp@len@apr}$ : \[\boxed{10^{\tmp@len@apr}\times\FracPerVar=\num{\xinteval{\tmp@avt*10**(\tmp@len@apr)+\tmp@apr}}{,}\overline{#3}} \quad (1)\]
+				}%
+			\noindent On \textit{décale} la période avant la virgule, en multipliant l'égalité (1) par $10^{\tmp@len@per}$ : \[10^{\tmp@len@per}\xintifboolexpr{\tmp@len@apr == 0}{}{\times10^{\tmp@len@apr}}\times\FracPerVar=10^{\tmp@len@per}\times\num{\xinteval{\tmp@avt*10**(\tmp@len@apr)+\tmp@apr}}{,}\overline{#3} \Rightarrow \boxed{10^{\xinteval{\tmp@len@per+\tmp@len@apr}}\times\FracPerVar = \num{\xintieval{10**(\tmp@len@per)*(\tmp@avt*10**(\tmp@len@apr)+\tmp@apr)+#3}}{,}\overline{#3}} \quad (2)\]
+			%soustraction
+			On soustrait les deux égalités, $(2)-(1)$, ce qui permet d'\textit{enlever} la partie décimale :
+			\begin{align*}
+				10^{\xinteval{\tmp@len@per+\tmp@len@apr}}\times\FracPerVar-\xintifboolexpr{\tmp@len@apr == 0}{}{10^{\tmp@len@apr}\times}\FracPerVar = \num{\xintieval{10**(\tmp@len@per)*(\tmp@avt*10**(\tmp@len@apr)+\tmp@apr)+#3}}{,}\overline{#3} -\num{\xinteval{\tmp@avt*10**(\tmp@len@apr)+\tmp@apr}}{,}\overline{#3} &\Rightarrow \big(10^{\xinteval{\tmp@len@per+\tmp@len@apr}}-\xintifboolexpr{\tmp@len@apr == 0}{1}{10^{\tmp@len@apr}}\big)\times\FracPerVar = \num{\xintieval{10**(\tmp@len@per)*(\tmp@avt*10**(\tmp@len@apr)+\tmp@apr)+#3}} - \num{\xintieval{\tmp@avt*10**(\tmp@len@apr)+\tmp@apr}} \\
+				\phantom{10^{\xinteval{\tmp@len@per+\tmp@len@apr}}\times\FracPerVar-10^{\tmp@len@apr}\times\FracPerVar = \num{\xintieval{10**(\tmp@len@per)*(\tmp@avt*10**(\tmp@len@apr)+\tmp@apr)+#3}}{,}\overline{#3} -\num{\xinteval{\tmp@avt*10**(\tmp@len@apr)+\tmp@apr}}{,}\overline{#3}} &\Rightarrow \num{\xinteval{10**(\tmp@len@per+\tmp@len@apr)-10**(\tmp@len@apr)}}\times\FracPerVar=\num{\xintieval{10**(\tmp@len@per)*(\tmp@avt*10**(\tmp@len@apr)+\tmp@apr)+#3- (\tmp@avt*10**(\tmp@len@apr)+\tmp@apr)}} \\
+				&\Rightarrow\FracPerVar = \ifboolKV[FracPeriod]{d}{\displaystyle}{}\frac{\num{\tmp@num@brut}}{\num{\tmp@denom@brut}}
+			\end{align*}
+			%affichage(s) OK
+			\noindent Ainsi on a \ensuremath{\tmp@enonce = \ifboolKV[FracPeriod]{d}{\displaystyle}{}\frac{\num{\tmp@num@brut}}{\num{\tmp@denom@brut}} \xintifboolexpr{\tmp@pgcd == 1}{}{=\ifboolKV[FracPeriod]{d}{\displaystyle}{}\frac{\num{\xintieval{\tmp@num@brut/\tmp@pgcd}}}{\num{\xintieval{\tmp@denom@brut/\tmp@pgcd}}}} \xintifboolexpr{\tmp@denom@brut/\tmp@pgcd == 1}{=\num{\xintieval{\tmp@num@brut/\tmp@pgcd}}}{}%
+			}.\par%
+		}%
+		{}%
+	\ifboolKV[FracPeriod]{Brut}%
+		{%
+			\xdef\FracPerNum{\tmp@num@brut}%
+			\xdef\FracPerDenom{\tmp@denom@brut}%
+			\xdef\FracPerNumSimpl{\xintieval{(\tmp@num@brut)/gcd(\tmp@num@brut,\tmp@denom@brut)}}%
+			\xdef\FracPerDenomSimpl{\xintieval{(\tmp@denom@brut)/gcd(\tmp@num@brut,\tmp@denom@brut)}}%
+		}%
+		{}%
+	\ifboolKV[FracPeriod]{Simple}%
+		{%
+			%affichage(s) OK
+			\noindent\ensuremath{%
+				\ifboolKV[FracPeriod]{Enonce}%
+					{%
+						\tmp@enonce = 
+					}%
+					{}%
+				\ifboolKV[FracPeriod]{d}{\displaystyle}{}\frac{\num{\tmp@num@brut}}{\num{\tmp@denom@brut}} \xintifboolexpr{\tmp@pgcd == 1}{}{=\ifboolKV[FracPeriod]{d}{\displaystyle}{}\frac{\num{\xintieval{\tmp@num@brut/\tmp@pgcd}}}{\num{\xintieval{\tmp@denom@brut/\tmp@pgcd}}}}%
+			}\par%
+		}%
+		{}%
+}
+\makeatletter
+\NewCommandCopy\pflfracperiod\FractionPeriode
+
+%====tkz ligne convexité
+\makeatletter
+\NewDocumentCommand\tkzTabLineConvex{ s m m }{%
+	%étoilé := mode texte
+	%1 := ligne
+	%2 := liste des cases ( ccv / cvx / t / d / i / i* )
+	%calculs intermédiaires
+	\xdef\j{#2}%
+	\xdef\k{\inteval{#2+1}}%
+	%récup hauteur ligne
+	\pgfpointdiff{\pgfpointanchor{T0\j}{center}}{\pgfpointanchor{T0\k}{center}}%
+	\pgf@xa=\pgf@x
+	\pgf@ya=\pgf@y
+	\pgfmathparse{veclen(\pgf@xa,\pgf@ya)/28.45274}%
+	\global\let\tmphautligne\pgfmathresult%
+	%suite
+	\setsepchar{,}%
+	\readlist*\lsttabconvex{#3}%
+	\foreach \i in {1,...,\lsttabconvexlen}{%
+		\itemtomacro\lsttabconvex[\i]{\paramcvxitem}%
+		\IfStrEqCase{\paramcvxitem}{%
+			{d}%double barre
+			{%
+				\xdef\nodedouble{\inteval{(\i+1)/2}}%
+				\draw[double style] (N\nodedouble\j)--(N\nodedouble\k) ;%
+			}%
+			{i*}%inflexion
+			{%
+				\xdef\nodedouble{\inteval{(\i+1)/2}}%
+				\draw[line width=\cmdTAB@tbs@lw] (N\nodedouble\j)--([xshift=-12pt]N\nodedouble\k) ;%
+				\draw[line width=\cmdTAB@tbs@lw] (N\nodedouble\j)--([xshift=12pt]N\nodedouble\k) ;%
+				\draw (N\nodedouble\k) node[font=\tiny,text width=1.5cm,align=center] {point\\d'inflexion} ;
+			}%
+			{i}%inflexion sans texte
+			{%
+				\xdef\nodedouble{\inteval{(\i+1)/2}}%
+				\draw[line width=\cmdTAB@tbs@lw] (N\nodedouble\j)--([xshift=-12pt]N\nodedouble\k) ;%
+				\draw[line width=\cmdTAB@tbs@lw] (N\nodedouble\j)--([xshift=12pt]N\nodedouble\k) ;%
+			}%
+			{t}%trait
+			{%
+				\xdef\nodedouble{\inteval{(\i+1)/2}}%
+				\draw[line width=\cmdTAB@tbs@lw,t style] (N\nodedouble\j)--(N\nodedouble\k) ;
+			}%
+			{ccv}%concave
+			{%
+				\xdef\nodedouble{\inteval{(\i)/2}}%
+				\IfBooleanTF{#1}%
+				{%
+					\draw ($(M\nodedouble\j)!0.5!(M\nodedouble\k)$) node {concave} ;%
+				}%
+				{%
+					\draw[line width={1.5*\cmdTAB@tbs@lw}] ($(M\nodedouble\j)!0.5!(M\nodedouble\k)+({-0.275*\cmdTAB@tbs@espcl},{-0.25*\tmphautligne})$) parabola bend ++({0.275*\cmdTAB@tbs@espcl},{0.5*\tmphautligne})  ($(M\nodedouble\j)!0.5!(M\nodedouble\k)+({0.275*\cmdTAB@tbs@espcl},{-0.25*\tmphautligne})$) ;
+				}%
+			}%
+			{cvx}%concave
+			{%
+				\xdef\nodedouble{\inteval{(\i)/2}}%
+				\IfBooleanTF{#1}%
+				{%
+					\draw ($(M\nodedouble\j)!0.5!(M\nodedouble\k)$) node {convexe} ;%
+				}%
+				{%
+					\draw[line width={1.5*\cmdTAB@tbs@lw}] ($(M\nodedouble\j)!0.5!(M\nodedouble\k)+({-0.275*\cmdTAB@tbs@espcl},{0.25*\tmphautligne})$) parabola bend ++({0.275*\cmdTAB@tbs@espcl},{-0.5*\tmphautligne})  ($(M\nodedouble\j)!0.5!(M\nodedouble\k)+({0.275*\cmdTAB@tbs@espcl},{0.25*\tmphautligne})$) ;
+				}%
+			}%
+		}%
+	}%
+}
+\makeatother
+
+%===F.CANONIQUE & F.HOMOGRAPHIQUE
+\NewDocumentCommand\FormeCanonique{ s O{d} m m m }{%
+	\def\tmpcoeffalpha{-(#4)/(2*(#3))}%
+	\def\tmpcoeffbeta{(#3)*(-(#4)/(2*(#3)))^2+(#4)*(-(#4)/(2*(#3)))+(#5)}%
+	\def\coeffaconv{\ConversionFraction[#2]{#3}}%
+	\def\coeffalpha{\ConversionFraction[#2]{-(#4)/(2*(#3))}}%
+	\def\coeffalphamoins{\ConversionFraction[#2]{(#4)/(2*(#3))}}%
+	\def\coeffbeta{\ConversionFraction[#2]{(#3)*(-(#4)/(2*(#3)))^2+(#4)*(-(#4)/(2*(#3)))+(#5)}}%
+	\ensuremath{%
+		%on affiche a, sauf s'il vaut 1 ou -1
+		\xintifboolexpr{#3 == 1}{}{}%
+		\xintifboolexpr{#3 == -1}{-}{}%
+		\xintifboolexpr{#3 != -1 'and' #3 != 1}{\coeffaconv}{}%
+		\xintifboolexpr{\tmpcoeffalpha == 0}%
+		{%
+			x^2%
+		}%
+		{%
+			\IfBooleanTF{#1}%
+			{%
+				\xintifboolexpr{\tmpcoeffalpha < 0}%
+					{%
+						{\left(x\xintifboolexpr{\tmpcoeffalpha < 0}{-}{+}{\left(\coeffalpha\right)}\right)}^2%
+					}%
+					{%
+						{\left(x\xintifboolexpr{\tmpcoeffalpha > 0}{}{+}\coeffalphamoins\right)}^2%
+					}%
+			}%
+			{%
+				{\left(x\xintifboolexpr{\tmpcoeffalpha > 0}{}{+}\coeffalphamoins\right)}^2%
+			}%
+		}%
+		\xintifboolexpr{\tmpcoeffbeta == 0}%
+		{}%
+		{%
+			\xintifboolexpr{\tmpcoeffbeta > 0}{+}{}\coeffbeta%
+		}%
+	}%
+}
+\NewCommandCopy\pflformcanoniq\FormeCanonique
+
+\NewDocumentCommand\FonctionHomographique{ s O{t} m m m m }{%
+	\xintifboolexpr{#3 != 0}%
+	{%
+		\def\tmpcoeffSeul{(#3)/(#5)}%
+		\def\tmpcoeffNum{((#4)*(#5)-(#3)*(#6))/((#5)*(#5))}%
+		\def\tmpcoeffDenom{(#6)/(#5)}%
+		\ensuremath{%
+			\ConversionFraction[d]{\tmpcoeffSeul}%
+			+\dfrac%
+			{\ConversionFraction[#2]{\tmpcoeffNum}}%
+			{x%
+				\xintifboolexpr{#6 == 0}{}{%
+					\IfBooleanTF{#1}%
+					{%
+						\xintifboolexpr{\tmpcoeffDenom > 0}{-\left(\ConversionFraction[#2]{-(\tmpcoeffDenom)}\right)}{\ConversionFraction[#2]{\tmpcoeffDenom}}%
+					}%
+					{%
+						\xintifboolexpr{\tmpcoeffDenom > 0}{+}{}\ConversionFraction[#2]{\tmpcoeffDenom}%
+					}%
+				}%
+			}%
+		}%
+	}%
+	{%
+		\def\tmpcoeffNum{(#4)/(#5)}%
+		\def\tmpcoeffDenom{(#6)/(#5)}%
+		\ensuremath{%
+			\dfrac%
+			{\ConversionFraction[#2]{\tmpcoeffNum}}%
+			{x%
+				\xintifboolexpr{#6 == 0}{}{%
+					\IfBooleanTF{#1}%
+					{%
+						\xintifboolexpr{\tmpcoeffDenom > 0}{-}{}\left(\ConversionFraction[#2]{-(\tmpcoeffDenom)}\right)%
+					}%
+					{%
+						\xintifboolexpr{\tmpcoeffDenom > 0}{+}{}\ConversionFraction[#2]{\tmpcoeffDenom}%
+					}%
+				}%
+			}%
+		}%
+	}%
+}
+\NewCommandCopy\pflfcthomogr\FonctionHomographique
+
+%----max/min
+\NewDocumentCommand\DetermineMax{ O{0.01} m m m O{\tmpmax} O{\tmpmaxvalx} }{%
+	\xdef#5{\xintfloateval{max(seq(#2,x=#3..[#1]..#4,#4))}}%
+	\xdef#6{\xintfloateval{first(seq((#2 == #5)?{x}{},x=#3..[#1]..#4,#4))}}%
+}
+\NewCommandCopy\pfldetmax\DetermineMax
+
+\NewDocumentCommand\DetermineMin{ O{0.01} m m m O{\tmpmin} O{\tmpminvalx} }{%
+	\xdef#5{\xintfloateval{min(seq(#2,x=#3..[#1]..#4,#4))}}%
+	\xdef#6{\xintfloateval{first(seq((#2 == #5)?{x}{},x=#3..[#1]..#4,#4))}}%
+}
+\NewCommandCopy\pfldetmin\DetermineMin
+
+\endinput

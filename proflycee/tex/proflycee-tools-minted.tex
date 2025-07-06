@@ -1,0 +1,153 @@
+% proflycee-tools-minted.tex
+% Copyright 2023-2024  Cédric Pierquet
+% Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+%3.05b	En standy pour le moment...
+%3.00g	Modif mineure pour la marge gauche
+%2.7.5	Argument optionnel pour les numéros de lignes + changement déclaration environnements
+%2.7.3	Correction de la couleur des bordures
+%2.5.8	Style alternatif + Modification marges
+
+%%------PYTHONMINTED
+
+%clés
+%\newlength{\MintedCodeXLeft}
+%\setlength{\MintedCodeXLeft}{14pt}
+
+\defKV[CodePythonMinted]{%
+	Largeur=\def\CodePythonMintedLarg{#1},%
+	PremLigne=\def\CodePythonMintedPremLigne{#1}
+}
+
+\setKVdefault[CodePythonMinted]{%
+	Largeur=\linewidth,%
+	PremLigne=1
+}
+
+%v1
+\tcbset{pytmintedno/.style={%
+	listing engine=minted,minted style=colorful,
+	minted language=python,listing only,
+	minted options={tabsize=4,fontsize=\footnotesize,autogobble},
+	}
+}
+
+\tcbset{pytminted/.style={%
+	listing engine=minted,minted style=colorful,
+	minted language=python,listing only,
+	minted options={tabsize=4,fontsize=\footnotesize,autogobble,xleftmargin=14pt,linenos,numbersep=10pt},
+	}
+}
+
+\NewDocumentEnvironment{CodePythonMinted}{ s O{} m }%nouvelle version avec option minted
+{%
+	\useKVdefault[CodePythonMinted]%
+	\setKV[CodePythonMinted]{#2}%
+	\IfBooleanTF{#1}%
+		{%
+			\tcblisting{listing engine=minted,minted style=colorful,minted language=python,listing only,minted options={tabsize=4,fontsize=\footnotesize,autogobble},enhanced,width=\CodePythonMintedLarg,#3,colframe=CouleurVertForet,colback=CouleurVertForet!5,boxrule=1.25pt,sharp corners=downhill,arc=12pt,before skip=0.5\baselineskip,after skip=0.5\baselineskip,%
+			left=0.6em,top=\baselineskip,bottom=2mm,right=5mm,%
+			attach boxed title to top right={yshift=-\tcboxedtitleheight},
+			boxed title style={
+				size=small,colback=CouleurVertForet!25,boxrule=1.25pt,
+				colframe=CouleurVertForet,boxsep=1.25pt,
+				sharp corners=downhill,
+				arc=12pt,
+				top=2pt,bottom=1pt,left=6pt,right=6pt
+			},
+			fonttitle=\color{CouleurVertForet}\itshape\ttfamily\footnotesize,
+			title={\scriptsize\faPython}\:Code Python\vphantom{y},
+			watermark text={\faPython},watermark opacity=0.175,watermark zoom=0.50,
+			before upper=\renewcommand{\theFancyVerbLine}{\scriptsize\ttfamily\color{darkgray}\arabic{FancyVerbLine}}
+			}
+		}%
+		{%
+			\tcblisting{listing engine=minted,minted style=colorful,minted language=python,listing only,minted options={tabsize=4,fontsize=\footnotesize,autogobble,xleftmargin=14pt,linenos,numbersep=10pt,firstnumber=\CodePythonMintedPremLigne},,enhanced,width=\CodePythonMintedLarg,#3,colframe=CouleurVertForet,colback=CouleurVertForet!5,boxrule=1.25pt,sharp corners=downhill,arc=12pt,before skip=0.5\baselineskip,after skip=0.5\baselineskip,%
+			left=0.6em,top=\baselineskip,bottom=2mm,right=5mm,%
+			attach boxed title to top right={yshift=-\tcboxedtitleheight},
+			boxed title style={
+				size=small,colback=CouleurVertForet!25,boxrule=1.25pt,
+				colframe=CouleurVertForet,boxsep=1.25pt,
+				sharp corners=downhill,
+				arc=12pt,
+				top=2pt,bottom=1pt,left=6pt,right=6pt
+			},
+			fonttitle=\color{CouleurVertForet}\itshape\ttfamily\footnotesize,
+			title={\scriptsize\faPython}\:Code Python\vphantom{y},
+			watermark text={\faPython},watermark opacity=0.175,watermark zoom=0.50,
+			before upper=\renewcommand{\theFancyVerbLine}{\scriptsize\ttfamily\color{darkgray}\arabic{FancyVerbLine}}
+			}
+		}%
+}%
+{%
+	\endtcblisting%
+}
+
+% \DeclareTCBListing{CodePythonMinted}{ s O{12cm} m }{% étoilée sans numéro, taille puis options...
+	% \IfBooleanTF{#1}{pytmintedno}{pytminted},
+	% enhanced,width=#2,#3,
+	% colframe=CouleurVertForet,colback=CouleurVertForet!5,%
+	% boxrule=1.25pt,
+	% sharp corners=downhill,arc=12pt,
+	% before skip=0.5\baselineskip,after skip=0.5\baselineskip,%
+	% left=0.6em,top=\baselineskip,bottom=2mm,right=5mm,%
+	% attach boxed title to top right={yshift=-\tcboxedtitleheight},
+	% boxed title style={
+		% size=small,colback=CouleurVertForet!25,boxrule=1.25pt,
+		% colframe=CouleurVertForet,boxsep=1.25pt,
+		% sharp corners=downhill,
+		% arc=12pt,
+		% top=2pt,bottom=1pt,left=6pt,right=6pt
+	% },
+	% fonttitle=\color{CouleurVertForet}\itshape\ttfamily\footnotesize,
+	% title={\scriptsize\faPython}\:Code Python\vphantom{y},
+	% watermark text={\faPython},watermark opacity=0.175,watermark zoom=0.50,
+	% before upper=\renewcommand{\theFancyVerbLine}{\scriptsize\ttfamily\color{darkgray}\arabic{FancyVerbLine}}
+% }
+
+%v2
+\tcbset{pytmintedaltno/.style={%
+	listing engine=minted,minted style=colorful,
+	minted language=python,listing only,
+	minted options={tabsize=4,fontsize=\footnotesize,autogobble},
+	}
+}
+
+\tcbset{pytmintedalt/.style={%
+	listing engine=minted,minted style=colorful,
+	minted language=python,listing only,
+	minted options={tabsize=4,fontsize=\footnotesize,autogobble,xleftmargin=14pt,linenos,numbersep=10pt},
+	underlay={%
+		\begin{tcbclipinterior}
+			\draw[draw=none,fill=lightgray!25] (interior.south west) rectangle ([xshift=1.3em]interior.north west) ;
+		\end{tcbclipinterior}%
+		}
+	}
+}
+
+\NewDocumentEnvironment{CodePythonMintedAlt}{ s O{} m }%nouvelle version avec option minted
+{%
+	\useKVdefault[CodePythonMinted]%
+	\setKV[CodePythonMinted]{#2}%
+	\IfBooleanTF{#1}%
+		{%
+			\tcblisting{listing engine=minted,minted style=colorful,minted language=python,listing only,minted options={tabsize=4,fontsize=\footnotesize,autogobble},width=\CodePythonMintedLarg,#3,enhanced,boxrule=0.75pt,colframe=darkgray!50!black,sharp corners,top=0mm,bottom=0mm,left=0.2em,right=5mm,before skip=0.5\baselineskip,after skip=0.5\baselineskip,colback=white,fontupper=\footnotesize,fontlower=\footnotesize,watermark text={\faPython},watermark opacity=0.25,watermark zoom=0.50,title={{\scriptsize\faCode} Code Python},lefttitle=0.4em,fonttitle=\bfseries\footnotesize\sffamily,colbacktitle=darkgray!50!black,before upper=\renewcommand{\theFancyVerbLine}{\scriptsize\ttfamily\color{darkgray}\arabic{FancyVerbLine}}}
+		}%
+		{%
+			\tcblisting{listing engine=minted,minted style=colorful,
+				minted language=python,listing only,
+				minted options={tabsize=4,fontsize=\footnotesize,autogobble,xleftmargin=14pt,linenos,numbersep=10pt,firstnumber=\CodePythonMintedPremLigne},
+				underlay={%
+					\begin{tcbclipinterior}
+						\draw[draw=none,fill=lightgray!25] (interior.south west) rectangle ([xshift=1.3em]interior.north west) ;
+					\end{tcbclipinterior}%
+					},
+				width=\CodePythonMintedLarg,#3,enhanced,boxrule=0.75pt,colframe=darkgray!50!black,sharp corners,top=0mm,bottom=0mm,left=0.2em,right=5mm,before skip=0.5\baselineskip,after skip=0.5\baselineskip,colback=white,fontupper=\footnotesize,fontlower=\footnotesize,watermark text={\faPython},watermark opacity=0.25,watermark zoom=0.50,title={{\scriptsize\faCode} Code Python},lefttitle=0.4em,fonttitle=\bfseries\footnotesize\sffamily,colbacktitle=darkgray!50!black,before upper=\renewcommand{\theFancyVerbLine}{\scriptsize\ttfamily\color{darkgray}\arabic{FancyVerbLine}}
+			}
+		}%
+}%
+{%
+	\endtcblisting%
+}
+
+\endinput

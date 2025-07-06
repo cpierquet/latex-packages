@@ -1,0 +1,159 @@
+% proflycee-tools-aleatoire.tex
+% Copyright 2023-2025 Cédric Pierquet
+% Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+%%------EnsembleList
+\defKV[kvensemble]{%
+	Sep=\def\PLenssep{#1},%
+	Option=\def\PLensopt{#1}
+}
+
+\setKVdefault[kvensemble]{%
+	Sep={;},%
+	Mathpunct=true,%
+	Option={}
+}
+
+\newcommand\EcritureEnsemble[2][]{%
+	\useKVdefault[kvensemble]%
+	\setKV[kvensemble]{#1}%
+	\ifboolKV[kvensemble]{Mathpunct}%
+		{\left\lbrace \PLensopt{} \mathpunct{} \StrSubstitute{#2}{/}{\mathpunct{}{\PLenssep}\mathpunct{}} \mathpunct{} \right\rbrace}%
+		{\left\lbrace \PLensopt{} \StrSubstitute{#2}{/}{{\PLenssep}} \right\rbrace}%
+}
+\NewCommandCopy\pflecritens\EcritureEnsemble
+
+%%------TRINOMEALEA
+\setKVdefault[trinomealea]{%
+	Alea=false,%
+	Anegatif=true
+}
+
+\NewDocumentCommand\EcritureTrinome{ O{} m m m }{%
+	\useKVdefault[trinomealea]%
+	\setKV[trinomealea]{#1}%
+	\ifboolKV[trinomealea]{Alea}%
+	{%
+		\xdef\Coeffa{\fpeval{randint(#2)}}\xdef\Coeffb{\fpeval{randint(#3)}}\xdef\Coeffc{\fpeval{randint(#4)}}%
+		\xdef\AleaSigneA{\fpeval{randint(1,2)}}%
+		\ifboolKV[trinomealea]{Anegatif}%
+			{\xintifboolexpr{\AleaSigneA == 1}{\def\TriSigneA{}}{\def\TriSigneA{-}}}%
+			{\def\TriSigneA{}}%forcément a>0
+	}%
+	{%
+		\xdef\Coeffa{#2}\xdef\Coeffb{#3}\xdef\Coeffc{#4}%
+		\def\TriSigneA{}%
+	}%
+	\def\TriPartieA{\num{\TriSigneA\Coeffa} x^2}%
+	\xintifboolexpr{\Coeffa == 1}%
+		{\def\TriPartieA{x^2}}{}%
+	\xintifboolexpr{\Coeffa == -1}%
+		{\def\TriPartieA{-x^2}}{}%
+	\def\TriPartieB{\num[print-implicit-plus]{\Coeffb}x}%
+	\xintifboolexpr{\Coeffb == 0}%
+		{\def\TriPartieB{}}{}%
+	\xintifboolexpr{\Coeffb == 1}%
+		{\def\TriPartieB{+x}}{}%
+	\xintifboolexpr{\Coeffb == -1}%
+		{\def\TriPartieB{-x}}{}%
+	\xintifboolexpr{\Coeffc == 0}%
+		{\def\TriPartieC{}}{\def\TriPartieC{\num[print-implicit-plus]{\Coeffc}}}%
+	%formatage
+	\ensuremath{\TriPartieA\TriPartieB\TriPartieC}%
+}
+\NewCommandCopy\pflecrittrinom\EcritureTrinome
+
+%%------ALEATOIRES
+\ExplSyntaxOn
+\NewDocumentCommand\TriListeCroiss{m}
+{
+	\clist_sort:Nn #1
+	{
+		\fp_compare:nNnTF {##1} > {##2}
+		{ \sort_return_swapped: }
+		{ \sort_return_same: }
+	}
+}
+\NewDocumentCommand\TriListeDecroiss{m}
+{
+	\clist_sort:Nn #1
+	{
+		\fp_compare:nNnTF {##1} < {##2}
+		{ \sort_return_swapped: }
+		{ \sort_return_same: }
+	}
+}
+\ExplSyntaxOff
+
+\newcommand\NbAlea[4][0]{%entier ou décimal
+	\xintifboolexpr{#1 == 0}%
+		{%
+			\xdef#4{\fpeval{randint(#2,#3)}}%
+		}%
+		{%
+			\xintifboolexpr{(#3-(#2)) == 1}%
+				{%
+					\xdef#4{\fpeval{round(#2+rand(),#1)}}%
+				}%
+				{%
+					\xdef#4{\fpeval{round(randint(#2,#3)+rand(),#1)}}%
+				}%
+		}%
+}
+\NewCommandCopy\pflnbalea\NbAlea
+
+\newcommand\VarNbAlea[2]{%
+	\xdef#1{\fpeval{#2}}%
+}
+\NewCommandCopy\pflvarnbalea\VarNbAlea
+
+\defKV[TirageAleatoireEntiersEntre]{%
+	ValMin=\def\TAEEmin{#1},%
+	ValMax=\def\TAEEmax{#1},%
+	NbVal=\def\TAEEnb{#1},%
+	Sep=\def\TAEEsep{#1},%
+	Tri=\def\TAEEtri{#1}
+}
+
+\setKVdefault[TirageAleatoireEntiersEntre]{%
+	ValMin=1,%
+	ValMax=50,%
+	NbVal=6,%
+	Sep={,},%
+	Tri=non,%
+	Repetition=false
+}
+
+\NewList{TirageEntiersAleatoires}
+\NewDocumentCommand\TirageAleatoireEntiers{ O{} m }{%1=options,2=nomliste triée ou non
+	\useKVdefault[TirageAleatoireEntiersEntre]%
+	\setKV[TirageAleatoireEntiersEntre]{#1}%
+	\ifboolKV[TirageAleatoireEntiersEntre]{Repetition}%suivant la possibilité de répéter
+		{%répétitions autorisées
+			%création de la liste (le 1er puis les autres)
+			\xdef#2{\fpeval{randint(\TAEEmin,\TAEEmax)}}%
+			\foreach \i in {2,3,...,\TAEEnb}%
+				{\xdef#2{#2,\fpeval{randint(\TAEEmin,\TAEEmax)}}}%
+		}%
+		{%pas de répétitions
+			%melange des nombres
+			\ClearList{TirageEntiersAleatoires}%on vide la liste aléatoire
+			\xintFor* ##1 in {\xintSeq{\TAEEmin}{\TAEEmax}}%
+				\do{\InsertRandomItem{TirageEntiersAleatoires}{##1}}%
+			%création de la liste (le 1er puis les autres)
+			\xdef#2{\TirageEntiersAleatoires[0]}%
+			\foreach \i in {1,2,...,{\inteval{\TAEEnb-1}}}%
+				{\xdef#2{#2,\TirageEntiersAleatoires[\i]}}%
+		}%
+	%on trie si besoin
+	\IfStrEq{\TAEEtri}{croissant}%si tri croissant
+		{\TriListeCroiss{#2}}%
+		{}%
+	\IfStrEq{\TAEEtri}{decroissant}%si tri décroissant
+		{\TriListeDecroiss{#2}}%
+		{}%
+	\StrSubstitute{#2}{,}{\TAEEsep}[#2]%on change le séparateur si besoin
+}
+\NewCommandCopy\pfltiragealeaent\TirageAleatoireEntiers
+
+\endinput

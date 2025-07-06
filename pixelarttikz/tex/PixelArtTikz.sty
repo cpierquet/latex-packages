@@ -1,0 +1,1267 @@
+% Author.........: C. Pierquet
+% licence........: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{PixelArtTikz}[2025/05/05 v0.1.8 PixelArts with csv and TikZ]
+% 0.1.8		Bugfix
+% 0.1.7		Correction d'un bug avec les découpages
+% 0.1.6		Ajout d'un style pour les traits + utilisation de datatool (plus rapide ?)
+% 0.1.5		Amélioration du code interne + possibilité de créer des grilles avec des symboles choisis dans une liste
+% 0.1.4		Cylinder anamorphic pixelart
+% 0.1.3		Split PA into grid
+% 0.1.2		Mini pixerlart
+% 0.1.1		Small bugfix with color
+% 0.1.0		Version initiale
+
+%------Option(s)
+\newif\if@csvii \@csviifalse
+\DeclareOption{csvii}{\@csviitrue}
+\DeclareOption*{}
+\ProcessOptions\relax
+
+%------Packages utiles
+\RequirePackage{tikz}
+\RequirePackage{simplekv}
+\RequirePackage{xintexpr}
+\RequirePackage{xinttools}
+\RequirePackage{xstring}
+\RequirePackage{multicol}
+\RequirePackage{listofitems}
+\RequirePackage{ifthen}
+%cvs
+\if@csvii
+	\RequirePackage[legacy]{csvsimple}
+\else
+	\RequirePackage{expl3}
+	\RequirePackage[l3]{csvsimple}
+\fi
+
+%------Styles tikz
+\tikzset{pixlarttrait/.style={}}
+\tikzset{pixlarttraitdecoup/.style={thick,purple}}
+\tikzset{pixlartnoticedecoup/.style={font=\large\sffamily}}
+
+\NewDocumentCommand\TraiteListeSymbPixelArt{ m }{%
+	\IfSubStr{#1}{§}%
+		{%
+			\setsepchar{§}%
+			\readlist*\lstPAchoices{#1}%
+			\xdef\lstPAchoicesrand{\fpeval{randint(1,\lstPAchoiceslen)}}%
+			\lstPAchoices[\lstPAchoicesrand]%
+		}%
+		{%c'est normal
+			#1%
+		}%
+}
+
+%------clés [fr] / keys [en]
+\defKV[pixelarttkz]{%
+	Codes=\def\PATlettres{#1},%
+	Couleurs=\def\PATcouleurs{#1},%
+	Symboles=\def\PATchiffres{#1},%
+	Style=\def\PATtaille{#1},%
+	Unite=\def\PATunit{#1},%
+	Decoupage=\def\PATdecoup{#1}
+}
+
+\setKVdefault[pixelarttkz]{%
+	Style=\scriptsize,%
+	Correction=false,%
+	Symb=false,%
+	BordCases=true,%
+	Unite=1,%
+	Decoupage={}
+}
+
+%----[fr] commands
+\NewDocumentCommand\PixelArtTikz{ s O{} D<>{} m }{%commande autonome
+	\useKVdefault[pixelarttkz]%
+	\setKV[pixelarttkz]{#2}%
+	%affichage du corrigé / display of correction
+	\IfBooleanTF{#1}{}{\begin{tikzpicture}[x=\PATunit cm,y=\PATunit cm,#3]}
+	\ifboolKV[pixelarttkz]{Correction}%
+	{%
+		\setsepchar{,}%
+		\readlist*\LCPA\PATcouleurs%
+		\csvloop{file=#4,no head,command={%
+			\foreach \l [count=\n] in \csvline {%
+				\StrDel{\l}{ }[\l]%
+				\StrPosition{\PATlettres}{\l}[\pixcnt]%
+				\ifnum\pixcnt>0%
+					\ifboolKV[pixelarttkz]{BordCases}%
+						{\draw[fill={\LCPA[\pixcnt]}] ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) ;}%
+						{\filldraw[{\LCPA[\pixcnt]}] ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) ;}%
+				\fi%
+				}%
+			}%
+		}%
+	}%
+	{%
+		\ifboolKV[pixelarttkz]{Symb}{%affichage du pixelart versions chiffres si besoin
+			\setsepchar{,}%
+			\readlist*\LCNA\PATchiffres%
+			\csvloop{file=#4,no head,command={%
+				\foreach \l [count=\n] in \csvline {%
+					\StrDel{\l}{ }[\l]%
+					\StrPosition{\PATlettres}{\l}[\pixpos]%
+					\xintifboolexpr{\pixpos>0}%
+						{%
+							\itemtomacro\LCNA[\pixpos]\pixchf%
+							\draw ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) node[inner sep=0,midway,font=\PATtaille] {\TraiteListeSymbPixelArt{\pixchf}} ;%
+						}%
+						{}%
+					}%
+				}%
+			}%
+		}%
+		{%affichage du pixelart versions lettres ou chiffres simples (<=9) / display of letters/symbols PixelArt
+			\csvloop{file=#4,no head,command={%
+				\foreach \l [count=\n] in \csvline {%
+					\StrDel{\l}{ }[\l]%
+					\IfSubStr{\PATlettres}{\l}%
+						{%
+							\draw ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) node[inner sep=0,midway,font=\PATtaille] {\l};%
+						}%
+						{}%
+					}%
+				}%
+			}%
+		}%
+	}%
+	%affichage des découpages éventuels
+	\IfStrEq{\PATdecoup}{}%
+		{}%
+		{%
+			\csvreader{#4}{}{}%en test
+			\xdef\NbLigTot{\thecsvinputline}%
+			\xdef\NbColTot{\thecsvcolumncount}%
+			\IfSubStr{\PATdecoup}{x}%
+				{%
+					\StrCut{\PATdecoup}{x}{\NbLigBloc}{\NbColBloc}%tracés des traits
+					\foreach \i in {0,\NbLigBloc,...,\NbLigTot}{\draw[pixlarttraitdecoup] ({0.5-0.33},{-\i-0.5}) -- ({\thecsvcolumncount+0.5+0.33},{-\i-0.5}) ;}%
+					\foreach \j in {0,\NbColBloc,...,\NbColTot}{\draw[pixlarttraitdecoup] ({\j+0.5},{-0.5+0.33}) -- ({\j+0.5},{-\thecsvinputline+0.5-0.33}) ;}%
+				}%
+				{}%
+			\IfSubStr{\PATdecoup}{+}%
+				{%
+					\StrCut{\PATdecoup}{+}{\NbBlocLIG}{\NbBlocCOL}%
+					\def\NbLigBloc{\xintieval{(\NbLigTot-1)/\NbBlocLIG}}%
+					\def\NbColBloc{\xintieval{(\NbColTot)/\NbBlocCOL}}%
+					\foreach \i in {0,\NbLigBloc,...,\NbLigTot}{\draw[pixlarttraitdecoup] ({0.5-0.33},{-\i-0.5}) -- ({\thecsvcolumncount+0.5+0.33},{-\i-0.5}) ;}%
+					\foreach \j in {0,\NbColBloc,...,\NbColTot}{\draw[pixlarttraitdecoup] ({\j+0.5},{-0.5+0.33}) -- ({\j+0.5},{-\thecsvinputline+0.5-0.33}) ;}%
+				}%
+				{}%
+		}%
+	\IfBooleanTF{#1}{}{\end{tikzpicture}}%
+}
+
+\NewDocumentEnvironment{EnvPixelArtTikz}{ O{} D<>{} m }%environnement
+{%
+	\useKVdefault[pixelarttkz]%
+	\setKV[pixelarttkz]{#1}%
+	%affichage du corrigé / display of correction
+	\begin{tikzpicture}[x=\PATunit cm,y=\PATunit cm,#2]
+		\ifboolKV[pixelarttkz]{Correction}%
+		{%
+			\setsepchar{,}%
+			\readlist*\LCPA\PATcouleurs%
+			\csvloop{file=#3,no head,command={%
+				\foreach \l [count=\n] in \csvline {%
+					\StrDel{\l}{ }[\l]%
+					\StrPosition{\PATlettres}{\l}[\pixcnt]%
+					\xintifboolexpr{\pixcnt>0}%
+						{%
+							\itemtomacro\LCPA[\pixcnt]\pixcol%
+							\ifboolKV[pixelarttkz]{BordCases}%
+								{\draw[fill=\pixcol] ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) ;}%
+								{\filldraw[\pixcol] ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) ;}%
+						}%
+						{}%
+					}%
+				}%
+			}%
+		}%
+		{%
+			\ifboolKV[pixelarttkz]{Symb}{%affichage du pixelart versions chiffres si besoin
+				\setsepchar{,}%
+				\readlist*\LCNA\PATchiffres%
+				\csvloop{file=#3,no head,command={%
+					\foreach \l [count=\n] in \csvline {%
+						\StrDel{\l}{ }[\l]%
+						\StrPosition{\PATlettres}{\l}[\pixpos]%
+						\xintifboolexpr{\pixpos>0}%
+							{%
+								\itemtomacro\LCNA[\pixpos]\pixchf%
+								\draw ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) node[inner sep=0,midway,font=\PATtaille] {\TraiteListeSymbPixelArt{\pixchf}} ;%
+							}%
+							{}%
+						}%
+					}%
+				}%
+			}%
+			{%affichage du pixelart versions lettres ou chiffres simples (<=9) / display of letters/symbols PixelArt
+				\csvloop{file=#3,no head,command={%
+						\foreach \l [count=\n] in \csvline {%
+							\StrDel{\l}{ }[\l]%
+							\IfSubStr{\PATlettres}{\l}%
+							{%
+								\draw ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) node[inner sep=0,midway,font=\PATtaille] {\l};%
+							}%
+							{}%
+						}%
+					}%
+				}%
+			}%
+		}%
+}%
+{%
+	\end{tikzpicture}%
+}%
+
+%----[en] commands
+\defKV[pixelarttkzen]{%
+	Codes=\def\PATlettres{#1},%
+	Colors=\def\PATcouleurs{#1},%
+	Symbols=\def\PATchiffres{#1},%
+	Style=\def\PATtaille{#1},%
+	Unit=\def\PATunit{#1},%
+	Grid=\def\PATdecoup{#1}
+}
+
+\setKVdefault[pixelarttkzen]{%
+	Style=\scriptsize,%
+	Correction=false,%
+	Symb=false,%
+	Border=true,%
+	Unit=1,%
+	Grid={}
+}
+
+\NewDocumentCommand\PixlArtTikz{ s O{} D<>{} m }{%commande autonome
+	\useKVdefault[pixelarttkzen]%
+	\setKV[pixelarttkzen]{#2}%
+	%affichage du corrigé / display of correction
+	\IfBooleanTF{#1}{}{\begin{tikzpicture}[x=\PATunit cm,y=\PATunit cm,#3]}
+		\ifboolKV[pixelarttkzen]{Correction}%
+		{%
+			\setsepchar{,}%
+			\readlist*\LCPA\PATcouleurs%
+			\csvloop{file=#4,no head,command={%
+					\foreach \l [count=\n] in \csvline {%
+						\StrDel{\l}{ }[\l]%
+						\StrPosition{\PATlettres}{\l}[\pixcnt]%
+						\xintifboolexpr{\pixcnt>0}%
+						{%
+							\itemtomacro\LCPA[\pixcnt]\pixcol%
+							\ifboolKV[pixelarttkzen]{Border}%
+							{\draw[fill=\pixcol] ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) ;}%
+							{\filldraw[\pixcol] ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) ;}%
+						}%
+						{}%
+					}%
+				}%
+			}%
+		}%
+		{%
+			\ifboolKV[pixelarttkzen]{Symb}{%affichage du pixelart versions chiffres si besoin
+				\setsepchar{,}%
+				\readlist*\LCNA\PATchiffres%
+				\csvloop{file=#4,no head,command={%
+						\foreach \l [count=\n] in \csvline {%
+							\StrDel{\l}{ }[\l]%
+							\StrPosition{\PATlettres}{\l}[\pixpos]%
+							\xintifboolexpr{\pixpos>0}%
+							{%
+								\itemtomacro\LCNA[\pixpos]\pixchf%
+								\draw ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) node[inner sep=0,midway,font=\PATtaille] {\TraiteListeSymbPixelArt{\pixchf}} ;%
+							}%
+							{}%
+						}%
+					}%
+				}%
+			}%
+			{%affichage du pixelart versions lettres ou chiffres simples (<=9) / display of letters/symbols PixelArt
+				\csvloop{file=#4,no head,command={%
+						\foreach \l [count=\n] in \csvline {%
+							\StrDel{\l}{ }[\l]%
+							\IfSubStr{\PATlettres}{\l}%
+							{%
+								\draw ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) node[inner sep=0,midway,font=\PATtaille] {\l};%
+							}%
+							{}%
+						}%
+					}%
+				}%
+			}%
+		}%
+	%affichage des découpages éventuels
+	\IfStrEq{\PATdecoup}{}%
+		{}%
+		{%
+			\csvreader{#4}{}{}%en test
+			\xdef\NbLigTot{\thecsvinputline}%
+			\xdef\NbColTot{\thecsvcolumncount}%
+			\IfSubStr{\PATdecoup}{x}%
+				{%
+					\StrCut{\PATdecoup}{x}{\NbLigBloc}{\NbColBloc}%tracés des traits
+					\foreach \i in {0,\NbLigBloc,...,\NbLigTot}{\draw[thick,purple] ({0.5-0.33},{-\i-0.5}) -- ({\thecsvcolumncount+0.5+0.33},{-\i-0.5}) ;}%
+					\foreach \j in {0,\NbColBloc,...,\NbColTot}{\draw[thick,purple] ({\j+0.5},{-0.5+0.33}) -- ({\j+0.5},{-\thecsvinputline+0.5-0.33}) ;}%
+				}%
+				{}%
+			\IfSubStr{\PATdecoup}{+}%
+				{%
+					\StrCut{\PATdecoup}{+}{\NbBlocLIG}{\NbBlocCOL}%
+					\def\NbLigBloc{\xintieval{(\NbLigTot-1)/\NbBlocLIG}}%
+					\def\NbColBloc{\xintieval{(\NbColTot)/\NbBlocCOL}}%
+					\foreach \i in {0,\NbLigBloc,...,\NbLigTot}{\draw[thick,purple] ({0.5-0.33},{-\i-0.5}) -- ({\thecsvcolumncount+0.5+0.33},{-\i-0.5}) ;}%
+					\foreach \j in {0,\NbColBloc,...,\NbColTot}{\draw[thick,purple] ({\j+0.5},{-0.5+0.33}) -- ({\j+0.5},{-\thecsvinputline+0.5-0.33}) ;}%
+				}%
+				{}%
+		}%
+	\IfBooleanTF{#1}{}{\end{tikzpicture}}%
+}
+
+\NewDocumentEnvironment{EnvPixlArtTikz}{ O{} D<>{} m }%environnement
+{%
+	\useKVdefault[pixelarttkzen]%
+	\setKV[pixelarttkzen]{#1}%
+	%affichage du corrigé / display of correction
+	\begin{tikzpicture}[x=\PATunit cm,y=\PATunit cm,#2]
+		\ifboolKV[pixelarttkzen]{Correction}%
+		{%
+			\setsepchar{,}%
+			\readlist*\LCPA\PATcouleurs%
+			\csvloop{file=#3,no head,command={%
+					\foreach \l [count=\n] in \csvline {%
+						\StrDel{\l}{ }[\l]%
+						\StrPosition{\PATlettres}{\l}[\pixcnt]%
+						\xintifboolexpr{\pixcnt>0}%
+						{%
+							\itemtomacro\LCPA[\pixcnt]\pixcol%
+							\ifboolKV[pixelarttkzen]{Border}%
+							{\draw[fill=\pixcol] ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) ;}%
+							{\filldraw[\pixcol] ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) ;}%
+						}%
+						{}%
+					}%
+				}%
+			}%
+		}%
+		{%
+			\ifboolKV[pixelarttkzen]{Symb}{%affichage du pixelart versions chiffres si besoin
+				\setsepchar{,}%
+				\readlist*\LCNA\PATchiffres%
+				\csvloop{file=#3,no head,command={%
+						\foreach \l [count=\n] in \csvline {%
+							\StrDel{\l}{ }[\l]%
+							\StrPosition{\PATlettres}{\l}[\pixpos]%
+							\xintifboolexpr{\pixpos>0}%
+							{%
+								\itemtomacro\LCNA[\pixpos]\pixchf%
+								\draw ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) node[inner sep=0,midway,font=\PATtaille] {\TraiteListeSymbPixelArt{\pixchf}} ;%
+							}%
+							{}%
+						}%
+					}%
+				}%
+			}%
+			{%affichage du pixelart versions lettres ou chiffres simples (<=9) / display of letters/symbols PixelArt
+				\csvloop{file=#3,no head,command={%
+						\foreach \l [count=\n] in \csvline {%
+							\StrDel{\l}{ }[\l]%
+							\IfSubStr{\PATlettres}{\l}%
+							{%
+								\draw ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) node[inner sep=0,midway,font=\PATtaille] {\l};%
+							}%
+							{}%
+						}%
+					}%
+				}%
+			}%
+		}%
+}%
+{%
+	\end{tikzpicture}%
+}%
+
+%----mini pixelart
+\newlength{\minipaunit}
+\defKV[miniPA]{Unite=\setlength{\minipaunit}{#1}}
+\setKVdefault[miniPA]{Bord=false,Unite=0.25em}
+
+\NewDocumentCommand\DessineCarrePA{ m m m }{%1=nblig,%2=nbcol,%3=color
+	\xdef\tmpcol{teal}%
+	\IfStrEq{#3}{R}{\xdef\tmpcol{red}}{}%
+	\IfStrEq{#3}{V}{\xdef\tmpcol{green}}{}%
+	\IfStrEq{#3}{B}{\xdef\tmpcol{blue}}{}%
+	\IfStrEq{#3}{J}{\xdef\tmpcol{yellow}}{}%
+	\IfStrEq{#3}{N}{\xdef\tmpcol{black}}{}%
+	\IfStrEq{#3}{G}{\xdef\tmpcol{gray}}{}%
+	\IfStrEq{#3}{.}{\xdef\tmpcol{white}}{}%
+	\IfStrEq{#3}{M}{\xdef\tmpcol{brown}}{}%
+	\IfStrEq{#3}{O}{\xdef\tmpcol{orange}}{}%
+	\IfStrEq{#3}{P}{\xdef\tmpcol{violet}}{}%
+	\ifboolKV[miniPA]{Bord}%
+		{\draw[line width=0.075\minipaunit,draw=black,fill=\tmpcol] ({\j},{-\i}) rectangle++ (1,-1) ;}%
+		{\draw[line width=0.075\minipaunit,draw=\tmpcol,fill=\tmpcol] ({\j},{-\i}) rectangle++ (1,-1) ;}%
+}
+
+\NewDocumentCommand\MiniPixelArt{ O{} m D<>{} }{%
+	\restoreKV[miniPA]%
+	\setKV[miniPA]{#1}%
+	\setsepchar{,}%
+	\readlist*\tmpdata{#2}%
+	\xdef\tmpnblgn{\tmpdatalen}%
+	\itemtomacro\tmpdata[1]\tmpdatacola%
+	\StrLen{\tmpdatacola}[\tmpnbcol]%
+	\begin{tikzpicture}[x=\minipaunit,y=\minipaunit,#3]
+		\foreach \i in {1,...,\tmpnblgn}{%
+			\itemtomacro\tmpdata[\i]\tmplgn%
+			\foreach \j in {1,...,\tmpnbcol}{%
+				\StrChar{\tmplgn}{\j}[\tmpchar]%
+				\DessineCarrePA{\j}{\i}{\tmpchar}%
+			}%
+		}%
+	\end{tikzpicture}%
+}
+
+\defKV[miniPAen]{Unit=\setlength{\minipaunit}{#1}}
+\setKVdefault[miniPAen]{Border=false,Unit=0.25em}
+
+\NewDocumentCommand\DrawSquarePA{ m m m }{%1=nblig,%2=nbcol,%3=color
+	\xdef\tmpcol{teal}%
+	\IfStrEq{#3}{R}{\xdef\tmpcol{red}}{}%
+	\IfStrEq{#3}{G}{\xdef\tmpcol{green}}{}%
+	\IfStrEq{#3}{C}{\xdef\tmpcol{blue}}{}%
+	\IfStrEq{#3}{Y}{\xdef\tmpcol{yellow}}{}%
+	\IfStrEq{#3}{B}{\xdef\tmpcol{black}}{}%
+	\IfStrEq{#3}{L}{\xdef\tmpcol{gray}}{}%
+	\IfStrEq{#3}{.}{\xdef\tmpcol{white}}{}%
+	\IfStrEq{#3}{M}{\xdef\tmpcol{brown}}{}%
+	\IfStrEq{#3}{O}{\xdef\tmpcol{orange}}{}%
+	\IfStrEq{#3}{P}{\xdef\tmpcol{violet}}{}%
+	\ifboolKV[miniPAen]{Border}%
+	{\draw[line width=0.075\minipaunit,draw=black,fill=\tmpcol] ({\j},{-\i}) rectangle++ (1,-1) ;}%
+	{\draw[line width=0.075\minipaunit,draw=\tmpcol,fill=\tmpcol] ({\j},{-\i}) rectangle++ (1,-1) ;}%
+}
+
+\NewDocumentCommand\MiniPixlArt{ O{} m D<>{} }{%
+	\restoreKV[miniPAen]%
+	\setKV[miniPAen]{#1}%
+	\setsepchar{,}%
+	\readlist*\tmpdata{#2}%
+	\xdef\tmpnblgn{\tmpdatalen}%
+	\itemtomacro\tmpdata[1]\tmpdatacola%
+	\StrLen{\tmpdatacola}[\tmpnbcol]%
+	\begin{tikzpicture}[x=\minipaunit,y=\minipaunit,#3]
+		\foreach \i in {1,...,\tmpnblgn}{%
+			\itemtomacro\tmpdata[\i]\tmplgn%
+			\foreach \j in {1,...,\tmpnbcol}{%
+				\StrChar{\tmplgn}{\j}[\tmpchar]%
+				\DrawSquarePA{\j}{\i}{\tmpchar}%
+			}%
+		}%
+	\end{tikzpicture}%
+}
+
+%----découpage [fr]
+\NewDocumentCommand\PixelArtTikzBloc{ O{} D<>{} m m m }{%commande individuelle
+	%3=fichier
+	%4=taille blocs (LxC) ou nombre de blocs (L+C)
+	%5=numbloc
+	%dernier argument := bloc
+	\useKVdefault[pixelarttkz]%
+	\setKV[pixelarttkz]{#1}%
+	\csvreader{#3}{}{}%en test
+	\xdef\NbLigTot{\thecsvinputline}%
+	\xdef\NbColTot{\thecsvcolumncount}%
+	\IfSubStr{#4}{x}%
+		{%
+			\StrCut{#4}{x}{\NbLigBloc}{\NbColBloc}%
+		}%
+		{}%
+	\IfSubStr{#4}{+}%
+		{%
+			\StrCut{#4}{+}{\NbBlocLIG}{\NbBlocCOL}%
+			\xdef\NbLigBloc{\xinteval{(\NbLigTot-1)/\NbBlocLIG}}%
+			\xdef\NbColBloc{\xinteval{(\NbColTot)/\NbBlocCOL}}%
+		}%
+		{}%
+	\StrCut{#5}{/}{\NumBlocLig}{\NumBlocCol}%
+	\xdef\PAfirstline{\xinteval{\NbLigBloc*(\NumBlocLig-1)+1}}%
+	\xdef\PAlastline{\xinteval{\NbLigBloc*(\NumBlocLig-1)+\NbLigBloc}}%
+	\xdef\PAblocmin{\xinteval{(\NbColBloc*(\NumBlocCol-1)+1)}}%
+	\xdef\PAblocmax{\xinteval{(\NbColBloc*(\NumBlocCol-1)+\NbColBloc)}}%
+	%affichage du corrigé / display of correction
+	\begin{tikzpicture}[x=\PATunit cm,y=\PATunit cm,#2]
+		\ifboolKV[pixelarttkz]{Correction}%
+		{%
+			\setsepchar{,}%
+			\readlist*\LCPA\PATcouleurs%
+			\csvloop{file=#3,range=\PAfirstline-\PAlastline,no head,command={%
+					\foreach \l [count=\n] in \csvline {%
+						\xintifboolexpr{ \n >= \PAblocmin 'and' \n <= \PAblocmax}%
+							{%
+								\StrDel{\l}{ }[\l]%
+								\setsepchar{,}%
+								%\readlist*\LCPA\PATcouleurs%
+								\StrPosition{\PATlettres}{\l}[\pixcnt]%
+								\xintifboolexpr{\pixcnt>0}%
+								{%
+									\itemtomacro\LCPA[\pixcnt]\pixcol%
+									\ifboolKV[pixelarttkz]{BordCases}%
+									{\draw[fill=\pixcol] ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) ;}%
+									{\filldraw[\pixcol] ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) ;}%
+								}%
+								{}%
+							}%
+							{}%
+					}%
+				}%
+			}%
+		}%
+		{%
+			\ifboolKV[pixelarttkz]{Symb}{%affichage du pixelart versions chiffres si besoin
+				\setsepchar{,}%
+				\readlist*\LCNA\PATchiffres%
+				\csvloop{file=#3,range=\PAfirstline-\PAlastline,no head,command={%
+						\foreach \l [count=\n] in \csvline {%
+							\xintifboolexpr{ \n >= \PAblocmin 'and' \n <= \PAblocmax}%
+								{%
+									\StrDel{\l}{ }[\l]%
+									\setsepchar{,}%
+									%\readlist*\LCNA\PATchiffres%
+									\StrPosition{\PATlettres}{\l}[\pixpos]%
+									\xintifboolexpr{\pixpos>0}%
+									{%
+										\itemtomacro\LCNA[\pixpos]\pixchf%
+										\draw ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) node[inner sep=0,midway,font=\PATtaille] {\TraiteListeSymbPixelArt{\pixchf}} ;%
+									}%
+									{}%
+								}%
+								{}%
+						}%
+					}%
+				}%
+			}%
+			{%affichage du pixelart versions lettres ou chiffres simples (<=9) / display of letters/symbols PixelArt
+				\csvloop{file=#3,range=\PAfirstline-\PAlastline,no head,command={%
+						\foreach \l [count=\n] in \csvline {%
+							\xintifboolexpr{ \n >= \PAblocmin 'and' \n <= \PAblocmax}%
+								{%
+									\StrDel{\l}{ }[\l]%
+									\IfSubStr{\PATlettres}{\l}%
+										{%
+											\draw ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) node[inner sep=0,midway,font=\PATtaille] {\l};%
+										}%
+										{}%
+								}%
+								{}%
+						}%
+					}%
+				}%
+			}%
+		}%
+	\end{tikzpicture}%
+}
+
+\def\PAalphabet{ABCDEFGHIJKLMNOPQRSTUVWXYZ}
+
+\NewDocumentCommand\DecoupPixelArtTikz{ s O{} D<>{} m m }{%commande de découpage global
+	%(*)=lettre pour les lignes
+	%1=clés globales
+	%2=options tikz
+	%3=fichier
+	%4=taille blocs LxC ou L+C
+	\csvreader{#4}{}{}%en test
+	\IfSubStr{#5}{x}%
+		{%
+			\StrCut{#5}{x}{\NbLigBloc}{\NbColBloc}%
+			\xdef\NbTotLig{\xintieval{(\thecsvinputline-1)/\NbLigBloc}}%
+			\xdef\NbTotCol{\xintieval{(\thecsvcolumncount)/\NbColBloc}}%
+		}%
+		{}%
+	\IfSubStr{#5}{+}%
+		{%
+			\StrCut{#5}{+}{\NbTotLig}{\NbTotCol}%
+		}%
+		{}%
+	\xintFor* ##1 in {\xintSeq{1}{\NbTotLig}}\do{%
+		\begin{tabular}{*{\NbTotCol}{c}}
+			\xintFor* ##2 in {\xintSeq{1}{\NbTotCol-1}}\do{%
+				Grille \IfBooleanTF{#1}{##1.}{\StrChar{\PAalphabet}{##1}}##2 &
+			}
+				Grille \IfBooleanTF{#1}{##1.}{\StrChar{\PAalphabet}{##1}}\NbTotCol \\
+			\xintFor* ##2 in {\xintSeq{1}{\NbTotCol-1}}\do{%
+				\PixelArtTikzBloc[#2]<#3>{#4}{#5}{##1/##2}&
+			}
+			\PixelArtTikzBloc[#2]<#3>{#4}{#5}{##1/\NbTotCol}\\
+		\end{tabular}\xintifboolexpr{##1 == \NbTotLig}{}{\\}
+	}%
+}
+
+\NewDocumentCommand\AideGrillePixelArtTikz{ s O{1} m m }{%création de la grille d'aide
+	\csvreader{#3}{}{}%en test
+	\IfSubStr{#4}{x}%
+		{%
+			\StrCut{#4}{x}{\NbLigBloc}{\NbColBloc}%
+			\xdef\NbTotLig{\xintieval{(\thecsvinputline-1)/\NbLigBloc}}%
+			\xdef\NbTotCol{\xintieval{(\thecsvcolumncount)/\NbColBloc}}%
+		}%
+		{}%
+	\IfSubStr{#4}{+}%
+		{%
+			\StrCut{#4}{+}{\NbTotLig}{\NbTotCol}%
+		}%
+		{}%
+	\xdef\EchelleGrilleAide{\xintfloateval{(\NbTotCol)/(\NbTotLig)}}%
+	\begin{tikzpicture}[scale=#2,transform shape]
+		\xintFor* ##1 in {\xintSeq{1}{\NbTotLig}}\do{%
+			\xintFor* ##2 in {\xintSeq{1}{\NbTotCol}}\do{%
+				\draw[semithick] (##2,{-##1*(\EchelleGrilleAide)}) rectangle++(1,{-1*(\EchelleGrilleAide)}) node[midway,pixlartnoticedecoup] {\IfBooleanTF{#1}{##1.}{\StrChar{\PAalphabet}{##1}}##2} ;
+			}%
+		}%
+	\end{tikzpicture}%
+}
+
+%----découpage [en]
+\NewDocumentCommand\PixlArtTikzBlock{ O{} D<>{} m m m }{%commande individuelle
+	%3=fichier
+	%4=taille blocs (LxC) ou nombre de blocs (L+C)
+	%5=numbloc
+	%dernier argument := bloc
+	\useKVdefault[pixelarttkzen]%
+	\setKV[pixelarttkzen]{#1}%
+	\csvreader{#3}{}{}%en test
+	\xdef\NbLigTot{\thecsvinputline}%
+	\xdef\NbColTot{\thecsvcolumncount}%
+	\IfSubStr{#4}{x}%
+		{%
+			\StrCut{#4}{x}{\NbLigBloc}{\NbColBloc}%
+		}%
+		{}%
+	\IfSubStr{#4}{+}%
+		{%
+			\StrCut{#4}{+}{\NbBlocLIG}{\NbBlocCOL}%
+			\xdef\NbLigBloc{\xinteval{(\NbLigTot-1)/\NbBlocLIG}}%
+			\xdef\NbColBloc{\xinteval{(\NbColTot)/\NbBlocCOL}}%
+		}%
+		{}%
+	\StrCut{#5}{/}{\NumBlocLig}{\NumBlocCol}%
+	\xdef\PAfirstline{\xinteval{\NbLigBloc*(\NumBlocLig-1)+1}}%
+	\xdef\PAlastline{\xinteval{\NbLigBloc*(\NumBlocLig-1)+\NbLigBloc}}%
+	\xdef\PAblocmin{\xinteval{(\NbColBloc*(\NumBlocCol-1)+1)}}%
+	\xdef\PAblocmax{\xinteval{(\NbColBloc*(\NumBlocCol-1)+\NbColBloc)}}%
+	%affichage du corrigé / display of correction
+	\begin{tikzpicture}[x=\PATunit cm,y=\PATunit cm,#2]
+		\ifboolKV[pixelarttkzen]{Correction}%
+		{%
+			\setsepchar{,}%
+			\readlist*\LCPA\PATcouleurs%
+			\csvloop{file=#3,range=\PAfirstline-\PAlastline,no head,command={%
+					\foreach \l [count=\n] in \csvline {%
+						\xintifboolexpr{ \n >= \PAblocmin 'and' \n <= \PAblocmax}%
+							{%
+								\StrDel{\l}{ }[\l]%
+								\setsepchar{,}%
+								%\readlist*\LCPA\PATcouleurs%
+								\StrPosition{\PATlettres}{\l}[\pixcnt]%
+								\xintifboolexpr{\pixcnt>0}%
+								{%
+									\itemtomacro\LCPA[\pixcnt]\pixcol%
+									\ifboolKV[pixelarttkzen]{Border}%
+									{\draw[fill=\pixcol] ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) ;}%
+									{\filldraw[\pixcol] ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) ;}%
+								}%
+								{}%
+							}%
+							{}%
+					}%
+				}%
+			}%
+		}%
+		{%
+			\ifboolKV[pixelarttkzen]{Symb}{%affichage du pixelart versions chiffres si besoin
+				\setsepchar{,}%
+				\readlist*\LCNA\PATchiffres%
+				\csvloop{file=#3,range=\PAfirstline-\PAlastline,no head,command={%
+						\foreach \l [count=\n] in \csvline {%
+							\xintifboolexpr{ \n >= \PAblocmin 'and' \n <= \PAblocmax}%
+								{%
+									\StrDel{\l}{ }[\l]%
+									\setsepchar{,}%
+									%\readlist*\LCNA\PATchiffres%
+									\StrPosition{\PATlettres}{\l}[\pixpos]%
+									\xintifboolexpr{\pixpos>0}%
+									{%
+										\itemtomacro\LCNA[\pixpos]\pixchf%
+										\draw ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) node[inner sep=0,midway,font=\PATtaille] {\TraiteListeSymbPixelArt{\pixchf}} ;%
+									}%
+									{}%
+								}%
+								{}%
+						}%
+					}%
+				}%
+			}%
+			{%affichage du pixelart versions lettres ou chiffres simples (<=9) / display of letters/symbols PixelArt
+				\csvloop{file=#3,range=\PAfirstline-\PAlastline,no head,command={%
+						\foreach \l [count=\n] in \csvline {%
+							\xintifboolexpr{ \n >= \PAblocmin 'and' \n <= \PAblocmax}%
+								{%
+									\StrDel{\l}{ }[\l]%
+									\IfSubStr{\PATlettres}{\l}%
+										{%
+											\draw ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) node[inner sep=0,midway,font=\PATtaille] {\l};%
+										}%
+										{}%
+								}%
+								{}%
+						}%
+					}%
+				}%
+			}%
+		}%
+	\end{tikzpicture}%
+}
+
+\NewDocumentCommand\CutPixlArtTikz{ s O{} D<>{} m m }{%commande de découpage global
+	%(*)=lettre pour les lignes
+	%1=clés globales
+	%2=options tikz
+	%3=fichier
+	%4=taille blocs LxC ou L+C
+	\csvreader{#4}{}{}%en test
+	\IfSubStr{#5}{x}%
+		{%
+			\StrCut{#5}{x}{\NbLigBloc}{\NbColBloc}%
+			\xdef\NbTotLig{\xintieval{(\thecsvinputline-1)/\NbLigBloc}}%
+			\xdef\NbTotCol{\xintieval{(\thecsvcolumncount)/\NbColBloc}}%
+		}%
+		{}%
+	\IfSubStr{#5}{+}%
+		{%
+			\StrCut{#5}{+}{\NbTotLig}{\NbTotCol}%
+		}%
+		{}%
+	\xintFor* ##1 in {\xintSeq{1}{\NbTotLig}}\do{%
+		\begin{tabular}{*{\NbTotCol}{c}}
+			\xintFor* ##2 in {\xintSeq{1}{\NbTotCol-1}}\do{%
+				Sample \IfBooleanTF{#1}{##1.}{\StrChar{\PAalphabet}{##1}}##2 &
+			}
+				Sample \IfBooleanTF{#1}{##1.}{\StrChar{\PAalphabet}{##1}}\NbTotCol \\
+			\xintFor* ##2 in {\xintSeq{1}{\NbTotCol-1}}\do{%
+				\PixlArtTikzBlock[#2]<#3>{#4}{#5}{##1/##2}&
+			}
+			\PixlArtTikzBlock[#2]<#3>{#4}{#5}{##1/\NbTotCol}\\
+		\end{tabular}\xintifboolexpr{##1 == \NbTotLig}{}{\\}
+	}%
+}
+
+\NewDocumentCommand\HelpGridPixelArtTikz{ s O{1} m m }{%création de la grille d'aide
+	\csvreader{#3}{}{}%en test
+	\IfSubStr{#4}{x}%
+		{%
+			\StrCut{#4}{x}{\NbLigBloc}{\NbColBloc}%
+			\xdef\NbTotLig{\xintieval{(\thecsvinputline-1)/\NbLigBloc}}%
+			\xdef\NbTotCol{\xintieval{(\thecsvcolumncount)/\NbColBloc}}%
+		}%
+		{}%
+	\IfSubStr{#4}{+}%
+		{%
+			\StrCut{#4}{+}{\NbTotLig}{\NbTotCol}%
+		}%
+		{}%
+	\begin{tikzpicture}[scale=#2,transform shape]
+		\xintFor* ##1 in {\xintSeq{1}{\NbTotLig}}\do{%
+			\xintFor* ##2 in {\xintSeq{1}{\NbTotCol}}\do{
+				\draw[semithick] (##2,{-##1*(\NbTotCol)/(\NbTotLig)}) rectangle++(1,{-1*(\NbTotCol)/(\NbTotLig)}) node[midway] {\IfBooleanTF{#1}{##1.}{\StrChar{\PAalphabet}{##1}}##2} ;
+			}%
+		}%
+	\end{tikzpicture}%
+}
+
+%====TABLEAU AUTOMATIQUE DES COULEURS (expérimental)
+\RequirePackage{tabularray}
+
+\defKV[TableCouleursPA]{%
+	Police=\def\PAtablfonte{#1},%
+	Largeur=\def\PAtabllarg{#1}
+}
+\setKVdefault[TableCouleursPA]{%
+	Police={\normalsize\normalfont},%
+	Largeur=auto
+}
+
+\NewDocumentCommand\TablCouleursPixelArt{ s O{} D<>{} m }{%
+	\restoreKV[TableCouleursPA]%
+	\setKV[TableCouleursPA]{#2}%
+	\def\runlistcolors{#4}%
+	\setsepchar{,}%
+	\readlist*\ListeCoulCases{#4}%
+	\def\PAtablenotice{}%
+	\IfBooleanTF{#1}%
+		{%
+			\foreach \AAAA/\BBBB/\CCCC/\DDDD [count=\i] in \runlistcolors{%
+				\xdef\PAtablenotice{\PAtablenotice \SetCell{bg=\BBBB,fg=\CCCC}\AAAA & \DDDD \\}
+			}%
+			\IfStrEq{\PAtabllarg}{auto}%
+				{%
+					\begin{tblr}[expand=\PAtablenotice]{hlines,vlines,colspec={*{2}{Q[m,c]}},cells={font=\PAtablfonte},#3}
+						\PAtablenotice
+					\end{tblr}%
+				}%
+				{%
+					\IfSubStr{\PAtabllarg}{/}%
+						{%
+							\StrCut{\PAtabllarg}{/}{\tmpLargColA}{\tmpLargColB}%
+							\IfStrEq{\tmpLargColA}{}%
+								{%
+									\IfStrEq{\tmpLargColB}{}%
+										{%
+											\begin{tblr}[expand=\PAtablenotice]{hlines,vlines,colspec={Q[m,c]Q[m,c]},cells={font=\PAtablfonte},#3}
+												\PAtablenotice
+											\end{tblr}%
+										}%
+										{%
+											\begin{tblr}[expand=\PAtablenotice]{hlines,vlines,colspec={Q[m,c]Q[m,c,\tmpLargColB]},cells={font=\PAtablfonte},#3}
+												\PAtablenotice
+											\end{tblr}%
+										}%
+								}%
+								{%
+									\IfStrEq{\tmpLargColB}{}%
+										{%
+											\begin{tblr}[expand=\PAtablenotice]{hlines,vlines,colspec={Q[m,c,\tmpLargColA]Q[m,c]},cells={font=\PAtablfonte},#3}
+												\PAtablenotice
+											\end{tblr}%
+										}%
+										{%
+											\begin{tblr}[expand=\PAtablenotice]{hlines,vlines,colspec={Q[m,c,\tmpLargColA]Q[m,c,\tmpLargColB]},cells={font=\PAtablfonte},#3}
+												\PAtablenotice
+											\end{tblr}%
+										}%
+								}%
+						}%
+						{%
+							\begin{tblr}[expand=\PAtablenotice]{width=\PAtabllarg,hlines,vlines,colspec={*{2}{X[m,c]}},cells={font=\PAtablfonte},#3}
+								\PAtablenotice
+							\end{tblr}%
+						}%
+				}%
+		}%
+		{%
+			\foreach \AAAA/\BBBB/\CCCC/\DDDD [count=\i] in \runlistcolors{%
+				\xdef\PAtablenotice{\PAtablenotice \SetCell{bg=\BBBB,fg=\CCCC}\AAAA \xintifboolexpr{\i == \ListeCoulCaseslen}{\\}{&}}
+			}%
+			\foreach \AAAA/\BBBB/\CCCC/\DDDD [count=\i] in \runlistcolors{%
+				\xdef\PAtablenotice{\PAtablenotice {\DDDD} \xintifboolexpr{\i == \ListeCoulCaseslen}{\\}{&}}
+			}%
+			\IfStrEq{\PAtabllarg}{auto}%
+				{%
+					\begin{tblr}[expand=\PAtablenotice]{hlines,vlines,colspec={*{\ListeCoulCaseslen}{Q[m,c]}},cells={font=\PAtablfonte},#3}
+						\PAtablenotice
+					\end{tblr}%
+				}%
+				{%
+					\begin{tblr}[expand=\PAtablenotice]{width=\PAtabllarg,hlines,vlines,colspec={*{\ListeCoulCaseslen}{X[m,c]}},cells={font=\PAtablfonte},#3}
+						\PAtablenotice
+					\end{tblr}%
+				}%
+		}%
+}
+
+%====COMMANDE SIMPLIFIÉE tabularray
+\NewExpandableDocumentCommand\cctblr{ O{black} m m }{%
+	%1=couleur police
+	%2=couleur case
+	%3=case
+	\SetCell{bg=#2,fg=#1}#3
+}
+
+%====ANAMORPHIC CYLINDER PixelArt [fr]
+\defKV[PixelArtCylinder]{
+	Largeur=\def\AAanamcyllarg{#1},%
+	Centre=\def\AAanamcylcenter{#1},%
+	Codes=\def\PATAAlettres{#1},%
+	Couleurs=\def\PATAAcouleurs{#1},%
+	Symboles=\def\PATAAchiffres{#1},%
+	Style=\def\PATAAtaille{#1}
+}
+\setKVdefault[PixelArtCylinder]{
+	Largeur=6,%
+	Centre=1.25,%
+	Symb=false,%
+	Correction=false,%
+	Style=\normalsize,%
+	Solution=false,%
+	Swap=false
+}
+\NewDocumentCommand\PixelArtTikzCylindre{ O{} m }{%
+	\restoreKV[PixelArtCylinder]%
+	\setKV[PixelArtCylinder]{#1}%
+	\csvreader{#2}{}{}%en test
+	\xdef\NbLigTot{\thecsvinputline}%
+	\xdef\NbColTot{\thecsvcolumncount}%
+	\xdef\CylindAng{\xintfloateval{round(180/\NbColTot,4)}}%\CylindNbsections~%
+	\xdef\CylindSect{\xintfloateval{round((\AAanamcyllarg-\AAanamcylcenter)/(\NbLigTot-1),4)}}%\CylindNbhauteurs%
+	\ifboolKV[PixelArtCylinder]{Solution}%
+		{%
+			\ifboolKV[PixelArtCylinder]{Swap}%
+				{\PixelArtTikz[#1,Correction,Unite=\CylindSect]{#2}}%
+				{\PixelArtTikz[#1,Correction,Unite=\CylindSect]<yscale=-1>{#2}}%
+		}%
+		{%
+			\begin{tikzpicture}[line join=round]
+				\csvloop{file=#2,no head,command={%
+					\foreach \l [count=\nnnn] in \csvline {%
+						\StrDel{\l}{ }[\l]%
+						\StrPosition{\PATAAlettres}{\l}[\pixcnt]%
+						\xintifboolexpr{\pixcnt>0}%
+							{%
+								\ifboolKV[PixelArtCylinder]{Correction}%
+									{%
+										\setsepchar{,}%
+										\readlist*\LCPA\PATAAcouleurs%
+										\itemtomacro\LCPA[\pixcnt]\pixcol%
+										\ifboolKV[PixelArtCylinder]{Swap}%
+											{%
+												\draw[fill=\pixcol] ({(\nnnn-1)*\CylindAng}:{-\AAanamcyllarg+(\thecsvrow-1)*\CylindSect}) arc({(\nnnn-1)*\CylindAng}:{(\nnnn)*\CylindAng}:{-\AAanamcyllarg+(\thecsvrow-1)*\CylindSect})--++ ({(\nnnn)*\CylindAng}:{\CylindSect}) arc({(\nnnn)*\CylindAng}:{(\nnnn-1)*\CylindAng}:{-\AAanamcyllarg+(\thecsvrow)*\CylindSect}) ;%
+											}%
+											{%
+												\draw[fill=\pixcol] ({(\nnnn-1)*\CylindAng}:{-\AAanamcylcenter-\thecsvrow*\CylindSect}) arc({(\nnnn-1)*\CylindAng}:{(\nnnn)*\CylindAng}:{-\AAanamcylcenter-\thecsvrow*\CylindSect})--++ ({(\nnnn)*\CylindAng}:{\CylindSect}) arc({(\nnnn)*\CylindAng}:{(\nnnn-1)*\CylindAng}:{-\AAanamcylcenter-(\thecsvrow-1)*\CylindSect}) ;%
+											}%
+									}%
+									{%
+										\ifboolKV[PixelArtCylinder]{Symb}%
+											{%
+												\setsepchar{,}%
+												\readlist*\LCNA\PATAAchiffres%
+												\StrPosition{\PATAAlettres}{\l}[\pixpos]%
+												\itemtomacro\LCNA[\pixpos]\pixchf%
+												\ifboolKV[PixelArtCylinder]{Swap}%
+													{%
+														\draw ({0.5*\CylindAng+(\nnnn-1)*\CylindAng}:{-\AAanamcyllarg+(\thecsvrow-0.5)*\CylindSect}) node[rotate={-90+0.5*\CylindAng+(\nnnn-1)*\CylindAng},font=\PATAAtaille] {\TraiteListeSymbPixelArt{\pixchf}} ;%
+													}%
+													{%
+														\draw ({0.5*\CylindAng+(\nnnn-1)*\CylindAng}:{-\AAanamcylcenter-(\thecsvrow-0.5)*\CylindSect}) node[rotate={-90+0.5*\CylindAng+(\nnnn-1)*\CylindAng},font=\PATAAtaille] {\TraiteListeSymbPixelArt{\pixchf}} ;%
+													}%
+											}%
+											{%
+												\ifboolKV[PixelArtCylinder]{Swap}%
+													{%
+														\draw ({0.5*\CylindAng+(\nnnn-1)*\CylindAng}:{-\AAanamcyllarg+(\thecsvrow-0.5)*\CylindSect}) node[rotate={-90+0.5*\CylindAng+(\nnnn-1)*\CylindAng},font=\PATAAtaille] {\l};%
+													}%
+													{%
+														\draw ({0.5*\CylindAng+(\nnnn-1)*\CylindAng}:{-\AAanamcylcenter-(\thecsvrow-0.5)*\CylindSect}) node[rotate={-90+0.5*\CylindAng+(\nnnn-1)*\CylindAng},font=\PATAAtaille] {\l};%
+													}%
+											}%
+									}%
+							}%
+							{}%
+					}%
+				}%
+				}%
+				%création de la grille en surimpression
+				\draw ({-\AAanamcyllarg},0)--({\AAanamcyllarg},0) arc (0:-180:\AAanamcyllarg) ;
+				\foreach \agl in {0,-\CylindAng,...,-180}{\draw (\agl:\AAanamcylcenter)--(\agl:\AAanamcyllarg) ;}
+				\foreach \sector in {0,\CylindSect,...,\xintfloateval{\AAanamcyllarg-\AAanamcylcenter}}{%
+					\draw ({\AAanamcylcenter+\sector},0) arc (0:-180:{\AAanamcylcenter+\sector}) ;
+				}%
+			\end{tikzpicture}%
+		}%
+}
+
+%====ANAMORPHIC CYLINDER PixelArt [en]
+\defKV[PixlArtCylinder]{
+	Width=\def\AAanamcyllarg{#1},%
+	Center=\def\AAanamcylcenter{#1},%
+	Codes=\def\PATAAlettres{#1},%
+	Colors=\def\PATAAcouleurs{#1},%
+	Symbols=\def\PATAAchiffres{#1},%
+	Style=\def\PATAAtaille{#1}
+}
+\setKVdefault[PixlArtCylinder]{
+	Width=6,%
+	Center=1.25,%
+	Symb=false,%
+	Correction=false,%
+	Style=\normalsize,%
+	Solution=false,%
+	Swap=false
+}
+\NewDocumentCommand\PixlArtTikzCylindric{ O{} m }{%
+	\restoreKV[PixlArtCylinder]%
+	\setKV[PixlArtCylinder]{#1}%
+	\csvreader{#2}{}{}%en test
+	\xdef\NbLigTot{\thecsvinputline}%
+	\xdef\NbColTot{\thecsvcolumncount}%
+	\xdef\CylindAng{\xintfloateval{round(180/\NbColTot,4)}}%\CylindNbsections~%
+	\xdef\CylindSect{\xintfloateval{round((\AAanamcyllarg-\AAanamcylcenter)/(\NbLigTot-1),4)}}%\CylindNbhauteurs%
+	\ifboolKV[PixlArtCylinder]{Solution}%
+		{%
+			\ifboolKV[PixlArtCylinder]{Swap}%
+				{\PixlArtTikz[#1,Correction,Unit=\CylindSect]{#2}}%
+				{\PixlArtTikz[#1,Correction,Unit=\CylindSect]<yscale=-1>{#2}}%
+		}%
+		{%
+			\begin{tikzpicture}[line join=round]
+				\csvloop{file=#2,no head,command={%
+					\foreach \l [count=\nnnn] in \csvline {%
+						\StrDel{\l}{ }[\l]%
+						\StrPosition{\PATAAlettres}{\l}[\pixcnt]%
+						\xintifboolexpr{\pixcnt>0}%
+							{%
+								\ifboolKV[PixlArtCylinder]{Correction}%
+									{%
+										\setsepchar{,}%
+										\readlist*\LCPA\PATAAcouleurs%
+										\itemtomacro\LCPA[\pixcnt]\pixcol%
+										\ifboolKV[PixlArtCylinder]{Swap}%
+											{%
+												\draw[fill=\pixcol] ({(\nnnn-1)*\CylindAng}:{-\AAanamcyllarg+(\thecsvrow-1)*\CylindSect}) arc({(\nnnn-1)*\CylindAng}:{(\nnnn)*\CylindAng}:{-\AAanamcyllarg+(\thecsvrow-1)*\CylindSect})--++ ({(\nnnn)*\CylindAng}:{\CylindSect}) arc({(\nnnn)*\CylindAng}:{(\nnnn-1)*\CylindAng}:{-\AAanamcyllarg+(\thecsvrow)*\CylindSect}) ;%
+											}%
+											{%
+												\draw[fill=\pixcol] ({(\nnnn-1)*\CylindAng}:{-\AAanamcylcenter-\thecsvrow*\CylindSect}) arc({(\nnnn-1)*\CylindAng}:{(\nnnn)*\CylindAng}:{-\AAanamcylcenter-\thecsvrow*\CylindSect})--++ ({(\nnnn)*\CylindAng}:{\CylindSect}) arc({(\nnnn)*\CylindAng}:{(\nnnn-1)*\CylindAng}:{-\AAanamcylcenter-(\thecsvrow-1)*\CylindSect}) ;%
+											}%
+									}%
+									{%
+										\ifboolKV[PixlArtCylinder]{Symb}%
+											{%
+												\setsepchar{,}%
+												\readlist*\LCNA\PATAAchiffres%
+												\StrPosition{\PATAAlettres}{\l}[\pixpos]%
+												\itemtomacro\LCNA[\pixpos]\pixchf%
+												\ifboolKV[PixlArtCylinder]{Swap}%
+													{%
+														\draw ({0.5*\CylindAng+(\nnnn-1)*\CylindAng}:{-\AAanamcyllarg+(\thecsvrow-0.5)*\CylindSect}) node[rotate={-90+0.5*\CylindAng+(\nnnn-1)*\CylindAng},font=\PATAAtaille] {\TraiteListeSymbPixelArt{\pixchf}} ;%
+													}%
+													{%
+														\draw ({0.5*\CylindAng+(\nnnn-1)*\CylindAng}:{-\AAanamcylcenter-(\thecsvrow-0.5)*\CylindSect}) node[rotate={-90+0.5*\CylindAng+(\nnnn-1)*\CylindAng},font=\PATAAtaille] {\TraiteListeSymbPixelArt{\pixchf}} ;%
+													}%
+											}%
+											{%
+												\ifboolKV[PixlArtCylinder]{Swap}%
+													{%
+														\draw ({0.5*\CylindAng+(\nnnn-1)*\CylindAng}:{-\AAanamcyllarg+(\thecsvrow-0.5)*\CylindSect}) node[rotate={-90+0.5*\CylindAng+(\nnnn-1)*\CylindAng},font=\PATAAtaille] {\l};%
+													}%
+													{%
+														\draw ({0.5*\CylindAng+(\nnnn-1)*\CylindAng}:{-\AAanamcylcenter-(\thecsvrow-0.5)*\CylindSect}) node[rotate={-90+0.5*\CylindAng+(\nnnn-1)*\CylindAng},font=\PATAAtaille] {\l};%
+													}%
+											}%
+									}%
+							}%
+							{}%
+					}%
+				}%
+				}%
+				%création de la grille en surimpression
+				\draw ({-\AAanamcyllarg},0)--({\AAanamcyllarg},0) arc (0:-180:\AAanamcyllarg) ;
+				\foreach \agl in {0,-\CylindAng,...,-180}{\draw (\agl:\AAanamcylcenter)--(\agl:\AAanamcyllarg) ;}
+				\foreach \sector in {0,\CylindSect,...,\xintfloateval{\AAanamcyllarg-\AAanamcylcenter}}{%
+					\draw ({\AAanamcylcenter+\sector},0) arc (0:-180:{\AAanamcylcenter+\sector}) ;
+				}%
+			\end{tikzpicture}%
+		}%
+}
+
+%-----With datatool, faster ?
+\RequirePackage{datatool}
+
+\NewDocumentCommand\readdtcsv{ m m }{%
+	\DTLsetseparator{|}%
+	\DTLloaddb[noheader,keys={cvsline}]{#2}{#1}%
+}
+
+\NewDocumentCommand\dtpixlarttikz{ O{} D<>{} m }{%commande autonome
+	\useKVdefault[pixelarttkz]%
+	\setKV[pixelarttkz]{#1}%
+	%affichage du corrigé / display of correction
+	\begin{tikzpicture}[x=\PATunit cm,y=\PATunit cm,#2]
+		\ifboolKV[pixelarttkz]{Correction}%
+			{%
+				\setsepchar{,}%
+				\readlist*\LCPA\PATcouleurs%
+				\DTLforeach*{#3}{\csvline=cvsline}{%
+					\setsepchar{,}%
+					\readlist*\tmpcsvline\csvline%
+					\foreachitem\PAchar\in\tmpcsvline{%
+						\StrPosition{\PATlettres}{\PAchar}[\pixcnt]%
+						\ifnum\pixcnt>0%
+							\ifboolKV[pixelarttkz]{BordCases}%
+								{\draw[fill={\LCPA[\pixcnt]}] ({\PAcharcnt-0.5},{-\theDTLrowi+0.5}) rectangle++(1,-1) ;}%
+								{\filldraw[{\LCPA[\pixcnt]}] ({\PAcharcnt-0.5},{-\theDTLrowi+0.5}) rectangle++(1,-1) ;}%
+						\fi%
+					}
+					% \foreach \l [count=\n] in \csvline {%old vesion, with foreach ?
+						% \StrPosition{\PATlettres}{\l}[\pixcnt]%
+						% \ifnum\pixcnt>0%
+						% \ifboolKV[pixelarttkz]{BordCases}%
+							% {\draw[fill={\LCPA[\pixcnt]}] ({\n-0.5},{-\theDTLrowi+0.5}) rectangle ({\n+0.5},{-\theDTLrowi-0.5}) ;}%
+							% {\filldraw[{\LCPA[\pixcnt]}] ({\n-0.5},{-\theDTLrowi+0.5}) rectangle ({\n+0.5},{-\theDTLrowi-0.5}) ;}%
+						% \fi%
+					% }%
+				}%
+			}%
+			{%
+				\ifboolKV[pixelarttkz]{Symb}%
+					{%affichage du pixelart versions chiffres si besoin
+						\setsepchar{,}%
+						\readlist*\LCNA\PATchiffres%
+						\DTLforeach*{#3}{\csvline=cvsline}{%
+							\setsepchar{,}%
+							\readlist*\tmpcsvline\csvline%
+							\foreachitem\PAchar\in\tmpcsvline{%
+								\StrPosition{\PATlettres}{\PAchar}[\pixpos]%
+								\xintifboolexpr{\pixpos>0}%
+									{%
+										\itemtomacro\LCNA[\pixpos]\pixchf%
+										\draw ({\PAcharcnt-0.5},{-\theDTLrowi+0.5}) rectangle++(1,-1) node[inner sep=0,midway,font=\PATtaille] {\TraiteListeSymbPixelArt{\pixchf}} ;%
+									}%
+									{}%
+								}
+							}%
+					}%
+					{%affichage du pixelart versions lettres ou chiffres simples (<=9) / display of letters/symbols PixelArt
+						\DTLforeach*{#3}{\csvline=cvsline}{%
+							\setsepchar{,}%
+							\readlist*\tmpcsvline\csvline%
+							\foreachitem\PAchar\in\tmpcsvline{%
+								\IfSubStr{\PATlettres}{\PAchar}%
+									{%
+										\draw ({\PAcharcnt-0.5},{-\theDTLrowi+0.5}) rectangle++(1,-1) node[inner sep=0,midway,font=\PATtaille] {\PAchar};%
+									}%
+									{}%
+								}%
+							}%
+					}%
+			}%
+		%affichage des découpages éventuels
+		\IfStrEq{\PATdecoup}{}%
+			{}%
+			{%
+				\xdef\NbLigTot{\DTLrowcount{#3}}%
+				\DTLgetvalue{\myvalrowone}{#3}{1}{1}%
+				\StrCount{\myvalrowone}{,}[\NbColTot]%
+				\xdef\NbColTot{\inteval{\NbColTot+1}}%
+				\IfSubStr{\PATdecoup}{x}%
+					{%
+						\StrCut{\PATdecoup}{x}{\NbLigBloc}{\NbColBloc}%tracés des traits
+						\foreach \i in {0,\NbLigBloc,...,\NbLigTot}{\draw[pixlarttraitdecoup] ({0.5-0.33},{-\i-0.5}) -- ({\NbColTot+0.5+0.33},{-\i-0.5}) ;}%
+						\foreach \j in {0,\NbColBloc,...,\NbColTot}{\draw[pixlarttraitdecoup] ({\j+0.5},{-0.5+0.33}) -- ({\j+0.5},{-\NbLigTot-0.5-0.33}) ;}%
+					}%
+					{}%
+				\IfSubStr{\PATdecoup}{+}%
+					{%
+						\StrCut{\PATdecoup}{+}{\NbBlocLIG}{\NbBlocCOL}%
+						\def\NbLigBloc{\xintieval{(\NbLigTot-1)/\NbBlocLIG}}%
+						\def\NbColBloc{\xintieval{(\NbColTot)/\NbBlocCOL}}%
+						\foreach \i in {0,\NbLigBloc,...,\NbLigTot}{\draw[pixlarttraitdecoup] ({0.5-0.33},{-\i-0.5}) -- ({\NbColTot+0.5+0.33},{-\i-0.5}) ;}%
+						\foreach \j in {0,\NbColBloc,...,\NbColTot}{\draw[pixlarttraitdecoup] ({\j+0.5},{-0.5+0.33}) -- ({\j+0.5},{-\NbLigTot-0.5-0.33}) ;}%
+					}%
+					{}%
+			}%
+	\end{tikzpicture}%
+}
+
+\NewDocumentCommand\dtpixlarttikzblock{ O{} D<>{} m m m }{%commande individuelle avec loi & datatool...
+	%3=fichier
+	%4=taille blocs (LxC) ou nombre de blocs (L+C)
+	%5=numbloc
+	\useKVdefault[pixelarttkz]%
+	\setKV[pixelarttkz]{#1}%
+	\xdef\NbLigTot{\DTLrowcount{#3}}%
+	\DTLgetvalue{\myvalrowone}{#3}{1}{1}%
+	\StrCount{\myvalrowone}{,}[\NbColTot]%
+	\xdef\NbColTot{\inteval{\NbColTot+1}}%
+	\IfSubStr{#4}{x}%
+		{%
+			\StrCut{#4}{x}{\NbLigBloc}{\NbColBloc}%
+		}%
+		{}%
+	\IfSubStr{#4}{+}%
+		{%
+			\StrCut{#4}{+}{\NbBlocLIG}{\NbBlocCOL}%
+			\xdef\NbLigBloc{\xinteval{(\NbLigTot-1)/\NbBlocLIG}}%
+			\xdef\NbColBloc{\xinteval{(\NbColTot)/\NbBlocCOL}}%
+		}%
+		{}%
+	\StrCut{#5}{/}{\NumBlocLig}{\NumBlocCol}%
+	\xdef\PAfirstline{\xinteval{\NbLigBloc*(\NumBlocLig-1)+1}}%
+	\xdef\PAlastline{\xinteval{\NbLigBloc*(\NumBlocLig-1)+\NbLigBloc}}%
+	\xdef\PAblocmin{\xinteval{(\NbColBloc*(\NumBlocCol-1)+1)}}%
+	\xdef\PAblocmax{\xinteval{(\NbColBloc*(\NumBlocCol-1)+\NbColBloc)}}%
+	%affichage du corrigé / display of correction
+	\begin{tikzpicture}[x=\PATunit cm,y=\PATunit cm,#2]
+		\ifboolKV[pixelarttkz]{Correction}%
+			{%
+				\setsepchar{,}%
+				\readlist*\LCPA\PATcouleurs%
+				\foreach \line in {\PAfirstline,...,\PAlastline}{%
+					\DTLgetvalue{\csvline}{#3}{\line}{1}%
+					\setsepchar{,}%
+					\readlist*\tmpcsvline\csvline%
+					\foreachitem\PAchar\in\tmpcsvline{%
+						\xintifboolexpr{ \PAcharcnt >= \PAblocmin 'and' \PAcharcnt <= \PAblocmax}%
+							{%
+								\StrPosition{\PATlettres}{\PAchar}[\pixcnt]%
+								\xintifboolexpr{\pixcnt>0}%
+									{%
+										\itemtomacro\LCPA[\pixcnt]\pixcol%
+										\ifboolKV[pixelarttkz]{BordCases}%
+											{\draw[fill=\pixcol] ({\PAcharcnt-0.5},{-\line+0.5}) rectangle++(1,-1) ;}%
+											{\filldraw[\pixcol] ({\PAcharcnt-0.5},{-\line+0.5}) rectangle++(1,-1) ;}%
+									}%
+									{}%
+							}%
+							{}%
+						}%
+					}%
+			}%
+			{%
+				\ifboolKV[pixelarttkz]{Symb}%
+					{%affichage du pixelart versions chiffres si besoin
+						\setsepchar{,}%
+						\readlist*\LCNA\PATchiffres%
+						\foreach \line in {\PAfirstline,...,\PAlastline}{%
+							\DTLgetvalue{\csvline}{#3}{\line}{1}%
+							\setsepchar{,}%
+							\readlist*\tmpcsvline\csvline%
+							\foreachitem\PAchar\in\tmpcsvline{%
+								\xintifboolexpr{ \PAcharcnt >= \PAblocmin 'and' \PAcharcnt <= \PAblocmax}%
+									{%
+										\StrPosition{\PATlettres}{\PAchar}[\pixpos]%
+										\xintifboolexpr{\pixpos>0}%
+											{%
+												\itemtomacro\LCNA[\pixpos]\pixchf%
+												\draw ({\PAcharcnt-0.5},{-\line+0.5}) rectangle++(1,-1) node[inner sep=0,midway,font=\PATtaille] {\TraiteListeSymbPixelArt{\pixchf}} ;%
+											}%
+											{}%
+									}%
+									{}%
+								}%
+							}%
+					}%
+					{%affichage du pixelart versions lettres ou chiffres simples (<=9) / display of letters/symbols PixelArt
+						\foreach \line in {\PAfirstline,...,\PAlastline}{%
+							\DTLgetvalue{\csvline}{#3}{\line}{1}%
+							\setsepchar{,}%
+							\readlist*\tmpcsvline\csvline%
+							\foreachitem\PAchar\in\tmpcsvline{%
+								\xintifboolexpr{ \PAcharcnt >= \PAblocmin 'and' \PAcharcnt <= \PAblocmax}%
+									{%
+										\IfSubStr{\PATlettres}{\PAchar}%
+											{%
+												\draw ({\PAcharcnt-0.5},{-\line+0.5}) rectangle++(1,-1) node[inner sep=0,midway,font=\PATtaille] {\PAchar};%
+											}%
+											{}%
+									}%
+									{}%
+								}%
+							}%
+					}%
+			}%
+	\end{tikzpicture}%
+}
+
+\endinput

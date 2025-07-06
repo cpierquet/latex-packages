@@ -1,0 +1,761 @@
+% proflycee-tools-complexes.tex
+% Copyright 2023-2024  Cédric Pierquet (expérimental)
+% Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NewDocumentCommand\PartieReelle{ D<>{} m O{\PartReRes} }{%
+	\StrSubstitute{#2}{I}{0}[#3]%
+	\IfEq{#1}{n}%
+		{\ensuremath{\num{\xinteval{#3}}}}{}%
+	\IfEq{#1}{f}%
+		{\ensuremath{\ConversionFraction{#3}}}{}%
+	\IfEq{#1}{df}%
+		{\ensuremath{\ConversionFraction[d]{#3}}}{}%
+}
+\NewDocumentCommand\PartieImaginaire{ D<>{} m O{\PartImRes} }{%
+	\StrSubstitute{#2}{I}{0}[\TmpPartReCplxA]%
+	\StrSubstitute{(#2)-(\TmpPartReCplxA)}{I}{1}[#3]%
+	\IfEq{#1}{n}%
+		{\ensuremath{\num{\xinteval{#3}}}}{}%
+	\IfEq{#1}{f}%
+		{\ensuremath{\ConversionFraction{#3}}}{}%
+	\IfEq{#1}{df}%
+		{\ensuremath{\ConversionFraction[d]{#3}}}{}%
+}
+
+\NewDocumentCommand\AffComplexe{ O{} }{%
+	\ensuremath{%
+		\xintifboolexpr{\xinttmpreCalc == 0 'and' \xinttmpimCalc == 0}{0}{}%
+		\xintifboolexpr{\xinttmpreCalc == 0 'and' \xinttmpimCalc == 1}{\i}{}%
+		\xintifboolexpr{\xinttmpreCalc == 0 'and' \xinttmpimCalc == -1}{-\i}{}%
+		\xintifboolexpr{\xinttmpreCalc == 0 'and' abs(\xinttmpimCalc) != 1 'and' \xinttmpimCalc != 0}{\ConversionFraction[#1]{\xinttmpimCalc}\i}{}%
+		\xintifboolexpr{\xinttmpreCalc != 0 'and' \xinttmpimCalc < 0 'and' \xinttmpimCalc != -1}{\ConversionFraction[#1]{\xinttmpreCalc}-\ConversionFraction[#1]{-(\xinttmpimCalc)}\i}{}%
+		\xintifboolexpr{\xinttmpreCalc != 0 'and' \xinttmpimCalc == -1}{\ConversionFraction[#1]{\xinttmpreCalc}-\i}{}%
+		\xintifboolexpr{\xinttmpreCalc != 0 'and' \xinttmpimCalc == 1}{\ConversionFraction[#1]{\xinttmpreCalc}+\i}{}%
+		\xintifboolexpr{\xinttmpreCalc != 0 'and' \xinttmpimCalc > 0 'and' \xinttmpimCalc != 1}{\ConversionFraction[#1]{\xinttmpreCalc}+\ConversionFraction[#1]{\xinttmpimCalc}\i}{}%
+		\xintifboolexpr{\xinttmpreCalc != 0 'and' \xinttmpimCalc == 0}{\ConversionFraction[#1]{\xinttmpreCalc}}{}%
+	}%
+}
+
+\NewDocumentCommand\Complexe{ O{} m }{%
+	\PartieReelle{#2}[\tmpreA]%
+	\PartieImaginaire{#2}[\tmpimA]%
+	\xdef\xinttmpreCalc{\xinteval{\tmpreA}}%
+	\xdef\xinttmpimCalc{\xinteval{\tmpimA}}%
+	\ensuremath{%
+		\xintifboolexpr{\xinttmpreCalc == 0 'and' \xinttmpimCalc == 0}{0}{}%
+		\xintifboolexpr{\xinttmpreCalc == 0 'and' \xinttmpimCalc == 1}{\i}{}%
+		\xintifboolexpr{\xinttmpreCalc == 0 'and' \xinttmpimCalc == -1}{-\i}{}%
+		\xintifboolexpr{\xinttmpreCalc == 0 'and' abs(\xinttmpimCalc) != 1 'and' \xinttmpimCalc != 0}{\ConversionFraction[#1]{\tmpimA}\i}{}%
+		\xintifboolexpr{\xinttmpreCalc != 0 'and' \xinttmpimCalc < 0 'and' \xinttmpimCalc != -1}{\ConversionFraction[#1]{\tmpreA}-\ConversionFraction[#1]{-(\tmpimA)}\i}{}%
+		\xintifboolexpr{\xinttmpreCalc != 0 'and' \xinttmpimCalc == -1}{\ConversionFraction[#1]{\tmpreA}-\i}{}%
+		\xintifboolexpr{\xinttmpreCalc != 0 'and' \xinttmpimCalc == 1}{\ConversionFraction[#1]{\tmpreA}+\i}{}%
+		\xintifboolexpr{\xinttmpreCalc != 0 'and' \xinttmpimCalc > 0 'and' \xinttmpimCalc != 1}{\ConversionFraction[#1]{\tmpreA}+\ConversionFraction[#1]{\tmpimA}\i}{}%
+		\xintifboolexpr{\xinttmpreCalc != 0 'and' \xinttmpimCalc == 0}{\ConversionFraction[#1]{\tmpreA}}{}%
+	}%
+}
+
+\NewDocumentCommand\SommeComplexes{ O{} m m }{%
+	\PartieReelle{#2}[\tmpreA]%
+	\PartieReelle{#3}[\tmpreB]%
+	\PartieImaginaire{#2}[\tmpimA]%
+	\PartieImaginaire{#3}[\tmpimB]%
+	%\xdef\tmpreCalc{(\tmpreA)+(\tmpreB)}%
+	\xdef\xinttmpreCalc{\xinteval{(\tmpreA)+(\tmpreB)}}%
+	%\xdef\tmpimCalc{(\tmpimA)+(\tmpimB)}%
+	\xdef\xinttmpimCalc{\xinteval{(\tmpimA)+(\tmpimB)}}%
+	%\xinttmpreCalc\text{ et }\xinttmpimCalc.
+	\AffComplexe[#1]%
+}
+
+\NewDocumentCommand\DifferenceComplexes{ O{} m m }{%
+	\PartieReelle{#2}[\tmpreA]%
+	\PartieReelle{#3}[\tmpreB]%
+	\PartieImaginaire{#2}[\tmpimA]%
+	\PartieImaginaire{#3}[\tmpimB]%
+	%\xdef\tmpreCalc{(\tmpreA)-(\tmpreB)}%
+	\xdef\xinttmpreCalc{\xinteval{(\tmpreA)-(\tmpreB)}}%
+	%\xdef\tmpimCalc{(\tmpimA)-(\tmpimB)}%
+	\xdef\xinttmpimCalc{\xinteval{(\tmpimA)-(\tmpimB)}}%
+	%\xinttmpreCalc\text{ et }\xinttmpimCalc.
+	\AffComplexe[#1]%
+}
+
+\NewDocumentCommand\ProduitComplexes{ O{} m m }{%
+	\PartieReelle{#2}[\tmpreA]%
+	\PartieReelle{#3}[\tmpreB]%
+	\PartieImaginaire{#2}[\tmpimA]%
+	\PartieImaginaire{#3}[\tmpimB]%
+	\xdef\tmpreCalc{(\tmpreA)*(\tmpreB)-(\tmpimA)*(\tmpimB)}%
+	\xdef\xinttmpreCalc{\xinteval{\tmpreCalc}}%
+	\xdef\tmpimCalc{(\tmpreA)*(\tmpimB)+(\tmpimA)*(\tmpreB)}%
+	\xdef\xinttmpimCalc{\xinteval{\tmpimCalc}}%
+	%\xinttmpreCalc\text{ et }\xinttmpimCalc.
+	\AffComplexe[#1]%
+}
+
+\NewDocumentCommand\QuotientComplexes{ O{} m m }{%
+	\PartieReelle{#2}[\tmpreA]%
+	\PartieReelle{#3}[\tmpreB]%
+	\PartieImaginaire{#2}[\tmpimA]%
+	\PartieImaginaire{#3}[\tmpimB]%
+	\xdef\tmpreCalc{((\tmpreA)*(\tmpreB)+(\tmpimA)*(\tmpimB))/((\tmpreB)*(\tmpreB)+(\tmpimB)*(\tmpimB))}%
+	\xdef\xinttmpreCalc{\xinteval{\tmpreCalc}}%
+	\xdef\tmpimCalc{(-(\tmpreA)*(\tmpimB)+(\tmpimA)*(\tmpreB))/((\tmpreB)*(\tmpreB)+(\tmpimB)*(\tmpimB))}%
+	\xdef\xinttmpimCalc{\xinteval{\tmpimCalc}}%
+	%\xinttmpreCalc\text{ et }\xinttmpimCalc.
+	\AffComplexe[#1]%
+}
+
+\NewDocumentCommand\CarreComplexe{ O{} m }{%
+	\PartieReelle{#2}[\tmpreA]%
+	\PartieImaginaire{#2}[\tmpimA]%
+	\xdef\tmpreCalc{(\tmpreA)*(\tmpreA)-(\tmpimA)*(\tmpimA)}%
+	\xdef\xinttmpreCalc{\xinteval{\tmpreCalc}}%
+	\xdef\tmpimCalc{2*(\tmpreA)*(\tmpimA)}%
+	\xdef\xinttmpimCalc{\xinteval{\tmpimCalc}}%
+	%\xinttmpreCalc\text{ et }\xinttmpimCalc.
+	\AffComplexe[#1]%
+}
+
+\NewDocumentCommand\CubeComplexe{ O{} m }{%
+	\PartieReelle{#2}[\tmpreA]%
+	\PartieImaginaire{#2}[\tmpimA]%
+	\xdef\tmpreCalc{(\tmpreA)*(\tmpreA)*(\tmpreA)-3*(\tmpreA)*(\tmpimA)*(\tmpimA)}%
+	\xdef\xinttmpreCalc{\xinteval{\tmpreCalc}}%
+	\xdef\tmpimCalc{3*(\tmpreA)*(\tmpreA)*(\tmpimA)-(\tmpimA)*(\tmpimA)*(\tmpimA)}%
+	\xdef\xinttmpimCalc{\xinteval{\tmpimCalc}}%
+	%\xinttmpreCalc\text{ et }\xinttmpimCalc.
+	\AffComplexe[#1]%
+}
+
+\NewDocumentCommand\ModuleComplexe{ m }{%
+	\PartieReelle{#1}[\tmpreA]%
+	\PartieImaginaire{#1}[\tmpimA]%
+	\IfSubStr{\tmpreA}{sqrt}%
+		{%
+			\StrDel{\tmpreA}{sqrt}[\tmpretmpA]%
+		}%
+		{%
+			\xdef\tmpretmpA{\tmpreA}%
+		}%
+	\IfSubStr{\tmpimA}{sqrt}%
+		{%
+			\StrDel{\tmpimA}{sqrt}[\tmpimtmpA]%
+		}%
+		{%
+			\xdef\tmpimtmpA{\tmpimA}%
+		}%
+	\IfSubStr{\tmpreA}{sqrt}%
+		{%
+			\IfSubStr{\tmpimA}{sqrt}%
+				{%
+					\xdef\tmpCarreModule{abs(\tmpretmpA)+abs(\tmpimtmpA)}%
+				}%
+				{%
+					\xdef\tmpCarreModule{abs(\tmpretmpA)+(\tmpimtmpA)*(\tmpimtmpA)}%
+				}%
+		}%
+		{%
+			\xdef\tmpCarreModule{(\tmpretmpA)*(\tmpretmpA)+(\tmpimtmpA)*(\tmpimtmpA)}%
+		}%
+	\ensuremath{\SimplificationRacine{\tmpCarreModule}}%
+}
+
+\NewDocumentCommand\ArgumentComplexe{ O{} m }{%
+	\PartieReelle{#2}[\tmpreA]%
+	\PartieImaginaire{#2}[\tmpimA]%
+	\xdef\tmpCarreModule{(\tmpreA)*(\tmpreA)+(\tmpimA)*(\tmpimA)}%
+	\xdef\tmpModUnRe{(\tmpreA)/(sqrt(\tmpCarreModule))}%
+	\xdef\tmpModUnIm{(\tmpimA)/(sqrt(\tmpCarreModule))}%
+	\ensuremath{%
+		\xintifboolexpr{\tmpModUnRe == 1 'and' \tmpModUnIm == 0}{0}{}%
+		\xintifboolexpr{\tmpModUnRe == -1 'and' \tmpModUnIm == 0}{\pi}{}%
+		\xintifboolexpr{\tmpModUnRe == 0.5 'and' \tmpModUnIm > 0}{\IfEq{#1}{d}{\dfrac{\pi}{3}}{\frac{\pi}{3}}}{}%
+		\xintifboolexpr{\tmpModUnRe == 0.5 'and' \tmpModUnIm < 0}{\IfEq{#1}{d}{\dfrac{-\pi}{3}}{\frac{-\pi}{3}}}{}%
+		\xintifboolexpr{\tmpModUnRe == -0.5 'and' \tmpModUnIm > 0}{\IfEq{#1}{d}{\dfrac{2\pi}{3}}{\frac{2\pi}{3}}}{}%
+		\xintifboolexpr{\tmpModUnRe == -0.5 'and' \tmpModUnIm < 0}{\IfEq{#1}{d}{\dfrac{-2\pi}{3}}{\frac{-2\pi}{3}}}{}%
+		\xintifboolexpr{\tmpModUnRe > 0 'and' \tmpModUnIm == 0.5}{\IfEq{#1}{d}{\dfrac{\pi}{6}}{\frac{\pi}{6}}}{}%
+		\xintifboolexpr{\tmpModUnRe < 0 'and' \tmpModUnIm == 0.5}{\IfEq{#1}{d}{\dfrac{5\pi}{6}}{\frac{5\pi}{6}}}{}%
+		\xintifboolexpr{\tmpModUnRe > 0 'and' \tmpModUnIm == -0.5}{\IfEq{#1}{d}{\dfrac{-\pi}{6}}{\frac{-\pi}{6}}}{}%
+		\xintifboolexpr{\tmpModUnRe < 0 'and' \tmpModUnIm == -0.5}{\IfEq{#1}{d}{\dfrac{-5\pi}{6}}{\frac{-5\pi}{6}}}{}%
+		\xintifboolexpr{\tmpModUnRe == \tmpModUnIm 'and' \tmpModUnRe > 0}{\IfEq{#1}{d}{\dfrac{\pi}{4}}{\frac{\pi}{4}}}{}%
+		\xintifboolexpr{\tmpModUnRe == \tmpModUnIm 'and' \tmpModUnRe < 0}{\IfEq{#1}{d}{\dfrac{-3\pi}{4}}{\frac{-3\pi}{4}}}{}%
+		\xintifboolexpr{\tmpModUnRe == -\tmpModUnIm 'and' \tmpModUnRe > 0}{\IfEq{#1}{d}{\dfrac{-\pi}{4}}{\frac{-\pi}{4}}}{}%
+		\xintifboolexpr{\tmpModUnRe == -\tmpModUnIm 'and' \tmpModUnRe < 0}{\IfEq{#1}{d}{\dfrac{3\pi}{4}}{\frac{3\pi}{4}}}{}%
+		\xintifboolexpr{\tmpModUnRe == 0 'and' \tmpModUnIm == 1}{\IfEq{#1}{d}{\dfrac{\pi}{2}}{\frac{\pi}{2}}}{}%
+		\xintifboolexpr{\tmpModUnRe == 0 'and' \tmpModUnIm == -1}{\IfEq{#1}{d}{\dfrac{-\pi}{2}}{\frac{-\pi}{2}}}{}%
+	}%
+}
+
+\NewDocumentCommand\FormeExpoComplexe{ m }{%
+	\PartieReelle{#1}[\tmpreA]%
+	\PartieImaginaire{#1}[\tmpimA]%
+	\IfSubStr{\tmpreA}{sqrt}%
+		{%
+			\StrDel{\tmpreA}{sqrt}[\tmpretmpA]%
+		}%
+		{%
+			\xdef\tmpretmpA{\tmpreA}%
+		}%
+	\IfSubStr{\tmpimA}{sqrt}%
+		{%
+			\StrDel{\tmpimA}{sqrt}[\tmpimtmpA]%
+		}%
+		{%
+			\xdef\tmpimtmpA{\tmpimA}%
+		}%
+	\IfSubStr{\tmpreA}{sqrt}%
+		{%
+			\IfSubStr{\tmpimA}{sqrt}%
+				{%
+					\xdef\tmpCarreModule{abs(\tmpretmpA)+abs(\tmpimtmpA)}%
+				}%
+				{%
+					\xdef\tmpCarreModule{abs(\tmpretmpA)+(\tmpimtmpA)*(\tmpimtmpA)}%
+				}%
+		}%
+		{%
+			\xdef\tmpCarreModule{(\tmpretmpA)*(\tmpretmpA)+(\tmpimtmpA)*(\tmpimtmpA)}%
+		}%
+	\xdef\tmpModUnRe{(\tmpreA)/(sqrt(\tmpCarreModule))}%
+	\xdef\tmpModUnIm{(\tmpimA)/(sqrt(\tmpCarreModule))}%
+	\ensuremath{%
+		\xintifboolexpr{\tmpCarreModule == 1}{}{\SimplificationRacine{\tmpCarreModule}}%
+		\e^{%
+			\xintifboolexpr{\tmpModUnRe == 1 'and' \tmpModUnIm == 0}{0}{}%
+			\xintifboolexpr{\tmpModUnRe == -1 'and' \tmpModUnIm == 0}{\i\pi}{}%
+			\xintifboolexpr{\tmpModUnRe == 0.5 'and' \tmpModUnIm > 0}{\IfEq{#1}{d}{\dfrac{\i\pi}{3}}{\frac{\i\pi}{3}}}{}%
+			\xintifboolexpr{\tmpModUnRe == 0.5 'and' \tmpModUnIm < 0}{\IfEq{#1}{d}{\dfrac{-\i\pi}{3}}{\frac{-\i\pi}{3}}}{}%
+			\xintifboolexpr{\tmpModUnRe == -0.5 'and' \tmpModUnIm > 0}{\IfEq{#1}{d}{\dfrac{2\i\pi}{3}}{\frac{2\i\pi}{3}}}{}%
+			\xintifboolexpr{\tmpModUnRe == -0.5 'and' \tmpModUnIm < 0}{\IfEq{#1}{d}{\dfrac{-2\i\pi}{3}}{\frac{-2\i\pi}{3}}}{}%
+			\xintifboolexpr{\tmpModUnRe > 0 'and' \tmpModUnIm == 0.5}{\IfEq{#1}{d}{\dfrac{\i\pi}{6}}{\frac{\i\pi}{6}}}{}%
+			\xintifboolexpr{\tmpModUnRe < 0 'and' \tmpModUnIm == 0.5}{\IfEq{#1}{d}{\dfrac{5\i\pi}{6}}{\frac{5\i\pi}{6}}}{}%
+			\xintifboolexpr{\tmpModUnRe > 0 'and' \tmpModUnIm == -0.5}{\IfEq{#1}{d}{\dfrac{-\i\pi}{6}}{\frac{-\i\pi}{6}}}{}%
+			\xintifboolexpr{\tmpModUnRe < 0 'and' \tmpModUnIm == -0.5}{\IfEq{#1}{d}{\dfrac{-5\i\pi}{6}}{\frac{-5\i\pi}{6}}}{}%
+			\xintifboolexpr{\tmpModUnRe == \tmpModUnIm 'and' \tmpModUnRe > 0}{\IfEq{#1}{d}{\dfrac{\i\pi}{4}}{\frac{\i\pi}{4}}}{}%
+			\xintifboolexpr{\tmpModUnRe == \tmpModUnIm 'and' \tmpModUnRe < 0}{\IfEq{#1}{d}{\dfrac{-3\i\pi}{4}}{\frac{-3\i\pi}{4}}}{}%
+			\xintifboolexpr{\tmpModUnRe == -\tmpModUnIm 'and' \tmpModUnRe > 0}{\IfEq{#1}{d}{\dfrac{-\i\pi}{4}}{\frac{-\i\pi}{4}}}{}%
+			\xintifboolexpr{\tmpModUnRe == -\tmpModUnIm 'and' \tmpModUnRe < 0}{\IfEq{#1}{d}{\dfrac{3\i\pi}{4}}{\frac{3\i\pi}{4}}}{}%
+			\xintifboolexpr{\tmpModUnRe == 0 'and' \tmpModUnIm == 1}{\IfEq{#1}{d}{\dfrac{\i\pi}{2}}{\frac{\i\pi}{2}}}{}%
+			\xintifboolexpr{\tmpModUnRe == 0 'and' \tmpModUnIm == -1}{\IfEq{#1}{d}{\dfrac{-\i\pi}{2}}{\frac{-\i\pi}{2}}}{}%
+		}%
+	}%
+}
+
+%====commandes alternatives
+\NewDocumentCommand\ExtractionCoeffExprRacines{ m O{\tmpCoeffA} O{\tmpCoeffB} O{\tmpCoeffC} O{\tmpCoeffD} }{%a*rac(b)+c*rac(d)
+	\IfSubStr{#1}{+}
+		{%
+			\StrCut{#1}{+}{\exprtestG}{\exprtestD}%
+			\IfSubStr{\exprtestG}{*sqrt}%
+				{%
+					\StrBefore{\exprtestG}{*}[#2]%
+					\StrBetween{\exprtestG}{sqrt(}{)}[#3]%
+				}%
+				{%
+					\xdef#2{\exprtestG}\xdef#3{1}%
+				}%
+			\IfSubStr{\exprtestD}{*sqrt}%
+				{%
+					\StrBefore{\exprtestD}{*}[#4]%
+					\StrBetween{\exprtestD}{sqrt(}{)}[#5]%
+				}%
+				{%
+					\xdef#4{\exprtestD}\xdef#5{1}%
+				}%
+		}%
+	{%
+		%si 2 moins...
+		\StrCount{#1}{-}[\tmpNbmoins]%
+		\xintifboolexpr{\tmpNbmoins == 2}%
+			{%
+				\StrCut[2]{#1}{-}{\exprtestG}{\exprtestD}%
+			}%
+			{%
+				\StrCut{#1}{-}{\exprtestG}{\exprtestD}%
+			}%
+		\IfSubStr{\exprtestG}{*sqrt}%
+			{%
+				\StrBefore{\exprtestG}{*}[#2]%
+				\StrBetween{\exprtestG}{sqrt(}{)}[#3]%
+			}%
+			{%
+				\xdef#2{\exprtestG}\xdef#3{1}%
+			}%
+		\IfSubStr{\exprtestD}{*sqrt}%
+			{%
+				\StrBefore{\exprtestD}{*}[#4]%
+				\xdef#4{-#4}%
+				\StrBetween{\exprtestD}{sqrt(}{)}[#5]%
+			}%
+			{%
+				\xdef#4{-#4}\xdef#5{1}%
+			}%
+	}%
+}
+
+\NewDocumentCommand\SimplifCarreExprRacine{ O{} m }{%
+	\ExtractionCoeffExprRacines{#2}%
+	\xintifboolexpr{\tmpCoeffA > 0 'and' \tmpCoeffC > 0}%
+		{%
+			\ensuremath{%
+				\ConversionFraction[#1]{(\tmpCoeffA)*(\tmpCoeffA)*(\tmpCoeffB)+(\tmpCoeffC)*(\tmpCoeffC)*(\tmpCoeffD)}+%
+				\IfEq{#1}{d}{\displaystyle}{}\SimplificationRacine{4*(\tmpCoeffA)*(\tmpCoeffA)*(\tmpCoeffC)*(\tmpCoeffC)*(\tmpCoeffB)*(\tmpCoeffD)}%
+			}%
+		}%
+		{}%
+	\xintifboolexpr{\tmpCoeffA > 0 'and' \tmpCoeffC < 0}%
+		{%
+			\ensuremath{%
+				\ConversionFraction[#1]{(\tmpCoeffA)*(\tmpCoeffA)*(\tmpCoeffB)+(\tmpCoeffC)*(\tmpCoeffC)*(\tmpCoeffD)}-%
+				\IfEq{#1}{d}{\displaystyle}{}\SimplificationRacine{4*(\tmpCoeffA)*(\tmpCoeffA)*(\tmpCoeffC)*(\tmpCoeffC)*(\tmpCoeffB)*(\tmpCoeffD)}%
+			}%
+		}%
+		{}%
+	\xintifboolexpr{\tmpCoeffA < 0 'and' \tmpCoeffC > 0}%
+		{%
+			\ensuremath{%
+				\ConversionFraction[#1]{(\tmpCoeffA)*(\tmpCoeffA)*(\tmpCoeffB)+(\tmpCoeffC)*(\tmpCoeffC)*(\tmpCoeffD)}-%
+				\IfEq{#1}{d}{\displaystyle}{}\SimplificationRacine{4*(\tmpCoeffA)*(\tmpCoeffA)*(\tmpCoeffC)*(\tmpCoeffC)*(\tmpCoeffB)*(\tmpCoeffD)}%
+			}%
+		}%
+		{}%
+	\xintifboolexpr{\tmpCoeffA < 0 'and' \tmpCoeffC < 0}%
+		{%
+			\ensuremath{%
+				\ConversionFraction[#1]{(\tmpCoeffA)*(\tmpCoeffA)*(\tmpCoeffB)+(\tmpCoeffC)*(\tmpCoeffC)*(\tmpCoeffD)}+%
+				\IfEq{#1}{d}{\displaystyle}{}\SimplificationRacine{4*(\tmpCoeffA)*(\tmpCoeffA)*(\tmpCoeffC)*(\tmpCoeffC)*(\tmpCoeffB)*(\tmpCoeffD)}%
+			}%
+		}%
+		{}%
+}
+
+\NewDocumentCommand\CalculModuleCplx{ O{} m m }{%
+	\ExtractionCoeffExprRacines{#2}[\Crea][\Creb][\Crec][\Cred]%
+	\ExtractionCoeffExprRacines{#3}[\Cima][\Cimb][\Cimc][\Cimd]%
+	\xdef\TmpCoeffsDebut{(\Crea)*(\Crea)*(\Creb)+(\Crec)*(\Crec)*(\Cred)+(\Cima)*(\Cima)*(\Cimb)+(\Cimc)*(\Cimc)*(\Cimd)}%
+	\xdef\TmpCoeffsRacineA{4*(\Crea)*(\Crea)*(\Crec)*(\Crec)*(\Creb)*(\Cred)}%
+	\xdef\TmpCoeffsRacineB{4*(\Cima)*(\Cima)*(\Cimc)*(\Cimc)*(\Cimb)*(\Cimd)}%
+	%\xinteval{\TmpCoeffsDebut}/\xinteval{\TmpCoeffsRacineA}/\xinteval{\TmpCoeffsRacineB}/\xinteval{(\Crea)*(\Crec)}/\xinteval{(\Cima)*(\Cimc)}=
+	\xintifboolexpr{\TmpCoeffsRacineA == 0 'and' \TmpCoeffsRacineB == 0}%
+		{%
+			\ensuremath{\IfEq{#1}{d}{\displaystyle}{}\SimplificationRacine{\TmpCoeffsDebut}}%
+		}%
+		{}%
+	\xintifboolexpr{\TmpCoeffsRacineA == 0 'and' \TmpCoeffsRacineB != 0}%
+		{%
+			\ensuremath{\IfEq{#1}{d}{\displaystyle}{}\sqrt{\SimplificationRacine{(\TmpCoeffsDebut)*(\TmpCoeffsDebut)}\xintifboolexpr{(\Cima)*(\Cimc) < 0}{-}{+}\SimplificationRacine{\TmpCoeffsRacineB}}}%
+		}%
+		{}%
+	\xintifboolexpr{\TmpCoeffsRacineA != 0 'and' \TmpCoeffsRacineB == 0}%
+		{%
+			\ensuremath{\IfEq{#1}{d}{\displaystyle}{}\sqrt{\SimplificationRacine{(\TmpCoeffsDebut)*(\TmpCoeffsDebut)}\xintifboolexpr{(\Crea)*(\Crec) < 0}{-}{+}\SimplificationRacine{\TmpCoeffsRacineA}}}%
+		}%
+		{}%
+	\xintifboolexpr{\TmpCoeffsRacineA != 0 'and' \TmpCoeffsRacineB != 0 'and' (\Crea)*(\Crec) < 0 'and' (\Cima)*(\Cimc) > 0 'and' \TmpCoeffsRacineA == \TmpCoeffsRacineB}%
+		{%
+			\ensuremath{\IfEq{#1}{d}{\displaystyle}{}\SimplificationRacine{\TmpCoeffsDebut}}%
+		}%
+		{}%
+	\xintifboolexpr{\TmpCoeffsRacineA != 0 'and' \TmpCoeffsRacineB != 0 'and' (\Crea)*(\Crec) > 0 'and' (\Cima)*(\Cimc) < 0 'and' \TmpCoeffsRacineA == \TmpCoeffsRacineB}%
+		{%
+			\ensuremath{\IfEq{#1}{d}{\displaystyle}{}\SimplificationRacine{\TmpCoeffsDebut}}%
+		}%
+		{}%
+	\xintifboolexpr{\TmpCoeffsRacineA != \TmpCoeffsRacineB}%
+		{%
+			\ensuremath{\IfEq{#1}{d}{\displaystyle}{}\sqrt{\SimplificationRacine{(\TmpCoeffsDebut)*(\TmpCoeffsDebut)}\xintifboolexpr{(\Crea)*(\Crec) < 0}{-}{+}\SimplificationRacine{\TmpCoeffsRacineA}\xintifboolexpr{(\Cima)*(\Cimc) < 0}{-}{+}\SimplificationRacine{\TmpCoeffsRacineB}}}%
+		}%
+		{}%
+}
+
+\NewDocumentCommand\TestArgumentComplexe{ O{} m m m }{%
+	\xintifboolexpr{\TmpArg == #2 'or' \TmpArg == #3}{\ensuremath{\IfEq{#1}{d}{\displaystyle}{}#4}}{}%
+}
+
+\NewDocumentCommand\CalculArgumentCplx{ s O{} m m }{%
+	\xdef\TmpArg{\xintfloateval{trunc(Argd(#3,#4),1)}}%\TmpArg%
+	\IfBooleanTF{#1}%
+		{%
+			%les pi/2
+			\TestArgumentComplexe[#2]{0}{0.0}{0}%
+			\TestArgumentComplexe[#2]{90}{90.0}{\frac{\pi}{2}}%
+			\TestArgumentComplexe[#2]{-90}{-90.0}{\frac{3\pi}{2}}%
+			\TestArgumentComplexe[#2]{180}{180.0}{\pi}%
+			%les pi/3
+			\TestArgumentComplexe[#2]{60}{60.0}{\frac{\pi}{3}}%
+			\TestArgumentComplexe[#2]{120}{120.0}{\frac{2\pi}{3}}%
+			\TestArgumentComplexe[#2]{-60}{-60.0}{\frac{5\pi}{3}}%
+			\TestArgumentComplexe[#2]{-120}{-120.0}{\frac{4\pi}{3}}%
+			%les pi/4
+			\TestArgumentComplexe[#2]{45}{45.0}{\frac{\pi}{4}}%
+			\TestArgumentComplexe[#2]{135}{135.0}{\frac{3\pi}{4}}%
+			\TestArgumentComplexe[#2]{-45}{-45.0}{\frac{7\pi}{4}}%
+			\TestArgumentComplexe[#2]{-135}{-135.0}{\frac{5\pi}{4}}%
+			%les pi/5
+			\TestArgumentComplexe[#2]{36}{36.0}{\frac{\pi}{5}}%
+			\TestArgumentComplexe[#2]{72}{72.0}{\frac{2\pi}{5}}%
+			\TestArgumentComplexe[#2]{108}{108.0}{\frac{3\pi}{5}}%
+			\TestArgumentComplexe[#2]{144}{144.0}{\frac{4\pi}{5}}%
+			\TestArgumentComplexe[#2]{-36}{-36.0}{\frac{9\pi}{5}}%
+			\TestArgumentComplexe[#2]{-72}{-72.0}{\frac{8\pi}{5}}%
+			\TestArgumentComplexe[#2]{-108}{-108.0}{\frac{7\pi}{5}}%
+			\TestArgumentComplexe[#2]{-144}{-144.0}{\frac{6\pi}{5}}%
+			%les pi/6
+			\TestArgumentComplexe[#2]{30}{30.0}{\frac{\pi}{6}}%
+			\TestArgumentComplexe[#2]{150}{150.0}{\frac{5\pi}{6}}%
+			\TestArgumentComplexe[#2]{-30}{-30.0}{\frac{11\pi}{6}}%
+			\TestArgumentComplexe[#2]{-150}{-150.0}{\frac{7\pi}{6}}%
+			%les pi/8
+			\TestArgumentComplexe[#2]{22.5}{22.5}{\frac{\pi}{8}}%
+			\TestArgumentComplexe[#2]{67.5}{67.5}{\frac{3\pi}{8}}%
+			\TestArgumentComplexe[#2]{112.5}{112.5}{\frac{5\pi}{8}}%
+			\TestArgumentComplexe[#2]{157.5}{157.5}{\frac{7\pi}{8}}%
+			\TestArgumentComplexe[#2]{-22.5}{-22.5}{\frac{15\pi}{8}}%
+			\TestArgumentComplexe[#2]{-67.5}{-67.5}{\frac{13\pi}{8}}%
+			\TestArgumentComplexe[#2]{-112.5}{-112.5}{\frac{11\pi}{8}}%
+			\TestArgumentComplexe[#2]{-157.5}{-157.5}{\frac{9\pi}{8}}%
+			%les pi/12
+			\TestArgumentComplexe[#2]{15}{15.0}{\frac{\pi}{12}}%
+			\TestArgumentComplexe[#2]{75}{75.0}{\frac{5\pi}{12}}%
+			\TestArgumentComplexe[#2]{105}{105.0}{\frac{7\pi}{12}}%
+			\TestArgumentComplexe[#2]{165}{165.0}{\frac{11\pi}{12}}%
+			\TestArgumentComplexe[#2]{-15}{-15.0}{\frac{23\pi}{12}}%
+			\TestArgumentComplexe[#2]{-75}{-75.0}{\frac{19\pi}{12}}%
+			\TestArgumentComplexe[#2]{-105}{-105.0}{\frac{17\pi}{12}}%
+			\TestArgumentComplexe[#2]{-165}{-165.0}{\frac{13\pi}{12}}%
+			%les pi/10
+			\TestArgumentComplexe[#2]{18}{18.0}{\frac{\pi}{10}}%
+			\TestArgumentComplexe[#2]{54}{54.0}{\frac{3\pi}{10}}%
+			\TestArgumentComplexe[#2]{126}{126.0}{\frac{7\pi}{10}}%
+			\TestArgumentComplexe[#2]{162}{162.0}{\frac{9\pi}{10}}%
+			\TestArgumentComplexe[#2]{-18}{-18.0}{\frac{19\pi}{10}}%
+			\TestArgumentComplexe[#2]{-54}{-54.0}{\frac{17\pi}{10}}%
+			\TestArgumentComplexe[#2]{-126}{-126.0}{\frac{13\pi}{10}}%
+			\TestArgumentComplexe[#2]{-162}{-162.0}{\frac{11\pi}{10}}%
+		}%
+		{%
+			%les pi/2
+			\TestArgumentComplexe[#2]{0}{0.0}{0}%
+			\TestArgumentComplexe[#2]{90}{90.0}{\frac{\pi}{2}}%
+			\TestArgumentComplexe[#2]{-90}{-90.0}{\frac{-\pi}{2}}%
+			\TestArgumentComplexe[#2]{180}{180.0}{\pi}%
+			%les pi/3
+			\TestArgumentComplexe[#2]{60}{60.0}{\frac{\pi}{3}}%
+			\TestArgumentComplexe[#2]{120}{120.0}{\frac{2\pi}{3}}%
+			\TestArgumentComplexe[#2]{-60}{-60.0}{\frac{-\pi}{3}}%
+			\TestArgumentComplexe[#2]{-120}{-120.0}{\frac{-2\pi}{3}}%
+			%les pi/4
+			\TestArgumentComplexe[#2]{45}{45.0}{\frac{\pi}{4}}%
+			\TestArgumentComplexe[#2]{135}{135.0}{\frac{3\pi}{4}}%
+			\TestArgumentComplexe[#2]{-45}{-45.0}{\frac{-\pi}{4}}%
+			\TestArgumentComplexe[#2]{-135}{-135.0}{\frac{-3\pi}{4}}%
+			%les pi/5
+			\TestArgumentComplexe[#2]{36}{36.0}{\frac{\pi}{5}}%
+			\TestArgumentComplexe[#2]{72}{72.0}{\frac{2\pi}{5}}%
+			\TestArgumentComplexe[#2]{108}{108.0}{\frac{3\pi}{5}}%
+			\TestArgumentComplexe[#2]{144}{144.0}{\frac{4\pi}{5}}%
+			\TestArgumentComplexe[#2]{-36}{-36.0}{\frac{-\pi}{5}}%
+			\TestArgumentComplexe[#2]{-72}{-72.0}{\frac{-2\pi}{5}}%
+			\TestArgumentComplexe[#2]{-108}{-108.0}{\frac{-3\pi}{5}}%
+			\TestArgumentComplexe[#2]{-144}{-144.0}{\frac{-4\pi}{5}}%
+			%les pi/6
+			\TestArgumentComplexe[#2]{30}{30.0}{\frac{\pi}{6}}%
+			\TestArgumentComplexe[#2]{150}{150.0}{\frac{5\pi}{6}}%
+			\TestArgumentComplexe[#2]{-30}{-30.0}{\frac{-\pi}{6}}%
+			\TestArgumentComplexe[#2]{-150}{-150.0}{\frac{-5\pi}{6}}%
+			%les pi/8
+			\TestArgumentComplexe[#2]{22.5}{22.5}{\frac{\pi}{8}}%
+			\TestArgumentComplexe[#2]{67.5}{67.5}{\frac{3\pi}{8}}%
+			\TestArgumentComplexe[#2]{112.5}{112.5}{\frac{5\pi}{8}}%
+			\TestArgumentComplexe[#2]{157.5}{157.5}{\frac{7\pi}{8}}%
+			\TestArgumentComplexe[#2]{-22.5}{-22.5}{\frac{-\pi}{8}}%
+			\TestArgumentComplexe[#2]{-67.5}{-67.5}{\frac{-3\pi}{8}}%
+			\TestArgumentComplexe[#2]{-112.5}{-112.5}{\frac{-5\pi}{8}}%
+			\TestArgumentComplexe[#2]{-157.5}{-157.5}{\frac{-7\pi}{8}}%
+			%les pi/12
+			\TestArgumentComplexe[#2]{15}{15.0}{\frac{\pi}{12}}%
+			\TestArgumentComplexe[#2]{75}{75.0}{\frac{5\pi}{12}}%
+			\TestArgumentComplexe[#2]{105}{105.0}{\frac{7\pi}{12}}%
+			\TestArgumentComplexe[#2]{165}{165.0}{\frac{11\pi}{12}}%
+			\TestArgumentComplexe[#2]{-15}{-15.0}{\frac{-\pi}{12}}%
+			\TestArgumentComplexe[#2]{-75}{-75.0}{\frac{-5\pi}{12}}%
+			\TestArgumentComplexe[#2]{-105}{-105.0}{\frac{-7\pi}{12}}%
+			\TestArgumentComplexe[#2]{-165}{-165.0}{\frac{-11\pi}{12}}%
+			%les pi/10
+			\TestArgumentComplexe[#2]{18}{18.0}{\frac{\pi}{10}}%
+			\TestArgumentComplexe[#2]{54}{54.0}{\frac{3\pi}{10}}%
+			\TestArgumentComplexe[#2]{126}{126.0}{\frac{7\pi}{10}}%
+			\TestArgumentComplexe[#2]{162}{162.0}{\frac{9\pi}{10}}%
+			\TestArgumentComplexe[#2]{-18}{-18.0}{\frac{-\pi}{10}}%
+			\TestArgumentComplexe[#2]{-54}{-54.0}{\frac{-3\pi}{10}}%
+			\TestArgumentComplexe[#2]{-126}{-126.0}{\frac{-7\pi}{10}}%
+			\TestArgumentComplexe[#2]{-162}{-162.0}{\frac{-9\pi}{10}}%
+		}%
+}
+
+\NewDocumentCommand\CalculFormeExpoCplx{ s O{} m m }{%
+	\xdef\TmpArg{\xintfloateval{trunc(Argd(#3,#4),1)}}%\TmpArg%
+	\ensuremath{%
+		\xintifboolexpr{(#3)**2+(#4)**2 == 1 'and' \TmpArg == 0}{1}{}%
+		\xintifboolexpr{(#3)**2+(#4)**2 == 1 'and' \TmpArg != 0}{}{\CalculModuleCplx[#2]{#3}{#4}}%
+		\IfBooleanTF{#1}%
+			{%
+				%les pi/2
+				\TestArgumentComplexe[#2]{0}{0.0}{}%
+				\TestArgumentComplexe[#2]{90}{90.0}{\e^{\frac{\i\pi}{2}}}%
+				\TestArgumentComplexe[#2]{-90}{-90.0}{\e^{\frac{3\i\pi}{2}}}%
+				\TestArgumentComplexe[#2]{180}{180.0}{\e^{\i\pi}}%
+				%les pi/3
+				\TestArgumentComplexe[#2]{60}{60.0}{\e^{\frac{\i\pi}{3}}}%
+				\TestArgumentComplexe[#2]{120}{120.0}{\e^{\frac{2\i\pi}{3}}}%
+				\TestArgumentComplexe[#2]{-60}{-60.0}{\e^{\frac{5\i\pi}{3}}}%
+				\TestArgumentComplexe[#2]{-120}{-120.0}{\e^{\frac{4\i\pi}{3}}}%
+				%les pi/4
+				\TestArgumentComplexe[#2]{45}{45.0}{\e^{\frac{\i\pi}{4}}}%
+				\TestArgumentComplexe[#2]{135}{135.0}{\e^{\frac{3\i\pi}{4}}}%
+				\TestArgumentComplexe[#2]{-45}{-45.0}{\e^{\frac{7\i\pi}{4}}}%
+				\TestArgumentComplexe[#2]{-135}{-135.0}{\e^{\frac{5\i\pi}{4}}}%
+				%les pi/5
+				\TestArgumentComplexe[#2]{36}{36.0}{\e^{\frac{\i\pi}{5}}}%
+				\TestArgumentComplexe[#2]{72}{72.0}{\e^{\frac{2\i\pi}{5}}}%
+				\TestArgumentComplexe[#2]{108}{108.0}{\e^{\frac{3\i\pi}{5}}}%
+				\TestArgumentComplexe[#2]{144}{144.0}{\e^{\frac{4\i\pi}{5}}}%
+				\TestArgumentComplexe[#2]{-36}{-36.0}{\e^{\frac{9\i\pi}{5}}}%
+				\TestArgumentComplexe[#2]{-72}{-72.0}{\e^{\frac{8\i\pi}{5}}}%
+				\TestArgumentComplexe[#2]{-108}{-108.0}{\e^{\frac{7\i\pi}{5}}}%
+				\TestArgumentComplexe[#2]{-144}{-144.0}{\e^{\frac{6\i\pi}{5}}}%
+				%les pi/6
+				\TestArgumentComplexe[#2]{30}{30.0}{\e^{\frac{\i\pi}{6}}}%
+				\TestArgumentComplexe[#2]{150}{150.0}{\e^{\frac{5\i\pi}{6}}}%
+				\TestArgumentComplexe[#2]{-30}{-30.0}{\e^{\frac{11\i\pi}{6}}}%
+				\TestArgumentComplexe[#2]{-150}{-150.0}{\e^{\frac{7\i\pi}{6}}}%
+				%les pi/8
+				\TestArgumentComplexe[#2]{22.5}{22.5}{\e^{\frac{\i\pi}{8}}}%
+				\TestArgumentComplexe[#2]{67.5}{67.5}{\e^{\frac{3\i\pi}{8}}}%
+				\TestArgumentComplexe[#2]{112.5}{112.5}{\e^{\frac{5\i\pi}{8}}}%
+				\TestArgumentComplexe[#2]{157.5}{157.5}{\e^{\frac{7\i\pi}{8}}}%
+				\TestArgumentComplexe[#2]{-22.5}{-22.5}{\e^{\frac{15\i\pi}{8}}}%
+				\TestArgumentComplexe[#2]{-67.5}{-67.5}{\e^{\frac{13\i\pi}{8}}}%
+				\TestArgumentComplexe[#2]{-112.5}{-112.5}{\e^{\frac{11\i\pi}{8}}}%
+				\TestArgumentComplexe[#2]{-157.5}{-157.5}{\e^{\frac{9\i\pi}{8}}}%
+				%les pi/12
+				\TestArgumentComplexe[#2]{15}{15.0}{\e^{\frac{\i\pi}{12}}}%
+				\TestArgumentComplexe[#2]{75}{75.0}{\e^{\frac{5\i\pi}{12}}}%
+				\TestArgumentComplexe[#2]{105}{105.0}{\e^{\frac{7\i\pi}{12}}}%
+				\TestArgumentComplexe[#2]{165}{165.0}{\e^{\frac{11\i\pi}{12}}}%
+				\TestArgumentComplexe[#2]{-15}{-15.0}{\e^{\frac{23\i\pi}{12}}}%
+				\TestArgumentComplexe[#2]{-75}{-75.0}{\e^{\frac{19\i\pi}{12}}}%
+				\TestArgumentComplexe[#2]{-105}{-105.0}{\e^{\frac{17\i\pi}{12}}}%
+				\TestArgumentComplexe[#2]{-165}{-165.0}{\e^{\frac{13\i\pi}{12}}}%
+				%les pi/10
+				\TestArgumentComplexe[#2]{18}{18.0}{\e^{\frac{\i\pi}{10}}}%
+				\TestArgumentComplexe[#2]{54}{54.0}{\e^{\frac{3\i\pi}{10}}}%
+				\TestArgumentComplexe[#2]{126}{126.0}{\e^{\frac{7\i\pi}{10}}}%
+				\TestArgumentComplexe[#2]{162}{162.0}{\e^{\frac{9\i\pi}{10}}}%
+				\TestArgumentComplexe[#2]{-18}{-18.0}{\e^{\frac{19\i\pi}{10}}}%
+				\TestArgumentComplexe[#2]{-54}{-54.0}{\e^{\frac{17\i\pi}{10}}}%
+				\TestArgumentComplexe[#2]{-126}{-126.0}{\e^{\frac{13\i\pi}{10}}}%
+				\TestArgumentComplexe[#2]{-162}{-162.0}{\e^{\frac{11\i\pi}{10}}}%
+			}%
+			{%
+				%les pi/2
+				\TestArgumentComplexe[#2]{0}{0.0}{}%
+				\TestArgumentComplexe[#2]{90}{90.0}{\e^{\frac{\i\pi}{2}}}%
+				\TestArgumentComplexe[#2]{-90}{-90.0}{\e^{\frac{-\i\pi}{2}}}%
+				\TestArgumentComplexe[#2]{180}{180.0}{\e^{\i\pi}}%
+				%les pi/3
+				\TestArgumentComplexe[#2]{60}{60.0}{\e^{\frac{\i\pi}{3}}}%
+				\TestArgumentComplexe[#2]{120}{120.0}{\e^{\frac{2\i\pi}{3}}}%
+				\TestArgumentComplexe[#2]{-60}{-60.0}{\e^{\frac{-\i\pi}{3}}}%
+				\TestArgumentComplexe[#2]{-120}{-120.0}{\e^{\frac{-2\i\pi}{3}}}%
+				%les pi/4
+				\TestArgumentComplexe[#2]{45}{45.0}{\e^{\frac{\i\pi}{4}}}%
+				\TestArgumentComplexe[#2]{135}{135.0}{\e^{\frac{3\i\pi}{4}}}%
+				\TestArgumentComplexe[#2]{-45}{-45.0}{\e^{\frac{-\i\pi}{4}}}%
+				\TestArgumentComplexe[#2]{-135}{-135.0}{\e^{\frac{-3\i\pi}{4}}}%
+				%les pi/5
+				\TestArgumentComplexe[#2]{36}{36.0}{\e^{\frac{\i\pi}{5}}}%
+				\TestArgumentComplexe[#2]{72}{72.0}{\e^{\frac{2\i\pi}{5}}}%
+				\TestArgumentComplexe[#2]{108}{108.0}{\e^{\frac{3\i\pi}{5}}}%
+				\TestArgumentComplexe[#2]{144}{144.0}{\e^{\frac{4\i\pi}{5}}}%
+				\TestArgumentComplexe[#2]{-36}{-36.0}{\e^{\frac{-\i\pi}{5}}}%
+				\TestArgumentComplexe[#2]{-72}{-72.0}{\e^{\frac{-2\i\pi}{5}}}%
+				\TestArgumentComplexe[#2]{-108}{-108.0}{\e^{\frac{-3\i\pi}{5}}}%
+				\TestArgumentComplexe[#2]{-144}{-144.0}{\e^{\frac{-4\i\pi}{5}}}%
+				%les pi/6
+				\TestArgumentComplexe[#2]{30}{30.0}{\e^{\frac{\i\pi}{6}}}%
+				\TestArgumentComplexe[#2]{150}{150.0}{\e^{\frac{5\i\pi}{6}}}%
+				\TestArgumentComplexe[#2]{-30}{-30.0}{\e^{\frac{-\i\pi}{6}}}%
+				\TestArgumentComplexe[#2]{-150}{-150.0}{\e^{\frac{-5\i\pi}{6}}}%
+				%les pi/8
+				\TestArgumentComplexe[#2]{22.5}{22.5}{\e^{\frac{\i\pi}{8}}}%
+				\TestArgumentComplexe[#2]{67.5}{67.5}{\e^{\frac{3\i\pi}{8}}}%
+				\TestArgumentComplexe[#2]{112.5}{112.5}{\e^{\frac{5\i\pi}{8}}}%
+				\TestArgumentComplexe[#2]{157.5}{157.5}{\e^{\frac{7\i\pi}{8}}}%
+				\TestArgumentComplexe[#2]{-22.5}{-22.5}{\e^{\frac{-\i\pi}{8}}}%
+				\TestArgumentComplexe[#2]{-67.5}{-67.5}{\e^{\frac{-3\i\pi}{8}}}%
+				\TestArgumentComplexe[#2]{-112.5}{-112.5}{\e^{\frac{-5\i\pi}{8}}}%
+				\TestArgumentComplexe[#2]{-157.5}{-157.5}{\e^{\frac{-7\i\pi}{8}}}%
+				%les pi/12
+				\TestArgumentComplexe[#2]{15}{15.0}{\e^{\frac{\i\pi}{12}}}%
+				\TestArgumentComplexe[#2]{75}{75.0}{\e^{\frac{5\i\pi}{12}}}%
+				\TestArgumentComplexe[#2]{105}{105.0}{\e^{\frac{7\i\pi}{12}}}%
+				\TestArgumentComplexe[#2]{165}{165.0}{\e^{\frac{11\i\pi}{12}}}%
+				\TestArgumentComplexe[#2]{-15}{-15.0}{\e^{\frac{-\i\pi}{12}}}%
+				\TestArgumentComplexe[#2]{-75}{-75.0}{\e^{\frac{-5\i\pi}{12}}}%
+				\TestArgumentComplexe[#2]{-105}{-105.0}{\e^{\frac{-7\i\pi}{12}}}%
+				\TestArgumentComplexe[#2]{-165}{-165.0}{\e^{\frac{-11\i\pi}{12}}}%
+				%les pi/10
+				\TestArgumentComplexe[#2]{18}{18.0}{\e^{\frac{\i\pi}{10}}}%
+				\TestArgumentComplexe[#2]{54}{54.0}{\e^{\frac{3\i\pi}{10}}}%
+				\TestArgumentComplexe[#2]{126}{126.0}{\e^{\frac{7\i\pi}{10}}}%
+				\TestArgumentComplexe[#2]{162}{162.0}{\e^{\frac{9\i\pi}{10}}}%
+				\TestArgumentComplexe[#2]{-18}{-18.0}{\e^{\frac{-\i\pi}{10}}}%
+				\TestArgumentComplexe[#2]{-54}{-54.0}{\e^{\frac{-3\i\pi}{10}}}%
+				\TestArgumentComplexe[#2]{-126}{-126.0}{\e^{\frac{-7\i\pi}{10}}}%
+				\TestArgumentComplexe[#2]{-162}{-162.0}{\e^{\frac{-9\i\pi}{10}}}%
+			}%
+	}%
+}
+
+\NewDocumentCommand\ExtractParamExprRac{ m O{\tmpCoeffA} O{\tmpCoeffB} O{\tmpCoeffC} O{\tmpCoeffD} }{%
+	\StrCount{#1}{sqrt}[\tmpnbrac]%
+	\xintifboolexpr{\tmpnbrac == 2}%
+		{%
+				\StrBetween{#1}{sqrt(}{)}[#3]%
+				\StrBetween[2,2]{#1}{sqrt(}{)}[#5]%
+				\StrBefore{#1}{sqrt}[#2]%
+				\StrBetween[1,2]{#1}{)}{sqrt}[#4]%
+				\StrDel{#2}{*}[#2]%
+				\IfEq{#2}{}{\xdef#2{1}}{}%
+				\IfEq{#2}{-}{\xdef#2{-1}}{}%
+				\StrDel{#4}{*}[#4]%
+				\StrDel{#4}{+}[#4]%
+				\IfEq{#4}{}{\xdef#4{1}}{}%
+				\IfEq{#4}{-}{\xdef#4{-1}}{}%
+			}%
+		{}%
+	\xintifboolexpr{\tmpnbrac == 0}%
+		{%
+				\xdef#2{#1}%
+				\xdef#3{1}%
+				\xdef#4{0}%
+				\xdef#5{1}%
+			}%
+		{}%
+	\xintifboolexpr{\tmpnbrac == 1}%
+		{%
+				\xdef#5{1}%
+				\StrBetween{#1}{sqrt(}{)}[#3]%
+				\StrBefore{#1}{sqrt}[#2]%
+				\StrDel{#2}{*}[#2]%
+				\IfEq{#2}{}{\xdef#2{1}}{}%
+				\IfEq{#2}{-}{\xdef#2{-1}}{}%
+				\StrBehind{#1}{)}[#4]%
+				\StrDel{#4}{+}[#4]%
+				\IfEq{#4}{}{\xdef#4{0}}{}%
+			}%
+		{}%
+}
+
+\NewDocumentCommand\SimplCarreExprRacine{ O{} m }{%
+	\ExtractParamExprRac{#2}%
+	%si le produit des racines est un entier ?
+	\xintifboolexpr{isint(sqrt(\tmpCoeffB*\tmpCoeffD)) == 1}%
+		{%
+				\ensuremath{%
+						\ConversionFraction[#1]{(\tmpCoeffA)*(\tmpCoeffA)*(\tmpCoeffB)+(\tmpCoeffC)*(\tmpCoeffC)*(\tmpCoeffD)+2*(\tmpCoeffA)*(\tmpCoeffC)*sqrt(\tmpCoeffB*\tmpCoeffD)}%
+					}%
+			}%
+		{%
+				\xintifboolexpr{\tmpCoeffA > 0 'and' \tmpCoeffC > 0}%
+				{%
+						\ensuremath{%
+								\ConversionFraction[#1]{(\tmpCoeffA)*(\tmpCoeffA)*(\tmpCoeffB)+(\tmpCoeffC)*(\tmpCoeffC)*(\tmpCoeffD)}+%
+								\IfEq{#1}{d}{\displaystyle}{}\SimplificationRacine{4*(\tmpCoeffA)*(\tmpCoeffA)*(\tmpCoeffC)*(\tmpCoeffC)*(\tmpCoeffB)*(\tmpCoeffD)}%
+							}%
+					}%
+				{}%
+				\xintifboolexpr{\tmpCoeffA > 0 'and' \tmpCoeffC < 0}%
+				{%
+						\ensuremath{%
+								\ConversionFraction[#1]{(\tmpCoeffA)*(\tmpCoeffA)*(\tmpCoeffB)+(\tmpCoeffC)*(\tmpCoeffC)*(\tmpCoeffD)}-%
+								\IfEq{#1}{d}{\displaystyle}{}\SimplificationRacine{4*(\tmpCoeffA)*(\tmpCoeffA)*(\tmpCoeffC)*(\tmpCoeffC)*(\tmpCoeffB)*(\tmpCoeffD)}%
+							}%
+					}%
+				{}%
+				\xintifboolexpr{\tmpCoeffA < 0 'and' \tmpCoeffC > 0}%
+				{%
+						\ensuremath{%
+								\ConversionFraction[#1]{(\tmpCoeffA)*(\tmpCoeffA)*(\tmpCoeffB)+(\tmpCoeffC)*(\tmpCoeffC)*(\tmpCoeffD)}-%
+								\IfEq{#1}{d}{\displaystyle}{}\SimplificationRacine{4*(\tmpCoeffA)*(\tmpCoeffA)*(\tmpCoeffC)*(\tmpCoeffC)*(\tmpCoeffB)*(\tmpCoeffD)}%
+							}%
+					}%
+				{}%
+				\xintifboolexpr{\tmpCoeffA < 0 'and' \tmpCoeffC < 0}%
+				{%
+						\ensuremath{%
+								\ConversionFraction[#1]{(\tmpCoeffA)*(\tmpCoeffA)*(\tmpCoeffB)+(\tmpCoeffC)*(\tmpCoeffC)*(\tmpCoeffD)}+%
+								\IfEq{#1}{d}{\displaystyle}{}\SimplificationRacine{4*(\tmpCoeffA)*(\tmpCoeffA)*(\tmpCoeffC)*(\tmpCoeffC)*(\tmpCoeffB)*(\tmpCoeffD)}%
+							}%
+					}%
+				{}%
+				\xintifboolexpr{\tmpCoeffC == 0 'and' abs(\tmpCoeffA) != 1}%
+				{%
+						\ensuremath{%
+								\ConversionFraction[#1]{(\tmpCoeffA)*(\tmpCoeffA)}%
+								\IfEq{#1}{d}{\displaystyle}{}\xintifboolexpr{\tmpCoeffB != 1}{\SimplificationRacine{(\tmpCoeffB)*(\tmpCoeffB)}}{}%
+							}%
+					}%
+				{}%
+				\xintifboolexpr{\tmpCoeffC == 0 'and' abs(\tmpCoeffA) == 1}%
+				{%
+						\ensuremath{%
+								\IfEq{#1}{d}{\displaystyle}{}\SimplificationRacine{(\tmpCoeffB)*(\tmpCoeffB)}%
+							}%
+					}%
+				{}%
+			}%
+}
+
+\NewDocumentCommand\CalcModuleCplx{ O{} m m }{%
+	\ExtractParamExprRac{#2}[\Crea][\Creb][\Crec][\Cred]%
+	\ExtractParamExprRac{#3}[\Cima][\Cimb][\Cimc][\Cimd]%
+	\xdef\TmpCoeffsDebut{(\Crea)*(\Crea)*(\Creb)+(\Crec)*(\Crec)*(\Cred)+(\Cima)*(\Cima)*(\Cimb)+(\Cimc)*(\Cimc)*(\Cimd)}%
+	\xdef\TmpCoeffsRacineA{4*(\Crea)*(\Crea)*(\Crec)*(\Crec)*(\Creb)*(\Cred)}%
+	\xdef\TmpCoeffsRacineB{4*(\Cima)*(\Cima)*(\Cimc)*(\Cimc)*(\Cimb)*(\Cimd)}%
+	%\xinteval{\TmpCoeffsDebut}/\xinteval{\TmpCoeffsRacineA}/\xinteval{\TmpCoeffsRacineB}/\xinteval{(\Crea)*(\Crec)}/\xinteval{(\Cima)*(\Cimc)}=
+	\xintifboolexpr{\TmpCoeffsRacineA == 0 'and' \TmpCoeffsRacineB == 0}%
+	{%
+			\ensuremath{\IfEq{#1}{d}{\displaystyle}{}\SimplificationRacine{\TmpCoeffsDebut}}%
+		}%
+	{}%
+	\xintifboolexpr{\TmpCoeffsRacineA == 0 'and' \TmpCoeffsRacineB != 0}%
+	{%
+			\ensuremath{\IfEq{#1}{d}{\displaystyle}{}\sqrt{\SimplificationRacine{(\TmpCoeffsDebut)*(\TmpCoeffsDebut)}\xintifboolexpr{(\Cima)*(\Cimc) < 0}{-}{+}\SimplificationRacine{\TmpCoeffsRacineB}}}%
+		}%
+	{}%
+	\xintifboolexpr{\TmpCoeffsRacineA != 0 'and' \TmpCoeffsRacineB == 0}%
+	{%
+			\ensuremath{\IfEq{#1}{d}{\displaystyle}{}\sqrt{\SimplificationRacine{(\TmpCoeffsDebut)*(\TmpCoeffsDebut)}\xintifboolexpr{(\Crea)*(\Crec) < 0}{-}{+}\SimplificationRacine{\TmpCoeffsRacineA}}}%
+		}%
+	{}%
+	\xintifboolexpr{\TmpCoeffsRacineA != 0 'and' \TmpCoeffsRacineB != 0 'and' (\Crea)*(\Crec) < 0 'and' (\Cima)*(\Cimc) > 0 'and' \TmpCoeffsRacineA == \TmpCoeffsRacineB}%
+	{%
+			\ensuremath{\IfEq{#1}{d}{\displaystyle}{}\SimplificationRacine{\TmpCoeffsDebut}}%
+		}%
+	{}%
+	\xintifboolexpr{\TmpCoeffsRacineA != 0 'and' \TmpCoeffsRacineB != 0 'and' (\Crea)*(\Crec) > 0 'and' (\Cima)*(\Cimc) < 0 'and' \TmpCoeffsRacineA == \TmpCoeffsRacineB}%
+	{%
+			\ensuremath{\IfEq{#1}{d}{\displaystyle}{}\SimplificationRacine{\TmpCoeffsDebut}}%
+		}%
+	{}%
+	\xintifboolexpr{\TmpCoeffsRacineA != \TmpCoeffsRacineB}%
+	{%
+			\ensuremath{\IfEq{#1}{d}{\displaystyle}{}\sqrt{\SimplificationRacine{(\TmpCoeffsDebut)*(\TmpCoeffsDebut)}\xintifboolexpr{(\Crea)*(\Crec) < 0}{-}{+}\SimplificationRacine{\TmpCoeffsRacineA}\xintifboolexpr{(\Cima)*(\Cimc) < 0}{-}{+}\SimplificationRacine{\TmpCoeffsRacineB}}}%
+		}%
+	{}%
+}
+
+\endinput

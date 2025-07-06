@@ -1,0 +1,602 @@
+% Author...................: C. Pierquet
+% licence..................: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+% licence (part of code).. : CC BY-SA 3.0 (from Mark Wibrow)
+% licence cliparts.........: CC0 (from openclipart or svgrepo)
+% code
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ProfLycee}[2025/06/26 3.12b Aide pour l'utilisation de LaTeX en lycee]
+% 3.12b Style grille histo + améliorations de qques codes + binôme Newton + corrections de bugs (nouveaux codes 'piton')
+% 3.12a	Ajout de cliparts 'zone bac' (via ProfLycee-Pictosbac)
+% 3.11g	Ajout de deux cliparts (bullseye)
+% 3.11f	Bugfix
+% 3.11e	Compatibilité avec fa5/6 (en projet) + nouvelle clé pour SolutionSeuil + Styles piton (Onglet & Carbon)
+% 3.11d	Correction d'un bug avec des espacements non voulus
+% 3.11c	Option [noncancel] pour ne pas charger cancel avec thicklines + option [compat] pour 'maximiser' les options utiles + améliorations dans le code
+% 3.11b	Option [nonsiunitxfr] + bugfix avec tabularray
+% 3.11a	Ajout d'aliases des commandes via \pfl... (à voir pour les environnements...)
+% 3.10g	Clé [warningsoff] pour envlever les warnings liés à unicode-math
+% 3.10f	Ajout de quelques commandes arithmétiques (test premier + décompo)
+% 3.10e	Correction de noms de commandes + \logo calculatrice interdite
+% 3.10d	Correction d'un nom de commande (doublon avec ProfMaquette)
+% 3.10c	Ajout de clés/arguments pour les arbres de probas + paramètres stats + arbres de dénombrement(s)
+% 3.10b	Ajout des empilements d'oranges + commandes sur les dates
+% 3.10a	Bifurcation pfl / pfllight + pflnum consolidée
+% 3.05b	Mise en standby des commandes liées à minted (attente de compatibilité complète avec tcblisting) + Clé [ValeursTan] pour les cercles trigo
+% 3.05a	Conversions entre bases + vectorial clipart (de openclipart)
+% 3.04g	Ajout de clés pour les arbres de probas
+% 3.04f	Ajout de clés pour la coloration des nombres et Piton
+% 3.04e	Commandes prix/angle/pourcent en lien avec siunitx
+% 3.04d	PitonInputFile et styles
+% 3.04c	Max et min pour des fonctions
+% 3.04b	Travail sur la loi binomiale + Ajout de clés pour les environnements graphiques
+% 3.04a	Améliorations de la partie graphiques tikz (intégrales, axes) + Factorielle
+% 3.03d	Page de garde type BAC
+% 3.03c	Correction du fonctionnement gobble avec piton + compatibilité luamplib PfC
+% 3.03b	Compétences Maths Lycées + \pflnum pour num+xint :-) + correction de bugs (div eucl)
+% 3.03a	Forme canonique + fonction homographique
+% 3.02g	Correction de bugs avec les arbres de probas
+% 3.02f	Ajout de petits schémas type pour la géométrie dans l'espace + conformité avec piton
+% 3.02e	Présentation python dans la style 'thonny' + amélioration dans la gestion du gobble avec piton
+% 3.02d	Retenues pour les soustractions dans les opérations posées
+% 3.02c	Ajout d'une commande pour le calcul d'une congruence (+petite pos / +petite nég) + ligne tkz-convex + Opérations posées
+% 3.02b	Amélioration du code pour les arbres de probas (tks M. Degrange pour les suggestions)
+% 3.02a	Ajout des [ecritures] proba conditionnelle, norme, valeur absolue et IF/IC
+% 3.01g	Ajout de commandes internes, en phase de test (et non documentées à 100%...)
+% 3.01f	PseudoCode avec piton (avec langage=minimal de FP ^^) + Suppression Terminal (doublon avec sim-os-menus)
+% 3.01e	Mise ne conformité avec pyluatex/piton
+% 3.01d	Ajout des commentaires en gris italique (via #) pour le pseudocode
+% 3.01c	Ajout des splines en mode génération (sans forcément tracer)
+% 3.01b	Ajout de la division euclidienne + correction du bugs mineurs
+% 3.01a	Ajout des courbes ECC/FCC + paramètres par interpolation
+% 3.00g	Amélioration de la marge Gauche dans le PseudoCode
+% 3.00f	Conversion d'une écriture décimale périodique en fraction (avec rédaction éventuelle)
+% 3.00e	Ajout des 'machines à transformer' + Correction d'un nom de commande (cc ProfCollege ^^)
+% 3.00d	Ajout de commandes pour des chateaux de cartes et des allumettes
+% 3.00c	Ajout de chiffrements (César + Affine + Hill)
+% 3.00b	Amélioration de la commande des intervalles (spécifier un label pour les bornes)
+% 3.00a	Ajout de commandes pour travailler avex des intervalles + Nouvelle numérotation
+% 2.8.0	Amélioration du tapis de Sierpinski
+% 2.7.9	Ajout de fractales (Koch + Sierpinski)
+% 2.7.8	Conversion hexa->bin présentée
+% 2.7.7	Ajout d'une commande pour matérialiser des points de discontinuité
+% 2.7.6	Amélioration de la gestion de la console piton
+% 2.7.5	Ajout d'options pour les environnements de code (piton + listings)
+% 2.7.4	Ajout de commandes pour des écritures mathématiques (avec librairie ?)
+% 2.7.3	Correction de la couleur de bordures vertes pour les codes python
+% 2.7.2	Modification du chargement de xcolor pour éviter les clash errors (couleurs adaptées du coup), passage en option (test)
+% 2.7.1	Modification du chargement de tcolorbox
+% 2.7.0	Ajout de la clé [Frac] pour \AxeyTikz + \FonctionRepartTikz
+% 2.6.9	Correction de bugs et améliorations des boîtes de codes
+% 2.6.8	Ajout d'une grille (manuelle) pour les histogrammes non réguliers
+% 2.6.7	Correction de bugs mineurs + Histogramme (classes régulières ou non)
+% 2.6.6	Externalisation du style Tikz mainlevee (dans tikz2d-fr)
+% 2.6.5	Ajout d'une option[noamssymb] pour éviter les clashs avec fourier (merci PfC) + Corections de bugs
+% 2.6.4	Correction d'un dysfonctionnement avec les racines (oubli du \num) + Equation diophantienne ax+by=c + Eq cartésiennes (plan & droite) + Corrections de bugs mineurs
+% 2.6.3	Ajout d'une commande pour rédiger l'obtention de l'équation affine d'une droite passant par deux points
+% 2.6.2	Correction de commandes pour la pseudo3d + nouvelle clé pour la trigo
+% 2.6.1	Ajout de commandes pour du calcul intégral (valeur approchée + tikz)
+% 2.6.0	Ajout d'une clé [Brut] pour les mesures principales + commande calcul ligne trigo
+%		Refonte des fichiers inclus + correction de bugs mineurs
+%		Split des thèmes en fichiers 'input'
+% 2.5.9	Ajout clé [CouleurNombres] pour CodePiton
+% 2.5.8	Ajout du style Classique pour PythonLst (externalisation listings) + Modification marges CodePiton (1.5)
+%		Refonte des commandes pour les codes pour éviter des soucis avec les étoilées
+% 2.5.7	Ajout d'un style classique pour le code python (Piton) + console piton/pyluatex
+%		Refonte des commandes tcbset pour les codes
+% 2.5.6	Ajout d'une clé [Trigo] pour \AxexTikz (avec graduations libres)
+%		"Suppression" de la fenêtre XCas de la documentation
+% 2.5.5	Correction d'un bug avec la fenetre XCas
+% 2.5.4	Amélioration des commandes de combinatoire avec calculs via xint (plus précis !)
+% 2.5.3	Modification des tests d'arguments dans les probas (macros autorisées)
+% 2.5.2	Correction d'un dysfonctionnement avec tcolorbox 6.0 :-(
+% 2.5.1	Modification de la commande de conversion en fraction
+% 2.5.0	Passage à des libraires via \useproflyclib
+% 2.2.0	Ajout de clés [Notation] pour les arrangements et combinaisons
+% 2.1.9	Correction d'un bug avec les MiniSchémas + version étoilée
+% 2.1.8	Suppression des pixelarts, désormais dans le package "PixelArtTikz" !
+% 2.1.7	Option booléenne Math pour les figures pave/tetraèdre
+% 2.1.6	Chargement de hologo à la place de hvlogos (bug potentiel avec \bm)
+% 2.1.5	Ajout de commandes pour calculer arrangements et combinaisons
+% 2.1.4	Ajout d'une commande pour résoudre de manière approchée une équation f(x)=k
+% 2.1.3	Ajout de l'option auto-tabs-gobble sur piton (v1.0) + correction d'un bug sur CodePiton
+% 2.1.2	Ajout d'une commande pour déterminer la mesure principale d'un angle + option <ElargirOx/y> pour les axes
+% 2.1.1	Ajout d'une section pour les tracés de repère et courbe, en tikz
+% 2.1.1	Ajout d'une section pour les tracés de repère et courbe, en tikz
+% 2.1.0	Ajout du calcul du seuil pour les suites récurrentes + racines de nombres décimaux + option pour pythontex
+% 2.0.9	Ajouts de commandes pour générer des nombres et listes aléatoires
+% 2.0.8	Ajout d'options pour stretch et fonte env python(s) (pas tous...)
+% 2.0.6	Quelques modifications sur les codes python (taille police et marges)...
+% 2.0.5	Correction d'un bug avec les calculs en valeurx exactes avec les suites récurrentes...
+% 2.0.4	Ajout d'une commande pour présenter un balayage (TVI) + calculs suites récurrentes 
+% 2.0.3Correction d'un bug avec les arbres 3x3
+% 2.0.2	Ajout de l'option auto-margin sur piton
+% 2.0.1	Chargement de piton uniquement si lua...
+% 2.0.0	Refonte des commandes, des options, et de la documentation !!!
+
+%------Mathtools
+\RequirePackage{mathtools}
+
+%------Option(s)
+\newif\if@xcolor \@xcolorfalse
+\newif\if@build \@buildfalse
+\newif\if@loadamssymb \@loadamssymbtrue
+\newif\if@loadsiunitxfr \@loadsiunitxfrtrue
+\newif\if@warningsoff \@warningsofffalse
+\newif\if@loadtikzbabel \@loadtikzbabeltrue
+\newif\if@loadcancel \@loadcanceltrue
+\newif\if@compatmax \@compatmaxfalse
+\newif\if@fafive \@fafivetrue
+\newif\if@fasix \@fasixfalse
+\newif\if@fafivesix \@fafivesixfalse
+
+\DeclareOption{xcolor}{\@xcolortrue}%
+\DeclareOption{build}{\@buildtrue}%
+\DeclareOption{nonsiunitxfr}{\@loadsiunitxfrfalse}%
+\DeclareOption{nonamssymb}{\@loadamssymbfalse}%
+\DeclareOption{warningsoff}{\@warningsofftrue}%
+\DeclareOption{nonwarnings}{\@warningsofftrue}%
+\DeclareOption{nontikzbabel}{\@loadtikzbabelfalse}%
+\DeclareOption{noncancel}{\@loadcancelfalse}%
+\DeclareOption{compat}{\@compatmaxtrue}%
+\DeclareOption{nonfa}{\@fafivefalse\@fasixfalse\@fafivesixfalse}
+\DeclareOption{fa6}{\@fafivefalse\@fafivesixfalse\@fasixtrue}
+\DeclareOption{fa5fa6}{\@fafivefalse\@fasixfalse\@fafivesixtrue}
+
+\DeclareOption*{}
+\ProcessOptions\relax
+
+\if@compatmax
+	\@warningsofftrue
+	\@loadamssymbfalse
+\fi
+
+%------Packages utiles
+\if@loadamssymb
+	\RequirePackage{amssymb}
+\fi
+\if@warningsoff
+	\PassOptionsToPackage{warnings-off={mathtools-colon,mathtools-overbracket}}{unicode-math}
+\fi
+\if@xcolor
+	\RequirePackage[table,svgnames]{xcolor}%Gestion des couleurs
+\fi
+\RequirePackage{tikz}
+\usetikzlibrary{calc,decorations,decorations.pathreplacing,decorations.markings,arrows,arrows.meta,shapes.geometric,decorations.pathmorphing}
+\if@loadtikzbabel
+	\usetikzlibrary{babel}
+\fi
+\RequirePackage{tkz-tab}
+\RequirePackage{pgf,pgffor}
+\RequirePackage{ifthen}
+\RequirePackage{xkeyval}
+\RequirePackage{xstring}
+\RequirePackage{xintexpr}
+\RequirePackage{xintbinhex}
+\RequirePackage{xinttools}
+\RequirePackage{randomlist}
+\RequirePackage{simplekv}
+\RequirePackage{listofitems}
+\RequirePackage{tabularray}
+\RequirePackage{settobox}
+\RequirePackage{hologo}
+\RequirePackage{fancyvrb}
+\RequirePackage{nicefrac}
+\RequirePackage{siunitx} %test avec v3
+\if@loadsiunitxfr
+	\sisetup{%
+		locale=FR,output-decimal-marker={,},%
+		mode=match,propagate-math-font=true,%
+		reset-math-version=false,reset-text-family=false,%
+		reset-text-series=false,reset-text-shape=false,%
+		text-family-to-math=true,text-series-to-math=true,%
+		group-minimum-digits=4%
+	}%
+\fi
+\if@fafive
+	\RequirePackage{fontawesome5}
+	\def\pflfacog{\faIcon{cog}}
+\fi
+\if@fasix
+	\RequirePackage{fontawesome6}
+	\def\pflfacog{\faIcon{gear}}
+\fi
+\if@fafivesix
+	\RequirePackage[fa5alias]{fontawesome6}
+	\def\pflfacog{\faIcon{gear}}
+\fi
+%\RequirePackage{fontawesome5}
+%tcolorbox
+\RequirePackage{tcolorbox}%
+\tcbuselibrary{breakable,fitting,skins,listings,listingsutf8,hooks}
+%divers
+\RequirePackage{iftex}
+
+%couleurs
+\definecolor{CouleurVertForet}{HTML}{1F8B36} %ForestGreen
+\colorlet{MotsClesPseudoCodeA}{blue!75}
+\colorlet{MotsClesPseudoCodeB}{green!50!black}
+\colorlet{MotsClesPseudoCodeChaine}{red!75}
+
+%%------LIBRAIRIES/BIBIOTHÈQUES
+\newcommand\useproflyclib[1]{%ajout d'une commande "librairie" pour charger des modules
+	\IfSubStr{#1}{piton}%
+		{%
+			\input{proflycee-tools-piton.tex}
+		}%
+		{}%
+	\IfSubStr{#1}{espace}%
+		{%
+			\input{proflycee-tools-espace.tex}
+		}%
+		{}%
+	%\IfSubStr{#1}{minted}%
+	%	{%
+	%		\if@build
+	%			\RequirePackage[outputdir=build]{minted} %on charge minted avec le répertoire build
+	%		\fi
+	%		\tcbuselibrary{minted} %on charge minted via la librairie tcbox
+	%		\input{proflycee-tools-minted.tex}
+	%	}%
+	%	{}%
+	\IfSubStr{#1}{pythontex}%
+		{%
+			\RequirePackage[gobble=auto]{pythontex}
+			\setpythontexlistingenv{pythont} %pour ne pas télescoper lstlistings (?)
+			\if@build
+				\setpythontexoutputdir{./build/pythontex-files-\jobname} %essai de modif pythontex répertoire build
+			\fi
+			\input{proflycee-tools-pythontex.tex}
+		}%
+		{}%
+	\IfSubStr{#1}{ecritures}%
+		{%
+			\input{proflycee-tools-ecritures.tex}
+		}%
+		{}%
+	\IfSubStr{#1}{cas}%
+		{%
+			\RequirePackage{FenetreCas}
+		}%
+		{}%
+	\IfSubStr{#1}{tikz2d}%
+		{%
+			\RequirePackage{tikz2d-fr}
+		}%
+		{}%
+	\IfSubStr{#1}{tikz3d}%
+		{%
+			\RequirePackage{tikz3d-fr}
+		}%
+		{}%
+}
+
+%%------patch num et xint
+\NewDocumentCommand\pflnum{ s D<>{} O{} m }{%version consolidée
+	%1 := version étoilée pour arrondi (normal) / - avant la fraction éventuelle
+	\IfEq{#2}{}%argument <> vide := entier/décimal -> checked
+		{%
+			\IfBooleanTF{#1}%
+				{%
+					\IfEq{#3}{}{\num{\xintfloateval{#4}}}{\num{\xintfloateval{round(#4,#3)}}}%
+				}%
+				{%
+					\num{\xintiieval{#4}}%
+				}%
+		}%
+		{}%
+	\IfEq{#2}{frac}%argument <frac> := fraction -> checked
+		{%
+			\IfBooleanTF{#1}%
+				{%
+					\pflnumfrac*[#3]{#4}%
+				}%
+				{%
+					\pflnumfrac[#3]{#4}%
+				}%
+		}%
+		{}%
+	\IfEq{#2}{rad}%argument <rad> := angle radian -> checked (juste le - devant...)
+		{%
+			\IfBooleanTF{#1}%
+				{%
+					\pflnumrad*[#3]{#4}%
+				}%
+				{%
+					\pflnumrad[#3]{#4}%
+				}%
+		}%
+		{}%
+	\IfEq{#2}{rac}%
+		{%
+			\pflnumsqrt[#3]{#4}%
+		}%
+		{}%
+	\IfEq{#2}{annee}%
+		{%
+			\IfBooleanTF{#1}%
+				{%
+					\IfEq{#3}{}{\num[digit-group-size=5]{\xintfloateval{#4}}}{\num[digit-group-size=5]{\xintfloateval{round(#4,#3)}}}%
+				}%
+				{%
+					\num[digit-group-size=5]{\xintiieval{#4}}%
+				}%
+		}%
+		{}%
+}
+
+\DeclareDocumentCommand\pflnumsqrt{ O{} m }{% argument mandataire {calcul ou fraction}
+	\xdef\calculargument{\xintIrr{\xinteval{#2}}}%
+	\xintifboolexpr{\calculargument == 1}%
+	{%
+		\ensuremath{1}%
+	}%
+	{%
+		\IfEndWith{\calculargument}{/1}%
+		{%si c'est un entier !
+			\xdef\calculargument{\xintiieval{#2}}%
+			\xdef\ExtractRacStop{\xintiFloor{\xintfloateval{sqrt(\calculargument)}}}%
+			\xintFor* ##1 in {\xintSeq{1}{\ExtractRacStop}}\do{%
+				\xintifboolexpr{ \xintiiRem{\calculargument}{\xintiieval{##1*##1}} == 0}%si le carré divise
+				{\xdef\ExtractRacID{##1}}%
+				{}%
+			}%
+			\xdef\ExtracReste{\xintiieval{\calculargument/(\ExtractRacID*\ExtractRacID)}}%
+			\ensuremath{\xintifboolexpr{\ExtractRacID == 1 && \ExtracReste == 1}%
+				{1}%
+				{ \xintifboolexpr{\ExtractRacID == 1}{}{\num{\xintiieval{\ExtractRacID}}}%
+					\xintifboolexpr{\ExtracReste == 1}{}{\sqrt{\num{\ExtracReste}}} }%
+			}%
+	}%
+	{%on va mettre sous forme a\sqrt(d)/b := buggue avec des millièmes...
+		\StrBefore{\calculargument}{/}[\numerateur]%on extrait le numérateur
+		\StrBehind{\calculargument}{/}[\denominateur]%on extrait le dénominateur
+		\xdef\ExtractRacNNum{\xintiieval{\numerateur*\denominateur}}%
+		\xdef\ExtractRacStop{\xintiFloor{\xintfloateval{sqrt(\ExtractRacNNum)}}}%
+		\xintFor* ##1 in {\xintSeq{1}{\ExtractRacStop}}\do{%
+			\xintifboolexpr{ \xintiiRem{\ExtractRacNNum}{\xintiieval{##1*##1}} == 0}%si le carré divise
+			{\xdef\ExtractRacID{##1}}%
+			{}
+		}%
+		\xdef\ExtractRacGCD{\xintiiGCD{\ExtractRacID}{\denominateur}}%
+		\xdef\RacNumSimpl{\xintiieval{\ExtractRacID/\ExtractRacGCD}}%simpl num
+		\xdef\RacDenomSimpl{\xintiieval{\denominateur/\ExtractRacGCD}}%
+		\xdef\RacRacSimpl{\xintiieval{\ExtractRacNNum/(\ExtractRacID*\ExtractRacID)}}%
+		\IfEq{#1}{}%fraction classique
+			{%
+				\ensuremath{\frac{%
+						\xintifboolexpr{\RacNumSimpl == 1 && \RacRacSimpl == 1}%
+						{1}%
+						{ \xintifboolexpr{\RacNumSimpl == 1}{}{\RacNumSimpl} \xintifboolexpr{\RacRacSimpl == 1}{}{\sqrt{\num{\RacRacSimpl}}} }%
+					}%
+					{ \RacDenomSimpl }}%
+			}%
+			{}%
+		\IfEq{#1}{d}%dfraction
+			{%
+				\ensuremath{\dfrac{%
+						\xintifboolexpr{\RacNumSimpl == 1 && \RacRacSimpl == 1}%
+						{1}%
+						{ \xintifboolexpr{\RacNumSimpl == 1}{}{\RacNumSimpl} \xintifboolexpr{\RacRacSimpl == 1}{}{\sqrt{\num{\RacRacSimpl}}} }%
+					}%
+					{ \RacDenomSimpl }}%
+			}%
+			{}%
+		\IfEq{#1}{n}%nfraction
+			{%
+				\ensuremath{\nicefrac{%
+						\xintifboolexpr{\RacNumSimpl == 1 && \RacRacSimpl == 1}%
+						{1}%
+						{ \xintifboolexpr{\RacNumSimpl == 1}{}{\RacNumSimpl} \xintifboolexpr{\RacRacSimpl == 1}{}{\sqrt{\num{\RacRacSimpl}}} }%
+					}%
+					{ \RacDenomSimpl }}%
+			}%
+			{}%
+	}%
+}%
+}
+
+\NewDocumentCommand\pflnumfrac{ s O{} m }{%patch xinttotexfrac
+	%*=moins sur le numérateur
+	%2=argument.optionnel[d/t/dec=...]
+	%3=argument mandataire {calcul ou fraction}
+	\xdef\calculargument{\xintPRaw{\xintIrr{\xinteval{#3}}}}%on calcule et on transforme en A/B
+	\IfSubStr{\calculargument}{/}%on teste si le symbole / apparaît
+		{%si oui := fraction
+			\StrBefore{\calculargument}{/}[\numerateur]%on extrait le numérateur
+			\StrBehind{\calculargument}{/}[\denominateur]%on extrait le dénominateur
+			\ifblank{#2}%
+				{%
+					\IfBooleanTF{#1}%
+						{\ensuremath{\frac{\num{\numerateur}}{\num{\denominateur}}}}%
+						{%
+							\ifthenelse{\numerateur < 0}%
+								{\ensuremath{-\frac{\num{\fpeval{abs(\numerateur)}}}{\num{\denominateur}}}}%
+								{\ensuremath{\frac{\num{\numerateur}}{\num{\denominateur}}}}%
+						}%
+				}%
+				{}%si l'argument optionnel est vide
+			\IfStrEq{#2}{d}%
+				{%
+					\IfBooleanTF{#1}%
+						{\ensuremath{\dfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+						{%
+							\ifthenelse{\numerateur < 0}%
+								{\ensuremath{-\dfrac{\num{\fpeval{abs(\numerateur)}}}{\num{\denominateur}}}}%
+								{\ensuremath{\dfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+						}%
+				}%
+				{}%si l'argument optionnel est vide
+			\IfStrEq{#2}{t}%
+				{%
+					\IfBooleanTF{#1}%
+						{\ensuremath{\tfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+						{%
+							\ifthenelse{\numerateur < 0}%
+								{\ensuremath{-\tfrac{\num{\fpeval{abs(\numerateur)}}}{\num{\denominateur}}}}%
+								{\ensuremath{\tfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+						}%
+				}%
+				{}%si l'argument optionnel est vide
+			\IfStrEq{#2}{n}%
+				{%
+					{\ensuremath{\nicefrac{\num{\numerateur}}{\num{\denominateur}}}}%
+				}%
+				{}%si l'argument optionnel est vide
+			\IfSubStr{#2}{dec}%on veut la forme décimale
+				{%
+					\IfSubStr{#2}{=}%si on rajoute une précision
+						{%
+							\StrBehind{#2}{=}[\precdecimal]%
+							\ensuremath{\num{\xintfloateval{round(#3,\precdecimal)}}}%
+						}%
+						{%
+							\ensuremath{\num{\xintfloateval{#3}}}%
+						}%
+				}%
+				{}%si l'argument optionnel est vide
+		}%
+		{%si non := entier
+			\num{\calculargument}%on affiche l'entier, avec le package siunitx
+		}%
+}
+
+\NewDocumentCommand\pflnumrad{ s O{} m }{%
+	%1 = options
+	%2 = angle sous la forme a*pi/b
+	\StrDel{#3}{pi}[\MPargument]%
+	\IfBeginWith{#3}{pi}%
+		{\StrSubstitute{#3}{pi}{1}[\MPargument]}%
+		{}%
+	\IfBeginWith{#3}{-pi}%
+		{\StrSubstitute{#3}{pi}{1}[\MPargument]}%
+		{}%
+	%on conserve les données initiales
+	\IfSubStr{\MPargument}{/}%on coupe numérateur/dénominateur
+		{\StrCut{\MPargument}{/}\MPnumerateurinit\MPdenominateurinit}%
+		{\xdef\MPnumerateurinit{\MPargument}\xdef\MPdenominateurinit{1}}%
+	%on affiche le début, avant simplification
+	\IfStrEq{#2}{d}%
+		{%
+			\ensuremath{%
+			\xintifboolexpr{\MPdenominateurinit == 1}%
+				{%
+					\xintifboolexpr{\MPnumerateurinit == 1}{\pi}{}%
+					\xintifboolexpr{\MPnumerateurinit == -1}{-\pi}{}%
+					\xintifboolexpr{\xinteval{abs(\MPnumerateurinit) != 1}}{\num{\MPnumerateurinit}\pi}{}%
+				}%
+				{%
+					\displaystyle\IfBooleanT{#1}{-}\frac{%
+						\xintifboolexpr{\MPnumerateurinit == 1}{\pi}{}%
+						\xintifboolexpr{\MPnumerateurinit == -1}{\IfBooleanTF{#1}{}{-}\pi}{}
+						\xintifboolexpr{\xinteval{abs(\MPnumerateurinit) != 1}}{\num{ \IfBooleanTF{#1}{\xinteval{abs(\MPnumerateurinit)}}{\MPnumerateurinit} }\pi}{}%
+					}%
+					{%
+						\num{\MPdenominateurinit}%
+					}%
+				}%
+			}%
+		}%
+		{}%
+	\IfStrEq{#2}{t}%
+		{%
+			\ensuremath{%
+			\xintifboolexpr{\MPdenominateurinit == 1}%
+				{%
+					\xintifboolexpr{\MPnumerateurinit == 1}{\pi}{}%
+					\xintifboolexpr{\MPnumerateurinit == -1}{-\pi}{}%
+					\xintifboolexpr{\xinteval{abs(\MPnumerateurinit) != 1}}{\num{\MPnumerateurinit}\pi}{}%
+				}%
+				{%
+					\IfBooleanT{#1}{-}\tfrac{%
+						\xintifboolexpr{\MPnumerateurinit == 1}{\pi}{}%
+						\xintifboolexpr{\MPnumerateurinit == -1}{-\pi}{}
+						\xintifboolexpr{\xinteval{abs(\MPnumerateurinit) != 1}}{\num{ \IfBooleanTF{#1}{\xinteval{abs(\MPnumerateurinit)}}{\MPnumerateurinit} }\pi}{}%
+					}%
+					{%
+						\num{\MPdenominateurinit}%
+					}%
+				}%
+			}%
+		}%
+		{}%
+	\IfStrEq{#2}{}%
+		{%
+			\ensuremath{%
+			\xintifboolexpr{\MPdenominateurinit == 1}%
+				{%
+					\xintifboolexpr{\MPnumerateurinit == 1}{\pi}{}%
+					\xintifboolexpr{\MPnumerateurinit == -1}{-\pi}{}%
+					\xintifboolexpr{\xinteval{abs(\MPnumerateurinit) != 1}}{\num{\MPnumerateurinit}\pi}{}%
+				}%
+				{%
+					\IfBooleanT{#1}{-}\frac{%
+						\xintifboolexpr{\MPnumerateurinit == 1}{\pi}{}%
+						\xintifboolexpr{\MPnumerateurinit == -1}{-\pi}{}
+						\xintifboolexpr{\xinteval{abs(\MPnumerateurinit) != 1}}{\num{ \IfBooleanTF{#1}{\xinteval{abs(\MPnumerateurinit)}}{\MPnumerateurinit} }\pi}{}%
+					}%
+					{%
+						\num{\MPdenominateurinit}%
+					}%
+				}%
+			}%
+		}%
+		{}%
+	\IfStrEq{#2}{n}%
+		{%
+			\ensuremath{%
+			\xintifboolexpr{\MPdenominateurinit == 1}%
+				{%
+					\xintifboolexpr{\MPnumerateurinit == 1}{\pi}{}%
+					\xintifboolexpr{\MPnumerateurinit == -1}{-\pi}{}%
+					\xintifboolexpr{\xinteval{abs(\MPnumerateurinit) != 1}}{\num{\MPnumerateurinit}\pi}{}%
+				}%
+				{%
+					\nicefrac{%
+						\xintifboolexpr{\MPnumerateurinit == 1}{\pi}{}%
+						\xintifboolexpr{\MPnumerateurinit == -1}{-\pi}{}
+						\xintifboolexpr{\xinteval{abs(\MPnumerateurinit) != 1}}{\num{\MPnumerateurinit}\pi}{}%
+					}%
+					{%
+						\num{\MPdenominateurinit}%
+					}%
+				}%
+			}%
+		}%
+		{}%
+}
+
+%%------Codes listings
+\input{proflycee-tools-listings.tex}
+%%------Trigo
+\input{proflycee-tools-trigo.tex}
+%%------Probas
+\input{proflycee-tools-probas.tex}
+%%------Stats
+\input{proflycee-tools-stats.tex}
+%%------Arithm
+\input{proflycee-tools-arithm.tex}
+%%------Graphiques
+\input{proflycee-tools-graphiques.tex}
+%%------Analyse
+\input{proflycee-tools-analyse.tex}
+%%------Aléatoire
+\input{proflycee-tools-aleatoire.tex}
+%%------Suites
+\input{proflycee-tools-suites.tex}
+%%------Complexes
+\input{proflycee-tools-complexes.tex}
+%%------Géométrie
+\input{proflycee-tools-geom.tex}
+%%------Récréations diverses
+\input{proflycee-tools-recreat.tex}
+%%------Compétences
+\input{proflycee-tools-competences.tex}
+%%------Examens
+\input{proflycee-tools-exams.tex}
+%%------Cliparts
+\input{proflycee-tools-cliparts.tex}
+%%------PictosBac
+\RequirePackage{ProfLycee-Pictosbac}
+
+\endinput

@@ -1,0 +1,267 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c
+% or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{PapierGurvan}[2023/09/11 0.1.0 Travailler avec des papiers type Gurvan]
+%0.1.0	Version initiale
+
+%------Packages utiles
+\RequirePackage{tikz}
+\RequirePackage{simplekv}
+\RequirePackage{xstring}
+\RequirePackage{setspace}
+%librairies tikz
+\usetikzlibrary{calc,positioning}
+
+%------variables utiles
+\newcounter{lggurvan}%compteur des lignes, qui sera incrémenté
+\definecolor{GurvanBleuFonce}{HTML}{B5CAF9}
+\definecolor{GurvanBleuCiel}{HTML}{DBF1F7}
+\def\ColGgurvan{gray!75/GurvanBleuFonce/GurvanBleuCiel}%réglure+fondfonce+fondclair
+
+\defKV[Gurvan]{%
+	NbCarreaux=\xdef\GurvanNbCar{#1},%
+	Elargir=\xdef\GurvanElar{#1},%
+	CouleurBarre=\xdef\GurvanCoulBarre{#1},%
+	Interligne=\xdef\GurvanInterligne{#1}
+}
+
+\setKVdefault[Gurvan]{%
+	NbCarreaux=17x5,%
+	Unite=1,%
+	Marge=4,%
+	Elargir=0,%
+	Cadre=false,%
+	AffBarres=true,%
+	CouleurBarre={red!75},%
+	Interligne=3
+}
+
+\NewDocumentCommand\PapierGurvan{ O{} D<>{gray!75/GurvanBleuFonce/GurvanBleuCiel} }{%affichage simple du quadrillage
+	\setcounter{lggurvan}{0}%on réinitialise les lignes
+	\useKVdefault[Gurvan]%on met les clés par défaut
+	\setKV[Gurvan]{#1}%on lit les clés
+	\IfSubStr{#2}{/}%on récupère les 3 couleurs
+		{%
+			\StrBefore[1]{#2}{/}[\GurvanCoulA]%
+			\StrBetween[1,2]{#2}{/}{/}[\GurvanCoulB]%
+			\StrBehind[2]{#2}{/}[\GurvanCoulC]%
+		}%
+		{\def\GurvanCoulA{#2!75}\def\GurvanCoulB{#2!40}\def\GurvanCoulC{#2!20}}%si nonocouleur
+	\StrCut{\GurvanNbCar}{x}{\GurvanNbCol}{\GurvanNbLig}%
+	\IfSubStr{\GurvanElar}{/}%on récupère les élargissements G et D
+		{\StrCut{\GurvanElar}{/}{\GurvanElarG}{\GurvanElarD}}%
+		{\def\GurvanElarG{\GurvanElar}\def\GurvanElarD{\GurvanElar}}%
+	\xdef\ValeurCarreauH{0.8}%
+	\xdef\ValeurCarreauV{\fpeval{0.8*\GurvanInterligne}}%
+	%tikzpicture
+	\begin{tikzpicture}[xscale={\useKV[Gurvan]{Unite}},yscale={\useKV[Gurvan]{Unite}}]
+		\useasboundingbox (0,0) rectangle ({\ValeurCarreauH*\GurvanNbCol},{-\ValeurCarreauV*\GurvanNbLig}) ;%on fixe la grille de base, avant élargissement éventuel
+		%coloriage
+		\def\GurvanNbLigMU{\fpeval{\GurvanNbLig-1}}%
+		\foreach \nblig in {0,1,...,\GurvanNbLigMU}{%
+			%2 lignes bleu ciel du haut
+			\filldraw[draw=none,fill=\GurvanCoulC] ({-\ValeurCarreauH*\GurvanElarG},{-\nblig*\GurvanInterligne*0.1*8}) rectangle++ ({\ValeurCarreauH*\GurvanNbCol+\ValeurCarreauH*\GurvanElarG},{-\GurvanInterligne*0.1*2}) ;
+			%2 lignes bleu ciel du bas
+			\filldraw[draw=none,fill=\GurvanCoulC] ({-\ValeurCarreauH*\GurvanElarG},{-\nblig*\GurvanInterligne*0.1*8-0.5*\GurvanInterligne}) rectangle++ ({\ValeurCarreauH*\GurvanNbCol+\ValeurCarreauH*\GurvanElarG},{-\GurvanInterligne*0.1*2}) ;
+			%ligne bleu foncé du bas
+			\filldraw[draw=none,fill=\GurvanCoulB] ({-\ValeurCarreauH*\GurvanElarG},{-\nblig*\GurvanInterligne*0.1*8-0.7*\GurvanInterligne}) rectangle++ ({\ValeurCarreauH*\GurvanNbCol+\ValeurCarreauH*\GurvanElarG},{-\GurvanInterligne*0.1}) ;
+		}
+		%grilles
+		\draw[xstep=\ValeurCarreauH,ystep={\GurvanInterligne*0.1},\GurvanCoulA] ({-\ValeurCarreauH*\GurvanElarG},0) grid ({\ValeurCarreauH*\GurvanNbCol+\ValeurCarreauH*\GurvanElarG},{-\ValeurCarreauV*\GurvanNbLig}) ;%grille gurvan principale
+		\foreach \nblig in {0,1,...,\GurvanNbLig}{%
+			\draw[thick,gray] ({-\ValeurCarreauH*\GurvanElarG},{-\nblig*8*\GurvanInterligne*0.1}) -- ({\ValeurCarreauH*\GurvanNbCol+\ValeurCarreauH*\GurvanElarG},{-\nblig*8*\GurvanInterligne*0.1}) ;
+		}%lignes principales
+		\ifboolKV[Gurvan]{AffBarres}%
+			{%
+				\draw[very thick,\GurvanCoulBarre] ({\ValeurCarreauH*\useKV[Gurvan]{Marge}},0) -- ({\ValeurCarreauH*\useKV[Gurvan]{Marge}},{-\ValeurCarreauV*\GurvanNbLig}) ;%barre verticale gauche
+				\draw[very thick,gray,densely dashed] ({\ValeurCarreauH*(\GurvanNbCol-2)},0) -- ({\ValeurCarreauH*(\GurvanNbCol-2)},{-\ValeurCarreauV*\GurvanNbLig}) ;%barre verticale froite
+			}{}
+	\end{tikzpicture}%
+}
+
+\NewDocumentEnvironment{EnvGurvan}{ O{} D<>{gray!75/GurvanBleuFonce/GurvanBleuCiel} }%créer le quadrillage, couleurs ?
+{%
+	\setcounter{lggurvan}{0}%on réinitialise les lignes
+	\useKVdefault[Gurvan]%on met les clés par défaut
+	\setKV[Gurvan]{#1}%on lit les clés
+	\IfSubStr{#2}{/}%on récupère les 3 couleurs
+		{%
+			\StrBefore[1]{#2}{/}[\GurvanCoulA]%
+			\StrBetween[1,2]{#2}{/}{/}[\GurvanCoulB]%
+			\StrBehind[2]{#2}{/}[\GurvanCoulC]%
+		}%
+		{\def\GurvanCoulA{#2!75}\def\GurvanCoulB{#2!40}\def\GurvanCoulC{#2!20}}%si monocouleur
+	\StrCut{\GurvanNbCar}{x}{\GurvanNbCol}{\GurvanNbLig}%
+	\IfSubStr{\GurvanElar}{/}%on récupère les élargissements G et D
+		{\StrCut{\GurvanElar}{/}{\GurvanElarG}{\GurvanElarD}}%
+		{\def\GurvanElarG{\GurvanElar}\def\GurvanElarD{\GurvanElar}}%
+	\xdef\ValeurCarreauH{0.8}%
+	\xdef\ValeurCarreauV{\fpeval{0.8*\GurvanInterligne}}%
+	%tikzpicture
+	\begin{tikzpicture}[xscale={\useKV[Gurvan]{Unite}},yscale={\useKV[Gurvan]{Unite}}]
+		\useasboundingbox (0,0) rectangle ({\ValeurCarreauH*\GurvanNbCol},{-\ValeurCarreauV*\GurvanNbLig}) ;%on fixe la grille de base, avant élargissement éventuel
+		%coloriage
+		\def\GurvanNbLigMU{\fpeval{\GurvanNbLig-1}}%
+		\foreach \nblig in {0,1,...,\GurvanNbLigMU}{%
+			%2 lignes bleu ciel du haut
+			\filldraw[draw=none,fill=\GurvanCoulC] ({-\ValeurCarreauH*\GurvanElarG},{-\nblig*\GurvanInterligne*0.1*8}) rectangle++ ({\ValeurCarreauH*\GurvanNbCol+\ValeurCarreauH*\GurvanElarG},{-\GurvanInterligne*0.1*2}) ;
+			%2 lignes bleu ciel du bas
+			\filldraw[draw=none,fill=\GurvanCoulC] ({-\ValeurCarreauH*\GurvanElarG},{-\nblig*\GurvanInterligne*0.1*8-0.5*\GurvanInterligne}) rectangle++ ({\ValeurCarreauH*\GurvanNbCol+\ValeurCarreauH*\GurvanElarG},{-\GurvanInterligne*0.1*2}) ;
+			%ligne bleu foncé du bas
+			\filldraw[draw=none,fill=\GurvanCoulB] ({-\ValeurCarreauH*\GurvanElarG},{-\nblig*\GurvanInterligne*0.1*8-0.7*\GurvanInterligne}) rectangle++ ({\ValeurCarreauH*\GurvanNbCol+\ValeurCarreauH*\GurvanElarG},{-\GurvanInterligne*0.1}) ;
+		}
+		%grilles
+		\draw[xstep=\ValeurCarreauH,ystep={\GurvanInterligne*0.1},\GurvanCoulA] ({-\ValeurCarreauH*\GurvanElarG},0) grid ({\ValeurCarreauH*\GurvanNbCol+\ValeurCarreauH*\GurvanElarG},{-\ValeurCarreauV*\GurvanNbLig}) ;%grille gurvan principale
+		\foreach \nblig in {0,1,...,\GurvanNbLig}{%
+			\draw[thick,gray] ({-\ValeurCarreauH*\GurvanElarG},{-\nblig*8*\GurvanInterligne*0.1}) -- ({\ValeurCarreauH*\GurvanNbCol+\ValeurCarreauH*\GurvanElarG},{-\nblig*8*\GurvanInterligne*0.1}) ;
+		}%lignes principales
+		\ifboolKV[Gurvan]{AffBarres}%
+		{%
+			\draw[very thick,\GurvanCoulBarre] ({\ValeurCarreauH*\useKV[Gurvan]{Marge}},0) -- ({\ValeurCarreauH*\useKV[Gurvan]{Marge}},{-\ValeurCarreauV*\GurvanNbLig}) ;%barre verticale gauche
+			\draw[very thick,darkgray,densely dashed] ({\ValeurCarreauH*(\GurvanNbCol-2)},0) -- ({\ValeurCarreauH*(\GurvanNbCol-2)},{-\ValeurCarreauV*\GurvanNbLig}) ;%barre verticale froite
+		}{}%
+}%
+{%
+	\end{tikzpicture}%
+}
+
+\newcommand\PasseLigneGurvan{\addtocounter{lggurvan}{1}}%passer une ligne
+
+\defKV[LigneGurvan]{Echelle=\xdef\GurvanEchelle{#1}}%déf des clés
+\setKVdefault[LigneGurvan]{DecalV=0pt,DecalH=0,Sep=0pt,Echelle=1}%valeurs par défaut
+
+\NewDocumentCommand\EcrireLigneGurvan{ O{} D<>{left} m }{%écrire sur les lignes l'une après l'autre
+	\addtocounter{lggurvan}{1}%
+	\useKVdefault[LigneGurvan]%
+	\setKV[LigneGurvan]{#1}
+	\node[text width=\fpeval{\ValeurCarreauH*(\GurvanNbCol-2)/\GurvanEchelle-\ValeurCarreauH*\useKV[Gurvan]{Marge}/\GurvanEchelle}cm,align=#2,scale=\GurvanEchelle,anchor=base west,inner sep={\useKV[LigneGurvan]{Sep}}] at ($({\ValeurCarreauH*\useKV[Gurvan]{Marge}+\ValeurCarreauH*\useKV[LigneGurvan]{DecalH}},{-\ValeurCarreauV*\thelggurvan})+(0.025,\useKV[LigneGurvan]{DecalV})$) {\strut #3} ;
+}
+
+%------page entière Gurvan
+\defKV[GurvanFull]{%
+	Interligne=\xdef\GurvanFullInter{#1},%
+	Papier=\xdef\GurvanFullPapier{#1},%
+	CoulLignes=\xdef\GurvanFullCoulLgn{#1},%
+	CoulFondClair=\xdef\GurvanFullFondClair{#1},%
+	CoulFondFonce=\xdef\GurvanFullFondFonce{#1},%
+	Marges=\xdef\GurvanFullMarges{#1}
+}
+\setKVdefault[GurvanFull]{%
+	Interligne=3,%
+	Papier=A4,%
+	CoulLignes=gray!75,%
+	CoulFondClair=GurvanBleuCiel,%
+	CoulFondFonce=GurvanBleuFonce,%
+	Marges={5/2},%
+	NumLignes=false
+}
+
+\NewDocumentEnvironment{PleinePageGurvan}{ O{} }%semble OK ^^
+{
+	\useKVdefault[GurvanFull]%
+	\setKV[GurvanFull]{#1}%
+	%variables utiles
+	\def\GurvanHautPapier{297}%
+	\def\GurvanLargPapier{210}%
+	\def\GurvanNbCarreauxIM{\fpeval{26-\GurvanFullMargeG-\GurvanFullMargeD}}%
+	\StrCut{\GurvanFullMarges}{/}{\GurvanFullMargeG}{\GurvanFullMargeD}%
+	\IfStrEq{\GurvanFullPapier}{A5}
+		{%
+			\def\GurvanHautPapier{210}\def\GurvanLargPapier{148}\def\GurvanNbCarreauxIM{\fpeval{18-\GurvanFullMargeG-\GurvanFullMargeD}}%
+		}{}%
+	\def\GurvanNbTotInterLignes{\fpeval{ceil(\GurvanHautPapier/(\GurvanFullInter))}}%
+	\def\GurvanNbTotLignes{\fpeval{ceil(\GurvanHautPapier/(8*\GurvanFullInter))}}%
+	\def\GurvanNbTotColonnes{\fpeval{ceil(\GurvanLargPapier/(8))}}%
+	\begin{tikzpicture}[remember picture,overlay,x=1cm,y=1cm]
+		%les fonds
+		\def\GurvanNbTotLignesMU{\fpeval{\GurvanNbTotLignes-1}}%
+		\foreach \nblig in {0,1,...,\GurvanNbTotLignesMU}{%
+			%2 lignes bleu ciel du haut
+			\filldraw[draw=none,fill=\GurvanFullFondClair] ($(current page.north west)+(0,{-\nblig*0.8*\GurvanFullInter})$) rectangle++ ({\paperwidth},{-0.2*\GurvanFullInter}) ;
+			%2 lignes bleu ciel du bas
+			\filldraw[draw=none,fill=\GurvanFullFondClair] ($(current page.north west)+(0,{-\nblig*0.8*\GurvanFullInter-0.5*\GurvanFullInter})$) rectangle++ ({\paperwidth},{-0.2*\GurvanFullInter}) ;
+			%ligne bleu foncé du bas
+			\filldraw[draw=none,fill=\GurvanFullFondFonce] ($(current page.north west)+(0,{-\nblig*0.8*\GurvanFullInter-0.7*\GurvanFullInter})$) rectangle++ ({\paperwidth},{-0.1*\GurvanFullInter}) ;
+		}
+		%grille secondaire
+		\foreach \L in {0,1,...,\GurvanNbTotInterLignes} {\draw[\GurvanFullCoulLgn] ($(current page.north west)+(0,{-\L*0.1*\GurvanFullInter})$)--++({\paperwidth},0) ;}
+		\foreach \C in {0,1,...,\GurvanNbTotColonnes} {\draw[\GurvanFullCoulLgn] ($(current page.north west)+({\C*0.8},0)$)--++(0,{-\paperheight}) ;}
+		%grille principale
+		\foreach \L in {0,1,...,\GurvanNbTotLignes} {\draw[thick,gray] ($(current page.north west)+(0,{-\L*0.8*\GurvanFullInter})$)--++({\paperwidth},0) ;}
+		%marge gauche
+		\draw[red!75,very thick] ($(current page.north west)+({\GurvanFullMargeG*0.8},0)$)--($(current page.south west)+({\GurvanFullMargeG*0.8},0)$) ;
+		%marge droite
+		\draw[gray,densely dashed,very thick] ($(current page.north west)+({(\GurvanFullMargeG+\GurvanNbCarreauxIM)*0.8},0)$)--($(current page.south west)+({(\GurvanFullMargeG+\GurvanNbCarreauxIM)*0.8},0)$) ;
+		%point initial
+		\coordinate (GurvanOrigine) at ($(current page.north west)+({\GurvanFullMargeG*0.8},{-0.8*\GurvanFullInter})$) ;
+		\ifboolKV[GurvanFull]{NumLignes}%
+			{%
+				\foreach \lig in {1,2,...,31} {\node[gray,inner sep=0pt,anchor=base east] at ($(GurvanOrigine)+(-0.2,{-0.8*\GurvanFullInter*(\lig-1)})$) {\scriptsize\sffamily \lig};}
+			}%
+			{}%
+}%
+{%
+	\end{tikzpicture}%
+}
+
+\defKV[GurvanLigne]{%
+	Couleur=\xdef\GurvanLigneCouleur{#1},%
+	Echelle=\xdef\GurvanLigneEchelle{#1},%
+	Ligne=\xdef\GurvanLigne{#1},%
+	DecalBord=\xdef\GurvanLigneDecalBord{#1},%
+	TaillePolice=\xdef\GurvanLigneFonte{#1}
+}
+\setKVdefault[GurvanLigne]{%
+	Couleur=black,%
+	Ligne=1,%
+	Echelle=1,%
+	DecalBord=0
+}
+
+\NewDocumentCommand\LigneGurvan{ O{} D<>{left} D(){0,0} m }{%
+	\def\GurvanNbCarreauxLarg{\fpeval{26-\GurvanFullMargeG-\GurvanFullMargeD}}%
+	\IfStrEq{\GurvanFullPapier}{A5}%
+		{%
+			\def\GurvanNbCarreauxLarg{\fpeval{18-\GurvanFullMargeG-\GurvanFullMargeD}}%
+		}{}%
+	\useKVdefault[GurvanLigne]%
+	\setKV[GurvanLigne]{#1}%
+	\node[\GurvanLigneCouleur,text width=\fpeval{0.8*\GurvanNbCarreauxLarg/\GurvanLigneEchelle-0.2*\GurvanLigneDecalBord/\GurvanLigneEchelle}cm,align=#2,inner sep=0pt,anchor=base west,scale=\GurvanLigneEchelle] at ($(GurvanOrigine)+({0.1*\GurvanLigneDecalBord},{-(\GurvanLigne-1)*0.8*\GurvanFullInter})+(#3)$) {#4} ;
+}
+
+\defKV[GurvanPar]{%
+	Couleur=\xdef\GurvanParCouleur{#1},%
+	Echelle=\xdef\GurvanParEchelle{#1},%
+	Espacement=\xdef\GurvanParBaseline{#1},%
+	Ligne=\xdef\GurvanParLgn{#1},%
+	DecalBord=\xdef\GurvanParDecalBord{#1}
+}
+\setKVdefault[GurvanPar]{%
+	Couleur=black,%
+	Ligne=1,%
+	Echelle=1,%
+	Espacement=auto,%
+	DecalBord=0
+}
+
+\NewDocumentCommand\ParagrapheGurvan{ O{} D<>{justify} D(){0,0} m }{%
+	\xdef\GurvanNbCarreauxLarg{\fpeval{26-\GurvanFullMargeG-\GurvanFullMargeD}}%
+	\IfStrEq{\GurvanFullPapier}{A5}%
+		{%
+			\def\GurvanNbCarreauxLarg{\fpeval{18-\GurvanFullMargeG-\GurvanFullMargeD}}%
+		}{}%
+	\IfStrEq{\GurvanParBaseline}{auto}%
+		{%
+			\def\GurvanParStretchPar{\fpeval{8*\GurvanFullInter/\GurvanParEchelle}}%
+		}%
+		{%
+			\def\GurvanParStretchPar{\GurvanParBaseline}%
+		}
+	\useKVdefault[GurvanPar]%
+	\setKV[GurvanPar]{#1}%
+	\node[\GurvanParCouleur,text width=\fpeval{0.8*\GurvanNbCarreauxLarg/\GurvanParEchelle-0.2*\GurvanParDecalBord/\GurvanParEchelle}cm,align=#2,inner sep=0pt,anchor=base west,scale=\GurvanParEchelle,execute at begin node=\setlength{\baselineskip}{\GurvanParStretchPar mm}] at ($(GurvanOrigine)+({0.1*\GurvanParDecalBord},{-(\GurvanParLgn-1)*0.8*\GurvanFullInter})+(#3)$) {#4} ;
+}
+
+\endinput

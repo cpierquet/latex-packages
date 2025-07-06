@@ -1,0 +1,914 @@
+% proflycee-tools-piton.tex
+% Copyright 2023-2025  Cédric Pierquet
+% Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+%3.12b	Modifs pour piton (semblent ok)...
+%3.11e	Ajout de styles pour piton (carbon & onglet)
+%3.04f	Ajout de clés pour la coloration des nombres et Piton
+%3.04d	PitonInputFile et styles, pour compatibilité pfm
+%3.03c	Thonny via piton + modification clé gobble ?
+%3.01f	PseudoCode via piton (?)
+%3.01e	Correction du comportement de la console repl piton/pyluatex
+%2.7.6	Correction du comportement de la console, avec une meilleure gestion de la largeur ^^ (merci à ablasz ;-))
+%2.7.5	Ajout d'un argument optionnel pour commencer les codes python à un numéro de ligne différent de 1
+%2.7.3	Correction de la couleur des bordures
+%2.6.9	Amalioration de la gestion des style := intégration directe dans la tcbox !
+%2.5.9	Ajout d'une clé pour la couleur des nombres
+%2.5.8	Modification des marges
+%2.5.7	Style alternatif
+
+\RequirePackage{iftex}
+\RequirePackage{varwidth}
+
+%%=============PYTHONPITON
+
+%==Clés globales
+\defKV[envpiton]{%
+	Largeur=\def\CODPITlargeur{#1},%
+	Alignement=\def\CODPITalign{#1},%
+	TaillePolice=\def\CODPITfonte{#1},%
+	Style=\def\CODPITstyle{#1},%
+	Titre=\def\CODPITtitre{#1},%
+	EspacementV=\def\CODPITespV{#1},%
+	CouleurNombres=\def\CODPITcolnb{#1},%
+	Gobble=\def\CODPITgobble{#1},%
+	Couleur=\def\CODPITcolor{#1},%
+	IconesCarbon=\def\CODPITicocarbon{#1}
+}
+
+\setKVdefault[envpiton]{%
+	Largeur=\linewidth,%
+	Alignement=center,%
+	Lignes=true,%
+	Gobble={},%
+	TaillePolice=\footnotesize,%
+	Filigrane=false,%
+	Style=Classique,%
+	Cadre=true,%
+	BarreTitre=true,%
+	Titre={{\scriptsize\faCode}~Code Python},%
+	EspacementV=0.5\baselineskip,%
+	CouleurNombres={orange!75!black},%
+	Couleur=red,%
+	IconesCarbon={\textcolor{red}{\faClone}\;\textcolor{orange}{\faClone}\;\textcolor{greensilicon}{\faClone}}
+}
+
+%==Style Moderne
+\tcbset{stylepiton/.style={%
+	enhanced,boxrule=1.25pt,%
+	sharp corners=downhill,arc=12pt,
+	before skip=\CODPITespV,after skip=\CODPITespV,%
+	top=\baselineskip,bottom=-0.5mm,left=0.6em,right=5mm,%
+	attach boxed title to top right={yshift=-\tcboxedtitleheight},
+	boxed title style={
+		size=small,colback=CouleurVertForet!25,boxrule=1.25pt,
+		colframe=CouleurVertForet,boxsep=1.25pt,
+		sharp corners=downhill,
+		arc=12pt,
+		top=2pt,bottom=1pt,left=6pt,right=6pt
+		},
+	fonttitle=\color{CouleurVertForet}\itshape\ttfamily\footnotesize,
+	title={{\scriptsize\faPython}~Code Python}
+	}
+}
+
+%==Style Classique
+\tcbset{thonnystyle/.style={%
+	enhanced,boxrule=0.75pt,colframe=darkgray!50!black,%
+	sharp corners,top=0mm,bottom=-0.5mm,left=0.4em,right=5mm,%
+	before skip=\CODPITespV,after skip=\CODPITespV,%
+	colback=white
+	}
+}
+
+\tcbset{thonnystylelineos/.style={%
+	thonnystyle,%
+	underlay={%
+		\begin{tcbclipinterior}
+			\draw[draw=none,fill=lightgray!25] (interior.south west) rectangle ([xshift=1.3em]interior.north west) ;
+		\end{tcbclipinterior}%
+		}
+	}
+}
+
+\tcbset{stylepitononglet/.style={%
+	enhanced,sharp corners=northwest,arc=4pt,
+	before skip=\CODPITespV,after skip=\CODPITespV,%
+	colback=\CODPITcolor!2.5,colframe=\CODPITcolor!50!black,boxrule=1.25pt,
+	attach boxed title to top left={xshift=1.2em+1mm,yshift*=1mm-\tcboxedtitleheight},
+	top=0.5mm,bottom=-0.5mm,left=0.6em,right=5mm,%
+	varwidth boxed title*=-3cm,
+	boxed title style={left=0mm,bottom=0mm,right=0mm,top=0mm,frame code={
+			\path[fill=tcbcolframe]
+			([yshift=-1mm,xshift=-1mm]frame.north west)
+			arc[start angle=0,end angle=180,radius=1mm]
+			([yshift=-1mm,xshift=1mm]frame.north east)
+			arc[start angle=180,end angle=0,radius=1mm];
+			\path[left color=tcbcolframe!80,right color=tcbcolframe!80,
+			middle color=tcbcolframe!60]
+			([xshift=-2mm]frame.north west) -- ([xshift=2mm]frame.north east)
+			[rounded corners=1mm]-- ([xshift=1mm,yshift=-1mm]frame.north east)
+			-- (frame.south east) -- (frame.south west)
+			-- ([xshift=-1mm,yshift=-1mm]frame.north west)
+			[sharp corners]-- cycle;
+		},interior engine=empty,
+	},
+	}
+}
+
+\tcbset{stylepitonsilicon/.style={%
+	enhanced,rounded corners,arc=4pt,
+	top=0mm,bottom=-0.5mm,left=0.4em,right=5mm,%
+	lefttitle=0.4em,bottomtitle=0mm,righttitle=0.4em,
+	title={\CODPITicocarbon\hfill{\CODPITtitre}},
+	before skip=\CODPITespV,after skip=\CODPITespV,%
+	colback=bgsilicon,colframe=bgsilicon,boxrule=1.25pt,interior engine=empty,
+	coltitle=white,colupper=white
+	}
+}
+
+\tcbset{stylepitonsiliconlight/.style={%
+		enhanced,rounded corners,arc=4pt,
+		top=0mm,bottom=-0.5mm,left=0.4em,right=5mm,%
+		lefttitle=0.4em,bottomtitle=0mm,righttitle=0.4em,
+		title={\CODPITicocarbon\hfill{\CODPITtitre}},
+		before skip=\CODPITespV,after skip=\CODPITespV,%
+		colback=bgsiliconlight,colframe=bgsiliconlight,boxrule=1.25pt,interior engine=empty,
+		coltitle=gray,colupper=black
+	}
+}
+
+\definecolor{bgsilicon}{HTML}{282a36}
+\definecolor{bgsiliconlight}{HTML}{fdf6e3}
+\definecolor{redsilicon}{HTML}{f92672}
+\definecolor{violetsilicon}{HTML}{ae81ff}
+\definecolor{orangesilicon}{HTML}{fd971f}
+\definecolor{yellowsilicon}{HTML}{e0d36c}
+\definecolor{bluesilicon}{HTML}{60d1e8}
+\definecolor{greensilicon}{HTML}{27c93f}
+
+%--
+\defKV[envpcpiton]{%
+	Largeur=\def\CODPITPClargeur{#1},%
+	Alignement=\def\CODPITPCalign{#1},%
+	TaillePolice=\def\CODPITPCfonte{#1},%
+	Style=\def\CODPITPCstyle{#1},%
+	Titre=\def\CODPITPCtitre{#1},%
+	EspacementV=\def\CODPITPCespV{#1},%
+	Gobble=\def\CODPITPCgobble{#1}
+}
+
+\setKVdefault[envpcpiton]{%
+	Largeur=\linewidth,%
+	Alignement=center,%
+	Lignes=true,%
+	Gobble={},%
+	TaillePolice=\footnotesize,%
+	Filigrane=false,%
+	Style=Classique,%
+	Cadre=true,%
+	BarreTitre=true,%
+	Titre={{\scriptsize\faFileCode}~PseudoCode},%
+	EspacementV=0.5\baselineskip,%
+	Couleurs=true
+}
+
+%==Style Moderne
+\tcbset{stylepcpiton/.style={%
+	enhanced,boxrule=1.25pt,%
+	sharp corners=downhill,arc=12pt,
+	before skip=\CODPITPCespV,after skip=\CODPITPCespV,%
+	top=\baselineskip,bottom=-0.5mm,left=0.6em,right=5mm,%
+	attach boxed title to top right={yshift=-\tcboxedtitleheight},
+	boxed title style={
+		size=small,colback=CouleurVertForet!25,boxrule=1.25pt,
+		colframe=CouleurVertForet,boxsep=1.25pt,
+		sharp corners=downhill,
+		arc=12pt,
+		top=2pt,bottom=1pt,left=6pt,right=6pt
+		},
+	fonttitle=\color{CouleurVertForet}~~PseudoCode
+	}
+}
+
+%==Style Classique
+\tcbset{thonnypcstyle/.style={%
+	enhanced,boxrule=0.75pt,colframe=darkgray!50!black,%
+	sharp corners,top=0mm,bottom=-0.5mm,left=0.4em,right=5mm,%
+	before skip=\CODPITPCespV,after skip=\CODPITPCespV,%
+	colback=white
+	}
+}
+
+\tcbset{thonnypcstylelineos/.style={%
+	thonnypcstyle,%
+	underlay={%
+		\begin{tcbclipinterior}
+			\draw[draw=none,fill=lightgray!25] (interior.south west) rectangle ([xshift=1.3em]interior.north west) ;
+		\end{tcbclipinterior}%
+		}
+	}
+}
+
+%==Création de la boîte (essai v2 ?)
+\ifluatex
+\RequirePackage{piton}
+
+\NewDocumentCommand\PrVal{}{\textleftarrow}
+
+\PitonOptions{begin-escape={(*},end-escape={*)}}
+
+\NewPitonEnvironment{CodePiton}{ O{} m D<>{} }%
+{%
+	\tcbset{reset}%
+	\useKVdefault[envpiton]%
+	\setKV[envpiton]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%------les styles piton
+	%\SetPitonStyle[Python]{ Number = \color{\CODPITcolnb} }
+	\tcbset{pitonlargeur/.style={width=\CODPITlargeur}}%
+	\ifboolKV[envpiton]{Lignes}%si lignes=true
+		{\PitonOptions{left-margin=0.75em,line-numbers={skip-empty-lines=false,label-empty-lines=true,#3}}}%left-margin=auto,
+		{}%
+	%\ifboolKV[envpiton]{Gobble}%si gobble=true
+	%	{\PitonOptions{}}%
+	%	{}%
+	%--gestion du gobble
+	\IfStrEqCase{\CODPITgobble}{%
+		{auto}{\PitonOptions{auto-gobble}}%
+		{env}{\PitonOptions{env-gobble}}%
+		{tabs}{\PitonOptions{tabs-auto-gobble}}%
+		{tabs-auto}{\PitonOptions{tabs-auto-gobble,auto-gobble}}%
+		{auto-tabs}{\PitonOptions{auto-gobble,tabs-auto-gobble}}%
+		{all}{\PitonOptions{auto-gobble,tabs-auto-gobble,env-gobble}}%
+	}
+	\IfInteger{\CODPITgobble}{\PitonOptions{gobble=\CODPITgobble}}{}%
+	%--fin gestion du gobble
+	\PitonOptions{break-lines,indent-broken-lines,continuation-symbol={\;}}%,numbers-sep=0.65em}%language=Python}
+	%------les styles tcbox
+	\IfEq{\CODPITstyle}{Moderne}%style Moderne (défaut)
+		{%
+			\tcbset{cadre/.style={}}
+			\tcbset{titre/.style={}}
+			\tcbset{stylebase/.style={stylepiton,colframe=CouleurVertForet,colback=CouleurVertForet!5,fontupper=\CODPITfonte,fontlower=\CODPITfonte,\CODPITalign,leftupper=0.75em}}
+			\ifboolKV[envpiton]{Filigrane}%si filigrane
+				{\tcbset{filigrane/.style={watermark text={\faPython},watermark opacity=0.175,watermark zoom=0.50}}}%
+				{\tcbset{filigrane/.style={}}}%
+			\SetPitonStyle{Number=\color{\CODPITcolnb}}%
+		}
+		{}%
+	%====TEST
+	\IfEq{\CODPITstyle}{Onglet}%style Onglet
+		{%
+			\tcbset{cadre/.style={}}
+			\tcbset{titre/.style={fonttitle=\bfseries\footnotesize\sffamily},title={\CODPITtitre}}
+			\tcbset{stylebase/.style={stylepitononglet,fontupper=\CODPITfonte,fontlower=\CODPITfonte,\CODPITalign,leftupper=0.75em}}
+			\ifboolKV[envpiton]{Filigrane}%si filigrane
+				{\tcbset{filigrane/.style={watermark text={\faPython},watermark opacity=0.175,watermark zoom=0.50}}}%
+				{\tcbset{filigrane/.style={}}}%
+			\SetPitonStyle{Number=\color{\CODPITcolnb}}%
+		}
+		{}%
+	%====TEST
+	%====TEST 2
+	\IfEq{\CODPITstyle}{Carbon}%style Silicon
+		{%
+			\tcbset{cadre/.style={}}
+			\tcbset{stylebase/.style={stylepitonsilicon,fontupper=\CODPITfonte,fontlower=\CODPITfonte,\CODPITalign,leftupper=0.75em}}
+			\ifboolKV[envpiton]{Filigrane}%si filigrane
+				{\tcbset{filigrane/.style={watermark text={\faPython},watermark opacity=0.025,watermark zoom=0.50,watermark color=white}}}%
+				{\tcbset{filigrane/.style={}}}%
+			\SetPitonStyle%
+				{%
+					Keyword=\color{redsilicon},Name.Function=\color{orangesilicon},Number=\color{violetsilicon},Operator=\color{white},String.Doc=\color{yellowsilicon}\itshape,%
+					Comment=\color{gray}\itshape,Name.Builtin=\color{bluesilicon}
+				}%
+			\ifboolKV[envpiton]{BarreTitre}%
+				{%
+					\tcbset{titre/.style={fonttitle=\bfseries\footnotesize\sffamily},title={\CODPITtitre}}
+				}%
+				{%
+					\tcbset{titre/.style={notitle}}
+				}%
+			\PitonOptions{line-numbers={format=\color{white}}}%
+		}%
+		{}%
+	%====TEST
+	%====TEST 3
+	\IfEq{\CODPITstyle}{CarbonClair}%style Silicon
+		{%
+			\tcbset{cadre/.style={}}
+			%\tcbset{titre/.style={fonttitle=\bfseries\footnotesize\sffamily},title={\CODPITtitre}}
+			\tcbset{stylebase/.style={stylepitonsiliconlight,fontupper=\CODPITfonte,fontlower=\CODPITfonte,\CODPITalign,leftupper=0.75em}}
+			\ifboolKV[envpiton]{Filigrane}%si filigrane
+				{\tcbset{filigrane/.style={watermark text={\faPython},watermark opacity=0.075,watermark zoom=0.50,watermark color=gray}}}%
+				{\tcbset{filigrane/.style={}}}%
+			\ifboolKV[envpiton]{BarreTitre}%
+				{%
+					\tcbset{titre/.style={fonttitle=\bfseries\footnotesize\sffamily},title={\CODPITtitre}}
+				}%
+				{%
+					\tcbset{titre/.style={notitle}}
+				}%
+			% \SetPitonStyle%
+				% {%
+					% Keyword=\color{redsilicon},Name.Function=\color{orangesilicon},Number=\color{violetsilicon},Operator=\color{white},String.Doc=\color{yellowsilicon}\itshape,%
+					% Comment=\color{gray}\itshape,Name.Builtin=\color{bluesilicon}
+				% }%
+			%\PitonOptions{line-numbers={format=\color{gray}}}%
+		}%
+		{}%
+	%====TEST
+	\IfEq{\CODPITstyle}{Classique}%style Classique
+		{%
+			\ifboolKV[envpiton]{Lignes}%si lignes=true
+				{\tcbset{stylebase/.style={thonnystylelineos,leftupper=0.75em,colframe=darkgray!50!black,fontupper=\CODPITfonte,fontlower=\CODPITfonte,\CODPITalign}}}%
+				{\tcbset{stylebase/.style={thonnystyle,leftupper=0.4em,colframe=darkgray!50!black,fontupper=\CODPITfonte,fontlower=\CODPITfonte,\CODPITalign}}}%
+			%\tcbset{width=\CODPITlargeur,colframe=darkgray!50!black,fontupper=\CODPITfonte,fontlower=\CODPITfonte,\CODPITalign}
+			\ifboolKV[envpiton]{Filigrane}%si filigrane
+				{\tcbset{filigrane/.style={watermark text={\faPython},watermark opacity=0.25,watermark zoom=0.50}}}%
+				{\tcbset{filigrane/.style={}}}%
+			\ifboolKV[envpiton]{BarreTitre}%
+				{%
+					\ifboolKV[envpiton]{Cadre}
+						{\tcbset{cadre/.style={}}}%
+						{\tcbset{cadre/.style={boxrule=0pt,frame hidden}}}%
+					\tcbset{titre/.style={lefttitle=0.4em,title={\CODPITtitre},fonttitle=\bfseries\footnotesize\sffamily,colbacktitle=darkgray!50!black}}
+				}%
+				{%
+					\tcbset{titre/.style={notitle}}
+					\ifboolKV[envpiton]{Cadre}
+						{\tcbset{cadre/.style={}}}
+						{\tcbset{cadre/.style={boxrule=0pt,frame hidden}}}
+				}%
+			\SetPitonStyle{Number=\color{\CODPITcolnb}}%
+		}
+		{}%
+	%on crée la boîte
+	\tcolorbox[stylebase,filigrane,cadre,titre,pitonlargeur,#2]
+}%
+{%
+	\endtcolorbox%
+}
+
+%inputfile
+\NewDocumentCommand\CodePitonFichier{ O{} m D<>{} }{%
+	{\tcbset{reset}%
+	\useKVdefault[envpiton]%
+	\setKV[envpiton]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%------les styles piton
+	%\SetPitonStyle[Python]{ Number = \color{\CODPITcolnb} }
+	\ifboolKV[envpiton]{Lignes}%si lignes=true
+		{\PitonOptions{left-margin=0.75em,line-numbers,line-numbers={skip-empty-lines=false,label-empty-lines=true,#3}}}%left-margin=auto,
+		{\PitonOptions{}}%
+	\PitonOptions{break-lines,indent-broken-lines,continuation-symbol={\;}}%,numbers-sep=0.65em}%language=Python}
+	%------les styles tcbox
+	\IfEq{\CODPITstyle}{Moderne}%style Moderne (défaut)
+		{%
+			\tcbset{cadre/.style={}}%
+			\tcbset{titre/.style={}}%
+			\tcbset{stylebase/.style={stylepiton,colframe=CouleurVertForet,colback=CouleurVertForet!5,width=\CODPITlargeur,fontupper=\CODPITfonte,fontlower=\CODPITfonte,\CODPITalign,leftupper=0.75em}}%
+			\ifboolKV[envpiton]{Filigrane}%si filigrane
+				{\tcbset{filigrane/.style={watermark text={\faPython},watermark opacity=0.175,watermark zoom=0.50}}}%
+				{\tcbset{filigrane/.style={}}}%
+			\SetPitonStyle{Number=\color{\CODPITcolnb}}%
+		}%
+		{}%
+	%====TEST
+	\IfEq{\CODPITstyle}{Onglet}%style Onglet
+		{%
+			\tcbset{cadre/.style={}}%
+			\tcbset{titre/.style={fonttitle=\bfseries\footnotesize\sffamily},title={\CODPITtitre}}%
+			\tcbset{stylebase/.style={stylepitononglet,width=\CODPITlargeur,fontupper=\CODPITfonte,fontlower=\CODPITfonte,\CODPITalign,leftupper=0.75em}}%
+			\ifboolKV[envpiton]{Filigrane}%si filigrane
+				{\tcbset{filigrane/.style={watermark text={\faPython},watermark opacity=0.175,watermark zoom=0.50}}}%
+				{\tcbset{filigrane/.style={}}}%
+			\SetPitonStyle{Number=\color{\CODPITcolnb}}%
+		}%
+		{}%
+	%====TEST
+	%====TEST 2
+	\IfEq{\CODPITstyle}{Carbon}%style Silicon
+		{%
+			\tcbset{cadre/.style={}}%
+			\tcbset{stylebase/.style={stylepitonsilicon,width=\CODPITlargeur,fontupper=\CODPITfonte,fontlower=\CODPITfonte,\CODPITalign,leftupper=0.75em}}%
+			\ifboolKV[envpiton]{Filigrane}%si filigrane
+				{\tcbset{filigrane/.style={watermark text={\faPython},watermark opacity=0.025,watermark zoom=0.50,watermark color=white}}}%
+				{\tcbset{filigrane/.style={}}}%
+			\SetPitonStyle%
+				{%
+					Keyword=\color{redsilicon},Name.Function=\color{orangesilicon},Number=\color{violetsilicon},Operator=\color{white},String.Doc=\color{yellowsilicon}\itshape,Comment=\color{gray}\itshape,Name.Builtin=\color{bluesilicon}%
+				}%
+			\ifboolKV[envpiton]{BarreTitre}%
+				{%
+					\tcbset{titre/.style={fonttitle=\bfseries\footnotesize\sffamily},title={\CODPITtitre}}%
+				}%
+				{%
+					\tcbset{titre/.style={notitle}}%
+				}%
+			\PitonOptions{line-numbers={format=\color{white}}}%
+		}%
+		{}%
+	%====TEST
+	%====TEST 3
+	\IfEq{\CODPITstyle}{CarbonClair}%style Silicon
+		{%
+			\tcbset{cadre/.style={}}%
+			%\tcbset{titre/.style={fonttitle=\bfseries\footnotesize\sffamily},title={\CODPITtitre}}
+			\tcbset{stylebase/.style={stylepitonsiliconlight,width=\CODPITlargeur,fontupper=\CODPITfonte,fontlower=\CODPITfonte,\CODPITalign,leftupper=0.75em}}%
+			\ifboolKV[envpiton]{Filigrane}%si filigrane
+				{\tcbset{filigrane/.style={watermark text={\faPython},watermark opacity=0.075,watermark zoom=0.50,watermark color=gray}}}%
+				{\tcbset{filigrane/.style={}}}%
+			\ifboolKV[envpiton]{BarreTitre}%
+				{%
+					\tcbset{titre/.style={fonttitle=\bfseries\footnotesize\sffamily},title={\CODPITtitre}}%
+				}%
+				{%
+					\tcbset{titre/.style={notitle}}%
+				}%
+			% \SetPitonStyle%
+				% {%
+					% Keyword=\color{redsilicon},Name.Function=\color{orangesilicon},Number=\color{violetsilicon},Operator=\color{white},String.Doc=\color{yellowsilicon}\itshape,%
+					% Comment=\color{gray}\itshape,Name.Builtin=\color{bluesilicon}
+				% }%
+			%\PitonOptions{line-numbers={format=\color{gray}}}%
+		}%
+		{}%
+	%====TEST
+	\IfEq{\CODPITstyle}{Classique}%style Classique
+		{%
+			\ifboolKV[envpiton]{Lignes}%si lignes=true
+			{\tcbset{stylebase/.style={thonnystylelineos,leftupper=0.75em,width=\CODPITlargeur,colframe=darkgray!50!black,fontupper=\CODPITfonte,fontlower=\CODPITfonte,\CODPITalign}}}%
+			{\tcbset{stylebase/.style={thonnystyle,leftupper=0.4em,width=\CODPITlargeur,colframe=darkgray!50!black,fontupper=\CODPITfonte,fontlower=\CODPITfonte,\CODPITalign}}}%
+			\ifboolKV[envpiton]{Filigrane}%si filigrane
+				{\tcbset{filigrane/.style={watermark text={\faPython},watermark opacity=0.25,watermark zoom=0.50}}}%
+				{\tcbset{filigrane/.style={}}}%
+			\ifboolKV[envpiton]{BarreTitre}%
+				{%
+					\ifboolKV[envpiton]{Cadre}%
+					{\tcbset{cadre/.style={}}}%
+					{\tcbset{cadre/.style={boxrule=0pt,frame hidden}}}%
+					\tcbset{titre/.style={lefttitle=0.4em,title={\CODPITtitre},fonttitle=\bfseries\footnotesize\sffamily,colbacktitle=darkgray!50!black}}%
+				}%
+				{%
+					\tcbset{titre/.style={notitle}}%
+					\ifboolKV[envpiton]{Cadre}%
+					{\tcbset{cadre/.style={}}}%
+					{\tcbset{cadre/.style={boxrule=0pt,frame hidden}}}%
+				}%
+			\SetPitonStyle{Number=\color{\CODPITcolnb}}%
+		}%
+		{}%
+	%on crée la boîte
+	\tcolorbox[stylebase,filigrane,cadre,titre]
+	\PitonInputFile{#2}
+	\endtcolorbox}%
+}
+
+%piton >= 2.4
+\NewPitonEnvironment{PseudoCodePiton}{ O{} m D<>{} }%
+{%
+	\tcbset{reset}%
+	\useKVdefault[envpcpiton]%
+	\setKV[envpcpiton]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%------les styles piton
+	\PitonOptions{break-lines,indent-broken-lines,language=minimal,continuation-symbol={\;}}%,numbers-sep=0.65em}%
+	\SetPitonStyle{ Number = }%
+	\ifboolKV[envpcpiton]{Couleurs}%
+		{%
+			\SetPitonIdentifier[minimal]{Algorithme,Fonction,Début,Paramètre,Paramètres,Faire,Fin,Si,Pour,Tant,Que,que,alors,Alors,Sinon,SinonSi,FinSi,FinPour,FinTantQue,TantQue,Variable,Variables,Procédure}{\color{MotsClesPseudoCodeA}}%
+			\SetPitonIdentifier[minimal]{Afficher,Renvoyer,Saisir}{\color{MotsClesPseudoCodeB}}%
+			% \PitonOptions{
+				% identifiers =
+					% {
+						% names = {Algorithme,Fonction,Début,Paramètre,Paramètres,allant,Faire,Fin,Si,Pour,Tant,Que,que,alors,Alors,Sinon,SinonSi,FinSi,FinPour,FinTantQue,TantQue,Variable,Variables,Procédure},
+						% style = \color{MotsClesPseudoCodeA}
+					% } ,
+				% identifiers =
+					% {
+						% names = {Afficher,Retourner,Saisir},
+						% style = \color{MotsClesPseudoCodeB}
+					% }
+				% }%
+			\SetPitonStyle%
+				{%
+					String = \color{MotsClesPseudoCodeChaine},
+					Comment = \itshape\color{gray},
+				}%
+		}%
+		{%
+			\SetPitonStyle%
+				{
+					String = ,
+					Comment = \itshape
+				}
+		}%
+	\ifboolKV[envpcpiton]{Lignes}%si lignes=true
+		{\PitonOptions{left-margin=0.75em,all-line-numbers,line-numbers={#3}}}%left-margin=auto,
+		{}%
+	%\ifboolKV[envpcpiton]{Gobble}%si gobble=true
+	%	{\PitonOptions{auto-gobble}}%
+	%	{}%
+	%--gestion du gobble
+	\IfStrEqCase{\CODPITPCgobble}{%
+		{auto}{\PitonOptions{auto-gobble}}%
+		{env}{\PitonOptions{env-gobble}}%
+		{tabs}{\PitonOptions{tabs-auto-gobble}}%
+		{tabs-auto}{\PitonOptions{tabs-auto-gobble,auto-gobble}}%
+		{auto-tabs}{\PitonOptions{auto-gobble,tabs-auto-gobble}}%
+		{all}{\PitonOptions{auto-gobble,tabs-auto-gobble,env-gobble}}%
+	}%
+	\IfInteger{\CODPITPCgobble}{\PitonOptions{gobble=\CODPITPCgobble}}{}%
+	%--fin gestion du gobble
+	%------les styles tcbox
+	\IfEq{\CODPITPCstyle}{Moderne}%style Moderne (défaut)
+		{%
+			\tcbset{cadre/.style={}}%
+			\tcbset{titre/.style={}}%
+			\tcbset{stylebase/.style={stylepcpiton,colframe=CouleurVertForet,colback=CouleurVertForet!5,width=\CODPITPClargeur,fontupper=\CODPITPCfonte,fontlower=\CODPITPCfonte,\CODPITPCalign,leftupper=0.75em}}%
+			\ifboolKV[envpcpiton]{Filigrane}%si filigrane
+				{\tcbset{filigrane/.style={watermark text={\faCode},watermark opacity=0.175,watermark zoom=0.50}}}%
+				{\tcbset{filigrane/.style={}}}%
+		}%
+		{}%
+	%====TEST
+	\IfEq{\CODPITPCstyle}{Onglet}%style Onglet
+		{%
+			\tcbset{cadre/.style={}}%
+			\tcbset{titre/.style={fonttitle=\bfseries\footnotesize\sffamily},title={\CODPITPCtitre}}%
+			\tcbset{stylebase/.style={stylepitononglet,width=\CODPITPClargeur,fontupper=\CODPITPCfonte,fontlower=\CODPITPCfonte,\CODPITPCalign,leftupper=0.75em}}%
+			\ifboolKV[envpcpiton]{Filigrane}%si filigrane
+				{\tcbset{filigrane/.style={watermark text={\faCode},watermark opacity=0.175,watermark zoom=0.50}}}%
+				{\tcbset{filigrane/.style={}}}%
+		}%
+		{}%
+	%====TEST
+	\IfEq{\CODPITPCstyle}{Classique}%style Classique
+		{%
+			\ifboolKV[envpcpiton]{Lignes}%si lignes=true
+				{\tcbset{stylebase/.style={thonnypcstylelineos,leftupper=0.75em,width=\CODPITPClargeur,colframe=darkgray!50!black,fontupper=\CODPITPCfonte,fontlower=\CODPITPCfonte,\CODPITPCalign}}}%
+				{\tcbset{stylebase/.style={thonnypcstyle,leftupper=0.4em,width=\CODPITPClargeur,colframe=darkgray!50!black,fontupper=\CODPITPCfonte,fontlower=\CODPITPCfonte,\CODPITPCalign}}}%
+			%\tcbset{width=\CODPITlargeur,colframe=darkgray!50!black,fontupper=\CODPITfonte,fontlower=\CODPITfonte,\CODPITalign}
+			\ifboolKV[envpcpiton]{Filigrane}%si filigrane
+				{\tcbset{filigrane/.style={watermark text={\faCode},watermark opacity=0.25,watermark zoom=0.50}}}%
+				{\tcbset{filigrane/.style={}}}%
+			\ifboolKV[envpcpiton]{BarreTitre}%
+				{%
+					\ifboolKV[envpcpiton]{Cadre}
+						{\tcbset{cadre/.style={}}}%
+						{\tcbset{cadre/.style={boxrule=0pt,frame hidden}}}%
+					\tcbset{titre/.style={lefttitle=0.4em,title={\CODPITPCtitre},fonttitle=\bfseries\footnotesize\sffamily,colbacktitle=darkgray!50!black}}
+				}%
+				{%
+					\tcbset{titre/.style={notitle}}
+					\ifboolKV[envpcpiton]{Cadre}
+						{\tcbset{cadre/.style={}}}
+						{\tcbset{cadre/.style={boxrule=0pt,frame hidden}}}
+				}%
+		}%
+		{}%
+	%on crée la boîte
+	\tcolorbox[stylebase,filigrane,cadre,titre,#2]
+}%
+{%
+	\endtcolorbox%
+}
+
+%--inputfile
+\NewDocumentCommand\PseudoCodePitonFichier{ O{} m D<>{} }{%
+	{\tcbset{reset}%
+	\useKVdefault[envpcpiton]%
+	\setKV[envpcpiton]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%------les styles piton
+	\ifboolKV[envpcpiton]{Lignes}%si lignes=true
+		{\PitonOptions{left-margin=0.75em,all-line-numbers}}%left-margin=auto,
+		{\PitonOptions{}}%
+	\PitonOptions{break-lines,indent-broken-lines,language=minimal,continuation-symbol={\;}}%,numbers-sep=0.65em}%
+	\SetPitonStyle{ Number = }
+	\ifboolKV[envpcpiton]{Couleurs}%
+		{%
+			\SetPitonIdentifier[minimal]{Algorithme,Fonction,Début,Paramètre,Paramètres,Faire,Fin,Si,Pour,Tant,Que,que,alors,Alors,Sinon,SinonSi,FinSi,FinPour,FinTantQue,TantQue,Variable,Variables,Procédure}{\color{MotsClesPseudoCodeA}}
+			\SetPitonIdentifier[minimal]{Afficher,Renvoyer,Saisir}{\color{MotsClesPseudoCodeB}}
+			% \PitonOptions{
+				% identifiers =
+					% {
+						% names = {Algorithme,Fonction,Début,Paramètre,Paramètres,allant,Faire,Fin,Si,Pour,Tant,Que,que,alors,Alors,Sinon,SinonSi,FinSi,FinPour,FinTantQue,TantQue,Variable,Variables,Procédure},
+						% style = \color{MotsClesPseudoCodeA}
+					% } ,
+				% identifiers =
+					% {
+						% names = {Afficher,Retourner,Saisir},
+						% style = \color{MotsClesPseudoCodeB}
+					% }
+				% }%
+			\SetPitonStyle
+				{
+					String = \color{MotsClesPseudoCodeChaine},
+					Comment = \itshape\color{gray},
+				}
+		}%
+		{%
+			\SetPitonStyle
+				{
+					String = ,
+					Comment = \itshape
+				}
+		}%
+	%------les styles tcbox
+	\IfEq{\CODPITPCstyle}{Moderne}%style Moderne (défaut)
+		{%
+			\tcbset{cadre/.style={}}
+			\tcbset{titre/.style={}}
+			\tcbset{stylebase/.style={stylepcpiton,colframe=CouleurVertForet,colback=CouleurVertForet!5,width=\CODPITPClargeur,fontupper=\CODPITPCfonte,fontlower=\CODPITPCfonte,\CODPITPCalign,leftupper=0.75em}}
+			\ifboolKV[envpcpiton]{Filigrane}%si filigrane
+				{\tcbset{filigrane/.style={watermark text={\faCode},watermark opacity=0.175,watermark zoom=0.50}}}%
+				{\tcbset{filigrane/.style={}}}%
+		}
+		{}%
+	%====TEST
+	\IfEq{\CODPITPCstyle}{Onglet}%style Onglet
+		{%
+			\tcbset{cadre/.style={}}
+			\tcbset{titre/.style={fonttitle=\bfseries\footnotesize\sffamily},title={\CODPITPCtitre}}
+			\tcbset{stylebase/.style={stylepitononglet,width=\CODPITPClargeur,fontupper=\CODPITPCfonte,fontlower=\CODPITPCfonte,\CODPITPCalign,leftupper=0.75em}}
+			\ifboolKV[envpcpiton]{Filigrane}%si filigrane
+				{\tcbset{filigrane/.style={watermark text={\faCode},watermark opacity=0.175,watermark zoom=0.50}}}%
+				{\tcbset{filigrane/.style={}}}%
+		}
+		{}%
+	%====TEST
+	\IfEq{\CODPITPCstyle}{Classique}%style Classique
+		{%
+			\ifboolKV[envpcpiton]{Lignes}%si lignes=true
+				{\tcbset{stylebase/.style={thonnypcstylelineos,leftupper=0.75em,width=\CODPITPClargeur,colframe=darkgray!50!black,fontupper=\CODPITPCfonte,fontlower=\CODPITPCfonte,\CODPITPCalign}}}%
+				{\tcbset{stylebase/.style={thonnypcstyle,leftupper=0.4em,width=\CODPITPClargeur,colframe=darkgray!50!black,fontupper=\CODPITPCfonte,fontlower=\CODPITPCfonte,\CODPITPCalign}}}%
+			\ifboolKV[envpcpiton]{Filigrane}%si filigrane
+				{\tcbset{filigrane/.style={watermark text={\faCode},watermark opacity=0.25,watermark zoom=0.50}}}%
+				{\tcbset{filigrane/.style={}}}%
+			\ifboolKV[envpcpiton]{BarreTitre}%
+				{%
+					\ifboolKV[envpcpiton]{Cadre}
+						{\tcbset{cadre/.style={}}}%
+						{\tcbset{cadre/.style={boxrule=0pt,frame hidden}}}%
+					\tcbset{titre/.style={lefttitle=0.4em,title={\CODPITPCtitre},fonttitle=\bfseries\footnotesize\sffamily,colbacktitle=darkgray!50!black}}
+				}%
+				{%
+					\tcbset{titre/.style={notitle}}
+					\ifboolKV[envpcpiton]{Cadre}
+						{\tcbset{cadre/.style={}}}
+						{\tcbset{cadre/.style={boxrule=0pt,frame hidden}}}
+				}
+		}
+		{}%
+	%on crée la boîte
+	\tcolorbox[stylebase,filigrane,cadre,titre]
+	\PitonInputFile{#2}%
+	\endtcolorbox}%
+}
+
+%======CONSOLE PYLUATEX (package à charger manuellement !!)
+\tcbset{consolepylua/.style={%base de la boîte
+	enhanced,colback=white,colframe=CouleurVertForet,sharp corners,boxrule=1pt,%
+	top=1.5mm,bottom=-0.5mm,left=2mm,right=3mm,fontupper=\footnotesize,%
+	before skip=0.5\baselineskip,after skip=0.5\baselineskip,%
+	}
+}
+
+\tcbset{consolepyluatexlogo/.style={%avec logo python
+	consolepylua,%
+	overlay={%
+		\draw ([yshift=0.5pt]frame.south) node[CouleurVertForet!50!black,fill=white,font=\scriptsize\ttfamily,inner ysep=1pt] {\scalebox{0.8}[0.8]{\faPython} Fin de la Console Python \scalebox{0.8}[0.8]{\faPython}} ;
+		\draw ([yshift=-0.5pt]frame.north) node[CouleurVertForet!50!black,fill=white,font=\scriptsize\ttfamily,inner ysep=1pt] {\scalebox{0.8}[0.8]{\faPython} Début de la Console Python \scalebox{0.8}[0.8]{\faPython}} ;
+		}
+	}
+}
+
+\tcbset{consolepyluatex/.style={%sans logo python
+	consolepylua,%
+	overlay={%
+		\draw ([yshift=0.5pt]frame.south) node[CouleurVertForet!50!black,fill=white,font=\scriptsize\ttfamily,inner ysep=1pt] {Fin de la Console Python} ;
+		\draw ([yshift=-0.5pt]frame.north) node[CouleurVertForet!50!black,fill=white,font=\scriptsize\ttfamily,inner ysep=1pt] {Début de la Console Python} ;
+		}
+	}
+}
+
+%===test newlength
+\newlength\ConsPyluaLarg
+
+\defKV[consolepyluatex]{%
+	Largeur=\setlength\ConsPyluaLarg{#1},
+	Alignement=\def\ConsPyluaAlign{#1},%
+	CouleurNombres=\def\CODPITcolnb{#1}
+}
+\setKVdefault[consolepyluatex]{%
+	Logo=true,%
+	Largeur=\linewidth,%
+	Alignement={flush left},%
+	CouleurNombres={orange!75!black}
+}
+
+\ExplSyntaxOn
+\NewDocumentEnvironment{ConsolePiton}{O{}D<>{}m} % semble OK
+{
+	\restoreKV[consolepyluatex]% revenir au valeurs par défaut
+	\setKV[consolepyluatex]{#2}% lit les arguments optionnels
+	\tcbset{reset}%
+	\SetPitonStyle[Python]{Number=\color{\CODPITcolnb} }%
+	\PitonOptions{width=\ConsPyluaLarg-5mm,break-lines,end-of-broken-line={\,},continuation-symbol={\;},#1}%
+	\PitonOptions{line-numbers=false,left-margin=auto}%
+	\PyLTVerbatimEnv
+	\ifboolKV[consolepyluatex]{Logo}%
+	{%
+	\begin{tcolorbox}[consolepyluatexlogo,width=\ConsPyluaLarg,\ConsPyluaAlign,#3]
+	}%
+	{%
+	\begin{tcolorbox}[consolepyluatex,width=\ConsPyluaLarg,\ConsPyluaAlign,#3]
+	}%
+	\begin{pythonrepl}
+	}
+	{
+	\end{pythonrepl}
+	\lua_now:n
+	{
+		tex.print("\\begin{Piton}")
+		tex.print(pyluatex.get_last_output())
+		tex.print("\\end{Piton}")
+		tex.print("") 
+	}
+	\end{tcolorbox}%
+	\ignorespacesafterend%
+}
+\ExplSyntaxOff
+
+% \NewDocumentEnvironment{ConsolePiton}{ O{} D<>{} m }%
+% %1=options piton
+% %2=clés
+% %3=options tcbox
+% {%
+	% \restoreKV[consolepyluatex]% revenir au valeurs par défaut
+	% \setKV[consolepyluatex]{#2}% lit les arguments optionnels
+	% \tcbset{reset}%
+	% \SetPitonStyle[Python]{ Number = \color{\CODPITcolnb} }%
+	% \PitonOptions{width={\ConsPyluaLarg-5mm},break-lines,end-of-broken-line={\,},continuation-symbol={\;},#1}%
+	% \PitonOptions{line-numbers=false,left-margin=auto}%
+	% %\PitonOptions{width={\ConsPyluaLarg-5mm},#1}
+	% \PyLTVerbatimEnv%
+	% \ifboolKV[consolepyluatex]{Logo}%
+		% {%
+			% \begin{tcolorbox}[consolepyluatexlogo,width=\ConsPyluaLarg,\ConsPyluaAlign,#3]
+		% }%
+		% {%
+			% \begin{tcolorbox}[consolepyluatex,width=\ConsPyluaLarg,\ConsPyluaAlign,#3]
+		% }%
+% %		{\tcbset{consolepyluatexlogo,width=\ConsPyluaLarg,\ConsPyluaAlign,#3}}
+% %		{\tcbset{consolepyluatex,width=\ConsPyluaLarg,\ConsPyluaAlign,#3}}
+	% \begin{pythonrepl}%
+% }%
+% {%
+	% \end{pythonrepl}%
+	% \directlua{
+		% tex.print("\\begin{Piton}")
+		% tex.print(pyluatex.get_last_output())
+		% tex.print("\\end{Piton}")
+		% tex.print("")
+	% }%
+	% \end{tcolorbox}%
+	% \ignorespacesafterend%
+% }
+
+%====PITONTHONNY
+\newlength{\LargeurNumbersThonny}
+\newlength{\LargeurThonny}
+
+\defKV[pitonthonny]{%
+	NomFichier=\def\thonnypitonfilename{#1},%
+	NomConsole=\def\thonnypitonshellname{#1},%
+	IntroConsole=\def\thonnypitonintroconsole{#1},%
+	Gobble=\def\thonnypitongobble{#1},%
+	CouleurNombres=\def\CODPITcolnb{#1},%
+	Largeur=\setlength\LargeurThonny{#1}
+}
+
+\setKVdefault[pitonthonny]{%
+	NomFichier={script.py},%
+	NomConsole=console,%
+	IntroConsole={Python 3.11.6 /usr/bin/python},%
+	Gobble={},%
+	CouleurNombres={orange!75!black},%
+	Largeur=\linewidth
+}
+
+\NewPitonEnvironment{PitonThonnyEditor}{O{}mD<>{}}%semble OK avec syntaxe v2...
+{%
+	%1 = clés
+	%2 = options tcbox
+	%3 = largeur ?
+	\restoreKV[pitonthonny]%
+	\setKV[pitonthonny]{#1}%
+	\settowidth{\LargeurNumbersThonny}{\footnotesize\texttt{00}}%
+	\SetPitonStyle[Python]{Number=\color{\CODPITcolnb}}%
+	\PitonOptions{width=\LargeurThonny-5mm,left-margin=\LargeurNumbersThonny+1mm,line-numbers={skip-empty-lines=false,label-empty-lines=true},break-lines,indent-broken-lines,continuation-symbol={},#3}%
+	%--gestion du gobble
+	\IfStrEqCase{\thonnypitongobble}{%
+		{auto}{\PitonOptions{auto-gobble}}%
+		{env}{\PitonOptions{env-gobble}}%
+		{tabs}{\PitonOptions{tabs-auto-gobble}}%
+		{tabs-auto}{\PitonOptions{tabs-auto-gobble,auto-gobble}}%
+		{auto-tabs}{\PitonOptions{auto-gobble,tabs-auto-gobble}}%
+		{all}{\PitonOptions{auto-gobble,tabs-auto-gobble,env-gobble}}%
+	}
+	\IfInteger{\thonnypitongobble}{\PitonOptions{gobble=\thonnypitongobble}}{}%
+	%--fin gestion du gobble
+	\tcbset{reset}%
+	\tcbset{tcbthonnypiton/.style={title=\vphantom{pf}{\thonnypitonfilename}\:\textcolor{gray}{×}},before skip=0.33\baselineskip,after skip=0.33\baselineskip}%
+	%\noindent%
+	\tcolorbox[enhanced,sharp corners=all,size=small,width=\LargeurThonny,colframe=gray,colback=lightgray!5,tcbthonnypiton,fonttitle=\scriptsize\sffamily,coltitle=black,attach boxed title to top left={yshift*=-0.4pt},fontupper=\footnotesize,bottom=-0.25mm,boxed title style={size=tight,colback=lightgray!15,sharp corners=all,boxrule=0.4pt,boxsep=2pt},boxrule=0.4pt,overlay={\begin{tcbclipinterior}\fill[draw=none,gray!25] ([shift={(0.4pt,0.4pt)}]frame.south west) rectangle ([shift={({\LargeurNumbersThonny+1mm+0.8pt},-0.4pt)}]frame.north west) ;\end{tcbclipinterior}},#2]%
+}%
+{%
+	\endtcolorbox%
+}%
+
+% \NewPitonEnvironment{PitonThonnyEditor}{ D<>{} O{} m }%semble OK... avec modif argument ??
+% {%
+	% %1 = clés
+	% %2 = options tcbox
+	% %3 = largeur ?
+	% \restoreKV[pitonthonny]%
+	% \setKV[pitonthonny]{#1}%
+	% \settowidth{\LargeurNumbersThonny}{\footnotesize\texttt{00}}%
+	% \SetPitonStyle[Python]{Number=\color{\CODPITcolnb}}%
+	% \PitonOptions{left-margin=\LargeurNumbersThonny+1mm,line-numbers={skip-empty-lines=false,label-empty-lines=true},break-lines,indent-broken-lines,continuation-symbol={}}%
+	% %--gestion du gobble
+	% \IfStrEqCase{\thonnypitongobble}{%
+		% {auto}{\PitonOptions{auto-gobble}}%
+		% {env}{\PitonOptions{env-gobble}}%
+		% {tabs}{\PitonOptions{tabs-auto-gobble}}%
+		% {tabs-auto}{\PitonOptions{tabs-auto-gobble,auto-gobble}}%
+		% {auto-tabs}{\PitonOptions{auto-gobble,tabs-auto-gobble}}%
+		% {all}{\PitonOptions{auto-gobble,tabs-auto-gobble,env-gobble}}%
+	% }
+	% \IfInteger{\thonnypitongobble}{\PitonOptions{gobble=\thonnypitongobble}}{}%
+	% %--fin gestion du gobble
+	% \tcbset{reset}%
+	% \tcbset{tcbthonnypiton/.style={title=\vphantom{pf}\thonnypitonfilename\:\textcolor{gray}{×}},before skip=0.33\baselineskip,after skip=0.33\baselineskip}%
+	% %\noindent%
+	% \tcolorbox[enhanced,sharp corners=all,size=small,width=#3,colframe=gray,colback=lightgray!5,tcbthonnypiton,fonttitle=\scriptsize\sffamily,coltitle=black,attach boxed title to top left={yshift*=-0.4pt},fontupper=\footnotesize,bottom=-0.25mm,boxed title style={size=tight,colback=lightgray!15,sharp corners=all,boxrule=0.4pt,boxsep=2pt},boxrule=0.4pt,overlay={\begin{tcbclipinterior}\fill[draw=none,gray!25] ([shift={(0.4pt,0.4pt)}]frame.south west) rectangle ([shift={({\LargeurNumbersThonny+1mm+0.8pt},-0.4pt)}]frame.north west) ;\end{tcbclipinterior}},#2]%
+% }%
+% {%
+	% \endtcolorbox%
+% }%
+
+\NewDocumentCommand\PitonThonnyEditorFichier{ O{} m D<>{} }%semble OK avec syntaxe v2...
+	{\restoreKV[pitonthonny]%
+	\setKV[pitonthonny]{#1}%
+	\tcbset{reset}%
+	\settowidth{\LargeurNumbersThonny}{\footnotesize\texttt{00}}%
+	\SetPitonStyle[Python]{Number=\color{\CODPITcolnb}}%
+	\PitonOptions{width=\LargeurThonny-5mm,left-margin=\LargeurNumbersThonny+1mm,line-numbers,line-numbers={skip-empty-lines=false,label-empty-lines=true},break-lines,indent-broken-lines,continuation-symbol={}}%
+	\tcbset{tcbthonnypiton/.style={title=\vphantom{pf}\thonnypitonfilename\:\textcolor{gray}{×}},before skip=0.33\baselineskip,after skip=0.33\baselineskip}%
+	\tcolorbox[sharp corners=all,enhanced,size=small,width=\LargeurThonny,colframe=gray,colback=lightgray!5,tcbthonnypiton,fonttitle=\scriptsize\sffamily,coltitle=black,attach boxed title to top left={yshift*=-0.4pt},fontupper=\footnotesize,bottom=-0.25mm,boxed title style={size=tight,colback=lightgray!15,sharp corners=all,boxrule=0.4pt,boxsep=2pt},boxrule=0.4pt,overlay={\begin{tcbclipinterior}\fill[draw=none,gray!25] ([shift={(0.4pt,0.4pt)}]frame.south west) rectangle ([shift={(\LargeurNumbersThonny+1mm+0.8pt,-0.4pt)}]frame.north west) ;\end{tcbclipinterior}},#3]%
+	\PitonInputFile{#2}
+	\endtcolorbox}%
+
+\NewDocumentEnvironment{PitonThonnyConsole}{ O{} m !D<>{} }%1=clés / 2=options tcbox /3=options piton
+{
+	\restoreKV[pitonthonny]%
+	\setKV[pitonthonny]{#1}%
+	\PyLTVerbatimEnv%
+	\tcbset{reset}%
+	\tcbset{tcbthonnypitonconsole/.style={title=\vphantom{pf}\thonnypitonshellname\:\textcolor{gray}{×}},before skip=0.33\baselineskip,after skip=0.33\baselineskip}%
+	\noindent%
+	\PitonOptions{width=\LargeurThonny-5mm,line-numbers=false,left-margin=auto,#3}%
+	\SetPitonStyle[Python]{Number=\color{\CODPITcolnb}}%
+	%--gestion du gobble
+	\IfStrEqCase{\thonnypitongobble}{%
+		{auto}{\PitonOptions{auto-gobble}}%
+		{env}{\PitonOptions{env-gobble}}%
+		{tabs}{\PitonOptions{tabs-auto-gobble}}%
+		{tabs-auto}{\PitonOptions{tabs-auto-gobble,auto-gobble}}%
+		{auto-tabs}{\PitonOptions{auto-gobble,tabs-auto-gobble}}%
+		{all}{\PitonOptions{auto-gobble,tabs-auto-gobble,env-gobble}}%
+	}
+	\IfInteger{\thonnypitongobble}{\PitonOptions{gobble=\thonnypitongobble}}{}%
+	%--fin gestion du gobble
+	\PitonOptions{width={\LargeurThonny-5mm},break-lines,end-of-broken-line={\,},continuation-symbol={\;}}%
+	\tcolorbox[sharp corners=all,enhanced,size=small,width=\LargeurThonny,colframe=gray,colback=white,tcbthonnypitonconsole,fonttitle=\scriptsize\sffamily,coltitle=black,
+	attach boxed title to top left={yshift*=-0.4pt},fontupper=\footnotesize,bottom=-0.5mm,#2,boxed title style={size=tight,colback=lightgray!15,sharp corners=all,boxrule=0.4pt,boxsep=2pt},boxrule=0.4pt,top=1mm,#3]%
+	\textcolor{gray}{\texttt{\thonnypitonintroconsole}}
+	\begin{pythonrepl}
+}
+{
+	\end{pythonrepl}
+	\directlua
+	{
+		tex.print("\\begin{Piton}")
+		tex.print(pyluatex.get_last_output())
+		tex.print("\\end{Piton}")
+		tex.print("")
+	}%
+	\endtcolorbox%
+	\ignorespacesafterend%
+}
+
+\fi
+
+\endinput

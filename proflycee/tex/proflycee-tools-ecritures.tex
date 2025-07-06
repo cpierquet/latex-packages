@@ -1,0 +1,693 @@
+% proflycee-tools-ecritures.tex
+% Copyright 2023-2025 Cédric Pierquet
+% Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+%===PACKAGE
+\RequirePackage{interval}
+\RequirePackage{esvect}
+\RequirePackage{ifthen}
+\RequirePackage{xspace}
+\RequirePackage{mleftright} %pour une meilleure gestion des espacements avec \left \right :-)
+%\RequirePackage{mathrsfs}%pour \mathscr (à voir...)
+
+%===UNITÉS
+
+\NewDocumentCommand\pflprix{ o m }{%
+	\IfValueTF{#1}%
+		{%
+			\num[round-mode=places,round-precision=#1]{#2}\,\text{€}%
+		}%
+		{%
+			\num{#2}\,\text{€}%
+		}%
+}
+
+\NewDocumentCommand\pflangle{ o m }{%
+	\IfValueTF{#1}%
+		{%
+			\num[round-mode=places,round-precision=#1]{#2}\text{\textdegree}%
+		}%
+		{%
+			\num{#2}\text{\textdegree}%
+		}%
+}
+
+\NewDocumentCommand\pflpcent{ o m }{%
+	\IfValueTF{#1}%
+	{%
+		\num[round-mode=places,round-precision=#1]{#2}\,\%%
+	}%
+	{%
+		\num{#2}\,\%%
+	}%
+}
+
+%===ENSEMBLES CLASSIQUES
+\ifthenelse{\isundefined{\N}}%
+	{%
+		\NewDocumentCommand\N{ s }{\IfBooleanTF{#1}{\ensuremath{\mathbb{N}^{*}}\xspace}{\ensuremath{\mathbb{N}}\xspace}}%
+	}%
+	{%
+		\RenewDocumentCommand\N{ s }{\IfBooleanTF{#1}{\ensuremath{\mathbb{N}^{*}}\xspace}{\ensuremath{\mathbb{N}}\xspace}}%
+	}%
+\ifthenelse{\isundefined{\Z}}%
+	{%
+		\NewDocumentCommand\Z{ s }{\IfBooleanTF{#1}{\ensuremath{\mathbb{Z}^{*}}\xspace}{\ensuremath{\mathbb{Z}}\xspace}}%
+	}%
+	{%
+		\RenewDocumentCommand\Z{ s }{\IfBooleanTF{#1}{\ensuremath{\mathbb{Z}^{*}}\xspace}{\ensuremath{\mathbb{Z}}\xspace}}%
+	}%
+\ifthenelse{\isundefined{\D}}%
+	{%
+		\NewDocumentCommand\D{ s }{\IfBooleanTF{#1}{\ensuremath{\mathbb{D}^{*}}\xspace}{\ensuremath{\mathbb{D}}\xspace}}%
+	}%
+	{%
+		\RenewDocumentCommand\D{ s }{\IfBooleanTF{#1}{\ensuremath{\mathbb{D}^{*}}\xspace}{\ensuremath{\mathbb{D}}\xspace}}%
+	}%
+\ifthenelse{\isundefined{\Q}}%
+	{%
+		\NewDocumentCommand\Q{ s }{\IfBooleanTF{#1}{\ensuremath{\mathbb{Q}^{*}}\xspace}{\ensuremath{\mathbb{Q}}\xspace}}%
+	}%
+	{%
+		\RenewDocumentCommand\Q{ s }{\IfBooleanTF{#1}{\ensuremath{\mathbb{Q}^{*}}\xspace}{\ensuremath{\mathbb{Q}}\xspace}}%
+	}%
+\ifthenelse{\isundefined{\R}}%
+	{%
+		\NewDocumentCommand\R{ s }{\IfBooleanTF{#1}{\ensuremath{\mathbb{R}^{*}}\xspace}{\ensuremath{\mathbb{R}}\xspace}}%
+	}%
+	{%
+		\RenewDocumentCommand\R{ s }{\IfBooleanTF{#1}{\ensuremath{\mathbb{R}^{*}}\xspace}{\ensuremath{\mathbb{R}}\xspace}}%
+	}%
+\ifthenelse{\isundefined{\C}}%
+	{%
+		\NewDocumentCommand\C{ s }{\IfBooleanTF{#1}{\ensuremath{\mathbb{C}^{*}}\xspace}{\ensuremath{\mathbb{C}}\xspace}}%
+	}%
+	{%
+		\RenewDocumentCommand\C{ s }{\IfBooleanTF{#1}{\ensuremath{\mathbb{C}^{*}}\xspace}{\ensuremath{\mathbb{C}}\xspace}}%
+	}%
+\ifthenelse{\isundefined{\ensH}}%
+	{%
+		\NewDocumentCommand\ensH{ s }{\IfBooleanTF{#1}{\ensuremath{\mathbb{H}^{*}}\xspace}{\ensuremath{\mathbb{H}}\xspace}}%
+	}%
+	{%
+		\RenewDocumentCommand\ensH{ s }{\IfBooleanTF{#1}{\ensuremath{\mathbb{H}^{*}}\xspace}{\ensuremath{\mathbb{H}}\xspace}}%
+	}%
+
+%====INTERVALLES
+\intervalconfig{separator symbol=;}
+\NewDocumentCommand\IntervalleFF{ O{scaled} m m }{\ensuremath{\interval[#1]{#2}{#3}}}
+\NewDocumentCommand\IntervalleOF{ O{scaled} m m }{\ensuremath{\interval[#1,open left]{#2}{#3}}}
+\NewDocumentCommand\IntervalleFO{ O{scaled} m m }{\ensuremath{\interval[#1,open right]{#2}{#3}}}
+\NewDocumentCommand\IntervalleOO{ O{scaled} m m }{\ensuremath{\interval[#1,open]{#2}{#3}}}
+
+%====ARRONDI
+\DeclareDocumentCommand\Arrondi{ s O{3} m }{% * pour afficher signe / opt = précision / argument = nb
+	\IfBooleanTF{#1}{\num[print-implicit-plus]{\xinteval{round(#3,#2)}}}{\num{\xinteval{round(#3,#2)}}}%
+}
+\NewCommandCopy\pflarrondi\Arrondi
+
+%====MODULO
+\NewDocumentCommand\Modulo{ s O{Cro} m }{%
+	\IfStrEq{#2}{Cro}%
+		{\IfBooleanTF{#1}{\quad}{\:\:}[#3]}{}%
+	\IfStrEq{#2}{Par}%
+		{\IfBooleanTF{#1}{\quad}{\:\:}(#3)}{}%
+	\IfStrEq{#2}{Txt}%
+		{\IfBooleanTF{#1}{\:\:}{\:}\text{modulo }#3}{}%
+}
+\NewCommandCopy\pflmod\Modulo
+
+%====COURBE
+\NewDocumentCommand\Courbe{ s O{} }{%
+	\IfBooleanTF{#1}%
+	{%
+		\IfNoValueTF{#2}%
+			{\ensuremath{{\mathscr{C}}}\xspace}%
+			{\ensuremath{{\mathscr{C}}_{#2}}\xspace}%
+	}%
+	{%
+		\IfNoValueTF{#2}%
+			{\ensuremath{{\mathcal{C}}}\xspace}%
+			{\ensuremath{{\mathcal{C}}_{#2}}\xspace}%
+	}%
+}
+\NewCommandCopy\pflcourbe\Courbe
+
+%====SUITE
+\NewDocumentCommand\Suite{ O{n} m }{%
+	\ensuremath{\left( #2_{#1} \right)}%
+}
+\NewCommandCopy\pflsuite\Suite
+
+%===DIVERS
+\AtBeginDocument{%voir hyperref...
+	\ifthenelse{\isundefined{\i}}{\newcommand\i{{\rm i}}}{\renewcommand\i{{\rm i}}}%
+	\ifthenelse{\isundefined{\e}}{\newcommand\e{{\rm e}}}{\renewcommand\e{{\rm e}}}%
+	\ifthenelse{\isundefined{\j}}{\newcommand\j{{\rm j}}}{\renewcommand\j{{\rm j}}}%
+}
+
+\ifthenelse{\isundefined{\jfexp}}%
+	{\newcommand\jfexp{\ensuremath{\e^{\i\frac{\pi}{3}}}}}%
+	{\renewcommand\jfexp{\ensuremath{\e^{\i\frac{\pi}{3}}}}}%
+
+\ifthenelse{\isundefined{\jfalg}}%
+	{\newcommand\jfalg{\ensuremath{\frac{1}{2}+\i\frac{\sqrt{3}}{2}}}}%
+	{\renewcommand\jfalg{\ensuremath{\frac{1}{2}+\i\frac{\sqrt{3}}{2}}}}%
+
+\ifthenelse{\isundefined{\Esper}}%
+	{\newcommand\Esper[2][\mathbb{E}]{\ensuremath{{#1}{\left({#2}\right)}}}}%
+	{\renewcommand\Esper[2][\mathbb{E}]{\ensuremath{{#1}{\left({#2}\right)}}}}%
+\NewCommandCopy\pflesper\Esper
+
+\ifthenelse{\isundefined{\Varianc}}%
+	{\newcommand\Varianc[2][\mathbb{V}]{\ensuremath{{#1}{\left({#2}\right)}}}}%
+	{\renewcommand\Varianc[2][\mathbb{V}]{\ensuremath{{#1}{\left({#2}\right)}}}}%
+\NewCommandCopy\pflvar\Varianc
+
+\ifthenelse{\isundefined{\EcType}}%
+	{\newcommand\EcType[1]{\ensuremath{\sigma{\left({#1}\right)}}}}%
+	{\renewcommand\EcType[1]{\ensuremath{\sigma{\left({#1}\right)}}}}%
+\NewCommandCopy\pflectype\EcType
+
+\ifthenelse{\isundefined{\dx}}%
+	{\newcommand\dx[1][x]{\ensuremath{~\text{d}#1}}}%
+	{\renewcommand\dx[1][x]{\ensuremath{~\text{d}#1}}}%
+
+\ifthenelse{\isundefined{\Integrale}}%
+	{\newcommand\Integrale{\displaystyle\int}}%
+	{\renewcommand\Integrale{\displaystyle\int}}%
+
+\ifthenelse{\isundefined{\Limite}}%
+	{%
+		\NewDocumentCommand\Limite{ s m m o }{%
+			\IfBooleanTF{#1}{\ensuremath{\lim_{\IfNoValueTF{#4}{#3}{\substack{#3 \\ #4}}} #2}}{\ensuremath{\lim\limits_{\IfNoValueTF{#4}{#3}{\substack{#3 \\ #4}}} #2}}}\xspace%
+	}%
+	{%
+		\RenewDocumentCommand\Limite{ s m m o }{%
+			\IfBooleanTF{#1}{\ensuremath{\lim_{\IfNoValueTF{#4}{#3}{\substack{#3 \\ #4}}} #2}}{\ensuremath{\lim\limits_{\IfNoValueTF{#4}{#3}{\substack{#3 \\ #4}}} #2}}}\xspace%
+	}%
+\NewCommandCopy\pfllim\Limite
+
+%====VALEUR ABSOLUE, NORME
+\DeclarePairedDelimiter\ValAbs{\lvert}{\rvert}%
+\DeclarePairedDelimiter\ModuleCplx{\lvert}{\rvert}%
+\DeclarePairedDelimiter\Norme{\lVert}{\rVert}%
+\makeatletter
+\let\TmpValAbs\ValAbs
+\let\TmpModule\ModuleCplx
+\let\TmpNorme\Norme
+\def\ValAbs{\@ifstar{\TmpValAbs}{\TmpValAbs*}}
+\def\ModuleCplx{\@ifstar{\TmpModule}{\TmpModule*}}
+\def\Norme{\@ifstar{\TmpNorme}{\TmpNorme*}}
+\makeatother
+
+%====PROBAS
+\NewDocumentCommand\LoiNormale{ s m m }{%
+	\IfBooleanTF{#1}{\ensuremath{\mathscr{N}{\left(#2;#3\right)}}}{\ensuremath{\mathcal{N}{\left(#2;#3\right)}}}%
+}
+\NewCommandCopy\pflloinorm\LoiNormale
+
+\NewDocumentCommand\LoiBinomiale{ s m m }{%
+	\IfBooleanTF{#1}{\ensuremath{\mathscr{B}{\left(#2;#3\right)}}}{\ensuremath{\mathcal{B}{\left(#2;#3\right)}}}%
+}
+\NewCommandCopy\pflloibinom\LoiBinomiale
+
+\NewDocumentCommand\LoiPoisson{ s m }{%
+	\IfBooleanTF{#1}{\ensuremath{\mathscr{P}_{#2}}}{\ensuremath{\mathcal{P}_{#2}}}%
+}
+\NewCommandCopy\pflloipoiss\LoiPoisson
+
+\NewDocumentCommand\LoiUnif{ s m }{%
+	\IfBooleanTF{#1}{\ensuremath{\mathscr{U}_{#2}}}{\ensuremath{\mathcal{U}_{#2}}}%
+}
+\NewCommandCopy\pflloiunif\LoiUnif
+
+\NewDocumentCommand\LoiExpo{ s m }{%
+	\IfBooleanTF{#1}{\ensuremath{\mathscr{E}_{#2}}}{\ensuremath{\mathcal{E}_{#2}}}%
+}
+\NewCommandCopy\pflloiexpo\LoiExpo
+
+
+%====COORDONNEES, VECTEURS
+\RequirePackage{nicematrix}
+
+\NewDocumentCommand\CoordPtPl{ O{0} m m }{%
+	\IfEq{#1}{0}%si pas d'argument optionnel := array, sinon nicematrix avec cell-space-limits
+		{%
+			\ensuremath{\left(#2;#3\right)}%
+		}%
+		{%
+			\ensuremath{\begin{pNiceMatrix}[cell-space-limits=#1] #2 ; #3 \end{pNiceMatrix}}%
+		}%
+}
+\NewCommandCopy\pflcoordptpl\CoordPtPl
+
+\NewDocumentCommand\CoordPtEsp{ O{0} m m m }{%
+	\IfEq{#1}{0}%si pas d'argument optionnel := array, sinon nicematrix avec cell-space-limits
+		{%
+			\ensuremath{\left(#2;#3;#4\right)}%
+		}%
+		{%
+			\ensuremath{\begin{pNiceMatrix}[cell-space-limits=#1] #2 ; #3 ; #4 \end{pNiceMatrix}}%
+		}%
+}
+\NewCommandCopy\pflcoordptesp\CoordPtEsp
+
+\NewDocumentCommand\CoordVecPl{ O{0} m m }{%
+	\IfEq{#1}{0}%si pas d'argument optionnel := array, sinon nicematrix avec cell-space-limits
+		{%
+			\ensuremath{\begin{pmatrix} #2 \\ #3 \end{pmatrix}}%
+		}%
+		{%
+			\ensuremath{\begin{pNiceMatrix}[cell-space-limits=#1] #2 \\ #3 \end{pNiceMatrix}}%
+		}%
+}
+\NewCommandCopy\pflcoordvecpl\CoordVecPl
+
+\NewDocumentCommand\CoordVecEsp{ O{0} m m m }{%
+	\IfEq{#1}{0}%si pas d'argument optionnel := array, sinon nicematrix avec cell-space-limits
+		{%
+			\ensuremath{\begin{pmatrix} #2 \\ #3 \\ #4 \end{pmatrix}}%
+		}%
+		{%
+			\ensuremath{\begin{pNiceMatrix}[cell-space-limits=#1] #2 \\ #3 \\ #4 \end{pNiceMatrix}}%
+		}%
+}
+\NewCommandCopy\pflcoordvecesp\CoordVecEsp
+
+\NewDocumentCommand\MatDeux{ O{0} m m m m }{%
+	\IfEq{#1}{0}%si pas d'argument optionnel := array, sinon nicematrix avec cell-space-limits
+		{%
+			\ensuremath{\begin{pmatrix} #2 & #3 \\ #4 & #5 \end{pmatrix}}%
+		}%
+		{%
+			\ensuremath{\begin{pNiceMatrix}[cell-space-limits=#1] #2 & #3 \\ #4 & #5 \end{pNiceMatrix}}%
+		}%
+}
+\NewCommandCopy\pflmatdeux\MatDeux
+
+\NewDocumentCommand\Vecteur{ s m O{} }{%
+	\IfBooleanTF{#1}{\ensuremath{\vv*{#2}{#3}}}{\ensuremath{\vv{#2}}}%
+}
+\NewCommandCopy\pflvect\Vecteur
+
+\NewDocumentCommand\EqParamDteEsp{ s O{t} m m m }{%
+	\IfBooleanTF{#1}%
+	{%
+		\ensuremath{\begin{cases}{#3}\\{#4}\\{#5}\end{cases}\text{ où }{#2}\in\R}%
+	}%
+	{%
+		\ensuremath{\begin{dcases}{#3}\\{#4}\\{#5}\end{dcases}\text{ où }{#2}\in\R}%
+	}%
+}
+\NewCommandCopy\pfleqparamdteesp\EqParamDteEsp
+
+%====REPÈRES
+\setKVdefault[ecrituresreperes]{%
+	Sep={;}
+}
+
+\NewDocumentCommand\RepereOij{ s O{} }{%
+	\useKVdefault[ecrituresreperes]%
+	\setKV[ecrituresreperes]{#2}%
+	\IfBooleanTF{#1}%si étoilé := on n'aligne pas les flèches + nosmash
+		{%
+			\ensuremath{\left(O\useKV[ecrituresreperes]{Sep}\Vecteur{\imath},\Vecteur{\jmath}\right)}\xspace%
+		}%
+		{%
+			\ensuremath{\left(O\useKV[ecrituresreperes]{Sep}\Vecteur{\vphantom{t}\imath},\Vecteur{\vphantom{t}\jmath}\right)}\xspace%
+		}%
+}
+\NewCommandCopy\pflrepoij\RepereOij
+
+\NewDocumentCommand\RepereOuv{ s O{} }{%
+	\useKVdefault[ecrituresreperes]%
+	\setKV[ecrituresreperes]{#2}%
+	\IfBooleanTF{#1}%si étoilé := on n'aligne pas les flèches + nosmash
+		{%
+			\ensuremath{\left(O\useKV[ecrituresreperes]{Sep}\Vecteur{u},\Vecteur{v}\right)}\xspace%
+		}%
+		{%
+			\ensuremath{\left(O\useKV[ecrituresreperes]{Sep}\Vecteur{\vphantom{t}u},\Vecteur{\vphantom{t}v}\right)}\xspace%
+		}%
+}
+\NewCommandCopy\pflrepouv\RepereOuv
+
+\NewDocumentCommand\RepereOijk{ s O{} }{%
+	\useKVdefault[ecrituresreperes]%
+	\setKV[ecrituresreperes]{#2}%
+	\IfBooleanTF{#1}%si étoilé := on n'aligne pas les flèches + nosmash
+		{%
+			\ensuremath{\left(O\useKV[ecrituresreperes]{Sep}\Vecteur{\imath},\Vecteur{\jmath},\Vecteur{k}\right)}\xspace%
+		}%
+		{%
+			\ensuremath{\left(O\useKV[ecrituresreperes]{Sep}\Vecteur{\vphantom{t}\imath},\Vecteur{\vphantom{t}\jmath},\Vecteur{\vphantom{t}\smash{k}}\right)}\xspace%
+		}%
+}
+\NewCommandCopy\pflrepoijk\RepereOijk
+
+\NewDocumentCommand\ReperePlan{ s O{} m m m }{%
+	\useKVdefault[ecrituresreperes]%
+	\setKV[ecrituresreperes]{#2}%
+	\IfBooleanTF{#1}%si étoilé := on n'aligne pas les flèches + nosmash
+		{%
+			\def\vecteurun{#4}\def\vecteurdeux{#5}%
+		}%
+		{%
+			\def\vecteurun{\smash{#4}}\def\vecteurdeux{\smash{#5}}%
+		}%
+	\IfStrEq{#4}{i}{\def\vecteurun{\imath}}{}%
+	\IfStrEq{#4}{j}{\def\vecteurun{\jmath}}{}%
+	\IfStrEq{#5}{i}{\def\vecteurdeux{\imath}}{}%
+	\IfStrEq{#5}{j}{\def\vecteurdeux{\jmath}}{}%
+	\IfBooleanTF{#1}%si étoilé := on n'aligne pas les flèches + nosmash
+		{%
+			\ensuremath{\left(#3\useKV[ecrituresreperes]{Sep}\Vecteur{\vecteurun},\Vecteur{\vecteurdeux}\right)}%
+		}%
+		{%
+			\ensuremath{\left(#3\useKV[ecrituresreperes]{Sep}\Vecteur{\vphantom{t}\vecteurun},\Vecteur{\vphantom{t}\vecteurdeux}\right)}%
+		}%
+}
+\NewCommandCopy\pflrepplan\ReperePlan
+
+\NewDocumentCommand\RepereEspace{ s O{} m m m m }{%
+	\useKVdefault[ecrituresreperes]%
+	\setKV[ecrituresreperes]{#2}%
+	\IfBooleanTF{#1}%si étoilé := on n'aligne pas les flèches + nosmash
+		{%
+			\def\vecteurun{#4}\def\vecteurdeux{#5}\def\vecteurtrois{#6}%
+		}%
+		{%
+			\def\vecteurun{\smash{#4}}\def\vecteurdeux{\smash{#5}}\def\vecteurtrois{\smash{#6}}%
+		}%
+	\IfStrEq{#4}{i}{\def\vecteurun{\imath}}{}%
+	\IfStrEq{#4}{j}{\def\vecteurun{\jmath}}{}%
+	\IfStrEq{#5}{i}{\def\vecteurdeux{\imath}}{}%
+	\IfStrEq{#5}{j}{\def\vecteurdeux{\jmath}}{}%
+	\IfStrEq{#6}{i}{\def\vecteurtrois{\imath}}{}%
+	\IfStrEq{#6}{j}{\def\vecteurtrois{\jmath}}{}%
+	\IfBooleanTF{#1}%si étoilé := on n'aligne pas les flèches + nosmash
+		{%
+			\ensuremath{\left(#3\useKV[ecrituresreperes]{Sep}\Vecteur{\vecteurun},\Vecteur{\vecteurdeux},\Vecteur{\vecteurtrois}\right)}%
+		}%
+		{%
+			\ensuremath{\left(#3\useKV[ecrituresreperes]{Sep}\Vecteur{\vphantom{t}\vecteurun},\Vecteur{\vphantom{t}\vecteurdeux},\Vecteur{\vphantom{t}\vecteurtrois}\right)}%
+		}%
+}
+\NewCommandCopy\pflrepesp\RepereEspace
+
+%====PROBAS
+\setKVdefault[probascondit]{%
+	min=false,%
+	Maj=false,%
+	BB=false,%
+	Formule=false
+}
+
+\newcommand\notationproba{P}%
+
+\NewDocumentCommand\ProbaCondit{ O{} m m }{%
+	\useKVdefault[probascondit]%
+	\setKV[probascondit]{#1}%
+	%gestion des booléens
+	\ifboolKV[probascondit]{Maj}{\def\notationproba{P}}{}%
+	\ifboolKV[probascondit]{min}{\def\notationproba{p}}{}%
+	\ifboolKV[probascondit]{BB}{\def\notationproba{\mathbb{P}}}{}%
+	\notationproba_{#3}{\left(#2\right)} \ifboolKV[probascondit]{Formule}{= \dfrac{\notationproba{\left(#2 \cap #3\right)}}{\notationproba{\left(#3\right)}}}{}%
+}
+\NewCommandCopy\pflprobcondit\ProbaCondit
+
+%====IF, IC
+\defKV[IntFluc]{%
+	Seuil=\def\intflucconfProba{#1},%
+	Classe=\def\intflucconfNiv{#1},%
+	p=\def\intflucconfP{#1},%
+	n=\def\intflucconfN{#1},%
+	Arrondi=\def\intflucconfPrec{#1}
+}
+\setKVdefault[IntFluc]{%
+	Seuil=95,%
+	Classe=Term,%
+	Arrondi=2,%
+	Calcul=false,%
+	Details=false,%
+	Formule=true,%
+	p={},%
+	n={},%
+	Symbole=\approx
+}
+
+\NewDocumentCommand\IntFluctu{ O{} }{%
+	\useKVdefault[IntFluc]%
+	\setKV[IntFluc]{#1}%
+	\IfStrEqCase{\intflucconfProba}{%
+		{90}{\def\ualpha{1.64}}%
+		{95}{\def\ualpha{1.96}}%
+		{99}{\def\ualpha{2.58}}%
+		%{99.9}{\def\ualpha{3.29}}%
+	}%
+	\ifboolKV[IntFluc]{Formule}%
+	{%
+		\IfStrEqCase{\intflucconfNiv}{%
+			{2de}{\IntervalleFF{ p - \dfrac{1}{\sqrt{n}} }{ p + \dfrac{1}{\sqrt{n}}}}%
+			{Term}{\IntervalleFF{ p-\num{\ualpha}\dfrac{\sqrt{p(1-p)}}{\sqrt{n}} }{ p+\num{\ualpha}\dfrac{\sqrt{p(1-p)}}{\sqrt{n}} }}%
+		}%
+	}%
+	{}%
+	\ifboolKV[IntFluc]{Details}%
+	{%
+		\IfSubStr{\intflucconfP}{/}%
+		{%
+			\def\ValIFp{\ConversionFraction[t]{\intflucconfP}}\def\ValIFpD{\ConversionFraction[d]{\intflucconfP}}%
+		}%
+		{%
+			\def\ValIFp{\num{\intflucconfP}}\def\ValIFpD{\num{\intflucconfP}}%
+		}%
+		=
+		\IfStrEqCase{\intflucconfNiv}{%
+			{2de}{\IntervalleFF{ \ValIFpD - \dfrac{1}{\sqrt{\num{\intflucconfN}}} }{ \ValIFpD + \dfrac{1}{\sqrt{\num{\intflucconfN}}}}}%
+			{Term}{\IntervalleFF{ \ValIFpD-\num{\ualpha}\dfrac{\sqrt{\ValIFp\mleft(1-\ValIFp\mright)}}{\sqrt{\num{\intflucconfN}}} }{ \ValIFpD+\num{\ualpha}\dfrac{\sqrt{\ValIFp\mleft(1-\ValIFp\mright)}}{\sqrt{\num{\intflucconfN}}} }}%
+		}%
+	}%
+	{}%
+	\ifboolKV[IntFluc]{Calcul}%
+	{%
+		\IfStrEqCase{\intflucconfNiv}{%calculs avec xfp ??
+			{2de}%
+			{%
+				\def\calcborneinfIF{ \fpeval{ max(floor(\intflucconfP - 1/sqrt(\intflucconfN),\intflucconfPrec),0) } }%
+				\def\calcbornesupIF{ \fpeval{ min(ceil(\intflucconfP + 1/sqrt(\intflucconfN),\intflucconfPrec),1) } }%
+			}%
+			{Term}%
+			{%
+				\def\calcborneinfIF{ \fpeval{ max(floor(\intflucconfP - \ualpha*sqrt(\intflucconfP*(1-\intflucconfP))/sqrt(\intflucconfN),\intflucconfPrec),0) } }%
+				\def\calcbornesupIF{ \fpeval{ min(ceil(\intflucconfP + \ualpha*sqrt(\intflucconfP*(1-\intflucconfP))/sqrt(\intflucconfN),\intflucconfPrec),1) } }%
+			}%
+		}%
+		\useKV[IntFluc]{Symbole} \IntervalleFF{ \num{\calcborneinfIF} }{ \num{\calcbornesupIF} }%
+	}%
+	{}%
+}
+\NewCommandCopy\pflintfluct\IntFluctu
+
+\NewDocumentCommand\RedactionIntFluct{ O{} m }{%
+	%\setKV[IntFluc]{#1}%
+	\begin{flalign*}
+		#2 &= \IntFluctu[Formule,Details=false,Calcul=false] && \\
+		   &  \IntFluctu[Formule=false,Details=true,Calcul=false,#1] && \\
+		   &  \IntFluctu[Formule=false,Details=false,Calcul=true,#1] && \\
+	\end{flalign*}%
+}
+\NewCommandCopy\pflredacintfluct\RedactionIntFluct
+
+\defKV[IntConf]{%
+	Seuil=\def\intflucconfProba{#1},%
+	Classe=\def\intflucconfNiv{#1},%
+	f=\def\intflucconfF{#1},%
+	n=\def\intflucconfN{#1},%
+	Arrondi=\def\intflucconfPrec{#1}
+}
+\setKVdefault[IntConf]{%
+	Seuil=95,%
+	Classe=Term,%
+	Arrondi=2,%
+	Calcul=false,%
+	Details=false,%
+	Formule=true,%
+	f={},%
+	n={},%
+	Symbole=\approx
+}
+
+\NewDocumentCommand\IntConf{ O{} }{%
+	\useKVdefault[IntConf]%
+	\setKV[IntConf]{#1}%
+	\IfStrEqCase{\intflucconfProba}{%
+		{90}{\def\ualpha{1.64}}%
+		{95}{\def\ualpha{1.96}}%
+		{99}{\def\ualpha{2.58}}%
+		%{99.9}{\def\ualpha{3.29}}%
+	}%
+	\ifboolKV[IntConf]{Formule}%
+	{%
+		\IfStrEqCase{\intflucconfNiv}{%
+			{2de}{\IntervalleFF{ f - \dfrac{1}{\sqrt{n}} }{ f + \dfrac{1}{\sqrt{n}}}}%
+			{Term}{\IntervalleFF{ f-\num{\ualpha}\dfrac{\sqrt{f(1-f)}}{\sqrt{n}} }{ f+\num{\ualpha}\dfrac{\sqrt{f(1-f)}}{\sqrt{n}} }}%
+		}%
+	}%
+	{}%
+	\ifboolKV[IntConf]{Details}%
+	{%
+		\IfSubStr{\intflucconfF}{/}%
+		{%
+			\def\ValIFp{\ConversionFraction[t]{\intflucconfF}}\def\ValIFpD{\ConversionFraction[d]{\intflucconfF}}%
+		}%
+		{%
+			\def\ValIFp{\num{\intflucconfF}}\def\ValIFpD{\num{\intflucconfF}}%
+		}%
+		=
+		\IfStrEqCase{\intflucconfNiv}{%
+			{2de}{\IntervalleFF{ \ValIFpD - \dfrac{1}{\sqrt{\num{\intflucconfN}}} }{ \ValIFpD + \dfrac{1}{\sqrt{\num{\intflucconfN}}}}}%
+			{Term}{\IntervalleFF{ \ValIFpD-\num{\ualpha}\dfrac{\sqrt{\ValIFp\mleft(1-\ValIFp\mright)}}{\sqrt{\num{\intflucconfN}}} }{ \ValIFpD+\num{\ualpha}\dfrac{\sqrt{\ValIFp\mleft(1-\ValIFp\mright)}}{\sqrt{\num{\intflucconfN}}} }}%
+		}%
+	}%
+	{}%
+	\ifboolKV[IntConf]{Calcul}%
+	{%
+		\IfStrEqCase{\intflucconfNiv}{%calculs avec xfp ??
+			{2de}%
+			{%
+				\def\calcborneinfIF{ \fpeval{ max(floor(\intflucconfF - 1/sqrt(\intflucconfN),\intflucconfPrec),0) } }%
+				\def\calcbornesupIF{ \fpeval{ min(ceil(\intflucconfF + 1/sqrt(\intflucconfN),\intflucconfPrec),1) } }%
+			}%
+			{Term}%
+			{%
+				\def\calcborneinfIF{ \fpeval{ max(floor(\intflucconfF - \ualpha*sqrt(\intflucconfF*(1-\intflucconfF))/sqrt(\intflucconfN),\intflucconfPrec),0) } }%
+				\def\calcbornesupIF{ \fpeval{ min(ceil(\intflucconfF + \ualpha*sqrt(\intflucconfF*(1-\intflucconfF))/sqrt(\intflucconfN),\intflucconfPrec),1) } }%
+			}%
+		}%
+		\useKV[IntConf]{Symbole}
+		\IntervalleFF{ \num{\calcborneinfIF} }{ \num{\calcbornesupIF} }%
+	}%
+	{}%
+}
+\NewCommandCopy\pflintconf\IntConf
+
+\NewDocumentCommand\RedactionIntConf{ O{} m }{%
+	%\setKV[IntConf]{#1}%
+	\begin{flalign*}
+		#2 &= \IntConf[Formule,Details=false,Calcul=false] && \\
+		   &  \IntConf[Formule=false,Details=true,Calcul=false,#1] && \\
+		   &  \IntConf[Formule=false,Details=false,Calcul=true,#1] && \\
+	\end{flalign*}%
+}
+\NewCommandCopy\pflredacintconf\RedactionIntConf
+
+%====binôme Newton (test)
+\defKV[binomnewton]{%
+	Indice=\def\binomnewtonindice{#1},%
+	NbTermes=\def\binomnewtonnbtermes{#1}
+}
+\setKVdefault[binomnewton]{%
+	Indice=k,%
+	NbTermes={3},%
+	Simplif=false,%
+	Tout=false,%
+	Enonce=true,%
+	Somme=true,%
+	Complet=false
+}
+
+\NewDocumentCommand\BinomeNewtonSomme{sO{}mmm}{%
+	%étoilé = displaystyle
+	%#2=clés
+	%#3=a
+	%#4=b
+	%#5=n
+	%\restoreKV[binomnewton]%
+	\setKV[binomnewton]{#2}%
+	\ensuremath{%
+		\IfBooleanT{#1}{\displaystyle}%
+		\sum_{\binomnewtonindice=0}^{#5} \binom{#5}{\binomnewtonindice}{#3}^{\binomnewtonindice}{#4}^{#5-\binomnewtonindice}
+	}%
+}
+\NewCommandCopy\pflbinomsum\BinomeNewtonSomme
+
+\NewDocumentCommand\BinomeNewton{sO{}mmm}{%
+	%étoilé = displaystyle
+	%#2=clés
+	%#3=a
+	%#4=b
+	%#5=n
+	\restoreKV[binomnewton]%
+	\setKV[binomnewton]{#2}%
+	\ensuremath{%
+		\IfBooleanT{#1}{\displaystyle}%
+		\ifboolKV[binomnewton]{Enonce}%
+			{%
+				\left(#3+#4\right)^{#5}=%
+			}%
+			{}%
+		\ifboolKV[binomnewton]{Somme}%
+			{%
+				\sum_{\binomnewtonindice=0}^{#5} \binom{#5}{\binomnewtonindice}{#3}^{\binomnewtonindice}{#4}^{#5-\binomnewtonindice}=%
+			}%
+			{}%
+		\ifboolKV[binomnewton]{Tout}%
+			{%
+				\ifboolKV[binomnewton]{Complet}{\binom{#5}{0}}{}%
+				{#3}^{#5}\ifboolKV[binomnewton]{Complet}{{#4}^{0}}{}+%
+				\xintFor* ##1 in {\xintSeq{1}{\xinteval{#5-1}}}\do{%
+					\ifboolKV[binomnewton]{Simplif}%
+						{\xinteval{binomial(#5,##1)}}%
+						{\binom{#5}{##1}}%
+					\ifboolKV[binomnewton]{Complet}%
+						{%
+							{#3}^{\xinteval{#5-##1}}%
+							{#4}^{##1}
+						}%
+						{%
+							\xintifboolexpr{#5-##1 == 1}{{#3}}{{#3}^{\xinteval{#5-##1}}}%
+							\xintifboolexpr{##1 == 1}{{#4}}{{#4}^{##1}}%
+						}%
+					+%
+					}%
+				\ifboolKV[binomnewton]{Complet}{\binom{#5}{#5}}{}%
+				\ifboolKV[binomnewton]{Complet}{{#3}^{0}}{}{#4}^{#5}%
+			}%
+			{%
+				\ifboolKV[binomnewton]{Complet}{\binom{#5}{0}}{}%
+				{#3}^{#5}\ifboolKV[binomnewton]{Complet}{{#4}^{0}}{}+%
+				\xintFor* ##1 in {\xintSeq{1}{\xinteval{\binomnewtonnbtermes-1}}}\do{%
+					\binom{#5}{##1}%
+					{#3}^{#5-##1}%
+					\ifboolKV[binomnewton]{Complet}{{#4}^{##1}}{\xintifboolexpr{##1 == 1}{{#4}}{{#4}^{##1}}}%
+					+%
+				}%
+				\ldots+%
+				\xintFor* ##1 in {\xintSeq{\xinteval{\binomnewtonnbtermes-1}}{1}}\do{%
+					\binom{#5}{#5-##1}%
+					\ifboolKV[binomnewton]{Complet}{{#3}^{##1}}{\xintifboolexpr{##1 == 1}{{#3}}{{#3}^{##1}}}%
+					{#4}^{#5-##1}%
+					+%
+				}%
+				\ifboolKV[binomnewton]{Complet}{\binom{#5}{#5}}{}%
+				\ifboolKV[binomnewton]{Complet}{{#3}^{0}}{}{#4}^{#5}%
+			}%
+	}%
+}
+\NewCommandCopy\pflbinomnewton\BinomeNewton
+
+\NewDocumentCommand\BinomeNewtonDetails{sO{}mmm}{%
+%\begin{flalign*}
+\noindent\ensuremath{%
+\IfBooleanT{#1}{\displaystyle}%
+\left({#3}+{#4}\right)^{#5}           = \BinomeNewtonSomme[#2]{#3}{#4}{#5}\\
+\phantom{\left({#3}+{#4}\right)^{#5}} = \BinomeNewton[Tout,Enonce=false,Somme=false,Complet,#2]{#3}{#4}{#5}\\
+\phantom{\left({#3}+{#4}\right)^{#5}} = \BinomeNewton[Tout,Simplif,Enonce=false,Somme=false,#2]{#3}{#4}{#5}\\
+%\end{flalign*}
+}%
+}
+\NewCommandCopy\pflbinomnewtondetails\BinomeNewtonDetails
+
+\endinput

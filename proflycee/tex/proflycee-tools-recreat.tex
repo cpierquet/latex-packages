@@ -1,0 +1,741 @@
+% proflycee-tools-recreat.tex
+% Copyright 2023-2025 Cédric Pierquet
+% Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+%%------FENÊTRE CALCUL FORMEL
+\newcommand\CFchap{\textasciicircum}
+\newcounter{CFnum}
+%def des clés
+\defKV[paramfenxcas]{%
+	Largeur=\def\CFlarg{#1},%
+	EspaceLg=\def\CFesplg{#1},%
+	PremCol=\def\CFpremcol{#1},%
+	HautPremCol=\def\CFhpremcol{#1},%
+	Taille=\def\CFtaille{#1},%
+	Couleur=\def\CFcouleur{#1},%
+	TailleTitre=\def\CFtailletitre{#1},%
+	CouleurCmd=\def\CFcoulcmd{#1},%
+	CouleurRes=\def\CFcoulres{#1},%
+	PosCmd=\def\CFposcmd{#1},%
+	PosRes=\def\CFposres{#1},%
+	LabelTitre=\def\CFlabeltitre{#1}%
+}
+\setKVdefault[paramfenxcas]{%
+	Largeur=16,EspaceLg=2pt,PremCol=0.3,HautPremCol=0.4,%
+	Couleur=darkgray,Menu=true,Titre=false,TailleTitre=\normalsize,Taille=\normalsize,%
+	Sep=true,PosRes=centre,PosCmd=gauche,%
+	CouleurCmd=red,CouleurRes=blue,%
+	LabelTitre={Résultats obtenus avec un logiciel de Calcul Formel}%
+}
+
+\newcommand\CalculFormelParametres[1][]{%
+	\setcounter{CFnum}{0}
+	\useKVdefault[paramfenxcas]%
+	\setKV[paramfenxcas]{#1}% on paramètres les nouvelles clés et on les simplifie
+}
+
+\defKV[paramlgxcas]{%
+	HautCmd=\def\CFhle{#1},%
+	HautRes=\def\CFhlr{#1}
+}
+\setKVdefault[paramlgxcas]{%
+	HautCmd=0.75,%
+	HautRes=0.75
+}
+
+\newcommand\CalculFormelLigne[3][]{%
+	\addtocounter{CFnum}{1}
+	\def\CFL{\theCFnum}%
+	\def\CFLA{\inteval{\CFL-1}}%
+	\useKVdefault[paramlgxcas]%
+	\setKV[paramlgxcas]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\def\CFLA{\inteval{\CFL-1}}%
+	%DÉCLARATION DES NŒUDS (les "6" coins des lignes commande et résultat)
+	\xintifboolexpr{\CFL == 1}%si c'est la première ligne
+		{\coordinate (A0\CFL) at (0,0);}
+		{\coordinate (A0\CFL) at ($(A2\CFLA) + (0,{-\CFesplg})$);}
+	\coordinate (A1\CFL) at ($(A0\CFL) + (0,{-\CFhle})$);
+	\coordinate (A2\CFL) at ($(A1\CFL) + (0,{-\CFhlr})$);
+	\coordinate (A3\CFL) at ($(A0\CFL) + ({\CFlarg},0)$);
+	\coordinate (A4\CFL) at ($(A1\CFL) + ({\CFlarg},0)$);
+	\coordinate (A5\CFL) at ($(A2\CFL) + ({\CFlarg},0)$);
+	%DÉCLARATION DES NŒUDS INTERMÉDIAIRES (pour les commandes et les résultats)
+	\coordinate (C1\CFL) at ($(A0\CFL) + (0,{-0.5*\CFhle})$);
+	\coordinate (C2\CFL) at ($(A0\CFL) + ({0.5*\CFlarg},{-0.5*\CFhle})$);
+	\coordinate (C3\CFL) at ($(A0\CFL) + ({\CFlarg},{-0.5*\CFhle})$);
+	\coordinate (R1\CFL) at ($(A1\CFL) + (0,{-0.5*\CFhlr})$);
+	\coordinate (R2\CFL) at ($(A1\CFL) + ({0.5*\CFlarg},{-0.5*\CFhlr})$);
+	\coordinate (R3\CFL) at ($(A1\CFL) + ({\CFlarg},{-0.5*\CFhlr})$);
+	%RECTANGLE DE BASE
+	\draw[\CFcouleur] (A0\CFL) rectangle (A5\CFL) ;
+	%LA COMMANDE EN ROUGE
+	\IfStrEq{\CFposcmd}{centre}%si poscmd=center
+		{\draw (C2\CFL) node[\CFcoulcmd,font=\CFtaille] {#2} ;}
+		{}
+	\IfStrEq{\CFposcmd}{gauche}%si poscmd=left
+		{\draw (C1\CFL) node[right,\CFcoulcmd,font=\CFtaille] {#2} ;}
+		{}
+	\IfStrEq{\CFposcmd}{right}%si poscmd=right
+		{\draw (C3\CFL) node[left,\CFcoulcmd,font=\CFtaille] {#2} ;}
+		{}
+	%LE RÉSULTAT
+	\IfStrEq{\CFposres}{centre}%si posrep=center
+		{\draw (R2\CFL) node[\CFcoulres,font=\CFtaille] {#3} ;}
+		{}
+	\IfStrEq{\CFposres}{gauche}%si posrep=left
+		{\draw (R1\CFL) node[right,\CFcoulres,font=\CFtaille] {#3} ;}
+		{}
+	\IfStrEq{\CFposres}{right}%si posrep=right
+		{\draw (R3\CFL) node[left,\CFcoulres,font=\CFtaille] {#3} ;}
+		{}
+	\ifboolKV[paramfenxcas]{Sep}%si sep=true
+		{\draw[\CFcouleur] (A1\CFL) -- (A4\CFL);}%
+		{}
+	%LE PETIT NUMÉRO
+	\draw[\CFcouleur] (A0\CFL) rectangle ++ ({-\CFpremcol},{-\CFhpremcol}) node[\CFcouleur,midway,font=\small\sffamily\bfseries] {\CFL} ;
+	%LE RECTANGLE "MENU"
+	\ifboolKV[paramfenxcas]{Menu}%si menu=true
+		{\draw[\CFcouleur,fill=\CFcouleur!25] (A5\CFL) rectangle ++ (-0.65,0.25) node[black,midway,font=\tiny\sffamily\bfseries] {MENU} ;}%
+		{}
+	%LE BLOC "TITRE"
+	\ifboolKV[paramfenxcas]{Titre}%si titre=true
+		{\draw[\CFcouleur,fill=lightgray!25,rounded corners] ($(A01) + (0,2pt)$) rectangle ++ ($({\CFlarg},2em)$) node[CouleurVertForet!50!\CFcouleur,midway,font=\CFtailletitre\ttfamily\bfseries] {\CFlabeltitre};}
+		{}
+}
+
+%%------CartoucheCapytale
+\definecolor{vertcapyt}{rgb}{0.0,0.5,0.0}
+%\definecolor{vertcapyt}{HTML}{008000}
+\DeclareTotalTCBox{\CartoucheCapytale}{ s O{} m }
+	{enhanced,size=fbox,on line,arc=3pt,colback=vertcapyt,colframe=vertcapyt,fontupper=\IfBooleanTF{#1}{\ttfamily}{\sffamily}\bfseries,colupper=white}%
+	{#3#2~{\scriptsize\faLink}}
+
+%%------SUDOMATHS
+\defKV[PLTIKZSUDOM]{%
+	CouleurTexte=\def\PLSMcoultexte{#1},%
+	Epaisseur=\def\PLSMepf{#1},%
+	Epaisseurg=\def\PLSMepg{#1},%
+	Unite=\def\PLSMunite{#1},%
+	CouleurCase=\def\PLSMcoulcase{#1},%
+	NbCol=\def\PLSMnbcol{#1},%
+	NbSubCol=\def\PLSMnbsubcol{#1},%
+	NbLig=\def\PLSMnblig{#1},%
+	NbSubLig=\def\PLSMnbsublig{#1},%
+	Police=\def\PLSMfonte{#1},%
+	PoliceLeg=\def\PLSMfonteleg{#1},%
+	ListeLegV=\def\PLSMlistelegv{#1},%
+	ListeLegH=\def\PLSMlistelegh{#1},%
+	DecalLegende=\def\PLSMdecalleg{#1}
+}
+
+\setKVdefault[PLTIKZSUDOM]{%
+	Epaisseurg=1.5pt,%
+	Epaisseur=0.5pt,%
+	Unite=1cm,%
+	CouleurCase=cyan!25,%
+	CouleurTexte=blue,%
+	NbCol=9,%
+	NbSubCol=3,%
+	NbLig=9,%
+	NbSubLig=3,
+	Police=\normalfont\normalsize,%
+	PoliceLeg=\normalfont\sffamily,%
+	Legendes=true,%
+	ListeLegV=ABCDEFGHIJKLMNOPQRSTUVWXYZ,%
+	ListeLegH=abcdefghijklmnopqrstuvwxyz,%
+	DecalLegende=0.45
+}
+
+\NewDocumentEnvironment{EnvSudoMaths}{ O{} m }
+	{
+	\useKVdefault[PLTIKZSUDOM]
+	\setKV[PLTIKZSUDOM]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%calculs intermédiaires
+	\def\larcolinter{\inteval{\PLSMnbcol/\PLSMnbsubcol}}
+	\def\larliginter{\inteval{\PLSMnblig/\PLSMnbsublig}}
+	%lecture liste
+	\IfEq{#2}{}{}%
+		{%
+			\setsepchar[.]{§./}%
+			\readlist*\SPGrilleSudoMaths{#2}%
+		}
+	%débt envtik
+	\begin{tikzpicture}[x=\PLSMunite,y=\PLSMunite,line join=miter]
+		%cases
+		\IfEq{#2}{}{}%
+		{%
+		\foreach \i in {1,2,...,\PLSMnblig}{%
+			\foreach \j in {1,2,...,\PLSMnbcol}{%
+				\itemtomacro\SPGrilleSudoMaths[\i,\j]\SMcase
+				\IfSubStr{\SMcase}{*}%si on veut colorier via *
+				{%
+					\StrDel{\SMcase}{*}[\SMcaseb]%
+					\draw[draw=none,fill=\PLSMcoulcase] ({\j-1},{1-\i}) rectangle++ (1,-1) node[inner sep=0pt,outer sep=0pt,\PLSMcoultexte,font=\PLSMfonte,midway] {\SMcaseb} ;%
+				}
+				{%
+					\draw ({\j-0.5},{0.5-\i}) node[inner sep=0pt,outer sep=0pt,\PLSMcoultexte,font=\PLSMfonte] {\SMcase} ;%
+				}
+			}
+		}%
+		}
+		%grilles
+		\draw[line width=\PLSMepg] (0,0) rectangle ({\PLSMnbcol},{-\PLSMnblig}) ;
+		\draw[line width=\PLSMepf,xstep=1,ystep=1] (0,0) grid ({\PLSMnbcol},{-\PLSMnblig}) ;
+		\draw[line width=\PLSMepg,xstep=\larcolinter,ystep=\larliginter] (0,0) grid ({\PLSMnbcol},{-\PLSMnblig}) ;
+		%légendes
+		\ifboolKV[PLTIKZSUDOM]{Legendes}
+			{%
+				\foreach \i in {1,2,...,\PLSMnbcol}{\draw ({\i-0.5},{\PLSMdecalleg}) node[inner sep=0pt,outer sep=0pt,font=\PLSMfonteleg] {\strut\StrChar{\PLSMlistelegh}{\i}} ;}
+				\foreach \j in {1,2,...,\PLSMnblig}{\draw ({-\PLSMdecalleg},{0.5-\j}) node[inner sep=0pt,outer sep=0pt,font=\PLSMfonteleg] {\StrChar{\PLSMlistelegv}{\j}} ;}
+			}{}
+	}
+	{
+	\end{tikzpicture}
+	}
+
+\NewDocumentCommand\SudoMaths{ O{} m }{%
+	\useKVdefault[PLTIKZSUDOM]
+	\setKV[PLTIKZSUDOM]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%calculs intermédiaires
+	\def\larcolinter{\inteval{\PLSMnbcol/\PLSMnbsubcol}}
+	\def\larliginter{\inteval{\PLSMnblig/\PLSMnbsublig}}
+	%lecture liste
+	\IfEq{#2}{}{}%
+	{%
+		\setsepchar[.]{§./}%
+		\readlist*\SPGrilleSudoMaths{#2}%
+	}
+	%débt envtik
+	\begin{tikzpicture}[x=\PLSMunite,y=\PLSMunite,line join=miter]
+		%cases
+		\IfEq{#2}{}{}%
+		{%
+			\foreach \i in {1,2,...,\PLSMnblig}{%
+				\foreach \j in {1,2,...,\PLSMnbcol}{%
+					\itemtomacro\SPGrilleSudoMaths[\i,\j]\SMcase
+					\IfSubStr{\SMcase}{*}%si on veut colorier via *
+					{%
+						\StrDel{\SMcase}{*}[\SMcaseb]%
+						\draw[draw=none,fill=\PLSMcoulcase] ({\j-1},{1-\i}) rectangle++ (1,-1) node[inner sep=0pt,outer sep=0pt,\PLSMcoultexte,font=\PLSMfonte,midway] {\SMcaseb} ;%
+					}
+					{%
+						\draw ({\j-0.5},{0.5-\i}) node[inner sep=0pt,outer sep=0pt,\PLSMcoultexte,font=\PLSMfonte] {\SMcase} ;%
+					}
+				}
+			}%
+		}
+		%grilles
+		\draw[line width=\PLSMepg] (0,0) rectangle ({\PLSMnbcol},{-\PLSMnblig}) ;
+		\draw[line width=\PLSMepf,xstep=1,ystep=1] (0,0) grid ({\PLSMnbcol},{-\PLSMnblig}) ;
+		\draw[line width=\PLSMepg,xstep=\larcolinter,ystep=\larliginter] (0,0) grid ({\PLSMnbcol},{-\PLSMnblig}) ;
+		%légendes
+		\ifboolKV[PLTIKZSUDOM]{Legendes}
+		{%
+			\foreach \i in {1,2,...,\PLSMnbcol}{\draw ({\i-0.5},{\PLSMdecalleg}) node[inner sep=0pt,outer sep=0pt,font=\PLSMfonteleg] {\strut\StrChar{\PLSMlistelegh}{\i}} ;}
+			\foreach \j in {1,2,...,\PLSMnblig}{\draw ({-\PLSMdecalleg},{0.5-\j}) node[inner sep=0pt,outer sep=0pt,font=\PLSMfonteleg] {\StrChar{\PLSMlistelegv}{\j}} ;}
+		}{}
+	\end{tikzpicture}
+}
+\NewCommandCopy\pflsudomaths\SudoMaths
+
+%=====FRACTALES
+\usetikzlibrary{lindenmayersystems}
+
+\pgfdeclarelindenmayersystem{FloconKoch}{
+	\rule{F -> F-F++F-F}}
+\pgfdeclarelindenmayersystem{TriangleSierpinski}{
+	\rule{F -> G-F-G}
+	\rule{G -> F+G+F}}
+	
+\pgfdeclarelindenmayersystem{SierpinskiTriangle}{
+    \symbol{X}{\pgflsystemdrawforward}
+    \symbol{Y}{\pgflsystemdrawforward}
+    \rule{X -> X-Y+X+Y-X}
+    \rule{Y -> YY}
+}%
+
+\defKV[tikzfract]{%
+	Epaisseur=\def\fracttikzthick{#1},%
+	Type=\def\fracttikztype{#1},%
+	Couleur=\def\fracttikzcolor{#1},%
+	LongueurCote=\def\fracttikzlg{#1},%
+	Etape=\def\fracttikzstep{#1},%
+	Remplissage=\def\fracttikzfill{#1},%
+	Depart=\def\fracttikzdepart{#1},%
+	Offset=\def\fracttikzoffset{#1}
+}
+
+\setKVdefault[tikzfract]{%
+	Epaisseur=0.6pt,%
+	Type=Koch,%
+	Couleur=black,%
+	LongueurCote=3,%
+	Etape=1,%
+	Remplir=false,%
+	Remplissage=lightgray,%
+	Depart={(0,0)},%
+	AlignV=false,%
+	Offset=2pt
+}
+
+\NewDocumentCommand\FractaleTikz{ s O{} D<>{} }{%
+	\restoreKV[tikzfract]%
+	\setKV[tikzfract]{#2}%
+	\def\fracttikzlgstep{\fpeval{(\fracttikzlg)/(3^\fracttikzstep)}}%
+	\IfStrEq{\fracttikztype}{Sierp}%
+		{%
+			\def\fracttikzlgstep{\fpeval{(\fracttikzlg)/(2^\fracttikzstep)}}%
+		}{}%
+	\IfBooleanF{#1}{\begin{tikzpicture}[#3]}
+	\ifboolKV[tikzfract]{Remplir}%
+		{%
+			\IfStrEq{\fracttikztype}{Koch}%
+				{%
+					\ifboolKV[tikzfract]{AlignV}%
+						{%
+							\node at ($(1/3*\fracttikzlg,0)+(-60:1/3*\fracttikzlg)$) {} ;
+						}{}%
+					\draw[line width =\fracttikzthick,shift=\fracttikzdepart,draw=\fracttikzcolor,fill=\fracttikzfill,l-system={FloconKoch,step=\fracttikzlgstep cm,angle=60,axiom=F++F++F,order=\fracttikzstep}] lindenmayer system -- cycle;
+				}{}%
+			\IfStrEq{\fracttikztype}{Sierp}%
+				{%
+					\fill[\fracttikzcolor] (0,0) -- ++(0:\fracttikzlg cm) -- ++(120:\fracttikzlg cm) -- cycle;
+					\draw[draw=none,shift=\fracttikzdepart,fill=white,l-system={SierpinskiTriangle,step=\fracttikzlgstep cm,angle=-120,axiom=X,order=\fracttikzstep}] lindenmayer system -- cycle;
+				}{}%
+		}%
+		{%
+			\IfStrEq{\fracttikztype}{Koch}%
+				{%
+					\ifboolKV[tikzfract]{AlignV}%
+						{%
+							\node at ($(1/3*\fracttikzlg,0)+(-60:1/3*\fracttikzlg)$) {} ;
+						}{}%
+					\draw [line width=\fracttikzthick,shift=\fracttikzdepart,\fracttikzcolor,l-system={FloconKoch,step=\fracttikzlgstep cm,angle=60,axiom=F++F++F,order=\fracttikzstep}] lindenmayer system -- cycle;
+				}{}%
+			\IfStrEq{\fracttikztype}{Sierp}%
+				{%
+					\fill[\fracttikzcolor] (0,0) -- ++(0:\fracttikzlg cm) -- ++(120:\fracttikzlg cm) -- cycle;
+					\draw[draw=none,shift=\fracttikzdepart,fill=white,l-system={SierpinskiTriangle,step=\fracttikzlgstep cm,angle=-120,axiom=X,order=\fracttikzstep}] lindenmayer system -- cycle;
+				}{}%
+		}%
+	\IfBooleanF{#1}{\end{tikzpicture}}%
+}
+\NewCommandCopy\pflfractaltikz\FractaleTikz
+
+\NewDocumentCommand\EtapesFloconKoch{ O{} D<>{} m }{%
+	\restoreKV[tikzfract]%
+	\setKV[tikzfract]{#1}%
+	\foreach \i in {#3} {%
+		\FractaleTikz[AlignV,#1,Etape=\i]<#2>\hspace{\fracttikzoffset}%
+	}
+}
+
+\NewDocumentCommand\EtapesTapisSierpinski{ O{} D<>{} m }{%
+	\restoreKV[tikzfract]%
+	\setKV[tikzfract]{#1}%
+	\foreach \i in {#3} {%
+		\FractaleTikz[Type=Sierp,#1,Etape=\i]<#2>\hspace{\fracttikzoffset}%
+	}
+}
+
+%====CHATEAUCARTES
+\usetikzlibrary{patterns.meta}
+%hauteurs utiles
+\xdef\HoCardsHgt{1}
+\xdef\HoCardsWdt{0.45}
+
+%styles
+\tikzstyle{CarteDroite}=[line width=\fpeval{\HoCardsScale*0.01}cm,rounded corners=\fpeval{\HoCardsScale*\HoCardsRound}cm,DecoDroite]
+\tikzstyle{CarteGauche}=[line width=\fpeval{\HoCardsScale*0.01}cm,rounded corners=\fpeval{\HoCardsScale*\HoCardsRound}cm,DecoGauche]
+\tikzstyle{CarteHoriz}=[line width=\fpeval{\HoCardsScale*0.01}cm,rounded corners=\fpeval{\HoCardsScale*\HoCardsRound}cm,DecoHoriz]
+
+%clés
+\defKV[houseofcards]{Echelle=\def\HoCardsScale{#1},CouleurDeco=\def\HoCardsColor{#1},AngleY=\def\HoCardsAglY{#1},AngleX=\def\HoCardsAglX{#1},PoliceLegende=\def\HoCardsFonteLeg{#1},Deco=\def\HoCardsDeco{#1}}
+\setKVdefault[houseofcards]{Echelle=1,CouleurDeco=black,Arrondi=true,,AngleY=20,AngleX=8,Bas=false,Legende=false,PoliceLegende=\normalsize\normalfont,Deco=remplir}
+
+\newcommand\HoCardsLeft[1]{%
+	\draw[CarteGauche] (#1) --++ ({0.5*\HoCardsHgt},0,{-sqrt(3)*\HoCardsHgt*0.5}) --++ ({0},{\HoCardsWdt},{0}) --++ ({-0.5*\HoCardsHgt},0,{sqrt(3)*\HoCardsHgt*0.5}) --cycle ;
+}
+
+\newcommand\HoCardsRight[1]{%
+	\draw[CarteDroite] (#1) --++ ({-0.5*\HoCardsHgt},0,{-sqrt(3)*\HoCardsHgt*0.5}) --++ ({0},{\HoCardsWdt},{0}) --++ ({0.5*\HoCardsHgt},0,{sqrt(3)*\HoCardsHgt*0.5}) --cycle ;
+}
+
+\newcommand\HoCardsHoriz[1]{%
+	\draw[CarteHoriz] (#1) --++ ({\HoCardsHgt},0,0) --++ ({0},{\HoCardsWdt},{0}) --++ ({-\HoCardsHgt},0,0) --cycle ;
+}
+
+\NewDocumentCommand\ChateauCartes{ O{} m D<>{} }{%
+	\useKVdefault[houseofcards]%
+	\setKV[houseofcards]{#1}%
+	\def\HoCardsNbLevel{#2}%
+	\def\HoCardsRound{0.025}%
+	\ifboolKV[houseofcards]{Arrondi}{\def\HoCardsRound{0}}{}%
+	%style remplir, si clé non reconnue
+	\tikzstyle{DecoDroite}=[fill=\HoCardsColor!20]
+	\tikzstyle{DecoGauche}=[fill=\HoCardsColor!10]
+	\tikzstyle{DecoHoriz}=[fill=\HoCardsColor!15]
+	\IfStrEq{\HoCardsDeco}{vide}
+		{%
+			\tikzstyle{DecoDroite}=[fill=white]
+			\tikzstyle{DecoGauche}=[fill=white]
+			\tikzstyle{DecoHoriz}=[fill=white]
+		}%
+		{}%
+	\IfStrEq{\HoCardsDeco}{hachures}
+		{%
+			\tikzstyle{DecoDroite}=[preaction={fill=white},pattern={Lines[angle={45-2.5*\HoCardsAglY},distance=\fpeval{\HoCardsScale*2}pt]},pattern color=\HoCardsColor]
+			\tikzstyle{DecoGauche}=[preaction={fill=white},pattern={Lines[angle={45-\HoCardsAglY},distance=\fpeval{\HoCardsScale*1.25}pt]},pattern color=\HoCardsColor]
+			\tikzstyle{DecoHoriz}=[preaction={fill=white},pattern={Lines[angle={45+\HoCardsAglY},distance=\fpeval{\HoCardsScale*2}pt]},pattern color=\HoCardsColor]
+		}%
+		{}%
+	\begin{tikzpicture}[x={({-180+\HoCardsAglX}:0.75cm)},y={({180-\HoCardsAglY}:1cm)},z={(90:1cm)},line join=bevel,scale=\HoCardsScale,#3]
+		%nœuds
+		\coordinate (A0-0) at (0,0,0) ;
+		\xintifboolexpr{\HoCardsNbLevel > 1}%
+			{
+				\foreach \i in {1,...,\HoCardsNbLevel}{%
+					\def\j{\inteval{\i-1}}%
+					\coordinate (A\i-0) at ($(A\j-0)+({-0.5*\HoCardsHgt},0,{-sqrt(3)*\HoCardsHgt*0.5})$) ;
+				}
+				\foreach \i in {1,...,\HoCardsNbLevel}{%
+					\foreach \j in {1,...,\i}{%
+						\def\k{\inteval{\j-1}}%
+						\coordinate (A\i-\j) at ($(A\i-\k)+({\HoCardsHgt},0,0)$) ;
+					}
+				}
+				%construction des étages, du bas vers le haut
+				\ifboolKV[houseofcards]{Bas}%
+					{%
+						\foreach \i in {0,...,\inteval{\HoCardsNbLevel-1}}{\HoCardsHoriz{A\HoCardsNbLevel-\i}}%
+					}{}%
+				\foreach \etage in {\inteval{\HoCardsNbLevel-1},...,1}{%
+					\foreach \i in {0,...,\etage}{\HoCardsRight{A\etage-\i}\HoCardsLeft{A\etage-\i}}
+					\foreach \i in {0,...,\inteval{\etage-1}}{\HoCardsHoriz{A\etage-\i}}
+				}
+			}%
+			{%
+				\coordinate (A1-0) at ($(A0-0)+({-0.5*\HoCardsHgt},0,{-sqrt(3)*\HoCardsHgt*0.5})$) ;
+				\coordinate (A1-1) at ($(A1-0)+({\HoCardsHgt},0,0)$) ;
+				\ifboolKV[houseofcards]{Bas}%
+					{%
+						\HoCardsHoriz{A1-0}%
+					}{}%
+			}%
+		%étage du dessus
+		\HoCardsRight{A0-0}\HoCardsLeft{A0-0}
+		%légende éventuelle
+		\ifboolKV[houseofcards]{Legende}%
+			{%
+				\draw ($(A\HoCardsNbLevel-0)!0.5!(A\HoCardsNbLevel-\HoCardsNbLevel)$) node[below,font=\HoCardsFonteLeg] {$n = \HoCardsNbLevel$} ;
+			}{}%
+	\end{tikzpicture}
+}
+\NewCommandCopy\pflchateaucartes\ChateauCartes
+
+%====ALLUMETTES
+\definecolor{BoisAllumette}{HTML}{E9D0B8}
+\definecolor{GratteAllumette}{HTML}{D32A0F}
+\xdef\LongueurGratte{0.28cm}
+\xdef\HauteurGratte{0.20cm}
+
+\makeatletter
+\newcommand{\CalcLg}[2]{%
+	\pgfpointdiff{\pgfpointanchor{#1}{center}}{\pgfpointanchor{#2}{center}}%
+	\pgf@xa=\pgf@x%
+	\pgf@ya=\pgf@y%
+	\pgfmathparse{veclen(\pgf@xa,\pgf@ya)}%
+}
+\makeatother
+
+\defKV[allumettes]{CouleurBois=\def\MatchWoodColor{#1},CouleurBout=\def\MatchEndColor{#1},Decal=\def\MatchOffset{#1}}
+\setKVdefault[allumettes]{CouleurBois=BoisAllumette,CouleurBout=GratteAllumette,Decal={0.8*\LongueurGratte},NoirBlanc=false}
+
+\NewDocumentCommand\PfLAllumette{ O{} m }{%1 offset,%2 = ptA>ptB
+	\useKVdefault[allumettes]%
+	\setKV[allumettes]{#1}%
+	\ifboolKV[allumettes]{NoirBlanc}%
+		{%
+			\def\MatchWoodColor{lightgray}\def\MatchEndColor{darkgray}%
+		}%
+		{}%
+	\StrCut{#2}{>}{\AlumPtDep}{\AlumPtArriv}%
+	\pgfmathanglebetweenpoints{\pgfpointanchor{\AlumPtDep}{center}}{\pgfpointanchor{\AlumPtArriv}{center}}\edef\AlumAngle{\pgfmathresult}%
+	\CalcLg{\AlumPtDep}{\AlumPtArriv}\edef\AlumLg{\pgfmathresult}%
+	\begin{scope}[shift={($(\AlumPtDep)+(\AlumAngle:{\MatchOffset})$)},rotate=\AlumAngle]
+		\fill[\MatchWoodColor] (0,-0.0975cm) rectangle++ ({\AlumLg-2*\LongueurGratte-2*\MatchOffset},0.2cm);
+		\fill[\MatchWoodColor!50!black] (0,-0.0975cm) --++ ({\AlumLg-2*\LongueurGratte-2*\MatchOffset},0) --++ (0.05cm,-0.05cm) --++ ({-\AlumLg+2*\LongueurGratte+2*\MatchOffset},0) --++ (-0.05cm,0.05cm);
+		\draw[line join=bevel,line cap=rect] (0,-0.0975cm) -- ++(0,0.2cm) -- ++({\AlumLg-2*\LongueurGratte-2*\MatchOffset},0) -- ++(0,-0.2cm) -- ++(0.05cm,-0.05cm) -- ++({-\AlumLg+2*\LongueurGratte+2*\MatchOffset},0) -- ++(-0.05cm,0.05cm) --cycle ;
+		\shade[draw,ball color=\MatchEndColor,rounded corners=0.1pt] ({\AlumLg-2*\LongueurGratte-2*\MatchOffset},0)--++(0,{0.1cm}) to[out=12.5,in=90]++({2*\LongueurGratte},{-0.1cm}) to[out=-90,in=-17.5]++({-2*\LongueurGratte+0.05cm},{-0.15cm}) --++ (-0.05cm,0.05cm) --cycle ;
+	\end{scope}
+}
+\NewCommandCopy\pflallumette\PfLAllumette
+
+\NewDocumentCommand\PfLAllumettes{ O{} m }{%
+	\setsepchar{ }%
+	\readlist*\listeptsalum{#2}%
+	\xintFor* ##1 in {\xintSeq{1}{\listeptsalumlen}}\do{%
+		\itemtomacro\listeptsalum[##1]{\diralum}
+		\PfLAllumette[#1]{\diralum}
+	}%
+}
+\NewCommandCopy\pflallumettes\PfLAllumettes
+
+%====MACHINE À TRANSFORMER
+\defKV[machtransf]{%
+	Couleur=\def\MachTransfCol{#1},%
+	CouleurFct=\def\MachTransfColF{#1},%
+	Hauteur=\def\MachTransfHt{#1},%
+	Largeur=\def\MachTransfWd{#1},%
+	Offset=\def\MachTransfOffset{#1},%
+	CouleurBloc=\def\MachTransfColBl{#1},%
+	PoliceTbl=\def\MachTransfFontTbl{#1},%
+	Fct=\def\MachTransfFct{#1},%
+	Formule=\def\MachTransfFormule{#1},%
+	Echelle=\def\MatchTransfScale{#1}
+}
+
+\setKVdefault[machtransf]{%
+	Couleur=lightgray,%
+	CouleurFct=white,%
+	Bordure=false,%
+	AffFleche=true,%
+	Hauteur=3,%
+	Largeur=2,%
+	Offset=4pt,%
+	CouleurBloc=red,%
+	Tableau=false,%
+	PoliceTbl=\footnotesize,%
+	Logo=true,%
+	Fct={},%
+	Auto=false,%
+	Formule={},%
+	ES=false,%
+	Echelle=1
+}
+
+\NewDocumentCommand\MachineTransformer{ O{} m D<>{} }{%
+	\useKVdefault[machtransf]%
+	\setKV[machtransf]{#1}%
+	\tikzset{MachTransfBlocVal/.style={draw=none,fill=\MachTransfColBl,rounded corners=3pt}}%
+	\tikzset{MachTransfVal/.style={text=white}}%
+	\begin{tikzpicture}[line join=bevel,scale=\MatchTransfScale,every node/.style={scale=\MatchTransfScale},#3]
+		\ifboolKV[machtransf]{Bordure}%
+			{%
+				\fill[draw=black,semithick,fill=\MachTransfCol] (0,0) rectangle (\MachTransfWd,\MachTransfHt) ;
+				\fill[draw=black,fill=\MachTransfCol] ({0.25*\MachTransfWd},{0.3*\MachTransfHt}) --++ (150:{0.4*\MachTransfHt}) --++ (0,{-0.4*\MachTransfHt}) --cycle ;
+				\fill[draw=black,fill=\MachTransfCol] ({0.75*\MachTransfWd},{0.7*\MachTransfHt}) --++ (30:{0.4*\MachTransfHt}) --++ (0,{-0.4*\MachTransfHt}) --cycle ;
+				\fill[fill=\MachTransfCol] (0,0) rectangle (\MachTransfWd,\MachTransfHt) ;
+			}%
+			{%
+				\fill[draw=none,semithick,fill=\MachTransfCol] (0,0) rectangle (\MachTransfWd,\MachTransfHt) ;
+				\fill[draw=none,semithick,fill=\MachTransfCol] ({0.25*\MachTransfWd},{0.3*\MachTransfHt}) --++ (150:{0.4*\MachTransfHt}) --++ (0,{-0.4*\MachTransfHt}) --cycle ;
+				\fill[draw=none,semithick,fill=\MachTransfCol] ({0.75*\MachTransfWd},{0.7*\MachTransfHt}) --++ (30:{0.4*\MachTransfHt}) --++ (0,{-0.4*\MachTransfHt}) --cycle ;
+			}%
+		\ifboolKV[machtransf]{Logo}%
+			{%
+				\node[scale={2*\MachTransfWd},text=\MachTransfCol!75!black] at ({0.5*\MachTransfWd},{0.5*\MachTransfHt}) {\pflfacog};
+			}%
+			{}%
+		\ifboolKV[machtransf]{AffFleche}%
+			{%
+				\draw[line width=2.5pt,\MachTransfColF,->,>=latex] ({0},{0.3*\MachTransfHt}) to[out=0,in=180] ({\MachTransfWd},{0.7*\MachTransfHt}) ;
+			}%
+			{}%
+		\ifboolKV[machtransf]{ES}%
+			{%
+				\node[draw,MachTransfBlocVal,MachTransfVal,left=\MachTransfOffset] at ({0.25*\MachTransfWd-0.346*\MachTransfHt},{0.3*\MachTransfHt}) {\phantom{9}} ;
+				\node[draw,MachTransfBlocVal,MachTransfVal,right=\MachTransfOffset] at ({0.75*\MachTransfWd+0.346*\MachTransfHt},{0.7*\MachTransfHt}) {\phantom{9}} ;
+			}%
+			{}%
+		\ifboolKV[machtransf]{Auto}%
+			{%
+				\IfStrEq{#2}{}%
+					{}%
+					{%
+						\setsepchar{,}%
+						\readlist*\machtransflst{#2}%
+						%1ère valeur
+						\itemtomacro\machtransflst[1]\tmpvaldeb%
+						\IfEq{\tmpvaldeb}{}%
+							{\xdef\tmpvaldeb{\phantom{9}}\xdef\tmpvalfin{\phantom{9}}}%
+							{\StrSubstitute{\MachTransfFormule}{X}{(\tmpvaldeb)}[\tmpvalfin]}
+						\node[draw,MachTransfBlocVal,MachTransfVal,left=\MachTransfOffset] at ({0.25*\MachTransfWd-0.346*\MachTransfHt},{0.3*\MachTransfHt}) {$\tmpvaldeb$} ;
+						\node[draw,MachTransfBlocVal,MachTransfVal,right=\MachTransfOffset] at ({0.75*\MachTransfWd+0.346*\MachTransfHt},{0.7*\MachTransfHt}) {$\xinteval{\tmpvalfin}$} ;
+						\ifboolKV[machtransf]{Tableau}%
+							{%
+								\node[below=\MachTransfOffset] at ({0.5*\MachTransfWd},0) {\begin{NiceTabular}[hvlines]{|c|c|}
+										\CodeBefore
+										\rowcolor{lightgray!25}{1}
+										\Body
+										\texttt{\MachTransfFontTbl{}Entrée}&\texttt{\MachTransfFontTbl{}Sortie}\\
+										\xintFor* ##1 in {\xintSeq{1}{\machtransflstlen}}\do{%
+											\itemtomacro\machtransflst[##1]\tmpvaldeb$\tmpvaldeb$ & %
+											\itemtomacro\machtransflst[##1]\tmpvaldeb\IfEq{\tmpvaldeb}{}%
+											{\xdef\tmpvaldeb{\phantom{9}}\xdef\tmpvalfin{\phantom{9}}}%
+											{\StrSubstitute{\MachTransfFormule}{X}{(\tmpvaldeb)}[\tmpvalfin]\xdef\tmpvalfin{\xinteval{\tmpvalfin}}}$\tmpvalfin$ \\%
+										}
+								\end{NiceTabular}} ;%
+							}%
+							{}%
+					}%
+			}%
+			{%
+				\IfStrEq{#2}{}%
+					{}%
+					{%
+						\setsepchar[.]{,./}%
+						\readlist*\machtransflst{#2}%
+						%1ère valeur
+						\itemtomacro\machtransflst[1,1]\tmpvaldeb%
+						\itemtomacro\machtransflst[1,2]\tmpvalfin%
+						\node[draw,MachTransfBlocVal,MachTransfVal,left=\MachTransfOffset] at ({0.25*\MachTransfWd-0.346*\MachTransfHt},{0.3*\MachTransfHt}) {\IfEq{\tmpvaldeb}{}{\phantom{9}}{\tmpvaldeb}} ;
+						\node[draw,MachTransfBlocVal,MachTransfVal,right=\MachTransfOffset] at ({0.75*\MachTransfWd+0.346*\MachTransfHt},{0.7*\MachTransfHt}) {\IfEq{\tmpvalfin}{}{\phantom{9}}{\tmpvalfin}} ;
+						\ifboolKV[machtransf]{Tableau}%
+							{%
+								\node[below=\MachTransfOffset] at ({0.5*\MachTransfWd},0) {\begin{NiceTabular}[hvlines]{|c|c|}
+										\CodeBefore
+										\rowcolor{lightgray!25}{1}
+										\Body
+										\texttt{\MachTransfFontTbl{}Entrée}&\texttt{\MachTransfFontTbl{}Sortie}\\
+										\xintFor* ##1 in {\xintSeq{1}{\machtransflstlen}}\do{%
+											\itemtomacro\machtransflst[##1,1]{\tmpvaldeb}\tmpvaldeb & %
+											\itemtomacro\machtransflst[##1,2]{\tmpvalfin}\tmpvalfin\\%
+										}
+								\end{NiceTabular}} ;%
+							}%
+							{}%
+					}%
+			}%
+		\IfStrEq{\MachTransfFct}{}%
+			{}%
+			{%
+				\node[text=black,above=0pt] at ({0.5*\MachTransfWd},0) {\MachTransfFct} ;
+			}%
+	\end{tikzpicture}
+}
+\NewCommandCopy\pflmachtransf\MachineTransformer
+
+%====PYRAMIDE D'ORANGES
+\usetikzlibrary{shadings}
+\usepackage{simplekv}
+
+\setKVdefault[PyrBalls]{%
+	Couleur=gray,%
+	Rotation=-5,%
+	Echelle=1
+}
+
+\NewDocumentCommand\EmpilementBalles{ O{} m }{%
+	\restoreKV[PyrBalls]%
+	\setKV[PyrBalls]{#1}%
+	\IfSubStr{#2}{-}%
+		{%
+			\StrCut{#2}{-}{\pyrballsdeb}{\pyrballsfin}%
+			\foreach \i in {\pyrballsdeb,...,\pyrballsfin}{%
+				\begin{tikzpicture}[scale=\fpeval{0.5*\useKV[PyrBalls]{Echelle}},rotate={\useKV[PyrBalls]{Rotation}},transform shape]
+					\foreach \x in {\numexpr\i-1\relax,...,0}{
+						\foreach \y in {\x,...,\numexpr\i-1\relax}{
+							%côté gauche
+							\shade[ball color={\useKV[PyrBalls]{Couleur}},shading angle=50] (0.6*\x,-\y+0.3*\x) circle[radius=0.55] ;
+							%côté 'droit'
+							\shade[ball color={\useKV[PyrBalls]{Couleur}},shading angle=0] (-0.6*\x,-\y+0.3*\x) circle[radius=0.55] ;
+						}
+					}
+				\end{tikzpicture}%
+			}%
+		}%
+		{%
+			\begin{tikzpicture}[scale={\useKV[PyrBalls]{Echelle}},rotate={\useKV[PyrBalls]{Rotation}},transform shape]
+				\foreach \x in {\numexpr#2-1\relax,...,0}{
+					\foreach \y in {\x,...,\numexpr#2-1\relax}{
+						%côté gauche
+						\shade[ball color={\useKV[PyrBalls]{Couleur}},shading angle=50] (0.6*\x,-\y+0.3*\x) circle[radius=0.55] ;
+						%côté 'droit'
+						\shade[ball color={\useKV[PyrBalls]{Couleur}},shading angle=0] (-0.6*\x,-\y+0.3*\x) circle[radius=0.55] ;
+					}
+				}
+			\end{tikzpicture}%
+		}%
+}
+\NewCommandCopy\pflempilballes\EmpilementBalles
+
+%====DATES
+\IfPackageLoadedTF{datetime2}%
+	{}%
+	{%
+		\RequirePackage[fr-FR]{datetime2}
+	}%
+
+\RequirePackage{datetime2-calc}
+
+\newcount\tmpmyct
+
+\NewDocumentCommand\JourSelonDate{ s m }{%
+	\StrBehind[2]{#2}{/}[\tmptheyear]%
+	\StrBetween[1,2]{#2}{/}{/}[\tmpthemonth]%
+	\StrBefore[1]{#2}{/}[\tmptheday]%
+	\xdef\tmpdate{\tmptheyear-\tmpthemonth-\tmptheday}%
+	\DTMcomputedayofweekindex{\tmpdate}{\indexjdls}%
+	\IfStrEqCase{\indexjdls}{%
+		{0}{\IfBooleanTF{#1}{L}{l}undi}%
+		{1}{\IfBooleanTF{#1}{M}{m}ardi}%
+		{2}{\IfBooleanTF{#1}{M}{m}ercredi}%
+		{3}{\IfBooleanTF{#1}{J}{j}eudi}%
+		{4}{\IfBooleanTF{#1}{V}{v}endredi}%
+		{5}{\IfBooleanTF{#1}{S}{s}amedi}%
+		{6}{\IfBooleanTF{#1}{D}{d}imanche}%
+	}{}%
+}
+\NewCommandCopy\pfljourselondate\JourSelonDate
+
+\NewDocumentCommand\DateComplete{ s m }{%
+	\IfBooleanTF{#1}%
+		{%
+			\JourSelonDate*{#2} %
+		}%
+		{
+			\JourSelonDate{#2} %
+		}%
+	\xdef\tmpdateinit{\tmptheyear-\tmpthemonth-\tmptheday}%
+	\DTMsavedate{datecplt}{\tmpdateinit}%
+	\DTMusedate{datecplt}{}%
+}
+\NewCommandCopy\pfldatecomplet\DateComplete
+
+\NewDocumentCommand\NbJoursEntreDates{ s m m O{\nbjoursentre} }{%
+	\StrBehind[2]{#2}{/}[\tmptheyear]%
+	\StrBetween[1,2]{#2}{/}{/}[\tmpthemonth]%
+	\StrBefore[1]{#2}{/}[\tmptheday]%
+	\xdef\tmpdateA{\tmptheyear-\tmpthemonth-\tmptheday}%
+	\StrBehind[2]{#3}{/}[\tmptheyear]%
+	\StrBetween[1,2]{#3}{/}{/}[\tmpthemonth]%
+	\StrBefore[1]{#3}{/}[\tmptheday]%
+	\xdef\tmpdateB{\tmptheyear-\tmpthemonth-\tmptheday}%
+	\DTMsavedate{dateinitiale}{\tmpdateA}%
+	\DTMsavedate{datefinale}{\tmpdateB}%
+	\DTMsaveddatediff{dateinitiale}{datefinale}{\tmpmyct}%
+	\xdef#4{\fpeval{abs(\tmpmyct)}}%
+	\IfBooleanT{#1}{#4}%
+}
+\NewCommandCopy\pflnbjoursdates\NbJoursEntreDates
+
+\NewDocumentCommand\AjoutJoursDate{ s m m }{%
+	\StrBehind[2]{#2}{/}[\tmptheyear]%
+	\StrBetween[1,2]{#2}{/}{/}[\tmpthemonth]%
+	\StrBefore[1]{#2}{/}[\tmptheday]%
+	\xdef\tmpdateinit{\tmptheyear-\tmpthemonth-\tmptheday}%
+	\DTMsavedate{dateinitiale}{\tmpdateinit}%
+	\DTMsaveddateoffsettojulianday{dateinitiale}{#3}\tmpmyct%
+	\DTMsavejulianday{datefinale}{\number\tmpmyct}%
+	\IfBooleanTF{#1}%
+		{%
+			\DTMfetchday{datefinale}/\DTMfetchmonth{datefinale}/\DTMfetchyear{datefinale}{}%
+		}%
+		{%
+			\DTMusedate{datefinale}{}%
+		}%
+}
+\NewCommandCopy\pflajoutjoursdate\AjoutJoursDate
+
+\endinput

@@ -1,0 +1,662 @@
+% proflycee-tools-competences.tex
+% Copyright 2024 Cédric Pierquet
+% Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+%====COMPÉTENCES MATHS LYCÉE
+\setKVdefault[competencesmaths]{%
+	AffCateg=false,%
+	AffNumero=false,%
+	Court=false,%
+	Puce=false,%
+	TypePuce={\textbullet~~}
+}
+
+%les versions individuelles lycée
+\def\tmpcompetAA{Analyser un problème.}
+\def\tmpcompetAB{Extraire, organiser et traiter l’information utile.}
+\def\tmpcompetAC{Observer, s’engager dans une démarche, expérimenter en utilisant éventuellement des outils logiciels, chercher des exemples ou des contre-exemples, simplifier ou particulariser une situation, reformuler un problème, émettre une conjecture.}
+\def\tmpcompetACc{Observer, s’engager dans une démarche, expérimenter [\ldots].}
+\def\tmpcompetAD{Valider, corriger une démarche, ou en adopter une nouvelle.}
+
+\def\tmpcompetBA{Traduire en langage mathématique une situation réelle (à l’aide d’équations, de suites, de fonctions, de configurations géométriques, de graphes, de lois de probabilité, d’outils statistiques, \ldots).}
+\def\tmpcompetBAc{Traduire en langage mathématique une situation réelle adaptée [\ldots].}
+\def\tmpcompetBB{Utiliser, comprendre, élaborer une simulation numérique ou géométrique prenant appui sur la modélisation et utilisant un logiciel.}
+\def\tmpcompetBBc{Utiliser, comprendre, élaborer une simulation numérique ou géométrique [\ldots].}
+\def\tmpcompetBC{Valider ou invalider un modèle.}
+
+\def\tmpcompetCA{Choisir un cadre (numérique, algébrique, géométrique, \ldots) adapté pour traiter un problème ou pour représenter un objet mathématique.}
+\def\tmpcompetCAc{Choisir un cadre adapté [\ldots].}
+\def\tmpcompetCB{Passer d’un mode de représentation à un autre.}
+\def\tmpcompetCC{Changer de registre.}
+
+\def\tmpcompetDA{Effectuer un calcul automatisable à la main ou à l’aide d’un instrument (calculatrice, logiciel).}
+\def\tmpcompetDAc{Effectuer un calcul automatisable à la main ou à l’aide d’un instrument [\ldots].}
+\def\tmpcompetDB{Mettre en \oe{}uvre des algorithmes simples.}
+\def\tmpcompetDC{Exercer l’intelligence du calcul : organiser les différentes étapes d’un calcul complexe, choisir des transformations, effectuer des simplifications.}
+\def\tmpcompetDCc{Exercer l’intelligence du calcul [\ldots].}
+\def\tmpcompetDD{Contrôler les calculs (au moyen d’ordres de grandeur, de considérations de signe ou d’encadrement).}
+\def\tmpcompetDDc{Contrôler les calculs [\ldots].}
+
+\def\tmpcompetEA{Utiliser les notions de la logique élémentaire (conditions nécessaires ou suffisantes, équivalences, connecteurs) pour bâtir un raisonnement.}
+\def\tmpcompetEAc{Utiliser les notions de la logique élémentaire [\ldots].}
+\def\tmpcompetEB{Différencier le statut des énoncés mis en jeu : définition, propriété, théorème démontré, théorème admis\ldots}
+\def\tmpcompetEBc{Différencier le statut des énoncés mis en jeu [\ldots].}
+\def\tmpcompetEC{Utiliser différents types de raisonnement (par analyse et synthèse, par équivalence, par disjonction de cas, par l’absurde, par contraposée, par récurrence\ldots).}
+\def\tmpcompetECc{Utiliser différents types de raisonnement [\ldots].}
+\def\tmpcompetED{Effectuer des inférences (inductives, déductives) pour obtenir de nouveaux résultats, conduire une démonstration, confirmer ou infirmer une conjecture, prendre une décision.}
+\def\tmpcompetEDc{Effectuer des inférences pour obtenir de nouveaux résultats [\ldots].}
+
+\def\tmpcompetFA{Opérer la conversion entre le langage naturel et le langage symbolique formel.}%
+\def\tmpcompetFB{Développer une argumentation mathématique correcte à l’écrit ou à l’oral.}%
+\def\tmpcompetFC{Critiquer une démarche ou un résultat.}%
+\def\tmpcompetFD{S’exprimer avec clarté et précision à l’oral et à l’écrit.}%
+
+%commande principale lycée
+\NewDocumentCommand\CompMathsLyc{ s O{} m }{%
+	\restoreKV[competencesmaths]%
+	\setKV[competencesmaths]{#2}%
+	\IfBooleanTF{#1}{}{\noindent}%
+	\IfSubStr{#3}{/}%
+		{%
+			\StrCut{#3}{/}{\tmpCategCompet}{\tmpItemCompet}%
+		}%
+		{%
+			\xdef\tmpCategCompet{#3}%
+		}%
+	\IfStrEqCase{\tmpCategCompet}{%
+		{CH}{%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Chercher.~}}{}%
+			\IfStrEqCase{\tmpItemCompet}{%
+				{Analyser}{\tmpcompetAA}%
+				{Extraire}{\tmpcompetAB}%
+				{Observer}{\ifboolKV[competencesmaths]{Court}{\tmpcompetACc}{\tmpcompetAC}}%
+				{Valider}{\tmpcompetAD}%
+				{A}{\tmpcompetAA}%
+				{E}{\tmpcompetAB}%
+				{O}{\ifboolKV[competencesmaths]{Court}{\tmpcompetACc}{\tmpcompetAC}}%
+				{V}{\tmpcompetAD}%
+				{An}{\tmpcompetAA}%
+				{Ex}{\tmpcompetAB}%
+				{Ob}{\ifboolKV[competencesmaths]{Court}{\tmpcompetACc}{\tmpcompetAC}}%
+				{Va}{\tmpcompetAD}%
+				{Tout}{%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetAA}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetAB}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						\ifboolKV[competencesmaths]{Court}{\tmpcompetACc}{\tmpcompetAC}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetAD}%
+				}%
+			}%
+		}%
+		{MO}{%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Modéliser.~}}{}%
+			\IfStrEqCase{\tmpItemCompet}{%
+				{Traduire}{\ifboolKV[competencesmaths]{Court}{\tmpcompetBAc}{\tmpcompetBA}}%
+				{Utiliser}{\ifboolKV[competencesmaths]{Court}{\tmpcompetBBc}{\tmpcompetBB}}%
+				{Valider}{\tmpcompetBC}%
+				{T}{\ifboolKV[competencesmaths]{Court}{\tmpcompetBAc}{\tmpcompetBA}}%
+				{U}{\ifboolKV[competencesmaths]{Court}{\tmpcompetBBc}{\tmpcompetBB}}%
+				{V}{\tmpcompetBC}%
+				{Tr}{\ifboolKV[competencesmaths]{Court}{\tmpcompetBAc}{\tmpcompetBA}}%
+				{Ut}{\ifboolKV[competencesmaths]{Court}{\tmpcompetBBc}{\tmpcompetBB}}%
+				{Va}{\tmpcompetBC}%
+				{Tout}{%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetBAc}{\tmpcompetBA}}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetBBc}{\tmpcompetBB}}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetBC}%
+				}%
+			}%
+		}%
+		{RE}{%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Représenter.~}}{}%
+			\IfStrEqCase{\tmpItemCompet}{%
+				{Cadre}{\ifboolKV[competencesmaths]{Court}{\tmpcompetCAc}{\tmpcompetCA}}%
+				{Passer}{\tmpcompetCB}%
+				{Registre}{\tmpcompetCC}%
+				{C}{\ifboolKV[competencesmaths]{Court}{\tmpcompetCAc}{\tmpcompetCA}}%
+				{P}{\tmpcompetCB}%
+				{R}{\tmpcompetCC}%
+				{Ca}{\ifboolKV[competencesmaths]{Court}{\tmpcompetCAc}{\tmpcompetCA}}%
+				{Pa}{\tmpcompetCB}%
+				{Re}{\tmpcompetCC}%
+				{Tout}{%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetCAc}{\tmpcompetCA}}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetCB}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetCC}%
+				}%
+			}%
+		}%
+		{CA}{%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Calculer.~}}{}%
+			\IfStrEqCase{\tmpItemCompet}{%
+				{Effectuer}{\ifboolKV[competencesmaths]{Court}{\tmpcompetDAc}{\tmpcompetDA}}%
+				{Mettre}{\tmpcompetDB}%
+				{Intellig}{\ifboolKV[competencesmaths]{Court}{\tmpcompetDCc}{\tmpcompetDC}}%
+				{Controler}{\ifboolKV[competencesmaths]{Court}{\tmpcompetDDc}{\tmpcompetDD}}%
+				{E}{\ifboolKV[competencesmaths]{Court}{\tmpcompetDAc}{\tmpcompetDA}}%
+				{M}{\tmpcompetDB}%
+				{I}{\ifboolKV[competencesmaths]{Court}{\tmpcompetDCc}{\tmpcompetDC}}%
+				{C}{\ifboolKV[competencesmaths]{Court}{\tmpcompetDDc}{\tmpcompetDD}}%
+				{Ef}{\ifboolKV[competencesmaths]{Court}{\tmpcompetDAc}{\tmpcompetDA}}%
+				{Me}{\tmpcompetDB}%
+				{In}{\ifboolKV[competencesmaths]{Court}{\tmpcompetDCc}{\tmpcompetDC}}%
+				{Co}{\ifboolKV[competencesmaths]{Court}{\tmpcompetDDc}{\tmpcompetDD}}%
+				{Tout}{%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetDAc}{\tmpcompetDA}}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetDB}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetDCc}{\tmpcompetDC}}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetDDc}{\tmpcompetDD}}%
+				}%
+			}%
+		}%
+		{RA}{%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Raisonner.~}}{}%
+			\IfStrEqCase{\tmpItemCompet}{%
+				{Logique}{\ifboolKV[competencesmaths]{Court}{\tmpcompetEAc}{\tmpcompetEA}}%
+				{Differencier}{\ifboolKV[competencesmaths]{Court}{\tmpcompetEBc}{\tmpcompetEB}}%
+				{Raisonnement}{\ifboolKV[competencesmaths]{Court}{\tmpcompetECc}{\tmpcompetEC}}%
+				{Inference}{\ifboolKV[competencesmaths]{Court}{\tmpcompetEDc}{\tmpcompetED}}%
+				{L}{\ifboolKV[competencesmaths]{Court}{\tmpcompetEAc}{\tmpcompetEA}}%
+				{D}{\ifboolKV[competencesmaths]{Court}{\tmpcompetEBc}{\tmpcompetEB}}%
+				{R}{\ifboolKV[competencesmaths]{Court}{\tmpcompetECc}{\tmpcompetEC}}%
+				{I}{\ifboolKV[competencesmaths]{Court}{\tmpcompetEDc}{\tmpcompetED}}%
+				{Lo}{\ifboolKV[competencesmaths]{Court}{\tmpcompetEAc}{\tmpcompetEA}}%
+				{Di}{\ifboolKV[competencesmaths]{Court}{\tmpcompetEBc}{\tmpcompetEB}}%
+				{Ra}{\ifboolKV[competencesmaths]{Court}{\tmpcompetECc}{\tmpcompetEC}}%
+				{In}{\ifboolKV[competencesmaths]{Court}{\tmpcompetEDc}{\tmpcompetED}}%
+				{Tout}{%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetEAc}{\tmpcompetEA}}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetEBc}{\tmpcompetEB}}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetECc}{\tmpcompetEC}}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetEDc}{\tmpcompetED}}%
+				}%
+			}%
+		}%
+		{CO}{%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Communiquer.~}}{}%
+			\IfStrEqCase{\tmpItemCompet}{%
+				{Operer}{\tmpcompetFA}%
+				{Developper}{\tmpcompetFB}%
+				{Critiquer}{\tmpcompetFC}%
+				{Exprimer}{\tmpcompetFD}%
+				{O}{\tmpcompetFA}%
+				{D}{\tmpcompetFB}%
+				{C}{\tmpcompetFC}%
+				{E}{\tmpcompetFD}%
+				{Op}{\tmpcompetFA}%
+				{De}{\tmpcompetFB}%
+				{Cr}{\tmpcompetFC}%
+				{Ex}{\tmpcompetFD}%
+				{Tout}{%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetFA}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetFB}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetFC}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetFD}%
+				}%
+			}%
+		}%
+	}%
+	\IfStrEqCase{\tmpCategCompet}{%
+		{LYC11}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Chercher.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetAA}}%
+		{LYC12}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Chercher.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetAB}}%
+		{LYC13}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Chercher.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetACc}{\tmpcompetAC}}}%
+		{LYC14}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Chercher.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetAD}}%
+		{LYC1}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Chercher.~}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet1.~}}{}\tmpcompetAA}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet2.~}}{}\tmpcompetAB}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet3.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetACc}{\tmpcompetACc}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet4.~}}{}\tmpcompetAD}%
+		}%fin catégorie 1
+		{LYC21}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Modéliser.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetBAc}{\tmpcompetBA}}}%
+		{LYC22}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Modéliser.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetBBc}{\tmpcompetBB}}}%
+		{LYC23}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Modéliser.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetBC}}%
+		{LYC2}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Modéliser.~}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet1.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetBAc}{\tmpcompetBA}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet2.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetBBc}{\tmpcompetBB}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet3.~}}{}\tmpcompetBC}%
+		}%fin catégorie 2
+		{LYC31}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Représenter.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetCAc}{\tmpcompetCA}}}%
+		{LYC32}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Représenter.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetCB}}%
+		{LYC33}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Représenter.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetCC}}%
+		{LYC3}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Représenter.~}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet1.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetCAc}{\tmpcompetCA}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet2.~}}{}\tmpcompetCB}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet3.~}}{}\tmpcompetCC}%
+		}%fin catégorie 3
+		{LYC41}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Calculer.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetDAc}{\tmpcompetDA}}}%
+		{LYC42}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Calculer.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetDB}}%
+		{LYC43}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Calculer.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetDCc}{\tmpcompetDC}}}%
+		{LYC44}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Calculer.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetDDc}{\tmpcompetDD}}}%
+		{LYC4}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Calculer.~}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet1.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetDAc}{\tmpcompetDA}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet2.~}}{}\tmpcompetDB}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet3.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetDCc}{\tmpcompetDC}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet4.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetDDc}{\tmpcompetDD}}%
+		}%fin catégorie 4
+		{LYC51}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Raisonner.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetEAc}{\tmpcompetEA}}}%
+		{LYC52}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Raisonner.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetEBc}{\tmpcompetEB}}}%
+		{LYC53}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Raisonner.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetECc}{\tmpcompetEC}}}%
+		{LYC54}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Raisonner.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetEDc}{\tmpcompetED}}}%
+		{LYC5}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Raisonner.~}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet1.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetEAc}{\tmpcompetEA}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet2.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetEBc}{\tmpcompetEB}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet3.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetECc}{\tmpcompetEC}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet4.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetEDc}{\tmpcompetED}}%
+		}%fin catégorie 5
+		{LYC61}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Communiquer.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetFA}}%
+		{LYC62}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Communiquer.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetFB}}%
+		{LYC63}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Communiquer.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetFC}}%
+		{LYC64}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Communiquer.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetFD}}%
+		{LYC6}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Communiquer.~}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet1.~}}{}\tmpcompetFA}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet2.~}}{}\tmpcompetFB}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet3.~}}{}\tmpcompetFC}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet4.~}}{}\tmpcompetFD}%
+		}
+		{LYC}{%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Chercher.~\\}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet11.~}}{}\tmpcompetAA}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet12.~}}{}\tmpcompetAB}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet13.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetACc}{\tmpcompetACc}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet14.~}}{}\tmpcompetAD}\\%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Modéliser.~\\}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet21.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetBAc}{\tmpcompetBA}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet22.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetBBc}{\tmpcompetBB}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet23.~}}{}\tmpcompetBC}\\%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Représenter.~\\}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet31.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetCAc}{\tmpcompetCA}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet32.~}}{}\tmpcompetCB}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet33.~}}{}\tmpcompetCC}\\%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Calculer.~\\}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet41.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetDAc}{\tmpcompetDA}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet42.~}}{}\tmpcompetDB}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet43.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetDCc}{\tmpcompetDC}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet44.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetDDc}{\tmpcompetDD}}\\%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Raisonner.~\\}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet51.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetEAc}{\tmpcompetEA}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet52.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetEBc}{\tmpcompetEB}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet53.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetECc}{\tmpcompetEC}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet54.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetEDc}{\tmpcompetED}}\\%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Communiquer.~\\}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet61.~}}{}\tmpcompetFA}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet62.~}}{}\tmpcompetFB}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet63.~}}{}\tmpcompetFC}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet64.~}}{}\tmpcompetFD}%
+		}%
+	}%
+}
+
+%les versions individuelles lycée pro
+%S’approprier
+\def\tmpcompetproAA{Rechercher, extraire et organiser l’information.}
+\def\tmpcompetproAB{Traduire des informations, des codages.}
+%Analyser/Raisonner
+\def\tmpcompetproBA{Émettre des conjectures, formuler des hypothèses.}
+\def\tmpcompetproBB{Proposer une méthode de résolution.}
+\def\tmpcompetproBC{Choisir un modèle ou des lois pertinentes.}
+\def\tmpcompetproBD{Élaborer un algorithme.}
+\def\tmpcompetproBE{Choisir, élaborer un protocole.}
+\def\tmpcompetproBF{Évaluer des ordres de grandeur.}
+%Réaliser
+\def\tmpcompetproCA{Mettre en \oe{}uvre les étapes d’une démarche.}
+\def\tmpcompetproCB{Utiliser un modèle.}
+\def\tmpcompetproCC{Représenter (tableau, graphique, \ldots), changer de registre.}
+\def\tmpcompetproCD{Calculer (calcul littéral, calcul algébrique, calcul numérique exact ou approché, instrumenté ou à la main).}
+\def\tmpcompetproCDc{Calculer (calcul littéral, calcul algébrique, [\ldots]).}
+\def\tmpcompetproCE{Mettre en \oe{}uvre des algorithmes.}
+\def\tmpcompetproCF{Expérimenter – en particulier à l’aide d’outils numériques (logiciels ou des dispositifs d’acquisition de données\ldots).}
+\def\tmpcompetproCFc{Expérimenter – en particulier à l’aide d’outils numériques [\ldots].}
+\def\tmpcompetproCG{Faire une simulation.}
+\def\tmpcompetproCH{Effectuer des procédures courantes (représentations, collectes de données, utilisation du matériel, etc).}
+\def\tmpcompetproCHc{Effectuer des procédures courantes (représentations, [\ldots]).}
+\def\tmpcompetproCI{Mettre en \oe{}uvre un protocole expérimental en respectant les règles de sécurité à partir d’un schéma ou d’un descriptif.}
+\def\tmpcompetproCIc{Mettre en \oe{}uvre un protocole expérimental en respectant les règles de sécurité [\ldots].}
+\def\tmpcompetproCJ{Organiser son poste de travail.}
+%Valider
+\def\tmpcompetproDA{Exploiter et interpréter les résultats obtenus ou les observations effectuées afin de répondre à une problématique.}
+\def\tmpcompetproDAc{Exploiter et interpréter les résultats obtenus ou les observations effectuées [\ldots].}
+\def\tmpcompetproDB{Valider ou invalider un modèle, une hypothèse en argumentant.}
+\def\tmpcompetproDC{Contrôler la vraisemblance d’une conjecture.}
+\def\tmpcompetproDD{Critiquer un résultat (signe, ordre de grandeur, identification des sources d’erreur), argumenter.}
+\def\tmpcompetproDDc{Critiquer un résultat [\ldots], argumenter.}
+\def\tmpcompetproDE{Conduire un raisonnement logique et suivre des règles établies pour parvenir à une conclusion (démontrer, prouver).}
+\def\tmpcompetproDEc{Conduire un raisonnement logique et suivre des règles établies [\ldots].}
+%Communiquer
+\def\tmpcompetproEA{Rendre compte d’un résultat en utilisant un vocabulaire adapté et choisir des modes de représentation appropriés.}
+\def\tmpcompetproEAc{Rendre compte d’un résultat en utilisant un vocabulaire adapté [\ldots].}
+\def\tmpcompetproEB{Expliquer une démarche.}
+
+%commande principale lycée
+\NewDocumentCommand\CompMathsLycPro{ s O{} m }{%
+	\restoreKV[competencesmaths]%
+	\setKV[competencesmaths]{#2}%
+	\IfBooleanTF{#1}{}{\noindent}%
+	\IfSubStr{#3}{/}%
+		{%
+			\StrCut{#3}{/}{\tmpCategCompet}{\tmpItemCompet}%
+		}%
+		{%
+			\xdef\tmpCategCompet{#3}%
+		}%
+	\IfStrEqCase{\tmpCategCompet}{%
+		{AP}{%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{S'approprier.~}}{}%
+			\IfStrEqCase{\tmpItemCompet}{%
+				{Rechercher}{\tmpcompetproAA}%
+				{Traduire}{\tmpcompetproAB}%
+				{R}{\tmpcompetproAA}%
+				{T}{\tmpcompetproAB}%
+				{Re}{\tmpcompetproAA}%
+				{Tr}{\tmpcompetproAB}%
+				{Tout}{%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetproAA}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetproAB}%
+				}%
+			}%
+		}%
+		{AR}{%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Analyser/Raisonner.~}}{}%
+			\IfStrEqCase{\tmpItemCompet}{%
+				{Emettre}{\tmpcompetproBA}%
+				{Proposer}{\tmpcompetproBB}%
+				{Modele}{\tmpcompetproBC}%
+				{Algorithme}{\tmpcompetproBD}%
+				{Choisir}{\tmpcompetproBE}%
+				{Grandeur}{\tmpcompetproBF}%
+				{E}{\tmpcompetproBA}%
+				{P}{\tmpcompetproBB}%
+				{M}{\tmpcompetproBC}%
+				{A}{\tmpcompetproBD}%
+				{C}{\tmpcompetproBE}%
+				{G}{\tmpcompetproBF}%
+				{Em}{\tmpcompetproBA}%
+				{Pr}{\tmpcompetproBB}%
+				{Mo}{\tmpcompetproBC}%
+				{Al}{\tmpcompetproBD}%
+				{Ch}{\tmpcompetproBE}%
+				{Gr}{\tmpcompetproBF}%
+				{Tout}{%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetproBA}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetproBB}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetproBC}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetproBD}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetproBE}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetproBF}%
+				}%
+			}%
+		}%
+		{RE}{%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Réaliser.~}}{}%
+			\IfStrEqCase{\tmpItemCompet}{%
+				{Etapes}{\tmpcompetproCA}%
+				{Modele}{\tmpcompetproCB}%
+				{Representer}{\tmpcompetproCC}%
+				{Calculer}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCDc}{\tmpcompetproCD}}%
+				{Algorithmes}{\tmpcompetproCE}%
+				{Experimenter}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCFc}{\tmpcompetproCF}}%
+				{Simulation}{\tmpcompetproCG}%
+				{Effectuer}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCHc}{\tmpcompetproCH}}%
+				{Protocole}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCIc}{\tmpcompetproCI}}%
+				{Organiser}{\tmpcompetproCJ}%
+				{E}{\tmpcompetproCA}%
+				{M}{\tmpcompetproCB}%
+				{R}{\tmpcompetproCC}%
+				{C}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCDc}{\tmpcompetproCD}}%
+				{A}{\tmpcompetproCE}%
+				{Ex}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCFc}{\tmpcompetproCF}}%
+				{S}{\tmpcompetproCG}%
+				{Ef}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCHc}{\tmpcompetproCH}}%
+				{P}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCIc}{\tmpcompetproCI}}%
+				{O}{\tmpcompetproCJ}%
+				{Et}{\tmpcompetproCA}%
+				{Mo}{\tmpcompetproCB}%
+				{Re}{\tmpcompetproCC}%
+				{Ca}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCDc}{\tmpcompetproCD}}%
+				{Al}{\tmpcompetproCE}%
+				{Si}{\tmpcompetproCG}%
+				{Pr}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCIc}{\tmpcompetproCI}}%
+				{Or}{\tmpcompetproCJ}%
+				{Tout}{%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetproCA}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetproCB}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetproCC}%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCDc}{\tmpcompetproCD}}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetproCE}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCFc}{\tmpcompetproCF}}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetproCG}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCHc}{\tmpcompetproCH}}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCIc}{\tmpcompetproCI}}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetproCJ}%
+				}%
+			}%
+		}%
+		{VA}{%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Valider.~}}{}%
+			\IfStrEqCase{\tmpItemCompet}{%
+				{Exploiter}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproDAc}{\tmpcompetproDA}}%
+				{Valider}{\tmpcompetproDB}%
+				{Controler}{\tmpcompetproDC}%
+				{Critiquer}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproDDc}{\tmpcompetproDD}}%
+				{Raisonnement}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproDEc}{\tmpcompetproDE}}%
+				{Ex}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproDAc}{\tmpcompetproDA}}%
+				{Va}{\tmpcompetproDB}%
+				{Co}{\tmpcompetproDC}%
+				{Cr}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproDDc}{\tmpcompetproDD}}%
+				{Ra}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproDEc}{\tmpcompetproDE}}%
+				{E}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproDAc}{\tmpcompetproDA}}%
+				{V}{\tmpcompetproDB}%
+				{R}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproDEc}{\tmpcompetproDE}}%
+				{Tout}{%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetproDAc}{\tmpcompetproDA}}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetproDB}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetproDC}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetproDDc}{\tmpcompetproDD}}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetproDEc}{\tmpcompetproDE}}%
+				}%
+			}%
+		}%
+		{CO}{%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Communiquer.~}}{}%
+			\IfStrEqCase{\tmpItemCompet}{%
+				{Rendre}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproEAc}{\tmpcompetproEA}}%
+				{Expliquer}{\tmpcompetproEB}%
+				{R}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproEAc}{\tmpcompetproEA}}%
+				{E}{\tmpcompetproEB}%
+				{Re}{\ifboolKV[competencesmaths]{Court}{\tmpcompetproEAc}{\tmpcompetproEA}}%
+				{Ex}{\tmpcompetproEB}%
+				{Tout}{%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\ifboolKV[competencesmaths]{Court}{\tmpcompetproEAc}{\tmpcompetproEA}}\\%
+					\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}%
+						{\tmpcompetproEB}%
+				}%
+			}%
+		}%
+	}%
+	\IfStrEqCase{\tmpCategCompet}{%
+		{LYC11}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{S’approprier.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproAA}}%
+		{LYC12}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{S’approprier.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproAB}}%
+		{LYC1}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{S’approprier.~}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet1.~}}{}\tmpcompetproAA}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet2.~}}{}\tmpcompetproAB}%
+		}%fin catégorie 1
+		{LYC21}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Analyser/Raisonner.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproBA}}%
+		{LYC22}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Analyser/Raisonner.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproBB}}%
+		{LYC23}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Analyser/Raisonner.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproBC}}%
+		{LYC24}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Analyser/Raisonner.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproBD}}%
+		{LYC25}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Analyser/Raisonner.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproBE}}%
+		{LYC26}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Analyser/Raisonner.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproBF}}%
+		{LYC2}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Analyser/Raisonner.~}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet1.~}}{}\tmpcompetproBA}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet2.~}}{}\tmpcompetproBB}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet3.~}}{}\tmpcompetproBC}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet4.~}}{}\tmpcompetproBD}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet5.~}}{}\tmpcompetproBE}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet6.~}}{}\tmpcompetproBF}%
+		}%fin catégorie 2
+		{LYC31}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Réaliser.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproCA}}%
+		{LYC32}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Réaliser.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproCB}}%
+		{LYC33}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Réaliser.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproCC}}%
+		{LYC34}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Réaliser.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCDc}{\tmpcompetproCD}}}%
+		{LYC35}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Réaliser.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproCE}}%
+		{LYC36}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Réaliser.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCFc}{\tmpcompetproCF}}}%
+		{LYC37}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Réaliser.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproCG}}%
+		{LYC38}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Réaliser.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCHc}{\tmpcompetproCH}}}%
+		{LYC39}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Réaliser.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetproCIc}{\tmpcompetproCI}}}%
+		{LYC3A}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Réaliser.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproCJ}}%
+		{LYC3}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Réaliser.~}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet1.~}}{}\tmpcompetproCA}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet2.~}}{}\tmpcompetproCB}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet3.~}}{}\tmpcompetproCC}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet4.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetproCDc}{\tmpcompetproCD}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet5.~}}{}\tmpcompetproCE}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet6.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetproCFc}{\tmpcompetproCF}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet7.~}}{}\tmpcompetproCG}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet8.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetproCHc}{\tmpcompetproCH}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet9.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetproCIc}{\tmpcompetproCI}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet{}A.~}}{}\tmpcompetproCJ}%
+		}%fin catégorie 3
+		{LYC41}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Valider.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetproDAc}{\tmpcompetproDA}}}%
+		{LYC42}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Valider.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproDB}}%
+		{LYC43}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Valider.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproDC}}%
+		{LYC44}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Valider.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproDD}}%
+		{LYC45}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Valider.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetproDEc}{\tmpcompetproDE}}}%
+		{LYC4}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Valider.~}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet1.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetproDAc}{\tmpcompetproDA}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet2.~}}{}\tmpcompetproDB}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet3.~}}{}\tmpcompetproDC}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet4.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetproDDc}{\tmpcompetproDD}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet5.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetproDEc}{\tmpcompetproDE}}%
+		}%fin catégorie 4
+		{LYC51}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Communiquer.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\ifboolKV[competencesmaths]{Court}{\tmpcompetproEAc}{\tmpcompetproEA}}}%
+		{LYC52}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Communiquer.~}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet.~}}{}%
+			{\tmpcompetproEB}}%
+		{LYC5}{\ifboolKV[competencesmaths]{AffCateg}{\textbf{Communiquer.~}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet1.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetproEAc}{\tmpcompetproEA}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet2.~}}{}\tmpcompetproEB}}%
+		{LYC}{%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{S’approprier.~\\}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet11.~}}{}\tmpcompetproAA}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet12.~}}{}\tmpcompetproAB}\\%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Analyser/Raisonner.~\\}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet21.~}}{}\tmpcompetproBA}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet22.~}}{}\tmpcompetproBB}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet23.~}}{}\tmpcompetproBC}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet24.~}}{}\tmpcompetproBD}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet25.~}}{}\tmpcompetproBE}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet26.~}}{}\tmpcompetproBF}\\%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Réaliser.~\\}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet31.~}}{}\tmpcompetproCA}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet32.~}}{}\tmpcompetproCB}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet33.~}}{}\tmpcompetproCC}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet34.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetproCDc}{\tmpcompetproCD}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet35.~}}{}\tmpcompetproCE}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet36.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetproCFc}{\tmpcompetproCF}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet37.~}}{}\tmpcompetproCG}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet38.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetproCHc}{\tmpcompetproCH}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet39.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetproCIc}{\tmpcompetproCI}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet3A.~}}{}\tmpcompetproCJ}\\%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Valider.~\\}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet41.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetproDAc}{\tmpcompetproDA}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet42.~}}{}\tmpcompetproDB}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet43.~}}{}\tmpcompetproDC}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet44.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetproDDc}{\tmpcompetproDD}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet45.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetproDEc}{\tmpcompetproDE}}\\%
+			\ifboolKV[competencesmaths]{AffCateg}{\textbf{Communiquer.~\\}}{}%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet61.~}}{}\ifboolKV[competencesmaths]{Court}{\tmpcompetproEAc}{\tmpcompetproEA}}\\%
+			{\ifboolKV[competencesmaths]{Puce}{\useKV[competencesmaths]{TypePuce}}{}\ifboolKV[competencesmaths]{AffNumero}{\textbf{\tmpCategCompet62.~}}{}\tmpcompetproEB}%
+		}%
+	}%
+}
+
+\endinput

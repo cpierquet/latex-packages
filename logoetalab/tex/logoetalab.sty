@@ -1,0 +1,220 @@
+% Author        : C. Pierquet
+% licence       : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+% licence svg   : CC BY 2.0 FR
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{logoetalab}[2023/11/19 0.1.1 Logo vectoriel ou tikz de la licence 'Licence Ouverte Etalab 2.0']
+
+%====HISTORIQUE
+% v 0.1.1	Ajout d'une version full tikz
+% v 0.1.0	Version initiale
+
+%====BASE
+\RequirePackage{graphicx}
+\RequirePackage{tikz}
+\usetikzlibrary{calc}
+\RequirePackage{xstring}
+\RequirePackage{calc}
+\RequirePackage{simplekv}
+
+%====DIMENSIONS
+\newlength{\tmp@logo@hauteur@totale}
+\newlength{\tmp@logo@profondeur}
+
+%====CLÉS
+\defKV[iconetalab]{%
+	Couleur=\def\tmplogocouleur{#1},%
+	TexteLegende=\def\tmplogotextleg{#1}
+}
+
+\setKVdefault[iconetalab]{%
+	Couleur=Noir,%
+	Legende=false,%
+	TexteLegende={Publié sous licence Etalab 2.0}
+}
+
+%====COMMANDES
+\NewDocumentCommand\loetalab{ s O{} }{%
+	\useKVdefault[iconetalab]%
+	\setKV[iconetalab]{#2}%
+	\settototalheight{\tmp@logo@hauteur@totale}{\hbox{qB}}%
+	\settodepth{\tmp@logo@profondeur}{\hbox{q}}%
+	\IfBooleanTF{#1}%
+		{%
+			\IfFileExists{LogoLicenceOuverte-\tmplogocouleur-H.pdf}%
+				{%
+					\raisebox{-\tmp@logo@profondeur+0.05\tmp@logo@hauteur@totale}{\includegraphics[height=0.9\tmp@logo@hauteur@totale]{LogoLicenceOuverte-\tmplogocouleur-H.pdf}}%
+				}%
+				{%
+					\raisebox{-\tmp@logo@profondeur+0.05\tmp@logo@hauteur@totale}{\includegraphics[height=0.9\tmp@logo@hauteur@totale]{LogoLicenceOuverte-Noir-H.pdf}}%
+				}%
+		}%
+		{%
+			\IfFileExists{LogoLicenceOuverte-\tmplogocouleur-V.pdf}%
+				{%
+					\raisebox{-\tmp@logo@profondeur+0.05\tmp@logo@hauteur@totale}{\includegraphics[height=0.9\tmp@logo@hauteur@totale]{LogoLicenceOuverte-\tmplogocouleur-V.pdf}}%
+				}%
+				{%
+					\raisebox{-\tmp@logo@profondeur+0.05\tmp@logo@hauteur@totale}{\includegraphics[height=0.9\tmp@logo@hauteur@totale]{LogoLicenceOuverte-Noir-V.pdf}}%
+				}%
+		}%
+	\ifboolKV[iconetalab]{Legende}{~\tmplogotextleg}{}%
+}
+
+\NewDocumentCommand\affloetalab{ s O{} }{%
+	\useKVdefault[iconetalab]%
+	\setKV[iconetalab]{#2}%
+	\settototalheight{\tmp@logo@hauteur@totale}{\hbox{B}}%
+	\IfBooleanTF{#1}%
+		{%
+			\IfFileExists{LogoLicenceOuverte-\tmplogocouleur-H.pdf}%
+				{%
+					\raisebox{-0.5\tmp@logo@hauteur@totale}{\includegraphics[height=2\tmp@logo@hauteur@totale]{LogoLicenceOuverte-\tmplogocouleur-H.pdf}}%
+				}%
+				{%
+					\raisebox{-0.5\tmp@logo@hauteur@totale}{\includegraphics[height=2\tmp@logo@hauteur@totale]{LogoLicenceOuverte-Noir-H.pdf}}%
+				}%
+		}%
+		{%
+			\IfFileExists{LogoLicenceOuverte-\tmplogocouleur-V.pdf}%
+				{%
+					\raisebox{-0.5\tmp@logo@hauteur@totale}{\includegraphics[height=2\tmp@logo@hauteur@totale]{LogoLicenceOuverte-\tmplogocouleur-V.pdf}}%
+				}%
+				{%
+					\raisebox{-0.5\tmp@logo@hauteur@totale}{\includegraphics[height=2\tmp@logo@hauteur@totale]{LogoLicenceOuverte-Noir-V.pdf}}%
+				}%
+		}%
+	\ifboolKV[iconetalab]{Legende}{~\tmplogotextleg}{}%
+}
+
+%====TIKZ
+\defKV[logoetalabtikz]{%
+	Hauteur=\def\LogoEtalabTikzHauteur{#1},%
+	Couleur=\def\LogoEtalabTikzCouleur{#1},%
+	DecalageV=\def\LogoEtalabTikzOffset{#1}
+}
+
+\setKVdefault[logoetalabtikz]{%
+	Hauteur=auto,%
+	Couleur=black,%
+	DecalageV=auto
+}
+
+\newlength{\tmplogoprofondeur}
+\newlength{\tmplogohauteurtotale}
+\newlength{\tmplogooffset}
+
+\NewDocumentCommand\loetalabtkz{ s O{} D<>{} }{%
+	\settodepth{\tmplogoprofondeur}{\hbox{q}}%
+	\useKVdefault[logoetalabtikz]%
+	\setKV[logoetalabtikz]{#2}%
+	\IfStrEq{\LogoEtalabTikzHauteur}{auto}%
+		{%
+			\settototalheight{\tmplogohauteurtotale}{\hbox{qB}}%
+			\IfStrEq{\LogoEtalabTikzOffset}{auto}%
+				{%
+					\setlength{\tmplogooffset}{-\tmplogoprofondeur+0.05\tmplogohauteurtotale}%
+				}%
+				{%
+					\setlength{\tmplogooffset}{\LogoEtalabTikzOffset}%
+				}%
+			\def\tmplogoscale{1}%
+		}%
+		{%
+			\setlength{\tmplogohauteurtotale}{\LogoEtalabTikzHauteur}%
+			\IfStrEq{\LogoEtalabTikzOffset}{auto}%
+				{%
+					\setlength{\tmplogooffset}{0pt}%
+				}%
+				{%
+					\setlength{\tmplogooffset}{\LogoEtalabTikzOffset}%
+				}%
+			\def\tmplogoscale{1}%
+		}%
+	\raisebox{\tmplogooffset}{%
+	\IfBooleanTF{#1}%
+		{%
+			\begin{tikzpicture}[scale={0.9*\tmplogoscale},x={\tmplogohauteurtotale},y={\tmplogohauteurtotale},outer sep=0pt,#3]
+				%cadre
+				\draw[draw=none,fill=\LogoEtalabTikzCouleur,rounded corners={1.5*0.125*\tmplogohauteurtotale}] (0,0) rectangle (2,1) ;
+				%cadre haut
+				\draw[draw=none,fill=white,rounded corners={1.5*0.125*0.875*\tmplogohauteurtotale}] ({0.5*0.125},{0.0625}) rectangle++ ({0.875},{0.875}) ;
+				%I gauche
+				\draw[draw=none,fill=\LogoEtalabTikzCouleur] ({0.15},{0.25}) rectangle++ ({0.1},{0.5}) ;
+				%I droit
+				\draw[draw=none,fill=white] ({1.85},{0.25}) rectangle++ ({-0.1},{0.5}) ;
+				%O gauche
+				\draw[draw=none,fill=\LogoEtalabTikzCouleur] ({0.6},{0.5}) circle[radius={0.25}] ;
+				\draw[draw=none,fill=white] ({0.6},{0.5}) circle[radius={0.15}] ;
+				%O droit
+				\draw[draw=none,fill=white] ({1.4},{0.5}) circle[radius={0.25}] ;
+				\draw[draw=none,fill=\LogoEtalabTikzCouleur] ({1.4},{0.5}) circle[radius={0.15}] ;
+			\end{tikzpicture}%
+		}%
+		{%
+			\begin{tikzpicture}[scale={0.5*0.9*\tmplogoscale},x={\tmplogohauteurtotale},y={\tmplogohauteurtotale},#3]
+				%cadre
+				\draw[draw=none,fill=\LogoEtalabTikzCouleur,rounded corners={0.75*0.125*\tmplogohauteurtotale}] (0,0) rectangle (1,2) ;
+				%cadre haut
+				\draw[draw=none,fill=white,rounded corners={0.75*0.125*0.875*\tmplogohauteurtotale}] ({0.5*0.125},{1.0625}) rectangle++ ({0.875},{0.875}) ;
+				%I haut
+				\draw[draw=none,fill=\LogoEtalabTikzCouleur] ({0.15},{1.25}) rectangle++ ({0.1},{0.5}) ;
+				%I bas
+				\draw[draw=none,fill=white] ({0.85},{0.25}) rectangle++({-0.1},{0.5}) ;
+				%O haut
+				\draw[draw=none,fill=\LogoEtalabTikzCouleur] ({0.6},{1.5}) circle[radius={0.25}] ;
+				\draw[draw=none,fill=white] ({0.6},{1.5}) circle[radius={0.15}] ;
+				%O bas
+				\draw[draw=none,fill=white] ({0.4},{0.5}) circle[radius={0.25}] ;
+				\draw[draw=none,fill=\LogoEtalabTikzCouleur] ({0.4},{0.5}) circle[radius={0.15}] ;
+			\end{tikzpicture}%
+		}%
+	}%
+}
+
+\NewDocumentCommand\affloetalabtkz{ s O{} D<>{} }{%
+	\settototalheight{\tmplogohauteurtotale}{\hbox{B}}%
+	\useKVdefault[logoetalabtikz]%
+	\setKV[logoetalabtikz]{#2}%
+	\raisebox{-0.5\tmplogohauteurtotale}{%
+	\IfBooleanTF{#1}%H, sinon V
+		{%
+			\begin{tikzpicture}[x={2*\tmplogohauteurtotale},y={2*\tmplogohauteurtotale},outer sep=0pt,#3]
+				%cadre
+				\draw[draw=none,fill=\LogoEtalabTikzCouleur,rounded corners={2.22*0.125*\tmplogohauteurtotale}] (0,0) rectangle (2,1) ;
+				%cadre haut
+				\draw[draw=none,fill=white,rounded corners={2.22*0.125*0.875*\tmplogohauteurtotale}] ({0.5*0.125},{0.0625}) rectangle++ ({0.875},{0.875}) ;
+				%I gauche
+				\draw[draw=none,fill=\LogoEtalabTikzCouleur] ({0.15},{0.25}) rectangle++ ({0.1},{0.5}) ;
+				%I droit
+				\draw[draw=none,fill=white] ({1.85},{0.25}) rectangle++ ({-0.1},{0.5}) ;
+				%O gauche
+				\draw[draw=none,fill=\LogoEtalabTikzCouleur] ({0.6},{0.5}) circle[radius={0.25}] ;
+				\draw[draw=none,fill=white] ({0.6},{0.5}) circle[radius={0.15}] ;
+				%O droit
+				\draw[draw=none,fill=white] ({1.4},{0.5}) circle[radius={0.25}] ;
+				\draw[draw=none,fill=\LogoEtalabTikzCouleur] ({1.4},{0.5}) circle[radius={0.15}] ;
+			\end{tikzpicture}%
+		}%
+		{%
+			\begin{tikzpicture}[x={\tmplogohauteurtotale},y={\tmplogohauteurtotale},#3]
+				%cadre
+				\draw[draw=none,fill=\LogoEtalabTikzCouleur,rounded corners={1.11*0.125*\tmplogohauteurtotale}] (0,0) rectangle (1,2) ;
+				%cadre haut
+				\draw[draw=none,fill=white,rounded corners={1.11*0.125*0.875*\tmplogohauteurtotale}] ({0.5*0.125},{1.0625}) rectangle++ ({0.875},{0.875}) ;
+				%I haut
+				\draw[draw=none,fill=\LogoEtalabTikzCouleur] ({0.15},{1.25}) rectangle++ ({0.1},{0.5}) ;
+				%I bas
+				\draw[draw=none,fill=white] ({0.85},{0.25}) rectangle++({-0.1},{0.5}) ;
+				%O haut
+				\draw[draw=none,fill=\LogoEtalabTikzCouleur] ({0.6},{1.5}) circle[radius={0.25}] ;
+				\draw[draw=none,fill=white] ({0.6},{1.5}) circle[radius={0.15}] ;
+				%O bas
+				\draw[draw=none,fill=white] ({0.4},{0.5}) circle[radius={0.25}] ;
+				\draw[draw=none,fill=\LogoEtalabTikzCouleur] ({0.4},{0.5}) circle[radius={0.15}] ;
+			\end{tikzpicture}%
+		}%
+	}%
+}
+
+\endinput
