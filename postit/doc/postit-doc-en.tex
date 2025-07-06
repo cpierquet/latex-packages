@@ -1,0 +1,678 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[english,a4paper,11pt]{article}
+\usepackage[margin=2cm,includefoot]{geometry}
+\def\TPversion{0.1.4}
+\def\TPdate{25/02/2025}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{postit}
+\usepackage{awesomebox}
+\usepackage{fontawesome5}
+\usepackage{footnote}
+\makesavenoteenv{tabular}
+\usepackage{enumitem}
+\usepackage{tabularray}
+\usepackage{wrapstuff}
+\usepackage{lipsum}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [postit]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+
+%\usepackage{hvlogos}
+\usepackage{hologo}
+\usepackage{xspace}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+\newcommand\TableauDocumentation{%
+	\begin{tblr}{width=\linewidth,colspec={X[c]X[c]X[c]X[c]X[c]X[c]},cells={font=\sffamily}}
+		{\LARGE \LaTeX} & & & & &\\
+		& {\LARGE \hologo{pdfLaTeX}} & & & & \\
+		& & {\LARGE \hologo{LuaLaTeX}} & & & \\
+		& & & {\LARGE \TikZ} & & \\
+		& & & & {\LARGE \TeXLive} & \\
+		& & & & & {\LARGE \hologo{MiKTeX}} \\
+	\end{tblr}
+}
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\setlength{\parindent}{0pt}
+\definecolor{LightGray}{gray}{0.9}
+
+\usepackage{babel}
+%\AddThinSpaceBeforeFootnotes
+%\FrenchFootnotes
+
+\usepackage{listings}
+
+\usepackage{newverbs}
+\newverbcommand{\motcletex}{\color{cyan!75!black}}{}
+\newverbcommand{\packagetex}{\color{violet!75!black}}{}
+
+\tcbuselibrary{listingsutf8}
+\newtcblisting{DemoCode}[1][]{%
+	enhanced,width=0.95\linewidth,center,%
+	bicolor,size=title,%
+	colback=cyan!2!white,%
+	colbacklower=cyan!1!white,%
+	colframe=cyan!75!black,%
+	listing options={%
+		breaklines=true,%
+		breakatwhitespace=true,%
+		style=tcblatex,basicstyle=\small\ttfamily,%
+		tabsize=4,%
+		commentstyle={\itshape\color{gray}},
+		keywordstyle={\color{blue}},%
+		classoffset=0,%
+		keywords={},%
+		alsoletter={-},%
+		keywordstyle={\color{blue}},%
+		classoffset=1,%
+		alsoletter={-},%
+		morekeywords={center,right,justify,left,\lipsum},%
+		keywordstyle={\color{violet}},%
+		classoffset=2,%
+		alsoletter={-},%
+		morekeywords={PostItNote,\MiniPostIt},%
+		keywordstyle={\color{green!50!black}},%
+		classoffset=3,%
+		morekeywords={Color,PinColor,Pin,Width,Hieght,Rotate,Shadow,Corner,PinShift,AlignH,AlignV,AlignPostIt,Border,ExtraRightMargin,Render,Title,FontTitle,StorePostIt},%
+		keywordstyle={\color{orange}}
+	},%
+	#1
+}
+
+\tcbset{vignettes/.style={%
+	nobeforeafter,box align=base,boxsep=0pt,enhanced,sharp corners=all,rounded corners=southeast,%
+	boxrule=0.75pt,left=7pt,right=1pt,top=0pt,bottom=0.25pt,%
+	}
+}
+
+\tcbset{vignetteMaJ/.style={%
+	fontupper={\vphantom{pf}\footnotesize\ttfamily},
+	vignettes,colframe=purple!50!black,coltitle=white,colback=purple!10,%
+	overlay={\begin{tcbclipinterior}%
+			\fill[fill=purple!75]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{black}{\scalebox{0.66}[0.66]{\textbf{MàJ}}}}} ($(interior.north west)+(5pt,0pt)$);%
+	\end{tcbclipinterior}}
+	}
+}
+
+\newcommand\Cle[1]{{\small\sffamily\textlangle \textcolor{orange}{#1}\textrangle}}
+\newcommand\cmaj[1]{\tcbox[vignetteMaJ]{#1}\xspace}
+
+\begin{document}
+
+\setlength{\aweboxleftmargin}{0.07\linewidth}
+\setlength{\aweboxcontentwidth}{0.93\linewidth}
+\setlength{\aweboxvskip}{8pt}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\vspace{2cm}
+
+\begin{center}
+	\begin{minipage}{0.75\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{postit} [en]}\\
+				\\
+				{\LARGE Small Post-It notes,} \\
+				\\
+				{\LARGE with \textsf{tcolorbox} or \textsf{Ti\textit{k}Z}.} \\
+			\end{tabular}
+			
+			\bigskip
+			
+			{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
+\end{tabular}
+\end{center}
+
+\vspace{0.25cm}
+
+{$\blacktriangleright$~~Display and customize Post-It or \textit{mini-}Post-It.}
+
+\vspace{0.25cm}
+
+{$\blacktriangleright$~~Custom width, height, rotation, decoration\ldots}
+
+\vspace{1cm}
+
+\begin{PostItNote}[StorePostIt=PI1]<center>
+	This is a small Post-It ! For example \[(a+b)^2=a^2+2ab+b^2.\]
+\end{PostItNote}
+
+\begin{PostItNote}[Render=tikz,Width=8cm,Color=orange,Pin=Paperclip,PinColor=blue,Rotate=-5,AlignPostIt=center,Title={- With a title -},FontTitle={\color{blue!50!black}\bfseries\small\sffamily},StorePostIt=PI2]
+\lipsum[1][1-4]
+\end{PostItNote}
+\hfill
+\begin{PostItNote}[Height=6cm,AlignV=center,Color=pink,Pin=Scotch,Rotate=15,Corner,AlignPostIt=center,StorePostIt=PI3]
+\lipsum[1][1-4]
+\end{PostItNote}
+
+\begin{tikzpicture}[remember picture,overlay]
+	\draw[very thick,->,>=latex] (PI1-S)to[out=-90,in=90](PI2-N) ;
+	\draw[very thick,lime,densely dashed,->,>=latex] (PI2-E)to[out=0,in=180](PI3-S-W) ;
+\end{tikzpicture}
+
+\vspace{0.5cm}
+
+%\hfill{}\textit{Merci à Denis Bitouzé et à Gilles Le Bourhis pour leurs retours et idées !}
+
+\smallskip
+
+\vfill
+
+\hrule
+
+\medskip
+
+\TableauDocumentation
+
+\medskip
+
+\hrule
+
+\medskip
+
+\newpage
+
+\phantomsection
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vfill
+
+\section{History}
+
+\verb|v0.1.4|~:~~~~Bugfix with horizontal alignment.
+
+\verb|v0.1.3|~:~~~~Nodes for anchor points.
+
+\verb|v0.1.2|~:~~~~English version.
+
+\verb|v0.1.1|~:~~~~\motcletex!\vphantom! for \textit{mini-}Post-It + Bugfixes + \TikZ{} rendering + optional title .
+
+\verb|v0.1.0|~:~~~~Initial version.
+
+\newpage
+
+\section{The package postit}
+
+\subsection{Introduction}
+
+\begin{noteblock}
+The package proposes small Post-It notes, in a \textsf{tex} doc, created with \packagetex!tcolorbox! or \packagetex!tikz!, with option(s) in order to :
+
+\begin{itemize}
+	\item change dimensions or color ;
+	\item use pin deocration like Paperclip, Pushpin or Scotch ;
+	\item customize border and/or corner ;
+	\item use anchor points for each Post-It.
+\end{itemize}
+
+The package propose a command to display \textit{mini-}Post-It (created with \motcletex!tcbox!), with color and shadow customization.
+\end{noteblock}
+
+\subsection{Loading of the package, and option}
+
+\begin{importantblock}
+The package Scrabble loads within the preamble.
+
+There's no option, and \packagetex!xcolor! isn't loaded.
+\end{importantblock}
+
+\begin{DemoCode}[listing only]
+\documentclass{article}
+\usepackage{postit}
+
+\end{DemoCode}
+
+\begin{noteblock}
+\packagetex!postit! loads the following packages and libraries :
+
+\begin{itemize}
+	\item \packagetex!tcolorbox! with library \packagetex!tcbox.skins! ;
+	\item \packagetex!tikz! libraries :
+	\begin{itemize}
+		\item \packagetex!tikz.calc! ;
+		\item \packagetex!tikz.babel! ;
+		\item \packagetex!tikz.decorations! ;
+		\item \packagetex!tikz.decorations.pathmorphing! ;
+	\end{itemize}
+	\item \packagetex!settobox!, \packagetex!xstring!, \packagetex!varwidth! and \packagetex!simplekv!.
+\end{itemize}
+
+It’s mostly compatible with \textsf{latex}, \textsf{pdflatex}, \textsf{lualatex} or \textsf{xelatex} compilation !
+\end{noteblock}
+
+\subsection{Compatibility}
+
+\begin{cautionblock}
+If an other package loads \packagetex!tcolorbox!, with \Cle{[most]} option, it's better to load \packagetex!postit! after, to avoid \motcletex!option clash error...!.
+\end{cautionblock}
+
+\begin{DemoCode}[listing only]
+\documentclass{article}
+\usepackage[<librairies>]{tcolorbox}
+\usepackage{postit}
+...
+
+\end{DemoCode}
+
+\vfill~
+
+\pagebreak
+
+\section{Post-It Environment}
+
+\subsection{Environment}
+
+\begin{cautionblock}
+The environment to display a Post-It note is \packagetex!PostItNote!.
+
+It works with keys, between \texttt{[...]} and, with \texttt{<...>}, it's possible to parse options to  the \motcletex!tcbox! (not necessary with \motcletex!tikz!) !
+\end{cautionblock}
+
+\begin{DemoCode}[listing only]
+\begin{PostIt}[keys]<options tcbox>
+...
+...
+\end{PostIt}
+\end{DemoCode}
+
+\begin{noteblock}
+As mentioned in the introduction, the Post-It note is create with a \motcletex!tcbox! or a  \motcletex!tikzpicture!.
+
+Most of the \motcletex!tcbox!/\motcletex!tikzpicture! parameters are fixed by the code, but some of them are configurable !
+\end{noteblock}
+
+\begin{DemoCode}[]
+%default rendering (tcbox), with lipsum paragraph
+\begin{PostItNote}
+\lipsum[1][1-2]
+\end{PostItNote}
+\end{DemoCode}
+
+\begin{DemoCode}[]
+%tikz rendering, with lipsum paragraph
+\begin{PostItNote}[Render=tikz]
+\lipsum[1][1-2]
+\end{PostItNote}
+%tikzv2 rendering, with lipsum paragraph
+\begin{PostItNote}[Render=tikzv2]
+\lipsum[1][1-2]
+\end{PostItNote}
+\end{DemoCode}
+
+\begin{tipblock}
+The colors must be used as \textit{single}, without \textit{mixes} (with \motcletex|CouleurA!...!CouleurB|) proposed by \packagetex!xcolor!. 
+
+
+However, every predefined color can be used within the Post-It.
+\end{tipblock}
+
+\begin{tipblock}
+The Post-It can be used with a \motcletex!minipage! or a \motcletex!wrapstuff! if needed.
+
+For horizontal alignment, \motcletex!\hfill! or \motcletex!flush...! can be used.
+\end{tipblock}
+
+\begin{warningblock}
+With a overlapping pin and the \textsf{tcbox} rendering, a vertical spacing before can be necessary, like \motcletex!\vspace! or \motcletex!\bigskip!\ldots
+\end{warningblock}
+
+\subsection{Keys and options}
+
+\begin{tipblock}
+The first argument, mandatory and between \texttt{[...]}, proposes the following \Cle{keys} :
+
+\begin{itemize}
+	\item \cmaj{0.1.3} \Cle{StorePostIt} : name (for further \TikZ{} code) of the Post-It ; \hfill{}default : \Cle{PostIt}
+	\item \Cle{Width} : width (in cm) of the Post-It  ; \hfill{}default : \Cle{6cm}
+	\item \Cle{Color} : color of the Post-It (border is a bit darker) ; \hfill{}default : \Cle{yellow}
+	\item \Cle{Height} : height (in cm, if needed) of the Post-It (\textit{automatic} by default) ;
+	
+	\hfill{}default : \Cle{auto}
+	\item \cmaj{0.1.1} \Cle{Render} : engine, within \Cle{tcbox / tikz / tikv2} ; \hfill{}default : \Cle{tcbox}
+	\item \Cle{Rotation} : rotation of the Post-It ; \hfill{}default : \Cle{0}
+	\item \Cle{Shadow} : boolean for shadow ; \hfill{}default : \Cle{true}
+	\item \Cle{Border} : boolean for a thin border ; \hfill{}default : \Cle{true}
+	\item \Cle{Corner} : boolean to the corner decoration (\motcletex!tcbox!) ; \hfill{}default : \Cle{false}
+	\item \Cle{Pin} : decoration, within \Cle{Paperclip / Pushpin / None / Scotch} ;
+	
+	\hfill{}default : \Cle{Pushpin}
+	\item \Cle{PinColor} : color of the pin ; \hfill{}default : \Cle{red}
+	\item \Cle{PinsShift} : horizontal shift (without unity, but in cm) of the original position of the pin \hfill{}default : \Cle{0}
+	\item \cmaj{0.1.1} \Cle{Title} : add a title (1st line and/or under the pin) ; \hfill{}default : \Cle{empty}
+	\item \cmaj{0.1.1} \Cle{Fonttitle} : font of the title ; \hfill{}default : \Cle{\textbackslash normalfont\textbackslash normalfont}
+	\item \cmaj{0.1.1} \Cle{ExtraRightMargin} : add (with \packagetex!tikz! rendering, and in cm) à right margin ;
+	
+	\hfill{}default : \Cle{0cm}
+	\item \Cle{AlignV} : vertical alignment in the Post-It (within \Cle{top/center/bottom}) ;
+	
+	\hfill{}default : \Cle{top}
+	\item \Cle{AlignH} : horizontal alignment in the Post-It (within \Cle{left/center/right/justify}) ;
+	
+	\hfill{}default : \Cle{justify}
+	\item \Cle{AlignPostIt} : vertical alignemnt of the Post-It (within \Cle{top/center/bottom}).
+	
+	\hfill{}default : \Cle{bottom}
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{tipblock}
+The second argument, optional and between \texttt{<...>} is used to parse options to the \motcletex!tcolorbox!.
+
+They can be used to modify locally options not present in the keys.
+\end{tipblock}
+
+\subsection{Anchor points}
+
+\begin{tipblock}
+Some anchor points are created with the code :
+
+\begin{itemize}
+	\item \motcletex!(<name>-N)!, \motcletex!(<name>-E)!, \motcletex!(<name>-S)! et \motcletex!(<name>-W)! for North/East/South/West ;
+	\item \motcletex!(<name>-N-W)!, \motcletex!(<name>-N-E)!, \motcletex!(<name>-S-E)! and \motcletex!(<name>-S-W)! for North East/North West/\ldots.
+\end{itemize}
+\end{tipblock}
+
+\begin{DemoCode}[]
+\begin{center}
+\begin{PostItNote}[Rotate=10,Pin=None,Render=tikz,StorePostIt=MySmallNote1]
+	\lipsum[1][1-2]
+\end{PostItNote}
+\end{center}
+\end{DemoCode}
+
+\begin{tikzpicture}[remember picture,overlay]
+	\foreach \dir/\pos in {N-W/above left,N/above,N-E/above right,E/right, S-E/below right,S/below,S-W/below left,W/left} 
+	{%
+		\draw[draw=blue,fill=red] (MySmallNote1-\dir) circle[radius=2pt] node[text=gray,\pos,font=\scriptsize\ttfamily] {MySmallNote1-\dir};%
+	}
+\end{tikzpicture}
+
+\begin{DemoCode}[]
+\begin{PostItNote}[StorePostIt=NoteY]<center>
+	This is a small Post-It ! For example \[(a+b)^2=a^2+2ab+b^2.\]
+\end{PostItNote}\\
+\begin{PostItNote}[Render=tikz,Width=8cm,Color=blue,Rotate=-5,StorePostIt=NoteZ]
+	\lipsum[1][1-2]
+\end{PostItNote}
+
+\begin{tikzpicture}[remember picture,overlay]
+	\draw[very thick,->,>=latex] (NoteY-S)to[out=-90,in=90](NoteZ-N) ;
+\end{tikzpicture}
+\end{DemoCode}
+
+\subsection{Examples}
+
+\begin{DemoCode}[]
+\begin{PostItNote}%tcbox rendering
+	[Color=cyan,Pin=Paperclip,Width=10cm,Rotate=10]<center,right=1.5cm>
+\lipsum[1][1-3]
+\end{PostItNote}
+\end{DemoCode}
+
+\begin{DemoCode}[]
+\hfill\begin{PostItNote}%tikz rendering
+	[Render=tikz,Color=violet,Width=9cm,Rotate=-10,Pin=Paperclip,
+	PinColor=black,ExtraRightMargin=1cm,Title={Small title},
+	FontTitle={\color{white}\bfseries\small\sffamily}]
+\lipsum[1][1-3]
+\end{PostItNote}\hfill~
+\end{DemoCode}
+
+\begin{DemoCode}[]
+\hfill\begin{PostItNote}%tikzv2 rendering
+	[Render=tikzv2,Color=orange,Width=9cm,rotate=-10,Pin=Scotch, Title={Try},
+	FontTitle={\color{blue!50!black}\bfseries\itshape\small\ttfamily}]
+\lipsum[1][1-3]
+\end{PostItNote}\hfill~
+\end{DemoCode}
+
+\begin{DemoCode}[]
+%usepackage{wrapstuff}
+\begin{wrapstuff}[r,top=1]
+\begin{PostItNote}[Rotate=5,Corner,Color=pink,PinkColor=blue,Border=false]
+\lipsum[1][1-2]
+\end{PostItNote}
+\end{wrapstuff}
+
+\lipsum[1]
+\end{DemoCode}
+
+\begin{DemoCode}[]
+%usepackage{wrapstuff}
+\begin{wrapstuff}[r,top=1]
+\begin{PostItNote}[Rotate=5,Render=tikz,Color=pink, PinkColor=blue,Border=false]
+\lipsum[1][1-2]
+\end{PostItNote}
+\end{wrapstuff}
+
+\lipsum[1]
+\end{DemoCode}
+
+\begin{DemoCode}[]
+%usepackage{wrapstuff}
+\begin{wrapstuff}[r,top=1]
+\begin{PostItNote}[Rotate=5,Render=tikzv2,Pin=Scotch,Color=pink]
+\lipsum[1][1-2]
+\end{PostItNote}
+\end{wrapstuff}
+
+\lipsum[1]
+\end{DemoCode}
+
+\begin{DemoCode}[]
+A small Post-It, and vertically aligned :
+%
+\hfill\begin{PostItNote}[Rotate=-10,Color=orange,Width=5cm,Height=5cm, AlignV=center,Corner,PinColor=yellow, PinShift=-1,AlignPostIt=center]
+
+\textsf{\small\lipsum[1][1-2]}
+\[\mathsf{\displaystyle\sum_{k=1}^{n} k = \dfrac{n(n+1)}{2}}\]
+\end{PostItNote}
+\end{DemoCode}
+
+\pagebreak
+
+\section{Simple inline Post-It Note}
+
+\subsection{Command}
+
+\begin{cautionblock}
+The inline \textit{mini-}Post-It note is \motcletex!MiniPostIt!.
+
+The only optional parameter for the \motcletex!tcbox! Post-It is the color.
+
+\smallskip
+
+Dimensions can't be changed, a \motcletex!\vphantom! is inserted at beginning to prevent different heights.
+\end{cautionblock}
+
+\begin{DemoCode}[listing only]
+\MiniPostIt(*)[color]{text}
+\end{DemoCode}
+
+\subsection{Arguments}
+
+\begin{noteblock}
+The starred version show the shadow of the \textit{mini-}Post-It.
+
+The color (\Cle{yellow}), is the only optional argument, between \texttt{[...]}.
+\end{noteblock}
+
+\subsection{Examples}
+
+\begin{DemoCode}[]
+To solve Diophantine equations, we can use \MiniPostIt*[orange]{Bézout's thoerem}, and \MiniPostIt{Gauss' theorem}, with the \MiniPostIt*[cyan]{reciprocal}.
+
+It's classic and good to know !
+\end{DemoCode}
+
+\pagebreak
+
+\section{Gallery of styles}
+
+\subsection{Render by tcbox}
+
+\begin{DemoCode}[text only]
+\hfill\begin{PostItNote}
+\texttt{Shadow/PushPin/Border}
+\end{PostItNote}
+\begin{PostIt}[Shadow=false]
+\texttt{Pin/Border}
+\end{PostIt}\hfill~
+
+\medskip
+
+\hfill\begin{PostItNote}[Border=false]
+\texttt{Shadow/Pushpin}
+\end{PostItNote}
+\begin{PostItNote}[Border=false,Shadow=false]
+\texttt{Pushpin}
+\end{PostItNote}\hfill~
+
+\medskip
+
+\hfill\begin{PostItNote}[Pin=Paperclip]
+\texttt{Shadow/Paperclip/Border}\\
+~
+\end{PostItNote}
+\begin{PostItNote}[Pin=Scotch]
+\texttt{Shadow/Scotch/Border}\\
+~
+\end{PostItNote}\hfill~
+
+\medskip
+
+\hfill\begin{PostItNote}[Pin=None]
+\texttt{Shadow/Border}
+\end{PostItNote}
+\begin{PostItNote}[Corner,Pin=None]
+\texttt{Shadow/Border/Corner}
+\end{PostItNote}\hfill~
+
+\vspace{1cm}
+
+\hfill\begin{PostItNote}[Title={Lipsum[1][1-4]},FontTitle={\large\sffamily},Rotate=5,Color=pink,Height=6cm,Pin=Scotch,AlignV=center,Corner]
+\lipsum[1][1-4]
+\end{PostItNote}\hfill~
+\end{DemoCode}
+
+\pagebreak
+
+\subsection{Render by tikz}
+
+\begin{DemoCode}[text only]
+\hfill\begin{PostItNote}[Render=tikz]
+\texttt{Shadow/Pushpin/Border}
+\end{PostItNote}
+\begin{PostItNote}[Shadow=false,Render=tikz]
+\texttt{Pushpin/Border}
+\end{PostItNote}\hfill~
+
+\medskip
+
+\hfill\begin{PostItNote}[Border=false,Render=tikz]
+\texttt{Shadow/Pushpin}
+\end{PostItNote}
+\begin{PostItNote}[Border=false,Shadow=false,Render=tikz]
+\texttt{Pushpin}
+\end{PostItNote}\hfill~
+
+\medskip
+
+\hfill\begin{PostItNote}[Pin=Paperclip,Render=tikz]
+\texttt{Shadow/Paperclip/Border}\\
+~
+\end{PostItNote}
+\begin{PostItNote}[Pin=Scotch,Render=tikz]
+\texttt{Shadow/Scotch/Border}\\
+~
+\end{PostItNote}\hfill~
+
+\medskip
+
+\hfill\begin{PostItNote}[Pin=None,Render=tikz]
+\texttt{Shadow/Border}
+\end{PostItNote}\hfill~
+
+\vspace{1cm}
+
+\hfill\begin{PostItNote}[Render=tikz,Title={Lipsum[1][1-4]},FontTitle={\large\sffamily},Rotate=5,Color=pink,Height=6cm,Pin=Scotch,AlignV=center,Corner]
+\lipsum[1][1-4]
+\end{PostItNote}\hfill~
+\end{DemoCode}
+
+\subsection{Render by tikzv2}
+
+\begin{DemoCode}[text only]
+\hfill\begin{PostItNote}[Render=tikzv2]
+\texttt{Shadow/Pushpin/Border}
+\end{PostItNote}
+\begin{PostItNote}[Shadow=false,Render=tikzv2]
+\texttt{Pushpin/Border}
+\end{PostItNote}\hfill~
+
+\medskip
+
+\hfill\begin{PostItNote}[Border=false,Render=tikzv2]
+\texttt{Shadow/Pushpin}
+\end{PostItNote}
+\begin{PostItNote}[Border=false,Shadow=false,Render=tikzv2]
+\texttt{Pushpin}
+\end{PostItNote}\hfill~
+
+\medskip
+
+\hfill\begin{PostItNote}[Pin=Paperclip,Render=tikzv2]
+\texttt{Shadow/Paperclip/Border}\\
+~
+\end{PostItNote}
+\begin{PostItNote}[Pin=Scotch,Render=tikzv2]
+\texttt{Shadow/Scotch/Border}\\
+~
+\end{PostItNote}\hfill~
+
+\medskip
+
+\hfill\begin{PostItNote}[Pin=None,Render=tikzv2]
+\texttt{Shadow/Border}
+\end{PostItNote}\hfill~
+
+\vspace{1cm}
+
+\hfill\begin{PostItNote}[Render=tikzv2,Title={Lipsum[1][1-4]},FontTitle={\large\sffamily},Rotate=5,Color=pink,Height=6cm,Pin=Scotch,AlignV=center,Corner]
+\lipsum[1][1-4]
+\end{PostItNote}\hfill~
+\end{DemoCode}
+
+\end{document}

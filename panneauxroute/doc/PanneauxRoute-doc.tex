@@ -1,0 +1,748 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[french,11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{tgpagella}
+\usepackage[scale=0.975]{cabin}
+\usepackage[scale=0.975]{inconsolata}
+\usepackage{PanneauxRoute}
+\usepackage{soul}
+\usepackage{codehigh}
+\usepackage{fontawesome5}
+\usepackage{multicol}
+\usepackage{tabularray}
+\DefTblrTemplate{contfoot-text}{normal}{\footnotesize \sffamily Suite page suivante}
+\SetTblrTemplate{contfoot-text}{normal}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [PanneauxRoute]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=1.5cm]{geometry}
+\setlength{\parindent}{0pt}
+
+\def\TPversion{0.1.2}
+\def\TPdate{14 septembre 2024}
+\usepackage{tcolorbox}
+
+
+\sethlcolor{lightgray!25}
+\NewDocumentCommand\MontreCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+
+\usepackage{babel}
+
+\NewDocumentCommand\PanneauTableau{ O{height=1cm} m }{%
+	$\vcenter{\hbox{\AffPanneau[#1]{#2}}}$%
+}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.75\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{PanneauxRoute}}\\
+				\\
+				{\LARGE Des panneaux de signalisation} \\
+				{\LARGE routière, au format vectoriel .} \\
+			\end{tabular}
+			
+			\medskip
+			
+			{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://github.com/cpierquet/PanneauxRoute}}
+\end{tabular}
+\end{center}
+
+\hrule
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+\hrule
+
+\vspace*{5mm}
+
+\vfill
+
+\hfill
+\prPassNivVap[height=4cm]~~\rotatebox{15}{\prInterdTournG[height=3cm]}~~\rotatebox{-25}{\prImpasse[height=3cm]}
+\hfill~
+
+\medskip
+
+\hfill
+\prDebAutor[scale=0.25]
+\hfill~
+
+\vfill~
+
+\pagebreak
+
+\section{Le package PanneauxRoute}
+
+\subsection{Idée}
+
+L'idée est de proposer des panneaux de signalisation routière pour des documents \TeX.
+
+\smallskip
+
+Les panneaux sont au format \MontreCode{pdf}, obtenu à l'aide de fichiers \MontreCode{svg}, donc au format vectoriel, avec comme sources :
+
+\medskip
+
+\begin{itemize}
+	\item \og Annexe de l’Arrêté interministériel du 24 novembre 1967 \fg{} ;  \hfill\href{https://equipementsdelaroute.cerema.fr/version-consolidee-de-l-arrete-du-24-novembre-1967-a537.html}{[lien]}
+	\item Le travail de Bertrand Bouteilles, sur le site de geoinformations.\hfill\href{https://www.geoinformations.developpement-durable.gouv.fr/panneaux-routiers-au-format-svg-et-png-par-a2688.html}{[lien]}
+	\item les fichiers \MontreCode{svg} de base sont proposés sous licence CC BY-SA 3.0.\hfill\href{http://sig974.free.fr/?p=1520}{[lien]}
+\end{itemize}
+
+\subsection{Historique}
+
+\verb|v0.1.2|~:~~~~Nouveaux panneaux
+
+\verb|v0.1.1|~:~~~~Ajout du panneau B14 (80) pour la limitation de vitesse 80
+
+\verb|v0.1.0|~:~~~~Version initiale
+
+\subsection{Chargement}
+
+Le package se charge dans le préambule, via \MontreCode{\textbackslash usepackage\{PanneauxRoute\}}, et seul \MontreCode{graphicx} est chargé.
+
+\begin{codehigh}[language=latex/latex3,style/main=cyan!5,style/code=cyan!5]
+\usepackage{PanneauxRoute}
+\end{codehigh}
+
+\subsection{Commandes et utilisation}
+
+Chaque panneau (disponible) est disponible au format \MontreCode{pdf} (vectoriel, de fond transparent et provenant de fichiers \MontreCode{svg}) peut-être inséré de deux manières différentes :
+
+\begin{itemize}
+	\item grâce à la commande \MontreCode{\textbackslash AffPanneau} et le code (officiel) du panneau (voir tableaux) ;
+	\item grâce à une commande \textit{alias}, sous la forme \MontreCode{\textbackslash pr<NomPanneau>}.
+\end{itemize}
+
+\begin{codehigh}[language=latex/latex3,style/main=cyan!5,style/code=cyan!5]
+\AffPanneau[options graphicx]{<CodePanneau>}
+\pr<NomPanneau>[options graphicx]
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=cyan!5,style/code=cyan!5,style/demo=cyan!5]
+\AffPanneau{A3b} ou \prChausRetG
+\end{demohigh}
+
+Les deux commandes permettent d'insérer un panneau avec une hauteur de 1.15~cm, mais la taille du panneau peut-être modifiée grâce à un argument optionnel, et entre \MontreCode{[...]}, compatible avec les options de \MontreCode{\textbackslash includegraphics} (comme \MontreCode{scale}, \MontreCode{height} ou \MontreCode{width}).
+
+\medskip
+
+Par défaut (dû à \MontreCode{\textbackslash includegraphics}) les \textit{images} sont placées sur la ligne de base, mais avec \MontreCode{\textbackslash raisebox} ou \MontreCode{\textbackslash vcenter}, on peut décaler le panneau verticalement.
+
+\begin{demohigh}[language=latex/latex3,style/main=cyan!5,style/code=cyan!5,style/demo=cyan!5]
+\raisebox{-0.2\height}{\AffPanneau[height=2ex]{B2b}} donne pareil que \raisebox{-0.2\height}{\prInterdTournD[height=2ex]}
+\end{demohigh}
+
+\medskip
+
+Pour les panneaux de (début/fin de) limitation de vitesse, la commande associée nécessite un argument obligatoire, et entre \MontreCode{\{...\}}, avec comme possibilités \MontreCode{15/30/50/70/90/110/130} :
+
+\begin{demohigh}[language=latex/latex3,style/main=cyan!5,style/code=cyan!5,style/demo=cyan!5]
+\prLimVites{15}\prLimVites{30}\prLimVites{50}\prLimVites{70}%
+\prLimVites{80}\prLimVites{90}\prLimVites{110}\prLimVites{130}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=cyan!5,style/code=cyan!5,style/demo=cyan!5]
+\prFinLimVit{15}\prFinLimVit{30}\prFinLimVit{50}\prFinLimVit{70}%
+\prFinLimVit{90}\prFinLimVit{110}\prFinLimVit{130}
+\end{demohigh}
+
+\pagebreak
+
+\section{Tableaux récapitulatifs des panneaux disponibles}
+
+\subsection{Panneaux de Danger}
+
+\begin{longtblr}[label=none,entry=none]{width=0.95\linewidth,hlines,vlines,colspec={Q[12.5mm,m,c]Q[m,c]X[l,m]Q[m,c,35mm]},row{1}={cyan!5,font=\Large\sffamily},row{2-Z}={font=\sffamily},cell{2-Z}{Z}={font=\footnotesize}}
+	Type & Panneau & Signification & Alias \\
+	A1a & \PanneauTableau{A1a} & Virage à droite & \fakeverb{\prVirDroit} \\
+	A1b & \PanneauTableau{A1b} & Virage à gauche & \fakeverb{\prVirGauche}\\
+	A1c & \PanneauTableau{A1c} & Succession de virages dont le premier est à droite & \fakeverb{\prVirsDroit} \\
+	A1d & \PanneauTableau{A1d} & Succession de virages dont le premier est à gauche & \fakeverb{\prVirsGauche} \\
+	A2a & \PanneauTableau{A2a} & Cassis ou dos-d'âne & \fakeverb{\prDosAne} \\
+	A2b & \PanneauTableau{A2b} & Ralentisseur de type dos-d'âne & \fakeverb{\prRalDosAne} \\
+	A3 & \PanneauTableau{A3} & Chaussée rétrécie & \fakeverb{\prChausRet} \\
+	A3a & \PanneauTableau{A3a} & Chaussée rétrécie par la droite & \fakeverb{\prChausRetD} \\
+	A3b & \PanneauTableau{A3b} & Chaussée rétrécie par la gauche & \fakeverb{\prChausRetG} \\
+	A4 & \PanneauTableau{A4} & Chaussée particulièrement glissante & \fakeverb{\prChaussGliss} \\
+	A6 & \PanneauTableau{A6} & Pont mobile & \fakeverb{\prPontMob} \\
+	A7 & \PanneauTableau{A7} & Passage à niveau muni de barrières à fonctionnement manuel [\ldots] & \fakeverb{\prPassNiv} \\
+	A8 & \PanneauTableau{A8} & Passage à niveau sans barrières ni demi-barrières & \fakeverb{\prPassNivVap} \\
+	A9 & \PanneauTableau{A9} & Panneau traversée de voies de tramway & \fakeverb{\prPassTram} \\
+	A13a & \PanneauTableau{A13a} & Endroit fréquenté par les enfants & \fakeverb{\prEnfants} \\
+	A13b & \PanneauTableau{A13b} & Passage pour piéton & \fakeverb{\prPietons} \\
+	A14 & \PanneauTableau{A14} & Autres dangers & \fakeverb{\prDanger} \\
+	A15a1 & \PanneauTableau{A15a1} & Passage d'animaux domestiques & \fakeverb{\prAnimaux} \\
+	A15a2 & \PanneauTableau{A15a1} & Passage d'animaux domestiques \\
+	A15b & \PanneauTableau{A15b} & Passage d'animaux sauvages & \fakeverb{\prAnimauxSauv} \\
+	A15c & \PanneauTableau{A15c} & Passage de cavaliers & \fakeverb{\prCavaliers} \\
+	A16 & \PanneauTableau{A16} & Descente dangereuse & \fakeverb{\prDescente} \\
+	A17 & \PanneauTableau{A17} & Annonce de feux tricolores & \fakeverb{\prFeux} \\
+	A18 & \PanneauTableau{A18} & Circulation dans les deux sens & \fakeverb{\prDeuxSens} \\
+	A19 & \PanneauTableau{A19} & Risque de chute de pierres ou de présence sur la route [\ldots] & \fakeverb{\prChute} \\
+	A20 & \PanneauTableau{A20} & Débouché sur un quai ou une berge & \fakeverb{\prQuai} \\
+	A21 & \PanneauTableau{A21} & Débouché de cyclistes venant de droite ou de gauche & \fakeverb{\prVelos} \\
+	A23 & \PanneauTableau{A23} & Traversée d'une aire de danger aérien & \fakeverb{\prAvions} \\
+	A24 & \PanneauTableau{A24} & Vent latéral & \fakeverb{\prVent}
+\end{longtblr}
+
+\pagebreak
+
+\subsection{Panneaux de Danger temporaires}
+
+\begin{longtblr}[label=none,entry=none]{width=0.95\linewidth,hlines,vlines,colspec={Q[12.5mm,m,c]Q[m,c]X[l,m]Q[m,c,35mm]},row{1}={cyan!5,font=\Large\sffamily},row{2-Z}={font=\sffamily},cell{2-Z}{Z}={font=\footnotesize}}
+	Type & Panneau & Signification & Alias \\
+	AK2 & \PanneauTableau{AK2} & Dos d'âne ou cassis & \fakeverb{\prDosAneTemp} \\
+	AK3 & \PanneauTableau{AK3} & Rétrécissement de chaussée & \fakeverb{\prChausRetTemp}\\
+	AK4 & \PanneauTableau{AK4} & Chaussée glissante & \fakeverb{\prChaussGlissTemp} \\
+	AK5 & \PanneauTableau{AK5} & Travaux & \fakeverb{\prTravauxTemp} \\
+	AK14 & \PanneauTableau{AK14} & Danger & \fakeverb{\prDangerTemp} \\
+	AK17 & \PanneauTableau{AK17} & Feux temporaires & \fakeverb{\prFeuxTemp} \\
+	AK22 & \PanneauTableau{AK22} & Projection de gravillons & \fakeverb{\prGraviersTemp} \\
+	AK30 & \PanneauTableau{AK30} & Embouteillage & \fakeverb{\prBouchonTemp} \\
+	AK31 & \PanneauTableau{AK31} & Accident & \fakeverb{\prAccidentTemp} \\
+	AK32 & \PanneauTableau{AK32} & Brouillard ou fumées épaisses & \fakeverb{\prBrouillardTemp} \\
+\end{longtblr}
+
+\pagebreak
+
+\subsection{Panneaux d'Interdiction et de Priorité}
+
+\begin{longtblr}[label=none,entry=none]{width=0.95\linewidth,hlines,vlines,colspec={Q[12.5mm,m,c]Q[m,c]X[l,m]Q[m,c,35mm]},row{1}={cyan!5,font=\Large\sffamily},row{2-Z}={font=\sffamily},cell{2-Z}{Z}={font=\footnotesize}}
+	Type & Panneau & Signification & Alias \\
+	AB1 & \PanneauTableau{AB1} & Intersection où le conducteur est tenu de céder le passage [\ldots]  & \fakeverb{\prIntersect} \\
+	AB2 & \PanneauTableau{AB2} & Intersection avec une route dont les usagers doivent céder le passage[\ldots] & \fakeverb{\prIntersectPrio} \\
+	AB3a & \PanneauTableau{AB3a} & Cédez le passage à l'intersection  & \fakeverb{\prCedez} \\
+	AB3b & \PanneauTableau{AB3b} & Cédez le passage à l'intersection & \fakeverb{\prCedezInter} \\
+	AB4 & \PanneauTableau{AB4} & Arrêt à l'intersection dans les conditions définies [\ldots]  & \fakeverb{\prStop} \\
+	AB5 & \PanneauTableau{AB5} & Arrêt à l'intersection & \fakeverb{\prArretInter} \\
+	AB6 & \PanneauTableau{AB6} & Indication du caractère prioritaire d'une route & \fakeverb{\prRoutePrio} \\
+	AB7 & \PanneauTableau{AB7} & Fin du caractère prioritaire d'une route & \fakeverb{\prFinRoutePrio} \\
+	AB25 & \PanneauTableau{AB25} & Carrefour à sens giratoire & \fakeverb{\prRondPoint} \\
+\end{longtblr}
+
+\pagebreak
+
+\subsection{Panneaux d'Interdiction}
+
+\begin{longtblr}[label=none,entry=none]{width=0.95\linewidth,hlines,vlines,colspec={Q[12.5mm,m,c]Q[m,c]X[l,m]Q[m,c,35mm]},row{1}={cyan!5,font=\Large\sffamily},row{2-Z}={font=\sffamily},cell{2-Z}{Z}={font=\footnotesize}}
+	Type & Panneau & Signification & Alias \\
+	B0 & \PanneauTableau{B0} & Circulation interdite à tout véhicule dans les deux sens & \fakeverb{\prCircInterd} \\
+	B1 & \PanneauTableau{B1} & Sens interdit à tout véhicule & \fakeverb{\prSensInterdit} \\
+	B1j & \PanneauTableau{B1j} & Répétition d'interdiction d'accès à contresens de bretelles [\ldots] & \fakeverb{\prSensInterditJ} \\
+	B2a & \PanneauTableau{B2a} & Interdiction de tourner à gauche à la prochaine intersection & \fakeverb{\prInterdTournG} \\
+	B2b & \PanneauTableau{B2b} & Interdiction de tourner à droite à la prochaine intersection & \fakeverb{\prInterdTournD} \\
+	B2c & \PanneauTableau{B2c} & Interdiction de faire demi-tour sur la route suivie jusqu'à la prochaine intersection & \fakeverb{\prInterdDemiTour} \\
+	B3 & \PanneauTableau{B3} & Interdiction de dépasser tous les véhicules à moteur autres que ceux à deux roues sans side-car & \fakeverb{\prInterdDepass} \\
+	B3a & \PanneauTableau{B3a} & Interdiction aux véhicules automobiles, véhicules articulés, trains doubles ou [\ldots] & \fakeverb{\prInterdVehic} \\
+	B4 & \PanneauTableau{B4} & Arrêt au poste de douane & \fakeverb{\prHalteDouane} \\
+	B5a & \PanneauTableau{B5a} & Arrêt au poste de gendarmerie & \fakeverb{\prHalteGendarm} \\
+	B5b & \PanneauTableau{B5b} & Arrêt au poste de police & \fakeverb{\prHaltePolice} \\
+	B5c & \PanneauTableau{B5c} & Arrêt au poste de péage & \fakeverb{\prHaltePeage} \\
+	B6a1 & \PanneauTableau{B6a1} & Stationnement interdit & \fakeverb{\prStationInterd} \\
+	B6a2 & \PanneauTableau{B6a2} & Stationnement interdit du 1er au 15 du mois & \fakeverb{\prStationInterdQA} \\
+	B6a3 & \PanneauTableau{B6a3} & Stationnement interdit du 16 à la fin du mois & \fakeverb{\prStationInterdQB} \\
+	B6d & \PanneauTableau{B6d} & Arrêt et stationnement interdits & \fakeverb{\prArStatInterd} \\
+	B7a & \PanneauTableau{B7a} & Accès interdit aux véhicules à moteur à l'exception des cyclomoteurs & \fakeverb{\prInterdMotSaufCyc} \\
+	B7b & \PanneauTableau{B7b} & Accès interdit à tous les véhicules à moteur & \fakeverb{\prInterdMot} \\
+	B8 & \PanneauTableau{B8} & Accès interdit aux véhicules affectés au transport de marchandises & \fakeverb{\prInterdMarchand} \\
+	B9a & \PanneauTableau{B9a} & Accès interdit aux piétons & \fakeverb{\prInterdPietons} \\
+	B9b & \PanneauTableau{B9b} & Accès interdit aux cycles & \fakeverb{\prInterdCycles} \\
+	B9c & \PanneauTableau{B9c} & Accès interdit aux véhicules à traction animale & \fakeverb{\prInterdTracAnim} \\
+	B9d & \PanneauTableau{B9d} & Accès interdit aux véhicules agricoles à moteur & \fakeverb{\prInterdAgricMot} \\
+	B9e & \PanneauTableau{B9e} & Accès interdit aux voitures à bras à l'exclusion de celles visées [\ldots] & \fakeverb{\prInterdBras} \\
+	B9f & \PanneauTableau{B9f} & Accès interdit aux véhicules de transport en commun de personnes & \fakeverb{\prInterdTranspComm} \\
+	B9g & \PanneauTableau{B9g} & Accès interdit aux cyclomoteurs & \fakeverb{\prInterdCyclomot} \\
+	B9h & \PanneauTableau{B9h} & Accès interdit aux motocyclettes et motocyclettes légères [\ldots] & \fakeverb{\prInterdCycloMoto} \\
+	B9i & \PanneauTableau{B9i} & Accès interdit aux véhicules tractant une caravane ou une remorque de plus de 250 kg [\ldots] & \fakeverb{\prInterdCaravanes} \\
+	B10a & \PanneauTableau{B10a} & Accès interdit aux véhicules, véhicules articulés, trains doubles [\ldots] & \fakeverb{\prInterdLong} \\
+	B11 & \PanneauTableau{B11} & Accès interdit aux véhicules dont la largeur, chargement compris, est supérieure [\ldots] & \fakeverb{\prInterdLarg} \\
+	B12 & \PanneauTableau{B12} & Accès interdit aux véhicules dont la hauteur, chargement compris, est supérieure [\ldots] & \fakeverb{\prInterdHaut} \\
+	B13 & \PanneauTableau{B13} & Accès interdit aux véhicules, véhicules articulés, trains doubles ou ensemble de véhicules [\ldots] & \fakeverb{\prInterdPoids} \\
+	B13a & \PanneauTableau{B13a} & Accès interdit aux véhicules pesant sur un essieu plus que le nombre indiqué & \fakeverb{\prInterdPoidsEssieu} \\
+	B14\_x & Limite de vitesse &  \PanneauTableau{B14_15}\PanneauTableau{B14_30}\PanneauTableau{B14_50}\PanneauTableau{B14_70}\PanneauTableau{B14_80}\PanneauTableau{B14_90}\PanneauTableau{B14_110}\PanneauTableau{B14_130} & \fakeverb{\prLimVites{x}}\\
+	B15 & \PanneauTableau{B15} & Cédez le passage à la circulation venant en sens inverse & \fakeverb{\prCedezInv} \\
+	B16 & \PanneauTableau{B16} & Signaux sonores interdits & \fakeverb{\prInterdSons}  \\
+	B17 & \PanneauTableau{B17} & Interdiction aux véhicules de circuler sans maintenir entre eux un intervalle [\ldots] & \fakeverb{\prDistance} \\
+	B18a & \PanneauTableau{B18a} & Accès interdit aux véhicules transportant des marchandises explosives ou facilement [\ldots] & \fakeverb{\prExplos} \\
+	B18b & \PanneauTableau{B18b} & Accès interdit aux véhicules transportant des marchandises susceptibles de polluer les eaux [\ldots] & \fakeverb{\prPollu} \\
+	B18c & \PanneauTableau{B18c} & Accès interdit aux véhicules transportant des marchandises dangereuses définies par l'arrêté [\ldots] & \fakeverb{\prDangereuses} \\
+	B19 & \PanneauTableau{B19} & Autres interdictions dont la nature est indiquée par une inscription sur le panneau \\
+\end{longtblr}
+
+\pagebreak
+
+\subsection{Panneaux d'Obligation}
+
+\begin{longtblr}[label=none,entry=none]{width=0.95\linewidth,hlines,vlines,colspec={Q[12.5mm,m,c]Q[m,c]X[l,m]Q[m,c,35mm]},row{1}={cyan!5,font=\Large\sffamily},row{2-Z}={font=\sffamily},cell{2-Z}{Z}={font=\footnotesize}}
+	Type & Panneau & Signification & Alias \\
+	B21-1 & \PanneauTableau{B21-1} & Obligation de tourner à droite avant le panneau & \fakeverb{\prObliAvDroite} \\
+	B21-2 & \PanneauTableau{B21-2} & Obligation de tourner à gauche avant le panneau & \fakeverb{\prObliAvGauche} \\
+	B21a1 & \PanneauTableau{B21a1} & Contournement obligatoire par la droite & \fakeverb{\prContournDroite} \\
+	B21a2 & \PanneauTableau{B21a2} & Contournement obligatoire par la gauche & \fakeverb{\prContournGauche} \\
+	B21b & \PanneauTableau{B21b} & Direction obligatoire à la prochaine intersection : tout droit & \fakeverb{\prToutDroit} \\
+	B21c1 & \PanneauTableau{B21c1} & Direction obligatoire à la prochaine intersection : à droite & \fakeverb{\prObliDroite} \\
+	B21c2 & \PanneauTableau{B21c2} & Direction obligatoire à la prochaine intersection : à gauche & \fakeverb{\prObliGauche} \\
+	B21d1 & \PanneauTableau{B21d1} & Directions obligatoires à la prochaine intersection : tout droit ou à droite & \fakeverb{\prObliToutDroite} \\
+	B21d2 & \PanneauTableau{B21d2} & Directions obligatoires à la prochaine intersection : tout droit ou à gauche & \fakeverb{\prObliToutGauche} \\
+	B21e & \PanneauTableau{B21e} & Directions obligatoires à la prochaine intersection : à droite ou à gauche & \fakeverb{\prObliDroiteGauche} \\
+	B22a & \PanneauTableau{B22a} & Piste ou bande obligatoire pour les cycles sans side-car & \fakeverb{\prObliCycles} \\
+	B22b & \PanneauTableau{B22b} & Chemin obligatoire pour piétons & \fakeverb{\prObliPietons} \\
+	B22c & \PanneauTableau{B22c} & Chemin obligatoire pour cavaliers & \fakeverb{\prObliCavaliers} \\
+	B25 & \PanneauTableau{B25} & Vitesse minimale obligatoire & \fakeverb{\prObliVitesse} \\
+	B26 & \PanneauTableau{B26} & Chaînes à neige obligatoires sur au moins deux roues motrices & \fakeverb{\prObliChaines} \\
+	B27a & \PanneauTableau{B27a} & Voie réservée aux véhicules routiers de transports en commun des lignes régulières dûment [\ldots] & \fakeverb{\prObliBus} \\
+	B27b & \PanneauTableau{B27b} & Voie réservée aux tramways & \fakeverb{\prObliTrams} \\
+	B29 & \PanneauTableau{B29} & Autres obligations dont la nature est mentionnée par une inscription sur le panneau \\
+\end{longtblr}
+
+\pagebreak
+
+\subsection{Panneaux de fin d'Interdiction}
+
+\begin{longtblr}[label=none,entry=none]{width=0.95\linewidth,hlines,vlines,colspec={Q[12.5mm,m,c]Q[m,c]X[l,m]Q[m,c,35mm]},row{1}={cyan!5,font=\Large\sffamily},row{2-Z}={font=\sffamily},cell{2-Z}{Z}={font=\footnotesize}}
+	Type & Panneau & Signification & Alias \\
+	B31 & \PanneauTableau{B31} & Fin de toutes les interdictions précédemment signalées[\ldots] & \fakeverb{\prFinInterd} \\
+	B33\_x & Fin de Limite de vitesse &  \PanneauTableau{B33_15}\PanneauTableau{B33_30}\PanneauTableau{B33_50}\PanneauTableau{B33_70}\PanneauTableau{B33_90}\PanneauTableau{B33_110}\PanneauTableau{B33_130} & \fakeverb{\prFinLimVit{x}} \\
+	B34 & \PanneauTableau{B34} & Fin d’interdiction de dépasser notifiée par le panneau B3 & \fakeverb{\prFinIntDepass} \\
+	B34a & \PanneauTableau{B34a} & Fin d’interdiction de dépasser notifiée par le panneau B3a & \fakeverb{\prFinIntDepassCam} \\
+	B35 & \PanneauTableau{B35} & Fin d'interdiction de l'usage de l'avertisseur sonore & \fakeverb{\prFinIntSons} \\
+	B39 & \PanneauTableau{B39} & Fin d'interdiction dont la nature est indiquée sur le panneau \\
+\end{longtblr}
+
+\pagebreak
+
+\subsection{Panneaux de fin d'Obligation}
+
+\begin{longtblr}[label=none,entry=none]{width=0.95\linewidth,hlines,vlines,colspec={Q[12.5mm,m,c]Q[m,c]X[l,m]Q[m,c,35mm]},row{1}={cyan!5,font=\Large\sffamily},row{2-Z}={font=\sffamily},cell{2-Z}{Z}={font=\footnotesize}}
+	Type & Panneau & Signification & Alias \\
+	B40 & \PanneauTableau{B40} & Fin de piste ou bande obligatoire pour cycles & \fakeverb{\prFinPisteOblCycl} \\
+	B41 & \PanneauTableau{B41} & Fin de chemin obligatoire pour piétons & \fakeverb{\prFinChemPiet} \\
+	B42 & \PanneauTableau{B42} & Fin de chemin obligatoire pour cavaliers & \fakeverb{\prFinChemCav} \\
+	B43 & \PanneauTableau{B43} & Fin de vitesse minimale obligatoire & \fakeverb{\prFinVitObli} \\
+	B44 & \PanneauTableau{B44} & Fin d'obligation de l'usage des chaînes à neige & \fakeverb{\prFinChaines} \\
+	B45a & \PanneauTableau{B45a} & Fin de voie réservée aux véhicules routiers de transports en commun des lignes régulières [\ldots] & \fakeverb{\prFinVoieBus} \\
+	B49 & \PanneauTableau{B49} & Fin d'obligation dont la nature est mentionnée par une inscription sur le panneau \\
+\end{longtblr}
+
+\subsection{Panneaux d'Indication}
+
+\begin{longtblr}[label=none,entry=none]{width=0.95\linewidth,hlines,vlines,colspec={Q[12.5mm,m,c]Q[m,c]X[l,m]Q[m,c,35mm]},row{1}={cyan!5,font=\Large\sffamily},row{2-Z}={font=\sffamily},cell{2-Z}{Z}={font=\footnotesize}}
+	Type & Panneau & Signification & Alias \\
+	C1a & \PanneauTableau{C1a} & Lieu aménagé pour le stationnement & \fakeverb{\prParking} \\
+	C1b & \PanneauTableau{C1b} & Lieu aménagé pour le stationnement gratuit à durée limitée avec contrôle par un disque & \fakeverb{\prParkDisq} \\
+	C1c & \PanneauTableau{C1c} & Lieu aménagé pour le stationnement payant & \fakeverb{\prParkPay} \\
+	C3 & \PanneauTableau{C3} & Risque d’incendie & \fakeverb{\prIncendie} \\
+	C44 & \PanneauTableau{C4a} & Vitesse conseillée & \fakeverb{\prVitConseil}  \\
+	C4b & \PanneauTableau{C4b} & Fin de vitesse conseillée & \fakeverb{\prFinVitConseil} \\
+	C5 & \PanneauTableau{C5} & Station de taxis & \fakeverb{\prTaxis} \\
+	C6 & \PanneauTableau{B49} & Arrêt d’autobus & \fakeverb{\prArretBus} \\
+	C8 & \PanneauTableau{C8} & Emplacement d'arrêt d'urgence & \fakeverb{\prArretUrg} \\
+	%C9 & \PanneauTableau{C9} & Station d'autopartage \\
+	C12 & \PanneauTableau{C12} & Circulation à sens unique & \fakeverb{\prCircSensUniq} \\
+	C13a & \PanneauTableau{C13a} & Impasse & \fakeverb{\prImpasse} \\
+	C13b & \PanneauTableau{C13b} & Présignalisation d’une impasse & \fakeverb{\prPreImpasse} \\
+	%C13c & \PanneauTableau{C13c} & Impasse comportant une issue pour les piétons \\
+	%C13d & \PanneauTableau{C13d} & Impasse comportant une issue pour les piétons et les cyclistes \\
+	C18 & \PanneauTableau{C18} & Priorité par rapport à la circulation venant en sens inverse & \fakeverb{\prPriorSensInv}\\
+	C20a & \PanneauTableau{C20a} & Passage pour piétons & \fakeverb{\prPassPietons} \\
+	%C20b & \PanneauTableau{C20b} & Traversée de voie de véhicules routiers des services réguliers de transport en commun \\
+	C20c & \PanneauTableau{C20c} & Traversée de voies de tramways & \fakeverb{\prTravTrams} \\
+	C23 & \PanneauTableau{C23} & Stationnement réglementé pour les caravanes et les autocaravanes & \fakeverb{\prStatCarav} \\
+	C24a1 & \PanneauTableau{C24a1} & Voies affectées & \fakeverb{\prVoiesAffA} \\
+	C24a4 & \PanneauTableau{C24a4} & Voies affectées & \fakeverb{\prVoiesAffB} \\
+	C24b1 & \PanneauTableau{C24b1} & Voies affectées & \fakeverb{\prVoiesAffC} \\
+	C24b2 & \PanneauTableau{C24b2} & Voies affectées & \fakeverb{\prVoiesAffD} \\
+	C24c1 & \PanneauTableau{C24c1} & Voies affectées & \fakeverb{\prVoiesAffE} \\
+	C24c2 & \PanneauTableau{C24c2} & Voies affectées & \fakeverb{\prVoiesAffF} \\
+	C25a & \PanneauTableau{C25a} & Indication aux frontières des limites de vitesse sur le territoire français & \fakeverb{\prVitFront} \\
+	C25b & \PanneauTableau{C25b} & Rappel des limites de vitesse sur autoroute & \fakeverb{\prVitAutor} \\
+	C26a & \PanneauTableau{C26a} & Voie de détresse à droite & \fakeverb{\prDetresseD} \\
+	C26b & \PanneauTableau{C26b} & Voie de détresse à gauche & \fakeverb{\prDetresseG} \\
+	C27 & \PanneauTableau{C27} & Surélévation de chaussée & \fakeverb{\prChausseSur} \\
+	C28a & \PanneauTableau{C28a} & Réduction du nombre de voies sur une route à chaussées séparées ou sur un créneau [\ldots] & \fakeverb{\prReducVoieA} \\
+	C28b & \PanneauTableau{C28b} & Réduction du nombre de voies sur une route à chaussées séparées ou sur un créneau [\ldots]& \fakeverb{\prReducVoieB} \\
+	C29b & \PanneauTableau{C29b} & Créneau de dépassement à trois voies affectées "deux voies dans un sens et une voie dans l’autre" & \fakeverb{\prCreneauDepas} \\
+	C30 & \PanneauTableau{C30} & Fin d'un créneau de dépassement à trois voies affectées & \fakeverb{\prFinCreneauDepas} \\
+	C50 & \PanneauTableau{C50} & Indications diverses \\
+	%C51a & \PanneauTableau{C51a} & Présignalisation du début d'une section à vitesse régulée \\
+	%C51b & \PanneauTableau{C51b} & Fin de section à vitesse régulée \\
+	C62 & \PanneauTableau{B49} & Présignalisation d'une borne de retrait de ticket de péage & \fakeverb{\prTickPeage} \\
+	C64a & \PanneauTableau{C64a} & Paiement auprès d'un péagiste & \fakeverb{\prPaiemPeage} \\
+	C64b & \PanneauTableau{C64b} & Paiement automatique par CB & \fakeverb{\prPaiemCB} \\
+	C64c & \PanneauTableau{C64c} & Paiement automatique par pièces de monnaie & \fakeverb{\prPaiemPieces} \\
+	C64d1 & \PanneauTableau{C64d1} & Paiement automatique par pièces et billets &  \fakeverb{\prPaiemPiecBil} \\
+	C64d2 & \PanneauTableau{C64d2} & Paiement automatique par Télépéage &  \fakeverb{\prPaiemTelepeage} \\
+	%	C64d & \PanneauTableau{C64d} & 	Paiement automatique par abonnement « télépéage » \\
+	C107 & \PanneauTableau{C107} & Route à accès réglementé & \fakeverb{\prRouteRegl} \\
+	C108 & \PanneauTableau{C108} & Fin de route à accès réglementé & \fakeverb{\prFinRouteRegl} \\
+	C111 & \PanneauTableau{C111} & Entrée d'un tunnel & \fakeverb{\prEntrTunnel} \\
+	C112 & \PanneauTableau{C112} & Sortie de tunnel & \fakeverb{\prSortieTunnel} \\
+	C113 & \PanneauTableau{C113} & Piste ou bande cyclable conseillée et réservée aux cycles à deux ou trois roues & \fakeverb{\prPisteCycl} \\
+	C114 & \PanneauTableau{C114} & Fin d'une piste ou d'une bande cyclable conseillée et réservée aux cycles à deux ou trois & \fakeverb{\prFinPisteCycl} \\
+	C115 & \PanneauTableau{C115} & Voie verte & \fakeverb{\prVoieVerte} \\
+	C116 & \PanneauTableau{C116} & Fin de voie verte & \fakeverb{\prFinVoieVerte} \\
+	C207 & \PanneauTableau{C207} & Début d’une section d’autoroute & \fakeverb{\prDebAutor} \\
+	C208 & \PanneauTableau{C208} & Fin d’une section d’autoroute & \fakeverb{\prFinAutor} \\
+\end{longtblr}
+
+\subsection{Panneaux de Signalisation des Services}
+
+\begin{longtblr}[label=none,entry=none]{width=0.95\linewidth,hlines,vlines,colspec={Q[12.5mm,m,c]Q[m,c]X[l,m]Q[m,c,35mm]},row{1}={cyan!5,font=\Large\sffamily},row{2-Z}={font=\sffamily},cell{2-Z}{Z}={font=\footnotesize}}
+	Type & Panneau & Signification & Alias \\
+	CE1 & \PanneauTableau{CE1} & Poste de secours & \fakeverb{\prPosteSecours} \\
+	CE2a & \PanneauTableau{CE2a} & Poste d'appel d'urgence & \fakeverb{\prPosteSecUrg} \\
+	CE2b & \PanneauTableau{CE2b} & Cabine téléphonique publique & \fakeverb{\prCabineTel} \\
+	CE3a & \PanneauTableau{CE3a} & Informations relatives aux services ou activités touristiques & \fakeverb{\prInfos} \\
+	%CE3b & \PanneauTableau{CE3b} & Panneau d’information service faisant partie du relais d’information service \\
+	CE4a & \PanneauTableau{CE4a} & Terrain de camping pour tentes & \fakeverb{\prCampingT} \\
+	CE4b & \PanneauTableau{CE4b} & Terrain de camping pour caravanes et autocaravanes & \fakeverb{\prCampingC} \\
+	CE4c & \PanneauTableau{CE4c} & Terrain de camping pour tentes, caravanes et autocaravanes & \fakeverb{\prCampingTC} \\
+	CE5a & \PanneauTableau{CE5a} & Auberge de jeunesse & \fakeverb{\prAubergJeun} \\
+	CE5b & \PanneauTableau{CE5b} & Chambre d'hôtes ou gîte & \fakeverb{\prGite} \\
+	CE6a & \PanneauTableau{CE6a} & Point de départ d’un itinéraire pédestre & \fakeverb{\prItinPedest} \\
+	CE6b & \PanneauTableau{CE6b} & Point de départ d'un circuit de ski de fond & \fakeverb{\prItinSkiFond} \\
+	CE7 & \PanneauTableau{CE7} & Emplacement pour pique-nique & \fakeverb{\prPicNic} \\
+	CE8 & \PanneauTableau{CE8} & Gare auto / train & \fakeverb{\prGareAutoTrain} \\
+	CE9 & \PanneauTableau{CE9} & Parc de stationnement sous vidéoprotection & \fakeverb{\prParkVideo} \\
+	CE10 & \PanneauTableau{CE10} & Embarcadère & \fakeverb{\prEmbarcad} \\
+	CE12 & \PanneauTableau{CE12} & Toilettes ouvertes au public & \fakeverb{\prToilettes} \\
+	CE14 & \PanneauTableau{CE14} & Installations accessibles aux personnes handicapées à mobilité réduite & \fakeverb{\prAccesHandic} \\
+	CE15a & \PanneauTableau{CE15a} & Poste de distribution de carburant ouvert 7 jours sur 7 et 24 heures sur 24 & \fakeverb{\prEssence} \\
+	CE15c & \PanneauTableau{CE15c} & Poste de distribution de carburant ouvert 7 jours sur 7 et 24 heures sur 24 [\ldots] & \fakeverb{\prEssenceGPL} \\
+	%CE15e & \PanneauTableau{CE15e} & Marque du poste de distribution de carburant ouvert 7 jours sur 7 et 24 heures sur 24 \\
+	%CE15f & \PanneauTableau{CE15f} & Marque du poste de distribution de carburant ouvert 7 jours sur 7 et 24 heures sur 24 [\ldots] \\
+	%CE15g & \PanneauTableau{CE15g} & Poste de distribution de carburant ouvert 7 jours sur 7 et 24 heures sur 24 [\ldots] \\
+	%CE15h & \PanneauTableau{CE15h} & Poste de distribution de carburant ouvert 7 jours sur 7 et 24 heures sur 24 [\ldots] \\
+	%CE15i & \PanneauTableau{CE15i} & Poste de recharge de véhicules électriques ouvert 7 jours sur 7 et 24 heures sur 24 [\ldots] \\
+	%CE15j & \PanneauTableau{CE15j} & Poste de recharge de véhicules électriques ouvert 7 jours sur 7 et 24 heures sur 24 [\ldots] \\
+	CE16 & \PanneauTableau{CE16} & Restaurant ouvert 7 jours sur 7 & \fakeverb{\prRestau} \\
+	CE17 & \PanneauTableau{CE17} & Hôtel ou motel ouvert 7 jours sur 7 & \fakeverb{\prHotel} \\
+	CE18 & \PanneauTableau{CE18} & Débit de boissons ou établissement proposant des collations sommaires ouvert 7 jours sur 7 & \fakeverb{\prBoissons} \\
+	CE19 & \PanneauTableau{CE19} & Emplacement de mise à l’eau d’embarcations légères & \fakeverb{\prEmbarcLeg} \\
+	CE20a & \PanneauTableau{CE20a} & Gare de téléphérique & \fakeverb{\prTelepher} \\
+	CE20b & \PanneauTableau{CE20b} & Point de départ d'un télésiège ou d'une télécabine & \fakeverb{\prTelecabin} \\
+	CE21 & \PanneauTableau{CE21} & Point de vue & \fakeverb{\prPointVue} \\
+	CE22 & \PanneauTableau{CE22} & Fréquence d’émission d’une station de radiodiffusion dédiée aux informations [\ldots] & \fakeverb{\prRadio} \\
+	CE23 & \PanneauTableau{CE23} & Jeux d'enfants & \fakeverb{\prJeuxEnfants} \\
+	CE24 & \PanneauTableau{CE24} & Station de vidange pour caravanes, auto-caravanes et cars & \fakeverb{\prVidange} \\
+	CE25 & \PanneauTableau{CE25} & Distributeur de billets de banque & \fakeverb{\prDistribBill} \\
+	CE26 & \PanneauTableau{CE26} & Station de gonflage, hors station service, dont l’usage est gratuit & \fakeverb{\prGonflage} \\
+	CE27 & \PanneauTableau{CE27} & Point de détente & \fakeverb{\prDetente} \\
+	CE28 & \PanneauTableau{CE28} & Poste de dépannage & \fakeverb{\prPosteDepann} \\
+	CE29 & \PanneauTableau{CE29} & Moyen de lutte contre l'incendie & \fakeverb{\prLutteIncendie} \\
+	CE30a & \PanneauTableau{CE30a} & Issue de secours vers la droite & \fakeverb{\prIssueSecD} \\
+	CE30b & \PanneauTableau{CE30b} & Issue de secours vers la gauche & \fakeverb{\prIssueSecG} \\
+	CE50 & \PanneauTableau{CE50} & Installations ou services divers \\
+	%CE51 & \PanneauTableau{CE51} & Point du réseau de distribution "écotaxe" (taxe nationale sur les véhicules [\ldots] \\
+	%CE52 & \PanneauTableau{CE52} & Lieu aménagé pour la pratique du covoiturage \\
+	%CE100 & \PanneauTableau{CE100} & Indication de l’enseigne de la ou des sociétés commerciales offrant un [\ldots] \\
+\end{longtblr}
+
+\subsection{Panneaux divers}
+
+\NewDocumentCommand\AffPanneauGenerique{ m }{%
+	\raisebox{-0.2\height}{\AffPanneau[height=1.5cm]{#1}} : \texttt{#1}
+}
+\begin{multicols}{3}
+	\AffPanneauGenerique{B50a} \\
+	\AffPanneauGenerique{B50b} \\
+	\AffPanneauGenerique{B50c} \\
+	\AffPanneauGenerique{B50d} \\
+	\AffPanneauGenerique{B50e} \\
+	\raisebox{-0.2\height}{\AffPanneau[height=1.5cm]{B51_30}} : \texttt{B51\_30} \\
+	\AffPanneauGenerique{B53} \\
+	\AffPanneauGenerique{B55} \\
+	\AffPanneauGenerique{B57} \\
+	\AffPanneauGenerique{B59} \\
+	\AffPanneauGenerique{B49VL} \\
+	\AffPanneauGenerique{C24a}
+\end{multicols}
+
+\pagebreak
+
+\section{Aliases, de hauteur 2.5ex}
+
+\begin{multicols}{3}
+	\raisebox{-0.2\height}{\prVirDroit[height=2.5ex]} : \verb+\prVirDroit+ \\
+	\raisebox{-0.2\height}{\prVirGauche[height=2.5ex]} : \verb+\prVirGauche+ \\
+	\raisebox{-0.2\height}{\prVirsDroit[height=2.5ex]} : \verb+\prVirsDroit+ \\
+	\raisebox{-0.2\height}{\prVirsGauche[height=2.5ex]} : \verb+\prVirsGauche+ \\
+	\raisebox{-0.2\height}{\prDosAne[height=2.5ex]} : \verb+\prDosAne+ \\
+	\raisebox{-0.2\height}{\prRalDosAne[height=2.5ex]} : \verb+\prRalDosAne+ \\
+	\raisebox{-0.2\height}{\prChausRet[height=2.5ex]} : \verb+\prChausRet+ \\
+	\raisebox{-0.2\height}{\prChausRetD[height=2.5ex]} : \verb+\prChausRetD+ \\
+	\raisebox{-0.2\height}{\prChausRetG[height=2.5ex]} : \verb+\prChausRetG+ \\
+	\raisebox{-0.2\height}{\prChaussGliss[height=2.5ex]} : \verb+\prChaussGliss+ \\
+	\raisebox{-0.2\height}{\prPontMob[height=2.5ex]} : \verb+\prPontMob+ \\
+	\raisebox{-0.2\height}{\prPassNiv[height=2.5ex]} : \verb+\prPassNiv+ \\
+	\raisebox{-0.2\height}{\prPassNivVap[height=2.5ex]} : \verb+\prPassNivVap+ \\
+	\raisebox{-0.2\height}{\prPassTram[height=2.5ex]} : \verb+\prPassTram+ \\
+	\raisebox{-0.2\height}{\prEnfants[height=2.5ex]} : \verb+\prEnfants+ \\
+	\raisebox{-0.2\height}{\prPietons[height=2.5ex]} : \verb+\prPietons+ \\
+	\raisebox{-0.2\height}{\prDanger[height=2.5ex]} : \verb+\prDanger+ \\
+	\raisebox{-0.2\height}{\prAnimaux[height=2.5ex]} : \verb+\prAnimaux+ \\
+	\raisebox{-0.2\height}{\prAnimauxSauv[height=2.5ex]} : \verb+\prAnimauxSauv+ \\
+	\raisebox{-0.2\height}{\prCavaliers[height=2.5ex]} : \verb+\prCavaliers+ \\
+	\raisebox{-0.2\height}{\prDescente[height=2.5ex]} : \verb+\prDescente+ \\
+	\raisebox{-0.2\height}{\prFeux[height=2.5ex]} : \verb+\prFeux+ \\
+	\raisebox{-0.2\height}{\prDeuxSens[height=2.5ex]} : \verb+\prDeuxSens+ \\
+	\raisebox{-0.2\height}{\prChute[height=2.5ex]} : \verb+\prChute+ \\
+	\raisebox{-0.2\height}{\prQuai[height=2.5ex]} : \verb+\prQuai+ \\
+	\raisebox{-0.2\height}{\prVelos[height=2.5ex]} : \verb+\prVelos+ \\
+	\raisebox{-0.2\height}{\prAvions[height=2.5ex]} : \verb+\prAvions+ \\
+	\raisebox{-0.2\height}{\prVent[height=2.5ex]} : \verb+\prVent+
+\end{multicols}
+
+\begin{multicols}{3}%temporaire
+	\raisebox{-0.2\height}{\prDosAneTemp[height=2.5ex]} : \verb+\prDosAneTemp+ \\
+	\raisebox{-0.2\height}{\prChausRetTemp[height=2.5ex]} : \verb+\prIntersectPrio+ \\
+	\raisebox{-0.2\height}{\prChaussGlissTemp[height=2.5ex]} : \verb+\prChaussGlissTemp+ \\
+	\raisebox{-0.2\height}{\prTravauxTemp[height=2.5ex]} : \verb+\prTravauxTemp+ \\
+	\raisebox{-0.2\height}{\prDangerTemp[height=2.5ex]} : \verb+\prDangerTemp+ \\
+	\raisebox{-0.2\height}{\prFeuxTemp[height=2.5ex]} : \verb+\prFeuxTemp+ \\
+	\raisebox{-0.2\height}{\prGraviersTemp[height=2.5ex]} : \verb+\prGraviersTemp+ \\
+	\raisebox{-0.2\height}{\prBouchonTemp[height=2.5ex]} : \verb+\prBouchonTemp+ \\
+	\raisebox{-0.2\height}{\prAccidentTemp[height=2.5ex]} : \verb+\prAccidentTemp+ \\
+	\raisebox{-0.2\height}{\prBrouillardTemp[height=2.5ex]} : \verb+\prBrouillardTemp+
+\end{multicols}
+
+\begin{multicols}{3}
+	\raisebox{-0.2\height}{\prIntersect[height=2.5ex]} : \verb+\prIntersect+ \\
+	\raisebox{-0.2\height}{\prIntersectPrio[height=2.5ex]} : \verb+\prIntersectPrio+ \\
+	\raisebox{-0.2\height}{\prCedez[height=2.5ex]} : \verb+\prCedez+ \\
+	\raisebox{-0.2\height}{\prCedezInter[height=2.5ex]} : \verb+\prCedezInter+ \\
+	\raisebox{-0.2\height}{\prStop[height=2.5ex]} : \verb+\prStop+ \\
+	\raisebox{-0.2\height}{\prArretInter[height=2.5ex]} : \verb+\prArretInter+ \\
+	\raisebox{-0.2\height}{\prRoutePrio[height=2.5ex]} : \verb+\prRoutePrio+ \\
+	\raisebox{-0.2\height}{\prFinRoutePrio[height=2.5ex]} : \verb+\prFinRoutePrio+ \\
+	\raisebox{-0.2\height}{\prRondPoint[height=2.5ex]} : \verb+\prRondPoint+
+\end{multicols}
+
+\begin{multicols}{3}
+	\raisebox{-0.2\height}{\prCircInterd[height=2.5ex]} : \verb+\prCircInterd+ \\
+	\raisebox{-0.2\height}{\prSensInterdit[height=2.5ex]} : \verb+\prSensInterdit+ \\
+	\raisebox{-0.2\height}{\prSensInterditJ[height=2.5ex]} : \verb+\prSensInterditJ+ \\
+	\raisebox{-0.2\height}{\prInterdTournG[height=2.5ex]} : \verb+\prInterdTournG+ \\
+	\raisebox{-0.2\height}{\prInterdTournD[height=2.5ex]} : \verb+\prInterdTournD+ \\
+	\raisebox{-0.2\height}{\prInterdDemiTour[height=2.5ex]} : \verb+\prInterdDemiTour+ \\
+	\raisebox{-0.2\height}{\prInterdDepass[height=2.5ex]} : \verb+\prInterdDepass+ \\
+	\raisebox{-0.2\height}{\prInterdVehic[height=2.5ex]} : \verb+\prInterdVehic+ \\
+	\raisebox{-0.2\height}{\prHalteDouane[height=2.5ex]} : \verb+\prHalteDouane+ \\
+	\raisebox{-0.2\height}{\prHalteGendarm[height=2.5ex]} : \verb+\prHalteGendarm+ \\
+	\raisebox{-0.2\height}{\prHaltePolice[height=2.5ex]} : \verb+\prHaltePolice+ \\
+	\raisebox{-0.2\height}{\prHaltePeage[height=2.5ex]} : \verb+\prHaltePeage+ \\
+	\raisebox{-0.2\height}{\prStationInterd[height=2.5ex]} : \verb+\prStationInterd+ \\
+	\raisebox{-0.2\height}{\prStationInterdQA[height=2.5ex]} : \verb+\prStationInterdQA+ \\
+	\raisebox{-0.2\height}{\prStationInterdQB[height=2.5ex]} : \verb+\prStationInterdQB+ \\
+	\raisebox{-0.2\height}{\prArStatInterd[height=2.5ex]} : \verb+\prArStatInterd+ \\
+	\raisebox{-0.2\height}{\prInterdMotSaufCyc[height=2.5ex]} : \verb+\prInterdMotSaufCyc+ \\
+	\raisebox{-0.2\height}{\prInterdMot[height=2.5ex]} : \verb+\prInterdMot+ \\
+	\raisebox{-0.2\height}{\prInterdMarchand[height=2.5ex]} : \verb+\prInterdMarchand+ \\
+	\raisebox{-0.2\height}{\prInterdPietons[height=2.5ex]} : \verb+\prInterdPietons+ \\
+	\raisebox{-0.2\height}{\prInterdCycles[height=2.5ex]} : \verb+\prInterdCycles+ \\
+	\raisebox{-0.2\height}{\prInterdTracAnim[height=2.5ex]} : \verb+\prInterdTracAnim+ \\
+	\raisebox{-0.2\height}{\prInterdAgricMot[height=2.5ex]} : \verb+\prInterdAgricMot+ \\
+	\raisebox{-0.2\height}{\prInterdBras[height=2.5ex]} : \verb+\prInterdBras+ \\
+	\raisebox{-0.2\height}{\prInterdTranspComm[height=2.5ex]} : \verb+\prInterdTranspComm+ \\
+	\raisebox{-0.2\height}{\prInterdCyclomot[height=2.5ex]} : \verb+\prInterdCyclomot+ \\
+	\raisebox{-0.2\height}{\prInterdCycloMoto[height=2.5ex]} : \verb+\prInterdCycloMoto+ \\
+	\raisebox{-0.2\height}{\prInterdCaravanes[height=2.5ex]} : \verb+\prInterdCaravanes+ \\
+	\raisebox{-0.2\height}{\prInterdLong[height=2.5ex]} : \verb+\prInterdLong+ \\
+	\raisebox{-0.2\height}{\prInterdLarg[height=2.5ex]} : \verb+\prInterdLarg+ \\
+	\raisebox{-0.2\height}{\prInterdHaut[height=2.5ex]} : \verb+\prInterdHaut+ \\
+	\raisebox{-0.2\height}{\prInterdPoids[height=2.5ex]} : \verb+\prInterdPoids+ \\
+	\raisebox{-0.2\height}{\prInterdPoidsEssieu[height=2.5ex]} : \verb+\prInterdPoidsEssieu+ \\
+	\raisebox{-0.2\height}{\prLimVites[height=2.5ex]{15}} : \verb+\prLimVites{15}+ \\
+	\raisebox{-0.2\height}{\prLimVites[height=2.5ex]{30}} : \verb+\prLimVites{30}+ \\
+	\raisebox{-0.2\height}{\prLimVites[height=2.5ex]{50}} : \verb+\prLimVites{50}+ \\
+	\raisebox{-0.2\height}{\prLimVites[height=2.5ex]{70}} : \verb+\prLimVites{70}+ \\
+	\raisebox{-0.2\height}{\prLimVites[height=2.5ex]{80}} : \verb+\prLimVites{80}+ \\
+	\raisebox{-0.2\height}{\prLimVites[height=2.5ex]{90}} : \verb+\prLimVites{90}+ \\
+	\raisebox{-0.2\height}{\prLimVites[height=2.5ex]{110}} : \verb+\prLimVites{110}+ \\
+	\raisebox{-0.2\height}{\prLimVites[height=2.5ex]{130}} : \verb+\prLimVites{130}+ \\
+	\raisebox{-0.2\height}{\prCedezInv[height=2.5ex]} : \verb+\prCedezInv+ \\
+	\raisebox{-0.2\height}{\prInterdSons[height=2.5ex]} : \verb+\prInterdSons+ \\
+	\raisebox{-0.2\height}{\prDistance[height=2.5ex]} : \verb+\prDistance+ \\
+	\raisebox{-0.2\height}{\prExplos[height=2.5ex]} : \verb+\prExplos+ \\
+	\raisebox{-0.2\height}{\prPollu[height=2.5ex]} : \verb+\prPollu+ \\
+	\raisebox{-0.2\height}{\prDangereuses[height=2.5ex]} : \verb+\prDangereuses+ \\
+	\raisebox{-0.2\height}{\prObliDroite[height=2.5ex]} : \verb+\prObliDroite+ \\
+	\raisebox{-0.2\height}{\prObliGauche[height=2.5ex]} : \verb+\prObliGauche+ \\
+	\raisebox{-0.2\height}{\prContournDroite[height=2.5ex]} : \verb+\prContournDroite+ \\
+	\raisebox{-0.2\height}{\prContournGauche[height=2.5ex]} : \verb+\prContournGauche+ \\
+	\raisebox{-0.2\height}{\prToutDroit[height=2.5ex]} : \verb+\prToutDroit+ \\
+	\raisebox{-0.2\height}{\prObliDroite[height=2.5ex]} : \verb+\prObliDroite+ \\
+	\raisebox{-0.2\height}{\prObliGauche[height=2.5ex]} : \verb+\prObliGauche+ \\
+	\raisebox{-0.2\height}{\prObliToutDroite[height=2.5ex]} : \verb+\prObliToutDroite+ \\
+	\raisebox{-0.2\height}{\prObliToutGauche[height=2.5ex]} : \verb+\prObliToutGauche+ \\
+	\raisebox{-0.2\height}{\prObliDroiteGauche[height=2.5ex]} : \verb+\prObliDroiteGauche+ \\
+	\raisebox{-0.2\height}{\prObliCycles[height=2.5ex]} : \verb+\prObliCycles+ \\
+	\raisebox{-0.2\height}{\prObliPietons[height=2.5ex]} : \verb+\prObliPietons+ \\
+	\raisebox{-0.2\height}{\prObliCavaliers[height=2.5ex]} : \verb+\prObliCavaliers+ \\
+	\raisebox{-0.2\height}{\prObliVitesse[height=2.5ex]} : \verb+\prObliVitesse+ \\
+	\raisebox{-0.2\height}{\prObliChaines[height=2.5ex]} : \verb+\prObliChaines+ \\
+	\raisebox{-0.2\height}{\prObliBus[height=2.5ex]} : \verb+\prObliBus+ \\
+	\raisebox{-0.2\height}{\prObliTrams[height=2.5ex]} : \verb+\prObliTrams+
+\end{multicols}
+
+\begin{multicols}{3}
+	\raisebox{-0.2\height}{\prFinInterd[height=2.5ex]} : \verb+\prFinInterd+ \\
+	\raisebox{-0.2\height}{\prFinLimVit[height=2.5ex]{15}} : \verb+\prFinLimVit{15}+ \\
+	\raisebox{-0.2\height}{\prFinLimVit[height=2.5ex]{30}} : \verb+\prFinLimVit{30}+ \\
+	\raisebox{-0.2\height}{\prFinLimVit[height=2.5ex]{50}} : \verb+\prFinLimVit{50}+ \\
+	\raisebox{-0.2\height}{\prFinLimVit[height=2.5ex]{70}} : \verb+\prFinLimVit{70}+ \\
+	\raisebox{-0.2\height}{\prFinLimVit[height=2.5ex]{90}} : \verb+\prFinLimVit{90}+ \\
+	\raisebox{-0.2\height}{\prFinLimVit[height=2.5ex]{110}} : \verb+\prFinLimVit{110}+ \\
+	\raisebox{-0.2\height}{\prFinLimVit[height=2.5ex]{130}} : \verb+\prFinLimVit{130}+ \\
+	\raisebox{-0.2\height}{\prFinIntDepass[height=2.5ex]} : \verb+\prFinIntDepass+ \\
+	\raisebox{-0.2\height}{\prFinIntDepassCam[height=2.5ex]} : \verb+\prFinIntDepassCam+ \\
+	\raisebox{-0.2\height}{\prFinIntSons[height=2.5ex]} : \verb+\prFinIntSons+ \\
+\end{multicols}
+
+\begin{multicols}{3}
+	\raisebox{-0.2\height}{\prFinPisteCycl[height=2.5ex]} : \verb+\prFinPisteCycl+ \\
+	\raisebox{-0.2\height}{\prFinChemPiet[height=2.5ex]} : \verb+\prFinChemPiet+ \\
+	\raisebox{-0.2\height}{\prFinChemCav[height=2.5ex]} : \verb+\prFinChemCav+ \\
+	\raisebox{-0.2\height}{\prFinVitObli[height=2.5ex]} : \verb+\prFinVitObli+ \\
+	\raisebox{-0.2\height}{\prFinChaines[height=2.5ex]} : \verb+\prFinChaines+ \\
+	\raisebox{-0.2\height}{\prFinVoieBus[height=2.5ex]} : \verb+\prFinVoieBus+
+\end{multicols}
+
+\begin{multicols}{3}
+	\raisebox{-0.2\height}{\prParking[height=2.5ex]} : \verb+\prParking+ \\
+	\raisebox{-0.2\height}{\prParkDisq[height=2.5ex]} : \verb+\prParkDisq+ \\
+	\raisebox{-0.2\height}{\prParkPay[height=2.5ex]} : \verb+\prParkPay+ \\
+	\raisebox{-0.2\height}{\prIncendie[height=2.5ex]} : \verb+\prIncendie+ \\
+	\raisebox{-0.2\height}{\prVitConseil[height=2.5ex]} : \verb+\prVitConseil+ \\
+	\raisebox{-0.2\height}{\prFinVitConseil[height=2.5ex]} : \verb+\prFinVitConseil+ \\
+	\raisebox{-0.2\height}{\prTaxis[height=2.5ex]} : \verb+\prTaxis+ \\
+	\raisebox{-0.2\height}{\prArretBus[height=2.5ex]} : \verb+\prArretBus+ \\
+	\raisebox{-0.2\height}{\prArretUrg[height=2.5ex]} : \verb+\prArretUrg+ \\
+	\raisebox{-0.2\height}{\prCircSensUniq[height=2.5ex]} : \verb+\prCircSensUniq+ \\
+	\raisebox{-0.2\height}{\prImpasse[height=2.5ex]} : \verb+\prImpasse+ \\
+	\raisebox{-0.2\height}{\prPreImpasse[height=2.5ex]} : \verb+\prPreImpasse+ \\
+	\raisebox{-0.2\height}{\prPriorSensInv[height=2.5ex]} : \verb+\\prPriorSensInv+ \\
+	\raisebox{-0.2\height}{\prPassPietons[height=2.5ex]} : \verb+\prPassPietons+ \\
+	\raisebox{-0.2\height}{\prTravTrams[height=2.5ex]} : \verb+\prTravTrams+ \\
+	\raisebox{-0.2\height}{\prStatCarav[height=2.5ex]} : \verb+\prStatCarav+ \\
+	\raisebox{-0.2\height}{\prVoiesAffA[height=2.5ex]} : \verb+\prVoiesAffA+ \\
+	\raisebox{-0.2\height}{\prVoiesAffB[height=2.5ex]} : \verb+\prVoiesAffB+ \\
+	\raisebox{-0.2\height}{\prVoiesAffC[height=2.5ex]} : \verb+\prVoiesAffC+ \\
+	\raisebox{-0.2\height}{\prVoiesAffD[height=2.5ex]} : \verb+\prVoiesAffD+ \\
+	\raisebox{-0.2\height}{\prVoiesAffE[height=2.5ex]} : \verb+\prVoiesAffE+ \\
+	\raisebox{-0.2\height}{\prVoiesAffF[height=2.5ex]} : \verb+\prVoiesAffF+ \\
+	\raisebox{-0.2\height}{\prVitFront[height=2.5ex]} : \verb+\prVitFront+ \\
+	\raisebox{-0.2\height}{\prVitAutor[height=2.5ex]} : \verb+\prVitAutor+ \\
+	\raisebox{-0.2\height}{\prDetresseD[height=2.5ex]} : \verb+\prDetresseD+ \\
+	\raisebox{-0.2\height}{\prDetresseG[height=2.5ex]} : \verb+\prDetresseG+ \\
+	\raisebox{-0.2\height}{\prChausseSur[height=2.5ex]} : \verb+\prChausseSur+ \\
+	\raisebox{-0.2\height}{\prReducVoieA[height=2.5ex]} : \verb+\prReducVoieA+ \\
+	\raisebox{-0.2\height}{\prReducVoieB[height=2.5ex]} : \verb+\prReducVoieB+ \\
+	\raisebox{-0.2\height}{\prCreneauDepas[height=2.5ex]} : \verb+\prCreneauDepas+ \\
+	\raisebox{-0.2\height}{\prFinCreneauDepas[height=2.5ex]} : \verb+\prFinCreneauDepas+
+\end{multicols}
+
+\begin{multicols}{3}
+	\raisebox{-0.2\height}{\prTickPeage[height=2.5ex]} : \verb+\prTickPeage+ \\
+	\raisebox{-0.2\height}{\prPaiemPeage[height=2.5ex]} : \verb+\prPaiemPeage+ \\
+	\raisebox{-0.2\height}{\prPaiemCB[height=2.5ex]} : \verb+\prPaiemCB+ \\
+	\raisebox{-0.2\height}{\prPaiemPieces[height=2.5ex]} : \verb+\prPaiemPieces+ \\
+	\raisebox{-0.2\height}{\prPaiemPiecBil[height=2.5ex]} : \verb+\prPaiemPiecBil+ \\
+	\raisebox{-0.2\height}{\prPaiemTelepeage[height=2.5ex]} : \verb+\prPaiemTelepeage+ \\
+	\raisebox{-0.2\height}{\prRouteRegl[height=2.5ex]} : \verb+\prRouteRegl+ \\
+	\raisebox{-0.2\height}{\prFinRouteRegl[height=2.5ex]} : \verb+\prFinRouteRegl+ \\
+	\raisebox{-0.2\height}{\prEntrTunnel[height=2.5ex]} : \verb+\prEntrTunnel+ \\
+	\raisebox{-0.2\height}{\prSortieTunnel[height=2.5ex]} : \verb+\prSortieTunnel+ \\
+	\raisebox{-0.2\height}{\prPisteCycl[height=2.5ex]} : \verb+\prPisteCycl+ \\
+	\raisebox{-0.2\height}{\prFinPisteCycl[height=2.5ex]} : \verb+\prFinPisteCycl+ \\
+	\raisebox{-0.2\height}{\prVoieVerte[height=2.5ex]} : \verb+\prVoieVerte+ \\
+	\raisebox{-0.2\height}{\prFinVoieVerte[height=2.5ex]} : \verb+\prFinVoieVerte+ \\
+	\raisebox{-0.2\height}{\prDebAutor[height=2.5ex]} : \verb+\prDebAutor+ \\
+	\raisebox{-0.2\height}{\prFinAutor[height=2.5ex]} : \verb+\prFinAutor+
+\end{multicols}
+
+\begin{multicols}{3}
+	\raisebox{-0.2\height}{\prPosteSecours[height=2.5ex]} : \verb+\prPosteSecours+ \\
+	\raisebox{-0.2\height}{\prPosteSecUrg[height=2.5ex]} : \verb+\prPosteSecUrg+ \\
+	\raisebox{-0.2\height}{\prCabineTel[height=2.5ex]} : \verb+\prCabineTel+ \\
+	\raisebox{-0.2\height}{\prInfos[height=2.5ex]} : \verb+\prInfos+ \\
+	\raisebox{-0.2\height}{\prCampingT[height=2.5ex]} : \verb+\prCampingT+ \\
+	\raisebox{-0.2\height}{\prCampingC[height=2.5ex]} : \verb+\prCampingC+ \\
+	\raisebox{-0.2\height}{\prCampingTC[height=2.5ex]} : \verb+\prCampingTC+ \\
+	\raisebox{-0.2\height}{\prAubergJeun[height=2.5ex]} : \verb+\prAubergJeun+ \\
+	\raisebox{-0.2\height}{\prGite[height=2.5ex]} : \verb+\prGite+ \\
+	\raisebox{-0.2\height}{\prItinPedest[height=2.5ex]} : \verb+\prItinPedest+ \\
+	\raisebox{-0.2\height}{\prItinSkiFond[height=2.5ex]} : \verb+\prItinSkiFond+ \\
+	\raisebox{-0.2\height}{\prPicNic[height=2.5ex]} : \verb+\prPicNic+ \\
+	\raisebox{-0.2\height}{\prGareAutoTrain[height=2.5ex]} : \verb+\prGareAutoTrain+ \\
+	\raisebox{-0.2\height}{\prParkVideo[height=2.5ex]} : \verb+\prParkVideo+ \\
+	\raisebox{-0.2\height}{\prEmbarcad[height=2.5ex]} : \verb+\prEmbarcad+ \\
+	\raisebox{-0.2\height}{\prToilettes[height=2.5ex]} : \verb+\prToilettes+ \\
+	\raisebox{-0.2\height}{\prAccesHandic[height=2.5ex]} : \verb+\prAccesHandic+ \\
+	\raisebox{-0.2\height}{\prEssence[height=2.5ex]} : \verb+\prEssence+ \\
+	\raisebox{-0.2\height}{\prEssenceGPL[height=2.5ex]} : \verb+\prEssenceGPL+ \\
+	\raisebox{-0.2\height}{\prRestau[height=2.5ex]} : \verb+\prRestau+ \\
+	\raisebox{-0.2\height}{\prHotel[height=2.5ex]} : \verb+\prHotel+ \\
+	\raisebox{-0.2\height}{\prBoissons[height=2.5ex]} : \verb+\prBoissons+ \\
+	\raisebox{-0.2\height}{\prEmbarcLeg[height=2.5ex]} : \verb+\prEmbarcLeg+ \\
+	\raisebox{-0.2\height}{\prTelepher[height=2.5ex]} : \verb+\prTelepher+ \\
+	\raisebox{-0.2\height}{\prTelecabin[height=2.5ex]} : \verb+\prTelecabin+ \\
+	\raisebox{-0.2\height}{\prPointVue[height=2.5ex]} : \verb+\prPointVue+ \\
+	\raisebox{-0.2\height}{\prRadio[height=2.5ex]} : \verb+\prRadio+ \\
+	\raisebox{-0.2\height}{\prJeuxEnfants[height=2.5ex]} : \verb+\prJeuxEnfants+ \\
+	\raisebox{-0.2\height}{\prVidange[height=2.5ex]} : \verb+\prVidange+ \\
+	\raisebox{-0.2\height}{\prDistribBill[height=2.5ex]} : \verb+\prDistribBill+ \\
+	\raisebox{-0.2\height}{\prGonflage[height=2.5ex]} : \verb+\prGonflage+ \\
+	\raisebox{-0.2\height}{\prDetente[height=2.5ex]} : \verb+\prDetente+ \\
+	\raisebox{-0.2\height}{\prPosteDepann[height=2.5ex]} : \verb+\prPosteDepann+ \\
+	\raisebox{-0.2\height}{\prLutteIncendie[height=2.5ex]} : \verb+\prLutteIncendie+ \\
+	\raisebox{-0.2\height}{\prIssueSecD[height=2.5ex]} : \verb+\prIssueSecD+ \\
+	\raisebox{-0.2\height}{\prIssueSecG[height=2.5ex]} : \verb+\prIssueSecG+
+\end{multicols}
+
+\end{document}
