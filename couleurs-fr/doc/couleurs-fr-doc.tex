@@ -34,8 +34,8 @@
 \usepackage[margin=1.5cm]{geometry}
 \setlength{\parindent}{0pt}
 
-\def\TPversion{0.1.3}
-\def\TPdate{02 juillet 2025}
+\def\TPversion{0.1.4}
+\def\TPdate{06 juillet 2025}
 \def\HtRet{0.45}\def\LgRect{1.5}
 \usepackage{tcolorbox}
 
@@ -95,14 +95,23 @@
 \end{minipage}
 \end{center}
 
-\vspace*{1mm}
-
 \begin{center}
 	\begin{tabular}{c}
 	\texttt{Cédric Pierquet}\\
-	{\ttfamily c pierquet -- at -- outlook . fr}\\
-	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
+	{\ttfamily cpierquet -- at -- outlook . fr}
 \end{tabular}
+\end{center}
+
+\begin{center}
+\begin{minipage}{0.85\linewidth}
+	\begin{tcolorbox}[colframe=teal,colback=teal!10,halign=center,fontupper=\footnotesize]
+		\texttt{\url{https://github.com/cpierquet/latex-packages/tree/main/couleurs-fr}}
+		
+		~
+		
+		\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
+	\end{tcolorbox}
+\end{minipage}
 \end{center}
 
 \hrule
@@ -159,7 +168,7 @@
 
 \subsection{Idée}
 
-L'idée est de proposer des couleurs au noms francisés (indépendamment d'options du package \MontreCode{xcolor}), de couleurs basées sur les palettes \MontreCode{[svgnames]} ou \MontreCode{[dvipsnames]} ou \MontreCode{[xkcd]} ou \MontreCode{[flexoki]} (\url{https://ctan.org/pkg/xcolor} et \url{https://xkcd.com/color/rgb.txt}).
+L'idée est de proposer des couleurs aux noms francisés (indépendamment d'options du package \MontreCode{xcolor}), de couleurs basées sur les palettes \MontreCode{[svgnames]} ou \MontreCode{[dvipsnames]} ou \MontreCode{[xkcd]} ou \MontreCode{[flexoki]} (\url{https://ctan.org/pkg/xcolor} et \url{https://xkcd.com/color/rgb.txt} et \url{https://stephango.com/flexoki}).
 
 \smallskip
 
@@ -189,7 +198,7 @@ Si \texttt{xcolor} est amené à être chargé avec des options particulières, 
 ...
 \end{codehigh}
 
-\subsection{Prefixe des couleurs génériques}
+\subsection{Préfixe des couleurs génériques}
 
 Pour éviter des éventuelles confusions avec d'autres couleurs précédemment définies, il est possible de préfixer les couleurs génériques, grâce à l'option \MontreCode{[Prefixe]} à passer au package \MontreCode{couleurs-fr}
 
@@ -204,13 +213,15 @@ Pour éviter des éventuelles confusions avec d'autres couleurs précédemment d
 
 \subsection{Historique}
 
+\verb|v0.1.4|~:~~~~Correction de doublons (merci à \textsf{quark67})
+
 \verb|v0.1.3|~:~~~~Ajout des couleurs \href{https://stephango.com/flexoki}{flexoki} préfixées par \textsf{f}
 
 \verb|v0.1.2|~:~~~~Ajout des couleurs \href{https://xkcd.com/color/rgb.txt}{xkcd} préfixées par \textsf{x}
 
 \verb|      |~:~~~~Option pour préfixer les couleurs génériques
 
-\verb|v0.1.1|~:~~~~Ajout de couleurs venant de wikipedia (\href{https://fr.wikipedia.org/wiki/Liste_de_noms_de_couleur}{[lien]})
+\verb|v0.1.1|~:~~~~Ajout de couleurs venant de Wikipédia (\href{https://fr.wikipedia.org/wiki/Liste_de_noms_de_couleur}{[lien]})
 
 \verb|v0.1.0|~:~~~~Version initiale
 
@@ -221,6 +232,10 @@ Pour éviter des éventuelles confusions avec d'autres couleurs précédemment d
 \section{Couleurs génériques}
 
 Les noms sont les noms génériques, qui peuvent être préfixés par \MontreCode{g} dans le cas où le package est chargé avec l'option \MontreCode{[Prefixe]}.
+
+\smallskip
+
+Les couleurs et leurs noms sont issues des bases \textsf{svgnames/dvipsnames} de \textsf{xcolor} ainsi qu'une liste provenant de \textsf{Wikipédia}.
 %
 %\subsection{Par ordre alphabétique}
 
@@ -742,6 +757,7 @@ Pour des soucis de compatibilité avec d'autres couleurs prédéfinies, les coul
 	\MontreCouleurXKCD{Adobe}{BD6C48}
 	\MontreCouleurXKCD{AigueMarine}{04D8B2}
 	\MontreCouleurXKCD{Algue}{54AC68}
+	\MontreCouleurXKCD{AlgueVerte}{21C36F}
 	\MontreCouleurXKCD{Ambre}{FEB308}
 	\MontreCouleurXKCD{Amethyste}{9B5FC0}
 	\MontreCouleurXKCD{Ardoise}{516572}
@@ -860,7 +876,6 @@ Pour des soucis de compatibilité avec d'autres couleurs prédéfinies, les coul
 	\MontreCouleurXKCD{Bleuet}{5170D7}
 	\MontreCouleurXKCD{Bleu}{0343DF}
 	\MontreCouleurXKCD{Ble}{FBDD7E}
-	\MontreCouleurXKCD{Bordeaux}{680018}
 	\MontreCouleurXKCD{Bordeaux}{7B002C}
 	\MontreCouleurXKCD{Boue}{735C12}
 	\MontreCouleurXKCD{BourgogneClair}{A8415B}
@@ -910,7 +925,6 @@ Pour des soucis de compatibilité avec d'autres couleurs prédéfinies, les coul
 	\MontreCouleurXKCD{CitronVertPale}{BEFD73}
 	\MontreCouleurXKCD{CitronVertVif}{87FD05}
 	\MontreCouleurXKCD{CitronVert}{AAFF32}
-	\MontreCouleurXKCD{CitronVert}{AEFF6E}
 	\MontreCouleurXKCD{Citron}{FDFF52}
 	\MontreCouleurXKCD{Cobalt}{1E488F}
 	\MontreCouleurXKCD{CoquilleOeuf}{FFFCC4}
@@ -1157,6 +1171,7 @@ Pour des soucis de compatibilité avec d'autres couleurs prédéfinies, les coul
 	\MontreCouleurXKCD{Peche}{FFB07C}
 	\MontreCouleurXKCD{PervencheClair}{C1C6FC}
 	\MontreCouleurXKCD{PervencheFonce}{665FD1}
+	\MontreCouleurXKCD{PetitCitronVert}{AEFF6E}
 	\MontreCouleurXKCD{Petrole}{005F6A}
 	\MontreCouleurXKCD{Pierre}{ADA587}
 	\MontreCouleurXKCD{Pin}{2B5D34}
@@ -1221,7 +1236,6 @@ Pour des soucis de compatibilité avec d'autres couleurs prédéfinies, les coul
 	\MontreCouleurXKCD{RoseCorail}{FF6163}
 	\MontreCouleurXKCD{RoseDoux}{FDB0C0}
 	\MontreCouleurXKCD{RoseElectrique}{FF0490}
-	\MontreCouleurXKCD{RoseFane}{C0737A}
 	\MontreCouleurXKCD{RoseFane}{D58A94}
 	\MontreCouleurXKCD{RoseFonce}{B5485D}
 	\MontreCouleurXKCD{RoseLaid}{CD7584}
@@ -1233,6 +1247,7 @@ Pour des soucis de compatibilité avec d'autres couleurs prédéfinies, les coul
 	\MontreCouleurXKCD{RosePastel}{FFBACD}
 	\MontreCouleurXKCD{RosePeche}{FF9A8A}
 	\MontreCouleurXKCD{RosePoudre}{FFB2D0}
+	\MontreCouleurXKCD{RosePoussiereux}{C0737A}
 	\MontreCouleurXKCD{RoseRose}{F6688E}
 	\MontreCouleurXKCD{RoseRougeatre}{FE2C54}
 	\MontreCouleurXKCD{RoseRouge}{FA2A55}
@@ -1248,6 +1263,7 @@ Pour des soucis de compatibilité avec d'autres couleurs prédéfinies, les coul
 	\MontreCouleurXKCD{Roseatre}{D46A7E}
 	\MontreCouleurXKCD{Rose}{CF6275}
 	\MontreCouleurXKCD{RougeAttenue}{BB3F3F}
+	\MontreCouleurXKCD{RougeBordeaux}{680018}
 	\MontreCouleurXKCD{RougeBrique}{8F1402}
 	\MontreCouleurXKCD{RougeBrule}{9F2305}
 	\MontreCouleurXKCD{RougeCamionPompier}{FE0002}
@@ -1333,9 +1349,9 @@ Pour des soucis de compatibilité avec d'autres couleurs prédéfinies, les coul
 	\MontreCouleurXKCD{TurquoiseVerdatre}{00FBB0}
 	\MontreCouleurXKCD{Turquoise}{06C2AC}
 	\MontreCouleurXKCD{Velours}{750851}
+	\MontreCouleurXKCD{Verdatre}{40A368}
 	\MontreCouleurXKCD{Vermillon}{F4320C}
 	\MontreCouleurXKCD{VertAcide}{8FFE09}
-	\MontreCouleurXKCD{VertAlgue}{21C36F}
 	\MontreCouleurXKCD{VertAlgue}{35AD6B}
 	\MontreCouleurXKCD{VertAqua}{12E193}
 	\MontreCouleurXKCD{VertArbre}{2A7E19}
@@ -1400,7 +1416,6 @@ Pour des soucis de compatibilité avec d'autres couleurs prédéfinies, les coul
 	\MontreCouleurXKCD{VertHopital}{9BE5AA}
 	\MontreCouleurXKCD{VertIrlandais}{019529}
 	\MontreCouleurXKCD{VertJade}{2BAF6A}
-	\MontreCouleurXKCD{VertJaunatre}{40A368}
 	\MontreCouleurXKCD{VertJaunatre}{B0DD16}
 	\MontreCouleurXKCD{VertJauneClair}{CCFD7F}
 	\MontreCouleurXKCD{VertJauneFonce}{728F02}
