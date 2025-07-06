@@ -1,0 +1,67 @@
+%---tkz-grapheur----
+Un des objectifs de cet exercice est de déterminer une approximation du nombre réel $\ln(2)$, en utilisant une des méthodes du mathématicien anglais Henry Briggs au 16\up{e} siècle.
+
+On désigne par $\left(u_{n}\right)$ la suite définie par : \[u_{0}=2 \quad \text { et } \quad \text { pour tout entier naturel } n,~u_{n+1}=\sqrt{u_{n}}.\]
+
+\textbf{PARTIE A}
+
+\begin{enumerate}
+	\item
+	\begin{enumerate}
+		\item Donner la valeur exacte de $u_{1}$ et de $u_{2}$.
+		\item Émettre une conjecture, à l'aide de la calculatrice, sur le sens de variation et la limite éventuelle de la suite.
+	\end{enumerate}
+	\item
+	\begin{enumerate}
+		\item Montrer par récurrence que pour tout entier naturel $n$, $1 \leqslant u_{n+1} \leqslant u_{n}$.
+		\item En déduire que la suite $\left(u_{n}\right)$ est convergente.
+		\item Résoudre dans l'intervalle $\IntervalleFO{0}{+\infty}$ l'équation $\sqrt{x}=x$.
+		\item Déterminer, en justifiant, la limite de la suite $\left(u_{n}\right)$.
+	\end{enumerate}
+\end{enumerate}
+
+\textbf{PARTIE B}
+
+\medskip
+
+On désigne par $\left(v_{n}\right)$ la suite définie pour tout entier naturel $n$ par $v_{n}=\ln{\left(u_{n}\right)}$.
+
+\begin{enumerate}
+	\item
+	\begin{enumerate}
+		\item Démontrer que la suite $\left(v_{n}\right)$ est géométrique de raison $\frac{1}{2}$.
+		\item Exprimer $v_{n}$ en fonction de $n$, pour tout entier naturel $n$.
+		\item En déduire que, pour tout entier naturel $n$, $\ln(2)=2^{n} \ln{\left(u_{n}\right)}$.
+	\end{enumerate}
+	\item On a tracé ci-dessous dans un repère orthonormé la courbe $\mathcal{C}$ de la fonction $\ln$ et la tangente $T$ à la courbe $\mathcal{C}$ au point d'abscisse 1.
+	Une équation de la droite T est $y=x-1$.
+	Les points $A_{0}, A_{1}, A_{2}$ ont pour abscisses respectives $u_{0}, u_{1}$ et $u_{2}$ et pour ordonnée 0 .
+	
+	\begin{Centrage}
+		\begin{GraphiqueTikz}[x=4.4cm,y=4.4cm,Xmin=-0.25,Xmax=2.25,Xgrille=1,Xgrilles=1,Ymin=-0.25,Ymax=1.25,Ygrille=1,Ygrilles=1]
+			\draw (-2pt,-2pt) node[below left] {$0$} ;
+			\TracerAxesGrilles[Grille=false,Elargir=2.5mm]{1,2}{0.5,1}
+			\TracerCourbe[Couleur=red,Debut=0.5]{ln(x)}
+			\TracerCourbe[Couleur=blue]{x-1}
+			\PlacerTexte[Police=\Large,Couleur=red]{(1.91,0.568)}{$\mathcal{C}$}
+			\PlacerTexte[Police=\Large,Couleur=blue]{(1.91,0.795)}{$T$}
+			%points suite u_n
+			\filldraw (2,0) circle[radius=2pt] node[above] {$A_{0}$} ;
+			\filldraw ({sqrt(2)},0) circle[radius=2pt] node[above] {$A_{1}$} ;
+			\filldraw ({sqrt(sqrt(2))},0) circle[radius=2pt] node[above] {$A_{2}$} ;
+		\end{GraphiqueTikz}
+	\end{Centrage}
+
+	On décide de prendre $x-1$ comme approximation de $\ln(x)$ lorsque $x$ appartient à l'intervalle $\IntervalleOO{0,99}{1,01}$.
+	\begin{enumerate}
+		\item Déterminer à l'aide de la calculatrice le plus petit entier naturel $k$ tel que $u_{k}$ appartienne à l'intervalle $\IntervalleOO{0,99}{1,01}$ et donner une valeur approchée de $u_{k}$ à $10^{-5}$ près.
+		\item En déduire une approximation de $\ln \left(u_{k}\right)$.
+		\item Déduire des questions \textbf{1.(c)} et \textbf{2.(b)} de la \textbf{partie B} une approximation de $\ln (2)$.
+	\end{enumerate}
+	\item On généralise la méthode précédente à tout réel $a$ strictement supérieur à 1.
+	
+	Recopier et compléter l'algorithme ci-dessous afin que l'appel \AffVignette[Type=py]{Briggs(a)} renvoie une approximation de $\ln (a)$.
+	On rappelle que l'instruction en langage \AffVignette[Type=py]{Python} \AffVignette[Type=py]{sqrt(a)} correspond à $\sqrt{a}$.
+	
+	\CodePythonLstFichierAlt*[8cm]{center}{an2025j2exo2.py}
+\end{enumerate}

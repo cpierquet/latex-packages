@@ -1,0 +1,40 @@
+On considère le repère orthonormé $\left(A;\vect{\imath},\,\vect{\jmath},\,\vect{k}\right)$ de l'espace dans lequel on place les points ${B(4;0;0)}$, ${D(0;4;0)}$, ${E(0;0;4)}$ et les points $C$, $F$, $G$ et $H$ de sorte que le solide $ABCDEFGH$ soit un cube.
+
+\begin{Centrage}
+	\begin{EnvTikzEspace}[UniteX={0:0.8cm},UniteY={52.5:0.56cm},UniteZ={90:0.8cm}]<line width=0.8pt>
+		%\filldraw[red] (2,4,3) circle[radius=1pt] ; \draw[red] (0,0,0) -- (2,4,3) ;
+		\draw[->,>=latex] (0,0,0)--(1,0,0) node[midway,below,font=\footnotesize] {$\vect{\imath}$} ;
+		\draw[->,>=latex] (0,0,0)--(0,1,0) node[right,font=\footnotesize] {$\vect{\jmath}$} ;
+		\draw (-2,0,0)--(6,0,0) (0,0,-1.5)--(0,0,6.5) ;
+		\draw[densely dashed] (0,4,0)--(0,5,0) ;
+		\PlacePointsEspace{A/0,0,0/bg B/4,0,0/b C/4,4,0/hd D/0,4,0/g E/0,0,4/g F/4,0,4/d G/4,4,4/h H/0,4,4/h I/2,0,4/h}
+		\draw (A)--(B)--(C)--(G)--(H)--(E)--cycle (B)--(F)--(G) (F)--(E) ;
+		\draw[densely dashed] (A)--(D) (H)--(D)--(C) (I)--(C) ;
+		\draw[->,>=latex] (0,0,0)--(0,0,1) node[midway,left,font=\footnotesize] {$\vect{k}$} ;
+		\def\abstG{-0.8}\def\abstH{1.125}
+		\draw ({2+2*\abstG},{4*\abstG},{4-4*\abstG})--(I) (C)--({2+2*\abstH},{4*\abstH},{4-4*\abstH});
+	\end{EnvTikzEspace}
+\end{Centrage}
+
+\begin{enumerate}
+	\item Donner les coordonnées des points $C$, $F$, $G$ et $H$.
+	\item On considère le point $I$ milieu de l’arête $[EF]$.
+	
+	Montrer qu’une représentation paramétrique de la droite $(IC)$ est donnée par : \[ \begin{dcases} x=2+2t\\y=4t\\z=4-4t\end{dcases} \text{ où } t \in \R. \]
+	\item On désigne par $\mathcal{P}$ le plan orthogonal à la droite $(IC)$ passant par le point $G$, et par $J$ l'intersection de $\mathcal{P}$ avec $(IC)$.
+	\begin{enumerate}
+		\item Démontrer qu'une équation cartésienne du plan $\mathcal{P}$ est donnée par \[ x+2y-2z-4=0. \]
+		\item Justifier que le point de coordonnées $\left(\frac{28}{9};\frac{20}{9};\frac{16}{9}\right)$. Que représente $J$ par rapport à $C$ ?
+		\item Vérifier que le point $K(0;2;0)$ appartient au plan $\mathcal{P}$.
+		\item Justifier que $(BK)$ est l'intersection des plans $\mathcal{P}$ et $(ABC)$.
+	\end{enumerate}
+	\item On rappelle que le volume d'une pyramide est données par la formule $\mathcal{V}=\frac{\mathcal{B}\times h}{3}$ où $\mathcal{B}$ est l'aire d'une base et $h$ la hauteur relative à cette base.
+	\begin{enumerate}
+		\item Déterminer la volume de la pyramide $CBKG$.
+		\item En déduire que l'aire du triangle $BKG$ est égale à 12.
+	\end{enumerate}
+	\item Justifier que la droite $(BG)$ est incluse dans $\mathcal{P}$.
+	\item On note $I'$ un point de l'arête $[EF]$, et $\mathcal{P}'$ le plan orthogonal à la droite $(I'C)$ passant par $G$.
+	
+	Peut-on affirmer que la droite $(BG)$ est incluse dans $\mathcal{P}'$ ?
+\end{enumerate}

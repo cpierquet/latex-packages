@@ -1,0 +1,1482 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cp-tcbox}[2022/03/27 Macros tcbox V2.7.1]
+% 2.7.1		Modif mineure pour <= et >= sur tcpseudocode
+% 2.7		Modif mineure pour \fontnwks suivant lualatex ou (pdf)latex
+% 2.6		Ajout de commandes fakes (pour RS et terminal)
+% 2.5		Commande \algomathtt pour la distinction mathtt / symtt (lua...)
+% 2.4		Ajout vignette cgraphtikz pour insérer du tikz dedans sans erreur...
+% 2.3		Modif légère du design de titre
+% 2.2.1		Boîte réponse avec seyes
+% 2.2		Modif numworks avec lualatex ou pdflatex ;-)
+% 2.1		Ajout des blocs epreuve/sousepreuve blocsujet et tcsousepreuve[opt]
+% 2.0.4		Modification gestion * dans tcpseudocode (pour le *fois*, mathtt(\times))
+% 2.0.3		Police sourcecodepro pour numworks (à installer quand même ;-))
+% 2.0.2		Ajout d'une boîte python sans num ligne envpythonnoline
+% 2.0.1		Ajout d'une capsule \csoluce pour les solutions de QCMs ;-)
+% 2.0		Nettoyage des boîtes, avec options globales pour une meilleure lisibilité ?
+% 1.9.1		Ajout d'une commande \cgrph pour une capsule lecture graphique
+% 1.9		Ajout d'une commande \calgpython pour le logo python version tcbox (compatible pstricks)
+% v1.8.1	Ajout d'une boîte clog et cloglogo pour les logiciels
+% v1.8		Changement font pcr pour les menus (plus jolie ?)
+% v1.7.2	Commande de menu/onglet numwks \menunwks
+% v1.7.1	Ajout d'une commande vignette \ccalg{} générique
+% v1.7		Environnements fiche et onglet (merci Anne ;-) !)
+% v1.6		Ajout d'environnements condensées envlatex et envshell [larg]{gooble=...} et enpython [larg]
+% v1.5.2	Ajout d'un "transparent" boîte ccalgo
+% V1.5.1	Modification logo chistoire
+% V1.5		Ajout de boîtes codes latex/shell + nettoyage du code
+% V1.4		Ajout d'une boîte Histoire des Maths (chistoire)
+% V1.3		Ajout de la tcbox ccalgologo avec un logo calculatrice en bas à droite ;-)
+% V1.2		Légère modification taille police code
+% V1.1		Essai de mots clés pseudocode avec accents !
+% V1		Externalisation des boîtes tcbox !
+
+% boites [breakable]
+\newif\if@breakable \@breakablefalse
+\DeclareOption{breakable}{\@breakabletrue}
+
+\DeclareOption*{}%% Ne rien faire quand une option est inconnue
+\ProcessOptions\relax
+
+\RequirePackage[most]{tcolorbox}
+\RequirePackage{ifluatex}
+\tcbuselibrary{skins}
+\tcbuselibrary{xparse}
+\tcbuselibrary{raster}
+
+%--shell python tcbox--
+\tcbset{pythonshell/.style={%
+	size=fbox,left=1mm,right=1mm,boxsep=0pt,on line,%
+	colback=green!5!white,colframe=green!75!black,%
+	fontupper={\blue >{}>{}>{} }\strut\footnotesize\ttfamily}%
+}
+
+%--point calculatrice--
+\newtcolorbox{pointcalc}{%
+	coltitle=red!75!black,colbacktitle=black!10!white,colback=white,sharp corners=uphill,arc=12pt,title=\faCalculator{}\:\textsf{Point Calculatrice}%
+}
+
+%--point python--
+\newtcolorbox{pointpython}{%
+	coltitle=green!75!black,colbacktitle=black!10!white,colback=white,sharp corners=uphill,arc=12pt,title=\faPython{}\:\textsf{Point Python}%
+}
+
+%--style par défaut python--
+\tcbset{cpython/.style={%
+	center,boxrule=1.25pt,%
+	colframe=Green,coltitle=Green!75!black,colbacktitle=black!10!white,colback=black!5,%
+	sharp corners=uphill,arc=12pt,left=5pt,leftupper=25pt,rightupper=25pt,before skip=8pt,after skip=8pt}%
+}
+
+%codepythontitre
+\newtcolorbox{codepython}[1][16cm]{%
+	cpython,width=#1,title=\faPython{}\:\textsf{Code Python}}
+
+%codepython
+\newtcolorbox{codepythonv}[1][16cm]{%
+	cpython,width=#1}
+
+%-----Commandes Python/Algo sous forme de vignette-----
+\tcbset{vignettelogo/.style={%
+	fontupper={\tiny \textcolor{Green!75!black}{\faPython}}\:\vphantom{pf}\small\ttfamily,%
+	nobeforeafter,box align=base,boxsep=0pt,enhanced,sharp corners=all,rounded corners=southeast,%
+	boxrule=0.75pt,left=1pt,right=1pt,top=0pt,bottom=0.25pt,%
+	colframe=Green,coltitle=Green!75!black,colback=ForestGreen!5,%
+	before upper = \vphantom{pf},
+	underlay={\begin{tcbclipinterior}%
+				\draw[color=ForestGreen!33,fill=ForestGreen!33]($(interior.south west)$) rectangle ($(interior.north west)+(7pt,0pt)$);%
+			\end{tcbclipinterior}}
+	}
+}
+
+%-----VIGNETTES AVEC TEXTE LATÉRAL-----
+\tcbset{vignettes/.style={%
+		nobeforeafter,box align=base,boxsep=0pt,enhanced,sharp corners=all,rounded corners=southeast,%
+		boxrule=0.75pt,left=7pt,right=1pt,top=0pt,bottom=0.25pt,%
+		%before upper={{\normalsize \vphantom{pf}}}
+	}
+}
+
+\tcbset{vignettepy/.style={%
+		fontupper={\vphantom{pf}\footnotesize\ttfamily},%
+		vignettes,%
+		colframe=Green,coltitle=Green!75!black,colback=ForestGreen!5,%
+		underlay={\begin{tcbclipinterior}%
+					\draw[color=lightgray!50,fill=lightgray!50]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{Green!75!black}{\scalebox{0.55}[0.75]{\textbf{PY}}}}} ($(interior.north west)+(5pt,0pt)$);%
+				\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{vignettepyccf/.style={%
+		fontupper={\vphantom{pf}\footnotesize},%
+		vignettes,%
+		colframe=Green,coltitle=Green!75!black,colback=ForestGreen!5,%
+		underlay={\begin{tcbclipinterior}%
+					\draw[color=lightgray!50,fill=lightgray!50]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{Green!75!black}{\scalebox{0.55}[0.75]{\textbf{PY}}}}} ($(interior.north west)+(5pt,0pt)$);%
+				\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{vignettealgo/.style={%
+		fontupper={\vphantom{pf}\footnotesize\ttfamily},%
+		vignettes,%
+		colframe=darkgray,coltitle=white,colback=darkgray!5,%
+		underlay={\begin{tcbclipinterior}%
+					\draw[color=lightgray!50,fill=lightgray!50]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{darkgray}{\scalebox{0.55}[0.75]{\textbf{ALGO}}}}} ($(interior.north west)+(5pt,0pt)$);%
+				\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{vignettetableur/.style={%
+		fontupper={\vphantom{pf}\footnotesize\sffamily},%
+		vignettes,%
+		colframe=SeaGreen,coltitle=White,colback=White,%
+		underlay={\begin{tcbclipinterior}%
+					\draw[color=SeaGreen!25,fill=SeaGreen!25]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{darkgray}{\scalebox{0.5}[0.75]{\textbf{EXCEL}}}}} ($(interior.north west)+(5pt,0pt)$);%
+				\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{vignettealgopython/.style={%
+		%fontupper={\vphantom{pf}\footnotesize\sffamily},%
+		vignettes,%
+		right=2pt,%
+		colframe=darkgray,coltitle=White,colback=White,%
+		underlay={\begin{tcbclipinterior}%
+					\draw[color=lightgray!50,fill=lightgray!50]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{darkgray}{\scalebox{0.55}[0.75]{\textbf{ALGO}}}}} ($(interior.north west)+(5pt,0pt)$);%
+				\end{tcbclipinterior}}
+		}
+	}
+
+\tcbset{vignettegraph/.style={%
+		fontupper={\vphantom{pf}\footnotesize\sffamily},%
+		vignettes,%
+		colframe=YellowGreen,coltitle=White,colback=White,%
+		underlay={\begin{tcbclipinterior}%
+					\draw[color=YellowGreen!25,fill=YellowGreen!25]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{darkgray}{\scalebox{0.55}[0.75]{\textbf{GRPH}}}}} ($(interior.north west)+(5pt,0pt)$);%
+				\end{tcbclipinterior}}
+		}
+	}
+
+\tcbset{vignettegraphtikz/.style={%
+		vignettes,top=2pt,bottom=2pt,%
+		colframe=YellowGreen,coltitle=White,colback=White,%
+		underlay={\begin{tcbclipinterior}%
+				\draw[color=YellowGreen!25,fill=YellowGreen!25]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{darkgray}{\scalebox{0.55}[0.75]{\textbf{GRPH}}}}} ($(interior.north west)+(5pt,0pt)$);%
+		\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{vignetteshell/.style={%
+		fontupper={\vphantom{pf}\footnotesize\sffamily},%
+		vignettes,%
+		colframe=Maroon,coltitle=white,colback=Maroon!5,%
+		underlay={\begin{tcbclipinterior}%
+					\draw[color=lightgray!50,fill=lightgray!50]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{Maroon}{\scalebox{0.55}[0.75]{\textbf{SHELL}}}}} ($(interior.north west)+(5pt,0pt)$);%
+				\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{vignettelatex/.style={%
+		fontupper={\vphantom{pf}\footnotesize\ttfamily},
+		vignettes,%
+		colframe=Turquoise,coltitle=white,colback=Turquoise!5,%
+		underlay={\begin{tcbclipinterior}%
+					\fill[fill=lightgray!50]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{Turquoise}{\scalebox{0.6}[0.75]{\textbf{\LaTeX}}}}} ($(interior.north west)+(5pt,0pt)$);%
+				\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{vignettexcas/.style={%
+		fontupper={\vphantom{pf}\footnotesize\sffamily},
+		vignettes,%
+		colframe=OrangeRed,coltitle=white,colback=OrangeRed!5,%
+		underlay={\begin{tcbclipinterior}%
+				\fill[fill=lightgray!50]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{OrangeRed}{\scalebox{0.55}[0.75]{\textbf{XCAS}}}}} ($(interior.north west)+(5pt,0pt)$);%
+		\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{vignettecrypt/.style={%
+		fontupper={\vphantom{pf}\footnotesize\ttfamily},
+		vignettes,%
+		left=10pt,right=2pt,colframe=Goldenrod,coltitle=white,colback=Goldenrod!5,%
+		underlay={\begin{tcbclipinterior}%
+					\draw[Goldenrod!25,fill=Goldenrod!25]($(interior.south west)$) rectangle node[]{\tiny \textcolor{Goldenrod!75!Black}{\scalebox{0.95}[1]{\faKey}}} ($(interior.north west)+(8pt,0pt)$);%
+				\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{vignettesoluce/.style={%
+		fontupper={\vphantom{pf}\footnotesize},%
+		vignettes,%
+		top=1.25pt,bottom=1.25pt,left=10pt,right=2pt,%
+		colframe=Lavender,coltitle=white,colback=Lavender!5,%
+		underlay={\begin{tcbclipinterior}%
+					\draw[Lavender!25,fill=Lavender!25]($(interior.south west)$) rectangle node[]{\tiny \textcolor{Lavender!75!Black}{\scalebox{0.95}[1]{\faCheckCircle}}} ($(interior.north west)+(8pt,0pt)$);%
+				\end{tcbclipinterior}}
+	}
+}
+
+%styles pseudocode/pythoncode avec bordure latérale
+\tcbset{pseudocode/.style={%
+		fontupper=\small\sffamily,%
+		enhanced,center,boxrule=1.25pt,%
+		sharp corners=all,rounded corners=southeast,arc=6pt,before skip=12pt,after skip=12pt,%
+		leftupper=15pt,top=1mm,bottom=1mm,rightupper=4pt,%
+		underlay={\begin{tcbclipinterior}%
+					\draw[color=lightgray!50,fill=lightgray!50]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{darkgray}{\scalebox{1.5}[1]{\textbf{\faFileCode\:Pseudo-Code}}}}} ($(interior.north west)+(12pt,0pt)$);%
+				\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{pythoncode/.style={%
+		enhanced,center,boxrule=1.25pt,%
+		sharp corners=all,rounded corners=southeast,arc=6pt,before skip=12pt,after skip=12pt,%
+		leftupper=30pt,top=1mm,bottom=1mm,rightupper=4pt,%
+		underlay={\begin{tcbclipinterior}%
+					\draw[color=ForestGreen!50,fill=ForestGreen!50]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{ForestGreen}{\scalebox{1.5}[1]{\textbf{\faPython\:Code Python}}}}} ($(interior
+					.north west)+(12pt,0pt)$);%
+				\end{tcbclipinterior}}
+	}
+}
+
+%environnements codes python/pseudocode
+\newtcolorbox{pytcode}[1][\linewidth]{width=#1,pythoncode,colframe=Green,colback=ForestGreen!5}
+\newtcolorbox{pcode}[1][12cm]{width=#1,pseudocode,colframe=darkgray,colback=lightgray!5}
+
+%vignettes algo/python/shell/latex/...
+\newcommand\calg[1]{\tcbox[vignettealgo]{#1}}
+\newcommand\cpyl[1]{\tcbox[vignettelogo]{#1}}
+\newcommand\cpy[1]{\tcbox[vignettepy]{#1}}
+\newcommand\cpyccf[1]{\tcbox[vignettepyccf]{\pyv{#1}}}
+\newcommand\cgrph[1]{\tcbox[vignettegraph]{#1}}
+\newcommand\cgrphtikz[1]{\tcbox[vignettegraphtikz]{#1}}
+\newcommand\cxcas[1]{\tcbox[vignettexcas]{#1}}
+\newcommand\cshell[1]{\tcbox[vignetteshell]{#1}}
+\newcommand\ctex[1]{\tcbox[vignettelatex]{#1}}
+\newcommand\ccrypt[1]{\tcbox[vignettecrypt]{#1}}
+\newcommand\csoluce[1]{\tcbox[vignettesoluce]{#1}}
+\newcommand\csheet[1]{\tcbox[vignettetableur]{#1}}
+\newcommand\calgpython{\tcbox[vignettealgopython]{$\vcenter{\hbox{\includegraphics[height=0.78\baselineskip]{logopython}}}$}}
+\newcommand\calgscratch{\tcbox[vignettealgopython]{$\vcenter{\hbox{\includegraphics[height=0.78\baselineskip]{logoscratch}}}$}}
+\newcommand\calgpythonccf{\tcbox[vignettealgopython]{$\vcenter{\hbox{\includegraphics[height=0.5\baselineskip]{logopython}}}$}}
+
+%vignette calculatrices
+\tcbset{vignettecalc/.style={%
+		fontupper={\vphantom{pf}\footnotesize\bfseries\ttfamily},%
+		nobeforeafter,box align=base,boxsep=0pt,enhanced,sharp corners=all,rounded corners=southeast,%
+		boxrule=0.75pt,left=7pt,right=1pt,top=0pt,bottom=0.25pt,%
+		colframe=Indigo,coltitle=Indigo!75!black,colback=White
+	}
+}
+
+\tcbset{vignettecasio/.style={%
+		underlay={\begin{tcbclipinterior}%
+					\draw[color=Indigo!33,fill=Indigo!33]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{Indigo!75!black}{\scalebox{0.5}[0.75]{\textbf{CASIO}}}}} ($(interior.north west)+(5pt,0pt)$);%
+				\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{vignettetexcas/.style={%
+		underlay={\begin{tcbclipinterior}%
+					\draw[color=Indigo!33,fill=Indigo!33]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{Indigo!75!black}{\scalebox{0.5}[0.75]{\textbf{TEXAS}}}}} ($(interior.north west)+(5pt,0pt)$);%
+				\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{vignettetenwks/.style={%
+	fontupper={\vphantom{pf}\scriptsize\fontnwks},%
+	nobeforeafter,box align=base,boxsep=0pt,enhanced,sharp corners=all,rounded corners=southeast,%
+	boxrule=0.75pt,left=7pt,right=1pt,top=0pt,bottom=0.25pt,%
+	colframe=Indigo,coltitle=Indigo!75!black,colback=White,
+	underlay={\begin{tcbclipinterior}%
+		\draw[color=Indigo!33,fill=Indigo!33]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{Indigo!75!black}{\scalebox{0.5}[0.75]{\textbf{NWKS}}}}} ($(interior.north west)+(5pt,0pt)$);%
+			\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{vignettecalculatrice/.style={%
+		underlay={\begin{tcbclipinterior}%
+					\draw[color=Indigo!33,fill=Indigo!33]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{Indigo!75!black}{\scalebox{0.5}[0.75]{\textbf{CALC.}}}}} ($(interior.north west)+(5pt,0pt)$);%
+				\end{tcbclipinterior}}
+	}
+}
+
+\newcommand\ccalc[1]{\tcbox[vignettecalc,vignettecasio]{#1}} %vignette CASIO
+\newcommand\ccalt[1]{\tcbox[vignettecalc,vignettetexcas]{#1}} %vignette TEXAS
+\newcommand\ccaln[1]{\tcbox[vignettetenwks]{#1}} %vignette TNWKS
+\newcommand\ccalg[1]{\tcbox[vignettecalc,vignettecalculatrice]{#1}} %vignette générique
+
+%%-----ALGORITHMES-----
+\ifluatex
+	\tcbuselibrary{listings}
+	\lstdefinelanguage{Natural}{%
+		keywords={},
+		inputencoding=utf8,
+		comment=[l]{}}
+\else
+	\tcbuselibrary{listingsutf8}
+	\lstdefinelanguage{Natural}{%
+		keywords={},
+		inputencoding=utf8/latin1,
+		comment=[l]{}}
+\fi
+
+%language pseudocode listings
+\lstdefinestyle{pseudocode}{%
+	language=Natural,
+	basicstyle=\footnotesize\ttfamily,
+	numberstyle=\scriptsize\ttfamily\color{gray},
+	keywordstyle=\bfseries,
+	stringstyle=\color{red!75},
+	keepspaces=true,
+	tabsize=4,numbersep=10pt,
+	xleftmargin=20pt,
+	numbers=left,
+	morestring=[b]",
+	showstringspaces=false,
+	%showtabs=false,
+	escapeinside={(*}{*)}
+	}
+
+\lstdefinestyle{pseudocodeno}{%
+	language=Natural,
+	basicstyle=\footnotesize\ttfamily,
+	numberstyle=\scriptsize\ttfamily\color{gray},
+	keywordstyle=\bfseries,
+	stringstyle=\color{red!75},
+	keepspaces=true,
+	tabsize=4,numbersep=10pt,
+	numbers=none,
+	showstringspaces=false,
+	morestring=[b]",
+	%showtabs=true,
+	escapeinside={(*}{*)}
+	}
+
+\tcbset{stylelatexcode/.style={%
+		enhanced,center,boxrule=1.25pt,%
+		%sharp corners=all,rounded corners=southeast,%
+		sharp corners=downhill,arc=12pt,%
+		before skip=12pt,after skip=12pt,%
+		leftupper=8pt,top=10pt,bottom=2pt,rightupper=4pt,%
+		attach boxed title to top right={yshift=-\tcboxedtitleheight},
+		boxed title style={
+			size=small,colback=Turquoise!25,boxrule=1.25pt,
+			colframe=Turquoise,boxsep=1.25pt,sharp corners=downhill,
+			arc=12pt,top=2pt,bottom=1pt,left=6pt,right=6pt
+		},
+		fonttitle=\color{Turquoise}\ttfamily\footnotesize,
+		title={\scriptsize\faStackOverflow}\:\textit{Code} \LaTeX\vphantom{y},
+		watermark text={\faStackOverflow},watermark opacity=0.175,watermark zoom=0.50
+	}
+}
+
+%boîte tcbox + latexcode
+\newtcolorbox{tclatexcode}[1][\linewidth]{%
+	width=#1,stylelatexcode,colframe=Turquoise,colback=Turquoise!5,%
+	fontlower=\small,%
+	%before upper = \renewcommand{\theFancyVerbLine}{\scriptsize\ttfamily\color{Green}\arabic{FancyVerbLine}}
+}
+
+\tcbset{styleshellcode/.style={%
+		enhanced,center,boxrule=1.25pt,%
+		%sharp corners=all,rounded corners=southeast,%
+		sharp corners=downhill,arc=12pt,before skip=12pt,after skip=12pt,%
+		leftupper=8pt,top=10pt,bottom=2pt,rightupper=4pt,%
+		attach boxed title to top right={yshift=-\tcboxedtitleheight},
+		boxed title style={
+			size=small,colback=Sienna!25,boxrule=1.25pt,
+			colframe=Sienna,boxsep=1.25pt,
+			sharp corners=downhill,arc=12pt,
+			top=2pt,bottom=1pt,left=6pt,right=6pt
+		},
+		fonttitle=\color{Sienna}\itshape\ttfamily\footnotesize,
+		title={\scriptsize\faTerminal}\:Code Shell\vphantom{y},
+		watermark text={\faTerminal},watermark opacity=0.175,watermark zoom=0.50
+	}
+}
+
+%boîte tcbox + shellcode
+\newtcolorbox{tcshellcode}[1][\linewidth]{%
+	width=#1,styleshellcode,colframe=Sienna,colback=Sienna!5,%
+	%before upper = \renewcommand{\theFancyVerbLine}{\scriptsize\ttfamily\color{Green}\arabic{FancyVerbLine}}
+}
+
+%style tcbox pseudocode avec bannière hautdroite
+\tcbset{stylepseudocode/.style={%
+		%fontupper=\small\sffamily,%
+		enhanced,center,boxrule=1.25pt,sharp corners=downhill,arc=12pt,
+		before skip=12pt,after skip=12pt,leftupper=5pt,top=8pt,bottom=2pt,rightupper=4pt,%
+		attach boxed title to top right={yshift=-\tcboxedtitleheight},
+		boxed title style={
+			size=small,colback=gray!25,boxrule=1.25pt,
+			colframe=darkgray,boxsep=1.25pt,
+			sharp corners=downhill,
+			arc=12pt,
+			top=2pt,bottom=1pt,left=6pt,right=6pt
+		},
+		fonttitle=\color{darkgray}\ttfamily\footnotesize,
+		title={\scriptsize\faFileCode}\:\textit{Pseudo-Code}\vphantom{y},
+		watermark text={\faCode},watermark opacity=0.175,watermark zoom=0.50,
+	}
+}
+
+%style tcbox pythoncode avec bannière hautdroite
+\tcbset{stylepythoncode/.style={%
+		enhanced,center,boxrule=1.25pt,%
+		%sharp corners=all,rounded corners=southeast,%
+		sharp corners=downhill,arc=12pt,
+		before skip=12pt,after skip=12pt,%
+		leftupper=25pt,top=10pt,bottom=1mm,rightupper=4pt,%
+		attach boxed title to top right={yshift=-\tcboxedtitleheight},
+		boxed title style={
+			size=small,colback=ForestGreen!25,boxrule=1.25pt,
+			colframe=Green,boxsep=1.25pt,
+			sharp corners=downhill,
+			arc=12pt,
+			top=2pt,bottom=1pt,left=6pt,right=6pt
+		},
+		fonttitle=\color{ForestGreen}\itshape\ttfamily\footnotesize,
+		title={\scriptsize\faPython}\:Code Python\vphantom{y},
+		watermark text={\faPython},watermark opacity=0.175,watermark zoom=0.50
+	}
+}
+
+\tcbset{stylepythoncodeno/.style={%
+		enhanced,center,boxrule=1.25pt,%
+		%sharp corners=all,rounded corners=southeast,%
+		sharp corners=downhill,arc=12pt,
+		before skip=12pt,after skip=12pt,%
+		leftupper=8pt,top=10pt,bottom=1mm,rightupper=4pt,%
+		attach boxed title to top right={yshift=-\tcboxedtitleheight},
+		boxed title style={
+			size=small,colback=ForestGreen!25,boxrule=1.25pt,
+			colframe=Green,boxsep=1.25pt,
+			sharp corners=downhill,
+			arc=12pt,
+			top=2pt,bottom=1pt,left=6pt,right=6pt
+		},
+		fonttitle=\color{ForestGreen}\itshape\ttfamily\footnotesize,
+		title={\scriptsize\faPython}\:Code Python\vphantom{y},
+		watermark text={\faPython},watermark opacity=0.175,watermark zoom=0.50
+	}
+}
+
+\tcbset{stylejupytercode/.style={%
+		enhanced,center,boxrule=1.25pt,%
+		%sharp corners=all,rounded corners=southeast,%
+		sharp corners=downhill,arc=12pt,
+		before skip=12pt,after skip=12pt,%
+		leftupper=25pt,top=12pt,bottom=1mm,rightupper=4pt,%
+		attach boxed title to top right={yshift=-\tcboxedtitleheight},
+		boxed title style={
+			size=small,colback=white!25,boxrule=1.25pt,
+			colframe=Green,boxsep=1.25pt,
+			sharp corners=downhill,
+			arc=12pt,
+			top=2pt,bottom=1pt,left=6pt,right=6pt
+		},
+		fonttitle=\color{OliveGreen}\itshape\ttfamily\footnotesize,
+		title={\scriptsize\faQrcode}\:Code Jupyter\vphantom{y},
+		watermark text={\faQrcode},watermark opacity=0.175,watermark zoom=0.50
+	}
+}
+
+\newtcolorbox{tcjupytercode}[1][\linewidth]{%
+	width=#1,stylejupytercode,colframe=OliveGreen,colback=white,%
+	%before upper = \renewcommand{\theFancyVerbLine}{\scriptsize\ttfamily\color{Green}\arabic{FancyVerbLine}}
+}
+
+%boîte tcbox + pythoncode
+\newtcolorbox{tcpythoncode}[1][\linewidth]{%
+	width=#1,stylepythoncode,colframe=Green,colback=ForestGreen!5,%
+	fontlower=\small,%
+	before upper = \renewcommand{\theFancyVerbLine}{\scriptsize\ttfamily\color{Green}\arabic{FancyVerbLine}}}
+
+\newtcolorbox{tcpythoncodeno}[1][\linewidth]{%
+	width=#1,stylepythoncodeno,colframe=Green,colback=ForestGreen!5,%
+	fontlower=\small,%
+	before upper = \renewcommand{\theFancyVerbLine}{\scriptsize\ttfamily\color{Green}\arabic{FancyVerbLine}}}
+
+\newtcblisting{pythonminted}[2][\linewidth]{%
+	listing engine=minted,minted style=colorful,
+	minted language=python,listing only,
+	minted options={tabsize=4,fontsize=\small,#2},
+	width=#1,colframe=Green,colback=ForestGreen!5,%
+	enhanced,center,boxrule=1.25pt,
+	sharp corners=downhill,arc=12pt,
+	before skip=12pt,after skip=12pt,%
+	leftupper=8pt,top=10pt,bottom=4pt,rightupper=4pt,%
+	attach boxed title to top right={yshift=-\tcboxedtitleheight},
+	boxed title style={
+		size=small,colback=ForestGreen!25,boxrule=1.25pt,
+		colframe=Green,boxsep=1.25pt,
+		sharp corners=downhill,
+		arc=12pt,
+		top=2pt,bottom=1pt,left=6pt,right=6pt
+	},
+	fonttitle=\color{ForestGreen}\itshape\ttfamily\footnotesize,
+	title={\scriptsize\faPython}\:Code Python\vphantom{y},
+	watermark text={\faPython},watermark opacity=0.175,watermark zoom=0.50
+}
+
+%boîte tcbox + pseudocode + listings
+\newcommand\keywordstyle[1]{{\bfseries{#1}}}%
+\ifluatex
+	\newcommand\algomathtt[1]{\symtt{#1}}
+\else
+	\newcommand\algomathtt[1]{\mathtt{#1}}
+\fi
+
+\newtcblisting{tcpseudocode}[1][12cm]{%
+	width=#1,
+	stylepseudocode,
+	listing only,listing engine=listings,
+	listing options={
+		style=pseudocode,
+		morekeywords={Alors,Variables,Algorithme,Debut,Fin,Afficher,Saisir,Faire,faire,Si,Sinon,SinonSi,Tant,TantQue,Que,Pour,allant,de,FinSi,FinPour,FinTantQue,ou,et,Fonctions,Fonction,Retourner,ALGORITHME},%
+		aboveskip=2pt,belowskip=2pt,
+		extendedchars=true,
+		%showspaces=true,
+		columns=flexible,
+		literate={é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1% 
+		{ú}{{\'u}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1%
+		{è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1%
+		{À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1%
+		{ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1%
+		{Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1%
+		{â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1%
+		{Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1%
+		{œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1%
+		{ű}{{\H{u}}}1 {Ű}{{\H{U}}}1 {ő}{{\H{o}}}1 {Ő}{{\H{O}}}1%
+		{ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1%
+		{€}{{\texteuro}}1 {£}{{\pounds}}1%
+		{Rôle}{{\keywordstyle{R{\^o}le}}}4%
+		{Répéter}{{\keywordstyle{R\'{e}p\'{e}ter}}}7%
+		{à}{{\keywordstyle{\`a}}}1%
+		{Jusqu'à}{{\keywordstyle{Jusqu'\`a}}}7%
+		{Début}{{\keywordstyle{D{\'e}but}}}5%
+		{utilisée}{{\keywordstyle{utilis{\'e}e}}}8%
+		{utilisées}{{\keywordstyle{utilis{\'e}es}}}9%
+		{Paramètres}{{\keywordstyle{Param\`etres}}}9%
+		{>=}{>=}2 {<=}{<=}2%
+		{=}{\textleftarrow}1 {==}{=}1%
+		%{*}{$\algomathtt{\times}$}{1}%
+		}
+	}
+
+\newtcblisting{tcpseudocodeno}[1][12cm]{%
+	width=#1,
+	stylepseudocode,
+	listing only,listing engine=listings,
+	listing options={
+		style=pseudocodeno,
+		morekeywords={Alors,Variables,Algorithme,Debut,Fin,Afficher,Saisir,Faire,faire,Si,Sinon,SinonSi,Tant,Que,TantQue,Pour,allant,de,FinSi,FinPour,FinTantQue,ou,et,Fonctions,Fonction,Retourner,ALGORITHME},%
+		aboveskip=2pt,belowskip=2pt,
+		columns=fullflexible,
+		literate={é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1% 
+		{ú}{{\'u}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1%
+		{è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1%
+		{À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1%
+		{ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1%
+		{Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1%
+		{â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1%
+		{Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1%
+		{œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1%
+		{ű}{{\H{u}}}1 {Ű}{{\H{U}}}1 {ő}{{\H{o}}}1 {Ő}{{\H{O}}}1%
+		{ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1%
+		{€}{{\texteuro}}1 {£}{{\pounds}}1%
+		{Rôle}{{\keywordstyle{R{\^o}le}}}4%
+		{Répéter}{{\keywordstyle{R\'{e}p\'{e}ter}}}7%
+		{à}{{\keywordstyle{\`a}}}1%
+		{Jusqu'à}{{\keywordstyle{Jusqu'\`a}}}7%
+		{Début}{{\keywordstyle{D{\'e}but}}}5%
+		{utilisée}{{\keywordstyle{utilis{\'e}e}}}8%
+		{utilisées}{{\keywordstyle{utilis{\'e}es}}}9%
+		{Paramètres}{{\keywordstyle{Param\`etres}}}9%
+		{>=}{>=}2 {<=}{<=}2%
+		{=}{\textleftarrow}1 {==}{=}1%
+		%{>=}{$\algomathtt{\geqslant}$}1 {<=}{$\algomathtt{\leqslant}$}1%
+		%{*}{$\algomathtt{\times}$}{1}%
+		}
+	}
+
+%----ENVIRONNEMENTS SIMPLIFIÉS-----
+\RequirePackage{fancyvrb}
+%\RequirePackage{minted}
+\DefineVerbatimEnvironment{VShell}{Verbatim}{fontsize=\footnotesize,tabsize=4}
+\DefineVerbatimEnvironment{VLatex}{Verbatim}{fontsize=\footnotesize,tabsize=4}
+
+\newenvironment{envlatex}[2][15cm]{%
+	\VerbatimEnvironment
+	\begin{tclatexcode}[#1]%
+		\begin{VLatex}[#2]%
+		}
+		{
+		\end{VLatex}%
+	\end{tclatexcode}%
+}
+
+\newenvironment{envlatexminted}[1][15cm]{%
+	\VerbatimEnvironment
+	\begin{tclatexcode}[#1]%
+		\begin{minted}[fontsize=\footnotesize,autogobble,tabsize=4,breaklines=true,breakafter=\}]{latex}%
+		}
+		{
+		\end{minted}%
+	\end{tclatexcode}%
+}
+
+\newenvironment{envshell}[2][15cm]{%
+	\VerbatimEnvironment
+	\begin{tcshellcode}[#1]%
+		\begin{VShell}[#2]%
+		}
+		{
+		\end{VShell}%
+	\end{tcshellcode}%
+}
+
+\RequirePackage{fvextra}
+
+\newenvironment{envpython}[1][15cm]{%
+	\VerbatimEnvironment
+	\begin{tcpythoncode}[#1]
+		\begin{pyverbatim}[][fontsize=\footnotesize,numbers=left,numbersep=10pt,commandchars=\\\{\},mathescape]
+		}
+		{
+		\end{pyverbatim}%
+	\end{tcpythoncode}%
+}
+
+\newenvironment{envpythonnoline}[1][15cm]{%
+	\VerbatimEnvironment
+	\begin{tcpythoncodeno}[#1]
+		\begin{pyverbatim}[][numbers=none,numbersep=0pt,fontsize=\footnotesize,commandchars=\\\{\},mathescape]
+		}
+		{
+		\end{pyverbatim}%
+	\end{tcpythoncodeno}%
+}
+
+%----PRÉSENTATION CODE TEX-----
+%charger la librairie minted \tcbuselibrary{minted} avec --shell-escape
+\newtcblisting{codelatex}[1][]{%
+	colback=white,colframe=red!75!black,title=\faCode{} Code \LaTeX,fonttitle=\small\sffamily\bfseries,fontlower=\footnotesize,%
+	left=3pt,right=3pt,top=2pt,bottom=2pt,#1,%
+	listing engine=minted,minted options={tabsize=4,fontsize=\footnotesize,autogobble}%
+}
+
+%------------------------%
+%-----BOÎTES COURS-------%
+%------------------------%
+\ifluatex
+	\newfontfamily\policetititreboite{Mint Spirit}
+	\newcommand\fontbox{\policetititreboite}
+	\newcommand\titrebox[1]{\textbf{\scalebox{0.925}[1]{#1}}}
+	\newfontfamily\policeqtcanaithtype{QTCanaithtype}
+\else
+	\newcommand\fontbox{\sffamily}
+	\newcommand\titrebox[1]{\textbf{#1}}
+\fi
+
+\if@breakable
+	\tcbuselibrary{breakable}
+	\tcbset{cdefaut/.style={%
+			fonttitle=\fontbox,%
+			enhanced,breakable,center,boxrule=1.25pt,drop shadow=black!33!white,%no shadow,%
+			sharp corners=uphill,arc=12pt,before skip=12pt,after skip=12pt,%
+			left=5pt,leftupper=5pt,top=1mm,bottom=1mm,%
+			before upper=\leavevmode
+		}
+	}
+\else
+	\tcbset{cdefaut/.style={%
+			fonttitle=\fontbox,%
+			enhanced,center,boxrule=1.25pt,drop shadow=black!33!white,%no shadow,%
+			sharp corners=uphill,arc=12pt,before skip=12pt,after skip=12pt,%
+			left=5pt,leftupper=5pt,top=1mm,bottom=1mm,%
+			before upper=\leavevmode
+		}
+	}
+\fi
+
+%macro pour générer les boîtes (via zestedusavoir)
+%\NewDocumentCommand\cpnewbox{ m m m m O{#4} !O{} }{%nom + titre + icone + couleur fond + options
+%	\DeclareTColorBox{#1}{ O{} }{
+%		cdefaut,%
+%		colframe=#4,coltitle=#4!25!black,colbacktitle=#4!35,colback=#5!15,%
+%		title={#3\:\:\titrebox{#2##1}},%
+%		#6
+%	}%
+%}
+%
+%%boîtes cours
+%\cpnewbox{cdefi}{Définition}{\faIcon[regular]{comment-dots}}{ForestGreen}
+%\cpnewbox{chumour}{Humour}{\faIcon[regular]{laugh-wink}}{Yellow}
+%\cpnewbox{cprop}{Propriété}{\faCog}{Salmon}
+%\cpnewbox{ccscq}{Conséquence}{\faArrowAltCircleRight[regular]}{Salmon}
+%\cpnewbox{cthm}{Théorème}{\faBullhorn}{FireBrick}
+%\cpnewbox{clog}{Logiciel}{\faDev}{CornflowerBlue}[white]
+
+
+%def
+\newtcolorbox{cdefi}[1][]{%
+	cdefaut,%
+	colframe=ForestGreen,coltitle=black,colbacktitle=ForestGreen!35,colback=ForestGreen!15,
+	title=\textcolor{ForestGreen!25!Black}{\faIcon[regular]{comment-dots}\:\:\titrebox{Définition#1}}
+}
+
+%humour
+\newtcolorbox{chumour}[1][]{%
+	cdefaut,%
+	colframe=Yellow,coltitle=black,colbacktitle=yellow!35,colback=white,
+	title=\textcolor{Yellow!25!Black}{\faIcon[regular]{laugh-wink}\:\:\titrebox{Humour#1}}
+}
+
+%prop
+\newtcolorbox{cprop}[1][]{%
+	cdefaut,%
+	colframe=Salmon,coltitle=black,colbacktitle=Salmon!35,colback=Salmon!15,
+	title=\textcolor{Salmon!25!Black}{\faCog\:\:\titrebox{Propriété#1}}
+}
+
+%csqc
+\newtcolorbox{ccscq}[1][]{%
+	cdefaut,%
+	colframe=Salmon,coltitle=black,colbacktitle=Salmon!30,colback=Salmon!10,
+	title=\textcolor{Salmon!25!Black}{\faArrowAltCircleRight[regular]\:\:\titrebox{Conséquence#1}}
+}
+
+%thm
+\newtcolorbox{cthm}[1][]{%
+	cdefaut,%
+	colframe=FireBrick,coltitle=black,colbacktitle=FireBrick!35,colback=FireBrick!15,
+	title=\textcolor{FireBrick!25!Black}{\faBullhorn\:\:\titrebox{Théorème#1}}
+}
+
+%toc
+\newtcolorbox{ctoc}[1][]{%
+	cdefaut,%
+	colframe=black,coltitle=black,colbacktitle=white,colback=white,
+	title=\textcolor{black}{\faTable}\:\:\titrebox{Table des matières #1}
+}
+
+%log
+\newtcolorbox{clog}[1][]{%
+	cdefaut,%
+	colframe=CornflowerBlue,coltitle=black,colbacktitle=CornflowerBlue!35,colback=white,
+	title=\textcolor{CornflowerBlue!25!Black}{\faDev\:\:\titrebox{Logiciel#1}}
+}
+
+%loglogo
+\newtcolorbox{cloglogo}[2][]{%
+	cdefaut,%
+	colframe=CornflowerBlue,coltitle=black,colbacktitle=CornflowerBlue!35,colback=white,
+	title=\textcolor{CornflowerBlue!25!Black}{\faDev\:\:\titrebox{Logiciel#1}},
+	overlay={\begin{tcbclipinterior}
+				\node[opacity=0.33,rotate=-45] at ($(interior.south east)+(-10pt,10pt)$){\includegraphics[height=24pt]{#2}};
+			\end{tcbclipinterior}}
+}
+
+%histoire
+\newtcolorbox{chistoire}[1][]{%
+	cdefaut,%
+	colframe=Chocolate,coltitle=black,colbacktitle=Chocolate!35,colback=white,
+	title=\textcolor{Chocolate!25!Black}{\faUniversity\:\:\titrebox{Point histoire#1}}
+}
+
+%demo
+\newtcolorbox{cdemo}[1][]{%
+	cdefaut,%
+	colframe=Violet,coltitle=black,colbacktitle=Violet!35,colback=Violet!15,
+	title=\textcolor{Violet!25!Black}{\faEdit[regular]\:\:\titrebox{Démonstration#1}},
+	overlay={\begin{tcbclipinterior}%
+				\node[] at ($(interior.south east)+(-10pt,10pt)$){\large\textcolor{Violet}{\textbf{\CheckedBox}}};%
+			\end{tcbclipinterior}}
+}
+
+%demoblanc
+\newtcolorbox{cdemoblanc}[1][]{%
+	cdefaut,%
+	colframe=Violet,coltitle=black,colbacktitle=Violet!35,colback=White,
+	title=\textcolor{Violet!25!Black}{\faEdit[regular]\:\:\titrebox{Démonstration#1}},
+	overlay={\begin{tcbclipinterior}%
+				\node[] at ($(interior.south east)+(-10pt,10pt)$){\large\textcolor{Violet}{\textbf{\CheckedBox}}};%
+			\end{tcbclipinterior}}
+}
+
+%rmq
+\newtcolorbox{crmq}[1][]{%
+	cdefaut,%
+	colframe=MidnightBlue,coltitle=black,colbacktitle=MidnightBlue!35,colback=MidnightBlue!15,
+	title=\textcolor{MidnightBlue!25!Black}{\faHandPointRight[regular]\:\:\titrebox{Remarque#1}}
+}
+
+%exercice
+\newtcolorbox{cexercice}[1][]{%
+	cdefaut,%
+	colframe=MidnightBlue,coltitle=black,colbacktitle=MidnightBlue!15,colback=MidnightBlue!5,
+	title=\textcolor{MidnightBlue!25!Black}{\faHubspot\:\:\titrebox{Exercice#1}}
+}
+
+%exercice
+\newtcolorbox{cexemple}[1][]{%
+	cdefaut,%
+	colframe=SeaGreen,coltitle=black,colbacktitle=SeaGreen!15,colback=SeaGreen!5,
+	title=\textcolor{SeaGreen!25!Black}{\faHubspot\:\:\titrebox{Exemple#1}}
+}
+
+%voc
+\newtcolorbox{cvoc}[1][]{%
+	cdefaut,%
+	colframe=YellowGreen,coltitle=black,colbacktitle=YellowGreen!35,colback=YellowGreen!15,
+	title=\textcolor{YellowGreen!25!Black}{\faList*[regular]\:\:\titrebox{Vocabulaire#1}}
+}
+
+%notation
+\newtcolorbox{cnota}[1][]{%
+	cdefaut,%
+	colframe=YellowGreen,coltitle=black,colbacktitle=YellowGreen!30,colback=YellowGreen!10,
+	title=\textcolor{YellowGreen!25!Black}{\faList*\:\:\titrebox{Notation#1}}
+}
+
+%cadre
+\newtcolorbox{ccadre}[1][]{%
+	cdefaut,%
+	colframe=Peru,coltitle=black,colbacktitle=Peru!35,colback=Peru!15,
+	title=\textcolor{Peru!25!Black}{\faInfoCircle\:\:\titrebox{Cadre#1}}
+}
+
+%idee
+\newtcolorbox{cidee}[1][]{%
+	cdefaut,%
+	colframe=Peru,coltitle=black,colbacktitle=Peru!35,colback=Peru!15,
+	title=\textcolor{Peru!25!Black}{\faInfo\:\:\titrebox{Idée#1}}
+}
+
+%intro
+\newtcolorbox{cintro}[1][]{%
+	cdefaut,%
+	colframe=LightSalmon,coltitle=black,colbacktitle=LightSalmon!35,colback=LightSalmon!15,
+	title=\textcolor{LightSalmon!25!Black}{\faMarker\:\:\titrebox{Intro#1}}
+}
+
+%illustr
+\newtcolorbox{cillustr}[1][]{%
+	cdefaut,%
+	colframe=Crimson,coltitle=black,colbacktitle=Crimson!35,colback=White,
+	title=\textcolor{Crimson!25!Black}{\faChartLine\:\:\titrebox{Illustration#1}}
+}
+
+%illustr
+\newtcolorbox{cvideo}[1][]{%
+	cdefaut,%
+	colframe=teal,coltitle=black,colbacktitle=teal!35,colback=White,
+	title=\textcolor{teal!25!Black}{\faIcon[regular]{file-video}\:\:\titrebox{#1}}
+}
+
+%bilan
+\newtcolorbox{cbilan}[1][]{%
+	cdefaut,%
+	colframe=Purple,coltitle=black,colbacktitle=Purple!35,colback=Purple!5,
+	title=\textcolor{Purple!25!Black}{\faForward\:\:\titrebox{Bilan#1}}
+}
+
+%algo
+\newtcolorbox{calgo}[1][]{%
+	cdefaut,%
+	colframe=OrangeRed,coltitle=black,colbacktitle=OrangeRed!35,colback=White,
+	title=\textcolor{OrangeRed!25!Black}{\faFileCode\:\:\titrebox{Algorithme#1}},
+	overlay={\begin{tcbclipinterior}%
+			\node[opacity=0.15,rotate=-15] at ($(interior.south east)+(-8pt,12pt)$){\includegraphics[height=24pt]{algorithmvec}};%
+	\end{tcbclipinterior}}
+}
+
+%methodo
+\newtcolorbox{cmethode}[1][]{%
+	cdefaut,%
+	colframe=Coral,coltitle=black,colbacktitle=Coral!35,colback=Coral!15,
+	title=\textcolor{Coral!25!Black}{\faTasks\:\:\titrebox{Méthode#1}}
+}
+
+%tuto
+\newtcolorbox{ctuto}[1][]{%
+	cdefaut,%
+	colframe=Coral,coltitle=black,colbacktitle=Coral!35,colback=White,
+	title=\textcolor{Coral!25!Black}{\faTerminal\:\:\titrebox{Tuto#1}}
+}
+
+%manip
+\newtcolorbox{cmanip}[1][]{%
+	cdefaut,%
+	colframe=DarkCyan,coltitle=black,colbacktitle=DarkCyan!35,colback=White,
+	title=\textcolor{DarkCyan!25!Black}{\faCodeBranch\:\:\titrebox{Manipulation#1}}
+}
+
+%aide {\tiny }
+\newtcolorbox{caide}{%
+	cdefaut,%
+	colframe=titrebleu!35,coltitle=titrebleu!50!Black,colbacktitle=titrebleu!15,colback=White,
+	title=\textcolor{titrebleu!25!Black}{\faBacon\:\:\titrebox{Niveaux de difficulté}},
+	overlay={\begin{tcbclipinterior}%
+			\node[opacity=0.33,rotate=45,scale=0.33] at ($(interior.south east)+(-6pt,6pt)$){\textcolor{titrebleu!50!Black}{\footnotesize \bfseries \sffamily \textcopyright{} Dairon11}};%
+	\end{tcbclipinterior}}
+}
+
+%algo
+\newtcolorbox{ccalco}[1][]{%
+	cdefaut,%
+	colframe=MediumVioletRed,coltitle=black,colbacktitle=MediumVioletRed!35,colback=White,
+	title=\textcolor{MediumVioletRed!25!Black}{\faCalculator\:\:\titrebox{Calculatrice#1}}
+}
+
+%outil
+\newtcolorbox{coutil}[1][]{%
+	cdefaut,%
+	colframe=DeepSkyBlue,coltitle=black,colbacktitle=DeepSkyBlue!35,colback=White,
+	title=\textcolor{DeepSkyBlue!25!Black}{\faTools\:\:\titrebox{Outil#1}}
+}
+
+%outil
+\newtcolorbox{coutilcalc}[1][]{%
+	cdefaut,%
+	colframe=DeepSkyBlue,coltitle=black,colbacktitle=DeepSkyBlue!35,colback=White,
+	title=\textcolor{DeepSkyBlue!25!Black}{\faFileVideo[regular]\:\:\titrebox{Tuto#1 Vidéo}}
+}
+
+\newtcolorbox{ccalcologo}[2][]{%
+	cdefaut,%
+	colframe=MediumVioletRed,coltitle=black,colbacktitle=MediumVioletRed!35,colback=White,
+	title=\textcolor{MediumVioletRed!25!Black}{\faCalculator\:\:\titrebox{Calculatrice#1}},
+	overlay={\begin{tcbclipinterior}%
+			\node[opacity=0.33,rotate=-45] at ($(interior.south east)+(-10pt,10pt)$){\includegraphics[height=48pt]{#2}};%
+	\end{tcbclipinterior}}
+}
+
+\definecolor{orangescratch}{HTML}{F8A31F}
+\newtcolorbox{cscratch}[1][]{%
+	cdefaut,%
+	colframe=orangescratch,coltitle=black,colbacktitle=orangescratch!35,colback=White,
+	title=\textcolor{orange!25!Black}{\includegraphics[height=1em]{scratch}\:\:\titrebox{Scratch#1}},
+	overlay={\begin{tcbclipinterior}%
+			\node[opacity=0.33,rotate=45] at ($(interior.south east)+(-12pt,12pt)$){\includegraphics[height=12pt]{scratchban}};%
+	\end{tcbclipinterior}}
+}
+
+%asavoir
+\newtcolorbox{casavoir}[1][]{%
+	cdefaut,%
+	colframe=Red,coltitle=black,colbacktitle=Red!35,colback=Red!5,
+	title=\textcolor{Red!25!Black}{\faHeart\:\:\titrebox{À savoir#1}}
+}
+
+%bloctd
+\newtcolorbox{cbloctd}[1][]{%
+	cdefaut,%
+	colframe=LightSeaGreen,coltitle=black,colbacktitle=LightSeaGreen!35,colback=White,
+	title=\textcolor{LightSeaGreen!25!Black}{\faHourglassStart\:\:\titrebox{TD#1}}
+}
+
+%blocdm
+\newtcolorbox{cblocdm}[1][]{%
+	cdefaut,%
+	colframe=LightSeaGreen,coltitle=black,colbacktitle=LightSeaGreen!35,colback=White,
+	title=\textcolor{LightSeaGreen!25!Black}{\faHourglassStart\:\:\titrebox{À vous de jouer#1}}
+}
+
+%rappel
+\newtcolorbox{crappel}[1][]{%
+	cdefaut,%
+	colframe=LightSalmon,coltitle=black,colbacktitle=LightSalmon!35,colback=LightSalmon!15,
+	title=\textcolor{LightSalmon!25!Black}{\faHandPointUp[regular]\:\:\titrebox{Rappel#1}}
+}
+
+%resol
+\newtcolorbox{cresol}[1][]{%
+	cdefaut,%
+	colframe=LightSeaGreen,coltitle=black,colbacktitle=LightSeaGreen!35,colback=White,
+	title=\textcolor{LightSeaGreen!25!Black}{\faPuzzlePiece\:\:\titrebox{Résolution#1}}
+}
+
+%attention
+\newtcolorbox{cattention}[1][]{%
+	cdefaut,%
+	colframe=Red,coltitle=black,colbacktitle=Red!30,colback=Red!10,
+	title=\textcolor{Red!25!Black}{\faExclamationTriangle\:\:\titrebox{Attention#1}}
+}
+
+%code
+\newtcolorbox{ccode}[1][]{%
+	cdefaut,%
+	colframe=Crimson,coltitle=black,colbacktitle=Crimson!35,colback=White,
+	title=\textcolor{Crimson!25!Black}{\faCode\:\:\titrebox{Code#1}}
+}
+
+%python
+\newtcolorbox{cpython}[1][]{%
+	cdefaut,%
+	colframe=SeaGreen,coltitle=black,colbacktitle=SeaGreen!35,colback=White,
+	title=\textcolor{SeaGreen!25!Black}{\faPython\:\:\titrebox{Python#1}}
+}
+
+%reponse
+\newtcolorbox{creponse}[1][]{%
+	cdefaut,%
+	colframe=Thistle,coltitle=black,colbacktitle=Thistle!35,colback=White,
+	before upper = \vspace{-0.05cm},
+	title=\textcolor{Thistle!25!Black}{\faIcon{pen-alt}\:\:\titrebox{Réponse#1}}
+}
+
+
+%%-----Menus Calculatrice CASIO-----
+%items noir & blanc
+\ifluatex
+	%\newfontfamily\fontcalc{PTSansNarrow}
+	\newfontfamily\fontcalcqd{GoMono-Bold}
+	\newfontfamily\fontcalctc{AnonymousPro}
+	\newcommand{\itemnqd}[1]{%
+		\setlength{\fboxsep}{1pt}%
+		{\footnotesize \colorbox{black}{\fontcalcqd\bfseries\white #1}}}
+	\newcommand{\itembqd}[1]{%
+		\setlength{\fboxsep}{1pt}%
+		{\footnotesize \fbox{\fontcalcqd\bfseries #1}}}
+	\newcommand{\itemntc}[1]{%
+		\setlength{\fboxsep}{1pt}%
+		{\footnotesize \colorbox{black}{\fontcalctc\bfseries\white #1}}}
+	\newcommand{\itembtc}[1]{%
+		\setlength{\fboxsep}{1pt}%
+		{\footnotesize \fbox{\fontcalctc\bfseries #1}}}
+\else
+	\newcommand{\itemnqd}[1]{%
+		\setlength{\fboxsep}{1pt}%
+		{\footnotesize \colorbox{black}{\fontfamily{pcr}\selectfont\bfseries\white #1}}}
+	\newcommand{\itembqd}[1]{%
+		\setlength{\fboxsep}{1pt}%
+		{\footnotesize \fbox{\texttt{#1}}}}
+\fi
+%POLICE
+\ifluatex
+	\newfontfamily\fontcasiotc{AnonymousPro}
+	%\newfontfamily\fontcasioqd{CascadiaCod3-Regular}
+	\newfontfamily\fontcasioqd{AlegreyaSans}
+	\newcommand\policecasiotc{\fontcasiotc\bfseries\footnotesize}
+	\newcommand\policecasioqd{\fontcasioqd\bfseries\footnotesize}
+\else
+	\newcommand\policecasiotc{\ttfamily\bfseries\small}
+	\newcommand\policecasioqd{\ttfamily\bfseries\small}
+\fi
+%LONGUEURS
+\newlength\largmenutc
+\settowidth{\largmenutc}{\policecasiotc XXXX}
+\addtolength{\largmenutc}{2pt}
+\newlength\largitemtc
+\settowidth{\largitemtc}{\ttfamily\textbf{XXXXXXXXXXXXXXXXXXX}}
+%STYLES CASIO 35+
+%MENU NORMAL
+\tcbset{casiotc/.style={%
+		enhanced,%
+		%height=0.8\baselineskip,%
+		fontupper=\policecasiotc,%
+		nobeforeafter,%
+		box align=base,%
+		boxsep=1pt,%
+		boxrule=0.75pt,%
+		boxsep=1pt,%
+		left=0pt,%
+		right=0pt,%
+		top=0pt,%
+		bottom=0pt,%
+		tcbox width=forced center,%
+		no borderline
+	}
+}
+%MENU NOIR
+\tcbset{casiotcmenunoir/.style={%
+		width=\largmenutc,%
+		colframe=black,%
+		colback=black,%
+		colupper=white,%
+		sharp corners,%
+		rounded corners=southeast,%
+		arc=3pt,%
+		arc is angular,%
+		add to width=1pt
+	}
+}
+%MENU BLANC
+\tcbset{casiotcmenublanc/.style={%
+		enhanced,%
+		frame hidden,%
+		width=\largmenutc,%
+		colframe=black,%
+		colback=white,%
+		colupper=black,%
+		sharp corners,%
+		add to width=1pt,
+		borderline north={0.75pt}{0pt}{black},
+		borderline west={0.75pt}{0pt}{black}
+	}
+}
+%ITEM NOIR
+\tcbset{casiotcitemnoir/.style={%
+		width=\largmenutc,%
+		colframe=black,%
+		colback=black,%
+		colupper=white,%
+		sharp corners,%
+		add to width=1pt
+	}
+}
+%ITEMSELEC
+\tcbset{casiotcitemsel/.style={%
+		width=\largitemtc,%
+		tcbox width=auto,%
+		sharp corners,%
+		colframe=black,%
+		colback=black,%
+		colupper=white,%
+	}
+}
+
+%STYLES CASIO 90+
+\newlength\largmenuqd
+\settowidth{\largmenuqd}{\policecasioqd XXXXX}
+%\addtolength{\largmenuqd}{2pt}
+%MENU NORMAL
+\tcbset{casioqd/.style={%
+		%height=0.7\baselineskip,%
+		%fontupper=\ttfamily\bfseries\small,%
+		fontupper=\policecasioqd,%
+		nobeforeafter,%
+		box align=base,%
+		boxsep=1pt,%
+		boxrule=0.75pt,%
+		boxsep=1pt,%
+		left=0pt,%
+		right=0pt,%
+		top=0pt,%
+		bottom=0pt,%
+		tcbox width=forced center
+	}
+}
+%MENU NOIR
+\tcbset{casioqdmenunoir/.style={%
+		enhanced,%
+		width=\largmenuqd,%
+		colframe=black,%
+		colback=black,%
+		colupper=white,%
+		arc=1pt,%
+		add to width=2pt
+	}
+}
+%MENU BLANC
+\tcbset{casioqdmenublanc/.style={%
+		width=\largmenuqd,%
+		colframe=black,%
+		colback=white,%
+		colupper=black,%
+		rounded corners,%
+		arc=1pt,%
+		add to width=2pt
+	}
+}
+%ITEM NOIR
+\tcbset{casioqditemnoir/.style={%
+		width=\largmenuqd,%
+		colframe=black,%
+		colback=black,%
+		colupper=white,%
+		sharp corners,%
+		add to width=2pt
+	}
+}
+
+%COMMANDES 35+
+\newcommand\mencastcn[1]{\tcbox[casiotc,casiotcmenunoir]{#1}}
+\newcommand\mencastcb[1]{\tcbox[casiotc,casiotcmenublanc]{#1}}
+\newcommand\itcastcn[1]{\tcbox[casiotc,casiotcitemnoir]{#1}}
+\newcommand\itcastcsel[1]{\tcbox[tcbox width=minimum center,casiotc,casiotcitemsel]{#1}}
+%COMMANDES 90+
+\newcommand\mencasqdn[2][white]{\tcbox[casioqd,casioqdmenunoir,overlay={\path[fill=#1]($(frame.south east) + (0.1pt,-0.1pt)$) -- ++ (0pt,3.2pt)  -- ++ (-3.2pt,-3.2pt) -- cycle;}]{#2}}
+\newcommand\mencasqdb[1]{\tcbox[casioqd,casioqdmenublanc]{#1}}
+\newcommand\itcasqdn[1]{\tcbox[casioqd,casioqditemnoir]{#1}}
+\newcommand\itcasqdsel[1]{\tcbox[casioqd,casiotcitemsel]{#1}}
+
+%MENUNWKS
+\ifluatex
+	\newfontfamily\fontnwks{SourceCodePro-Medium}
+%	\tcbset{vignettemenunwks/.style={%
+%			size=small,%
+%			left=2pt,right=2pt,%
+%			fontupper={\vphantom{pf}\scriptsize\fontnwks},%
+%			nobeforeafter,%
+%			box align=base,%
+%			boxsep=0pt,%
+%			sharp corners=all
+%		}
+%	}
+\else
+	\newcommand\fontnwks{\ttfamily}
+\fi
+
+\tcbset{vignettemenunwks/.style={%
+	size=small,%
+	left=2pt,right=2pt,%
+	fontupper={\vphantom{pf}\scriptsize\fontnwks},%
+	nobeforeafter,%
+	box align=base,%
+	boxsep=0pt,%
+	sharp corners=all}
+}
+
+\newcommand\menunwks[1]{\tcbox[vignettemenunwks,colframe=gray,colupper=white,colback=gray]{\scalebox{0.9}[1]{#1}}}
+\newcommand\menunwksg[1]{\tcbox[vignettemenunwks,colframe=lightgray!50,colupper=black,colback=lightgray!50]{\scalebox{0.9}[1]{#1}}}
+\newcommand\menunwksb[1]{\tcbox[vignettemenunwks,colframe=lightgray,colupper=gray,colback=white]{\scalebox{0.9}[1]{#1}}}
+\newcommand\nwkstri{\textcolor{orange}{$\blacktriangleright$}}
+
+%MENU/ITEM/SEL Texas
+\newcommand\menuselecti[1]{\tcbox[size=tight,fontupper=\ttfamily\bfseries\footnotesize,colback=black,colupper=white,nobeforeafter,left=0pt,right=0pt,top=0pt,bottom=0pt,box align=base,]{\scalebox{0.85}[1.15]{#1}}}
+
+\newcommand\tpp{\scalebox{0.66}[1]{\dots}}
+
+\newcommand\ongletselecti[1]{\tcbox[size=tight,fontupper=\ttfamily\bfseries\small,colback=black,colframe=black,colupper=white,nobeforeafter,left=0pt,right=0pt,top=0pt,bottom=0pt,box align=base]{\vphantom{[A]/Fiy}#1}}
+
+\newcommand\itemselecti[2]{\ongletselecti{\NoAutoSpacing\vphantom{[A]/Fiy}#1}\tcbox[size=tight,fontupper=\ttfamily\bfseries\small,colback=white,colupper=black,nobeforeafter,left=1pt,right=0pt,top=0pt,bottom=0pt,box align=base,colframe=black]{\vphantom{[A]/Fiy}#2}}
+
+%titre de la fiche
+\newtcolorbox{fiche}{sharp corners=uphill,colback=black!66,colupper=white,fontupper=\centering \scshape \bfseries \LARGE}
+
+%modèle de box avec onglets : page 166 de la doc du package (merci Anne ^_^)
+\newtcolorbox{onglet}[2][]{enhanced,
+	before skip=3mm,after skip=3mm,
+	colback=black!5,colframe=black!80,boxrule=0.2mm,
+	attach boxed title to top left={xshift=1cm,yshift*=1mm-\tcboxedtitleheight},
+	varwidth boxed title*=-3cm,
+	boxed title style={frame code={
+			\path[fill=tcbcolback!30!black]
+			([yshift=-1mm,xshift=-1mm]frame.north west)
+			arc[start angle=0,end angle=180,radius=1mm]
+			([yshift=-1mm,xshift=1mm]frame.north east)
+			arc[start angle=180,end angle=0,radius=1mm];
+			\path[left color=tcbcolback!60!black,right color=tcbcolback!80!black,
+			middle color=tcbcolback!70!black]
+			([xshift=-2mm]frame.north west) -- ([xshift=2mm]frame.north east)
+			[rounded corners=1mm]-- ([xshift=1mm,yshift=-1mm]frame.north east)
+			-- (frame.south east) -- (frame.south west)
+			-- ([xshift=-1mm,yshift=-1mm]frame.north west)
+			[sharp corners]-- cycle;
+		},interior engine=empty,
+	},
+	fonttitle=\bfseries,
+	title={#2},#1}
+
+%bloc titre sujet BAC/BTS, etc
+\newtcolorbox{blocsujet}[2][]{enhanced,size=small,halign=flush center,
+	colback=white!5,colframe=marron,boxrule=1.25pt,
+	attach boxed title to top left={xshift=0.5cm,yshift=1mm-\tcboxedtitleheight},
+	varwidth boxed title*=-3cm,
+	boxed title style={frame code={
+			\path[fill=tcbcolback!30!black]
+			([yshift=-1mm,xshift=-1mm]frame.north west)
+			arc[start angle=0,end angle=180,radius=1mm]
+			([yshift=-1mm,xshift=1mm]frame.north east)
+			arc[start angle=180,end angle=0,radius=1mm];
+			\path[left color=tcbcolback!60!black,right color=tcbcolback!60!black,
+			middle color=tcbcolback!80!black]
+			([xshift=-2mm]frame.north west) -- ([xshift=2mm]frame.north east)
+			[rounded corners=1mm]-- ([xshift=1mm,yshift=-1mm]frame.north east)
+			-- (frame.south east) -- (frame.south west)
+			-- ([xshift=-1mm,yshift=-1mm]frame.north west)
+			[sharp corners]-- cycle;
+		},interior engine=empty,
+	},
+	fonttitle=\bfseries\sffamily,
+	colupper=marron,
+	fontupper=\huge\bfseries\sffamily,
+	title={#2},#1}
+
+\tcbset{sousepreuve/.style={%
+		center,after skip=1pt,size=small,boxsep=3pt,boxrule=1pt,colframe=Orchid,colback=white,left=2pt,right=2pt,%
+		sharp corners,rounded corners=downhill,arc=8pt,colupper=Orchid,
+		fontupper={\sffamily\bfseries\large}
+	}
+}
+
+\newcommand\tcsousepreuve[1][]{%
+	\ifthenelse{\equal{#1}{}}{\tcbox[sousepreuve]{Épreuve \epreuve}}{}
+	\ifthenelse{\equal{#1}{U21}}{\tcbox[sousepreuve,before upper=\faSortNumericDown\:\:,after upper=\:\:\faProjectDiagram]{Épreuve \epreuve}}{}
+	\ifthenelse{\equal{#1}{UF2}}{\tcbox[sousepreuve,before upper=\faDice\:\:,after upper=\:\:\faChartLine]{Épreuve \epreuve}}{}
+}
+
+\newtcolorbox{blocexo}[1][]{%
+	enhanced,size=small,
+	colback=white,colframe=titrebleu,boxrule=0.75pt,
+	fontupper=\color{titrebleu}\Large\sffamily\bfseries,
+	sharp corners,rounded corners=south,arc=4pt
+}
+
+\newtcolorbox{marker}[1][]{enhanced,width=7cm,before skip=2mm,after skip=3mm,fontupper=\small\sffamily,
+	boxrule=0.4pt,left=5mm,right=2mm,top=1pt,bottom=1pt,colback=yellow!15,colframe=yellow!20!black,
+	sharp corners,rounded corners=southeast,arc is angular,arc=3mm,center,
+	underlay={%
+		\path[fill=tcbcolback!80!black] ([yshift=3mm]interior.south east)--++(-0.4,-0.1)--++(0.1,-0.2);
+		\path[draw=tcbcolframe,shorten <=-0.05mm,shorten >=-0.05mm] ([yshift=3mm]interior.south east)--++(-0.4,-0.1)--++(0.1,-0.2);
+		%\path[fill=yellow!50!black,draw=none] (interior.south west) rectangle node[midway,white]{\Large\bfseries{}!} ([xshift=3mm]interior.north west);
+	},
+	drop fuzzy shadow,#1}
+
+%----- FAKES RS&TERM -----
+\RequirePackage{tabularray}
+\usepackage{simplekv}
+\usetikzlibrary{shapes.geometric}
+
+\tcbset{fakefb/.style={%
+		enhanced,center,boxrule=1pt,rounded corners=all,arc=4pt,before skip=12pt,after skip=12pt,%
+		colframe=gray,colback=white,colbacktitle=white,coltitle=black,%
+		titlerule=0.4pt,titlerule style=lightgray,%
+		left=5pt,top=2pt,bottom=2pt,right=5pt,middle=2pt
+	}
+}
+
+\tcbset{faketw/.style={%
+		enhanced,center,boxrule=1pt,rounded corners=all,arc=4pt,before skip=12pt,after skip=12pt,%
+		colframe=gray,colback=white,%
+		left=5pt,top=2pt,bottom=2pt,right=5pt,middle=2pt
+	}
+}
+
+\newtcolorbox{fakeFB}[2][\linewidth]{width=#1,fakefb,title={#2}}
+\setKVdefault[fakeFB]{img=avatar,nom={C. Pierquet},temps={37 min}}
+\setKVdefault[fakeFBbottom]{likes=15,comm=4,partages=5}
+
+\newtcolorbox{fakeTW}[1][\linewidth]{width=#1,faketw}
+\setKVdefault[fakeTW]{img=avatar,nom={C. Pierquet},pseudo={cpierquet},temps={14 min}}
+
+
+\newcommand\fakefbtitre[1][]{%
+	\restoreKV[fakeFB]%
+	\setKV[fakeFB]{#1}
+	\begin{tabularx}{\linewidth}{@{}c@{}Xc}
+		\multirow{2}{*}{\includegraphics[height=20pt]{\useKV[fakeFB]{img}}} & ~~\textsf{\small\useKV[fakeFB]{nom}} & \multirow{2}{*}{\LARGE $\cdot\!\cdot\!\cdot$} \\[-4pt]
+		& ~~\textcolor{gray}{\textsf{\scriptsize \useKV[fakeFB]{temps}}} & \\
+	\end{tabularx}
+}
+
+\newcommand\faketwtitre[1][]{%
+	\restoreKV[fakeTW]%
+	\setKV[fakeTW]{#1}%
+	\begin{tabularx}{\linewidth}{@{}c@{}Xc}
+		\raisebox{-0.33\height}{\includegraphics[height=20pt]{\useKV[fakeTW]{img}}} & ~~\textsf{\small\useKV[fakeTW]{nom}} \textcolor{gray}{\small \textsf{~@\useKV[fakeTW]{pseudo}}~$\mathsf{\cdot}$~\textsf{\useKV[fakeTW]{temps}}} & {\LARGE $\cdot\!\cdot\!\cdot$} \\
+	\end{tabularx}%
+}
+
+\newcommand\fakefbcommandes[1][]{%
+	\restoreKV[fakeFBbottom]%
+	\setKV[fakeFBbottom]{#1}%
+	\begin{tabularx}{\linewidth}{@{}X@{}}
+		$\vcenter{\hbox{\includegraphics[height=6pt]{fblike}}}$ \textcolor{gray}{\textsf{\scriptsize\useKV[fakeFBbottom]{likes}}} \hfill \textcolor{gray}{\textsf{\scriptsize\useKV[fakeFBbottom]{comm} commentaires \useKV[fakeFBbottom]{partages} partages}} \\ \arrayrulecolor{lightgray}\hline
+		{\tiny \faThumbsUp}~\textsf{\scriptsize\textbf{J’aime}} \hfill {\tiny\faComment*[regular]}~\textsf{\scriptsize\textbf{Commenter}} \hfill {\tiny\faShareSquare}~\textsf{\scriptsize\textbf{Partager}} \\
+	\end{tabularx}
+}
+
+\newcommand\faketwcommandes{%
+	\begin{tabularx}{\linewidth}{@{}Y@{}Y@{}Y@{}Y@{}}
+		{\footnotesize\faComment[regular]} & {\footnotesize\faRetweet} & {\footnotesize\faHeart} & {\footnotesize\faShareSquare} \\
+	\end{tabularx}
+}
+
+%-----terminal win & nux-----
+\tcbset{faketermwin/.style={%
+		enhanced,center,boxrule=1pt,sharp corners,before skip=12pt,after skip=12pt,%
+		colframe=WinBlue,colback=black,colbacktitle=white,colupper=white,coltitle=black,%
+		titlerule=0.4pt,left=2pt,top=2pt,bottom=2pt,right=2pt,middle=2pt,%
+		fonttitle=\small\sffamily
+	}
+}
+
+\newtcblisting{fakeTERMwin}[2][\linewidth]{%
+	faketermwin,title={#2},%
+	listing only,listing engine=listings,%
+	listing options={style=tcblatex,language=sh,basicstyle=\footnotesize\ttfamily},%
+	width=#1
+}
+
+\setKVdefault[fakeTERM]{title={Terminal Windows}}
+
+\newcommand\commandeswin{%
+	\begin{tikzpicture}[thick,scale=0.66]
+		\draw (0,0)--(1em,0) ; \draw (2em,0) rectangle (3em,1em) ; \draw (4em,1em)--(5em,0) (4em,0)--(5em,1em) ;
+	\end{tikzpicture}%
+}
+
+\newcommand\faketermwintitre[1][]{%
+	\restoreKV[fakeTERM]
+	\setKV[fakeTERM]{#1}
+	\begin{tblr}{colsep=0pt,rowsep=0pt,width=\linewidth,colspec={X[l]r}}
+		{\footnotesize\faTerminal}~~\useKV[fakeTERM]{title} & \commandeswin \\ %
+	\end{tblr}
+}
+
+\definecolor{mpurple}{RGB}{48,10,36}
+\definecolor{mgray}{RGB}{70,72,67}
+\definecolor{ogray}{RGB}{148,147,141}
+\definecolor{oorange}{RGB}{233,101,56}
+\definecolor{termimal}{RGB}{80,78,70}
+\definecolor{linux}{RGB}{0,39,51}
+\definecolor{WinBlue}{HTML}{1883D7}
+
+\newcommand{\UbuntuWhite}{%
+	\begin{tikzpicture}[thick,anchor=base,baseline]
+		\filldraw[mgray] (0,0.25em) circle[radius=0.5em] ;
+	\end{tikzpicture}%
+}
+\newcommand{\UbuntuMin}{%
+	\begin{tikzpicture}[thick,anchor=base,baseline]
+		\filldraw[color=ogray!50!white] (0,0.25em) circle[radius=0.5em];
+		\draw[termimal](-0.35em,0.25em)--(0.35em,0.25em);
+	\end{tikzpicture}%
+}
+\newcommand{\UbuntuClose}{%
+	\begin{tikzpicture}[thick,anchor=base,baseline]
+		\filldraw[color=oorange!70!white] (0,0.25em) circle[radius=0.5em];
+		\draw[termimal] (-0.32em,-0.07em)--(0.32em,0.57em);
+		\draw[termimal] (-0.32em,0.57em)--(0.32em,-0.07em);
+	\end{tikzpicture}%
+}
+\newcommand{\UbuntuMax}{%
+	\begin{tikzpicture}[thick,anchor=base,baseline]
+		\filldraw[color=ogray!50!white] (0,0.25em) circle[radius=0.5em];
+		\draw[termimal] (-0.32em,0.5em) rectangle (0.32em,0);
+	\end{tikzpicture}%
+}
+
+\tcbset{faketermlinux/.style={%
+		enhanced,center,boxrule=1pt,arc=4pt,before skip=12pt,after skip=12pt,%
+		colframe=mgray,colback=mpurple,colbacktitle=mgray,colupper=white,coltitle=white,%
+		titlerule=0.4pt,left=2pt,top=2pt,bottom=2pt,right=2pt,middle=2pt,%
+		fonttitle=\small\sffamily
+	}
+}
+
+\newtcblisting{fakeTERMunix}[2][\linewidth]{%
+	faketermlinux,title={#2},%
+	listing only,listing engine=listings,%
+	listing options={style=tcblatex,language=sh,basicstyle=\footnotesize\ttfamily},%
+	width=#1
+}
+
+\setKVdefault[fakeTERMnux]{title={Terminal UNiX}}
+
+\newcommand\faketermnuxtitre[1][]{%
+	\restoreKV[fakeTERMnux]
+	\setKV[fakeTERMnux]{#1}
+	\begin{tblr}{colsep=0pt,rowsep=0pt,width=\linewidth,colspec={lX[c]r}}
+		\UbuntuWhite~~\UbuntuWhite~~\UbuntuWhite & \vphantom{p}\useKV[fakeTERMnux]{title} & \UbuntuMin~~\UbuntuMax~~\UbuntuClose \\
+	\end{tblr}
+}
+
+\endinput

@@ -1,0 +1,58 @@
+\textit{Les parties A et B peuvent être traitées indépendamment.}
+
+\medskip
+
+\textbf{Partie A}
+
+\medskip
+
+On considère la fonction $f$ définie sur $\R$ par : \[ f(x)=\left(x+\dfrac12\right)\e^{-x}+x. \]
+
+\begin{enumerate}
+	\item Déterminer les limites de $f$ en $-\infty$ et en $+\infty$.
+	\item On admet que $f$ est deux fois dérivable sur $\R$.
+	\begin{enumerate}
+		\item Démontrer que, pour tout $x \in \R$, \[ f''(x)=\left(x-\dfrac32\right)\e^{-x}. \]
+		\item En déduire les variations et le minimum de la fonction $f'$ sur $\R$.
+		\item Justifier que pour tout $x \in \R$, $f'(x)>0$.
+		\item En déduire que l'équation $f(x)=0$ admet une unique solution sur $\R$.
+		\item Donner une valeur arrondie à $10^{-3}$ de cette solution.
+	\end{enumerate}
+\end{enumerate}
+
+\medskip
+
+\textbf{Partie B}
+
+\medskip
+
+On considère une fonction $h$, définie et dérivable sur $\R$, ayant une expression de la forme \[ h(x)=(ax+b)\e^{-x}+x,\] où $a$ et $b$ sont deux réels.
+
+Dans un repère orthonormé ci-après figurent :
+
+\begin{itemize}
+	\item la courbe représentative de la fonction $h$ ;
+	\item les points $A$ et $B$ de coordonnées respectives $(-2;-2,5)$ et $(2;3,5)$.
+\end{itemize}
+
+\begin{center}
+	\begin{tikzpicture}[x=0.75cm,y=0.75cm,xmin=-7,xmax=6,xgrille=1,xgrilles=0.2,ymin=-5,ymax=6,ygrille=1,ygrilles=0.2]
+		\GrilleTikz\AxesTikz
+		\AxexTikz[AffOrigine=false,Police=\small]{-6,-5,...,6}
+		\AxeyTikz[AffOrigine=false,Police=\small]{-5,-4,...,6}
+		\draw (-6pt,-4pt) node[below] {$0$} ;
+		\clip (\xmin,\ymin) rectangle (\xmax,\ymax) ;
+		\CourbeTikz[line width=1.25pt,blue,samples=2]{1.5*\x+0.5}{\xmin:\xmax}
+		\filldraw[blue] (-2,-2.5) circle[radius=2pt] node[right] {$A$} ;
+		\filldraw[blue] (2,3.5) circle[radius=2pt] node[right] {$B$} ;
+		\CourbeTikz[line width=1.25pt,red,samples=250]{(\x+0.5)*exp(-\x)+\x}{-1.5:6}
+	\end{tikzpicture}
+\end{center}
+
+\begin{enumerate}
+	\item Conjecturer, avec la précision permise par le graphique, les abscisses des éventuels points d'inflexion de la courbe représentative de la fonction $h$.
+	\item Sachant que la fonction $h$ admet sur $\R$ une dérivée seconde d'expression \[ h''(x)=-\dfrac32\e^{-x}+x\,\e^{-x},\]%
+	valider ou non la conjecture précédente.
+	\item Déterminer une équation de la droite $(AB)$.
+	\item Sachant que la droite $(AB)$ est tangente à la courbe représentative de la fonction $h$ au point d'abscisse $0$, en déduire les valeurs de $a$ et $b$.
+\end{enumerate}

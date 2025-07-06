@@ -1,0 +1,60 @@
+\textbf{Partie I}
+
+\medskip
+
+On considère la fonction $h$ définie sur l'intervalle $]0; +\infty[$ par : \[h(x) = 1 + \dfrac{\ln (x)}{x}.\]
+
+\begin{enumerate}
+	\item Déterminer la limite de la fonction $h$ en $0$.
+	\item Déterminer la limite de la fonction $h$ en $+\infty$.
+	\item On note $h'$ la fonction dérivée de $h$. Démontrer que, pour tout nombre réel $x$ de $]0; +\infty[$, on a : \[h'(x) = \dfrac{1 - \ln (x)}{x^2}.\]
+	\item Dresser le tableau de variations de la fonction $h$ sur l'intervalle $]0; +\infty[$.
+	\item Démontrer que l'équation $h(x) = 0$ admet une unique solution $\alpha$ dans $]0; +\infty[$. 
+	
+	Justifier que l'on a : $0,5 < \alpha < 0,6$.
+\end{enumerate}
+
+\textbf{Partie II}
+
+\medskip
+
+Dans cette partie, on considère les fonctions $f$ et $g$ définies sur $]0; +\infty[$ par : \[f(x) = x \ln (x) - x \text{ et }  g(x) = \ln (x).\]
+%
+On note $\mathcal{C}_f$ et $\mathcal{C}_g$ les courbes représentant respectivement les fonctions $f$ et $g$ dans un repère orthonormé $\Rij$.
+
+Pour tout nombre réel $a$ strictement positif, on appelle:
+
+\begin{itemize}
+	\item $T_a$ la tangente à $\mathcal{C}_f$ en son point d'abscisse $a$ ;
+	\item $D_a$ la tangente à $\mathcal{C}_g$ en son point d'abscisse $a$.
+\end{itemize}
+
+Les courbes  $\mathcal{C}_f$ et $\mathcal{C}_g$ ainsi que deux tangentes $T_a$ et $D_a$ sont représentées ci-dessous.
+
+\begin{center}
+	\begin{tikzpicture}[x=1cm,y=1cm,xmin=0,xmax=7,xgrille=1,ymin=-2,ymax=6,ygrille=1]
+		\GrilleTikz[Affs=false]
+		\AxesTikz[ElargirOx=0/0,ElargirOy=0/0]
+		\AxexTikz{0,1,...,6} \AxeyTikz{-2,-1,...,5}
+		\clip (\xmin,\ymin) rectangle (\xmax,\ymax) ;
+		\draw[line width=1.25pt,red,domain=0.01:7,samples=2000] plot (\x,{\x*ln(\x)-\x}) ;
+		\draw[line width=1pt,blue,domain=0.01:7,samples=2000] plot (\x,{ln(\x)}) ;
+		\draw[line width=1pt,red,domain=0.01:7,samples=2] plot (\x,{1.833*\x-6.254}) ;
+		\draw[line width=1pt,blue,domain=0.01:7,samples=2] plot (\x,{0.162*\x+0.833}) ;
+		\draw (1,1) node[above,blue] {$D_a$} ; \draw (2.9,-1) node[right,red] {$T_a$} ;
+		\draw (4.3,2) node[left,red] {$\mathcal{C}_f$} ; \draw (0.2,-1.8) node[right,blue] {$\mathcal{C}_g$} ;
+		\draw[dotted,line width=1.25pt] (6.25,0) node[below] {$a$} -- (6.25,5.204) ;
+	\end{tikzpicture}
+\end{center}
+
+On recherche d'éventuelles valeurs de $a$ pour lesquelles les droites $T_a$ et $D_a$ sont perpendiculaires.
+
+Soit $a$ un nombre réel appartenant à l'intervalle $]0; +\infty[$.
+
+\begin{enumerate}
+	\item Justifier que la droite $D_a$ a pour coefficient directeur $\dfrac{1}{a}$.
+	\item Justifier que la droite $T_a$ a pour coefficient directeur $\ln(a)$.
+	
+	On rappelle que dans un repère orthonormé, deux droites de coefficients directeurs respectifs $m$ et $m'$sont perpendiculaires si et seulement si $mm' = -1$.
+	\item Démontrer qu'il existe une unique valeur de $a$, que l'on identifiera, pour laquelle les droites $T_a$ et $D_a$ sont perpendiculaires.
+\end{enumerate}

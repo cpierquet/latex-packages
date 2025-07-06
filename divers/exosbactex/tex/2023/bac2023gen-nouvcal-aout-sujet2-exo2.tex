@@ -1,0 +1,55 @@
+On considère la fonction $f$, définie sur $\intervFO{0}{+\infty}$ par :%
+\[ f(x)=x\,\e^{-x}. \]
+%
+On note $\mathcal{C}_f$ sa courbe représentative dans un repère orthonormé du plan.
+
+On admet que $f$ est deux fois dérivable sur $\intervFO{0}{+\infty}$.
+
+On note $f'$ sa dérivée et $f''$ sa dérivée seconde.
+
+\begin{enumerate}
+	\item En remarquant que pour tout $x$ dans $\intervFO{0}{+\infty}$, on a $f(x) = \frac{x}{\e^x}$, démontrer que la courbe $\mathcal{C}_f$ possède une asymptote en $+\infty$ dont on donnera une équation.
+	\item Démontrer que pour tout réel $x$ appartenant à $\intervFO{0}{+\infty}$ :%
+	\[ f'(x)=(1-x)\,\e^{-x}. \]
+	\item Dresser le tableau de variations de $f$ sur $\intervFO{0}{+\infty}$, sur lequel on fera figurer les valeurs aux bornes ainsi que la valeur exacte de l'extremum.
+	\item Déterminer, sur l'intervalle $\intervFO{0}{+\infty}$, le nombre de solutions de l'équation :%
+	\[ f(x)=\frac{367}{\num{1000}}. \]
+	\item  On admet que pour tout $x$ appartenant à $\intervFO{0}{+\infty}$ :%
+	\[ f''(x)= \e^{-x} (x-2). \]
+	%
+	Étudier la convexité de la fonction $f$ sur l'intervalle $\intervFO{0}{+\infty}$.
+	\item Soit $a$ un réel appartenant à $\intervFO{0}{+\infty}$ et $A$ le point de la courbe $\mathcal{C}_f$ d'abscisse $a$.
+	
+	\begin{wrapstuff}[r]
+		\begin{tikzpicture}[x=2cm,y=10cm,xmin=0,xmax=3,ymin=0,ymax=0.45]
+			\draw[semithick] (-0.5,0)--(\xmax,0) ;
+			\draw[semithick] (0,0)--(0,\ymax) ;
+			\CourbeTikz[thick,blue,samples=250]{\x*exp(-\x)}{0:\xmax}
+			\draw[blue] (2.25,0.23714) node[above] {$\mathcal{C}_f$} ;
+			\draw[thick,dashed] (0.75,0) node[below] {$a$} --++ (0,{0.75*exp(-0.75)}) ;
+			\draw[thick,teal] (0,{0.75^2*exp(-0.75)})--({1.75},{0.25*exp(-0.75)*1.75+0.75^2*exp(-0.75)}) node[pos=0.75,above] {$T_a$};
+			\draw[thick,->,>=latex] (-0.25,0)--++(0,{0.75^2*exp(-0.75)}) node[midway,left] {$g(a)$};
+			\draw[thick,densely dashed] (-0.25,{0.75^2*exp(-0.75)})--++(0.25,0) ;
+			\filldraw (0.75,{0.75*exp(-0.75)}) circle[fill,radius=1.5pt] node[above] {$A$} ;
+			\filldraw (0,{0.75^2*exp(-0.75)}) circle[fill,radius=1.5pt] node[above left] {$H_a$} ;
+		\end{tikzpicture}
+	\end{wrapstuff}
+	
+	On note $T_a$ la tangente à $\mathcal{C}_f$ en $A$.
+	
+	On note $H_a$ le point d'intersection de la droite $T_a$ et de l'axe des ordonnées.
+	
+	On note $g(a)$ l'ordonnée de $H_a$.
+	
+	La situation est représentée sur la figure ci-contre.
+\end{enumerate}
+
+\begin{enumerate}
+	\item[]
+	\begin{enumerate}
+		\item Démontrer qu’une équation réduite de la tangente $T_a$ est : \[y=\left( (1-a)\,\e^{-a} \right) \times x + a^2 \, \e^{-a}.\]
+		\item En déduire l'expression de $g(a)$.
+		\item Démontrer que $g(a)$ est maximum lorsque $A$ est un point d'inflexion de la courbe $\mathcal{C}_f$.\\
+		\emph{Les traces de recherche, même incomplètes ou infructueuses, seront valorisées.}
+	\end{enumerate}
+\end{enumerate}

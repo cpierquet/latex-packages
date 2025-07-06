@@ -1,0 +1,181 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cp-python}[2017/12/15 Environnement Python, V1.1.2]
+% 1.1.2 Ajout console
+
+%couleurs python
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstnewenvironment{python}{
+	\lstset{
+		language=Python,
+		backgroundcolor=\color{backcolour},   
+		commentstyle=\color{codegreen},
+		keywordstyle=\color{magenta},
+		numberstyle=\small\color{codegray},
+		stringstyle=\color{codepurple},
+		basicstyle=\ttfamily\small,
+		breakatwhitespace=false, 
+		otherkeywords={self},    
+		literate={á}{{\'a}}1 {ã}{{\~a}}1 {é}{{\'e}}1 {î}{{\^i}}1 {ê}{{\^e}}1 {è}{{\`e}}1 {\%}{{\%}}1,	
+		breaklines=true,                 
+		captionpos=b,   
+		frame=single,                 
+		keepspaces=true,                 
+		numbers=left,                    
+		numbersep=10pt,                  
+		showspaces=false,                
+		showstringspaces=false,
+		showtabs=false,                  
+		tabsize=2,
+		rulesepcolor=\color{gray},
+		rulecolor=\color{black},
+		xleftmargin=0.05\textwidth,
+		xrightmargin=0.05\textwidth
+		}}{}
+
+\lstnewenvironment{pythonetroit}{
+	\lstset{
+		mathescape,
+		language=Python,
+		backgroundcolor=\color{backcolour},   
+		commentstyle=\color{codegreen},
+		keywordstyle=\color{magenta},
+		numberstyle=\small\color{codegray},
+		stringstyle=\color{codepurple},
+		basicstyle=\ttfamily\small,
+		breakatwhitespace=false, 
+		otherkeywords={self},    
+		literate={á}{{\'a}}1 {ã}{{\~a}}1 {é}{{\'e}}1 {î}{{\^i}}1 {ê}{{\^e}}1 {è}{{\`e}}1 {\%}{{\%}}1,	
+		breaklines=true,                 
+		captionpos=b,   
+		frame=single,                 
+		keepspaces=true,                 
+		numbers=left,                    
+		numbersep=10pt,                  
+		showspaces=false,                
+		showstringspaces=false,
+		showtabs=false,                  
+		tabsize=2,
+		rulesepcolor=\color{gray},
+		rulecolor=\color{black},
+		xleftmargin=75pt,
+		xrightmargin=75pt
+		}}{}
+
+\lstnewenvironment{pythonv}{
+	\lstset{
+		language=Python,
+		backgroundcolor=\color{backcolour},   
+		commentstyle=\color{codegreen},
+		keywordstyle=\color{magenta},
+		numberstyle=\small\color{codegray},
+		stringstyle=\color{codepurple},
+		basicstyle=\ttfamily\small,
+		breakatwhitespace=false,    
+		otherkeywords={self},     
+		breaklines=true,    
+		literate={á}{{\'a}}1 {ã}{{\~a}}1 {é}{{\'e}}1 {î}{{\^i}}1 {ê}{{\^e}}1 {è}{{\`e}}1,
+		captionpos=b,   
+		frame=single,                 
+		keepspaces=true,                 
+		numbers=none,                    
+		numbersep=10pt,                  
+		showspaces=false,                
+		showstringspaces=false,
+		showtabs=false,                  
+		tabsize=2,
+		rulesepcolor=\color{gray},
+		rulecolor=\color{black},
+		xleftmargin=.05\textwidth,
+		xrightmargin=.05\textwidth
+		}}{}
+		
+\lstnewenvironment{pythonshell}{
+	\lstset{
+		language=Python,
+		escapeinside={<@}{@>},
+		backgroundcolor=\color{white},   
+		commentstyle=\color{codegreen},
+		keywordstyle=\color{magenta},
+		numberstyle=\small\color{codegray},
+		stringstyle=\color{codepurple},
+		basicstyle=\ttfamily\small,
+		breakatwhitespace=false,    
+		otherkeywords={self},     
+		breaklines=true,    
+		literate={à}{{\`a}}1 {á}{{\'a}}1 {ã}{{\~a}}1 {é}{{\'e}}1 {î}{{\^i}}1 {ê}{{\^e}}1 {è}{{\`e}}1,
+		captionpos=b,   
+		frame=single,                 
+		keepspaces=true,                 
+		numbers=none,                    
+		numbersep=10pt,                  
+		showspaces=false,                
+		showstringspaces=false,
+		showtabs=false,                  
+		tabsize=2,
+		rulesepcolor=\color{gray},
+		rulecolor=\color{black},
+		xleftmargin=.05\textwidth,
+		xrightmargin=.05\textwidth
+		}}{}
+		
+\lstnewenvironment{pythonshellpetit}{
+	\lstset{
+		language=Python,
+		escapeinside={<@}{@>},
+		backgroundcolor=\color{white},   
+		commentstyle=\color{codegreen},
+		keywordstyle=\color{magenta},
+		numberstyle=\small\color{codegray},
+		stringstyle=\color{codepurple},
+		basicstyle=\ttfamily\footnotesize,
+		breakatwhitespace=false,    
+		otherkeywords={self},     
+		breaklines=true,    
+		literate={á}{{\'a}}1 {ã}{{\~a}}1 {é}{{\'e}}1 {î}{{\^i}}1 {ê}{{\^e}}1 {è}{{\`e}}1,
+		captionpos=b,   
+		frame=single,                 
+		keepspaces=true,                 
+		numbers=none,                    
+		numbersep=10pt,                  
+		showspaces=false,                
+		showstringspaces=false,
+		showtabs=false,                  
+		tabsize=2,
+		rulesepcolor=\color{gray},
+		rulecolor=\color{black},
+		xleftmargin=.01\textwidth,
+		xrightmargin=.01\textwidth
+		}}{}
+
+\lstnewenvironment{pythonshelletroit}{
+	\lstset{
+		language=Python,
+		escapeinside={<@}{@>},
+		backgroundcolor=\color{white},   
+		commentstyle=\color{codegreen},
+		keywordstyle=\color{magenta},
+		numberstyle=\small\color{codegray},
+		stringstyle=\color{codepurple},
+		basicstyle=\ttfamily\footnotesize,
+		breakatwhitespace=false,    
+		otherkeywords={self},     
+		breaklines=true,    
+		literate={á}{{\'a}}1 {ã}{{\~a}}1 {é}{{\'e}}1 {î}{{\^i}}1 {ê}{{\^e}}1 {è}{{\`e}}1,
+		captionpos=b,   
+		frame=single,                 
+		keepspaces=true,                 
+		numbers=none,                    
+		numbersep=10pt,                  
+		showspaces=false,                
+		showstringspaces=false,
+		showtabs=false,                  
+		tabsize=2,
+		rulesepcolor=\color{gray},
+		rulecolor=\color{black},
+		xleftmargin=75pt,
+		xrightmargin=75pt
+		}}{}

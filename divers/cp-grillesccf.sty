@@ -1,0 +1,312 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cp-grillesccf}[2024/05/15 0.1.a Commandes pour les grilles de CCF]
+% 0.1.a	Version initiale
+
+% ====Packages
+\RequirePackage{amssymb}
+\RequirePackage{tabularray}
+\RequirePackage{listofitems}
+\RequirePackage{xstring}
+\RequirePackage{simplekv}
+
+% ====Clés
+\defKV[GrillesCCFSIO]{%
+	Session=\def\grccfsioannee{#1},%
+	PoliceManuscrite=\def\grpoliceccf{#1},%
+	Type=\def\grtypeccf{#1}
+}
+
+\setKVdefault[GrillesCCFSIO]{%
+	Session={\year},%
+	PoliceManuscrite={},%
+	Type={7-1}
+}
+
+% ====Environnements
+\NewDocumentCommand\GrilleCCFSIO{ O{} m m m D<>{default} }{%
+	%1=clés
+	%2=candidat
+	%3=date
+	%4=résumé
+	%5=compétences
+	\restoreKV[GrillesCCFSIO]%
+	\setKV[GrillesCCFSIO]{#1}%
+	\IfStrEq{\grtypeccf}{7-1}%
+		{%
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]},row{1}={l},row{2-3}={c},cells={font=\sffamily\bfseries}}
+				\hline
+				BTS SERVICES INFORMATIQUES AUX ORGANISATIONS\hspace*{2cm}SESSION {\grccfsioannee} \\
+				ANNEXE 7-1 : Document de préparation au déroulement de la situation 1 \\
+				Épreuve E2 – Mathématiques pour l’informatique (CCF) \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\begin{tblr}{
+					vline{1,Z}={solid},%
+					vline{2}={3-4}{solid},%
+					width=\linewidth,
+					colspec={X[m]Q[7cm,m]},
+					hlines,stretch=1.25,
+					cells={font=\bfseries\sffamily},
+					rows={1cm},%
+					row{2}={t},%
+					row{4}={t}
+				}
+				\SetCell[c=2]{c}{SITUATION PROBLÈME} & \\
+				NOM et prénom : \textmd{\grpoliceccf #2} & \SetCell{l}{\phantom{BLABLA}OPTION SLAM\phantom{ISR}$\Box$ \\ \phantom{BLABLA}OPTION SISR\phantom{LAM}$\Box$} \\
+				N° candidat : & N° commission \\
+				{Intitulé court de la situation proposée : \\~\\ \textmd{\grpoliceccf #4} \\} & {\\~\\ Date : \textmd{\grpoliceccf #3}} \\
+				{Consignes\\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\ \\} & \\
+				{Documents ou composants fournis\\ \\ \textmd{\grpoliceccf Notice + Aide-mémoire + Clé USB}\\ \\ \\} & \\
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\textsf{\textit{Au cours de l’épreuve, la personne candidate est autorisée à utiliser les ressources électroniques disponibles dans le centre d’examen à l’exception de tout service d’échanges synchrones ou asynchrones avec un tiers. Elle est informée que l’ensemble des connexions réalisées peuvent faire l’objet d’un contrôle par la commission d’interrogation.}}
+			
+			\pagebreak
+		}%
+		{}%
+	\IfStrEq{\grtypeccf}{7-2}%
+		{%
+			\IfStrEq{#5}{default}%
+				{%
+					\def\compteccfA{}%
+					\def\compteccfB{}%
+					\def\compteccfC{}%
+					\def\compteccfD{}%
+				}%
+				{%
+					\setsepchar[.]{/}%
+					\readlist*\lstcompetccf{#5}%
+					\itemtomacro\lstcompetccf[1]\compteccfA%
+					\itemtomacro\lstcompetccf[2]\compteccfB%
+					\itemtomacro\lstcompetccf[3]\compteccfC%
+					\itemtomacro\lstcompetccf[4]\compteccfD%
+
+				}%
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]},row{1}={l},row{2-3}={c},cells={font=\sffamily\bfseries}}
+				\hline
+				BTS SERVICES INFORMATIQUES AUX ORGANISATIONS\hspace*{2cm}SESSION \grccfsioannee \\
+				ANNEXE 7-2 : Grille d’aide à l’évaluation de la situation 1 (recto) \\
+				Épreuve E2 – Mathématiques pour l’informatique (CCF) \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]Q[3.5cm,m]},cells={font=\sffamily\bfseries},stretch=1.25}
+				\hline
+				NOM et prénom : \textmd{\grpoliceccf #2} & N° commission\textsuperscript{\scriptsize 1} : \\
+				N° candidat : & \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{0.75cm}
+			
+			\noindent\begin{tblr}{
+					hlines,vlines,
+					width=\linewidth,colspec={X[0.625,m]X[0.375,m]},
+					cells={font=\sffamily},%
+					row{2}={1.25cm},%
+					row{X}={0.75cm}
+				}
+			\SetCell[c=2]{l}{\bfseries Intitulé court de la situation problème proposée :} & \\
+			\SetCell[c=2]{l}{\grpoliceccf #4} & \\
+			\textbf{Évaluation\textsuperscript{\footnotesize 2}} & \textbf{Critères d'évaluation} \\
+			\textbf{Maîtrise des connaissances (sur 8)} & \\
+			\textmd{-- \grpoliceccf \compteccfA} & \\
+			\textmd{-- \grpoliceccf \compteccfB} & \\
+			\textmd{-- \grpoliceccf \compteccfC} & \\
+			\textmd{-- \grpoliceccf \compteccfD} & \\
+			\textbf{Production commentée (sur 6)} & \\
+			\textmd{Efficacité et pertinence de la solution proposée} & \\
+			\textmd{Pertinence de la solution proposée} & \\
+			\textmd{Correction et cohérence de l’utilisation du formalisme retenu} & \\
+			\textmd{Cohérence de l’utilisation du formalisme retenu} & \\
+			\textmd{Lisibilité de la solution proposée} & \\
+			\textbf{Mise en \oe{}uvre commentée (sur 6)} & \\
+			\textmd{Qualité de la mise en \oe{}uvre} & \\
+			\textmd{Efficacité de l’implémentation} & \\
+			\textmd{Pertinence de l’utilisation des composants logiciels fournis} & \\
+			\textmd{Adéquation des tests de validation effectués} & \\
+			\textmd{Capacité à proposer des corrections pertinentes} & \\
+			\textbf{Note globale} & \SetCell{r}{\textbf{Note ~~~/\,20}} \\
+			\SetCell[c=2]{l}{\textbf{Date :} {\grpoliceccf #3} \\ ~ \\ \textbf{Nom et signature de la commission d’évaluation :} \\ ~} & \\
+			\SetCell[c=2]{l}{\textbf{\textit{Joindre le document descriptif de la situation problème proposée }}} & \\
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\textsf{\textbf{\textit{Cette partie est à l’usage exclusif de la commission d’interrogation et ne peut être communiquée à la personne candidate.}}}
+			
+			\vfill
+			
+			\par\noindent\rule{0.33\linewidth}{0.4pt}
+			
+			\noindent\textsf{\textsuperscript{\footnotesize 1}{\footnotesize Indiquer le nom du professeur responsable de l’évaluation.}}
+			
+			\noindent\textsf{\textsuperscript{\footnotesize 2}{\footnotesize Des appels (2 au maximum) permettent de s’assurer de la compréhension du problème et d’évaluer la communication orale et les capacités liées à l’usage des outils numériques.}}
+			
+			\vspace*{5mm}
+			
+			\pagebreak
+			
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]},row{1}={l},row{2-3}={c},cells={font=\sffamily\bfseries}}
+				\hline
+				BTS SERVICES INFORMATIQUES AUX ORGANISATIONS\hspace*{2cm}SESSION \grccfsioannee \\
+				ANNEXE 7-2 : Grille d’aide à l’évaluation de la situation 1 (verso) \\
+				Épreuve E2 – Mathématiques pour l’informatique (CCF) \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]Q[6cm,m]},cells={font=\sffamily\bfseries},stretch=1.25}
+				\hline
+				NOM et prénom : \textmd{\grpoliceccf #2} & Date de l'interrogation : \\
+				N° candidat : & \textmd{\grpoliceccf #3} \\ \hline
+			\end{tblr}
+			
+			\vspace*{0.75cm}
+			
+			\noindent\begin{tblr}{%
+					width=\linewidth,colspec={XQ[7cm]},cells={font=\bfseries\sffamily},
+					row{1}={m,j,1cm},
+					row{2}={m,7cm},
+					row{3}={m,j,1cm},
+					row{4}={m,4cm},
+					vline{1,Z}={solid},
+					vline{2}={Z}{solid},
+					stretch=1.25}
+				\hline
+				Appréciation globale & \\ \hline
+				~
+				\\ \hline 
+				Questionnement complémentaire éventuel & \\ \hline
+				~
+				\\ \hline
+				{\underline{Note sur 20 :}\\ \\ \\} & {Visa de la commission \\ \\ \\} \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\textsf{\textbf{Ce document d’évaluation peut être communiqué à la personne candidate, à sa demande, après délibération du jury.}}
+			
+			\pagebreak
+		}%
+		{}%
+	\IfStrEq{\grtypeccf}{7-3}%
+		{%
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]},row{1}={l},row{2-3}={c},cells={font=\sffamily\bfseries}}
+				\hline
+				BTS SERVICES INFORMATIQUES AUX ORGANISATIONS\hspace*{2cm}SESSION \grccfsioannee \\
+				ANNEXE 7-3 : Grille d’aide à l’évaluation de la situation 2 (recto) \\
+				Épreuve E2 – Mathématiques pour l’informatique (CCF) \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]Q[3.5cm,m]},cells={font=\sffamily\bfseries},stretch=1.25}
+				\hline
+				NOM et prénom : \textmd{\grpoliceccf #2} & N° commission\textsuperscript{\scriptsize 3} : \\
+				N° candidat : & \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{0.75cm}
+			
+			\noindent\begin{tblr}{%
+					hline{1}={solid},%
+					hline{3-Y}={solid},
+					hline{Z}={2-Z}{solid},
+					vline{1}={1-Y}{solid},
+					vline{2}={3-Z}{solid},
+					vline{Z}={solid},
+					width=\linewidth,colspec={X[0.525]X[0.475]},
+					cells={font=\sffamily},
+					row{1}={m,j},
+					row{2}={m,j,1.5cm},
+					row{3-Z}={m,j,1cm},stretch=1.25}
+				\textbf{Identification du sujet proposé :} & \\
+				\textmd{\grpoliceccf #4} & \\
+				\SetCell{c}{\textbf{Compétences}} & \SetCell{c}{\textbf{Appréciation du niveau d’acquisition\textsuperscript{\scriptsize 4}}} \\
+				Maîtrise des connaissances figurant au programme & \\
+				Pertinence des sources d’information mobilisées & \\
+				Adaptation de la stratégie choisie au problème à résoudre & \\
+				Efficacité dans la mise en œuvre de cette stratégie & \\
+				Rigueur et pertinence dans l’utilisation des savoir-faire figurant au programme de mathématiques & \\
+				Cohérence de l’argumentation employée & \\
+				Aptitude à analyser un résultat avec pertinence & \\
+				Qualité d’expression écrite ou orale & \\
+				& \SetCell{r}{\textbf{/\,20}} \\
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\textsf{\textbf{\textit{Cette partie est à l’usage exclusif de la commission d’interrogation et ne peut être communiquée à la personne candidate.}}}
+			
+			\vfill
+			
+			\par\noindent\rule{0.33\linewidth}{0.4pt}
+			
+			\noindent\textsf{\textsuperscript{\footnotesize 3}{\footnotesize Indiquer le nom du professeur responsable de l’évaluation.}}
+			
+			\noindent\textsf{\textsuperscript{\footnotesize 4}{\footnotesize Le professeur peut utiliser toute forme d’annotation lui permettant d’évaluer par compétences.}}
+			
+			\vspace*{5mm}
+			
+			\pagebreak
+			
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]},row{1}={l},row{2-3}={c},cells={font=\sffamily\bfseries}}
+				\hline
+				BTS SERVICES INFORMATIQUES AUX ORGANISATIONS\hspace*{2cm}SESSION \grccfsioannee \\
+				ANNEXE 7-3 : Grille d’aide à l’évaluation de la situation 2 (verso) \\
+				Épreuve E2 – Mathématiques pour l’informatique (CCF) \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\begin{tblr}{vlines,width=\linewidth,colspec={X[m]Q[6cm,m]},cells={font=\sffamily\bfseries},stretch=1.25}
+				\hline
+				NOM et prénom : \textmd{\grpoliceccf #2} & Date de l'interrogation : \\
+				N° candidat : & \textmd{\grpoliceccf #3} \\ \hline
+			\end{tblr}
+			
+			\vspace*{0.75cm}
+			
+			\noindent\begin{tblr}{%
+					width=\linewidth,colspec={XQ[7cm]},cells={font=\bfseries\sffamily},
+					row{1}={m,j,1cm},
+					row{2}={m,7cm},
+					row{3}={m,j,1cm},
+					row{4}={m,4cm},
+					vline{1,Z}={solid},
+					vline{2}={Z}{solid},
+					stretch=1.25}
+				\hline
+				Appréciation globale & \\ \hline
+				~
+				\\ \hline 
+				Questionnement complémentaire éventuel & \\ \hline
+				~
+				\\ \hline
+				{\underline{Note sur 20 :}\\ \\ \\} & {Visa de la commission \\ \\ \\} \\
+				\hline
+			\end{tblr}
+			
+			\vspace*{5mm}
+			
+			\noindent\textsf{\textbf{Ce document d’évaluation peut être communiqué à la personne candidate, à sa demande, après délibération du jury.}}
+			
+			\pagebreak
+		}%
+		{}%
+}
+
+\endinput

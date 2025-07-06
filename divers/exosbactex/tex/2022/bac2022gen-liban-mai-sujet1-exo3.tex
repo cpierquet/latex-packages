@@ -1,0 +1,66 @@
+\textbf{\large Partie A}
+
+\medskip
+
+On considère la fonction $f$ définie pour tout réel $x$ par : \[ f(x)=1+x-\e^{0,5x-2}. \]
+%
+On admet que la fonction $f$ est dérivable sur $\R$. On note $f'$ sa dérivée.
+
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Déterminer la limite de la fonction $f$ en $-\infty$.
+		\item Démontrer que, pour tout réel $x$ non nul, $f(x)=1+0,5x\left( 2 - \dfrac{\e^{0,5x}}{0,5x} \times \e^{-2} \right)$.
+		
+		En déduire la limite de la fonction $f$ en $+\infty$
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Déterminer $f'(x)$ pour tout réel $x$.
+		\item Démontrer que l'ensemble des solutions de l'inéquation $f'(x)<0$ est l'intervalle $]4+2\,\ln(2);+\infty[$.
+	\end{enumerate}
+	\item Déduire des questions précédentes le tableau de variation de la fonction $f$ sur $\R$.
+	
+	On fera figurer la valeur exacte de l'image de $4+2\,\ln(2)$ par $f$.
+	\item Montrer que l'équation $f(x)=0$ admet une unique solution sur l'intervalle $[-1;0]$.
+\end{enumerate}
+
+\textbf{\large Partie B}
+
+\medskip
+
+On considère la suite $\suiten$ définie par $u_0=0$ et, pour tout entier naturel $n$, 
+
+\smallskip
+
+\hfill~$u_{n+1}=f\big(u_n\big)$ où $f$ est la fonction définie à la \textbf{partie A}.\hfill~
+
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Démontrer par récurrence que, pour tout entier naturel $n$, on a : \[ u_n \leqslant u_{n+1} \leqslant 4.\]
+		\item En déduire que la suite $\suiten$ converge. On notera $\ell$ la limite. 
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item On rappelle que $\ell$ vérifie la relation $\ell=f\big(\ell\big)$.
+		
+		Démontrer que $\ell=4$.
+		\item On considère la fonction \texttt{valeur} écrite ci-contre dans le langage \textsf{Python} :
+		
+\begin{CodePythonLstAlt}*[Largeur=8cm]{center}
+def valeur(a) :
+	u = 0
+	n = 0
+	while u <= a :
+		u = 1+u-exp(0.5*u-2)
+		n = n+1
+	return n
+\end{CodePythonLstAlt}
+		
+		L'instruction \texttt{valeur(3.99)} renvoie la valeur \texttt{12}.
+		
+		Interpréter ce résultat dans le contexte de l'exercice.
+	\end{enumerate}
+\end{enumerate}
+

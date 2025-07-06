@@ -1,0 +1,36 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: lualatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: lualatex: {shell: no, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[a4paper,french,11pt]{article}
+\usepackage[margin=1.25cm]{geometry}
+\usepackage[chargepackages]{exosbactex}
+\useproflyclib{piton}
+\setlength{\parindent}{0pt}
+
+\NewDocumentCommand\GenExosBac{ m m m }{%
+	\readlist*\lstnumexos{#3}%
+	%1=annee,%2=lieux,%3=nombres
+	\foreach \lieu [count=\i] in {#2}{%
+		\itemtomacro\lstnumexos[\i]{\tmpnumberex}%
+		\foreach \exonb in {1,...,\tmpnumberex}{%
+			{\Large\bfseries#1-\lieu-n°\exonb}
+			
+			\medskip
+			
+			\InsertionExoBac{#1-\lieu}{\exonb}
+			
+			\pagebreak
+		}%
+	}%
+}
+
+\begin{document}
+
+%\InsertionExoBac{2024-all-mars-j0}{1}\pagebreak
+
+\GenExosBac{2024}{all-mars-j0}{8}
+
+\GenExosBac{2023}{ce-mars-j1,ce-mars-j2}{4,4}
+
+\end{document}

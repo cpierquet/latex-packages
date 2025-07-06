@@ -1,0 +1,65 @@
+On considère la suite $\left(u_n\right)$ définie par $u_0 = 3$ et, pour tout entier naturel $n$,
+\[u_{n+1} = \dfrac12u_n + \dfrac12n + 1.\]
+
+\smallskip
+
+\textbf{Partie A}
+
+\medskip
+
+\emph{Cette partie est un questionnaire à choix multiples.\\ Pour chacune des questions suivantes, une seule des quatre réponses proposées est exacte.\\Pour répondre, indiquer sur la copie le numéro de la question et la lettre de la réponse choisie.\\Aucune justification n'est demandée.\\Une réponse fausse, une absence de réponse, ou une réponse multiple, ne rapporte ni n'enlève de point.}
+
+\medskip
+
+\begin{enumerate}
+	\item La valeur de $u_2$ est égale à :
+	
+	\medskip
+	
+	\begin{tblr}{width=\linewidth,colspec={X[m,l]X[m,l]}}
+		(a)~~$\dfrac{11}{4}$ & (b)~~$\dfrac{13}{2}$\\
+		(c)~~$3,5$ & (b)~~$2,7$
+	\end{tblr}
+	\item La suite $\left(v_n\right)$ définie, pour tout entier naturel $n$, par $v_n = u_n - n$ est :
+	
+	\medskip
+	
+	\begin{tblr}{width=\linewidth,colspec={X[m,l]X[m,l]}}
+			(a)~~arithmétique de raison $\dfrac12$ & (b)~~ géométrique de raison $\dfrac12$\\
+			(c)~~constante. & (d)~~ni arithmétique, ni géométrique.
+	\end{tblr}
+	\item On considère la fonction ci-dessous, écrite de manière incomplète en langage \textsf{Python}.
+	
+\begin{CodePythonLstAlt}[Largeur=7cm]{center}
+def terme(n) :
+	U = 3
+	for i in range(3) :
+		.........
+	return U
+\end{CodePythonLstAlt}
+	
+	$n$ désigne un entier naturel non nul. 
+	
+	On rappelle qu'en langage \textsf{Python} \og \texttt{i in range(n)} \fg{} signifie que \texttt{i} varie de \texttt{0} à \texttt{n-1}.
+
+	Pour que \texttt{terme(n)} renvoie la valeur de $u_n$, on peut compléter la ligne \texttt{4} par :
+	
+	\medskip
+	
+	\begin{tblr}{width=\linewidth,colspec={X[m,l]X[m,l]}}
+		(a)~~\texttt{U = U/2 + (i+1)/2 + 1} & (b)~~\texttt{U = U/2 + n/2 + 1}\\
+		(c)~~\texttt{U = U/2 + (i-1)/2 + 1} & (d)~~\texttt{U = U/2 + i/2 + 1}
+	\end{tblr}
+\end{enumerate}
+
+\medskip
+
+\textbf{Partie B}
+
+\medskip
+
+\begin{enumerate}
+	\item Démontrer par récurrence que pour tout entier naturel $n$ : \[n \leqslant u_n \leqslant n + 3.\]
+	\item En déduire la limite de la suite $\left(u_n\right)$.
+	\item Déterminer la limite de la suite $\left(\dfrac{u_n}{n}\right)$.
+\end{enumerate}

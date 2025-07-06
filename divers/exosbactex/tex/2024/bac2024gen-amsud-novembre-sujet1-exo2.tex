@@ -1,0 +1,99 @@
+On dispose de deux urnes opaques $U_1$ et $U_2$.
+
+L’urne $U_1$ contient 4 boules noires et 6 boules blanches.
+
+L’urne $U_2$ contient 1 boule noire et 3 boules blanches.
+
+\smallskip
+
+On considère l’expérience aléatoire suivante.
+
+On pioche au hasard une boule dans $U_1$ que l’on place dans $U_2$, puis on pioche au hasard une boule dans $U_2$.
+
+\smallskip
+
+On note :
+
+\begin{itemize}
+	\item $N_1$ l’évènement « Piocher une boule noire dans l’urne $U_1$ » ;
+	\item $N_2$ l’évènement « Piocher une boule noire dans l’urne $U_2$ ».
+\end{itemize}
+
+Pour tout évènement $A$, on note $\overline{A}$ son évènement contraire.
+
+\medskip
+
+\textbf{PARTIE A}
+
+\smallskip
+
+\begin{enumerate}
+	\item On considère l’arbre de probabilités ci-contre.
+	
+	\begin{wrapstuff}[r,abovesep=-0.5\baselineskip]
+		\def\ArbreDeuxDeux{
+			$N_1$//above,
+			$N_2$//above,
+			$\overline{N_2}$//above,
+			$\overline{N_1}$//above,
+			$N_2$/\num{0.2}/,
+			$\overline{N_2}$//above
+		}
+		\ArbreProbasTikz[EspaceNiveau=2.25]{\ArbreDeuxDeux}
+	\end{wrapstuff}
+	
+	\begin{enumerate}
+		\item Justifier que la probabilité de piocher une boule noire dans l’urne $U_2$ sachant qu’on a pioché une boule blanche dans l’urne $U_1$ est $0,2$.
+		\item Recopier et compléter l’arbre de probabilités ci-contre, en faisant apparaître sur chaque branche les probabilités des évènements concernés, sous forme décimale.
+	\end{enumerate}
+	\item Calculer la probabilité de piocher une boule noire dans l’urne $U_1$ et une boule noire dans l’urne $U_2$.
+	\item Justifier que la probabilité de piocher une boule noire dans l’urne $U_2$ est égale à $0,28$.
+	\item On a pioché une boule noire dans l’urne $U_2$. Calculer la probabilité d’avoir pioché une boule blanche dans l’urne $U_1$. On donnera
+	le résultat sous forme décimale arrondie à $10^{-2}$.
+\end{enumerate}
+
+\smallskip
+
+\textbf{PARTIE B}
+
+\medskip
+
+$n$ désigne un entier naturel non nul.
+
+L’expérience aléatoire précédente est répétée n fois de façon identique et indépendante, c’est-à-dire que les urnes $U_1$ et $U_2$ sont remises dans leur configuration initiale, avec respectivement 4 boules noires et 6 boules blanches dans l’urne $U_1$ et 1 boule noire et 3 boules blanches dans l’urne $U_2$, entre chaque expérience.
+
+\smallskip
+
+On note $X$ la variable aléatoire qui compte le nombre de fois où on pioche une boule noire dans l’urne $U_2$.
+
+\smallskip
+
+On rappelle que la probabilité de piocher une boule noire dans l’urne $U_2$ est égale à $0,28$ et celle de piocher une boule blanche dans l’urne $U_2$ est égale à $0,72$.
+
+\begin{enumerate}
+	\item Déterminer la loi de probabilité suivie par $X$. Justifier votre réponse.
+	\item Déterminer par le calcul le plus petit entier naturel $n$ tel que :
+	$1-0,72^n \geqslant 0,9$.
+	\item Interpréter le résultat précédent dans le contexte de l’expérience.
+\end{enumerate}
+
+\smallskip
+
+\textbf{PARTIE C}
+
+\medskip
+
+Dans cette partie les urnes $U_1$ et $U_2$ sont remises dans leur configuration initiale, avec respectivement 4 boules noires et 6 boules blanches dans l’urne $U_1$ et 1 boule noire et 3 boules
+blanches dans l’urne $U_2$.
+
+\smallskip
+
+On considère la nouvelle expérience aléatoire suivante.
+
+On pioche simultanément deux boules dans l’urne $U_1$ que l’on place dans l’urne $U_2$, puis on pioche au hasard une boule dans l’urne $U_2$.
+
+\begin{enumerate}
+	\item Combien y a-t-il de tirages possibles de deux boules simultanément dans l’urne $U_1$ ?
+	\item Combien y a-t-il de tirages possibles de deux boules simultanément dans l’urne $U_1$ contenant exactement une boule blanche et une boule noire ?
+	\item La probabilité de piocher une boule noire dans l’urne $U_2$ avec cette nouvelle expérience est- elle supérieure à la probabilité de tirer une boule noire dans l’urne $U_2$ avec l’expérience de la \textbf{partie A} ? Justifier votre réponse. \textit{On pourra s’aider d’un arbre pondéré modélisant cette expérience.}
+\end{enumerate}

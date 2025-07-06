@@ -1,0 +1,78 @@
+\emph{Cet exercice est un questionnaire à choix multiples.\\Pour chacune des questions suivantes, une seule des quatre réponses proposées est exacte. Une réponse fausse, une réponse multiple ou l'absence de réponse à une question ne rapporte ni n'enlève de point.\\Pour répondre, indiquer sur la copie le numéro de la question et la lettre de la réponse choisie. Aucune justification n'est demandée.}
+
+\begin{enumerate}
+	\item On considère la fonction $g$ définie sur $\R$ par : \[ g(x) = \dfrac{2\text{e}^x}{\text{e}^x +1}.\]
+	
+	La courbe représentative de la fonction $ g$ admet pour asymptote en $+ \infty$ la droite d'équation :
+	
+	\medskip
+	
+	\begin{tblr}{width=\linewidth,colspec={*{4}{X[l,m]}}}
+		(a)~~$x = 2$ ; & (b)~~$y = 2$ ; & (c)~~$y = 0$ ; & (d)~~$x = - 1$\\
+	\end{tblr}
+	\item On considère une fonction $f$ définie et deux fois dérivable sur $\R$. On appelle $\mathcal{C}$ sa représentation graphique.
+	
+	On désigne par $f''$ la dérivée seconde de $f$.
+	
+	On a représenté sur le graphique ci-dessous la courbe de $f''$, notée 
+	$\mathcal{C}''$.
+	
+	\begin{center}
+		\begin{tikzpicture}[x=0.8cm,y=0.8cm,xmin=-7,xmax=3,xgrille=1,xgrilles=0.5,ymin=-6,ymax=4,ygrille=1,ygrilles=0.5]
+			\GrilleTikz \AxesTikz[ElargirOx=0/0,ElargirOy=0/0]
+			\AxexTikz[AffGrad=false]{-6,-5,...,2} \AxeyTikz[AffGrad=false]{-5,-4,...,3}
+			\draw (1,-4pt) node[below,font=\small] {1} ;
+			\draw (2,-4pt) node[below,font=\small] {2} ;
+			\draw (0,0) node[below left,font=\small] {0} ;
+			\draw (-1,-4pt) node[below,font=\small] {$-1$} ;
+			\draw (-4pt,1) node[left,font=\small] {1} ;
+			\draw (-5,0.25) node[above left,red,font=\large] {$\mathcal{C}''$} ;
+			\clip (\xmin,\ymin) rectangle (\xmax,\ymax) ;
+			\draw[very thick,red,samples=250,domain=-7:2.25] plot (\x,{(\x+1)*(\x-2)*exp(\x)}) ;
+		\end{tikzpicture}
+	\end{center}
+	%
+	\begin{tblr}{width=\linewidth,colspec={*{2}{X[l,m]}}}
+		(a)~~$\mathcal{C}$ admet un unique point d'inflexion ; & (b)~~$f$ est convexe sur l'intervalle $[-1;2 ]$ ; \\
+		(c)~~$f$ est convexe sur $]-\infty;-1$] et sur $[2;+ \infty[$ ; & (d)~~$f$ est convexe sur $\R$ \\
+	\end{tblr}
+	\item On donne la suite $\left(u_n\right)$ définie par : $u_0 = 0$ et pour tout entier naturel $n$, $u_{n+1} = \dfrac12 u_n + 1$.
+	
+	La suite $\left(v_n\right)$, définie pour tout entier naturel $n$ par $v_n = u_n  - 2$, est :
+	
+	\medskip
+	
+	\begin{tblr}{width=\linewidth,colspec={*{2}{X[l,m]}}}
+		(a)~~arithmétique de raison $- 2$ ; & (b)~~géométrique de raison $- 2$ ; \\
+		(c)~~arithmétique de raison 1 ; & (d)~~géométrique de raison  $\dfrac12$. \\
+	\end{tblr}
+	\item  On considère une suite $\left(u_n\right)$ telle que, pour tout entier naturel, on a : \[1  + \left(\dfrac14\right)^n \leqslant u_n \leqslant 2 - \dfrac{n}{n+1}.\]
+	%
+	On peut affirmer que la suite $\left(u_n\right)$ :
+	
+	\medskip
+	
+	\begin{tblr}{width=\linewidth,colspec={*{2}{X[l,m]}}}
+		(a)~~converge vers 2 ; & (b)~~converge vers 1 ; \\
+		(c)~~diverge vers $+ \infty$ ; & (d)~~n'a pas de limite. \\
+	\end{tblr}
+	\item Soit $f$ la fonction définie sur $]0;+\infty[$ par $f(x) = x^2 \ln x$. 
+	
+	Une primitive $F$ de $f$ sur $]0~;~+\infty[$ est définie par :
+	
+	\medskip
+	
+	\begin{tblr}{width=\linewidth,colspec={*{2}{X[l,m]}}}
+		(a)~~$F(x) = \dfrac13 x^3 \left(\ln x - \dfrac13 \right)$ ; & (b)~~$F(x) = \dfrac13 x^3 (\ln x - 1)$ ; \\
+		(c)~~$F(x) = \dfrac13 x^2$ ; & (d)~~$F(x) = \dfrac13 x^2 (\ln x - 1)$. \\
+	\end{tblr}
+	\item Pour tout réel $x$, l’expression $2 + \dfrac{3\text{e}^{-x} - 5}{\text{e}^{-x} + 1}$ est égale à :
+	
+	\medskip
+	
+	\begin{tblr}{width=\linewidth,colspec={*{2}{X[l,m]}}}
+		(a)~~$\dfrac{5 - 3\text{e}^x}{1 + \text{e}^x}$ ; & (b)~~$\dfrac{5 + 3\text{e}^x}{1 - \text{e}^x}$ ; \\
+		(c)~~$\dfrac{5 + 3\text{e}^x}{1 + \text{e}^x}$ ; & (d)~~$\dfrac{5 - 3\text{e}^x}{1 - \text{e}^x}$. \\
+	\end{tblr}
+\end{enumerate}
+

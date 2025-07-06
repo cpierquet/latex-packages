@@ -1,0 +1,66 @@
+Une agence de marketing a étudié la satisfaction des clients concernant le service clientèle à l'occasion de l'achat d'un téléviseur. Ces achats ont été réalisés soit sur internet, soit dans une chaîne de magasins d'électroménager, soit dans une enseigne de grandes surfaces.
+
+\smallskip
+
+Les achats sur internet représentent $60\,\%$ des ventes, les achats en magasin d'électroménager $30 \%$ des ventes et ceux en grandes surfaces $10\,\%$ des ventes.
+
+\smallskip
+
+Une enquête montre que la proportion des clients satisfaits du service clientèle est de :
+
+\begin{itemize}
+	\item $75\,\%$ pour les clients sur internet ;
+	\item $90\,\%$ pour les clients en magasin d'électroménager ;
+	\item $80\,\%$ pour les clients en grande surface.
+\end{itemize}
+
+On choisit au hasard un client ayant acheté le modèle de téléviseur concerné.
+
+On définit les événements suivants :
+
+\begin{itemize}
+	\item $I$ : « le client a effectué son achat sur internet » ;
+	\item $M$ : « le client a effectué son achat en magasin d'électroménager » ;
+	\item $G$ : « le client a effectué son achat en grande surface » ;
+	\item $S$ : «le client est satisfait du service clientèle ».
+\end{itemize}
+
+Si $A$ est un événement quelconque, on notera $\overline{A}$ son événement contraire et $P(A)$ sa probabilité.
+
+\begin{wrapstuff}[r]
+\begin{EnvArbreProbasTikz}[Type=3x2,PositionProbas=auto,EspaceNiveau=2]{%
+	$I$/\numdots/,$S$/\numdots/,$\overline{S}$/\numdots/,%
+	$M$/\numdots/,$S$/\numdots/,$\overline{S}$/\numdots/,%
+	$G$/\numdots/,$S$/\numdots/,$\overline{S}$/\numdots/}
+\end{EnvArbreProbasTikz}
+\end{wrapstuff}
+
+\begin{enumerate}
+	\item Reproduire et compléter l'arbre ci-contre.
+	\item Calculer la probabilité que le client ait réalisé son achat sur internet et soit satisfait du service clientèle.
+	\item Démontrer que $P(S)=0,8$.
+	\item Un client est satisfait du service clientèle. Quelle est la probabilité qu'il ait effectué son achat sur internet? On donnera un résultat arrondi à $10^{-3}$ près.
+	\item Pour réaliser l'étude, l'agence doit contacter chaque jour 30 clients parmi les acheteurs du téléviseur. On suppose que le nombre de clients est suffisamment important pour assimiler le choix des 30 clients à un tirage avec remise. On note $X$ la variable aléatoire qui, à chaque échantillon de 30 clients, associe le nombre de clients satisfaits du service clientèle.
+	
+	\begin{enumerate}
+		\item Justifier que $X$ suit une loi binomiale dont on précisera les paramètres.
+		\item Déterminer la probabilité, arrondie à $10^{-3}$ près, qu'au moins 25 clients soient satisfaits dans un échantillon de 30 clients contactés sur une même journée.
+	\end{enumerate}
+	\item En résolvant une inéquation, déterminer la taille minimale de l'échantillon de clients à contacter pour que la probabilité qu'au moins l'un d'entre eux ne soit pas satisfait soit supérieure à $0,99$.
+	\item Dans les deux questions (a) et (b) qui suivent, on ne s'intéresse qu'aux seuls achats sur internet.
+	
+	Lorsqu'une commande de téléviseur est passée par un client, on considère que le temps de livraison du téléviseur est modélisé par une variable aléatoire $T$ égale à la somme de deux variables aléatoires $T_{1}$ et $T_{2}$.
+	
+	La variable aléatoire $T_{1}$ modélise le nombre entier de jours pour l'acheminement du téléviseur depuis un entrepôt de stockage vers une plateforme de distribution. La variable aléatoire $T_{2}$ modélise le nombre entier de jours pour l'acheminement du téléviseur depuis cette plateforme jusqu'au domicile du client.
+	
+	On admet que les variables aléatoires $T_{1}$ et $T_{2}$ sont indépendantes, et on donne :
+	
+	\begin{itemize}
+		\item L'espérance $E\big(T_{1}\big)=4$ et la variance $V\big(T_{1}\big)=2$;
+		\item L'espérance $E\big(T_{2}\big)=3$ et la variance $V\big(T_{2}\big)=1$.
+	\end{itemize}
+	\begin{enumerate}
+		\item Déterminer l'espérance $E(T)$ et la variance $V(T)$ de la variable aléatoire $T$.
+		\item Un client passe une commande de téléviseur sur internet. Justifier que la probabilité qu'il reçoive son téléviseur entre 5 et 9 jours après sa commande est supérieure ou égale à $\frac{2}{3}$.
+	\end{enumerate}
+\end{enumerate}

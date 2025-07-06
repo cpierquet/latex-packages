@@ -1,0 +1,78 @@
+Une entreprise a créé une Foire Aux Questions (« FAQ ») sur son site internet.
+
+\smallskip
+
+On étudie le nombre de questions qui y sont posées chaque mois. 
+
+\bigskip
+
+\textbf{Partie A : Première modélisation}
+
+\medskip
+
+Dans cette partie, on admet que, chaque mois :
+
+\begin{itemize}
+	\item 90\,\% des questions déjà posées le mois précédent sont conservées sur la FAQ ;
+	\item 130 nouvelles questions sont ajoutées à la FAQ.
+\end{itemize}
+
+Au cours du premier mois, 300 questions ont été posées. 
+
+\smallskip
+
+Pour estimer le nombre de questions, en centaines, présentes sur la FAQ le $n$-ième mois, on modélise la situation ci-dessus à l’aide de la suite $\left(u_n\right)$ définie par :%
+\[ u_1=3 \text{ et, pour tout entier naturel } n \geqslant 1\text{, } u_{n+1}=0,9u_n+1,3. \]
+%
+\begin{enumerate}
+	\item Calculer $u_2$ et $u_3$ et proposer une interprétation dans le contexte de l’exercice.
+\begin{wrapstuff}[r,abovesep=0.75\baselineskip]
+\begin{CodePythonLstAlt}*[Largeur=5.5cm]{fontupper=\scriptsize}
+def seuil(p) :
+	n = 1
+	u = 3
+	while u <= p :
+		n = n+1
+		u = 0.9*u + 1.3
+	return n
+\end{CodePythonLstAlt}
+\end{wrapstuff}
+	\item Montrer par récurrence que pour tout entier naturel $n\geqslant 1$ :%
+	\[ u_{n} = 13 - \frac{100}{9} \times 0,9^n. \]
+	\item En déduire que la suite $\left(u_n\right)$ est croissante.
+	\item On considère le programme ci-contre, écrit en langage \textsf{Python}.
+	
+	\smallskip
+	
+	Déterminer la valeur renvoyée par la saisie de \texttt{seuil(8.5)} et l’interpréter dans le contexte de l’exercice. 
+\end{enumerate}
+
+\smallskip
+
+\textbf{Partie B : Une autre modélisation}
+
+\medskip
+
+Dans cette partie, on considère une seconde modélisation à l’aide d’une nouvelle suite $\left(v_n\right)$ définie pour tout entier naturel $n \geqslant 1$ par :
+%
+\[ v_n = 9 - 6 \times \text{e}^{-0,19 \times (n-1)} .\]
+%
+Le terme $v_n$ est une estimation du nombre de questions, en centaines, présentes le $n$-ième mois sur la FAQ.
+
+\begin{enumerate}
+	\item Préciser les valeurs arrondies au centième de $v_1$ et $v_2$.
+	\item Déterminer, en justifiant la réponse, la plus petite valeur de $n$ telle que $v_n > 8,5$.
+\end{enumerate}
+
+\smallskip
+
+\textbf{Partie C : Comparaison des deux modèles}
+
+\smallskip
+
+\begin{enumerate}
+	\item L’entreprise considère qu’elle doit modifier la présentation de son site lorsque plus de 850 questions sont présentes sur la FAQ. Parmi ces deux modélisations, laquelle conduit à procéder le plus tôt à cette modification ? 
+	
+	Justifier votre réponse. 
+	\item En justifiant la réponse, pour quelle modélisation y a-t-il le plus grand nombre de questions sur la FAQ à long terme ? 
+\end{enumerate}

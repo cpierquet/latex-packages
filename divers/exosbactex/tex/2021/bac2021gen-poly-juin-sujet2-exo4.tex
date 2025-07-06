@@ -1,0 +1,77 @@
+Cet exercice est composé de trois parties indépendantes.
+
+\medskip
+
+On a représenté ci-dessous, dans un repère orthonormé, une portion de la courbe
+représentative $\mathcal{C}$ d'une fonction $f$ définie sur $\R$ :
+
+\begin{center}
+	\begin{tikzpicture}[x=1.25cm,y=1.25cm,xmin=-3,xmax=4,ymin=-1,ymax=4]
+		\GrilleTikz
+		\AxesTikz[ElargirOx=0/0,ElargirOy=0/0,Labelx=$x$,PosLabelx=below,PosLabely=left,Labely=$y$]
+		\AxexTikz{-3,-2,-1,1,2,3} \AxeyTikz{-1,1,2,3}
+		\draw (-4pt,-4pt) node[below left] {$0$} ;
+		\clip (\xmin,\ymin) rectangle (\xmax,\ymax) ;
+		\draw[red,line width=1.5pt,domain=-2.25:3.5,samples=250] plot (\x,{(\x+2)*exp(-\x)}) ;
+		\draw[blue,dotted,line width=1.5pt,domain=-1.5:2.5,samples=2] plot (\x,{-\x+2}) ;
+		\filldraw (0,2) circle[radius=2pt] node[above right] {$A$} (2,0) circle[radius=2pt] node[above right] {$B$} ;
+		\draw[red] (-2,2) node[above right,font=\Large] {$\mathcal{C}$} ;
+	\end{tikzpicture}
+\end{center}
+
+On considère les points $A(0;2)$ et $B(2;0)$.
+
+\medskip
+
+\textbf{Partie 1}
+
+\medskip
+
+Sachant que la courbe $\mathcal{C}$ passe par $A$ et que la droite $(AB)$ est la tangente à la courbe $\mathcal{C}$ au point $A$, donner par lecture graphique : 
+
+\begin{enumerate}
+	\item La valeur de $f(0)$ et celle de $f'(0)$.
+	\item Un intervalle sur lequel la fonction $f$ semble convexe.
+\end{enumerate}
+
+\medskip
+
+\textbf{Partie 2}
+
+\medskip
+
+On note $(E)$ l'équation différentielle \[y' = -y + \e^{-x}.\]
+%
+On admet que $g$ : $  x \mapsto  x\e^{-x}$ est une solution particulière de $(E)$.
+
+\begin{enumerate}
+	\item Donner toutes les solutions sur $\R$ de l'équation différentielle $(H)$ : $y' = -y$.
+	\item En déduire toutes les solutions sur $\R$ de l'équation différentielle $(E)$.
+	\item Sachant que la fonction $f$ est la solution particulière de $(E)$ qui vérifie $f(0) = 2$, déterminer une expression de $f(x)$ en fonction de $x$.
+\end{enumerate}
+
+\medskip
+
+\textbf{Partie 3}
+
+\medskip
+
+On admet que pour tout nombre réel $x$, $f(x) = (x + 2)\e^{-x}$.
+
+\begin{enumerate}
+	\item On rappelle que $f'$ désigne la fonction dérivée de la fonction $f$.
+	\begin{enumerate}
+		\item Montrer que pour tout $x \in \R$, $f'(x) = (-x - 1) \e^{-x}$.
+		\item Étudier le signe de $f'(x)$ pour tout $x \in \R$ et dresser le tableau des variations de $f$ sur $\R$.
+		
+		On ne précisera ni la limite de $f$ en $- \infty$ ni la limite de $f$ en $+ \infty$.
+		
+		On calculera la valeur exacte de l'extremum de $f$ sur $\R$.
+	\end{enumerate}
+	\item On rappelle que $f''$ désigne la fonction dérivée seconde de la fonction $f$.
+	\begin{enumerate}
+		\item Calculer pour tout $x \in \R$, $f''(x)$.
+		\item Peut-on affirmer que $f$ est convexe sur l'intervalle $[0;+\infty[$?
+	\end{enumerate}
+\end{enumerate}
+

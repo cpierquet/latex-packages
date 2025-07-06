@@ -1,0 +1,92 @@
+\emph{Cet exercice est un questionnaire à choix multiple.\\ Pour chaque question, une seule des quatre réponses proposées est exacte. Le candidat indiquera sur sa copie le numéro de la question et la réponse choisie.\\ Aucune justification n’est demandée. \\ Aucun point n’est enlevé en l’absence de réponse ou en cas de réponse inexacte. \\ Les questions sont indépendantes.}
+
+\bigskip
+
+Un technicien contrôle les machines équipant une grande entreprise. Toutes ces machines sont identiques. 
+
+On sait que :
+
+\begin{itemize}
+	\item 20\,\% des machines sont sous garantie ;
+	\item $0,2$\,\% des machines sont à la fois défectueuses et sous garantie ;
+	\item $8,2$\,\% des machines sont défectueuses.
+\end{itemize}
+
+\begin{wrapstuff}[r,abovesep=-0.25\baselineskip]
+	\def\ArbreDeuxDeux{
+	$G$//above,
+	//above,
+	//above,
+	//above,
+	//above,
+	//above
+}
+\ArbreProbasTikz[EspaceNiveau=1.85,EspaceFeuille=1.05]{\ArbreDeuxDeux}
+\end{wrapstuff}
+
+Le technicien teste une machine au hasard.
+
+\smallskip
+
+On considère les événements suivants :
+
+\begin{itemize}
+	\item $G$ : « la machine est sous garantie » ;
+	\item $D$ : « la machine est défectueuse » ;
+	\item $\overline{G}$ et $\overline{D}$ désignent respectivement les événements contraires de $G$ et $D$.
+\end{itemize}
+
+Pour répondre aux questions \textbf{1} à \textbf{3}, on pourra s’aider de l’arbre proposé ci-contre.
+
+\begin{enumerate}
+	\item La probabilité $p_G(D)$ de l’événement $D$ sachant que $G$ est réalisé est égale à : 
+	
+	\smallskip
+	
+	\begin{tblr}{width=\linewidth,colspec={X[l,m]X[l,m]}}%X[l,m]X[l,m]}}
+		\textbf{a.}~~$0,002$ & \textbf{b.}~~$0,01$ \\
+		\textbf{c.}~~$0,024$ & \textbf{d.}~~$0,2$
+	\end{tblr}
+	\item La probabilité $p\big(\overline{G} \cap D\big)$ : 
+	
+	\smallskip
+	
+	\begin{tblr}{width=\linewidth,colspec={X[l,m]X[l,m]}}%X[l,m]X[l,m]}}
+		\textbf{a.}~~$0,01$ & \textbf{b.}~~$0,08$ \\
+		\textbf{c.}~~$0,1$ & \textbf{d.}~~$0,21$
+	\end{tblr}
+	\item La machine est défectueuse. La probabilité qu’elle soit sous garantie est environ égale, à $10^{-3}$ près, à :
+	
+	\smallskip
+	
+	\begin{tblr}{width=\linewidth,colspec={X[l,m]X[l,m]}}%X[l,m]X[l,m]}}
+		\textbf{a.}~~$0,01$ & \textbf{b.}~~$0,024$ \\
+		\textbf{c.}~~$0,082$ & \textbf{d.}~~$0,1$
+	\end{tblr}
+\end{enumerate}
+
+Pour les questions \textbf{4} et \textbf{5}, on choisit au hasard et de façon indépendante $n$ machines de l’entreprise, où $n$ désigne un entier naturel non nul. On assimile ce choix à un tirage avec remise, et on désigne par $X$ la variable aléatoire qui associe à chaque lot de $n$ machines le nombre de machines défectueuses dans ce lot. 
+
+On admet que $X$ suit la loi binomiale de paramètres $n$ et $p = 0,082$.
+
+\begin{enumerate}[resume]
+	\item Dans cette question, on prend $n=50$.
+	
+	\smallskip
+	
+	La valeur de la probabilité $p(X > 2)$, arrondie au millième, est de :
+	
+	\smallskip
+	
+	\begin{tblr}{width=\linewidth,colspec={X[l,m]X[l,m]}}%X[l,m]X[l,m]}}
+		\textbf{a.}~~$0,136$ & \textbf{b.}~~$0,789$ \\
+		\textbf{c.}~~$0,864$ & \textbf{d.}~~$0,924$
+	\end{tblr}
+	\item On considère un entier $n$ pour lequel la probabilité que toutes les machines d’un lot de taille $n$ fonctionnent correctement est supérieure à $0,4$. La plus grande valeur possible pour $n$ est égale à : 
+	
+	\smallskip
+	
+	\begin{tblr}{width=\linewidth,colspec={X[l,m]X[l,m]X[l,m]X[l,m]}}
+		\textbf{a.}~~$5$ & \textbf{b.}~~$6$ & \textbf{c.}~~$10$ & \textbf{d.}~~$11$
+	\end{tblr}
+\end{enumerate}

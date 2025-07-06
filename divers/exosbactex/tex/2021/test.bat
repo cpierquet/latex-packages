@@ -1,0 +1,1 @@
+For /R %%G IN (*.tex) do (csplit -z %%G /QSDFGH/ '{*}' -f %%~nG_exo -n 1)

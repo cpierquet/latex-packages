@@ -1,0 +1,34 @@
+Dans le plan muni d’un repère, on considère ci-dessous la courbe $\mathcal{C}_f$ représentative d’une fonction $f$, deux fois dérivable sur l’intervalle $\intervOO{0}{+\infty}$. La courbe $\mathcal{C}_f$ admet une tangente horizontale $\mathcal{T}$ au point $A(1;4)$.
+
+\begin{center}
+	\begin{tikzpicture}[x=1.2cm,y=1.2cm,xmin=0,xmax=9,xgrilles=0.2,ymin=-1,ymax=5,ygrilles=0.2]
+		\GrilleTikz
+		\AxesTikz[ElargirOx=0/0,ElargirOy=0/0] \AxexTikz{1,2,...,8} \AxeyTikz{-1,0,...,4}
+		\clip (\xmin,\ymin) rectangle (\xmax,\ymax) ;
+		\draw[blue,line width=1.25pt] (0,4) -- (\xmax,4) ;
+		\draw[blue] (8,4) node[above right,font=\Large] {$\mathcal{T}$} ;
+		\draw[red,line width=1.25pt,domain=0.05:\xmax,samples=250] plot (\x,{(4+4*ln(\x))/\x}) ;
+		\draw[red] (0.35,-0.25) node[below right,font=\Large] {$\mathcal{C}_f$} ;
+		\draw (1,4) node[above,font=\large] {$A$} ;
+	\end{tikzpicture}
+\end{center}
+
+\begin{enumerate}
+	\item Préciser les valeurs $f(1)$ et $f'(1)$.
+\end{enumerate}
+
+On admet que la fonction $f$ est définie pour tout réel $x$ de l’intervalle $\intervOO{0}{+\infty}$ par : \[ f(x)=\dfrac{a+b\,\ln(x)}{x} \text{ où } a \text{ et } b \text{ sont deux nombres réels.} \]
+
+\begin{enumerate}[resume]
+	\item Démontrer que, pour tout réel $x$ strictement positif, on a : \[ f'(x)=\dfrac{b-a-b \, \ln(x)}{x^2}. \]
+	\item En déduire les valeurs des réels $a$ et $b$.
+\end{enumerate}
+
+Dans la suite de l’exercice, on admet que la fonction $f$ est définie pour tout réel $x$ de l’intervalle $\intervOO{0}{+\infty}$ par : \[ f(x)=\dfrac{4+4\,\ln(x)}{x}. \]
+
+\begin{enumerate}[resume]
+	\item Déterminer les limites de $f$ en $0$ et en $+\infty$.
+	\item Déterminer le tableau de variations de $f$ sur l’intervalle $\intervOO{0}{+\infty}$.
+	\item Démontrer que, pour tout réel $x$ strictement positif, on a : \[ f''(x)=\dfrac{-4+8\,\ln(x)}{x^3}. \]
+	\item Montrer que la courbe $\mathcal{C}_f$ possède un unique point d’inflexion $B$ dont on précisera les coordonnées. 
+\end{enumerate}

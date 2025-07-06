@@ -1,0 +1,80 @@
+\hfill~\emph{Les deux parties de cet exercice sont indépendantes.}\hfill~.
+
+\medskip
+
+\textbf{Partie 1}
+
+\medskip
+
+Julien doit prendre l'avion; il a prévu de prendre le bus pour se rendre à l'aéroport. 
+
+S'il prend le bus de $8$~h, il est sûr d'être à l'aéroport à temps pour son vol.
+
+Par contre, le bus suivant ne lui permettrait pas d'arriver à temps à l'aéroport.
+
+Julien est parti en retard de son appartement et la probabilité qu'il manque son bus est de $0,8$.
+
+S'il manque son bus, il se rend à l'aéroport en prenant une compagnie de voitures privées; il a alors une probabilité de $0,5$ d'être à l'heure à l'aéroport.
+
+\smallskip
+
+On notera :
+
+\begin{itemize}
+	\item $B$ l'évènement: \og Julien réussit à prendre son bus \fg ;
+	\item $V$ l'évènement: \og Julien est à l'heure à l'aéroport pour son vol \fg.
+\end{itemize}
+
+\begin{enumerate}
+	\item Donner la valeur de $P_B(V)$.
+	\item Représenter la situation par un arbre pondéré.
+	\item Montrer que $P(V) = 0,6$.
+	\item Si Julien est à l'heure à l'aéroport pour son vol, quelle est la probabilité qu'il soit arrivé à l'aéroport en bus ? Justifier.
+\end{enumerate}
+
+\textbf{Partie 2}
+
+\medskip
+
+Les compagnies aériennes vendent plus de billets qu'il n'y a de places dans les avions car certains passagers ne se présentent pas à l'embarquement du vol sur lequel ils ont réservé.
+On appelle cette pratique le surbooking.
+
+Au vu des statistiques des vols précédents, la compagnie aérienne estime que chaque passager a 5\,\% de chance de ne pas se présenter à l'embarquement.
+
+Considérons un vol dans un avion de $200$~places pour lequel $206$~billets ont été vendus.
+On suppose que la présence à l'embarquement de chaque passager est indépendante des autres passagers et on appelle $X$ la variable aléatoire qui compte le nombre de passagers se présentant à l'embarquement.
+
+\begin{enumerate}
+	\item Justifier que $X$ suit une loi binomiale dont on précisera les paramètres.
+	\item En moyenne, combien de passagers vont-ils se présenter à l'embarquement ?
+	\item Calculer la probabilité que $201$ passagers se présentent à l'embarquement. Le résultat sera arrondi à $10^{-3}$ près.
+	\item Calculer $P(X \leqslant 200)$, le résultat sera arrondi à $10^{-3}$ près. Interpréter ce résultat dans le contexte de l'exercice.
+	\item La compagnie aérienne vend chaque billet à $250$ euros.
+	
+	Si plus de $200$ passagers se présentent à l'embarquement, la compagnie doit rembourser le billet d'avion et payer une pénalité de $600$ euros à chaque passager lésé. On appelle :
+	
+	\begin{itemize}
+		\item $Y$ la variable aléatoire égale au nombre de passagers qui ne peuvent pas embarquer
+		bien qu'ayant acheté un billet;
+		\item $C$ la variable aléatoire qui totalise le chiffre d'affaire de la compagnie aérienne sur ce vol.
+	\end{itemize}
+	
+	On admet que $Y$ suit la loi de probabilité donnée par le tableau suivant:
+	
+	\begin{center}
+		\begin{tabularx}{0.95\linewidth}{|c|*{7}{>{\centering \arraybackslash}X|}}\hline
+			$y_i$					&0	&1	&2	&3	&4	&5	&6\\ \hline
+			$P\left(Y = y_i\right)$	&\num{0,94775}&\num{0,03063}&\num{0,01441}&\num{0,00539}&\num{0,00151}&\num{0,00028}& \\ \hline
+		\end{tabularx}
+	\end{center}
+	
+	\begin{enumerate}
+		\item Compléter la loi de probabilité donnée ci-dessus en calculant $P(Y = 6)$.
+		\item Justifier que: $C = \num{51500} - 850Y$.
+		\item Donner la loi de probabilité de la variable aléatoire $C$ sous forme d'un tableau.
+		
+		Calculer l'espérance de la variable aléatoire $C$ à l'euro près.
+		\item Comparer le chiffre d'affaires obtenu en vendant exactement $200$ billets et le chiffre d'affaires moyen obtenu en pratiquant le surbooking.
+	\end{enumerate}
+\end{enumerate}
+

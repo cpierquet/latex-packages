@@ -1,0 +1,657 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txtf
+% graphics   : CC0 by Gee (https://framamemes.org)
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{framamemes}[2025/06/13 Framamemes v1.0d]
+% 1.0d	Ajout Batman
+% 1.0c	Ajout de mèmes (toutvabien + plangru + memeimage)
+% 1.0b	Amélioration du code
+% 1.0a	Version initiale
+
+% ============option
+\newif\if@contour \@contourtrue
+\DeclareOption{noncontour}{\@contourfalse}
+\DeclareOption*{}%si option(s) inconnue(s) ;-)
+\ProcessOptions\relax
+
+% ============packages
+\RequirePackage{iftex}
+\RequirePackage{tikz}
+\RequirePackage{simplekv}
+\RequirePackage{xstring}
+\usetikzlibrary{calc,positioning}
+
+% ============macros interne
+\newcommand\fmcalcwidthnodetikz[2]{%
+	\pgfpointdiff{\pgfpointanchor{#1}{east}}{\pgfpointanchor{#1}{west}}%
+	\pgf@xa=\pgf@x
+	\pgf@ya=\pgf@y
+	% to convert from pt to cm   
+	\pgfmathparse{veclen(\pgf@xa,\pgf@ya)/28.45274}%
+	\global\let#2\pgfmathresult%
+}
+\newcommand\fmcalcheightnodetikz[2]{%
+	\pgfpointdiff{\pgfpointanchor{#1}{south}}{\pgfpointanchor{#1}{north}}%
+	\pgf@xa=\pgf@x
+	\pgf@ya=\pgf@y
+	% to convert from pt to cm   
+	\pgfmathparse{veclen(\pgf@xa,\pgf@ya)/28.45274}%
+	\global\let#2\pgfmathresult%
+}
+
+% ============longueurs
+\newlength\framamemeborder
+\newlength\framamemexshifta
+\newlength\framamemeyshifta
+\newlength\framamemexshiftb
+\newlength\framamemeyshiftb
+\newlength\framamemexshiftc
+\newlength\framamemeyshiftc
+\newlength\framamemexshiftd
+\newlength\framamemeyshiftd
+
+% ============clés
+\defKV[framameme]{%
+	TexteA=\def\framamemetextea{#1},%
+	EchelleA=\def\framamemetexteasize{#1},%
+	DecalhA=\setlength\framamemexshifta{#1},%
+	DecalvA=\setlength\framamemeyshifta{#1},%
+	TexteB=\def\framamemetexteb{#1},%
+	EchelleB=\def\framamemetextebsize{#1},%
+	DecalhB=\setlength\framamemexshiftb{#1},%
+	DecalvB=\setlength\framamemeyshiftb{#1},%
+	TexteC=\def\framamemetextec{#1},%
+	EchelleC=\def\framamemetextecsize{#1},%
+	DecalhC=\setlength\framamemexshiftc{#1},%
+	DecalvC=\setlength\framamemeyshiftc{#1},%
+	TexteD=\def\framamemetexted{#1},%
+	EchelleD=\def\framamemetextedsize{#1},%
+	DecalhD=\setlength\framamemexshiftd{#1},%
+	DecalvD=\setlength\framamemeyshiftd{#1},%
+	Police=\def\framamemepolice{#1},%
+	Noeud=\def\framamemenode{#1},%
+	Contour=\setlength\framamemeborder{#1}
+}
+
+\ifluatex
+	\if@contour
+		\RequirePackage[auto]{contour}
+		\newcommand\contourtxt[2][0.075em]{{\contourlength{#1}\color{white}\contour{black}{#2}}}
+	\else
+		%\newcommand\contourtxt[2][0.075em]{\pdfrender{TextRenderingMode=FillStroke,FillColor=white,StrokeColor=black,LineWidth=#1,MiterLimit=1}{#2}}
+		\newcommand\contourtxt[2][white]{{\color{#1}{#2}}}
+	\fi
+	\setKVdefault[framameme]{%
+		TexteA={},EchelleA={1},DecalhA={0pt},DecalvA={0pt},%
+		TexteB={},EchelleB={1},DecalhB={0pt},DecalvB={0pt},%
+		TexteC={},EchelleC={1},DecalhC={0pt},DecalvC={0pt},%
+		TexteD={},EchelleD={1},DecalhD={0pt},DecalvD={0pt},%
+		Police={\sffamily\bfseries},%
+		Noeud=FramaMeme,%
+		Contour=0.8pt,%
+		GrilleAide=false
+	}
+\else
+	\if@contour
+		\RequirePackage[auto,outline]{contour}
+		\newcommand\contourtxt[2][0.075em]{{\contourlength{#1}\color{white}\contour{black}{#2}}}
+	\else
+		%\newcommand\contourtxt[2][0.075em]{\pdfrender{TextRenderingMode=FillStroke,FillColor=white,StrokeColor=black,LineWidth=#1,MiterLimit=1}{#2}}
+		\newcommand\contourtxt[2][white]{{\color{#1}{#2}}}
+	\fi
+	\setKVdefault[framameme]{%
+		TexteA={},EchelleA={1},DecalhA={0pt},DecalvA={0pt},%
+		TexteB={},EchelleB={1},DecalhB={0pt},DecalvB={0pt},%
+		TexteC={},EchelleC={1},DecalhC={0pt},DecalvC={0pt},%
+		TexteD={},EchelleD={1},DecalhD={0pt},DecalvD={0pt},%
+		Police={\sffamily\bfseries},%
+		Noeud=FramaMeme,%
+		Contour=1pt,%
+		GrilleAide=false
+	}
+\fi
+
+% ============styles
+\tikzset{framamemetxta/.style={inner sep=0pt,font=\framamemepolice,scale=\framamemetexteasize}}
+\tikzset{framamemetxtb/.style={inner sep=0pt,font=\framamemepolice,scale=\framamemetextebsize}}
+\tikzset{framamemetxtc/.style={inner sep=0pt,font=\framamemepolice,scale=\framamemetextecsize}}
+\tikzset{framamemetxtd/.style={inner sep=0pt,font=\framamemepolice,scale=\framamemetextedsize}}
+
+% ============commandes
+\NewDocumentCommand\FramaMeme{ O{} O{} D<>{} m }{%
+	\restoreKV[framameme]%
+	\setKV[framameme]{#1}%
+	\IfStrEqCase{#4}{%
+		{petitami}%
+		{%
+			\def\framamemeoffsetA{\fpeval{3/13*\mytmpwidth}cm,\fpeval{2/8.6*\mytmpheight}cm}%
+			\def\framamemeoffsetB{\fpeval{7.75/13*\mytmpwidth}cm,\fpeval{2.75/8.6*\mytmpheight}cm}%
+			\def\framamemeoffsetC{\fpeval{10.75/13*\mytmpwidth}cm,\fpeval{1.5/8.6*\mytmpheight}cm}%
+			\begin{tikzpicture}[transform shape,#3]
+				\IfFileExists{framamemes-distractedboyfriend.pdf}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{framamemes-distractedboyfriend.pdf}};
+					}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{example-image.pdf}};
+					}%
+				\fmcalcwidthnodetikz{\framamemenode}{\mytmpwidth}%
+				\fmcalcheightnodetikz{\framamemenode}{\mytmpheight}%
+				\clip (\framamemenode.south west) rectangle (\framamemenode.north east) ;
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\draw[gray,semithick,xstep=0.25cm,ystep=0.25cm] (\framamemenode.south west) grid (\framamemenode.north east) ;
+					}%
+					{}%
+				\if@contour
+					%fille rouge
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%garçon
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+					%fille bleue
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetC)$) node[framamemetxtc] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+				\else
+					%fille rouge
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%garçon
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+					%fille bleue
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetC)$) node[framamemetxtc] {\contourtxt{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+				\fi
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetA)$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetB)$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetC)$) circle[radius=0.75mm] ;
+					}%
+					{}%
+			\end{tikzpicture}%
+		}%
+		{deuxboutons}%
+		{%
+			\def\framamemeoffsetA{\fpeval{3.1/13*\mytmpwidth}cm,\fpeval{16.4/19.7*\mytmpheight}cm}%
+			\def\framamemeoffsetB{\fpeval{7.6/13*\mytmpwidth}cm,\fpeval{18.1/19.7*\mytmpheight}cm}%
+			\def\framamemeoffsetC{\fpeval{5/13*\mytmpwidth}cm,\fpeval{2.6/19.7*\mytmpheight}cm}%
+			\begin{tikzpicture}[transform shape,#3]
+				\IfFileExists{framamemes-dailystruggle.pdf}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{framamemes-dailystruggle.pdf}};
+					}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{example-image.pdf}};
+					}%
+				\fmcalcwidthnodetikz{\framamemenode}{\mytmpwidth}%
+				\fmcalcheightnodetikz{\framamemenode}{\mytmpheight}%
+				\clip (\framamemenode.south west) rectangle (\framamemenode.north east) ;
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\draw[gray,semithick,xstep=0.25cm,ystep=0.25cm] (\framamemenode.south west) grid (\framamemenode.north east) ;
+					}%
+					{}%
+				\if@contour
+					%bouton1
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta,rotate=19.5] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%bouton2
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb,rotate=19.5] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+					%légende
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetC)$) node[framamemetxtc] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+				\else
+					%bouton1
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta,rotate=19.5] {\contourtxt{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%bouton2
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb,rotate=19.5] {\contourtxt{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+					%légende
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetC)$) node[framamemetxtc] {\contourtxt{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+				\fi
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetA)$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetB)$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetC)$) circle[radius=0.75mm] ;
+					}%
+					{}%
+			\end{tikzpicture}%
+		}%
+		{aimeaimepas}%
+		{%
+			\def\framamemeoffsetA{\fpeval{0.75*\mytmpwidth}cm,\fpeval{0.75*\mytmpheight}cm}%
+			\def\framamemeoffsetB{\fpeval{0.75*\mytmpwidth}cm,\fpeval{0.25*\mytmpheight}cm}%
+			\begin{tikzpicture}[transform shape,#3]
+				\IfFileExists{framamemes-drakelikedontlike.pdf}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{framamemes-drakelikedontlike.pdf}};
+					}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{example-image.pdf}};
+					}%
+				\fmcalcwidthnodetikz{\framamemenode}{\mytmpwidth}%
+				\fmcalcheightnodetikz{\framamemenode}{\mytmpheight}%
+				\clip (\framamemenode.south west) rectangle (\framamemenode.north east) ;
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\draw[gray,semithick,xstep=0.25cm,ystep=0.25cm] (\framamemenode.south west) grid (\framamemenode.north east) ;
+					}%
+					{}%
+				\if@contour
+					%aime
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%aime pas
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+				\else
+					%aime
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt[black]{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%aime pas
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt[black]{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+				\fi
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetA)$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetB)$) circle[radius=0.75mm] ;
+					}%
+					{}%
+			\end{tikzpicture}%
+		}%
+		{poigneemains}%
+		{%
+			\def\framamemeoffsetA{\fpeval{2.1/13*\mytmpwidth}cm,\fpeval{3.4/9.4*\mytmpheight}cm}%
+			\def\framamemeoffsetB{\fpeval{6/13*\mytmpwidth}cm,\fpeval{7.4/9.4*\mytmpheight}cm}%
+			\def\framamemeoffsetC{\fpeval{10.75/13*\mytmpwidth}cm,\fpeval{3.75/9.4*\mytmpheight}cm}%
+			\begin{tikzpicture}[transform shape,#3]
+				\IfFileExists{framamemes-epichandshake.pdf}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{framamemes-epichandshake.pdf}};
+					}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{example-image.pdf}};
+					}%
+				\fmcalcwidthnodetikz{\framamemenode}{\mytmpwidth}%
+				\fmcalcheightnodetikz{\framamemenode}{\mytmpheight}%
+				\clip (\framamemenode.south west) rectangle (\framamemenode.north east) ;
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\draw[gray,semithick,xstep=0.25cm,ystep=0.25cm] (\framamemenode.south west) grid (\framamemenode.north east) ;
+					}%
+					{}%
+				\if@contour
+					%gauche
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%milieu
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+					%droit
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetC)$) node[framamemetxtc] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+				\else
+					%gauche
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%milieu
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+					%droit
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetC)$) node[framamemetxtc] {\contourtxt{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+				\fi
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetA)$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetB)$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetC)$) circle[radius=0.75mm] ;
+					}%
+					{}%
+			\end{tikzpicture}%
+		}%
+		{sortieroute}%
+		{%
+			\def\framamemeoffsetA{\fpeval{2.375/13*\mytmpwidth}cm,\fpeval{10/12.5*\mytmpheight}cm}%
+			\def\framamemeoffsetB{\fpeval{8.5/13*\mytmpwidth}cm,\fpeval{8.7/12.5*\mytmpheight}cm}%
+			\def\framamemeoffsetC{\fpeval{6.5/13*\mytmpwidth}cm,\fpeval{3.7/12.5*\mytmpheight}cm}%
+			\begin{tikzpicture}[transform shape,#3]
+				\IfFileExists{framamemes-leftexit.pdf}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{framamemes-leftexit.pdf}};
+					}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{example-image.pdf}};
+					}%
+				\fmcalcwidthnodetikz{\framamemenode}{\mytmpwidth}%
+				\fmcalcheightnodetikz{\framamemenode}{\mytmpheight}%
+				\clip (\framamemenode.south west) rectangle (\framamemenode.north east) ;
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\draw[gray,semithick,xstep=0.25cm,ystep=0.25cm] (\framamemenode.south west) grid (\framamemenode.north east) ;
+					}%
+					{}%
+				\if@contour
+					%A0
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%N12
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+					%VOITURE
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetC)$) node[framamemetxtc] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+				\else
+					%A0
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%N12
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+					%VOITURE
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetC)$) node[framamemetxtc] {\contourtxt{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+				\fi
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetA)$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetB)$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetC)$) circle[radius=0.75mm] ;
+					}%
+					{}%
+			\end{tikzpicture}%
+		}%
+		{anakinpadme}%
+		{%
+			\def\framamemeoffsetA{\fpeval{0.25*\mytmpwidth}cm,\fpeval{0.5*\mytmpheight}cm}%
+			\def\framamemeoffsetB{\fpeval{0.75*\mytmpwidth}cm,\fpeval{\mytmpheight}cm}%
+			\def\framamemeoffsetC{\fpeval{0.75*\mytmpwidth}cm,\fpeval{0.5*\mytmpheight}cm}%
+			\begin{tikzpicture}[transform shape,#3]
+				\IfFileExists{framamemes-anakinpadme.pdf}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{framamemes-anakinpadme.pdf}};
+					}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{example-image.pdf}};
+					}%
+				\fmcalcwidthnodetikz{\framamemenode}{\mytmpwidth}%
+				\fmcalcheightnodetikz{\framamemenode}{\mytmpheight}%
+				\clip (\framamemenode.south west) rectangle (\framamemenode.north east) ;
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\draw[gray,semithick,xstep=0.25cm,ystep=0.25cm] (\framamemenode.south west) grid (\framamemenode.north east) ;
+					}%
+					{}%
+				\if@contour
+					%Anakin
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta,above=\fpeval{0.025*\mytmpwidth}cm] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%Padme1
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb,below=\fpeval{0.025*\mytmpwidth}cm] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+					%Padme2
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetC)$) node[framamemetxtc,below=\fpeval{0.025*\mytmpwidth}cm] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+				\else
+					%Anakin
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta,above=\fpeval{0.025*\mytmpwidth}cm] {\contourtxt{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%Padme1
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb,below=\fpeval{0.025*\mytmpwidth}cm] {\contourtxt{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+					%Padme2
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetC)$) node[framamemetxtc,below=\fpeval{0.025*\mytmpwidth}cm] {\contourtxt{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+				\fi
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetA)+(0,{\fpeval{0.025*\mytmpwidth}cm})$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetB)+(0,{\fpeval{-0.025*\mytmpwidth}cm})$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetC)+(0,{\fpeval{-0.025*\mytmpwidth}cm})$) circle[radius=0.75mm] ;
+					}%
+					{}%
+			\end{tikzpicture}%
+		}%
+		{unopioche}%
+		{%
+			\def\framamemeoffsetA{\fpeval{4/13*\mytmpwidth}cm,\fpeval{7.8/12.9*\mytmpheight}cm}%
+			\def\framamemeoffsetB{\fpeval{10.25/13*\mytmpwidth}cm,\fpeval{11.4/12.9*\mytmpheight}cm}%
+			\begin{tikzpicture}[transform shape,#3]
+				\IfFileExists{framamemes-unodraw25.pdf}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{framamemes-unodraw25.pdf}};
+					}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{example-image.pdf}};
+					}%
+				\fmcalcwidthnodetikz{\framamemenode}{\mytmpwidth}%
+				\fmcalcheightnodetikz{\framamemenode}{\mytmpheight}%
+				\clip (\framamemenode.south west) rectangle (\framamemenode.north east) ;
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\draw[gray,semithick,xstep=0.25cm,ystep=0.25cm] (\framamemenode.south west) grid (\framamemenode.north east) ;
+					}%
+					{}%
+				\if@contour
+					%carte
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%moi
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+				\else
+					%carte
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt[black]{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%moi
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+				\fi
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetA)$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetB)$) circle[radius=0.75mm] ;
+					}%
+					{}%
+			\end{tikzpicture}%
+		}%
+		{toutvabien}%
+		{%
+			\def\framamemeoffsetA{\fpeval{3.2/13*\mytmpwidth}cm,\fpeval{1.5/6.5*\mytmpheight}cm}%
+			\def\framamemeoffsetB{\fpeval{10.9/13*\mytmpwidth}cm,\fpeval{1.25/6.5*\mytmpheight}cm}%
+			\begin{tikzpicture}[transform shape,#3]
+				\IfFileExists{framamemes-thisisfine.pdf}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{framamemes-thisisfine.pdf}};
+					}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{example-image.pdf}};
+					}%
+				\fmcalcwidthnodetikz{\framamemenode}{\mytmpwidth}%
+				\fmcalcheightnodetikz{\framamemenode}{\mytmpheight}%
+				\clip (\framamemenode.south west) rectangle (\framamemenode.north east) ;
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\draw[gray,semithick,xstep=0.25cm,ystep=0.25cm] (\framamemenode.south west) grid (\framamemenode.north east) ;
+					}%
+					{}%
+				\if@contour
+					%A
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta,rotate=5] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%B
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb,rotate=5] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+				\else
+					%A
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta,rotate=5] {\contourtxt[black]{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%B
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb,rotate=5] {\contourtxt{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+				\fi
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetA)$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetB)$) circle[radius=0.75mm] ;
+					}%
+					{}%
+			\end{tikzpicture}%
+		}%
+		{plangru}%
+		{%
+			\def\framamemeoffsetA{\fpeval{4.85/13.1*\mytmpwidth}cm,\fpeval{5.95/8.4*\mytmpheight}cm}%
+			\def\framamemeoffsetB{\fpeval{11.4/13.1*\mytmpwidth}cm,\fpeval{5.95/8.4*\mytmpheight}cm}%
+			\def\framamemeoffsetC{\fpeval{4.85/13.1*\mytmpwidth}cm,\fpeval{1.7/8.4*\mytmpheight}cm}%
+			\def\framamemeoffsetD{\fpeval{11.4/13.1*\mytmpwidth}cm,\fpeval{1.7/8.4*\mytmpheight}cm}%
+			\begin{tikzpicture}[transform shape,#3]
+				\IfFileExists{framamemes-plangru.pdf}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{framamemes-plangru.pdf}};
+					}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{example-image.pdf}};
+					}%
+				\fmcalcwidthnodetikz{\framamemenode}{\mytmpwidth}%
+				\fmcalcheightnodetikz{\framamemenode}{\mytmpheight}%
+				\clip (\framamemenode.south west) rectangle (\framamemenode.north east) ;
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\draw[gray,semithick,xstep=0.25cm,ystep=0.25cm] (\framamemenode.south west) grid (\framamemenode.north east) ;
+					}%
+					{}%
+				\if@contour
+					%1
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%2
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+					%3a
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetC)$) node[framamemetxtc] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+					%3a
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetD)$) node[framamemetxtc] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+				\else
+					%1
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt[black]{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%2
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+					%3a
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetC)$) node[framamemetxtc] {\contourtxt{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+					%3b
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetD)$) node[framamemetxtc] {\contourtxt{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+				\fi
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetA)$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetB)$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetC)$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetD)$) circle[radius=0.75mm] ;
+					}%
+					{}%
+			\end{tikzpicture}%
+		}%
+		{memeimage}%
+		{%
+			\def\framamemeoffsetA{\fpeval{3.3/13.05*\mytmpwidth}cm,\fpeval{11.1/14.8*\mytmpheight}cm}%
+			\def\framamemeoffsetB{\fpeval{9.8/13.05*\mytmpwidth}cm,\fpeval{11.1/14.8*\mytmpheight}cm}%
+			\def\framamemeoffsetC{\fpeval{6.9/13.05*\mytmpwidth}cm,\fpeval{1.9/14.8*\mytmpheight}cm}%
+			\begin{tikzpicture}[transform shape,#3]
+				\IfFileExists{framamemes-samepicture.pdf}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{framamemes-samepicture.pdf}};
+					}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{example-image.pdf}};
+					}%
+				\fmcalcwidthnodetikz{\framamemenode}{\mytmpwidth}%
+				\fmcalcheightnodetikz{\framamemenode}{\mytmpheight}%
+				\clip (\framamemenode.south west) rectangle (\framamemenode.north east) ;
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\draw[gray,semithick,xstep=0.25cm,ystep=0.25cm] (\framamemenode.south west) grid (\framamemenode.north east) ;
+					}%
+					{}%
+				\if@contour
+					%Image HG
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%Image HD
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+					%Ccl
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetC)$) node[framamemetxtc] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+				\else
+					%Image HG
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%Image HD
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+					%Ccl
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetC)$) node[framamemetxtc] {\contourtxt{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+				\fi
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetA)+(0,{\fpeval{0.025*\mytmpwidth}cm})$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetB)+(0,{\fpeval{-0.025*\mytmpwidth}cm})$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetC)+(0,{\fpeval{-0.025*\mytmpwidth}cm})$) circle[radius=0.75mm] ;
+					}%
+					{}%
+			\end{tikzpicture}%
+		}%
+		{batmanrobin}%l=11.4 & h=11
+		{%
+			\def\framamemeoffsetA{\fpeval{3.25/11.4*\mytmpwidth}cm,\fpeval{9.75/11*\mytmpheight}cm}%
+			\def\framamemeoffsetB{\fpeval{9/11.4*\mytmpwidth}cm,\fpeval{9.75/11*\mytmpheight}cm}%
+			\begin{tikzpicture}[transform shape,#3]
+				\IfFileExists{framamemes-batmanrobin.pdf}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{framamemes-batmanrobin.pdf}};
+					}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{example-image.pdf}};
+					}%
+				\fmcalcwidthnodetikz{\framamemenode}{\mytmpwidth}%
+				\fmcalcheightnodetikz{\framamemenode}{\mytmpheight}%
+				\clip (\framamemenode.south west) rectangle (\framamemenode.north east) ;
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\draw[gray,semithick,xstep=0.25cm,ystep=0.25cm] (\framamemenode.south west) grid (\framamemenode.north east) ;
+					}%
+					{}%
+				\if@contour
+					%Image G
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%Image D
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+				\else
+					%Image G
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%Image D
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+				\fi
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetA)+(0,{\fpeval{0.025*\mytmpwidth}cm})$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetB)+(0,{\fpeval{-0.025*\mytmpwidth}cm})$) circle[radius=0.75mm] ;
+					}%
+					{}%
+			\end{tikzpicture}%
+		}%
+		{boardroom}%l=13.1 & h=17
+		{%
+			\def\framamemeoffsetA{\fpeval{8/13.1*\mytmpwidth}cm,\fpeval{16.25/17*\mytmpheight}cm}%
+			\def\framamemeoffsetB{\fpeval{2.2/13.1*\mytmpwidth}cm,\fpeval{10.2/17*\mytmpheight}cm}%
+			\def\framamemeoffsetC{\fpeval{6.5/13.1*\mytmpwidth}cm,\fpeval{10.2/17*\mytmpheight}cm}%
+			\def\framamemeoffsetD{\fpeval{11/13.1*\mytmpwidth}cm,\fpeval{10.2/17*\mytmpheight}cm}%
+			\begin{tikzpicture}[transform shape,#3]
+				\IfFileExists{framamemes-boardroom.pdf}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{framamemes-boardroom.pdf}};
+					}%
+					{%
+						\node[shape=rectangle,inner sep=0pt](\framamemenode){\includegraphics[#2]{example-image.pdf}};
+					}%
+				\fmcalcwidthnodetikz{\framamemenode}{\mytmpwidth}%
+				\fmcalcheightnodetikz{\framamemenode}{\mytmpheight}%
+				\clip (\framamemenode.south west) rectangle (\framamemenode.north east) ;
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\draw[gray,semithick,xstep=0.25cm,ystep=0.25cm] (\framamemenode.south west) grid (\framamemenode.north east) ;
+					}%
+					{}%
+				\if@contour
+					%Image H
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%Image G
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+					%Image M
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetC)$) node[framamemetxtc] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+					%Image D
+					\draw ($([xshift=\framamemexshiftd,yshift=\framamemeyshiftd]\framamemenode.south west)+(\framamemeoffsetD)$) node[framamemetxtd] {\contourtxt[\framamemeborder]{\begin{tabular}{c}\framamemetexted\end{tabular}}} ;
+				\else
+					%Image H
+					\draw ($([xshift=\framamemexshifta,yshift=\framamemeyshifta]\framamemenode.south west)+(\framamemeoffsetA)$) node[framamemetxta] {\contourtxt{\begin{tabular}{c}\framamemetextea\end{tabular}}} ;
+					%Image G
+					\draw ($([xshift=\framamemexshiftb,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetB)$) node[framamemetxtb] {\contourtxt{\begin{tabular}{c}\framamemetexteb\end{tabular}}} ;
+					%Image M
+					\draw ($([xshift=\framamemexshiftc,yshift=\framamemeyshiftc]\framamemenode.south west)+(\framamemeoffsetC)$) node[framamemetxtc] {\contourtxt{\begin{tabular}{c}\framamemetextec\end{tabular}}} ;
+					%Image D
+					\draw ($([xshift=\framamemexshiftd,yshift=\framamemeyshiftb]\framamemenode.south west)+(\framamemeoffsetD)$) node[framamemetxtd] {\contourtxt{\begin{tabular}{c}\framamemetexted\end{tabular}}} ;
+				\fi
+				\ifboolKV[framameme]{GrilleAide}%
+					{%
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetA)+(0,{\fpeval{0.025*\mytmpwidth}cm})$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetB)+(0,{\fpeval{-0.025*\mytmpwidth}cm})$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetC)+(0,{\fpeval{0.025*\mytmpwidth}cm})$) circle[radius=0.75mm] ;
+						\filldraw[draw=black,fill=red] ($(\framamemenode.south west)+(\framamemeoffsetD)+(0,{\fpeval{-0.025*\mytmpwidth}cm})$) circle[radius=0.75mm] ;
+					}%
+					{}%
+			\end{tikzpicture}%
+		}%
+	}%
+}%
+
+\endinput

@@ -1,0 +1,59 @@
+Une chaîne de fabrication produit des pièces mécaniques. On estime que 5\,\% des pièces produites par cette chaîne sont défectueuses.
+
+Un ingénieur a mis au point un test à appliquer aux pièces. Ce test a deux résultats possibles : « positif » ou bien « négatif ».
+
+On applique ce test à une pièce choisie au hasard dans la production de la chaîne.
+
+On note $p(E)$ la probabilité d'un événement $E$.
+
+On considère les événements suivants :
+
+\begin{itemize}
+	\item $D$ : « la pièce est défectueuse » ;
+	\item $T$ : « la pièce présente un test positif » ;
+	\item $\overline{D}$ et $\overline{T}$ désignent respectivement les évènements contraires de $D$ et $T$.
+\end{itemize}
+
+Compte tenu des caractéristiques du test, on sait que :
+
+\begin{itemize}
+	\item la probabilité qu'une pièce présente un test positif sachant qu'elle défectueuse est égale à $0,98$ ;
+	\item la probabilité qu'une pièce présente un test négatif sachant qu'elle n'est pas défectueuse est égale à $0,97$.
+\end{itemize}
+
+\begin{center}
+	\textbf{Les parties I et II peuvent être traitées de façon indépendante.}
+\end{center}
+
+\begin{center}
+	\textbf{PARTIE I}
+\end{center}
+
+\begin{enumerate}
+	\item Traduire la situation à l'aide d'un arbre pondéré.
+	\item 
+	\begin{enumerate}
+		\item Déterminer la probabilité qu'une pièce choisie au hasard dans la production de la chaîne soit défectueuse et présente un test positif.
+		\item Démontrer que : $p(T) = \num{0,0775}$.
+	\end{enumerate}
+	\item On appelle valeur prédictive positive du test la probabilité qu'une pièce soit défectueuse sachant que le test est positif. On considère que pour être efficace, un test doit avoir une valeur prédictive positive supérieure à $0,95$.
+	
+	Calculer la valeur prédictive positive de ce test et préciser s'il est efficace.
+\end{enumerate}
+
+\begin{center}
+	\textbf{PARTIE II}
+\end{center}
+
+On choisit un échantillon de 20 pièces dans la production de la chaîne, en assimilant ce choix à un tirage avec remise. On note $X$ la variable aléatoire qui donne le nombre de pièces défectueuses dans cet échantillon.
+
+On rappelle que : $p(D) = 0,05$.
+
+\begin{enumerate}
+	\item Justifier que $X$ suit une loi binomiale et déterminer les paramètres de cette loi.
+	\item Calculer la probabilité que cet échantillon contienne au moins une pièce défectueuse.
+	
+	On donnera un résultat arrondi au centième.
+	\item Calculer l'espérance de la variable aléatoire $X$ et interpréter le résultat obtenu.
+\end{enumerate}
+

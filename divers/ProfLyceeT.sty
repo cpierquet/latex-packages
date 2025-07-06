@@ -1,0 +1,3370 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c
+% or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ProfLycee}[2022/12/15 2.0.9 Aide pour l'utilisation de LaTeX en lycee]
+% 2.0.9	Ajouts de commandes pour générer des nombres et listes aléatoires
+% 2.0.8	Ajout d'options pour stretch et fonte env python(s) (pas tous...)
+% 2.0.6	Quelques modifications sur les codes python (taille police et marges)...
+% 2.0.5	Correction d'un bug avec les calculs en valeurx exactes avec les suites récurrentes...
+% 2.0.4	Ajout d'une commande pour présenter un balayage (TVI) + calculs suites récurrentes 
+% 2.0.3Correction d'un bug avec les arbres 3x3
+% 2.0.2	Ajout de l'option auto-margin sur piton
+% 2.0.1	Chargement de piton uniquement si lua...
+% 2.0.0	Refonte des commandes, des options, et de la documentation !!!
+% ------------------------------------------------------------------
+% 1.3.7	Ajout d'un environnement simplifié pour du code python via piton
+% 1.3.6	Ajout d'un "générateur" de trinômes (ou mise en forme basique)
+% 1.3.5	Correction de bugs sur les calculs de probas (loi géométrique)
+% 1.3.4	Ajout des calculs de probas geométriques et hypergeometriques + petits schémas probas
+% 1.3.3	Ajout de commandes pour des arbres de probas classiques, en tikz
+% 1.3.2	Correction d'une commande liée à la conversion bintohex (suppression clé trait)
+% 1.3.1	Ajout d'une option pour ne pas afficher les bords des cases en pixelart
+% 1.3.0	Ajout d'une commande pour mettre en forme une conversion depuis la base 10
+% 1.2.9	Correction d'une incompatibilité avec simplekv (clés vides...)
+% 1.2.8	Correction de l'oubli d'une librairie tikz et remise en forme de la documentation
+% 1.2.7	Calculs de probas pour des lois classiques
+% 1.2.6	Ajout d'un environnement tikz pour des sudomaths personnalisés
+% 1.2.5	Ajout d'une commande pour des boites à moustaches, en tikz
+% 1.2.4	Correction de quelques bugs mineurs, et mise à jour de la doc
+% 1.2.3	Ajout d'un environnement simplifié pour du code python
+% 1.2.2	Ajouts de commandes pour des stats à 2 variables
+% 1.2.1	Amélioration de la gestion du csv pour les pixelart
+% 1.2	Correction d'un méchant bug avec pixelart, erf...
+% 1.1.9	Commande pour du pixelart en tikz (avec option csvii pour compatibilité)
+% 1.1.8	Ajout d'un style mainlevee pour tikz
+% 1.1.7	Ajout de commandes pour des conversions bin/dec/hex
+% 1.1.6	Ajout d'une commande pour déterminer les paramètres d'un régression linéaire par moindres carrés
+% 1.1.5	Ajout de commandes pour "visualiser" le signe de ax+b ou de ax2+bx+c (cf tnsana !)
+% 1.1.4	Ajout d'une commande cercletrigoPL pour, en \TikZ, créer facilement un cercle trigo avec options
+% 1.1.3	Ajout d'une commande ensemble pour créer un ensemble à partir d'une liste
+% 1.1.2	Modifs mineures
+% 1.1.1	Modification mineure de l'environnement CF, avec prise de charge de la taille du texte !
+% 1.1.0	Ajout d'une commande tetraPL pour un tetraèdre dans un environnement TikZ
+% 1.0.9	Ajout d'une commande pavePL pour un pave droit dans un environnement TikZ
+% 1.0.8 Ajout d'une commande liencapytale pour créer un cartouche "comme sur capytale"
+% 1.0.7	Option [build] pour placer les fichiers temporaires dans un répertoire build (désactivée par défaut)
+% 1.0.6	Option [nominted] pour éviter de charger minted & nettoyage amssymb
+% 1.0.5	Environnement code python avec minted
+% 1.0.4	Environnement pour simuler terminal windows & linux
+% 1.0.3	Environnement pour présenter du pseudocode
+% 1.0.2	Environnement pour présenter du code python (avec pythontex)
+% 1.0.1	Modif mineure du chargement de xcolor (compatibilité avec d'autres packages notamment...)
+% 1.0	Version initiale
+
+%------Option(s)
+\newif\if@nonshellescape \@nonshellescapefalse
+\DeclareOption{nonshellescape}{\@nonshellescapetrue}
+\newif\if@build \@buildfalse
+\DeclareOption{build}{\@buildtrue}
+\newif\if@csvii \@csviifalse
+\DeclareOption{csvii}{\@csviitrue}
+\DeclareOption*{}
+\ProcessOptions\relax
+
+%------Packages utiles
+\RequirePackage{mathtools}
+%\RequirePackage{amssymb}
+\RequirePackage[table,svgnames]{xcolor}%Gestion des couleurs
+\RequirePackage{tikz}
+\RequirePackage{tkz-tab}
+\RequirePackage{pgf,pgffor}
+\RequirePackage{ifthen}
+\RequirePackage{xparse}
+\RequirePackage{xkeyval}
+%\RequirePackage{xfp} %plus utile
+\RequirePackage{xstring}
+\RequirePackage{xintexpr}
+\RequirePackage{xintbinhex}
+\RequirePackage{xinttools}
+\RequirePackage{randomlist}
+\RequirePackage{simplekv}
+\RequirePackage{listofitems}
+\RequirePackage{tabularray}
+\RequirePackage{hvlogos}
+\RequirePackage{siunitx} %test avec v3
+\sisetup{%
+  locale=FR,%
+  mode = match, propagate-math-font = true,%
+  reset-math-version = false, reset-text-family = false,%
+  reset-text-series = false, reset-text-shape = false,%
+  text-family-to-math = true, text-series-to-math = true,%
+  output-decimal-marker={,},%
+%  group-minimum-digits=4%
+}%
+\RequirePackage{fontawesome5}
+\if@csvii
+	\RequirePackage[legacy]{csvsimple}
+\else
+	\RequirePackage{expl3}
+	\RequirePackage[l3]{csvsimple}
+\fi
+%librairies tikz
+\usetikzlibrary{calc}
+\usetikzlibrary{decorations}
+\usetikzlibrary{decorations.pathreplacing}
+\usetikzlibrary{decorations.markings}
+\usetikzlibrary{arrows,arrows.meta}
+\usetikzlibrary{babel}
+\usetikzlibrary{shapes.geometric}
+\usetikzlibrary{decorations.pathmorphing}
+%tcolorbox
+\RequirePackage[most]{tcolorbox}
+%divers
+\RequirePackage{iftex}
+%python
+\RequirePackage{fancyvrb}
+\RequirePackage[gobble=auto]{pythontex}
+\setpythontexlistingenv{pythont} %pour ne pas télescoper lstlistings (?)
+\if@build
+	\setpythontexoutputdir{./build/pythontex-files-\jobname} %essai de modif pythontex répertoire build
+\fi
+%shellescape
+\if@nonshellescape
+	%on ne charge pas minted et la librairie tcbox
+\else
+	\if@build
+		%on charge minted avec le répertoire build
+		\RequirePackage[outputdir=build]{minted}
+	\fi
+	%on charge minted via la librairie tcbox
+	\tcbuselibrary{minted}
+\fi
+
+%-----------PRESENTATIONDECODES--------------
+\NewTCBListing{PresentationCode}{ O{ForestGreen} m }{%
+	sharp corners=downhill,enhanced,arc=12pt,skin=bicolor,%
+	colback=#1!5!white,colframe=#1!75!black,colbacklower=White,%
+	attach boxed title to top right={yshift=-\tcboxedtitleheight},title=Code \LaTeX,%
+	boxed title style={%
+		colframe=#1!75!black,colback=#1!15!white,%
+		,sharp corners=downhill,arc=12pt,%
+	},%
+	fonttitle=\color{#1!90!black}\itshape\ttfamily\footnotesize,%
+	listing options={%
+		style=tcblatex,basicstyle=\footnotesize\ttfamily,%
+		keywordstyle=\bfseries\color{Blue},tabsize=2,%
+	},%
+	#2
+}
+
+%---------------SPLINES----------------------
+%------commande utile pour extraire des infos d'une liste
+\newcommand\extractcoeff[2]{% #1=liste & #2=numero
+	\setsepchar{§}%
+	\readlist*\lcoeffs{#1}
+	\ifnum \lcoeffslen=1
+		\def\COEFFA{#1}
+		\def\COEFFB{#1}
+	\else
+		\itemtomacro\lcoeffs[#2]\COEFF
+		\IfSubStr{\COEFF}{/}%
+			{\StrCut{\COEFF}{/}{\COEFFA}{\COEFFB}}%
+			{\def\COEFFA{\COEFF}\def\COEFFB{\COEFF}}
+	\fi
+}
+
+%------splines en tikz avec ..controls
+\defKV[spline]{%
+	Epaisseur=\def\SPLepaisseur{#1},%
+	Couleur=\def\SPLcouleur{#1},%
+	Coeffs=\def\SPLcoeffs{#1},%
+	CouleurPoints=\def\SPLcouleurpoints{#1},%
+	TaillePoints=\def\SPLtaillepoints{#1},%
+	Style=\def\SPLstyle{#1}
+}
+
+\setKVdefault[spline]{%
+	Epaisseur=1.25pt,%
+	Couleur=red,%
+	Coeffs=3,%
+	CouleurPoints=black,%
+	TaillePoints=2pt,%
+	AffPoints=false,%
+	Style={}
+}
+
+\newcommand\SplineTikz[2][]{%
+	\useKVdefault[spline]
+	\setKV[spline]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%on lit la liste des points/nbderivés et on stocke dans \listepoints
+	\setsepchar[.]{§./}%
+	\readlist*\SPLlistepoints{#2}%
+	\def\SPLnbsplines{\inteval{\SPLlistepointslen-1}}%
+	%si uniquement deux points, pas de boucle...
+	\ifnum \SPLlistepointslen=2
+		%extraction des coeffs de compensation
+		\extractcoeff{\SPLcoeffs}{1}%
+		%extraction des coordonnées
+		\itemtomacro\SPLlistepoints[1,1]\xa
+		\itemtomacro\SPLlistepoints[1,2]\ya
+		\itemtomacro\SPLlistepoints[1,3]\fprimea
+		\itemtomacro\SPLlistepoints[2,1]\xb
+		\itemtomacro\SPLlistepoints[2,2]\yb
+		\itemtomacro\SPLlistepoints[2,3]\fprimeb
+		\draw[line width=\SPLepaisseur,\SPLcouleur,\SPLstyle] (\xa,\ya) ..controls +({atan \fprimea}:{(\xb-\xa)/\COEFFA}) and +({-180 + atan \fprimeb}:{(\xb-\xa)/\COEFFA}).. (\xb,\yb) ;%
+	%sinon on construit bout par bout !
+	\else
+		\foreach \i in {1,2,...,\SPLnbsplines}{
+			%extraction des coeffs de compensation
+			\extractcoeff{\SPLcoeffs}{\i}
+			\def\j{\inteval{\i+1}}
+			\itemtomacro\SPLlistepoints[\i,1]\xa
+			\itemtomacro\SPLlistepoints[\i,2]\ya
+			\itemtomacro\SPLlistepoints[\i,3]\fprimea
+			\itemtomacro\SPLlistepoints[\j,1]\xb
+			\itemtomacro\SPLlistepoints[\j,2]\yb
+			\itemtomacro\SPLlistepoints[\j,3]\fprimeb
+			\draw[line width=\SPLepaisseur,\SPLcouleur,\SPLstyle] (\xa,\ya) ..controls +({atan \fprimea}:{(\xb-\xa)/\COEFFA}) and +({-180 + atan \fprimeb}:{(\xb-\xa)/\COEFFB}).. (\xb,\yb) ;%
+		}
+	\fi
+	\ifboolKV[spline]{AffPoints}%on affiche les points de contrôle
+	{%
+		\foreach \i in {1,2,...,\SPLlistepointslen}{%
+			\itemtomacro\SPLlistepoints[\i,1]\xa
+			\itemtomacro\SPLlistepoints[\i,2]\ya
+			\filldraw[\SPLcouleurpoints] (\xa,\ya) circle[radius=\SPLtaillepoints] ;%
+		}
+	}
+	{}
+}
+
+%------tangente(s) en TikZ, avec point/dérivée ou liste points/dérivées
+\defKV[tgte]{%
+	Epaisseur=\def\TGTepaisseur{#1},%
+	Couleur=\def\TGTcouleur{#1},%
+	xl=\def\TGTXL{#1},%
+	xr=\def\TGTXR{#1},%
+	Style=\def\TGTstyle{#1},%
+	Point=\def\TGTnumpt{#1}
+}
+
+\setKVdefault[tgte]{
+	Epaisseur=1.25pt,%
+	Couleur=red,%
+	xl=0.5,xr=0.5,%
+	Style={},%
+	Point=1
+}
+
+\newcommand\TangenteTikz[2][]{%
+	\useKVdefault[tgte]%
+	\setKV[tgte]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\setsepchar[.]{§./}%
+	\readlist*\TGTlistepoints{#2}%
+	\itemtomacro\TGTlistepoints[\TGTnumpt,1]\xa
+	\itemtomacro\TGTlistepoints[\TGTnumpt,2]\ya
+	\itemtomacro\TGTlistepoints[\TGTnumpt,3]\fprimea
+	\def\TGTDEB{\fpeval{\xa-\TGTXL}}\def\TGTFIN{\fpeval{\xa+\TGTXR}}%
+	\draw[line width=\TGTepaisseur,\TGTcouleur,domain=\TGTDEB:\TGTFIN,\TGTstyle] plot (\x,{\fprimea*(\x-\xa)+\ya}) ;%
+}
+
+%----------------FENÊTRE CALCUL FORMEL
+\newcommand\CFchap{\textasciicircum}
+\newcounter{CFnum}
+%def des clés
+\defKV[paramfenxcas]{%
+	Largeur=\def\CFlarg{#1},%
+	EspaceLg=\def\CFesplg{#1},%
+	PremCol=\def\CFpremcol{#1},%
+	HautPremCol=\def\CFhpremcol{#1},%
+	Taille=\def\CFtaille{#1},%
+	Couleur=\def\CFcouleur{#1},%
+	TailleTitre=\def\CFtailletitre{#1},%
+	CouleurCmd=\def\CFcoulcmd{#1},%
+	CouleurRes=\def\CFcoulres{#1},%
+	PosCmd=\def\CFposcmd{#1},%
+	PosRes=\def\CFposres{#1},%
+	LabelTitre=\def\CFlabeltitre{#1}%
+}
+\setKVdefault[paramfenxcas]{%
+	Largeur=16,EspaceLg=2pt,PremCol=0.3,HautPremCol=0.4,%
+	Couleur=darkgray,Menu=true,Titre=false,TailleTitre=\normalsize,Taille=\normalsize,%
+	Sep=true,PosRes=centre,PosCmd=gauche,%
+	CouleurCmd=red,CouleurRes=blue,%
+	LabelTitre={Résultats obtenus avec un logiciel de Calcul Formel}%
+}
+
+\newcommand\CalculFormelParametres[1][]{%
+	\setcounter{CFnum}{0}
+	\useKVdefault[paramfenxcas]%
+	\setKV[paramfenxcas]{#1}% on paramètres les nouvelles clés et on les simplifie
+}
+%def des clés
+\defKV[paramlgxcas]{%
+	HautCmd=\def\CFhle{#1},%
+	HautRes=\def\CFhlr{#1}
+}
+\setKVdefault[paramlgxcas]{%
+	HautCmd=0.75,%
+	HautRes=0.75
+}
+
+\newcommand\CalculFormelLigne[3][]{%
+	\addtocounter{CFnum}{1}
+	\def\CFL{\theCFnum}
+	\def\CFLA{\inteval{\CFL-1}}%
+	\useKVdefault[paramlgxcas]%
+	\setKV[paramlgxcas]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\def\CFLA{\inteval{\CFL-1}}%
+	%DÉCLARATION DES NŒUDS (les "6" coins des lignes commande et résultat)
+	\xintifboolexpr{\CFL == 1}%si c'est la première ligne
+		{\coordinate (A0\CFL) at (0,0);}
+		{\coordinate (A0\CFL) at ($(A2\CFLA) + (0,{-\CFesplg})$);}
+	\coordinate (A1\CFL) at ($(A0\CFL) + (0,{-\CFhle})$);
+	\coordinate (A2\CFL) at ($(A1\CFL) + (0,{-\CFhlr})$);
+	\coordinate (A3\CFL) at ($(A0\CFL) + ({\CFlarg},0)$);
+	\coordinate (A4\CFL) at ($(A1\CFL) + ({\CFlarg},0)$);
+	\coordinate (A5\CFL) at ($(A2\CFL) + ({\CFlarg},0)$);
+	%DÉCLARATION DES NŒUDS INTERMÉDIAIRES (pour les commandes et les résultats)
+	\coordinate (C1\CFL) at ($(A0\CFL) + (0,{-0.5*\CFhle})$);
+	\coordinate (C2\CFL) at ($(A0\CFL) + ({0.5*\CFlarg},{-0.5*\CFhle})$);
+	\coordinate (C3\CFL) at ($(A0\CFL) + ({\CFlarg},{-0.5*\CFhle})$);
+	\coordinate (R1\CFL) at ($(A1\CFL) + (0,{-0.5*\CFhlr})$);
+	\coordinate (R2\CFL) at ($(A1\CFL) + ({0.5*\CFlarg},{-0.5*\CFhlr})$);
+	\coordinate (R3\CFL) at ($(A1\CFL) + ({\CFlarg},{-0.5*\CFhlr})$);
+	%RECTANGLE DE BASE
+	\draw[\CFcouleur] (A0\CFL) rectangle (A5\CFL) ;
+	%LA COMMANDE EN ROUGE
+	\IfStrEq{\CFposcmd}{centre}%si poscmd=center
+		{\draw (C2\CFL) node[\CFcoulcmd,font=\CFtaille] {#2} ;}
+		{}
+	\IfStrEq{\CFposcmd}{gauche}%si poscmd=left
+		{\draw (C1\CFL) node[right,\CFcoulcmd,font=\CFtaille] {#2} ;}
+		{}
+	\IfStrEq{\CFposcmd}{right}%si poscmd=right
+		{\draw (C3\CFL) node[left,\CFcoulcmd,font=\CFtaille] {#2} ;}
+		{}
+	%LA LIGNE DE SÉPARATION
+	\ifboolKV[paramfenxcas]{Sep}%si sep=true
+		{\draw[\CFcouleur] (A1\CFL) -- (A4\CFL);}
+		{}
+	%LE RÉSULTAT
+	\IfStrEq{\CFposres}{centre}%si posrep=center
+		{\draw (R2\CFL) node[\CFcoulres,font=\CFtaille] {#3} ;}
+		{}
+	\IfStrEq{\CFposres}{gauche}%si posrep=left
+		{\draw (R1\CFL) node[right,\CFcoulres,font=\CFtaille] {#3} ;}
+		{}
+	\IfStrEq{\CFposres}{right}%si posrep=right
+		{\draw (R3\CFL) node[left,\CFcoulres,font=\CFtaille] {#3} ;}
+		{}
+	\ifboolKV[paramfenxcas]{Sep}%si sep=true
+		{\draw[\CFcouleur] (A1\CFL) -- (A4\CFL);}%
+		{}
+	%LE PETIT NUMÉRO
+	\draw[\CFcouleur] (A0\CFL) rectangle ++ ({-\CFpremcol},{-\CFhpremcol}) node[\CFcouleur,midway,font=\small\sffamily\bfseries] {\CFL} ;
+	%LE RECTANGLE "MENU"
+	\ifboolKV[paramfenxcas]{Menu}%si menu=true
+		{\draw[\CFcouleur,fill=\CFcouleur!25] (A5\CFL) rectangle ++ (-0.65,0.25) node[black,midway,font=\tiny\sffamily\bfseries] {MENU} ;}%
+		{}
+	%LE BLOC "TITRE"
+	\ifboolKV[paramfenxcas]{Titre}%si titre=true
+		{\draw[\CFcouleur,fill=lightgray!25,rounded corners] ($(A01) + (0,2pt)$) rectangle ++ ($({\CFlarg},2em)$) node[ForestGreen!50!\CFcouleur,midway,font=\CFtailletitre\ttfamily\bfseries] {\CFlabeltitre};}
+		{}
+}
+
+%=========CONSOLEPYTHON=========== OK !!
+\defKV[envpythonconsole]{%
+	Largeur=\def\CSPYlargeur{#1},%
+	Centre=\testboolKV{#1}
+		{\def\hookcenterpre{\begin{center}}\def\hookcenterpost{\end{center}}}
+		{\def\hookcenterpre{\begin{flushleft}}\def\hookcenterpost{\end{flushleft}}},%
+	TaillePolice=\def\CSPYfonte{#1},%
+	EspacementVertical=\def\CSPYstretch{#1}
+}
+
+\setKVdefault[envpythonconsole]{%
+	Largeur=\linewidth,%
+	Centre=true,%
+	Label=true,%
+	TaillePolice=\footnotesize,%
+	EspacementVertical=1
+}
+
+\newenvironment{ConsolePythontex}[1][]{%
+	\useKVdefault[envpythonconsole]%
+	\setKV[envpythonconsole]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\VerbatimEnvironment
+	\hookcenterpre
+	\begin{minipage}{\CSPYlargeur}
+		\ifboolKV[envpythonconsole]{Label}%si label
+		{\begin{pyconsole}[][%
+				framesep=3mm,frame=single,fontsize=\CSPYfonte,framerule=1pt,rulecolor=\color{ForestGreen},label={[\scriptsize Début de la console python]\scriptsize Fin de la console python},baselinestretch=\CSPYstretch]}%
+		{\begin{pyconsole}[][%
+				framesep=3mm,frame=single,fontsize=\CSPYfonte,framerule=1pt,rulecolor=\color{ForestGreen},baselinestretch=\CSPYstretch]}
+			}
+			{
+		\end{pyconsole}
+	\end{minipage}
+	\hookcenterpost
+}
+
+%=========CODEPYTHONTEX=========== OK!!
+\defKV[envpythonverb]{%
+	Largeur=\def\CODPYlargeur{#1},%
+	TaillePolice=\def\CODPYfonte{#1},%
+	EspacementVertical=\def\CODPYstretch{#1},%
+	Centre=\testboolKV{#1}
+		{\def\verbcenterpre{\begin{center}}\def\verbcenterpost{\end{center}}}
+		{\def\verbcenterpre{}\def\verbcenterpost{}}
+}
+
+\setKVdefault[envpythonverb]{%
+	Largeur=\linewidth,%
+	Centre=true,%
+	Lignes=true,%
+	TaillePolice=\footnotesize,%
+	EspacementVertical=1
+}
+
+\tcbset{stylepythontex/.style={%
+		enhanced,boxrule=1.25pt,%
+		sharp corners=downhill,arc=12pt,
+		before skip=12pt,after skip=12pt,%
+		top=10pt,bottom=1mm,rightupper=4pt,%leftupper=25pt,
+		attach boxed title to top right={yshift=-\tcboxedtitleheight},
+		boxed title style={
+			size=small,colback=ForestGreen!25,boxrule=1.25pt,
+			colframe=Green,boxsep=1.25pt,
+			sharp corners=downhill,
+			arc=12pt,
+			top=2pt,bottom=1pt,left=6pt,right=6pt
+		},
+		fonttitle=\color{ForestGreen}\itshape\ttfamily\footnotesize,
+		title={\scriptsize\faPython}\:Code Python\vphantom{p},
+		watermark text={\faPython},watermark opacity=0.175,watermark zoom=0.50,
+	}
+}
+
+\tcbset{stylepythonnolineos/.style={%
+		stylepythontex,leftupper=10pt,
+		colframe=Green,colback=ForestGreen!5,%
+%		fontlower=\small,%
+		before upper=\renewcommand\theFancyVerbLine{\scriptsize\ttfamily\color{Gray}\arabic{FancyVerbLine}}
+	}
+}
+
+\tcbset{stylepythonlineos/.style={%
+		stylepythontex,leftupper=25pt,
+		colframe=Green,colback=ForestGreen!5,%
+%		fontlower=\small,%
+		before upper=\renewcommand\theFancyVerbLine{\scriptsize\ttfamily\color{Gray}\arabic{FancyVerbLine}}
+	}
+}
+
+\newtcolorbox{tcpythontexcode}[1][\linewidth]{%
+	width=#1,stylepythonlineos
+}
+
+\newtcolorbox{tcpythontexcodeno}[1][\linewidth]{%
+	width=#1,stylepythonnolineos
+}
+
+\newenvironment{CodePythontex}[1][]{%
+	\useKVdefault[envpythonverb]%
+	\setKV[envpythonverb]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\VerbatimEnvironment
+	\verbcenterpre
+	\ifboolKV[envpythonverb]{Lignes}%si lignes=true
+		{\begin{tcpythontexcode}[\CODPYlargeur]}
+		{\begin{tcpythontexcodeno}[\CODPYlargeur]}
+	\ifboolKV[envpythonverb]{Lignes}%si lignes=true
+		{\begin{pyverbatim}[][fontsize=\CODPYfonte,numbers=left,numbersep=10pt,commandchars=\\\{\},mathescape,baselinestretch=\CODPYstretch]}
+		{\begin{pyverbatim}[][numbers=none,numbersep=0pt,fontsize=\CODPYfonte,commandchars=\\\{\},mathescape,baselinestretch=\CODPYstretch]}
+		}
+		{
+	\end{pyverbatim}
+	\ifboolKV[envpythonverb]{Lignes}%si lignes=true
+		{\end{tcpythontexcode}}
+		{\end{tcpythontexcodeno}}
+	\verbcenterpost
+}
+
+%=========PYTHONMINTED========= OK !!
+\tcbset{pytmintedno/.style={%
+		listing engine=minted,minted style=colorful,
+		minted language=python,listing only,
+		minted options={tabsize=4,fontsize=\footnotesize,autogobble},
+	}
+}
+
+\tcbset{pytminted/.style={%
+		listing engine=minted,minted style=colorful,
+		minted language=python,listing only,
+		minted options={tabsize=4,fontsize=\footnotesize,autogobble,xleftmargin=16pt,linenos,numbersep=10pt},
+	}
+}
+
+\DeclareTCBListing{CodePythonMinted}{ s O{12cm} O{} }{% étoilée sans numéro, taille puis options...
+	\IfBooleanTF{#1}{pytmintedno}{pytminted},
+	enhanced,width=#2,#3,
+	colframe=Green,colback=ForestGreen!5,%
+	boxrule=1.25pt,
+	sharp corners=downhill,arc=12pt,
+	before skip=12pt,after skip=12pt,%
+	leftupper=8pt,top=10pt,bottom=4pt,rightupper=4pt,%
+	attach boxed title to top right={yshift=-\tcboxedtitleheight},
+	boxed title style={
+		size=small,colback=ForestGreen!25,boxrule=1.25pt,
+		colframe=Green,boxsep=1.25pt,
+		sharp corners=downhill,
+		arc=12pt,
+		top=2pt,bottom=1pt,left=6pt,right=6pt
+	},
+	fonttitle=\color{ForestGreen}\itshape\ttfamily\footnotesize,
+	title={\scriptsize\faPython}\:Code Python\vphantom{y},
+	watermark text={\faPython},watermark opacity=0.175,watermark zoom=0.50,
+	before upper=\renewcommand{\theFancyVerbLine}{\scriptsize\ttfamily\color{Green}\arabic{FancyVerbLine}}
+}
+
+%=======STYLE ALGO LST========= OK !
+\ifluatex
+	\tcbuselibrary{listings}
+	\lstdefinelanguage{langnat}{%
+		keywords={},
+		inputencoding=utf8,
+		comment=[l]{}}
+	\lstdefinestyle{PLpython}{%
+		language          = python,
+		inputencoding     = utf8,
+		basicstyle        = \ttfamily\footnotesize,
+		keywordstyle      = \color{ForestGreen},
+		keywordstyle      = [2]\color{magenta},
+		commentstyle      = \color{gray}\itshape,
+		stringstyle       = \color{red!75},
+		numberstyle       = \scriptsize\ttfamily\color{Green},
+		aboveskip        =  0pt,
+		belowskip         = 0pt,
+		tabsize           = 4,
+		showstringspaces  = false,
+		columns           = fullflexible,
+		keepspaces        = true,
+		breaklines        = true,
+		breakatwhitespace = true
+	}
+\else
+	\tcbuselibrary{listingsutf8}
+	\lstdefinelanguage{langnat}{%
+		keywords={},
+		inputencoding=utf8/latin1,
+		comment=[l]{}}
+	\lstdefinestyle{PLpython}{%
+		language          = python,
+		inputencoding     = utf8/latin1,
+		basicstyle        = \ttfamily\footnotesize,
+		keywordstyle      = \color{ForestGreen},
+		keywordstyle      = [2]\color{magenta},
+		commentstyle      = \color{gray}\itshape,
+		stringstyle       = \color{red!75},
+		numberstyle       = \scriptsize\ttfamily\color{Green},
+		aboveskip        =  0pt,
+		belowskip         = 0pt,
+		tabsize           = 4,
+		showstringspaces  = false,
+		columns           = fullflexible,
+		keepspaces        = true,
+		breaklines        = true,
+		breakatwhitespace = true
+	}
+\fi
+
+%=======PYTHONLISTINGS========= OK !!
+\tcbset{stylepythonlst/.style={%
+		enhanced,boxrule=1.25pt,%
+		leftupper=10pt,
+		sharp corners=downhill,arc=12pt,
+		before skip=12pt,after skip=12pt,%
+		top=10pt,bottom=1mm,rightupper=4pt,%leftupper=25pt,
+		attach boxed title to top right={yshift=-\tcboxedtitleheight},
+		boxed title style={
+			size=small,colback=ForestGreen!25,boxrule=1.25pt,
+			colframe=Green,boxsep=1.25pt,
+			sharp corners=downhill,
+			arc=12pt,
+			top=2pt,bottom=1pt,left=6pt,right=6pt
+		},
+		colframe=Green,colback=ForestGreen!5,%
+		fonttitle=\color{ForestGreen}\itshape\ttfamily\footnotesize,
+		title={\scriptsize\faPython}\:Code Python\vphantom{p},
+		watermark text={\faPython},watermark opacity=0.175,watermark zoom=0.50,
+		listing only,listing engine=listings,%
+	}
+}
+
+\tcbset{stylepythonlstnolineos/.style={%
+		stylepythonlst,
+		listing options={style=PLpython,xleftmargin=0pt,numbers=none}
+	}
+}
+
+\tcbset{stylepythonlstlineos/.style={%
+		stylepythonlst,
+		listing options={style=PLpython,xleftmargin=16pt,numbers=left}
+	}
+}
+
+\DeclareTCBListing{CodePythonLst}{ s O{\linewidth} m }{% * off pour numéros de lignes + {largeur} + <options tcbox>
+	\IfBooleanTF{#1}{stylepythonlstnolineos}{stylepythonlstlineos},
+	width=#2,#3
+}
+
+\NewTCBInputListing{\CodePythonLstFichier}{ s O{\linewidth} m m }{
+	\IfBooleanTF{#1}{stylepythonlstnolineos}{stylepythonlstlineos},
+	width=#2,#3,
+	listing file={#4}}
+
+%=========PYTHONPITON========== OK !!
+\defKV[envpiton]{%
+	Largeur=\def\CODPITlargeur{#1},%
+	Alignement=\def\CODPITalign{#1},%
+	TaillePolice=\def\CODPITfonte{#1}
+}
+
+\setKVdefault[envpiton]{%
+	Largeur=\linewidth,%
+	Alignement=center,%
+	Lignes=true,%
+	TaillePolice=\footnotesize
+}
+\ifluatex
+	\RequirePackage{piton}
+	\NewPitonEnvironment{CodePiton}{ O{} }%
+		{%
+			\useKVdefault[envpiton]%
+			\setKV[envpiton]{#1}% on paramètres les nouvelles clés et on les simplifie
+			\ifboolKV[envpiton]{Lignes}%si lignes=true
+				{\PitonOptions{left-margin=auto,line-numbers}}%
+				{\PitonOptions{}}%
+			\begin{tcolorbox}[stylepythontex,leftupper=8pt,colframe=Green,colback=ForestGreen!5,width=\CODPITlargeur,fontupper=\CODPITfonte,fontlower=\CODPITfonte,\CODPITalign]
+		}%
+		{%
+			\end{tcolorbox}%
+		}
+\fi
+
+%=========PSEUDOCODE=========== OK !!
+%language pseudocode listings
+\lstdefinestyle{pseudocodePL}{%
+	language=langnat,
+	basicstyle=\footnotesize\ttfamily,
+	numberstyle=\scriptsize\ttfamily\color{gray},
+	keywordstyle=\bfseries,
+	stringstyle=\color{red!75},
+	keepspaces=true,
+	tabsize=4,numbersep=10pt,
+	xleftmargin=14pt,
+	numbers=left,
+	morestring=[b]",
+	showstringspaces=false,
+	%showtabs=false,
+	escapeinside={(*}{*)}
+}
+
+\lstdefinestyle{pseudocodenoPL}{%
+	language=langnat,
+	basicstyle=\footnotesize\ttfamily,
+	numberstyle=\scriptsize\ttfamily\color{gray},
+	keywordstyle=\bfseries,
+	stringstyle=\color{red!75},
+	keepspaces=true,
+	tabsize=4,numbersep=10pt,
+	numbers=none,
+	showstringspaces=false,
+	morestring=[b]",
+	%showtabs=true,
+	escapeinside={(*}{*)}
+}
+
+%style tcbox pseudocode avec bannière hautdroite
+\tcbset{stylepseudocodePL/.style={%
+		%fontupper=\small\sffamily,%
+		enhanced,boxrule=1.25pt,sharp corners=downhill,arc=12pt,
+		before skip=12pt,after skip=12pt,leftupper=10pt,top=8pt,bottom=2pt,rightupper=4pt,%
+		attach boxed title to top right={yshift=-\tcboxedtitleheight},
+		boxed title style={
+			size=small,colback=gray!25,boxrule=1.25pt,
+			colframe=darkgray,boxsep=1.25pt,
+			sharp corners=downhill,
+			arc=12pt,
+			top=2pt,bottom=1pt,left=6pt,right=6pt
+		},
+		fonttitle=\color{darkgray}\ttfamily\footnotesize,
+		title={\scriptsize\faFileCode}\:\textit{Pseudo-Code}\vphantom{p},
+		watermark text={\faCode},watermark opacity=0.175,watermark zoom=0.50,
+	}
+}
+
+\ifluatex
+	\newcommand\algomathttPL[1]{\symtt{#1}}
+\else
+	\newcommand\algomathttPL[1]{\mathtt{#1}}
+\fi
+
+\DeclareTCBListing{PseudoCode}{ s O{12cm} O{} }{% étoilée sans numéro, <taille> puis option...
+	width=#2,#3,
+	stylepseudocodePL,
+	listing only,listing engine=listings,
+	listing options={
+		style=\IfBooleanTF{#1}{pseudocodenoPL}{pseudocodePL},%version étoilée sans numéro de lignes
+		aboveskip=2pt,belowskip=2pt,
+		columns=fullflexible,
+		literate={é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1% 
+		{ú}{{\'u}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1%
+		{è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1%
+		{À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1%
+		{ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1%
+		{Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1%
+		{â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1%
+		{Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1%
+		{œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1%
+		{ű}{{\H{u}}}1 {Ű}{{\H{U}}}1 {ő}{{\H{o}}}1 {Ő}{{\H{O}}}1%
+		{ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1%
+		{€}{{\texteuro}}1 {£}{{\pounds}}1%
+		{=}{\textleftarrow}1 {==}{=}1%
+		{*}{$\algomathttPL{\times}$}{1}%
+	}
+}
+
+%============FakeTerm=========== OK !!
+%couleurs (inspirées par termsim !)
+\definecolor{PLmpurple}{RGB}{48,10,36}
+\definecolor{PLmgray}{RGB}{70,72,67}
+\definecolor{PLogray}{RGB}{148,147,141}
+\definecolor{PLoorange}{RGB}{233,101,56}
+\definecolor{PLterminal}{RGB}{80,78,70}
+\definecolor{PLlinux}{RGB}{0,39,51}
+\definecolor{PLwinblue}{HTML}{1883D7}
+\definecolor{PLosxgray}{HTML}{D8D6D9}
+
+%WINDOWS
+\tcbset{PLfaketermwin/.style={%
+		enhanced,boxrule=1pt,sharp corners,before skip=12pt,after skip=12pt,%
+		colframe=PLwinblue,colback=black,colbacktitle=white,colupper=white,coltitle=black,%
+		titlerule=0.4pt,left=2pt,top=2pt,bottom=2pt,right=2pt,middle=2pt,%
+		fonttitle=\bfseries\small\sffamily
+	}
+}
+
+\setKVdefault[fakeTERMwin]{Titre={Terminal Windows}}
+
+\newcommand\PLcommandeswin{%
+	\begin{tikzpicture}[thick,scale=0.66]
+		\draw (0,0)--(1em,0) ; \draw (2em,0) rectangle (3em,1em) ; \draw (4em,1em)--(5em,0) (4em,0)--(5em,1em) ;
+	\end{tikzpicture}%
+}
+
+\newcommand\termwintitre[1][]{%
+	\restoreKV[fakeTERMwin]
+	\setKV[fakeTERMwin]{#1}
+	\begin{tblr}{colsep=0pt,rowsep=0pt,width=\linewidth,colspec={X[l]r}}
+		{\footnotesize\faTerminal}~~\useKV[fakeTERMwin]{Titre} & \PLcommandeswin \\ %
+	\end{tblr}
+}
+
+\DeclareTCBListing{TerminalWin}{ O{\linewidth} m !O{} }{%<taille> puis {Titre=...} puis [option]
+	PLfaketermwin,title={\termwintitre[#2]},%
+	listing only,listing engine=listings,%
+	listing options={style=tcblatex,language={},basicstyle=\footnotesize\ttfamily},%
+	width=#1,#3
+}
+
+%LINUX
+\newcommand{\PLUbuntuWhite}{%
+	\begin{tikzpicture}[thick,anchor=base,baseline]
+		\filldraw[PLmgray] (0,0.25em) circle[radius=0.5em] ;
+	\end{tikzpicture}%
+}
+\newcommand{\PLUbuntuMin}{%
+	\begin{tikzpicture}[thick,anchor=base,baseline]
+		\filldraw[color=PLogray!50!white] (0,0.25em) circle[radius=0.5em];
+		\draw[PLterminal](-0.35em,0.25em)--(0.35em,0.25em);
+	\end{tikzpicture}%
+}
+\newcommand{\PLUbuntuClose}{%
+	\begin{tikzpicture}[thick,anchor=base,baseline]
+		\filldraw[color=PLoorange!70!white] (0,0.25em) circle[radius=0.5em];
+		\draw[PLterminal] (-0.32em,-0.07em)--(0.32em,0.57em);
+		\draw[PLterminal] (-0.32em,0.57em)--(0.32em,-0.07em);
+	\end{tikzpicture}%
+}
+\newcommand{\PLUbuntuMax}{%
+	\begin{tikzpicture}[thick,anchor=base,baseline]
+		\filldraw[color=PLogray!50!white] (0,0.25em) circle[radius=0.5em];
+		\draw[PLterminal] (-0.32em,0.5em) rectangle (0.32em,0);
+	\end{tikzpicture}%
+}
+
+\tcbset{PLtermlinux/.style={%
+		enhanced,boxrule=1pt,arc=4pt,before skip=12pt,after skip=12pt,%
+		colframe=PLmgray,colback=PLmpurple,colbacktitle=PLmgray,colupper=white,coltitle=white,%
+		titlerule=0.4pt,left=2pt,top=2pt,bottom=2pt,right=2pt,middle=2pt,%
+		fonttitle=\bfseries\small\sffamily
+	}
+}
+
+\setKVdefault[fakeTERMnux]{Titre={Terminal UNiX}}
+
+\newcommand\termnuxtitre[1][]{%
+	\restoreKV[fakeTERMnux]
+	\setKV[fakeTERMnux]{#1}
+	\begin{tblr}{colsep=0pt,rowsep=0pt,width=\linewidth,colspec={lX[c]r}}
+		\PLUbuntuWhite~~\PLUbuntuWhite~~\PLUbuntuWhite & \vphantom{p}\useKV[fakeTERMnux]{Titre} & \PLUbuntuMin~~\PLUbuntuMax~~\PLUbuntuClose \\
+	\end{tblr}
+}
+
+\DeclareTCBListing{TerminalUnix}{ O{\linewidth} m !O{} }{%<taille> puis {Titre=...} puis [option]
+	PLtermlinux,title={\termnuxtitre[#2]},%
+	listing only,listing engine=listings,%
+	listing options={style=tcblatex,language={},basicstyle=\footnotesize\ttfamily},%
+	width=#1,#3
+}
+
+%OSX
+\tcbset{PLfaketermosx/.style={%
+	enhanced,boxrule=1pt,arc=6pt,before skip=12pt,after skip=12pt,%
+	colframe=PLosxgray,colback=lightgray!15,colbacktitle=PLosxgray,colupper=black,coltitle=black,%
+	titlerule=0.4pt,left=2pt,top=2pt,bottom=2pt,right=2pt,middle=2pt,%
+	fonttitle=\bfseries\small\sffamily
+	}
+}
+
+\newcommand{\PLOSXRed}{%
+	\begin{tikzpicture}[thick,anchor=base,baseline]
+		\filldraw[red] (0,0.25em) circle[radius=0.45em] ;
+	\end{tikzpicture}%
+}
+
+\newcommand{\PLOSXOrange}{%
+	\begin{tikzpicture}[thick,anchor=base,baseline]
+		\filldraw[orange] (0,0.25em) circle[radius=0.45em] ;
+	\end{tikzpicture}%
+}
+
+\newcommand{\PLOSXGreen}{%
+	\begin{tikzpicture}[thick,anchor=base,baseline]
+		\filldraw[ForestGreen] (0,0.25em) circle[radius=0.45em] ;
+	\end{tikzpicture}%
+}
+
+\newcommand{\PLOSXLG}{%
+	\begin{tikzpicture}[thick,anchor=base,baseline]
+		\filldraw[PLosxgray] (0,0.25em) circle[radius=0.45em] ;
+	\end{tikzpicture}%
+}
+
+\setKVdefault[fakeTERMosx]{titre={Terminal OSX}}
+
+\newcommand\termosxtitre[1][]{%
+	\restoreKV[fakeTERMosx]
+	\setKV[fakeTERMosx]{#1}
+	\begin{tblr}{colsep=0pt,rowsep=0pt,width=\linewidth,colspec={lX[c]r}}
+		\PLOSXRed~\PLOSXOrange~\PLOSXGreen & \vphantom{p}\useKV[fakeTERMosx]{Titre} & \PLOSXLG~\PLOSXLG~\PLOSXLG \\
+	\end{tblr}
+}
+
+\DeclareTCBListing{TerminalOSX}{ O{\linewidth} m !O{} }{%<taille> puis {Titre=...} puis [option]
+	PLfaketermosx,title={\termosxtitre[#2]},%
+	listing only,listing engine=listings,%
+	listing options={style=tcblatex,language={},basicstyle=\footnotesize\ttfamily},%
+	width=#1,#3
+}
+
+%============CartoucheCapytale========= OK !!
+\definecolor{vertcapyt}{rgb}{0.0,0.5,0.0}
+%\definecolor{vertcapyt}{HTML}{008000}
+\DeclareTotalTCBox{\CartoucheCapytale}{ s O{} m }
+	{enhanced,size=fbox,on line,arc=3pt,colback=vertcapyt,colframe=vertcapyt,fontupper=\IfBooleanTF{#1}{\ttfamily}{\sffamily}\bfseries,colupper=white}%
+	{#3#2~{\scriptsize\faLink}}
+
+%============PaveDroitTikZ============= OK !!
+\defKV[paramspave]{%
+	Largeur=\xdef\PFPaveLg{#1},%
+	Profondeur=\xdef\PFPavePf{#1},%
+	Hauteur=\xdef\PFPaveHt{#1},%
+	Angle=\xdef\PFPaveAngl{#1},%
+	Fuite=\xdef\PFPaveFuite{#1},%
+	Sommets=\def\PFPaveSommets{#1},%
+	Epaisseur=\xdef\PFPaveThick{#1}
+}
+\setKVdefault[paramspave]{%
+	Aff=false,%
+	Plein=false,%
+	Largeur=2,%
+	Profondeur=1,%
+	Hauteur=1.25,%
+	Angle=30,%
+	Fuite=0.5,%
+	Epaisseur=thick,%
+	Sommets=A§B§C§D§E§F§G§H,%
+	Cube=false
+}
+
+\newcommand\PaveTikz[1][]{%
+	\useKVdefault[paramspave]%
+	\setKV[paramspave]{#1}%
+	\ifboolKV[paramspave]{Cube}
+	{\xdef\PFPavePf{\PFPaveLg}%
+		\xdef\PFPaveHt{\PFPaveLg}}
+	{}
+	\setsepchar{§}%
+	\readlist*\PFListeSommets\PFPaveSommets
+	\itemtomacro\PFListeSommets[1]\PaveA
+	\itemtomacro\PFListeSommets[2]\PaveB
+	\itemtomacro\PFListeSommets[3]\PaveC
+	\itemtomacro\PFListeSommets[4]\PaveD
+	\itemtomacro\PFListeSommets[5]\PaveE
+	\itemtomacro\PFListeSommets[6]\PaveF
+	\itemtomacro\PFListeSommets[7]\PaveG
+	\itemtomacro\PFListeSommets[8]\PaveH
+	%les nœuds du pave
+	\coordinate (\PaveA) at (0,0) ;
+	\coordinate (\PaveB) at ({\PFPaveLg},0) ;
+	\coordinate (\PaveC) at ($(\PaveB) + ({\PFPaveAngl}:{\PFPaveFuite*\PFPavePf})$) ;
+	\coordinate (\PaveD) at ($(\PaveA) + ({\PFPaveAngl}:{\PFPaveFuite*\PFPavePf})$) ;
+	\coordinate (\PaveE) at ($(\PaveA) + (0,{\PFPaveHt})$) ;
+	\coordinate (\PaveF) at ($(\PaveB) + (0,{\PFPaveHt})$) ;
+	\coordinate (\PaveG) at ($(\PaveC) + (0,{\PFPaveHt})$) ;
+	\coordinate (\PaveH) at ($(\PaveD) + (0,{\PFPaveHt})$) ;
+	\ifboolKV[paramspave]{Aff}
+		{\draw (\PaveA) node[below left] {\PaveA} ;
+			\draw (\PaveB) node[below right] {\PaveB} ;
+			\draw (\PaveC) node[above right] {\PaveC} ;
+			\ifboolKV[paramspave]{Plein}
+				{}
+				{\draw (\PaveD) node[above left] {\PaveD} ;}
+				\draw (\PaveE) node[below left] {\PaveE} ;
+				\draw (\PaveF) node[below right] {\PaveF} ;
+				\draw (\PaveG) node[above right] {\PaveG} ;
+				\draw (\PaveH) node[above left] {\PaveH} ;}
+		{}%on affiche rien
+	\draw[\PFPaveThick] (\PaveA)--(\PaveB)--(\PaveF)--(\PaveE)--cycle
+	                    (\PaveB)--(\PaveC)--(\PaveG)--(\PaveF)--cycle
+	                    (\PaveG)--(\PaveH)--(\PaveE) ;
+	\ifboolKV[paramspave]{Plein}
+		{}
+		{\draw[dashed,\PFPaveThick] (\PaveA)--(\PaveD)--(\PaveC)
+		                            (\PaveD)--(\PaveH) ;}
+}
+
+%============TétraèdreTikZ============= OK !!
+\defKV[paramstetra]{%
+	Largeur=\xdef\PFTetraLg{#1},%
+	Profondeur=\xdef\PFTetraPf{#1},%
+	Hauteur=\xdef\PFTetraHt{#1},%
+	Alpha=\xdef\PFTetraAlpha{#1},%
+	Beta=\xdef\PFTetraBeta{#1},%
+	Sommets=\def\PFTetraSommets{#1},%
+	Epaisseur=\xdef\PFTetraThick{#1}
+}
+\setKVdefault[paramstetra]{%
+	Aff=false,%
+	Plein=false,%
+	Largeur=4,%
+	Profondeur=1.25,%
+	Hauteur=3,%
+	Alpha=40,%
+	Beta=60,%
+	Epaisseur=thick,%
+	Sommets=A§B§C§D,%
+}
+
+\newcommand\TetraedreTikz[1][]{%
+	\useKVdefault[paramstetra]%
+	\setKV[paramstetra]{#1}%
+	\setsepchar{§}%
+	\readlist*\PFListeSommets\PFTetraSommets
+	\itemtomacro\PFListeSommets[1]\TetraA
+	\itemtomacro\PFListeSommets[2]\TetraB
+	\itemtomacro\PFListeSommets[3]\TetraC
+	\itemtomacro\PFListeSommets[4]\TetraD
+	%les nœuds du tétraèdre
+	\coordinate (\TetraA) at (0,0) ;
+	\coordinate (\TetraB) at ($(\TetraA) + ({-\PFTetraAlpha}:{\PFTetraPf})$) ;
+	\coordinate (\TetraC) at ({\PFTetraLg},0) ;
+	\coordinate (\TetraD) at ($(\TetraA) + ({\PFTetraBeta}:{\PFTetraHt})$) ;
+	\ifboolKV[paramstetra]{Aff}
+	{\draw (\TetraA) node[left] {\TetraA} ;
+		\draw (\TetraB) node[below] {\TetraB} ;
+		\draw (\TetraC) node[right] {\TetraC} ;
+		\draw (\TetraD) node[above] {\TetraD} ;}
+		{}%on affiche rien
+	\draw[\PFTetraThick] (\TetraA)--(\TetraD)--(\TetraC)--(\TetraB)--cycle
+						(\TetraD)--(\TetraB) ;
+	\ifboolKV[paramstetra]{Plein}
+		{}
+		{\draw[dashed,\PFTetraThick] (\TetraA)--(\TetraC) ;}
+}
+
+%============EnsembleList============== OK !!
+\defKV[kvensemble]{%
+	Sep=\def\PLenssep{#1},%
+	Option=\def\PLensopt{#1}
+}
+
+\setKVdefault[kvensemble]{%
+	Sep={;},%
+	Mathpunct=true,%
+	Option={}
+}
+
+\newcommand\EcritureEnsemble[2][]{%
+	\useKVdefault[kvensemble]%
+	\setKV[kvensemble]{#1}%
+	\ifboolKV[kvensemble]{Mathpunct}%
+		{\left\lbrace \PLensopt{} \mathpunct{} \StrSubstitute{#2}{/}{\mathpunct{}{\PLenssep}\mathpunct{}} \mathpunct{} \right\rbrace}%
+		{\left\lbrace \PLensopt{} \StrSubstitute{#2}{/}{{\PLenssep}} \right\rbrace}
+}
+
+%===============SimplFrac============== OK !!
+\DeclareDocumentCommand\ConversionFraction{ O{} m }{% argument optionnel [d ou t] puis argument mandataire {calcul ou fraction}
+	\def\calculargument{\xintPRaw{\xintIrr{\xinteval{#2}}}}%on calcule et on transforme en A/B
+	\IfSubStr{\calculargument}{/}%on teste si le symbole / apparaît
+	{%si oui := fraction
+		\StrBefore{\calculargument}{/}[\numerateur]%on extrait le numérateur
+		\StrBehind{\calculargument}{/}[\denominateur]%on extrait le dénominateur
+		\ifblank{#1}{\ensuremath{\frac{\num{\numerateur}}{\num{\denominateur}}}}{}%si l'argument optionnel est vide
+		\IfStrEq{#1}{d}{\ensuremath{\dfrac{\num{\numerateur}}{\num{\denominateur}}}}{}%si l'arg opt est d
+		\IfStrEq{#1}{t}{\ensuremath{\tfrac{\num{\numerateur}}{\num{\denominateur}}}}{}%si l'arg opt est t
+	}{%si non := entier
+		\num{\calculargument}%on affiche l'entier, avec le package siunitx
+	}
+}
+
+%================CabWeb================ OK !!
+\defKV[webrecurr]{%
+	Fct=\def\PLRecurfct{#1},%
+	Nom=\def\PLRecurnom{#1},%
+	No=\def\PLRecurno{#1},%
+	Nb=\def\PLRecurnb{#1},%
+	Uno=\def\PLRecuruno{#1},%
+	PosLabel=\def\PLRecurposlab{#1},%
+	DecalLabel=\def\PLRecuroffset{#1},%
+	TailleLabel=\def\PLRecurlabelsize{#1}
+}
+
+\setKVdefault[webrecurr]{
+	No=0,%
+	Nom=u,%
+	Nb=5,%
+	AffTermes=true,%
+	PosLabel=below,%
+	DecalLabel=6pt,%
+	TailleLabel=\small
+}
+
+%\newcommand\recurr[1][]{%
+\NewDocumentCommand\ToileRecurrence{ O{} O{thick,color=magenta} O{dotted} }{
+	%<clés> + <style cabweb> + <style supplémentaire pointillés>
+	\useKVdefault[webrecurr]%
+	\setKV[webrecurr]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\foreach \i [remember=\i as \x (initially \PLRecuruno)] in {1,...,\PLRecurnb}{%
+		\def\y{\fpeval{\PLRecurfct}}
+		%test de la position courbe / bissectrice ?
+		\ifnum \i=1
+			\newdimen \X
+			\newdimen \Y
+			\X = \x pt
+			\Y = \y pt
+			\ifdim \Y < \X
+				\draw[#2] (\x,\y)--(\y,\y) ;
+			\else
+				\draw[#2] (\x,\x)--(\x,\y)--(\y,\y) ;
+			\fi
+		\else
+			\draw[#2] (\x,\x)--(\x,\y)--(\y,\y) ;
+		\fi
+		\ifboolKV[webrecurr]{AffTermes}
+			{\def\indice{\fpeval{\i+\PLRecurno-1}}
+		 \draw[#2,#3] (\x,\y)--(\x,0) node[\PLRecurposlab=\PLRecuroffset,font=\PLRecurlabelsize]{$\PLRecurnom_\indice$};}
+			{}
+		\def\i{\fpeval{\y}}%
+	}
+}
+
+%================CercleTrigo=========== OK !!
+\defKV[cercletrigo]{%
+	Rayon=\def\PLcerclerayon{#1},%
+	Epaisseur=\def\PLcerclethick{#1},%
+	EpaisseurSol=\def\PLcerclesolthick{#1},%
+	Marge=\def\PLcerclemarge{#1},%
+	TailleValeurs=\def\PLcerclevaleurs{#1},%
+	TailleAngles=\def\PLcercleangles{#1},%
+	CouleurFond=\def\PLcerclefond{#1},%
+	Decal=\def\PLcercledecal{#1},%
+	cos=\def\PLcerclevalcos{#1},%
+	sin=\def\PLcerclevalsin{#1},%
+	CouleurSol=\def\PLcerclecoleq{#1}
+}
+
+\setKVdefault[cercletrigo]{
+	Rayon=3,%
+	Marge=0.25,%
+	Decal=10pt,%
+	Epaisseur=thick,%
+	EpaisseurSol=very thick,%
+	AffAngles=true,%
+	AffTraits=true,%
+	AffValeurs=true,%
+	MoinsPi=true,%
+	TailleValeurs=\scriptsize,%
+	TailleAngles=\footnotesize,%
+	CouleurFond=white,%
+	Equationcos=false,%
+	Equationsin=false,%
+	cos=45,%
+	sin=30,%
+	CouleurSol=blue
+}
+
+\newcommand\CercleTrigo[1][]{%
+	\useKVdefault[cercletrigo]
+	\setKV[cercletrigo]{#1}
+	\tikzset{PLval/.style={inner sep=1pt,font=\PLcerclevaleurs,fill=\PLcerclefond}}
+	\tikzset{PLagl/.style={inner sep=1pt,font=\PLcercleangles,fill=\PLcerclefond}}
+	%valeurs remarquables
+	\ifboolKV[cercletrigo]{AffAngles}
+		{%valeursdudessus
+		\draw ({\PLcerclerayon},0) node[above right=2pt,font=\PLcercleangles] {0} ;
+		\draw ($(30:{\PLcerclerayon})+(30:\PLcercledecal)$) node[PLagl] {$\tfrac{\pi}{6}$} ;
+		\draw ($(45:{\PLcerclerayon})+(45:\PLcercledecal)$) node[PLagl] {$\tfrac{\pi}{4}$} ;
+		\draw ($(60:{\PLcerclerayon})+(60:\PLcercledecal)$) node[PLagl] {$\tfrac{\pi}{3}$} ;
+		\draw (0,{\PLcerclerayon}) node[above right=2pt,PLagl] {$\tfrac{\pi}{2}$} ;
+		\draw ({-\PLcerclerayon},0) node[above left=2pt,PLagl] {$\pi$} ;
+		\draw ($(150:{\PLcerclerayon})+(150:\PLcercledecal)$) node[PLagl] {$\tfrac{5\pi}{6}$} ;
+		\draw ($(135:{\PLcerclerayon})+(135:\PLcercledecal)$) node[PLagl] {$\tfrac{3\pi}{4}$} ;
+		\draw ($(120:{\PLcerclerayon})+(120:\PLcercledecal)$) node[PLagl] {$\tfrac{2\pi}{3}$} ;
+		\draw ($(30:{\PLcerclerayon})+(30:\PLcercledecal)$) node[PLagl] {$\tfrac{\pi}{6}$} ;
+		%valeursdudessous
+		\draw ($(-30:{\PLcerclerayon})+(-30:\PLcercledecal)$) node[PLagl] {$\tfrac{\ifboolKV[cercletrigo]{MoinsPi}{-}{11}\pi}{6}$} ;
+		\draw ($(-45:{\PLcerclerayon})+(-45:\PLcercledecal)$) node[PLagl] {$\tfrac{\ifboolKV[cercletrigo]{MoinsPi}{-}{7}\pi}{4}$} ;
+		\draw ($(-60:{\PLcerclerayon})+(-60:\PLcercledecal)$) node[PLagl] {$\tfrac{\ifboolKV[cercletrigo]{MoinsPi}{-}{5}\pi}{3}$} ;
+		\draw (0,{-\PLcerclerayon}) node[below right=2pt,PLagl] {$\tfrac{\ifboolKV[cercletrigo]{MoinsPi}{-}{3}\pi}{2}$} ;
+		\draw ($(-120:{\PLcerclerayon})+(-120:\PLcercledecal)$) node[PLagl] {$\tfrac{\ifboolKV[cercletrigo]{MoinsPi}{-2}{4}\pi}{3}$} ;
+		\draw ($(-135:{\PLcerclerayon})+(-135:\PLcercledecal)$) node[PLagl] {$\tfrac{\ifboolKV[cercletrigo]{MoinsPi}{-3}{5}\pi}{4}$} ;
+		\draw ($(-150:{\PLcerclerayon})+(-150:\PLcercledecal)$) node[PLagl] {$\tfrac{\ifboolKV[cercletrigo]{MoinsPi}{-5}{7}\pi}{6}$} ;
+		\ifboolKV[cercletrigo]{MoinsPi}
+			{\draw ({-\PLcerclerayon},0) node[below left=2pt,PLagl] {$-\pi$} ;}
+			{\draw ({\PLcerclerayon},0) node[below right=2pt,PLagl] {$2\pi$} ;}
+		}%
+		{}
+	%tracés
+	\draw[\PLcerclethick,->] ({-\PLcerclerayon-\PLcerclemarge},0)--({\PLcerclerayon+\PLcerclemarge},0) ;
+	\draw[\PLcerclethick,->] (0,{-\PLcerclerayon-\PLcerclemarge})--(0,{\PLcerclerayon+\PLcerclemarge}) ;
+	\draw[\PLcerclethick] (0,0) circle[radius=\PLcerclerayon] ;
+	\draw (0,0) node[below left=2pt,PLval] {0} ;
+	%equations
+	\ifboolKV[cercletrigo]{Equationcos}
+		{%traitsdeconstructioncos
+		\draw[\PLcerclethick,dotted,gray] (-45:\PLcerclerayon) -- (135:\PLcerclerayon)
+										  (-135:\PLcerclerayon) -- (45:\PLcerclerayon)
+										  (30:\PLcerclerayon) -- (150:\PLcerclerayon)
+										  (-30:\PLcerclerayon) -- (-150:\PLcerclerayon)
+										  (-60:\PLcerclerayon)--(60:\PLcerclerayon)
+										  (-120:\PLcerclerayon)--(120:\PLcerclerayon) ;
+		\draw[\PLcerclesolthick,\PLcerclecoleq] ({\PLcerclevalcos}:\PLcerclerayon)--({-\PLcerclevalcos}:\PLcerclerayon) ;
+		\filldraw[\PLcerclecoleq] ({\PLcerclevalcos}:\PLcerclerayon) circle[radius=2pt] ({-\PLcerclevalcos}:\PLcerclerayon) circle[radius=2pt] ;%
+		}
+		{}
+	\ifboolKV[cercletrigo]{Equationsin}
+		{%traitsdeconstructioncos
+		\draw[\PLcerclethick,dotted,gray] (-45:\PLcerclerayon) -- (135:\PLcerclerayon)
+										  (-135:\PLcerclerayon) -- (45:\PLcerclerayon)
+										  (30:\PLcerclerayon) -- (150:\PLcerclerayon)
+										  (-30:\PLcerclerayon) -- (-150:\PLcerclerayon)
+										  (-60:\PLcerclerayon)--(60:\PLcerclerayon)
+										  (-120:\PLcerclerayon)--(120:\PLcerclerayon) ;
+		\draw[\PLcerclesolthick,\PLcerclecoleq] ({\PLcerclevalsin}:\PLcerclerayon)--({180-\PLcerclevalsin}:\PLcerclerayon) ;
+		\filldraw[\PLcerclecoleq] ({\PLcerclevalsin}:\PLcerclerayon) circle[radius=2pt] ({180-\PLcerclevalsin}:\PLcerclerayon) circle[radius=2pt] ;%
+		}
+		{}
+	%valeurs
+	\ifboolKV[cercletrigo]{AffValeurs}
+		{%
+		\draw ({0.5*\PLcerclerayon},0) node[below=2pt,PLval] {$\tfrac{1}{2}$} ;
+		\draw ({-0.5*\PLcerclerayon},0) node[below=2pt,PLval] {$-\tfrac{1}{2}$} ;
+		\draw (0,{0.5*\PLcerclerayon}) node[left=2pt,PLval] {$\tfrac{1}{2}$} ;
+		\draw (0,{-0.5*\PLcerclerayon}) node[left=2pt,PLval] {$-\tfrac{1}{2}$} ;
+		\draw ({0.866*\PLcerclerayon},0) node[below=2pt,PLval] {$\tfrac{\sqrt{3}}{2}$} ;
+		\draw ({-0.866*\PLcerclerayon},0) node[below=2pt,PLval] {$-\tfrac{\sqrt{3}}{2}$} ;
+		\draw (0,{0.866*\PLcerclerayon}) node[left=2pt,PLval] {$\tfrac{\sqrt{3}}{2}$} ;
+		\draw (0,{-0.866*\PLcerclerayon}) node[left=2pt,PLval] {$-\tfrac{\sqrt{3}}{2}$} ;
+		\draw ({0.707*\PLcerclerayon},0) node[above=2pt,PLval] {$\tfrac{\sqrt{2}}{2}$} ;
+		\draw ({-0.707*\PLcerclerayon},0) node[above=2pt,PLval] {$-\tfrac{\sqrt{2}}{2}$} ;
+		\draw (0,{0.707*\PLcerclerayon}) node[right=2pt,PLval] {$\tfrac{\sqrt{2}}{2}$} ;
+		\draw (0,{-0.707*\PLcerclerayon}) node[right=2pt,PLval] {$-\tfrac{\sqrt{2}}{2}$} ;
+		%\draw[\PLcerclethick] (0,0) circle[radius=\PLcerclerayon] ; %on retrace par dessus ?
+		}%
+		{}
+	%valeurs remarquables en dernier
+	\ifboolKV[cercletrigo]{AffTraits}
+		{%
+		\draw[\PLcerclethick,dotted,gray] (-120:\PLcerclerayon) rectangle (60:\PLcerclerayon) ;
+		\draw[\PLcerclethick,dotted,gray] (-150:\PLcerclerayon) rectangle (30:\PLcerclerayon) ;
+		\draw[\PLcerclethick,dotted,gray] (-135:\PLcerclerayon) rectangle (45:\PLcerclerayon) ;
+		\draw[\PLcerclethick,dotted,gray] (-120:\PLcerclerayon)--(60:\PLcerclerayon) ;
+		\draw[\PLcerclethick,dotted,gray] (-150:\PLcerclerayon)--(30:\PLcerclerayon) ;
+		\draw[\PLcerclethick,dotted,gray] (-135:\PLcerclerayon)--(45:\PLcerclerayon) ;
+		\draw[\PLcerclethick,dotted,gray] (120:\PLcerclerayon)--(-60:\PLcerclerayon) ;
+		\draw[\PLcerclethick,dotted,gray] (150:\PLcerclerayon)--(-30:\PLcerclerayon) ;
+		\draw[\PLcerclethick,dotted,gray] (135:\PLcerclerayon)--(-45:\PLcerclerayon) ;
+		}%
+		{}
+}
+
+%==================AideTds============= OK !!
+\defKV[aidetds]{%
+	Code=\def\tdsparam{#1},%
+	Couleur=\def\tdscouleur{#1},%
+	Racines=\def\tdsracine{#1},%
+	Largeur=\def\tdslarg{#1},%
+	Hauteur=\def\tdshaut{#1}
+}
+
+\setKVdefault[aidetds]{%
+	Code=da+,
+	Couleur=red,%
+	Largeur=2,%
+	Hauteur=1,%
+	Cadre=true,%
+	Racines=2
+}
+
+\NewDocumentCommand\schematdsaff{ s m m m m }{%pour les droites (interne)
+	% * = étoilée -> a négatif
+	% #2 = couleur
+	% #3 = largeur
+	% #4 = hauteur
+	% #5 = racine
+	\IfBooleanTF{#1}%si étoile := droite qui descend
+		{%
+			\def\possgnavant{above right}\def\possgnapres{below left}\def\sgnavant{\strut+}\def\sgnapres{\strut-}%
+			\draw[thick,#2] ({-0.5*#3},{0.5*#4})--({0.5*#3},{-0.5*#4});
+		}
+		{%
+			\def\possgnavant{below right}\def\possgnapres{above left}\def\sgnavant{\strut-}\def\sgnapres{\strut+}%
+			\draw[thick,#2] ({-0.5*#3},{-0.5*#4})--({0.5*#3},{0.5*#4});
+		}
+	\draw[#2] ({-0.5*#3},0) node[inner sep=0pt,\possgnavant=1pt,font=\scriptsize] {\textcircled{$\sgnavant$}};
+	\draw[#2] ({0.5*#3},0) node[inner sep=0pt,\possgnapres=1pt,font=\scriptsize] {\textcircled{$\sgnapres$}};
+	\draw[#2] (0,0) node[inner sep=0pt,above=3pt,font=\scriptsize] {$\strut#5$} ;
+	\filldraw[#2] (0,0) circle[radius=2pt] ;
+}
+
+\NewDocumentCommand\schematdsparab{ m m m m m o }{%pour les paraboles (interne)
+	% #1 = signe de a (1 ou -1) ?
+	% #2 = couleur
+	% #3 = largeur
+	% #4 = hauteur
+	% #5 = nb racine
+	% #6 = liste racines (option)
+	\xintifboolexpr{ #1 > 0 'and' #5 == 2 } %a>0 et delta>0
+	{%
+		\StrCut{#6}{/}{\xun}{\xdeux}
+		\draw[thick,#2] ({-0.375*#3},{0.5*#4}) parabola bend (0,{-0.5*#4}) ({0.375*#3},{0.5*#4}) ;
+		\draw[#2] ({-0.5*#3},0) node[above right=1pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut+$}};
+		\draw[#2] ({0.5*#3},0) node[above left=1pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut+$}};
+		\draw[#2] (0,0) node[below=1pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut-$}};
+		\filldraw[#2] ({0.2625*#3},0) circle[radius=2pt] node[below right=1pt,inner sep=0pt,font=\scriptsize] {$\strut\xdeux$};
+		\filldraw[#2] ({-0.2625*#3},0) circle[radius=2pt] node[below left=1pt,inner sep=0pt,font=\scriptsize] {$\strut\xun$};%
+	}
+	{}
+	\xintifboolexpr{ #1 < 0 'and' #5 == 2 } %a<0 et delta>0
+	{%
+		\StrCut{#6}{/}{\xun}{\xdeux}
+		\draw[thick,#2] ({-0.375*#3},{-0.5*#4}) parabola bend (0,{0.5*#4}) ({0.375*#3},{-0.5*#4}) ;
+		\draw[#2] ({-0.5*#3},0) node[below right=1pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut-$}};
+		\draw[#2] ({0.5*#3},0) node[below left=1pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut-$}};
+		\draw[#2] (0,0) node[above=1pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut+$}};
+		\filldraw[#2] ({0.2625*#3},0) circle[radius=2pt] node[above right=1pt,inner sep=0pt,font=\scriptsize] {$\strut\xdeux$};
+		\filldraw[#2] ({-0.2625*#3},0) circle[radius=2pt] node[above left=1pt,inner sep=0pt,font=\scriptsize] {$\strut\xun$};%
+	}
+	{}
+	\xintifboolexpr{ #1 > 0 'and' #5 == 1 } %a>0 et delta=0
+	{%
+		\draw[thick,#2] ({-0.375*#3},{0.5*#4}) parabola bend (0,0) ({0.375*#3},{0.5*#4}) ;
+		\filldraw[#2] (0,0) circle[radius=2pt] node[below=3pt,inner sep=1pt,font=\scriptsize] {$#6$};
+		\draw[#2] (0,0) node[above=3pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut+$}};
+	}
+	{}
+	\xintifboolexpr{ #1 < 0 'and' #5 == 1 } %a>0 et delta=0
+	{%
+		\draw[thick,#2] ({-0.375*#3},{-0.5*#4}) parabola bend (0,0) ({0.375*#3},{-0.5*#4}) ;
+		\filldraw[#2] (0,0) circle[radius=2pt] node[above=3pt,inner sep=0pt,font=\scriptsize] {$#6$};
+		\draw[#2] (0,0) node[below=3pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut-$}};
+	}
+	{}
+	\xintifboolexpr{ #1 > 0 'and' #5 == 0 } %a>0 et delta<0
+	{%
+		\draw[thick,#2] ({-0.375*#3},{0.5*#4}) parabola bend (0,{0.075*#4}) ({0.375*#3},{0.5*#4}) ;
+		\draw[#2] (0,{0.075*#4}) node[above=2pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut+$}};
+	}
+	{}
+	\xintifboolexpr{ #1 < 0 'and' #5 == 0 } %a>0 et delta<0
+	{%
+		\draw[thick,#2] ({-0.375*#3},{-0.5*#4}) parabola bend (0,{-0.075*#4}) ({0.375*#3},{-0.5*#4}) ;
+		\draw[#2] (0,{-0.075*#4}) node[below=2pt,inner sep=0pt,font=\scriptsize] {\textcircled{$\strut-$}};
+	}
+	{}
+}
+
+\newcommand\MiniSchemaSignes[1][]{%
+	\useKVdefault[aidetds]
+	\setKV[aidetds]{#1}
+	%simplification des codes
+	\IfEq{\tdsparam}{da+}{\def\xcode{1}}{}
+	\IfEq{\tdsparam}{da-}{\def\xcode{-1}}{}
+	\IfEq{\tdsparam}{pa+d+}{\def\xcode{12}}{}
+	\IfEq{\tdsparam}{pa-d+}{\def\xcode{-12}}{}
+	\IfEq{\tdsparam}{pa+d0}{\def\xcode{11}}{}
+	\IfEq{\tdsparam}{pa-d0}{\def\xcode{-11}}{}
+	\IfEq{\tdsparam}{pa+d-}{\def\xcode{10}}{}
+	\IfEq{\tdsparam}{pa-d-}{\def\xcode{-10}}{}
+	%cadre si booléen true
+	\ifboolKV[aidetds]{Cadre}
+		{\draw[lightgray] ({-0.5*\tdslarg},{-0.5*\tdshaut}) rectangle ({0.55*\tdslarg},{0.5*\tdshaut}) ;}
+		{}
+	%restriction de la petite fenêtre
+	\clip ({-0.5*\tdslarg},{-0.5*\tdshaut}) rectangle ({0.55*\tdslarg},{0.5*\tdshaut}) ;
+	%axe (Ox)
+	\draw[thick,->] ({-0.5*\tdslarg},0)--({0.55*\tdslarg},0);
+	%1er degré a+ code = 1
+	\ifnum\xcode=1
+		\schematdsaff{\tdscouleur}{\tdslarg}{\tdshaut}{\tdsracine}
+	\fi
+	%1er degré a- code = -1
+	\ifnum\xcode=-1
+		\schematdsaff*{\tdscouleur}{\tdslarg}{\tdshaut}{\tdsracine}
+	\fi
+	%2d degré a+delta+ code = 12
+	\ifnum\xcode=12
+		\schematdsparab{1}{\tdscouleur}{\tdslarg}{\tdshaut}{2}[\tdsracine]
+	\fi
+	%2d degré a-delta+ code = -12
+	\ifnum\xcode=-12
+		\schematdsparab{-1}{\tdscouleur}{\tdslarg}{\tdshaut}{2}[\tdsracine]
+	\fi
+	%2d degré a+delta0 code = 11
+	\ifnum\xcode=11
+		\schematdsparab{1}{\tdscouleur}{\tdslarg}{\tdshaut}{1}[\tdsracine]
+	\fi
+	%2d degré a-delta0 code = -11
+	\ifnum\xcode=-11
+		\schematdsparab{-1}{\tdscouleur}{\tdslarg}{\tdshaut}{1}[\tdsracine]
+	\fi
+	%2d degré a+delta- code = 10
+	\ifnum\xcode=10
+		\schematdsparab{1}{\tdscouleur}{\tdslarg}{\tdshaut}{0}
+	\fi
+	%2d degré a-delta- code = -10
+	\ifnum\xcode=-10
+		\schematdsparab{-1}{\tdscouleur}{\tdslarg}{\tdshaut}{0}
+	\fi
+}
+
+%pour l'interaction avec tkz-tab
+\defKV[aidetdstkz]{%
+	Echelle=\def\tdstkzscale{#1},%
+	Decal=\def\tdstkzoffset{#1}
+}
+
+\setKVdefault[aidetdstkz]{%
+	Echelle=1,%
+	Decal=1.25
+}
+
+\NewDocumentCommand\MiniSchemaSignesTkzTab{ o m O{0.85} O{1.5} }{%
+	%#1 = codeaidetikz
+	%#2 = numligne
+	%#3 = échelle
+	%#4 = décalage
+	%\shorthandoff{:}\shorthandoff{!} %bizzzzzzzzare
+	%\NoAutoSpacing
+	\coordinate (ZZZ) at ($(T2#2)!.5!(T2\the\numexpr#2+1\relax)$) ;
+	%\shorthandon{:}\shorthandon{!}
+	\path (ZZZ.east) + (#4,0) pic[right,scale=#3,every node/.style={scale=#3}] {code={\MiniSchemaSignes[#1]}} ;
+}
+
+%=============RegressionLinéaire======= OK !!
+%calcul des paramètres
+\defKV[coeffreglin]{%
+	NomCoeffa=\def\RegLinCoeffa{#1},%
+	NomCoeffb=\def\RegLinCoeffb{#1},%
+	NomCoeffr=\def\RegLinCoeffr{#1},%
+	NomCoeffrd=\def\RegLinCoeffrd{#1},%
+	NomXmin=\def\RegLinCoeffXmin{#1},%
+	NomXmax=\def\RegLinCoeffXmax{#1}
+}
+
+\setKVdefault[coeffreglin]{%
+	NomCoeffa=COEFFa,%
+	NomCoeffb=COEFFb,%
+	NomCoeffr=COEFFr,%
+	NomCoeffrd=COEFFrd,%
+	NomXmin=LXmin,%
+	NomXmax=LXmax
+}
+
+\newcommand\CalculsRegLin[3][]{%
+	\useKVdefault[coeffreglin]%
+	\setKV[coeffreglin]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%xmin et xmax
+	\expandafter\def\csname\RegLinCoeffXmin\endcsname{\fpeval{min(#2)}}
+	\expandafter\def\csname\RegLinCoeffXmax\endcsname{\fpeval{max(#2)}}
+	%listes des données
+	\def\xliste{#2}
+	\def\yliste{#3}
+	\readlist*\LX{\xliste}
+	\readlist*\LY{\yliste}
+	%taille des listes
+	\def\LNB{\inteval{\LXlen}}
+	%somme des LX et des LY OK
+	\xdef\LXSomme{0}
+	\xdef\LYSomme{0}
+	\foreach \i in {1,2,...,\LNB}{
+		\xdef\LXSomme{\fpeval{\LXSomme+\LX[\i]}}
+	}
+	\foreach \i in {1,2,...,\LNB}{
+		\xdef\LYSomme{\fpeval{\LYSomme+\LY[\i]}}
+	}
+	%moyenne des LX et des LY OK
+	\xdef\LXmoy{\fpeval{\LXSomme/\LNB}}
+	\xdef\LYmoy{\fpeval{\LYSomme/\LNB}}
+	%variance des LX et des LY OK
+	\xdef\LXvar{0}
+	\foreach \i in {1,2,...,\LNB}{
+		\xdef\LXvar{\fpeval{\LXvar+(\LX[\i]-\LXmoy)*(\LX[\i]-\LXmoy)}}
+	}
+	\xdef\LXvar{\fpeval{\LXvar/\LNB}}
+	\xdef\LYvar{0}
+	\foreach \i in {1,2,...,\LNB}{
+		\xdef\LYvar{\fpeval{\LYvar+(\LY[\i]-\LYmoy)*(\LY[\i]-\LYmoy)}}
+	}
+	\xdef\LYvar{\fpeval{\LYvar/\LNB}}
+	%covariance des XY OK
+	\xdef\LXYvar{0}
+	\foreach \i in {1,2,...,\LNB}{
+		\xdef\LXYvar{\fpeval{\LXYvar+(\LX[\i]-\LXmoy)*(\LY[\i]-\LYmoy)}}
+	}
+	\xdef\LXYvar{\fpeval{\LXYvar/\LNB}}
+	%COEFFS OK
+	\expandafter\def\csname\RegLinCoeffa\endcsname{\fpeval{\LXYvar/\LXvar}}
+	\expandafter\def\csname\RegLinCoeffb\endcsname{\fpeval{\LYmoy-\csname\RegLinCoeffa\endcsname*\LXmoy}}
+	\expandafter\def\csname\RegLinCoeffr\endcsname{\fpeval{\LXYvar/sqrt(\LXvar*\LYvar)}}
+	\expandafter\def\csname\RegLinCoeffrd\endcsname{\fpeval{\csname\RegLinCoeffr\endcsname*\csname\RegLinCoeffr\endcsname}}
+}
+
+%pour un nuage en TiKz
+\defKV[nuagereglin]{%
+	Couleur=\def\RegLinNuageCouleur{#1},%
+	Taille=\def\RegLinNuageTaille{#1},
+	Ox=\def\RegLinNuageOx{#1},%
+	Oy=\def\RegLinNuageOy{#1},%
+}
+
+\setKVdefault[nuagereglin]{%
+	Couleur=teal,%
+	Taille=2pt,%
+	Ox=0,%
+	Oy=0
+}
+
+\newcommand\PointsRegLin[3][]{%
+	\useKVdefault[nuagereglin]
+	\setKV[nuagereglin]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\def\xliste{#2}
+	\def\yliste{#3}
+	\readlist*\LX{\xliste}
+	\readlist*\LY{\yliste}
+	%taille des listes
+	\def\LNB{\inteval{\LXlen}}
+	\foreach \i in {1,2,...,\LNB} {\filldraw[\RegLinNuageCouleur] ({\LX[\i]-\RegLinNuageOx},{\LY[\i]-\RegLinNuageOy}) circle[radius=\RegLinNuageTaille] ;}
+}
+
+%=============ConversionsBases========= OK !!
+%dec->bin avec blocs de 4 chiffres
+\setKVdefault[CONVDECBIN]{%
+	AffBase=true
+}
+\NewDocumentCommand\ConversionDecBin{ s O{} m }{%
+	\useKVdefault[CONVDECBIN]
+	\setKV[CONVDECBIN]{#2}% on paramètres les nouvelles clés et on les simplifie
+	\def\resbrut{\xintDecToBin{#3}}
+	\StrLen{\resbrut}[\nbchiffres]
+	\def\nbgrp{\fpeval{4*ceil(\nbchiffres/4,0)}}
+	\IfBooleanTF{#1}
+		{\num{#3}\ifboolKV[CONVDECBIN]{AffBase}{_{10}}{}=\num[digit-group-size=4]{\resbrut}\ifboolKV[CONVDECBIN]{AffBase}{_{2}}{}}
+		{\num{#3}\ifboolKV[CONVDECBIN]{AffBase}{_{10}}{}=\num[digit-group-size=4,minimum-integer-digits=\nbgrp]{\resbrut}\ifboolKV[CONVDECBIN]{AffBase}{_{2}}{}}
+}
+
+%bin->hexa avec blocs de 4 chiffres
+%\defKV[CONVBINHEX]{%
+%	trait=\def\epcrochet{#1}
+%}
+\setKVdefault[CONVBINHEX]{%
+	%trait=0.5pt,%
+	AffBase=true,%
+	Details=true
+}
+%bourrage de 0 avant
+\ExplSyntaxOn
+\NewExpandableDocumentCommand{\PLstrzeros}{m}
+{
+	\int_compare:nT { #1 > 0 }
+	{
+		0 \prg_replicate:nn { #1 - 1 } { 0 }
+	}
+}
+\ExplSyntaxOff
+
+
+%la conversion complète
+\newcommand\ConversionBinHex[2][]{%
+	\useKVdefault[CONVBINHEX]
+	\setKV[CONVBINHEX]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\def\chbrut{#2}
+	\StrLen{\chbrut}[\nbchiffres] %nb de chiffres du binaire
+	\xdef\nbgrp{\fpeval{4*ceil(\nbchiffres/4,0)}} %nb de chiffres avec blocs de 4
+	\xdef\nbblocs{\fpeval{\nbgrp/4}} %nb de blocs
+	%on rajoute des zeros si besoin := OK
+	\xdef\resinter{\chbrut}
+	\num[digit-group-size=4]{\chbrut}\ifboolKV[CONVBINHEX]{AffBase}{_{2}}{}=
+	\ifboolKV[CONVBINHEX]{Details}{%
+	\ifnum\nbchiffres<\nbgrp
+		\xdef\nbz{\inteval{\nbgrp-\nbchiffres}}
+		\xdef\resinter{\PLstrzeros{\nbz}\chbrut}
+		\num[digit-group-size=4,minimum-integer-digits=\nbgrp]{\resinter}=
+	\fi
+	%découpage par blocs et conversion en hexa := OK
+	\newcount\cpt
+	\cpt0
+	\loop\ifnum \cpt<\nbblocs
+		\def\iinit{\fpeval{4*\cpt+1}}%
+		\def\ifinal{\fpeval{4*(\cpt+1)}}%
+		\StrMid{\resinter}{\iinit}{\ifinal}[\blocinter]%
+		{\underbracket{\blocinter}_{\xintBinToHex{\blocinter}}\,}
+		\advance\cpt by 1
+	\repeat
+	\!=
+	}%
+	{}
+	\xintBinToHex{\chbrut}\ifboolKV[CONVBINHEX]{AffBase}{_{16}}{}
+}
+
+%hexa/bin->dec avec écriture polynomiale
+\defKV[CONVTODEC]{%
+	BaseDep=\def\basedepart{#1}
+}
+\setKVdefault[CONVTODEC]{%
+	BaseDep=2,%
+	AffBase=true,%
+	Details=true,%
+	Zeros=true
+}
+
+\ExplSyntaxOn
+\newcommand\convertbasetobasedix[2]{%
+	\int_from_base:nn {#1}{#2}
+}
+\ExplSyntaxOff
+
+\newcommand\ConversionVersDec[2][]{%
+	\useKVdefault[CONVTODEC]
+	\setKV[CONVTODEC]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\def\nbdepart{#2}
+	\StrLen{\nbdepart}[\nbchiffres]
+	\StrChar{\nbdepart}{1}[\chiffre]
+	%si on est en base 16
+	\xintifboolexpr{\basedepart == 16}%
+	{%
+		\nbdepart\ifboolKV[CONVTODEC]{AffBase}{_{\basedepart}}{} =
+		\ifboolKV[CONVTODEC]{Details}{%
+			\xintHexToDec{\chiffre}\times\basedepart^{\inteval{\nbchiffres-1}}%
+			\newcount\cpt
+			\cpt2
+			\loop\ifnum \cpt<\inteval{\nbchiffres+1}
+				\def\puiss{\inteval{\nbchiffres-\cpt}}
+				\StrChar{\nbdepart}{\cpt}[\chiffre]
+				\ifboolKV[CONVTODEC]{Zeros}%
+					{%
+						+\xintHexToDec{\chiffre}\times\basedepart^{\puiss}%
+					}
+					{
+						\ifnum\xintHexToDec{\chiffre} > 0
+							+\xintHexToDec{\chiffre}\times\basedepart^{\puiss}%
+						\fi
+					}
+				\advance\cpt by 1
+			\repeat
+			=
+			}
+			{}
+		\num{\xintHexToDec{\nbdepart}}\ifboolKV[CONVTODEC]{AffBase}{_{10}}{}
+	}%
+	{}
+	\xintifboolexpr{\basedepart == 2}%
+	{%
+		\num[digit-group-size=4]{\nbdepart}\ifboolKV[CONVTODEC]{AffBase}{_{\basedepart}}{} =
+		\ifboolKV[CONVTODEC]{Details}{%
+			\chiffre\times\basedepart^{\inteval{\nbchiffres-1}}%
+			\newcount\cpt
+			\cpt2
+			\loop\ifnum \cpt<\inteval{\nbchiffres+1}
+				\def\puiss{\inteval{\nbchiffres-\cpt}}
+				\StrChar{\nbdepart}{\cpt}[\chiffre]
+				\ifboolKV[CONVTODEC]{Zeros}%
+				{%
+					+\chiffre\times\basedepart^{\puiss}%
+				}
+				{
+					\ifnum\chiffre > 0
+						+\chiffre\times\basedepart^{\puiss}%
+					\fi
+				}
+			\advance\cpt by 1
+			\repeat
+			=
+			}
+			{}
+		\num{\xintBinToDec{\nbdepart}}\ifboolKV[CONVTODEC]{AffBase}{_{10}}{}
+	}%
+	{}%
+}
+
+\newcommand\ConversionBaseDix[3][]{%1=options,%2=nb,%3=basedep ??
+	\useKVdefault[CONVTODEC]
+	\setKV[CONVTODEC]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\def\NBdepart{#2}
+	\def\basedepart{#3}
+	\StrLen{\NBdepart}[\nbchiffres]
+	\StrChar{\NBdepart}{1}[\chiffre]
+	\NBdepart\ifboolKV[CONVTODEC]{AffBase}{_{\basedepart}}{} =
+	\ifboolKV[CONVTODEC]{Details}{%
+		\xintHexToDec{\chiffre}\times\basedepart^{\inteval{\nbchiffres-1}}%
+		\newcount\cpt
+		\cpt2
+		\loop\ifnum \cpt<\inteval{\nbchiffres+1}
+			\def\puiss{\inteval{\nbchiffres-\cpt}}
+			\StrChar{\NBdepart}{\cpt}[\chiffre]
+			\ifboolKV[CONVTODEC]{Zeros}%
+				{%
+					+\xintHexToDec{\chiffre}\times\basedepart^{\puiss}%
+				}
+				{
+					\ifnum\xintHexToDec{\chiffre} > 0
+						+\xintHexToDec{\chiffre}\times\basedepart^{\puiss}%
+					\fi
+				}
+			\advance\cpt by 1
+		\repeat
+		=
+		}%
+		{}%
+	\num{\convertbasetobasedix{#2}{#3}}\ifboolKV[CONVTODEC]{AffBase}{_{10}}{}%
+}
+
+%==============MainLevée TikZ========== OK !!
+\tikzset{%
+	mainlevee/.style args={#1et#2}{decorate,decoration={random steps,segment length=#1,amplitude=#2}},
+	mainlevee/.default={5mm et 0.6pt}
+}
+
+%==============PixelArt TikZ=========== OK !!
+\defKV[pixelarttkz]{%
+	Codes=\def\PATlettres{#1},%
+	Couleurs=\def\PATcouleurs{#1},%
+	Symboles=\def\PATchiffres{#1},%
+	Style=\def\PATtaille{#1}
+}
+
+\setKVdefault[pixelarttkz]{%
+	Style=\scriptsize,%
+	Correction=false,%
+	Symb=false,%
+	BordCases=true
+}
+
+\newcommand\PixelArtTikz[2][]{%
+	\useKVdefault[pixelarttkz]
+	\setKV[pixelarttkz]{#1}
+	%affichage du corrigé
+	\ifboolKV[pixelarttkz]{Correction}
+	{%
+		\csvloop{file=#2,no head,command={%
+				\foreach \l [count=\n] in \csvline {%
+					\StrDel{\l}{ }[\l]
+					\setsepchar{,}
+					\readlist*\LCPA\PATcouleurs
+					\StrPosition{\PATlettres}{\l}[\pixcnt]%
+					\xintifboolexpr{\pixcnt>0}%
+					{%
+						\itemtomacro\LCPA[\pixcnt]\pixcol%
+						\ifboolKV[pixelarttkz]{BordCases}%
+							{\draw[fill=\pixcol] ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) ;}%
+							{\filldraw[\pixcol] ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) ;}%
+						%
+					}%
+					{}
+				}
+			}
+		}
+	}
+	{%
+		\ifboolKV[pixelarttkz]{Symb}
+		{%affichage du pixelart versions chiffres si besoin
+			\csvloop{file=#2,no head,command={%
+					\foreach \l [count=\n] in \csvline {%
+						\StrDel{\l}{ }[\l]
+						\setsepchar{,}
+						\readlist*\LCNA\PATchiffres
+						\StrPosition{\PATlettres}{\l}[\pixpos]%
+						\xintifboolexpr{\pixpos>0}%
+						{%
+							\itemtomacro\LCNA[\pixpos]\pixchf%
+							\draw ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) node[inner sep=0,midway,font=\PATtaille] {\pixchf} ;%
+						}
+						{}%
+					}
+				}
+			}
+		}
+		{%affichage du pixelart versions lettres ou chiffres simples (<=9)
+			\csvloop{file=#2,no head,command={%
+					\foreach \l [count=\n] in \csvline {%
+						\StrDel{\l}{ }[\l]
+						\IfSubStr{\PATlettres}{\l}%
+						{%
+							\draw ({\n-0.5},{-\thecsvrow+0.5}) rectangle ({\n+0.5},{-\thecsvrow-0.5}) node[inner sep=0,midway,font=\PATtaille] {\l};}
+						{}
+					}
+				}
+			}
+		}
+	}
+}
+
+%=========STATS2VAR=========
+%variables directement dans tikzpicture
+\tikzset{%
+	Ox/.store in=\axexOx,Ox/.default=0,Ox=0,%essai
+	Oy/.store in=\axeyOy,Oy/.default=0,Oy=0,%essai
+	xmin/.store in=\xmin,xmin/.default=-5,xmin=-5,
+	xmax/.store in=\xmax,xmax/.default=5,xmax=5,
+	ymin/.store in=\ymin,ymin/.default=-5,ymin=-5,
+	ymax/.store in=\ymax,ymax/.default=5,ymax=5,
+	xgrille/.store in=\xgrille,xgrille/.default=1,xgrille=1,
+	xgrilles/.store in=\xgrilles,xgrilles/.default=0.5,xgrilles=0.5,
+	ygrille/.store in=\ygrille,ygrille/.default=1,ygrille=1,
+	ygrilles/.store in=\ygrilles,ygrilles/.default=0.5,ygrilles=0.5,
+	xunit/.store in=\xunit,xunit/.default=1,xunit=1,
+	yunit/.store in=\yunit,yunit/.default=1,yunit=1
+}
+
+%style point croix
+\tikzset{pics/PLdotcross/.style args={#1/#2}{
+		code={
+			\draw[line width={0.5*#1},rotate=#2] (-#1,0) -- (#1,0);
+			\draw[line width={0.5*#1},rotate=#2] (0,-#1) -- (0, #1);
+		}
+	},
+	pics/PLdotcross/.default={4pt/0}
+}
+
+%axeOx
+\defKV[PLaxextkz]{%
+	Epaisseur=\def\axexwidth{#1},%
+	Police=\def\axexfont{#1},%
+	HautGrad=\def\axextickwidth{#1},%
+	PosGrad=\def\axexposlabel{#1}
+}
+
+\setKVdefault[PLaxextkz]{%
+	Epaisseur=1.25pt,%
+	Police=\normalsize\normalfont,%
+	PosGrad=below,%
+	HautGrad=4pt,%
+	AffGrad=true,%
+	AffOrigine=true,%
+	Annee=false
+}
+
+\DeclareDocumentCommand\AxexTikz{ O{} m }{%
+	\useKVdefault[PLaxextkz]
+	\setKV[PLaxextkz]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%formatage des années
+	\IfSubStr{\axextickwidth}{/}
+	{\StrCut{\axextickwidth}{/}{\axextickwidthA}{\axextickwidthB}}
+	{\def\axextickwidthA{\axextickwidth}\def\axextickwidthB{\axextickwidth}}
+	\foreach \x in {#2}{%
+		\draw[line width=\axexwidth] ({\x-\axexOx},{\axextickwidthA}) -- ({\x-\axexOx},{-\axextickwidthB})%
+		\ifboolKV[PLaxextkz]{AffGrad}%on affiche les graduations
+		{%
+			\ifboolKV[PLaxextkz]{AffOrigine}%si on demande d'afficher l'origine
+			{node[\axexposlabel,font=\axexfont] 
+				{\ifboolKV[PLaxextkz]{Annee}%
+					{\num[group-digits=none]{\x}}%
+					{\num[text-family-to-math=true,text-series-to-math=true]{\x}}%
+				}
+			}
+			{\xintifboolexpr{\x==\axexOx}{}{node[\axexposlabel,font=\axexfont] {\ifboolKV[PLaxextkz]{Annee}%
+						{\num[group-digits=none]{\x}}%
+						{\num[text-family-to-math=true,text-series-to-math=true]{\x}}%
+					}
+				}
+			}
+		}
+		{}
+		;}
+}
+
+%axeOy
+\defKV[PLaxeytkz]{%
+	Epaisseur=\def\axeywidth{#1},%
+	Police=\def\axeyfont{#1},%
+	HautGrad=\def\axeytickwidth{#1},%
+	PosGrad=\def\axeyposlabel{#1}
+}
+
+\setKVdefault[PLaxeytkz]{%
+	Epaisseur=1.25pt,%
+	Police=\normalsize\normalfont,%
+	PosGrad=left,%
+	HautGrad=4pt,%
+	AffGrad=true,%
+	AffOrigine=true,%
+	Annee=false
+}
+
+\DeclareDocumentCommand\AxeyTikz{ O{} m }{%
+	\useKVdefault[PLaxeytkz]
+	\setKV[PLaxeytkz]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\IfSubStr{\axeytickwidth}{/}
+	{\StrCut{\axeytickwidth}{/}{\axeytickwidthA}{\axeytickwidthB}}
+	{\def\axeytickwidthA{\axeytickwidth}\def\axeytickwidthB{\axeytickwidth}}
+	\foreach \y in {#2}{%
+		\draw[line width=\axeywidth] ({\axeytickwidthA},{\y-\axeyOy}) -- ({-\axeytickwidthB},{\y-\axeyOy})%
+		\ifboolKV[PLaxeytkz]{AffGrad}%on affiche les graduations
+		{%
+			\ifboolKV[PLaxeytkz]{AffOrigine}%si on demande d'afficher l'origine
+			{node[\axeyposlabel,font=\axeyfont] 
+				{\ifboolKV[PLaxeytkz]{Annee}%
+					{\num[group-digits=none]{\y}}%
+					{\num[text-family-to-math=true,text-series-to-math=true]{\y}}%
+				}
+			}
+			{\xintifboolexpr{\y==\axeyOy}{}{node[\axeyposlabel,font=\axeyfont] {\ifboolKV[PLaxeytkz]{Annee}%
+						{\num[group-digits=none]{\y}}%
+						{\num[text-family-to-math=true,text-series-to-math=true]{\y}}%
+					}
+				}
+			}
+		}
+		{}
+		;}
+}
+
+%axes
+\defKV[PLaxestkz]{%
+	Epaisseur=\def\axeswidth{#1},%
+	Police=\def\axesfont{#1},%
+	Labelx=\def\axeslabelx{#1},%
+	Labely=\def\axeslabely{#1},%
+	PosLabelx=\def\axesposlabelx{#1},%
+	PosLabely=\def\axesposlabely{#1},%
+	EchelleFleche=\def\axesechellefleche{#1},%
+	TypeFleche=\def\axestypefleche{#1},%
+	AffLabel=\def\axesafflabel{#1}
+}
+
+\setKVdefault[PLaxestkz]{%
+	Epaisseur=1.25pt,%
+	Police=\normalsize\normalfont,%
+	Labelx=$x$,%
+	Labely=$y$,%
+	AffLabel=z,%
+	PosLabelx=right,%
+	PosLabely=above,%
+	EchelleFleche=1,%
+	TypeFleche=>
+}
+
+\DeclareDocumentCommand\AxesTikz{ O{} }{%
+	\useKVdefault[PLaxestkz]
+	\setKV[PLaxestkz]{#1}%
+	%on affiche les deux axes
+	\draw[line width=\axeswidth,-{\axestypefleche[scale=\axesechellefleche]}] ({\xmin-\axexOx},0) -- ({\xmax-\axexOx},0) ;
+	\draw[line width=\axeswidth,-{\axestypefleche[scale=\axesechellefleche]}] (0,{\ymin-\axeyOy}) -- (0,{\ymax-\axeyOy}) ;
+	%les labels éventuels
+	\IfSubStr{\axesafflabel}{x}%
+		{\draw ({\xmax-\axexOx},0) node[\axesposlabelx,font=\axesfont] {\axeslabelx} ;}
+		{}
+	\IfSubStr{\axesafflabel}{y}%
+		{\draw (0,{\ymax-\axeyOy}) node[\axesposlabely,font=\axesfont] {\axeslabely} ;}
+		{}
+}
+
+%fenêtre clippée
+\newcommand\FenetreTikz{%
+	\clip ({\xmin-\axexOx},{\ymin-\axeyOy}) rectangle ({\xmax-\axexOx},{\ymax-\axeyOy}) ;
+}
+
+%origine
+\defKV[PLaxesorig]{%
+	Police=\def\axesorfont{#1},%
+	Pos=\def\axesorpos{#1},%
+	Decal=\def\axesordecal{#1},%
+	Valeur=\def\axesorval{#1}
+}
+
+\setKVdefault[PLaxesorig]{%
+	Police=\normalsize\normalfont,%
+	Pos={below left},%
+	Decal=2pt,%
+	Valeur=0
+}
+
+\DeclareDocumentCommand\OrigineTikz{ O{} }{%
+	\useKVdefault[PLaxesorig]%
+	\setKV[PLaxesorig]{#1}%
+	\draw (0,0) node[\axesorpos=\axesordecal,font=\axesorfont] {\axesorval} ;
+}
+
+%grilles
+\setKVdefault[PLgrillestkz]{%
+	Affp=true,%
+	Affs=true
+}
+
+\DeclareDocumentCommand\GrilleTikz{ O{} O{thin,lightgray} O{ultra thin,lightgray} }{%
+	\useKVdefault[PLgrillestkz]
+	\setKV[PLgrillestkz]{#1}%
+	\ifboolKV[PLgrillestkz]{Affs}
+		{\draw[xstep=\xgrilles,ystep=\ygrilles,#3] ({\xmin-\axexOx},{\ymin-\axeyOy}) grid ({\xmax-\axexOx},{\ymax-\axeyOy});}
+		{}
+	\ifboolKV[PLgrillestkz]{Affp}
+		{\draw[xstep=\xgrille,ystep=\ygrille,#2] ({\xmin-\axexOx},{\ymin-\axeyOy}) grid ({\xmax-\axexOx},{\ymax-\axeyOy});}
+		{}
+}
+
+%point(s) avec changement origines
+\defKV[PLpts]{%
+	Taille=\def\ptstaille{#1},%
+	Couleur=\def\ptscouleur{#1},%
+	Style=\def\ptsstyle{#1}
+}
+
+\setKVdefault[PLpts]{%
+	Taille=2pt,%
+	Couleur=blue,%
+	Style=o
+}
+
+\newcommand\PLnuagepoints[2][]{%
+	\useKVdefault[PLpts]
+	\setKV[PLpts]{#1}%
+	\setsepchar{§}%
+	\readlist\listepointsaffiches{#2}
+	\foreachitem\point\in\listepointsaffiches{%
+		\StrBetween{\point}{(}{,}[\XPT]
+		\StrBetween{\point}{,}{)}[\YPT]
+		\IfStrEq{\ptsstyle}{o}%
+			{\filldraw[\ptscouleur] ({\XPT-\axexOx},{\YPT-\axeyOy}) circle[radius=\ptstaille] ;}
+			{}
+		\IfStrEq{\ptsstyle}{x}%
+			{\draw[\ptscouleur] ({\XPT-\axexOx},{\YPT-\axeyOy}) pic {PLdotcross=\ptstaille/45} ;}
+			{}
+		\IfStrEq{\ptsstyle}{+}%
+			{\draw[\ptscouleur] ({\XPT-\axexOx},{\YPT-\axeyOy}) pic {PLdotcross=\ptstaille/0} ;}
+			{}
+	}
+}
+
+\newcommand\NuagePointsTikz[3][]{%
+	\useKVdefault[PLpts]
+	\setKV[PLpts]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\def\xliste{#2}
+	\def\yliste{#3}
+	\readlist*\LX{\xliste}
+	\readlist*\LY{\yliste}
+	%taille des listes
+	\def\LNB{\inteval{\LXlen}}
+	\foreach \i in {1,2,...,\LNB} {
+		\IfStrEq{\ptsstyle}{o}%
+			{
+				\IfSubStr{\ptscouleur}{/}
+				{\StrCut{\ptscouleur}{/}{\ptscouleurA}{\ptscouleurB}\draw[thick,\ptscouleurA,fill=\ptscouleurB] ({\LX[\i]-\axexOx},{\LY[\i]-\axeyOy}) circle[radius=\ptstaille] ;}
+				{\draw[\ptscouleur,fill=\ptscouleur] ({\LX[\i]-\axexOx},{\LY[\i]-\axeyOy}) circle[radius=\ptstaille] ;}
+			}
+			{}
+		\IfStrEq{\ptsstyle}{x}%
+			{\draw[\ptscouleur] ({\LX[\i]-\axexOx},{\LY[\i]-\axeyOy}) pic {PLdotcross=\ptstaille/45} ;}
+			{}
+		\IfStrEq{\ptsstyle}{+}%
+			{\draw[\ptscouleur] ({\LX[\i]-\axexOx},{\LY[\i]-\axeyOy}) pic {PLdotcross=\ptstaille/0} ;}
+			{}
+	}
+}
+
+\defKV[PLptmoy]{%
+	Police=\def\ptmoyfont{#1},%
+	Taille=\def\ptmoytaille{#1},%
+	Couleur=\def\ptmoycouleur{#1},%
+	Style=\def\ptmoystyle{#1},%
+	xg=\def\ptmoyx{#1},%
+	yg=\def\ptmoyy{#1},%
+	Nom=\def\ptmoynom{#1},%
+	Pos=\def\ptmoypos{#1},%
+	Decal=\def\ptmoydecal{#1}%
+}
+
+\setKVdefault[PLptmoy]{%
+	Police=\normalsize\normalfont,%
+	Taille=4pt,%
+	Couleur=red,%
+	Style=x,%
+	xg=\LXmoy,%
+	yg=\LYmoy,%
+	Nom=G,%
+	Pos=above,%
+	Decal=0pt,%
+	AffNom=true
+}
+
+\newcommand\PointMoyenTikz[1][]{%
+	\useKVdefault[PLptmoy]
+	\setKV[PLptmoy]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\IfStrEq{\ptmoystyle}{o}%
+		{
+			\IfSubStr{\ptmoycouleur}{/}
+			{\StrCut{\ptmoycouleur}{/}{\ptmoycouleurA}{\ptmoycouleurB}\draw[thick,\ptmoycouleurA,fill=\ptmoycouleurB] ({\ptmoyx-\axexOx},{\ptmoyy-\axeyOy}) circle[radius=\ptmoytaille] ;}
+			{\draw[\ptmoycouleur,fill=\ptmoycouleur] ({\ptmoyx-\axexOx},{\ptmoyy-\axeyOy}) circle[radius=\ptmoytaille] ;}
+		}
+		{}
+	\IfStrEq{\ptmoystyle}{x}%
+		{\draw[\ptmoycouleur] ({\ptmoyx-\axexOx},{\ptmoyy-\axeyOy}) pic {PLdotcross=\ptmoytaille/45} ;}
+		{}
+	\IfStrEq{\ptmoystyle}{+}%
+		{\draw[\ptmoycouleur] ({\ptmoyx-\axexOx},{\ptmoyy-\axeyOy}) pic {PLdotcross=\ptmoytaille/0} ;}
+		{}
+	\ifboolKV[PLptmoy]{AffNom}
+		{\draw ({\ptmoyx-\axexOx},{\ptmoyy-\axeyOy}) node[\ptmoypos={\ptmoytaille+\ptmoydecal},font=\ptmoyfont] {\ptmoynom} ;}
+		{}
+	
+}
+
+%courbe ?
+\newcommand\CourbeTikz[3][]{%
+	\setsepchar{:}%
+	\readlist\PLdomaine{#3}
+	\itemtomacro\PLdomaine[1]\PLDm
+	\itemtomacro\PLdomaine[2]\PLDM
+	\saveexpandmode\noexpandarg
+	\StrSubstitute{#2}{\x}{(\x+\axexOx)}[\fctdecx]
+	\restoreexpandmode % restore the previous mode
+	\draw[#1] plot[domain={\PLDm-\axexOx}:{\PLDM-\axexOx}] (\x,{\fctdecx-\axeyOy}) ;
+}
+
+\setKVdefault[PLsimplewindow]{%
+	Axes=true,%
+	Grille=true,%
+}
+
+\DeclareDocumentCommand\FenetreSimpleTikz{ O{} D<>{} m D<>{} m }{%
+	\useKVdefault[PLsimplewindow]%
+	\setKV[PLsimplewindow]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\ifboolKV[PLsimplewindow]{Grille}%
+		{\GrilleTikz}%
+		{}%
+	\ifboolKV[PLsimplewindow]{Axes}%
+		{\AxesTikz\AxexTikz[#2]{#3}\AxeyTikz[#4]{#5}}%
+		{}%
+}
+
+\NewDocumentEnvironment{StatsTikz}{ O{} }
+{%
+	\begin{tikzpicture}[#1]
+	}%
+	{%
+	\end{tikzpicture}%
+}
+
+%=============BOITES MOUSTACHES======== OK !!
+\defKV[boiteamoustaches]{%
+	Couleur=\def\BaMCouleur{#1},%
+	Elevation=\def\BaMElevation{#1},%
+	Hauteur=\def\BaMHauteur{#1},%
+	Moyenne=\def\BaMMoyenne{#1},%
+	Epaisseur=\def\BaMEpaisseur{#1},%
+	Remplir=\def\BaMRemplissage{#1}
+}
+
+\setKVdefault[boiteamoustaches]{%
+	Couleur=black,%
+	Elevation=1,%
+	Hauteur=1,%
+	AffMoyenne=false,%
+	Epaisseur=thick,%
+	Pointilles=false,%
+	Valeurs=false,%
+	Remplir=white
+}
+
+\defKV[boiteamoustachesaxe]{%
+	Min=\def\BaMAxeMin{#1},%
+	Max=\def\BaMAxeMax{#1},%
+	Elargir=\def\BaMAxeElarg{#1},%
+	Epaisseur=\def\BaMAxeEpaisseur{#1},%
+	Valeurs=\def\BaMAxeValeurs{#1}
+}
+
+\setKVdefault[boiteamoustachesaxe]{%
+	Elargir=0.05,%
+	Epaisseur=thick,%
+	AffValeurs=false
+}
+
+\newcommand\BoiteMoustachesAxe[1][]{
+	\useKVdefault[boiteamoustachesaxe]
+	\setKV[boiteamoustachesaxe]{#1}
+	\def\BaMaxelargeur{\fpeval{\BaMAxeMax-\BaMAxeMin}}
+	\def\BaMaxexmin{\fpeval{\BaMAxeMin-\BaMAxeElarg*\BaMaxelargeur}}
+	\def\BaMaxexmax{\fpeval{\BaMAxeMax+\BaMAxeElarg*\BaMaxelargeur}}
+	\draw[\BaMAxeEpaisseur,->] (\BaMaxexmin,0) -- (\BaMaxexmax,0) ;
+	\ifboolKV[boiteamoustachesaxe]{AffValeurs}
+		{\foreach \x in \BaMAxeValeurs \draw[\BaMAxeEpaisseur] (\x,3pt)--(\x,-3pt) node[below=3pt] {\num{\x}} ;}
+		{}
+}
+
+\newcommand\BoiteMoustaches[2][]{
+	\useKVdefault[boiteamoustaches]
+	\setKV[boiteamoustaches]{#1}
+	\setsepchar[.]{/}%
+	\readlist*\BaMListeparams{#2}%
+	\itemtomacro\BaMListeparams[1]\BaMmin%
+	\itemtomacro\BaMListeparams[2]\BaMqu%
+	\itemtomacro\BaMListeparams[3]\BaMmed%
+	\itemtomacro\BaMListeparams[4]\BaMqt%
+	\itemtomacro\BaMListeparams[5]\BaMmax%
+	\draw[draw,\BaMEpaisseur,\BaMCouleur,fill=\BaMRemplissage] ({\BaMqu},{\BaMElevation-0.5*\BaMHauteur}) rectangle ({\BaMqt},{\BaMElevation+0.5*\BaMHauteur}) ;
+	\draw[\BaMEpaisseur,\BaMCouleur] (\BaMmin,{\BaMElevation-0.5*\BaMHauteur})--(\BaMmin,{\BaMElevation+0.5*\BaMHauteur}) (\BaMmax,{\BaMElevation-0.5*\BaMHauteur})--(\BaMmax,{\BaMElevation+0.5*\BaMHauteur}) (\BaMmed,{\BaMElevation-0.5*\BaMHauteur})--(\BaMmed,{\BaMElevation+0.5*\BaMHauteur});
+	\draw[\BaMEpaisseur,\BaMCouleur] ({\BaMmin},{\BaMElevation})--({\BaMqu},{\BaMElevation}) ({\BaMqt},{\BaMElevation})--({\BaMmax},{\BaMElevation}) ;
+	\ifboolKV[boiteamoustaches]{AffMoyenne}
+		{\filldraw[\BaMCouleur] ({\BaMMoyenne},{\BaMElevation}) circle[radius=2.5pt] ;}
+		{}
+	\ifboolKV[boiteamoustaches]{Pointilles}
+		{
+			\draw[\BaMEpaisseur,densely dashed] (\BaMmin,{\BaMElevation-0.5*\BaMHauteur}) -- (\BaMmin,0) ;
+			\draw[\BaMEpaisseur,densely dashed] (\BaMqu,{\BaMElevation-0.5*\BaMHauteur}) -- (\BaMqu,0) ;
+			\draw[\BaMEpaisseur,densely dashed] (\BaMmed,{\BaMElevation-0.5*\BaMHauteur}) -- (\BaMmed,0) ;
+			\draw[\BaMEpaisseur,densely dashed] (\BaMqt,{\BaMElevation-0.5*\BaMHauteur}) -- (\BaMqt,0) ;
+			\draw[\BaMEpaisseur,densely dashed] (\BaMmax,{\BaMElevation-0.5*\BaMHauteur}) -- (\BaMmax,0) ;
+		}
+		{}
+	\ifboolKV[boiteamoustaches]{Valeurs}
+		{
+			\filldraw (\BaMmin,0) circle[radius=2pt] node[below=4pt] {\num{\BaMmin}} ;
+			\filldraw (\BaMqu,0) circle[radius=2pt] node[below=4pt] {\num{\BaMqu}} ;
+			\filldraw (\BaMmed,0) circle[radius=2pt] node[below=4pt] {\num{\BaMmed}} ;
+			\filldraw (\BaMqt,0) circle[radius=2pt] node[below=4pt] {\num{\BaMqt}} ;
+			\filldraw (\BaMmax,0) circle[radius=2pt] node[below=4pt] {\num{\BaMmax}} ;
+		}
+		{}
+}
+
+%================SUDOMATHS============= OK !!
+\defKV[PLTIKZSUDOM]{%
+	CouleurTexte=\def\PLSMcoultexte{#1},%
+	Epaisseur=\def\PLSMepf{#1},%
+	Epaisseurg=\def\PLSMepg{#1},%
+	Unite=\def\PLSMunite{#1},%
+	CouleurCase=\def\PLSMcoulcase{#1},%
+	NbCol=\def\PLSMnbcol{#1},%
+	NbSubCol=\def\PLSMnbsubcol{#1},%
+	NbLig=\def\PLSMnblig{#1},%
+	NbSubLig=\def\PLSMnbsublig{#1},%
+	Police=\def\PLSMfonte{#1},%
+	PoliceLeg=\def\PLSMfonteleg{#1},%
+	ListeLegV=\def\PLSMlistelegv{#1},%
+	ListeLegH=\def\PLSMlistelegh{#1},%
+	DecalLegende=\def\PLSMdecalleg{#1}
+}
+
+\setKVdefault[PLTIKZSUDOM]{%
+	Epaisseurg=1.5pt,%
+	Epaisseur=0.5pt,%
+	Unite=1cm,%
+	CouleurCase=LightBlue!50,%
+	CouleurTexte=blue,%
+	NbCol=9,%
+	NbSubCol=3,%
+	NbLig=9,%
+	NbSubLig=3,
+	Police=\normalfont\normalsize,%
+	PoliceLeg=\normalfont\sffamily,%
+	Legendes=true,%
+	ListeLegV=ABCDEFGHIJKLMNOPQRSTUVWXYZ,%
+	ListeLegH=abcdefghijklmnopqrstuvwxyz,%
+	DecalLegende=0.45
+}
+
+\NewDocumentEnvironment{EnvSudoMaths}{ O{} m }
+	{
+	\useKVdefault[PLTIKZSUDOM]
+	\setKV[PLTIKZSUDOM]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%calculs intermédiaires
+	\def\larcolinter{\inteval{\PLSMnbcol/\PLSMnbsubcol}}
+	\def\larliginter{\inteval{\PLSMnblig/\PLSMnbsublig}}
+	%lecture liste
+	\IfEq{#2}{}{}%
+		{%
+			\setsepchar[.]{§./}%
+			\readlist*\SPGrilleSudoMaths{#2}%
+		}
+	%débt envtik
+	\begin{tikzpicture}[x=\PLSMunite,y=\PLSMunite,line join=miter]
+		%cases
+		\IfEq{#2}{}{}%
+		{%
+		\foreach \i in {1,2,...,\PLSMnblig}{%
+			\foreach \j in {1,2,...,\PLSMnbcol}{%
+				\itemtomacro\SPGrilleSudoMaths[\i,\j]\SMcase
+				\IfSubStr{\SMcase}{*}%si on veut colorier via *
+				{%
+					\StrDel{\SMcase}{*}[\SMcaseb]%
+					\draw[draw=none,fill=\PLSMcoulcase] ({\j-1},{1-\i}) rectangle++ (1,-1) node[inner sep=0pt,outer sep=0pt,\PLSMcoultexte,font=\PLSMfonte,midway] {\SMcaseb} ;%
+				}
+				{%
+					\draw ({\j-0.5},{0.5-\i}) node[inner sep=0pt,outer sep=0pt,\PLSMcoultexte,font=\PLSMfonte] {\SMcase} ;%
+				}
+			}
+		}%
+		}
+		%grilles
+		\draw[line width=\PLSMepg] (0,0) rectangle ({\PLSMnbcol},{-\PLSMnblig}) ;
+		\draw[line width=\PLSMepf,xstep=1,ystep=1] (0,0) grid ({\PLSMnbcol},{-\PLSMnblig}) ;
+		\draw[line width=\PLSMepg,xstep=\larcolinter,ystep=\larliginter] (0,0) grid ({\PLSMnbcol},{-\PLSMnblig}) ;
+		%légendes
+		\ifboolKV[PLTIKZSUDOM]{Legendes}
+			{%
+				\foreach \i in {1,2,...,\PLSMnbcol}{\draw ({\i-0.5},{\PLSMdecalleg}) node[inner sep=0pt,outer sep=0pt,font=\PLSMfonteleg] {\strut\StrChar{\PLSMlistelegh}{\i}} ;}
+				\foreach \j in {1,2,...,\PLSMnblig}{\draw ({-\PLSMdecalleg},{0.5-\j}) node[inner sep=0pt,outer sep=0pt,font=\PLSMfonteleg] {\StrChar{\PLSMlistelegv}{\j}} ;}
+			}{}
+	}
+	{
+	\end{tikzpicture}
+	}
+
+\NewDocumentCommand\SudoMaths{ O{} m }{%
+	\useKVdefault[PLTIKZSUDOM]
+	\setKV[PLTIKZSUDOM]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%calculs intermédiaires
+	\def\larcolinter{\inteval{\PLSMnbcol/\PLSMnbsubcol}}
+	\def\larliginter{\inteval{\PLSMnblig/\PLSMnbsublig}}
+	%lecture liste
+	\IfEq{#2}{}{}%
+	{%
+		\setsepchar[.]{§./}%
+		\readlist*\SPGrilleSudoMaths{#2}%
+	}
+	%débt envtik
+	\begin{tikzpicture}[x=\PLSMunite,y=\PLSMunite,line join=miter]
+		%cases
+		\IfEq{#2}{}{}%
+		{%
+			\foreach \i in {1,2,...,\PLSMnblig}{%
+				\foreach \j in {1,2,...,\PLSMnbcol}{%
+					\itemtomacro\SPGrilleSudoMaths[\i,\j]\SMcase
+					\IfSubStr{\SMcase}{*}%si on veut colorier via *
+					{%
+						\StrDel{\SMcase}{*}[\SMcaseb]%
+						\draw[draw=none,fill=\PLSMcoulcase] ({\j-1},{1-\i}) rectangle++ (1,-1) node[inner sep=0pt,outer sep=0pt,\PLSMcoultexte,font=\PLSMfonte,midway] {\SMcaseb} ;%
+					}
+					{%
+						\draw ({\j-0.5},{0.5-\i}) node[inner sep=0pt,outer sep=0pt,\PLSMcoultexte,font=\PLSMfonte] {\SMcase} ;%
+					}
+				}
+			}%
+		}
+		%grilles
+		\draw[line width=\PLSMepg] (0,0) rectangle ({\PLSMnbcol},{-\PLSMnblig}) ;
+		\draw[line width=\PLSMepf,xstep=1,ystep=1] (0,0) grid ({\PLSMnbcol},{-\PLSMnblig}) ;
+		\draw[line width=\PLSMepg,xstep=\larcolinter,ystep=\larliginter] (0,0) grid ({\PLSMnbcol},{-\PLSMnblig}) ;
+		%légendes
+		\ifboolKV[PLTIKZSUDOM]{Legendes}
+		{%
+			\foreach \i in {1,2,...,\PLSMnbcol}{\draw ({\i-0.5},{\PLSMdecalleg}) node[inner sep=0pt,outer sep=0pt,font=\PLSMfonteleg] {\strut\StrChar{\PLSMlistelegh}{\i}} ;}
+			\foreach \j in {1,2,...,\PLSMnblig}{\draw ({-\PLSMdecalleg},{0.5-\j}) node[inner sep=0pt,outer sep=0pt,font=\PLSMfonteleg] {\StrChar{\PLSMlistelegv}{\j}} ;}
+		}{}
+	\end{tikzpicture}
+}
+
+%================LOISPROBAS============ OK !!
+%calculs "simples"
+\newcommand\CalcBinomP[3]{%npk
+	\xintFloatToDecimal{\xintfloateval{binomial(#1,#3)*#2^#3*(1-#2)^(#1-#3)}}
+}
+\newcommand\CalcBinomC[4]{%npab
+	\def\BorneInf{#3}\def\BorneSup{#4}
+	\ifthenelse{\equal{#3}{*}}%
+		{\def\BorneInf{0}}
+		{}
+	\ifthenelse{\equal{#4}{*}}%
+		{\def\BorneSup{#1}}
+		{}
+	\xintFloatToDecimal{\xintfloateval{add(binomial(#1,i)*#2^i*(1-#2)^(#1-i), i=\BorneInf..\BorneSup)}}
+}
+\newcommand\CalcGeomP[2]{%pk
+	\xintFloatToDecimal{\xintfloateval{(1-#1)^(#2-1)*(#1)}}
+}
+\newcommand\CalcGeomC[3]{%pab
+	\def\BorneInf{#2}\def\BorneSup{#3}
+	\ifthenelse{\equal{#2}{*}}%
+		{\def\BorneInf{1}}
+		{}
+	\ifthenelse{\equal{#3}{*}}%
+		{\def\BorneSup{\fpeval{trunc(1/#1*10,0)}}}
+		{}
+	\xintFloatToDecimal{\xintfloateval{add((1-#1)^(i-1)*(#1), i=\BorneInf..\BorneSup)}}
+}
+\newcommand\CalcHypergeomP[4]{%Nnmk
+	\xintFloatToDecimal{\xintfloateval{binomial(#3,#4)*binomial(#1-#3,#2-#4)/binomial(#1,#2)}}
+}
+\newcommand\CalcHypergeomC[5]{%Nnmab
+	\def\BorneInf{#4}\def\BorneSup{#5}
+	\ifthenelse{\equal{#4}{*}}%
+		{\def\BorneInf{0}}
+		{}
+	\ifthenelse{\equal{#5}{*}}%
+		{\def\BorneSup{#1}}
+		{}
+	\xintFloatToDecimal{\xintfloateval{add(binomial(#3,i)*binomial(#1-#3,#2-i)/binomial(#1,#2), i=\BorneInf..\BorneSup)}}
+}
+\newcommand\CalcPoissP[2]{%lk
+	\xintFloatToDecimal{\xintfloateval{exp(-#1)*#1^#2/factorial(#2)}}
+}
+\newcommand\CalcPoissC[3]{%lab
+	\def\BorneInf{#2}\def\BorneSup{#3}
+	\ifthenelse{\equal{#2}{*}}%
+		{\def\BorneInf{0}}
+		{}
+	\ifthenelse{\equal{#3}{*}}%
+		{\def\BorneSup{10*#1}}
+		{}
+	\xintFloatToDecimal{\xintfloateval{add(exp(-#1)*#1^i/factorial(i), i=\BorneInf..\BorneSup)}}
+}
+%utiles idée de https://tex.stackexchange.com/questions/355574/im-searching-for-a-table-with-cdf-of-standard-normal-distribution
+\xintdeffloatvar a_1,a_2,a_3,a_4,a_5,a_6 :=
+0.0705230784,0.0422820123,0.0092705272,0.0001520143,0.0002765672,0.0000430638;
+\xintdeffloatvar rac2inv := sqrt(2)/2 ;
+\xintdeffloatfunc erfc(x) := % uniquement pour x positif
+((((((a_6*x+a_5)*x+a_4)*x+a_3)*x+a_2)*x+a_1)*x+1)**-16 ; % fin de définition de erfc(x)
+\xintdeffloatfunc Phi(z) := (z>=0)?{1 - 0.5 * erfc(rac2inv * z)}{0.5 * erfc(-rac2inv * z)};
+
+\newcommand\CalcNormC[4]{%msab
+	%def des bornes de l'intervalle suivant l'absence de a ou de b...
+	\def\BorneInf{#3}\def\BorneSup{#4}
+	\ifthenelse{\equal{#3}{*}}%
+		{\def\BorneInf{#4-10*#2}}
+		{}
+	\ifthenelse{\equal{#4}{*}}%
+		{\def\BorneSup{#3+10*#2}}
+		{}
+	\xintFloatToDecimal{\xintfloateval{Phi((\BorneSup-#1)/#2)-Phi((\BorneInf-#1)/#2)}}
+}
+%calculs "simples" fiabilite
+\newcommand\CalcExpoC[3]{%lab
+	\def\BorneInf{#2}\def\BorneSup{#3}
+	\ifthenelse{\equal{#2}{*}}%
+		{\def\BorneInf{0}}
+		{}
+	\ifthenelse{\equal{#3}{*}}%
+		{\def\BorneSup{100/#1}}
+		{}
+	\xintFloatToDecimal{\xintfloateval{exp(-#1*\BorneInf)-exp(-#1*\BorneSup)}}
+}
+
+%calculs formatés
+\NewDocumentCommand{\BinomP}{ s O{3} m m m }{%*=sci,2=prec,3=n,4=p,5=k
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(binomial(#3,#5)*#4^#5*(1-#4)^(#3-#5),#2)}}}
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round(binomial(#3,#5)*#4^#5*(1-#4)^(#3-#5),#2)}}}
+	}
+}
+
+\NewDocumentCommand{\BinomC}{ s O{3} m m m m }{%*=sci,2=prec,3=n,4=p,5=a,6=b
+	\def\BorneInf{#5}\def\BorneSup{#6}
+	\ifthenelse{\equal{#5}{*}}%
+		{\def\BorneInf{0}}
+		{}
+	\ifthenelse{\equal{#6}{*}}%
+		{\def\BorneSup{#3}}
+		{}
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(add(binomial(#3,i)*#4^i*(1-#4)^(#3-i), i=\BorneInf..\BorneSup),#2)}}}
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round(add(binomial(#3,i)*#4^i*(1-#4)^(#3-i), i=\BorneInf..\BorneSup),#2)}}}
+	}
+}
+
+\NewDocumentCommand{\GeomP}{ s O{3} m m }{%*=sci,2=prec,3=p,4=k
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round((1-#3)^(#4-1)*(#3),#2)}}}
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round((1-#3)^(#4-1)*(#3),#2)}}}
+	}
+}
+
+\NewDocumentCommand{\GeomC}{ s O{3} m m m }{%*=sci,2=prec,3=p,4=a,5=b
+	\def\BorneInf{#4}\def\BorneSup{#5}
+	\ifthenelse{\equal{#4}{*}}%
+		{\def\BorneInf{1}}
+		{}
+	\ifthenelse{\equal{#5}{*}}%
+		{\def\BorneSup{\fpeval{trunc(1/#3*10,0)}}}
+		{}
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(add((1-#3)^(i-1)*(#3), i=\BorneInf..\BorneSup),#2)}}}
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round(add((1-#3)^(i-1)*(#3), i=\BorneInf..\BorneSup),#2)}}}
+	}
+}
+
+\NewDocumentCommand{\HypergeomP}{ s O{3} m m m m }{%*=sci,2=prec,3=N,4=n,5=m,6=k
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(binomial(#5,#6)*binomial(#3-#5,#4-#6)/binomial(#3,#4),#2)}}}
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round(binomial(#5,#6)*binomial(#3-#5,#4-#6)/binomial(#3,#4),#2)}}}
+	}
+}
+
+\NewDocumentCommand{\HypergeomC}{ s O{3} m m m m m }{%*=sci,2=prec,3=N,4=n,5=m,6=a,7=b
+	\def\BorneInf{#6}\def\BorneSup{#7}
+	\ifthenelse{\equal{#6}{*}}%
+		{\def\BorneInf{0}}
+		{}
+	\ifthenelse{\equal{#7}{*}}%
+		{\def\BorneSup{#3}}
+		{}
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(add(binomial(#5,i)*binomial(#3-#5,#4-i)/binomial(#3,#4), i=\BorneInf..\BorneSup),#2)}}}
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round(add(binomial(#5,i)*binomial(#3-#5,#4-i)/binomial(#3,#4), i=\BorneInf..\BorneSup),#2)}}}
+	}
+}
+
+\NewDocumentCommand{\PoissonP}{ s O{3} m m }{%*=sci,2=prec,3=lbda,4=k
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(exp(-#3)*#3^#4/factorial(#4),#2)}}}
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round(exp(-#3)*#3^#4/factorial(#4),#2)}}}
+	}
+}
+
+\NewDocumentCommand{\PoissonC}{ s O{3} m m m }{%*=ing,2=prec,3=lbda,4=a,5=b
+	\def\BorneInf{#4}\def\BorneSup{#5}
+	\ifthenelse{\equal{#4}{*}}%
+		{\def\BorneInf{0}}
+		{}
+	\ifthenelse{\equal{#5}{*}}%
+		{\def\BorneSup{10*#3}}
+		{}
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(add(exp(-#3)*#3^i/factorial(i), i=\BorneInf..\BorneSup),#2)}}}
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round(add(exp(-#3)*#3^i/factorial(i), i=\BorneInf..\BorneSup),#2)}}}
+	}
+}
+
+\NewDocumentCommand{\NormaleC}{ s O{3} m m m m }{%
+	%*=ing,2=prec,3=mu,4=sigma,5=a,6=b
+	%def des bornes de l'intervalle suivant l'absence de a ou de b...
+	\def\BorneInf{#5}\def\BorneSup{#6}
+	\ifthenelse{\equal{#5}{*}}%
+		{\def\BorneInf{#6-10*#4}}
+		{}
+	\ifthenelse{\equal{#6}{*}}%
+		{\def\BorneSup{#5+10*#4}}
+		{}
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(Phi((\BorneSup-#3)/#4)-Phi((\BorneInf-#3)/#4),#2)}}}
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintfloateval{round(Phi((\BorneSup-#3)/#4)-Phi((\BorneInf-#3)/#4),#2)}}}
+	}
+}
+
+\NewDocumentCommand{\ExpoC}{ s O{3} m m m }{%*=ing,2=prec,3=lbda,4=a,5=b
+	\def\BorneInf{#4}\def\BorneSup{#5}
+	\ifthenelse{\equal{#4}{*}}%
+		{\def\BorneInf{0}}
+		{}
+	\ifthenelse{\equal{#5}{*}}%
+		{\def\BorneSup{100/#3}}
+		{}
+	\IfBooleanTF{#1}%
+	{%
+		\num[exponent-mode=scientific]{\xintFloatToDecimal{\xintfloateval{round(exp(-#3*\BorneInf)-exp(-#3*\BorneSup),#2)}}}
+	}%
+	{%
+		\num[minimum-decimal-digits=#2]{\xintFloatToDecimal{\xintFloatToDecimal{\xintfloateval{round(exp(-#3*\BorneInf)-exp(-#3*\BorneSup),#2)}}}}
+	}
+}
+
+%===============CONVFROMDEC============ OK !!
+\newcommand\PLnoeud[2]{\tikz[remember picture,baseline=(#1.base)]\node[shape=rectangle,inner sep=0pt](#1){#2};}
+\ExplSyntaxOn
+\newcommand\convertbasedixtobase[2]{%
+	\int_to_Base:nn {#1}{#2}
+}
+\ExplSyntaxOff
+
+\defKV[convfromten]{%
+	Couleur=\def\PLConvCouleur{#1},%
+	DecalH=\def\PLConvDecalH{#1},%
+	DecalV=\def\PLConvDecalV{#1},%
+	Noeud=\def\PLConvNoeud{#1}
+}
+
+\setKVdefault[convfromten]{%
+	Couleur=red,%
+	DecalH=2pt,%
+	DecalV=3pt,%
+	Rect=true,%
+	Noeud=EEE,%
+	CouleurRes=false
+}
+
+\newcommand\ConversionDepuisBaseDix[3][]{%
+	\useKVdefault[convfromten]%
+	\setKV[convfromten]{#1}%
+	\xdef\ValRes{\xintDecToHex{#2}}%
+	\xdef\ValA{#2}\xdef\ValB{#3}%
+	\xdef\ValTMP{#2}%
+	\xdef\ValMU{\inteval{#3-1}}%
+	\ensuremath{%
+		\left\lbrace\begin{array}{@{\,}r@{\;=\;}l@{\;+\;}r}
+			%1ere division
+			\xdef\ValQ{\fpeval{trunc(\ValTMP/#3,0)}}\xdef\ValR{\fpeval{\ValTMP-#3*\ValQ}}
+			\num{\ValTMP}\uppercase{&}\num{\ValB}\times\num{\ValQ}\uppercase{&}\PLnoeud{\PLConvNoeud1}{\num{\ValR}}%
+			\xdef\ValTMP{\ValQ}%
+			\whiledo {\ValTMP > \ValMU}%
+			{%
+				\xdef\ValQ{\fpeval{trunc(\ValTMP/#3,0)}}\xdef\ValR{\fpeval{\ValTMP-#3*\ValQ}}%
+				\\ \num{\ValTMP}\uppercase{&}\num{\ValB}\times\num{\ValQ}\uppercase{&}\num{\ValR}
+				\xdef\ValTMP{\ValQ}%
+			}
+			%dernière
+			\xdef\ValQ{\fpeval{trunc(\ValTMP/#3,0)}}\xdef\ValR{\fpeval{\ValTMP-#3*\ValQ}}%
+			\\ \num{\ValTMP}\uppercase{&}\num{\ValB}\times\num{\ValQ}\uppercase{&}\PLnoeud{\PLConvNoeud2}{\num{\ValR}}
+		\end{array} \right| \Rightarrow \num{#2}_{10}=\ifboolKV[convfromten]{CouleurRes}{\mathcolor{\PLConvCouleur}{\convertbasedixtobase{#2}{#3}_{#3}}}{\convertbasedixtobase{#2}{#3}_{#3}}}%
+	\ifboolKV[convfromten]{Rect}%
+	{%
+		\IfSubStr{\PLConvDecalH}{/}%
+			{\StrCut{\PLConvDecalH}{/}{\PLConvDecalHg}{\PLConvDecalHd}}%
+			{\def\PLConvDecalHg{\PLConvDecalH}\def\PLConvDecalHd{\PLConvDecalH}}%
+		\begin{tikzpicture}
+			\draw[overlay,rounded corners=4pt,\PLConvCouleur,thick] ($(\PLConvNoeud1.north west)+(-\PLConvDecalHg,\PLConvDecalV)$) rectangle ($(\PLConvNoeud2.south east)+(\PLConvDecalHd,-\PLConvDecalV)$) ;
+			\draw[overlay,rounded corners=4pt,\PLConvCouleur,thick,->,>=latex] ($(\PLConvNoeud2.east)+(\PLConvDecalHd,0)$)--++(0,{0.75\baselineskip}) ;
+		\end{tikzpicture}%
+	}{}%
+}
+
+%===============ARBRESPROBAS=========== OK !!
+\defKV[PLTIKZARBRE]{%
+	Unite=\def\PLAPunite{#1},%
+	EspaceNiveau=\def\PLAPespniv{#1},%
+	EspaceFeuille=\def\PLAPespfeuille{#1},%
+	Type=\def\PLAPtype{#1},%
+	Police=\def\PLAPfont{#1},%
+	PoliceProbas=\def\PLAPfontproba{#1},%
+	StyleTrait=\def\PLAPtypetrait{#1},%
+	EpaisseurTrait=\def\PLAPeptrait{#1}
+}
+
+\setKVdefault[PLTIKZARBRE]{%
+	Unite=1cm,%
+	EspaceNiveau=3.25,%
+	EspaceFeuille=1,%
+	Type=2x2,%
+	Police=\normalfont\normalsize,%
+	PoliceProbas=\normalfont\small,%
+	InclineProbas=true,%
+	Fleche=false,%
+	StyleTrait={},%
+	EpaisseurTrait=semithick
+}
+
+\NewDocumentCommand\ArbreProbasTikz{ O{} m }{%1=options,2=libellés
+	\useKVdefault[PLTIKZARBRE]%
+	\setKV[PLTIKZARBRE]{#1}%
+	\setsepchar[.]{,./}%
+	\readlist*\PLARBREDONNES{#2}%
+	\begin{tikzpicture}[x=\PLAPunite,y=\PLAPunite]
+		%styles
+		\tikzstyle{noeud} = [font=\PLAPfont]
+		\tikzstyle{probas}= [font=\PLAPfontproba]
+		\ifboolKV[PLTIKZARBRE]{InclineProbas}
+			{\tikzstyle{PLetiquette}=[pos=0.525,sloped,fill=white]}
+			{\tikzstyle{PLetiquette}=[pos=0.525,fill=white]}
+		\ifboolKV[PLTIKZARBRE]{Fleche}
+			{\tikzstyle{PLfleche}=[->,>=latex,\PLAPtypetrait,\PLAPeptrait]}
+			{\tikzstyle{PLfleche}=[\PLAPtypetrait,\PLAPeptrait]}
+		%arbre2x2
+		\IfEq{\PLAPtype}{2x2}
+		{%
+			\coordinate (R) at ({0*\PLAPespniv},{-1.5*\PLAPespfeuille}) ;
+			\node[noeud] (A11) at ({1*\PLAPespniv},{-0.5*\PLAPespfeuille}) {\PLARBREDONNES[1,1]};
+			\node[noeud] (A21) at ({2*\PLAPespniv},{-0*\PLAPespfeuille}) {\PLARBREDONNES[2,1]};
+			\node[noeud] (A22) at ({2*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[3,1]};
+			\node[noeud] (A12) at ({1*\PLAPespniv},{-2.5*\PLAPespfeuille}) {\PLARBREDONNES[4,1]};
+			\node[noeud] (A23) at ({2*\PLAPespniv},{-2*\PLAPespfeuille}) {\PLARBREDONNES[5,1]};
+			\node[noeud] (A24) at ({2*\PLAPespniv},{-3*\PLAPespfeuille}) {\PLARBREDONNES[6,1]};
+			\IfEq{\PLARBREDONNES[1,2]}{}
+			{\draw[PLfleche] (R)--(A11) ;}
+			{\draw[PLfleche] (R)--(A11) node[probas,PLetiquette,{\PLARBREDONNES[1,3]}] {{\PLARBREDONNES[1,2]}} ;}
+			\IfEq{\PLARBREDONNES[2,2]}{}
+			{\draw[PLfleche] (A11)--(A21) ;}
+			{\draw[PLfleche] (A11)--(A21) node[probas,PLetiquette,{\PLARBREDONNES[2,3]}] {{\PLARBREDONNES[2,2]}} ;}
+			\IfEq{\PLARBREDONNES[3,2]}{}
+			{\draw[PLfleche] (A11)--(A22) ;}
+			{\draw[PLfleche] (A11)--(A22) node[probas,PLetiquette,{\PLARBREDONNES[3,3]}] {{\PLARBREDONNES[3,2]}} ;}
+			\IfEq{\PLARBREDONNES[4,2]}{}
+			{\draw[PLfleche] (R)--(A12) ;}
+			{\draw[PLfleche] (R)--(A12) node[probas,PLetiquette,{\PLARBREDONNES[4,3]}] {{\PLARBREDONNES[4,2]}} ;}
+			\IfEq{\PLARBREDONNES[5,2]}{}
+			{\draw[PLfleche] (A12)--(A23) ;}
+			{\draw[PLfleche] (A12)--(A23) node[probas,PLetiquette,{\PLARBREDONNES[5,3]}] {{\PLARBREDONNES[5,2]}} ;}
+			\IfEq{\PLARBREDONNES[6,2]}{}
+			{\draw[PLfleche] (A12)--(A24) ;}
+			{\draw[PLfleche] (A12)--(A24) node[probas,PLetiquette,{\PLARBREDONNES[6,3]}] {{\PLARBREDONNES[6,2]}} ;}
+		}{}
+		%arbre3x2
+		\IfEq{\PLAPtype}{3x2}
+		{%
+			%sommets
+			\coordinate (R) at ({0*\PLAPespniv},{-2.5*\PLAPespfeuille}) ;
+			\node[noeud] (A11) at ({1*\PLAPespniv},{-0.5*\PLAPespfeuille}) {\PLARBREDONNES[1,1]};
+			\node[noeud] (A21) at ({2*\PLAPespniv},{-0*\PLAPespfeuille}) {\PLARBREDONNES[2,1]};
+			\node[noeud] (A22) at ({2*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[3,1]};
+			\node[noeud] (A12) at ({1*\PLAPespniv},{-2.5*\PLAPespfeuille}) {\PLARBREDONNES[4,1]};
+			\node[noeud] (A23) at ({2*\PLAPespniv},{-2*\PLAPespfeuille}) {\PLARBREDONNES[5,1]};
+			\node[noeud] (A24) at ({2*\PLAPespniv},{-3*\PLAPespfeuille}) {\PLARBREDONNES[6,1]};
+			\node[noeud] (A13) at ({1*\PLAPespniv},{-4.5*\PLAPespfeuille}) {\PLARBREDONNES[7,1]};
+			\node[noeud] (A25) at ({2*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[8,1]};
+			\node[noeud] (A26) at ({2*\PLAPespniv},{-5*\PLAPespfeuille}) {\PLARBREDONNES[9,1]};
+			%branches
+			\IfEq{\PLARBREDONNES[1,2]}{}
+			{\draw[PLfleche] (R)--(A11) ;}
+			{\draw[PLfleche] (R)--(A11) node[probas,PLetiquette,{\PLARBREDONNES[1,3]}] {{\PLARBREDONNES[1,2]}} ;}
+			\IfEq{\PLARBREDONNES[2,2]}{}
+			{\draw[PLfleche] (A11)--(A21) ;}
+			{\draw[PLfleche] (A11)--(A21) node[probas,PLetiquette,{\PLARBREDONNES[2,3]}] {{\PLARBREDONNES[2,2]}} ;}
+			\IfEq{\PLARBREDONNES[3,2]}{}
+			{\draw[PLfleche] (A11)--(A22) ;}
+			{\draw[PLfleche] (A11)--(A22) node[probas,PLetiquette,{\PLARBREDONNES[3,3]}] {{\PLARBREDONNES[3,2]}} ;}
+			\IfEq{\PLARBREDONNES[4,2]}{}
+			{\draw[PLfleche] (R)--(A12) ;}
+			{\draw[PLfleche] (R)--(A12) node[probas,PLetiquette,{\PLARBREDONNES[4,3]}] {{\PLARBREDONNES[4,2]}} ;}
+			\IfEq{\PLARBREDONNES[5,2]}{}
+			{\draw[PLfleche] (A12)--(A23) ;}
+			{\draw[PLfleche] (A12)--(A23) node[probas,PLetiquette,{\PLARBREDONNES[5,3]}] {{\PLARBREDONNES[5,2]}} ;}
+			\IfEq{\PLARBREDONNES[6,2]}{}
+			{\draw[PLfleche] (A12)--(A24) ;}
+			{\draw[PLfleche] (A12)--(A24) node[probas,PLetiquette,{\PLARBREDONNES[6,3]}] {{\PLARBREDONNES[6,2]}} ;}
+			\IfEq{\PLARBREDONNES[7,2]}{}
+			{\draw[PLfleche] (R)--(A13) ;}
+			{\draw[PLfleche] (R)--(A13) node[probas,PLetiquette,{\PLARBREDONNES[7,3]}] {{\PLARBREDONNES[7,2]}} ;}
+			\IfEq{\PLARBREDONNES[8,2]}{}
+			{\draw[PLfleche] (A13)--(A25) ;}
+			{\draw[PLfleche] (A13)--(A25) node[probas,PLetiquette,{\PLARBREDONNES[8,3]}] {{\PLARBREDONNES[8,2]}} ;}
+			\IfEq{\PLARBREDONNES[9,2]}{}
+			{\draw[PLfleche] (A13)--(A26) ;}
+			{\draw[PLfleche] (A13)--(A26) node[probas,PLetiquette,{\PLARBREDONNES[9,3]}] {{\PLARBREDONNES[9,2]}} ;}
+		}{}
+		%arbre2x3
+		\IfEq{\PLAPtype}{2x3}
+		{%
+			%sommets
+			\coordinate (R) at ({0*\PLAPespniv},{-2.5*\PLAPespfeuille}) ;
+			\node[noeud] (A11) at ({1*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[1,1]};
+			\node[noeud] (A12) at ({1*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[5,1]};
+			\node[noeud] (A21) at ({2*\PLAPespniv},{-0*\PLAPespfeuille}) {\PLARBREDONNES[2,1]};
+			\node[noeud] (A22) at ({2*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[3,1]};
+			\node[noeud] (A23) at ({2*\PLAPespniv},{-2*\PLAPespfeuille}) {\PLARBREDONNES[4,1]};
+			\node[noeud] (A24) at ({2*\PLAPespniv},{-3*\PLAPespfeuille}) {\PLARBREDONNES[6,1]};
+			\node[noeud] (A25) at ({2*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[7,1]};
+			\node[noeud] (A26) at ({2*\PLAPespniv},{-5*\PLAPespfeuille}) {\PLARBREDONNES[8,1]};
+			%branches
+			\IfEq{\PLARBREDONNES[1,2]}{}
+			{\draw[PLfleche] (R)--(A11) ;}
+			{\draw[PLfleche] (R)--(A11) node[probas,PLetiquette,{\PLARBREDONNES[1,3]}] {{\PLARBREDONNES[1,2]}} ;}
+			\IfEq{\PLARBREDONNES[5,2]}{}
+			{\draw[PLfleche] (R)--(A12) ;}
+			{\draw[PLfleche] (R)--(A12) node[probas,PLetiquette,{\PLARBREDONNES[5,3]}] {{\PLARBREDONNES[5,2]}} ;}
+			\IfEq{\PLARBREDONNES[2,2]}{}
+			{\draw[PLfleche] (A11)--(A21) ;}
+			{\draw[PLfleche] (A11)--(A21) node[probas,PLetiquette,{\PLARBREDONNES[2,3]}] {{\PLARBREDONNES[2,2]}} ;}
+			\IfEq{\PLARBREDONNES[3,2]}{}
+			{\draw[PLfleche] (A11)--(A22) ;}
+			{\draw[PLfleche] (A11)--(A22) node[probas,PLetiquette,{\PLARBREDONNES[3,3]}] {{\PLARBREDONNES[3,2]}} ;}
+			\IfEq{\PLARBREDONNES[4,2]}{}
+			{\draw[PLfleche] (A11)--(A23) ;}
+			{\draw[PLfleche] (A11)--(A23) node[probas,PLetiquette,{\PLARBREDONNES[4,3]}] {{\PLARBREDONNES[4,2]}} ;}
+			\IfEq{\PLARBREDONNES[6,2]}{}
+			{\draw[PLfleche] (A12)--(A24) ;}
+			{\draw[PLfleche] (A12)--(A24) node[probas,PLetiquette,{\PLARBREDONNES[6,3]}] {{\PLARBREDONNES[6,2]}} ;}
+			\IfEq{\PLARBREDONNES[7,2]}{}
+			{\draw[PLfleche] (A12)--(A25) ;}
+			{\draw[PLfleche] (A12)--(A25) node[probas,PLetiquette,{\PLARBREDONNES[7,3]}] {{\PLARBREDONNES[7,2]}} ;}
+			\IfEq{\PLARBREDONNES[8,2]}{}
+			{\draw[PLfleche] (A12)--(A26) ;}
+			{\draw[PLfleche] (A12)--(A26) node[probas,PLetiquette,{\PLARBREDONNES[8,3]}] {{\PLARBREDONNES[8,2]}} ;}
+		}{}
+		%arbre2x3
+		\IfEq{\PLAPtype}{3x3}
+		{%
+			%sommets
+			\coordinate (R) at ({0*\PLAPespniv},{-4*\PLAPespfeuille}) ;
+			\node[noeud] (A11) at ({1*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[1,1]};
+			\node[noeud] (A12) at ({1*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[5,1]};
+			\node[noeud] (A13) at ({1*\PLAPespniv},{-7*\PLAPespfeuille}) {\PLARBREDONNES[9,1]};
+			\node[noeud] (A21) at ({2*\PLAPespniv},{-0*\PLAPespfeuille}) {\PLARBREDONNES[2,1]};
+			\node[noeud] (A22) at ({2*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[3,1]};
+			\node[noeud] (A23) at ({2*\PLAPespniv},{-2*\PLAPespfeuille}) {\PLARBREDONNES[4,1]};
+			\node[noeud] (A24) at ({2*\PLAPespniv},{-3*\PLAPespfeuille}) {\PLARBREDONNES[6,1]};
+			\node[noeud] (A25) at ({2*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[7,1]};
+			\node[noeud] (A26) at ({2*\PLAPespniv},{-5*\PLAPespfeuille}) {\PLARBREDONNES[8,1]};
+			\node[noeud] (A27) at ({2*\PLAPespniv},{-6*\PLAPespfeuille}) {\PLARBREDONNES[10,1]};
+			\node[noeud] (A28) at ({2*\PLAPespniv},{-7*\PLAPespfeuille}) {\PLARBREDONNES[11,1]};
+			\node[noeud] (A29) at ({2*\PLAPespniv},{-8*\PLAPespfeuille}) {\PLARBREDONNES[12,1]};
+			%branches
+			\IfEq{\PLARBREDONNES[1,2]}{}
+			{\draw[PLfleche] (R)--(A11) ;}
+			{\draw[PLfleche] (R)--(A11) node[probas,PLetiquette,{\PLARBREDONNES[1,3]}] {{\PLARBREDONNES[1,2]}} ;}
+			\IfEq{\PLARBREDONNES[5,2]}{}
+			{\draw[PLfleche] (R)--(A12) ;}
+			{\draw[PLfleche] (R)--(A12) node[probas,PLetiquette,{\PLARBREDONNES[5,3]}] {{\PLARBREDONNES[5,2]}} ;}
+			\IfEq{\PLARBREDONNES[9,2]}{}
+			{\draw[PLfleche] (R)--(A13) ;}
+			{\draw[PLfleche] (R)--(A13) node[probas,PLetiquette,{\PLARBREDONNES[9,3]}] {{\PLARBREDONNES[9,2]}} ;}
+			%N2
+			\IfEq{\PLARBREDONNES[2,2]}{}
+			{\draw[PLfleche] (A11)--(A21) ;}
+			{\draw[PLfleche] (A11)--(A21) node[probas,PLetiquette,{\PLARBREDONNES[2,3]}] {{\PLARBREDONNES[2,2]}} ;}
+			\IfEq{\PLARBREDONNES[3,2]}{}
+			{\draw[PLfleche] (A11)--(A22) ;}
+			{\draw[PLfleche] (A11)--(A22) node[probas,PLetiquette,{\PLARBREDONNES[3,3]}] {{\PLARBREDONNES[3,2]}} ;}
+			\IfEq{\PLARBREDONNES[4,2]}{}
+			{\draw[PLfleche] (A11)--(A23) ;}
+			{\draw[PLfleche] (A11)--(A23) node[probas,PLetiquette,{\PLARBREDONNES[4,3]}] {{\PLARBREDONNES[4,2]}} ;}
+			\IfEq{\PLARBREDONNES[6,2]}{}
+			{\draw[PLfleche] (A12)--(A24) ;}
+			{\draw[PLfleche] (A12)--(A24) node[probas,PLetiquette,{\PLARBREDONNES[6,3]}] {{\PLARBREDONNES[6,2]}} ;}
+			\IfEq{\PLARBREDONNES[7,2]}{}
+			{\draw[PLfleche] (A12)--(A25) ;}
+			{\draw[PLfleche] (A12)--(A25) node[probas,PLetiquette,{\PLARBREDONNES[7,3]}] {{\PLARBREDONNES[7,2]}} ;}
+			\IfEq{\PLARBREDONNES[8,2]}{}
+			{\draw[PLfleche] (A12)--(A26) ;}
+			{\draw[PLfleche] (A12)--(A26) node[probas,PLetiquette,{\PLARBREDONNES[8,3]}] {{\PLARBREDONNES[8,2]}} ;}
+			\IfEq{\PLARBREDONNES[10,2]}{}
+			{\draw[PLfleche] (A13)--(A27) ;}
+			{\draw[PLfleche] (A13)--(A27) node[probas,PLetiquette,{\PLARBREDONNES[10,3]}] {{\PLARBREDONNES[10,2]}} ;}
+			\IfEq{\PLARBREDONNES[11,2]}{}
+			{\draw[PLfleche] (A13)--(A28) ;}
+			{\draw[PLfleche] (A13)--(A28) node[probas,PLetiquette,{\PLARBREDONNES[11,3]}] {{\PLARBREDONNES[11,2]}} ;}
+			\IfEq{\PLARBREDONNES[12,2]}{}
+			{\draw[PLfleche] (A13)--(A29) ;}
+			{\draw[PLfleche] (A13)--(A29) node[probas,PLetiquette,{\PLARBREDONNES[12,3]}] {{\PLARBREDONNES[12,2]}} ;}
+		}{}
+	\end{tikzpicture}
+}
+
+\NewDocumentEnvironment{EnvArbreProbasTikz}{ O{} m }%1=options,2=libellés
+{
+	\useKVdefault[PLTIKZARBRE]
+	\setKV[PLTIKZARBRE]{#1}
+	\setsepchar[.]{,./}%
+	\readlist*\PLARBREDONNES{#2}
+	\begin{tikzpicture}[x=\PLAPunite,y=\PLAPunite]
+		%styles
+		\tikzstyle{noeud} = [font=\PLAPfont]
+		\tikzstyle{probas}= [font=\PLAPfontproba]
+		\ifboolKV[PLTIKZARBRE]{InclineProbas}
+			{\tikzstyle{PLetiquette}=[pos=0.525,sloped,fill=white]}
+			{\tikzstyle{PLetiquette}=[pos=0.525,fill=white]}
+		\ifboolKV[PLTIKZARBRE]{Fleche}
+			{\tikzstyle{PLfleche}=[->,>=latex,\PLAPtypetrait,\PLAPeptrait]}
+			{\tikzstyle{PLfleche}=[\PLAPtypetrait,\PLAPeptrait]}
+		%arbre2x2
+		\IfEq{\PLAPtype}{2x2}
+		{%
+			\coordinate (R) at ({0*\PLAPespniv},{-1.5*\PLAPespfeuille}) ;
+			\node[noeud] (A11) at ({1*\PLAPespniv},{-0.5*\PLAPespfeuille}) {\PLARBREDONNES[1,1]};
+			\node[noeud] (A21) at ({2*\PLAPespniv},{-0*\PLAPespfeuille}) {\PLARBREDONNES[2,1]};
+			\node[noeud] (A22) at ({2*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[3,1]};
+			\node[noeud] (A12) at ({1*\PLAPespniv},{-2.5*\PLAPespfeuille}) {\PLARBREDONNES[4,1]};
+			\node[noeud] (A23) at ({2*\PLAPespniv},{-2*\PLAPespfeuille}) {\PLARBREDONNES[5,1]};
+			\node[noeud] (A24) at ({2*\PLAPespniv},{-3*\PLAPespfeuille}) {\PLARBREDONNES[6,1]};
+			\IfEq{\PLARBREDONNES[1,2]}{}
+			{\draw[PLfleche] (R)--(A11) ;}
+			{\draw[PLfleche] (R)--(A11) node[probas,PLetiquette,{\PLARBREDONNES[1,3]}] {{\PLARBREDONNES[1,2]}} ;}
+			\IfEq{\PLARBREDONNES[2,2]}{}
+			{\draw[PLfleche] (A11)--(A21) ;}
+			{\draw[PLfleche] (A11)--(A21) node[probas,PLetiquette,{\PLARBREDONNES[2,3]}] {{\PLARBREDONNES[2,2]}} ;}
+			\IfEq{\PLARBREDONNES[3,2]}{}
+			{\draw[PLfleche] (A11)--(A22) ;}
+			{\draw[PLfleche] (A11)--(A22) node[probas,PLetiquette,{\PLARBREDONNES[3,3]}] {{\PLARBREDONNES[3,2]}} ;}
+			\IfEq{\PLARBREDONNES[4,2]}{}
+			{\draw[PLfleche] (R)--(A12) ;}
+			{\draw[PLfleche] (R)--(A12) node[probas,PLetiquette,{\PLARBREDONNES[4,3]}] {{\PLARBREDONNES[4,2]}} ;}
+			\IfEq{\PLARBREDONNES[5,2]}{}
+			{\draw[PLfleche] (A12)--(A23) ;}
+			{\draw[PLfleche] (A12)--(A23) node[probas,PLetiquette,{\PLARBREDONNES[5,3]}] {{\PLARBREDONNES[5,2]}} ;}
+			\IfEq{\PLARBREDONNES[6,2]}{}
+			{\draw[PLfleche] (A12)--(A24) ;}
+			{\draw[PLfleche] (A12)--(A24) node[probas,PLetiquette,{\PLARBREDONNES[6,3]}] {{\PLARBREDONNES[6,2]}} ;}
+		}{}
+		%arbre3x2
+		\IfEq{\PLAPtype}{3x2}
+		{%
+			%sommets
+			\coordinate (R) at ({0*\PLAPespniv},{-2.5*\PLAPespfeuille}) ;
+			\node[noeud] (A11) at ({1*\PLAPespniv},{-0.5*\PLAPespfeuille}) {\PLARBREDONNES[1,1]};
+			\node[noeud] (A21) at ({2*\PLAPespniv},{-0*\PLAPespfeuille}) {\PLARBREDONNES[2,1]};
+			\node[noeud] (A22) at ({2*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[3,1]};
+			\node[noeud] (A12) at ({1*\PLAPespniv},{-2.5*\PLAPespfeuille}) {\PLARBREDONNES[4,1]};
+			\node[noeud] (A23) at ({2*\PLAPespniv},{-2*\PLAPespfeuille}) {\PLARBREDONNES[5,1]};
+			\node[noeud] (A24) at ({2*\PLAPespniv},{-3*\PLAPespfeuille}) {\PLARBREDONNES[6,1]};
+			\node[noeud] (A13) at ({1*\PLAPespniv},{-4.5*\PLAPespfeuille}) {\PLARBREDONNES[7,1]};
+			\node[noeud] (A25) at ({2*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[8,1]};
+			\node[noeud] (A26) at ({2*\PLAPespniv},{-5*\PLAPespfeuille}) {\PLARBREDONNES[9,1]};
+			%branches
+			\IfEq{\PLARBREDONNES[1,2]}{}
+			{\draw[PLfleche] (R)--(A11) ;}
+			{\draw[PLfleche] (R)--(A11) node[probas,PLetiquette,{\PLARBREDONNES[1,3]}] {{\PLARBREDONNES[1,2]}} ;}
+			\IfEq{\PLARBREDONNES[2,2]}{}
+			{\draw[PLfleche] (A11)--(A21) ;}
+			{\draw[PLfleche] (A11)--(A21) node[probas,PLetiquette,{\PLARBREDONNES[2,3]}] {{\PLARBREDONNES[2,2]}} ;}
+			\IfEq{\PLARBREDONNES[3,2]}{}
+			{\draw[PLfleche] (A11)--(A22) ;}
+			{\draw[PLfleche] (A11)--(A22) node[probas,PLetiquette,{\PLARBREDONNES[3,3]}] {{\PLARBREDONNES[3,2]}} ;}
+			\IfEq{\PLARBREDONNES[4,2]}{}
+			{\draw[PLfleche] (R)--(A12) ;}
+			{\draw[PLfleche] (R)--(A12) node[probas,PLetiquette,{\PLARBREDONNES[4,3]}] {{\PLARBREDONNES[4,2]}} ;}
+			\IfEq{\PLARBREDONNES[5,2]}{}
+			{\draw[PLfleche] (A12)--(A23) ;}
+			{\draw[PLfleche] (A12)--(A23) node[probas,PLetiquette,{\PLARBREDONNES[5,3]}] {{\PLARBREDONNES[5,2]}} ;}
+			\IfEq{\PLARBREDONNES[6,2]}{}
+			{\draw[PLfleche] (A12)--(A24) ;}
+			{\draw[PLfleche] (A12)--(A24) node[probas,PLetiquette,{\PLARBREDONNES[6,3]}] {{\PLARBREDONNES[6,2]}} ;}
+			\IfEq{\PLARBREDONNES[7,2]}{}
+			{\draw[PLfleche] (R)--(A13) ;}
+			{\draw[PLfleche] (R)--(A13) node[probas,PLetiquette,{\PLARBREDONNES[7,3]}] {{\PLARBREDONNES[7,2]}} ;}
+			\IfEq{\PLARBREDONNES[8,2]}{}
+			{\draw[PLfleche] (A13)--(A25) ;}
+			{\draw[PLfleche] (A13)--(A25) node[probas,PLetiquette,{\PLARBREDONNES[8,3]}] {{\PLARBREDONNES[8,2]}} ;}
+			\IfEq{\PLARBREDONNES[9,2]}{}
+			{\draw[PLfleche] (A13)--(A26) ;}
+			{\draw[PLfleche] (A13)--(A26) node[probas,PLetiquette,{\PLARBREDONNES[9,3]}] {{\PLARBREDONNES[9,2]}} ;}
+		}{}
+		%arbre2x3
+		\IfEq{\PLAPtype}{2x3}
+		{%
+			%sommets
+			\coordinate (R) at ({0*\PLAPespniv},{-2.5*\PLAPespfeuille}) ;
+			\node[noeud] (A11) at ({1*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[1,1]};
+			\node[noeud] (A12) at ({1*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[5,1]};
+			\node[noeud] (A21) at ({2*\PLAPespniv},{-0*\PLAPespfeuille}) {\PLARBREDONNES[2,1]};
+			\node[noeud] (A22) at ({2*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[3,1]};
+			\node[noeud] (A23) at ({2*\PLAPespniv},{-2*\PLAPespfeuille}) {\PLARBREDONNES[4,1]};
+			\node[noeud] (A24) at ({2*\PLAPespniv},{-3*\PLAPespfeuille}) {\PLARBREDONNES[6,1]};
+			\node[noeud] (A25) at ({2*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[7,1]};
+			\node[noeud] (A26) at ({2*\PLAPespniv},{-5*\PLAPespfeuille}) {\PLARBREDONNES[8,1]};
+			%branches
+			\IfEq{\PLARBREDONNES[1,2]}{}
+			{\draw[PLfleche] (R)--(A11) ;}
+			{\draw[PLfleche] (R)--(A11) node[probas,PLetiquette,{\PLARBREDONNES[1,3]}] {{\PLARBREDONNES[1,2]}} ;}
+			\IfEq{\PLARBREDONNES[5,2]}{}
+			{\draw[PLfleche] (R)--(A12) ;}
+			{\draw[PLfleche] (R)--(A12) node[probas,PLetiquette,{\PLARBREDONNES[5,3]}] {{\PLARBREDONNES[5,2]}} ;}
+			\IfEq{\PLARBREDONNES[2,2]}{}
+			{\draw[PLfleche] (A11)--(A21) ;}
+			{\draw[PLfleche] (A11)--(A21) node[probas,PLetiquette,{\PLARBREDONNES[2,3]}] {{\PLARBREDONNES[2,2]}} ;}
+			\IfEq{\PLARBREDONNES[3,2]}{}
+			{\draw[PLfleche] (A11)--(A22) ;}
+			{\draw[PLfleche] (A11)--(A22) node[probas,PLetiquette,{\PLARBREDONNES[3,3]}] {{\PLARBREDONNES[3,2]}} ;}
+			\IfEq{\PLARBREDONNES[4,2]}{}
+			{\draw[PLfleche] (A11)--(A23) ;}
+			{\draw[PLfleche] (A11)--(A23) node[probas,PLetiquette,{\PLARBREDONNES[4,3]}] {{\PLARBREDONNES[4,2]}} ;}
+			\IfEq{\PLARBREDONNES[6,2]}{}
+			{\draw[PLfleche] (A12)--(A24) ;}
+			{\draw[PLfleche] (A12)--(A24) node[probas,PLetiquette,{\PLARBREDONNES[6,3]}] {{\PLARBREDONNES[6,2]}} ;}
+			\IfEq{\PLARBREDONNES[7,2]}{}
+			{\draw[PLfleche] (A12)--(A25) ;}
+			{\draw[PLfleche] (A12)--(A25) node[probas,PLetiquette,{\PLARBREDONNES[7,3]}] {{\PLARBREDONNES[7,2]}} ;}
+			\IfEq{\PLARBREDONNES[8,2]}{}
+			{\draw[PLfleche] (A12)--(A26) ;}
+			{\draw[PLfleche] (A12)--(A26) node[probas,PLetiquette,{\PLARBREDONNES[8,3]}] {{\PLARBREDONNES[8,2]}} ;}
+		}{}
+		%arbre2x3
+		\IfEq{\PLAPtype}{3x3}
+		{%
+			%sommets
+			\coordinate (R) at ({0*\PLAPespniv},{-4*\PLAPespfeuille}) ;
+			\node[noeud] (A11) at ({1*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[1,1]};
+			\node[noeud] (A12) at ({1*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[5,1]};
+			\node[noeud] (A13) at ({1*\PLAPespniv},{-7*\PLAPespfeuille}) {\PLARBREDONNES[9,1]};
+			\node[noeud] (A21) at ({2*\PLAPespniv},{-0*\PLAPespfeuille}) {\PLARBREDONNES[2,1]};
+			\node[noeud] (A22) at ({2*\PLAPespniv},{-1*\PLAPespfeuille}) {\PLARBREDONNES[3,1]};
+			\node[noeud] (A23) at ({2*\PLAPespniv},{-2*\PLAPespfeuille}) {\PLARBREDONNES[4,1]};
+			\node[noeud] (A24) at ({2*\PLAPespniv},{-3*\PLAPespfeuille}) {\PLARBREDONNES[6,1]};
+			\node[noeud] (A25) at ({2*\PLAPespniv},{-4*\PLAPespfeuille}) {\PLARBREDONNES[7,1]};
+			\node[noeud] (A26) at ({2*\PLAPespniv},{-5*\PLAPespfeuille}) {\PLARBREDONNES[8,1]};
+			\node[noeud] (A27) at ({2*\PLAPespniv},{-6*\PLAPespfeuille}) {\PLARBREDONNES[10,1]};
+			\node[noeud] (A28) at ({2*\PLAPespniv},{-7*\PLAPespfeuille}) {\PLARBREDONNES[11,1]};
+			\node[noeud] (A29) at ({2*\PLAPespniv},{-8*\PLAPespfeuille}) {\PLARBREDONNES[12,1]};
+			%branches
+			\IfEq{\PLARBREDONNES[1,2]}{}
+			{\draw[PLfleche] (R)--(A11) ;}
+			{\draw[PLfleche] (R)--(A11) node[probas,PLetiquette,{\PLARBREDONNES[1,3]}] {{\PLARBREDONNES[1,2]}} ;}
+			\IfEq{\PLARBREDONNES[5,2]}{}
+			{\draw[PLfleche] (R)--(A12) ;}
+			{\draw[PLfleche] (R)--(A12) node[probas,PLetiquette,{\PLARBREDONNES[5,3]}] {{\PLARBREDONNES[5,2]}} ;}
+			\IfEq{\PLARBREDONNES[9,2]}{}
+			{\draw[PLfleche] (R)--(A13) ;}
+			{\draw[PLfleche] (R)--(A13) node[probas,PLetiquette,{\PLARBREDONNES[9,3]}] {{\PLARBREDONNES[9,2]}} ;}
+			%N2
+			\IfEq{\PLARBREDONNES[2,2]}{}
+			{\draw[PLfleche] (A11)--(A21) ;}
+			{\draw[PLfleche] (A11)--(A21) node[probas,PLetiquette,{\PLARBREDONNES[2,3]}] {{\PLARBREDONNES[2,2]}} ;}
+			\IfEq{\PLARBREDONNES[3,2]}{}
+			{\draw[PLfleche] (A11)--(A22) ;}
+			{\draw[PLfleche] (A11)--(A22) node[probas,PLetiquette,{\PLARBREDONNES[3,3]}] {{\PLARBREDONNES[3,2]}} ;}
+			\IfEq{\PLARBREDONNES[4,2]}{}
+			{\draw[PLfleche] (A11)--(A23) ;}
+			{\draw[PLfleche] (A11)--(A23) node[probas,PLetiquette,{\PLARBREDONNES[4,3]}] {{\PLARBREDONNES[4,2]}} ;}
+			\IfEq{\PLARBREDONNES[6,2]}{}
+			{\draw[PLfleche] (A12)--(A24) ;}
+			{\draw[PLfleche] (A12)--(A24) node[probas,PLetiquette,{\PLARBREDONNES[6,3]}] {{\PLARBREDONNES[6,2]}} ;}
+			\IfEq{\PLARBREDONNES[7,2]}{}
+			{\draw[PLfleche] (A12)--(A25) ;}
+			{\draw[PLfleche] (A12)--(A25) node[probas,PLetiquette,{\PLARBREDONNES[7,3]}] {{\PLARBREDONNES[7,2]}} ;}
+			\IfEq{\PLARBREDONNES[8,2]}{}
+			{\draw[PLfleche] (A12)--(A26) ;}
+			{\draw[PLfleche] (A12)--(A26) node[probas,PLetiquette,{\PLARBREDONNES[8,3]}] {{\PLARBREDONNES[8,2]}} ;}
+			\IfEq{\PLARBREDONNES[10,2]}{}
+			{\draw[PLfleche] (A13)--(A27) ;}
+			{\draw[PLfleche] (A13)--(A27) node[probas,PLetiquette,{\PLARBREDONNES[10,3]}] {{\PLARBREDONNES[10,2]}} ;}
+			\IfEq{\PLARBREDONNES[11,2]}{}
+			{\draw[PLfleche] (A13)--(A28) ;}
+			{\draw[PLfleche] (A13)--(A28) node[probas,PLetiquette,{\PLARBREDONNES[11,3]}] {{\PLARBREDONNES[11,2]}} ;}
+			\IfEq{\PLARBREDONNES[12,2]}{}
+			{\draw[PLfleche] (A13)--(A29) ;}
+			{\draw[PLfleche] (A13)--(A29) node[probas,PLetiquette,{\PLARBREDONNES[12,3]}] {{\PLARBREDONNES[12,2]}} ;}
+		}{}
+	}
+	{
+	\end{tikzpicture}
+}
+
+%==============SCHEMASPROBAS============= OK!
+%densites utiles
+\def\densnorm#1{1/(sqrt(2*pi))*exp(-0.5*(#1*#1))}
+\def\densexpo#1{exp(-#1)}
+
+\defKV[GRPHPROBCONTINUES]{%
+	CouleurAire=\def\GRPHPROBcoulsurf{#1},%
+	CouleurCourbe=\def\GRPHPROBcoulcbe{#1},%
+	Largeur=\def\GRPHPROBlarg{#1},%
+	Hauteur=\def\GRPHPROBhauteur{#1}
+}
+
+\setKVdefault[GRPHPROBCONTINUES]{%
+	CouleurAire=LightGray,%
+	CouleurCourbe=red,%
+	Largeur=2,%
+	Hauteur=1,%
+	AfficheM=true,%
+	AfficheCadre=true
+}
+
+\NewDocumentCommand\LoiNormaleGraphe{ O{} D<>{} m m m m }{%1=options,2=optionstikz,3=m,4=s,5=a,6=b
+	%simplekv
+	\useKVdefault[GRPHPROBCONTINUES]%
+	\setKV[GRPHPROBCONTINUES]{#1}%
+	%unites
+	\def\UNITEX{\fpeval{\GRPHPROBlarg/8}}\def\UNITEY{\fpeval{\GRPHPROBhauteur/0.5}}%
+	%bornes
+	\def\BorneInf{\fpeval{(#5-#3)/#4}}\def\BorneSup{\fpeval{(#6-#3)/#4}}%
+	\ifthenelse{\equal{#5}{*}}{\def\BorneInf{-4}}{}%
+	\ifthenelse{\equal{#6}{*}}{\def\BorneSup{4}}{}%
+	%tikzpicture
+	\begin{tikzpicture}[x=\UNITEX cm,y=\UNITEY cm,#2]
+		\ifboolKV[GRPHPROBCONTINUES]{AfficheM}%
+			{\draw (0,-0.0375) node[font=\tiny,scale={2*\UNITEX}] {#3} ;}
+			{}
+		\ifboolKV[GRPHPROBCONTINUES]{AfficheCadre}%
+			{\draw[Gray] (-4,-0.075) rectangle (4,0.425) ;}
+			{}
+		\clip (-4,-0.075) rectangle (4,0.425) ;
+		\draw[black,semithick,fill=\GRPHPROBcoulsurf] ({\BorneInf},0) -- plot [domain={\BorneInf}:{\BorneSup},samples=100] (\x,{\densnorm{\x}}) -- ({\BorneSup},0) -- cycle;
+		\draw[thick,->,>=stealth] (-4,0)--(4,0) ;
+		\draw[thick,densely dotted] (0,0)--(0,0.39894) ;
+		\draw[thick,domain=-4:4,samples=100,\GRPHPROBcoulcbe] plot (\x,{\densnorm{\x}}) ;
+	\end{tikzpicture}
+}
+
+\NewDocumentCommand\LoiExpoGraphe{ O{} D<>{} m m m }{%1=options,2=optionstikz,3=l,4=a,5=b
+	%simplekv
+	\useKVdefault[GRPHPROBCONTINUES]%
+	\setKV[GRPHPROBCONTINUES]{#1}%
+	%unites
+	\def\UNITEX{\fpeval{\GRPHPROBlarg/4}}\def\UNITEY{\fpeval{\GRPHPROBhauteur/1}}%
+	\def\MOYENNE{\fpeval{trunc(1/#3,0)}}%
+	%bornes
+	\def\BorneInf{\fpeval{#3*#4}}\def\BorneSup{\fpeval{#3*#5}}%
+	\ifthenelse{\equal{#4}{*}}{\def\BorneInf{0}}{}%
+	\ifthenelse{\equal{#5}{*}}{\def\BorneSup{4}}{}%
+	%tikzpicture
+	\begin{tikzpicture}[x=\UNITEX cm,y=\UNITEY cm,#2]
+		\ifboolKV[GRPHPROBCONTINUES]{AfficheCadre}%
+			{\draw[Gray] (-0.2,-0.15) rectangle (3.8,0.85) ;}
+			{}
+		\clip (-0.2,-0.15) rectangle (3.8,0.85) ;
+		\draw[black,semithick,fill=\GRPHPROBcoulsurf] ({\BorneInf},0) -- plot [domain={\BorneInf}:{\BorneSup},samples=100] (\x,{0.7*\densexpo{\x}}) -- ({\BorneSup},0) -- cycle;
+		\ifboolKV[GRPHPROBCONTINUES]{AfficheM}%
+			{\draw (1,-0.075) node[font=\tiny,scale={\UNITEX}] {\MOYENNE} ;
+			\draw[thick,densely dotted] (1,0)--(1,{0.7*\densexpo{1}}) ;}
+			{}
+		\draw[thick,->,>=stealth] (-0.2,0)--(3.8,0) ;
+		\draw[thick,->,>=stealth] (0,-0.15)--(0,0.85) ;
+		\draw[thick,domain=0:3.8,samples=100,\GRPHPROBcoulcbe] plot (\x,{0.7*\densexpo{\x}}) ;
+	\end{tikzpicture}
+}
+
+%===============TRINOMEALEA============== OK!
+\setKVdefault[trinomealea]{%
+	Alea=false,%
+	Anegatif=true
+}
+
+\NewDocumentCommand\EcritureTrinome{ O{} m m m }{%
+	\useKVdefault[trinomealea]%
+	\setKV[trinomealea]{#1}%
+	\ifboolKV[trinomealea]{Alea}%
+	{%
+		\xdef\Coeffa{\fpeval{randint(#2)}}\xdef\Coeffb{\fpeval{randint(#3)}}\xdef\Coeffc{\fpeval{randint(#4)}}%
+		\xdef\AleaSigneA{\fpeval{randint(1,2)}}%
+		\ifboolKV[trinomealea]{Anegatif}%
+			{\xintifboolexpr{\AleaSigneA == 1}{\def\TriSigneA{}}{\def\TriSigneA{-}}}%
+			{\def\TriSigneA{}}%forcément a>0
+	}%
+	{%
+		\xdef\Coeffa{#2}\xdef\Coeffb{#3}\xdef\Coeffc{#4}%
+		\def\TriSigneA{}%
+	}%
+	\def\TriPartieA{\num{\TriSigneA\Coeffa} x^2}%
+	\xintifboolexpr{\Coeffa == 1}%
+		{\def\TriPartieA{x^2}}{}%
+	\xintifboolexpr{\Coeffa == -1}%
+		{\def\TriPartieA{-x^2}}{}%
+	\def\TriPartieB{\num[print-implicit-plus]{\Coeffb}x}%
+	\xintifboolexpr{\Coeffb == 0}%
+		{\def\TriPartieB{}}{}%
+	\xintifboolexpr{\Coeffb == 1}%
+		{\def\TriPartieB{+x}}{}%
+	\xintifboolexpr{\Coeffb == -1}%
+		{\def\TriPartieB{-x}}{}%
+	\xintifboolexpr{\Coeffc == 0}%
+		{\def\TriPartieC{}}{\def\TriPartieC{\num[print-implicit-plus]{\Coeffc}}}%
+	%formatage
+	\ensuremath{\TriPartieA\TriPartieB\TriPartieC}%
+}
+
+
+%=================PRESPGCD=============== OK!
+\DeclareMathOperator{\PLpgcd}{PGCD}
+\defKV[prespgcd]{%
+	Couleur=\def\PLPGCDCouleur{#1},%
+	DecalRect=\def\PLPGCDDecal{#1},%
+	Noeud=\def\PLPGCDNoeud{#1}
+}
+
+\setKVdefault[prespgcd]{%
+	Couleur=red,%
+	DecalRect=2pt,%
+	Rectangle=true,%
+	Noeud=FFF,%
+	CouleurResultat=false,%
+	AfficheConclusion=true,%
+	AfficheDelimiteurs=true
+}
+
+\newcommand\PresentationPGCD[3][]{%
+	\useKVdefault[prespgcd]%
+	\setKV[prespgcd]{#1}%
+	\xdef\respgcd{\xinteval{gcd(#2,#3)}}
+	\xdef\ValA{#2}\xdef\ValB{#3}%on stocke les valeurs du départ
+	\ensuremath{%
+		\ifboolKV[prespgcd]{AfficheDelimiteurs}%
+		{\left\lbrace}%
+		{}%
+		\begin{array}{@{\,}r@{\;=\;}l@{\;+\;}r}
+			%1ère division
+			\xdef\ValQ{\fpeval{trunc(\ValA/\ValB,0)}}\xdef\ValR{\fpeval{\ValA-\ValB*\ValQ}}
+			\num{\ValA}\uppercase{&}\num{\ValB}\times\num{\ValQ}\uppercase{&}%
+			\xintifboolexpr{\ValR == \respgcd}%
+			{\PLnoeud{\PLPGCDNoeud1}{\num{\ValR}}}%noeud si c'est le pgcd
+			{\num{\ValR}}%
+			\xdef\ValA{\ValB}\xdef\ValB{\ValR}%nouvelles valeurs
+			\whiledo {\ValR > 0}%
+			{%
+				\xdef\ValQ{\fpeval{trunc(\ValA/\ValB,0)}}\xdef\ValR{\fpeval{\ValA-\ValB*\ValQ}}%
+				\\%
+				\num{\ValA}\uppercase{&}\num{\ValB}\times\num{\ValQ}\uppercase{&}%
+				\xintifboolexpr{\ValR == \respgcd}%
+				{\PLnoeud{\PLPGCDNoeud1}{\num{\ValR}}}%noeud si c'est le pgcd
+				{\num{\ValR}}%
+				\xdef\ValA{\ValB}\xdef\ValB{\ValR}%nouvelles valeurs
+			}%
+		\end{array}%
+		\ifboolKV[prespgcd]{AfficheDelimiteurs}%
+		{\right|}%
+		{}%
+		\ifboolKV[prespgcd]{AfficheConclusion}%
+		{%
+			\Rightarrow \PLpgcd\left(\num{#2}\mathpunct{};\num{#3}\right)=\ifboolKV[prespgcd]{CouleurResultat}{\mathcolor{\PLPGCDCouleur}{\num{\respgcd}}}{\num{\respgcd}}%
+		}%
+		{}%
+	}%
+	\ifboolKV[prespgcd]{Rectangle}%
+	{%
+		\begin{tikzpicture}
+			\draw[overlay,rounded corners=4pt,\PLPGCDCouleur,thick] ($(\PLPGCDNoeud1.north west)+(-\PLPGCDDecal,\PLPGCDDecal)$) rectangle ($(\PLPGCDNoeud1.south east)+(\PLPGCDDecal,-\PLPGCDDecal)$) ;
+		\end{tikzpicture}%
+	}{}%
+}
+
+%================TVISOLUTION============= OK!
+\defKV[dichoto]{%
+	NomFct=\def\DHTnomfct{#1},%
+	va=\def\DHTva{#1},%
+	vb=\def\DHTvb{#1},%
+	Precision=\def\DHTprec{#1},%
+	NomSol=\def\DHTnomsol{#1},%
+	Stretch=\def\DHTstretch{#1}
+}
+
+\setKVdefault[dichoto]{%
+	NomFct=f,%
+	Precision=2,%
+	NomSol=\alpha,%
+	Stretch=1.15,%
+	Balayage=false,%
+	Calculatrice=false,%
+	Majuscule=true
+}
+
+\newcommand\SolutionTVI[3][]{%
+	\useKVdefault[dichoto]%
+	\setKV[dichoto]{#1}%
+	\xintdeffloatfunc varfct(x) := #2 ;%
+	\ifboolKV[dichoto]{Balayage}{\ifboolKV[dichoto]{Majuscule}{P}{p}ar balayage, on obtient }{}%
+	\ifboolKV[dichoto]{Calculatrice}{\ifboolKV[dichoto]{Majuscule}{P}{p}ar calculatrice, on obtient }{}%
+	\ensuremath{%
+		\left\lbrace \begin{tblr}{stretch=\DHTstretch,colsep=1pt,rll}%
+			{\DHTnomfct}{\left( \num{\DHTva} \right)} &\approx \num[minimum-decimal-digits=\DHTprec]{\xintFloatToDecimal{\xintfloateval{round(varfct(\DHTva),\DHTprec)}}} & \xintifGt{\xintfloateval{varfct(\DHTva)-#3}}{0}{> \num{#3}}{< \num{#3}} \: \\ %
+			{\DHTnomfct}{\left( \num{\DHTvb} \right)} &\approx \num[minimum-decimal-digits=\DHTprec]{\xintFloatToDecimal{\xintfloateval{round(varfct(\DHTvb),\DHTprec)}}} & \xintifGt{\xintfloateval{varfct(\DHTvb)-#3}}{0}{> \num{#3}}{< \num{#3}} \:%
+		\end{tblr}%
+		\right|%
+		\Rightarrow%
+		\num{\DHTva} < \DHTnomsol < \num{\DHTvb}%
+	}%
+}
+
+%=================CALCSRECUR============= OK!
+\NewDocumentCommand\CalculInterneTermeRecurrence{ m m m m }{%pas forcément utile
+	\xintdeffloatfunc varfctrecur(x) := #1 ;%
+	\xdef\vartmp{#3}%
+	\IfEq{#4}{\inteval{#2+1}}%
+	{\xdef\vartmp{\xintfloateval{varfctrecur(\vartmp)}}}%
+	{%
+		\foreach \i in {1,2,...,\inteval{#4-#2}}%
+		{\xdef\vartmp{\xintfloateval{varfctrecur(\vartmp)}}}%
+	}%
+	\xintFloatToDecimal{\vartmp}%
+}
+
+\defKV[calculsuiterecur]{%
+	No=\def\SRninit{#1},%
+	UNo=\def\SRuninit{#1},%
+	Precision=\def\SRprec{#1},%
+	N=\def\SRnfinal{#1}
+	%Format=\def\SRformat{#1},%
+	%OptionFrac=\def\SRoptfrac{#1}
+}
+
+\setKVdefault[calculsuiterecur]{%
+	Precision=3
+	%Format=Arrondi,%
+	%OptionFrac={}
+}
+
+\NewDocumentCommand\CalculTermeRecurrence{ O{} m }{%attention avec les calculs en exact :-(
+	\useKVdefault[calculsuiterecur]%
+	\setKV[calculsuiterecur]{#1}%
+	\xintdeffloatfunc varfct(x) := #2 ;%
+	\xdef\vartmp{\fpeval{\SRuninit}}%
+	\IfEq{\SRnfinal}{\inteval{\SRninit+1}}%
+		{\xdef\vartmp{\xintfloateval{varfct(\vartmp)}}}%
+		{%
+			\foreach \i in {1,2,...,\inteval{\SRnfinal-\SRninit}}%
+				{\xdef\vartmp{\xintfloateval{varfct(\vartmp)}}}%
+		}%
+	%\num[minimum-decimal-digits=\SRprec]{\xintfloateval{round(\vartmp,\SRprec)}}%
+	\num{\xintfloateval{round(\vartmp,\SRprec)}}%
+	%\IfStrEq{\SRformat}{Fraction}{\ConversionFraction[\SRoptfrac]{\xinteval{\vartmp}}}{}%
+	%\IfStrEq{\SRformat}{Brut}{\xinteval{\vartmp}}{}%
+	%\IfStrEq{\SRformat}{Decimal}{\num{\xintfloateval{\vartmp}}}{}%
+	%\IfStrEq{\SRformat}{BrutDecimal}{\xintFloatToDecimal{\vartmp}}{}%
+}
+
+\defKV[suiteseuil]{%
+	No=\def\SEUILindiceinit{#1},%
+	UNo=\def\SEUILtermeinit{#1},%
+	NomSuite=\def\SEUILnomsuite{#1},%
+	SolN=\def\SEUILn{#1},%
+	Precision=\def\SEUILprec{#1},%
+	Stretch=\def\SEUILstretch{#1},%
+	Sens=\def\SEUILsens{#1}
+}
+
+\setKVdefault[suiteseuil]{%
+	NomSuite=u,%
+	Precision=3,%
+	Stretch=1.15,%
+	Balayage=false,%
+	Calculatrice=false,%
+	Majuscule=true,%
+	Sens=>
+}
+
+\newcommand\SolutionSeuil[3][]{%1=options + %2 = fonction + %3 = seuil
+	\useKVdefault[suiteseuil]%
+	\setKV[suiteseuil]{#1}%
+	\def\SEUILnmu{\inteval{\SEUILn-1}}%
+	\IfEq{\SEUILsens}{>}%
+		{\def\SensDeb{\leqslant}\def\SensFin{>}}%
+		{\def\SensDeb{\geqslant}\def\SensFin{<}}%
+	\ifboolKV[suiteseuil]{Balayage}{\ifboolKV[suiteseuil]{Majuscule}{P}{p}ar balayage, on obtient }{}%
+	\ifboolKV[suiteseuil]{Calculatrice}{\ifboolKV[suiteseuil]{Majuscule}{P}{p}ar calculatrice, on obtient }{}%
+	\ensuremath{%
+		\left\lbrace \begin{tblr}{stretch=\SEUILstretch,colsep=1pt,rll}%
+			\SEUILnomsuite_{\SEUILnmu} &\approx \CalculTermeRecurrence[Precision=\SEUILprec,No=\SEUILindiceinit,UNo=\SEUILtermeinit,N=\SEUILnmu]{#2} & \SensDeb\num{#3} \: \\ %
+			\SEUILnomsuite_{\SEUILn} &\approx \CalculTermeRecurrence[Precision=\SEUILprec,No=\SEUILindiceinit,UNo=\SEUILtermeinit,N=\SEUILn]{#2} & \SensFin\num{#3} \: %
+		\end{tblr}%
+		\right|%
+		\Rightarrow%
+		n \geqslant \SEUILn%
+	}%
+}
+
+%=================ALEATOIRES============= OK!
+\ExplSyntaxOn
+\NewDocumentCommand\TriListeCroiss{m}
+{
+	\clist_sort:Nn #1
+	{
+		\fp_compare:nNnTF {##1} > {##2}
+		{ \sort_return_swapped: }
+		{ \sort_return_same: }
+	}
+}
+\NewDocumentCommand\TriListeDecroiss{m}
+{
+	\clist_sort:Nn #1
+	{
+		\fp_compare:nNnTF {##1} < {##2}
+		{ \sort_return_swapped: }
+		{ \sort_return_same: }
+	}
+}
+\ExplSyntaxOff
+
+\newcommand\NbAlea[4][0]{%entier ou décimal
+	\xintifboolexpr{#1 == 0}%
+		{\xdef#4{\fpeval{randint(#2,#3)}}}%
+		{\xdef#4{\fpeval{round(randint(#2,#3)+rand(),#1)}}}%
+}
+\newcommand\VarNbAlea[2]{%
+	\xdef#1{\fpeval{#2}}%
+}
+
+\defKV[TirageAleatoireEntiersEntre]{%
+	ValMin=\def\TAEEmin{#1},%
+	ValMax=\def\TAEEmax{#1},%
+	NbVal=\def\TAEEnb{#1},%
+	Sep=\def\TAEEsep{#1},%
+	Tri=\def\TAEEtri{#1}
+}
+
+\setKVdefault[TirageAleatoireEntiersEntre]{%
+	ValMin=1,%
+	ValMax=50,%
+	NbVal=6,%
+	Sep={,},%
+	Tri=non,%
+	Repetition=false
+}
+
+\NewList{TirageEntiersAleatoires}
+\NewDocumentCommand\TirageAleatoireEntiers{ O{} m }{%1=options,2=nomliste triée ou non
+	\useKVdefault[TirageAleatoireEntiersEntre]%
+	\setKV[TirageAleatoireEntiersEntre]{#1}%
+	\ifboolKV[TirageAleatoireEntiersEntre]{Repetition}%suivant la possibilité de répéter
+		{%répétitions autorisées
+			%création de la liste (le 1er puis les autres)
+			\xdef#2{\fpeval{randint(\TAEEmin,\TAEEmax)}}%
+			\foreach \i in {2,3,...,\TAEEnb}%
+				{\xdef#2{#2,\fpeval{randint(\TAEEmin,\TAEEmax)}}}%
+		}%
+		{%pas de répétitions
+			%melange des nombres
+			\ClearList{TirageEntiersAleatoires}%on vide la liste aléatoire
+			\xintFor* ##1 in {\xintSeq{\TAEEmin}{\TAEEmax}}%
+				\do{\InsertRandomItem{TirageEntiersAleatoires}{##1}}%
+			%création de la liste (le 1er puis les autres)
+			\xdef#2{\TirageEntiersAleatoires[0]}%
+			\foreach \i in {1,2,...,{\inteval{\TAEEnb-1}}}%
+				{\xdef#2{#2,\TirageEntiersAleatoires[\i]}}%
+		}%
+	%on trie si besoin
+	\IfStrEq{\TAEEtri}{croissant}%si tri croissant
+		{\TriListeCroiss{#2}}%
+		{}%
+	\IfStrEq{\TAEEtri}{decroissant}%si tri décroissant
+		{\TriListeDecroiss{#2}}%
+		{}%
+	\StrSubstitute{#2}{,}{\TAEEsep}[#2]%on change le séparateur si besoin
+}
+
+\endinput

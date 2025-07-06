@@ -1,0 +1,30 @@
+On considère un cube $ABCDEFGH$ et on appelle $K$ le milieu du segment $[BC]$.
+
+\begin{center}
+	\begin{tikzpicture}[line join=bevel]
+		\PaveTikz[Aff=false,Cube,Largeur=4,Angle=58,Fuite=0.7]
+		\coordinate (K) at ($(B)!0.5!(C)$) ;
+		\draw[draw=none,fill=lightgray!50,opacity=0.66] (E)--(G)--(K)--cycle ;
+		\PaveTikz[Aff,Cube,Largeur=4,Epaisseur={thick},Angle=58,Fuite=0.7]
+		\draw (K) node[below right] {K} ;
+		\draw[thick] (K)--(F) (E)--(G) (G)--(K);
+		\draw[dashed,thick] (K)--(E) ;
+	\end{tikzpicture}
+\end{center}
+
+On se place dans le repère $\left( A\,;\,\vect{AB}\,,\,\vect{AD}\,,\,\vect{AE}\right)$ et on considère le tétraèdre $EFGK$.
+
+On rappelle que le volume d’un tétraèdre est donné par : \[\mathcal{V} = \dfrac13 \times \mathcal{B} \times h\] où $\mathcal{B}$ désigne l’aire d’une base et $h$ la hauteur relative à cette base.
+
+\begin{enumerate}
+	\item Préciser les coordonnées des points $E$, $F$, $G$ et $K$.
+	\item Montrer que le vecteur $\vect{n} \begin{pmatrix}2\\-2\\1\end{pmatrix}$ est orthogonal au plan $(EGK)$.
+	\item Démontrer que le plan $(EGK)$ admet pour équation cartésienne : $2x - 2y + z - 1 = 0$.
+	\item Déterminer une représentation paramétrique de la droite $(d)$ orthogonale au plan $(EGK)$ passant par $F$.
+	\item Montrer que le projeté orthogonal $L$ de $F$ sur le plan $(EGK)$ a pour coordonnées $\left( \frac59;\frac49;\frac79 \right)$.
+	\item Justifier que la longueur $LF$ est égale à $\dfrac23$.
+	\item Calculer l’aire du triangle $EFG$. En déduire que le volume du tétraèdre $EFGK$ est égal à $\dfrac16$.
+	\item Déduire des questions précédentes l’aire du triangle $EGK$.
+	\item On considère les points $P$ milieu du segment $[EG]$, $M$ milieu du segment $[EK]$ et $N$ milieu du segment $[GK]$. Déterminer le volume du tétraèdre $FPMN$.
+\end{enumerate}
+

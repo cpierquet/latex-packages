@@ -1,0 +1,268 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cp-touchescalc}[2017/10/08 Touches TI83 et 35+]
+%avec gestion des tailles de police et alignement hampe et jambage ;-)
+
+%CASIO 35+
+%\def\xc{1.1}
+%\def\xcg{1.2}
+%\def\yc{0.5}
+%\def\ycg{0.7}
+
+\RequirePackage{ifluatex}
+\def\xc{2.9em}
+\def\xcg{2.25em}
+\def\yc{1.15em}
+\def\ycg{1.2em}
+\def\lbase{0.2em}
+
+\newcommand{\noirecasio}{%
+	\draw[fill=black!85,line width=1pt,rounded corners=3pt] (0,0) rectangle (\xc,\yc);
+}
+\newcommand{\noirecasiogrande}{%
+	\draw[fill=black!85,line width=1pt,rounded corners=3pt] (0,0) rectangle (\xcg,\ycg);
+}
+\newcommand{\centrecasio}{%
+	\draw (0.5*\xc,0.5*\yc)
+}
+\newcommand{\centrecasiog}{%
+	\draw (0.5*\xcg,0.5*\ycg)
+}
+
+\newcommand{\ToucheCasioMenu}{%
+	\begin{tikzpicture}[baseline=\lbase]
+		\draw[fill=gray!66,line width=1pt,rounded corners=3pt] (0,0) rectangle (\xc,\yc);
+		\centrecasio node {{\tiny \white \textbf{\textsf{\strut MENU}}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheCasioDel}{%
+	\begin{tikzpicture}[baseline=\lbase]
+		\draw[fill=gray!66,line width=1pt,rounded corners=3pt] (0,0) rectangle (\xcg,\ycg);
+		\centrecasiog node {{\tiny \white \textbf{\textsf{\strut DEL}}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheCasioAC}{%
+	\begin{tikzpicture}[baseline=\lbase]
+		\draw[fill=gray!66,line width=1pt,rounded corners=3pt] (0,0) rectangle (\xcg,\ycg);
+		\centrecasiog node {{\tiny \white \textbf{\textsf{\strut AC\up{/ON}}}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheCasioEXE}{%
+	\begin{tikzpicture}[baseline=\lbase]
+		\draw[fill=blue!60,line width=1pt,rounded corners=3pt] (0,0) rectangle (\xcg,\ycg);
+		\centrecasiog node {{\tiny \white \textbf{\textsf{\strut EXE}}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheCasioOpe}[1]{%
+	\begin{tikzpicture}[baseline=\lbase]
+		\noirecasio
+		\centrecasio node {{\tiny \white \textbf{\textsf{\strut #1}}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheCasioNum}[1]{%
+	\begin{tikzpicture}[baseline=\lbase]
+		\noirecasiogrande
+		\centrecasiog node {{\tiny \white \textbf{\textsf{\strut #1}}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheCasioPui}{%
+	\begin{tikzpicture}[baseline=\lbase]
+		\noirecasiogrande
+		\draw (0.5*\xcg,0.47*\ycg) node {{\tiny \white \textbf{\textsf{\strut 10\up{x}}}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheCasioFD}{%
+	\begin{tikzpicture}[baseline=\lbase]
+		\noirecasio
+		\centrecasio node {{\tiny \white \textbf{\textsf{\strut F\boldmath$\leftrightarrow$\unboldmath{}D}}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheCasioSto}{%
+	\begin{tikzpicture}[baseline=\lbase]
+		\noirecasio
+		\draw[white,-latex,line width=1.5pt] (0.25*\xc,0.5*\yc) -- (0.75*\xc,0.5*\yc);
+	\end{tikzpicture}
+}
+\newcommand{\ToucheCasioCarre}{%
+	\begin{tikzpicture}[baseline=\lbase]
+		\noirecasio
+		\centrecasio node {{\tiny \white \textbf{\boldmath ${x^2}$ \unboldmath}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheCasioVar}{%
+	\begin{tikzpicture}[baseline=\lbase]
+		\noirecasio
+		\centrecasio node {\tiny \white{\textbf{\textsf X,T,n}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheCasioVars}{%
+	\begin{tikzpicture}[baseline=0.2em]
+		\noirecasio
+		\centrecasio node {\tiny \white{\textbf{\boldmath $\mathsf{X,T,n}$ \unboldmath}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheCasioChap}{%
+	\begin{tikzpicture}[baseline=\lbase]
+		\noirecasio
+		\draw[white,line width=1.25pt] (0.4*\xc,0.48*\yc) -- (0.5*\xc,0.66*\yc) -- (0.6*\xc,0.48*\yc);
+	\end{tikzpicture}}
+\newcommand{\ToucheCasioAlpha}{%
+	\begin{tikzpicture}[baseline=\lbase]
+		\draw[fill=red!75,line width=1pt,rounded corners=3pt] (0,0) rectangle (\xc,\yc);
+		\centrecasio node {\tiny \white {\textbf{\textsf{\strut ALPHA}}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheCasioShift}{%
+	\begin{tikzpicture}[baseline=\lbase]
+		\draw[fill=Dandelion!85,line width=1pt,rounded corners=3pt] (0,0) rectangle (\xc,\yc);
+		\centrecasio node {\tiny \white {\textbf{\textsf{\strut SHIFT}}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheCasioFrac}{%
+	\begin{tikzpicture}[baseline=\lbase]
+		\noirecasio
+		\draw[white,fill=white,line width=0.5pt] (0.4*\xc,0.85*\yc) rectangle (0.6*\xc,0.62*\yc);
+		\draw[white,line width=0.5pt] (0.33*\xc,0.5*\yc) -- (0.66*\xc,0.5*\yc);
+		\draw[white,line width=0.5pt] (0.4*\xc,0.38*\yc) rectangle (0.6*\xc,0.15*\yc);
+	\end{tikzpicture}}
+\newcommand{\ToucheCasioF}[1]{%
+	\begin{tikzpicture}[baseline=\lbase]
+		\draw[fill=gray!66,line width=1pt,rounded corners=2pt] (0,0) rectangle (\yc+0.2em,\yc);
+		\draw (0.5*\yc+0.1em,0.5*\yc) node[font=\fontsize{6pt}{7}\selectfont] {{\white \textbf{\textsf{\strut F#1}}}};
+	\end{tikzpicture}}
+	
+%items
+\newcommand{\itemb}[1]{%
+	\setlength{\fboxsep}{1pt}%
+	{\footnotesize \fbox{\texttt{#1}}}}
+%\newcommand{\itemn}[1]{%
+%	\setlength{\fboxsep}{3pt}%
+%	{\footnotesize \colorbox{black}{\texttt{\white #1}}}}
+\ifluatex
+	\newfontfamily\fontti{PTSansNarrow}
+	\newcommand{\itemn}[1]{%
+		\setlength{\fboxsep}{1pt}%
+		{\footnotesize \colorbox{black}{\fontti\bfseries\white #1}}}
+\else
+	\newcommand{\itemn}[1]{%
+		\setlength{\fboxsep}{1pt}%
+		{\footnotesize \colorbox{black}{\fontfamily{pcr}\selectfont\bfseries\white #1}}}
+\fi
+\newcommand{\menuaff}[1]{{\small \textbf{\texttt{#1}}}}
+
+%TI83CE
+%\def\xc{2.3em}
+%\def\xcg{1.6em}
+%\def\yc{0.95em}
+%\def\ycg{0.95em}
+%\def\x{3.7em}
+%\def\y{1.75em}
+%\def\yg{2em}
+\def\x{2.9em}
+\def\y{1.15em}
+\def\yg{1.2em}
+
+\newcommand{\bordnormal}{
+	\draw[line width=1pt,rounded corners=3pt] (0,0) rectangle (\x,\y);
+}
+\newcommand{\centre}{
+	\draw (0.5*\x,0.47*\y)
+}
+\newcommand{\centreg}{
+	\draw (0.33*\x,0.5*\y)
+}
+\newcommand{\grise}{
+	\draw[fill=gray!25,line width=1pt,rounded corners=3pt] (0,0) rectangle (\x,\y);
+}
+\newcommand{\noire}{
+	\draw[fill=black!85,line width=1pt,rounded corners=3pt] (0,0) rectangle (\x,\y);
+}
+
+\newcommand{\ToucheBlanche}[1]{%
+	\begin{tikzpicture}[baseline=0.2em]
+		\bordnormal
+		\centre node[font=\fontsize{6pt}{8}\selectfont] {{\textbf{\textsf{\vphantom{fg}#1}}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheBlancheSymb}[1]{%
+	\begin{tikzpicture}[baseline=0.2em]
+		\bordnormal
+		\draw (0.5*\x,0.45*\y) node[font=\fontsize{6pt}{8}\selectfont] {{\textsf{\vphantom{fg}#1}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheGrise}[1]{%
+	\begin{tikzpicture}[baseline=0.2em]
+		\grise
+		\centre node[font=\fontsize{6pt}{8}\selectfont] {{\textbf{\textsf{\vphantom{fg}#1}}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheMatrix}{%
+	\begin{tikzpicture}[baseline=0.2em]
+		\grise
+		\centre node[font=\fontsize{6pt}{8}\selectfont] {{\textbf{\textsf{\vphantom{fg}matrice}}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheMoins}[1]{%
+	\begin{tikzpicture}[baseline=0.2em]
+		\draw[fill=gray!40,line width=1pt,rounded corners=3pt] (0,0) rectangle (\x,\yg);
+		\draw (0.5*\x,0.45*\yg) node[font=\fontsize{7pt}{9}\selectfont] {{\textbf{\textsf{\vphantom{fg}($-$)}}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheNombre}[1]{%
+	\begin{tikzpicture}[baseline=0.2em]
+		\draw[fill=gray!40,line width=1pt,rounded corners=3pt] (0,0) rectangle (\x,\yg);
+		\draw (0.5*\x,0.45*\yg) node[font=\fontsize{8pt}{10}\selectfont] {{\textbf{\textsf{\strut #1}}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheFracDec}{%
+	\begin{tikzpicture}[baseline=0.2em]
+		\grise
+		\draw[fill=black,line width=0.25pt] (0.5*\x-0.3em,0.5*\y-0.3em) -- (0.5*\x-0.3em,0.5*\y+0.3em) --(0.5*\x-0.55em,0.5*\y) -- cycle;
+		\draw[fill=black,line width=0.25pt] (0.5*\x+0.3em,0.5*\y-0.3em) -- (0.5*\x+0.3em,0.5*\y+0.3em) --(0.5*\x+0.55em,0.5*\y) -- cycle;
+%		\draw[fill=black,line width=1pt] (0.5*\x-0.1,0.5*\y-0.05) -- (0.5*\x-0.1,0.5*\y+0.05) --(0.5*\x-0.18,0.5*\y) -- cycle;
+%		\draw[fill=black,line width=1pt] (0.5*\x+0.1,0.5*\y-0.05) -- (0.5*\x+0.1,0.5*\y+0.05) --(0.5*\x+0.18,0.5*\y) -- cycle;
+\end{tikzpicture}}
+\newcommand{\ToucheFrac}{%
+	\begin{tikzpicture}[baseline=0.2em]
+		\grise
+		\draw[line width=0.25pt] (0.4*\x,0.85*\y) rectangle (0.6*\x,0.59*\y);
+		\draw[line width=0.25pt] (0.33*\x,0.5*\y) -- (0.66*\x,0.5*\y);
+		\draw[line width=0.25pt] (0.4*\x,0.41*\y) rectangle (0.6*\x,0.15*\y);
+	\end{tikzpicture}}
+\newcommand{\ToucheSto}{%
+	\begin{tikzpicture}[baseline=0.2em]
+		\grise
+		\centreg node[font=\fontsize{6pt}{8}\selectfont] {{\textbf{\textsf{sto}}}};
+		\draw[-latex,line width=0.75pt] (0.6*\x,0.5*\y) -- (0.92*\x,0.5*\y);
+	\end{tikzpicture}}
+\newcommand{\ToucheVar}{%
+	\begin{tikzpicture}[baseline=0.2em]
+		\grise
+		\centre node[font=\fontsize{6pt}{8}\selectfont] {{\textbf{\textsf X,T,\boldmath$\theta$\unboldmath,n}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheVars}{%
+	\begin{tikzpicture}[baseline=0.2em]
+		\grise
+		\centre node[font=\fontsize{6pt}{8}\selectfont] {{\textbf{\boldmath $\mathsf{X,T,\theta,n}$ \unboldmath}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheCarre}{
+	\begin{tikzpicture}[baseline=0.2em]
+		\grise
+		\centre node[font=\fontsize{6pt}{8}\selectfont] {{\textbf{\boldmath $\mathsf{x^2}$ \unboldmath}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheChap}{%
+	\begin{tikzpicture}[baseline=0.2em]
+		\grise
+		\draw[line width=1.25pt] (0.4*\x,0.48*\y) -- (0.5*\x,0.66*\y) -- (0.6*\x,0.48*\y);
+	\end{tikzpicture}}
+\newcommand{\ToucheAlpha}{%
+	\begin{tikzpicture}[baseline=0.2em]
+		\draw[fill=ForestGreen!85,line width=1pt,rounded corners=3pt] (0,0) rectangle (\x,\y);
+		\centre node[font=\fontsize{6pt}{8}\selectfont] {\white {\textbf{\textsf{\vphantom{fg}alpha}}}};
+	\end{tikzpicture}}
+\newcommand{\ToucheSec}{%
+	\begin{tikzpicture}[baseline=0.2em]
+		\draw[fill=NavyBlue!85,line width=1pt,rounded corners=3pt] (0,0) rectangle (\x,\y);
+		\centre node[font=\fontsize{6pt}{8}\selectfont] {\white {\textbf{\textsf{\vphantom{fg}2nde}}}};
+	\end{tikzpicture}}
+
+\newcommand{\ToucheFleche}{%
+	\draw[thick] (1,0.4) arc (56.31:123.69:7.2mm) -- (0.4,0.1) --  (0.4,0.1) arc (123.69:56.31:3.6mm) -- cycle;
+	\draw[line width=1.5pt] (0.5,0.32) -- (0.6,0.41) -- (0.7,0.32); \clip (0.15,0.05) rectangle (1.05,0.55);
+}
+\newcommand{\ToucheFlecheH}{%
+	\begin{tikzpicture}[baseline=0.2em]
+		\ToucheFleche
+	\end{tikzpicture}}
+\newcommand{\ToucheFlecheB}{%
+	\begin{tikzpicture}[rotate=180,baseline=0.2em]
+		\ToucheFleche
+	\end{tikzpicture}}
+\newcommand{\ToucheFlecheG}{%
+	\begin{tikzpicture}[rotate=90,baseline=0.2em]
+		\ToucheFleche
+	\end{tikzpicture}}
+\newcommand{\ToucheFlecheD}{%
+	\begin{tikzpicture}[rotate=270,baseline=0.2em]
+		\ToucheFleche
+	\end{tikzpicture}}

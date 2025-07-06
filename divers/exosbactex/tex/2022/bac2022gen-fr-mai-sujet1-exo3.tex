@@ -1,0 +1,66 @@
+Le directeur d’une grande entreprise a proposé à l’ensemble de ses salariés un stage de formation à l’utilisation d’un nouveau logiciel.
+
+\smallskip
+
+Ce stage a été suivi par 25\,\% des salariés.
+
+\begin{enumerate}
+	\item Dans cette entreprise, 52\,\% des salariés sont des femmes, parmi lesquelles 40\,\% ont suivi le stage.
+	
+	On interroge au hasard un salarié de l’entreprise et on considère les événements :
+	
+	\begin{itemize}
+		\item $F$ : « le salarié interrogé est une femme » ;
+		\item $S$ : « le salarié interrogé a suivi le stage ».
+	\end{itemize}
+	
+	$\overline{F}$ et $\overline{S}$ désignent respectivement les évènements contraires de $F$ et de $S$.
+	\begin{enumerate}
+		\item Donner la probabilité de l’événement $S$.
+		\item Recopier et compléter les pointillés de l’arbre pondéré ci-dessous sur
+		les quatre branches indiquées.
+		
+		\begin{center}
+			\begin{forest} for tree = {grow'=0,math content,l=3cm,s sep=0.75cm},
+				[\Omega , name=Omega
+					[A , fleche , aproba=\ldots , name=A11
+						[B , fleche , aproba=\ldots , name=A21]
+						[\overline{B} , fleche , bproba=\ldots , name=A22]
+					]
+					[\overline{A} , fleche , bproba=\ldots , name=A12
+						[B , fleche , aproba=\ldots , name=A23]
+						[\overline{B} , fleche , bproba=\ldots , name=A24]
+					]
+				]
+			\end{forest}
+		\end{center}
+		\item Démontrer que la probabilité que la personne interrogée soit une femme ayant suivi le stage est égale à $0,208$.
+		\item On sait que la personne interrogée a suivi le stage. Quelle est la probabilité que ce soit une femme ?
+		\item Le directeur affirme que, parmi les hommes salariés de l’entreprise, moins de 10\,\% ont suivi le stage.
+		
+		Justifier l’affirmation du directeur. 
+	\end{enumerate}
+	\item On note $X$ la variable aléatoire qui à un échantillon de 20 salariés de cette entreprise choisis au hasard associe le nombre de salariés de cet échantillon ayant suivi le stage. On suppose que l’effectif des salariés de l’entreprise est suffisamment important pour assimiler ce choix à un tirage avec remise.
+	\begin{enumerate}
+		\item Déterminer, en justifiant, la loi de probabilité suivie par la variable aléatoire $X$.
+		\item Déterminer, à $10^{-3}$ près, la probabilité que 5 salariés dans un échantillon de 20 aient suivi le stage.
+		\item Le programme ci-dessous, écrit en langage \textsf{Python}, utilise la fonction  \texttt{binomiale(i,n,p)} créée pour l’occasion qui renvoie la valeur de la probabilité $P(x=i)$ dans le cas où la variable aléatoire $X$ suit une loi binomiale de paramètres $n$ et $p$.
+
+\begin{CodePythonLstAlt}*[Largeur=8cm]{center}
+def proba(k) :
+	P = 0
+	for i in range(0 ,k+1) :
+		P = P + binomiale(i, 20, 0.25)
+	return P
+\end{CodePythonLstAlt}
+
+		Déterminer, à $10^{-3}$ près, la valeur renvoyée par ce programme lorsque l’on saisit \texttt{proba(5)} dans la console \textsf{Python}. Interpréter cette valeur dans le contexte de l’exercice.
+		\item Déterminer, à $10^{-3}$ près, la probabilité qu’au moins 6 salariés dans un échantillon de 20 aient suivi le stage.
+	\end{enumerate}
+	\item Cette question est indépendante des questions \textbf{1} et \textbf{2}.
+	
+	Pour inciter les salariés à suivre le stage, l’entreprise avait décidé d’augmenter les salaires des salariés ayant suivi le stage de 5\,\%, contre 2\,\% d’augmentation pour les salariés n’ayant pas suivi le stage.
+	
+	Quel est le pourcentage moyen d’augmentation des salaires de cette entreprise dans ces conditions ?
+\end{enumerate}
+

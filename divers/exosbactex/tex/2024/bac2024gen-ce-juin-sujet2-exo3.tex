@@ -1,0 +1,31 @@
+Le cube $ABCDEFGH$ a pour arête 1~cm.
+
+Le point $I$ est le milieu du segment $[AB]$ et le point $J$ est le milieu du segment $[CG]$.
+
+\begin{Centrage}
+	\begin{EnvTikzEspace}[UniteX={0:4cm},UniteZ={90:4cm},UniteY={65:2.4cm}]
+		\PaveTikzTriDim[Cube,Largeur=1,AffLabel]
+		\PlacePointsEspace{I/0.5,0,0/b J/1,1,0.5/d}
+		\MarquePointsEspace[StyleMarque=x]{I,J}
+	\end{EnvTikzEspace}
+\end{Centrage}
+
+On se place dans le repère orthonormé $\left(A;\Vecteur{AB},\Vecteur{AD},\Vecteur{AE}\right)$.
+
+\begin{enumerate}
+	\item Donner les coordonnées des points $I$ et $J$.
+	\item Montrer que le vecteur $\Vecteur{EJ}$ est normal au plan $(FHI)$.
+	\item Montrer qu’une équation cartésienne du plan $(FHI)$ est $-2x-2y+z+1=0$.
+	\item Déterminer une représentation paramétrique de la droite $(EJ)$.
+	\item 
+	\begin{enumerate}
+		\item On note $K$ le projeté orthogonal du point $E$ sur le plan $(FHI)$.
+		
+		Calculer ses coordonnées.
+		\item Montrer que le volume de la pyramide EFHI est $\frac16$~cm\up{3}.
+	\end{enumerate}
+	\emph{On pourra utiliser le point $L$, milieu du segment $[EF]$. On admet que ce point est le projeté orthogonal du point $I$ sur le plan $(EFH)$.}
+	\begin{enumerate}[resume]
+		\item Déduire des deux questions précédentes l’aire du triangle $FHI$.
+	\end{enumerate}
+\end{enumerate}

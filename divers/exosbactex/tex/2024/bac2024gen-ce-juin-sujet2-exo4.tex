@@ -1,0 +1,49 @@
+\textbf{Partie A}
+
+\medskip
+
+On considère la fonction $f$ définie sur l’intervalle $\IntervalleFO{0}{+\infty}$ par $f(x)=\sqrt{x+1}$.
+
+On admet que cette fonction est dérivable sur ce même intervalle.
+
+\begin{enumerate}
+	\item Démontrer que la fonction $f$ est croissante sur l’intervalle $\IntervalleFO{0}{+\infty}$.
+	\item Démontrer que pour tout nombre réel $x$ appartenant à l’intervalle $\IntervalleFO{0}{+\infty}$ : \[ f'(x)-x=\frac{-x^2+x+1}{\sqrt{x+1}+1}. \]
+	\item En déduire que sur l’intervalle $\IntervalleFO{0}{+\infty}$ l’équation $f(x)=x$ admet pour unique solution : \[ \ell = \frac{1+\sqrt{5}}{2}. \]
+\end{enumerate}
+
+\smallskip
+
+\textbf{Partie B}
+
+\medskip
+
+On considère la suite $\Suite{u}$ définie par $u_0 = 5$ et pour tout entier naturel $n$, $u_{n+1} = f\big(u_n\big)$ où $f$ est la fonction étudiée dans la \textbf{partie A}.
+
+On admet que la suite de terme général $u_n$ est bien définie pour tout entier naturel $n$.
+
+\begin{enumerate}
+	\item Démontrer par récurrence que pour tout entier naturel $n$, on a $1 \leqslant u_{n+1} \leqslant u_n$.
+	\item En déduire que la suite $\Suite{u}$ converge.
+	\item Démontrer que la suite $\Suite{u}$ converge vers $\ell = \frac{1+\sqrt{5}}{2}$.
+	\item On considère le script \textsf{Python} ci-dessous :
+
+\begin{CodePythonLstAlt}[Largeur=0.6\linewidth]{center}
+from math import *
+def seuil(n) :
+	u = 5
+	i = 0
+	ell = (1+sqrt(5))/2
+	while abs(u - ell) >= 10**(-n) :
+		u = sqrt(u+1)
+		i = i+1
+	return(i)
+\end{CodePythonLstAlt}
+	\emph{On rappelle que la commande \textup{\texttt{abs(x)}} renvoie la valeur absolue de \textup{\texttt{x}}}.
+	\begin{enumerate}
+		\item Donner la valeur renvoyée par \texttt{seuil(2)}.
+		\item La valeur renvoyée par \texttt{seuil(4)} est \texttt{9}.
+		
+		Interpréter cette valeur dans le contexte de l’exercice.
+	\end{enumerate}
+\end{enumerate}

@@ -1,0 +1,59 @@
+\textbf{Partie 1}
+
+\medskip
+
+On considère la fonction $f$ définie sur l'ensemble des nombres réels $\R$ par : \[ f(x)=\left(x^{2}-4\right) e^{-x}. \]
+%
+On admet que la fonction $f$ est dérivable sur $\R$ et on note $f'$ sa fonction dérivée.
+
+\begin{enumerate}
+	\item Déterminer les limites de la fonction $f$ en $-\infty$ et en $+\infty$.
+	\item Justifier que pour tout réel $x$, $f'(x)=\left(-x^{2}+2 x+4\right)\,\e^{-x}$.
+	\item En déduire les variations de la fonction $f$ sur $\R$.
+\end{enumerate}
+
+\medskip
+
+\textbf{Partie 2}
+
+\medskip
+
+On considère la suite $\Suite{I}$ définie pour tout entier naturel $n$ par $I_{n}=\int_{-2}^{0} x^{n}\,\e^{-x} \dx$.
+
+\begin{enumerate}
+	\item Justifier que $I_{0}=\e^{2}-1$.
+	\item En utilisant une intégration par partie, démontrer l'égalité : \[ I_{n+1}=(-2)^{n+1}\,\e^{2}+(n+1) I_{n}. \]
+	\item En déduire les valeurs exactes de $I_{1}$ et de $I_{2}$.
+\end{enumerate}
+
+\medskip
+
+\begin{wrapstuff}[r]
+\begin{GraphiqueTikz}%
+	[x=0.33cm,y=0.33cm,Xmin=-4,Xmax=6,Ymin=-9,Ymax=4]
+	\DefinirCourbe[Nom=cf,Debut=-4,Fin=10]<f>{(x^2-4)*exp(-x)}
+	\TracerIntegrale[Type=fct,Style=hachures,Couleurs=orange]{f(x)}{-2}{0}
+	\TracerAxesGrilles[Grille=false]{}{}
+	\TracerCourbe[Couleur=blue]{f(x)}
+	\draw[pflaxes] (0,0)--++(1,0) node[below,midway,font=\tiny] {$\Vecteur{\imath}$} ;
+	\draw[pflaxes] (0,0)--++(0,1) node[left,midway,font=\tiny] {$\Vecteur{\jmath}$} ;
+	\PlacerTexte[Police=\small]{(-3,1)}{$\mathcal{C}_{f}$}
+	\PlacerTexte[Police=\tiny,Position=below left]{(0,0)}{$O$}
+	\PlacerTexte[Police=\small]{(-1,-4)}{$\bm{D}$}
+\end{GraphiqueTikz}
+\end{wrapstuff}
+
+\textbf{Partie 3}
+
+\smallskip
+
+\begin{enumerate}
+	\item Déterminer le signe sur $\R$ de la fonction $f$ définie dans la \textbf{partie 1}.
+	\item On a représenté ci-contre la courbe $\mathcal{C}_{f}$ de la fonction $f$ dans un repère orthonormé $\Rij$.
+	
+	\smallskip
+	
+	Le domaine $\bm{D}$ du plan hachuré ci-contre est délimité par la courbe $\mathcal{C}_{f}$, l'axe des abscisses et l'axe des ordonnées.
+	
+	Calculer la valeur exacte, en unité d'aire, de l'aire $S$ du domaine $\bm{D}$.
+\end{enumerate}

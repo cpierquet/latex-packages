@@ -1,0 +1,1056 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{cp-base}[2022/11/18 - Packages de base, V3.7]
+% 3.7	Un peu de nettoyage
+% 3.6	Modifs pour compatibilité avec ProfLycee 2.0 (option [nonshellescape])
+% 3.5	Modifications mineures + neoeuler
+% 3.4	Modifications mineures
+% 3.3	Option [schola] pour une font tex gyre schola + correction tblr competences
+% 3.2.1	Ajout commande \arrond avec xfp + num et d'une commande \convdecbin
+% 3.2	Ajout commande \tableaucompetences
+% 3.18	Modif color/xcolor pour mathcolor (wait for xcolor update...)
+% 3.17	Modifcation icomma -> textualicomma & environnement mycenter pour gestion espace avant
+% 3.16	Ajout d'une commande pour créer le répertoire build si shellescape est activé
+% 3.15	Ajout d'environnements enumulti (pour fusionner pour plusieurs colonnes) avec tasks
+% 3.14	Ajout d'un patch mathcolor (pour les symboles notamment...)
+% 3.13	Option [inconsolata] pour tt avec erewhon
+% 3.12	Ajout d'une option nobuild pour se répercuter sur proflycee ;-)
+% 3.11	Nettoyage option pythontex (toujours chargée par défaut...)
+% 3.10	Ajout d'une option xcharter pour lua
+% 3.9.1	Retour à la normale (pour erewhon) ?
+% 3.9	Modif mineur suite à un bug avec fourier-orns...
+% 3.8	Nettoyage de vieux packages plus utiles
+% 3.7	Ajour de la fonte concmath-otf
+% 3.6	Essai d'utilisation du répertoire build comme sortie minted/pythontex
+% 3.5.2	Ajout d'une option pour les polices newpx
+% 3.5.1	Modif mineure sur la place du package lualatex-math (bizarre...)
+% 3.5	Modifaction des 'alphabets' pour gérer (pdf/lua)latex
+% 3.4	Option xits pour la fonts... xits
+% 3.3	Ajout d'une option kpfonts en lua
+% 3.2	Modification cabin pour sff puis adaptation titre... hope ^_^
+% 3.1	Ajout de commandes spécifiques pour le CCF d'algo
+% 3.0.1	Passage (en pdflatex) à la font cabin en sans serif (déjà param en lua/xe)
+% 3.0	Distinction pdflatex / lualatex
+% 2.6	Option [pythontex] ;-)
+% 2.5	Option [code] pour charger minted
+% 2.4	Modif des \donnees avec valeurs par défaut (éviter valeurs non définies...)
+% 2.3.3	Colonne O pour cellspace !
+% 2.3	Ajout des titres via frame et \part (pb avec \chapter...)
+% 2.2	Nettoyage pstricks (uniquement en compil tricks)
+% 2.1.1	Passage siunitx et icomma pour l'espace après la virgule en mathmode
+% 2.1	Commandes numeropage ou numeropagetot
+% 2.0	Ajout du package interval avec \intervff etc...
+% 1.9.3	Ajout d'une commande \espcellule[sep] pour cellspace ;-) avec cellule C{X} ou C{Y} !
+% 1.9.2	Correction de la commande revgoku (avec la hauteur de ligne)
+% 1.9	Externalisation tikz-tricks
+% 1.6.1	Amélioration grilles / axes en tikz ;-)
+% 1.6	Utilisation des pgfkeys pour axes et grilles en tikz !!!
+% 1.4	Commande \noticetikz(*) pour les notices de lecture graphique
+% 1.2	Ajout d'un environnement {envconsolepython}
+
+% ======================================base
+\RequirePackage{iftex,ifluatex,ifxetex,ifpdf,ifthen}
+
+% =============================fontes luatex
+\newif\if@erewhon \@erewhontrue
+\newif\if@fira \@firafalse
+\newif\if@inconsolata \@inconsolatafalse
+
+\DeclareOption{fira}{\@erewhonfalse \@firatrue}
+\DeclareOption{inconsolata}{\@inconsolatatrue}
+
+% ============les entetes [noentete/exambts]
+\newif\if@entete \@entetetrue
+\newif\if@noentete \@noentetefalse
+\newif\if@exambts \@exambtsfalse
+\DeclareOption{noentete}{\@entetefalse \@noentetetrue}
+\DeclareOption{exambts}{\@entetefalse \@exambtstrue}
+
+% ===============commandes puces [dense/exam]
+\newif\if@dense \@densefalse
+\DeclareOption{dense}{\@densetrue}
+\newif\if@exam \@examfalse
+\DeclareOption{exam}{\@examtrue}
+
+% ======commandes exos [sujet/sujetl/revgoku]
+\newif\if@sujet \@sujetfalse
+\DeclareOption{sujet}{\@sujettrue}
+\newif\if@sujetl \@sujetlfalse
+\DeclareOption{sujetl}{\@sujetltrue}
+\newif\if@revgoku \@revgokufalse
+\DeclareOption{revgoku}{\@revgokutrue}
+
+% ===========================options diverses
+% [minted] pour charger minted dans ProfLycee
+% [nobuild] pour empêcher le ./build dans pythontex/minted de ProfLycee
+\newif\if@breakable \@breakablefalse
+\DeclareOption{breakable}{\@breakabletrue}
+%\newif\if@minted \@mintedfalse
+%\DeclareOption{minted}{\@mintedtrue}
+%\newif\if@nobuild \@nobuildfalse
+%\DeclareOption{nobuild}{\@nobuildtrue}
+%\newif\if@greek \@greekfalse
+%\DeclareOption{greek}{\@greektrue}
+
+% [pythonenv]
+\newif\if@pythonenv \@pythonenvfalse
+\DeclareOption{pythonenv}{\@pythonenvtrue}
+
+\DeclareOption*{}%% Ne rien faire quand une option est inconnue
+%Fin des options, ouf !!
+\ProcessOptions\relax
+ 
+% =============================Classe de base
+\everymath{\displaystyle}
+%\def\rm#1{\textrm{#1}}
+\AtBeginDocument{%
+	\abovedisplayskip=0.33\baselineskip
+	\abovedisplayshortskip=0.33\baselineskip
+	\belowdisplayskip=0.33\baselineskip
+	\belowdisplayshortskip=0.33\baselineskip
+	\ifnum\ShellEscapeStatus=1 \ShellEscape{mkdir build} \fi
+}
+
+% =====================Moteurs de compilation
+\newif\ifxetexorluatex
+\ifxetex
+	\xetexorluatextrue
+\else
+	\ifluatex
+		\xetexorluatextrue
+	\else
+		\xetexorluatexfalse
+	\fi
+\fi
+
+%\if@minted
+%\if@nobuild
+%\RequirePackage{ProfLycee}
+%\else
+%\RequirePackage[build]{ProfLycee}
+%\fi
+%\else
+%\if@nobuild
+%\RequirePackage[nonshellescape]{ProfLycee}
+%\else
+%\RequirePackage[build,nonshellescape]{ProfLycee}
+%\fi
+%\fi
+
+% =================================lua ou pdf
+\ifxetexorluatex %si moteur=lualatex ou xelatex
+%	\RequirePackage{babel}
+%	\frenchsetup{StandardLists=true}
+	\RequirePackage{fontspec}
+	%\RequirePackage{amsmath}
+	%\let\normalunderbracket=\underbracket
+	%\RequirePackage{mathtools}
+	\RequirePackage{lualatex-math}
+	%\RequirePackage{amsmath}
+	%\let\underbracket=\normalunderbracket
+	%\RequirePackage{luatexbase}
+	\RequireLuaModule{lualibs}
+	%\RequirePackage{metalogo}
+	\RequirePackage{luacode}
+	\if@erewhon
+		\RequirePackage[math-style=french,bold-style=ISO]{fourier-otf}
+		\setsansfont{Fira Sans}[Scale=MatchLowercase] % sf
+		\if@inconsolata
+			%\setmonofont{Inconsolatazi4}[Scale=MatchLowercase] % tt
+			\setmonofont{Inconsolatazi4}%
+				[ItalicFont=*-Regular,ItalicFeatures={FakeSlant=0.225},BoldItalicFont=*-Bold,BoldItalicFeatures={FakeSlant=0.225},Scale=MatchLowercase]
+		\fi
+	\fi
+	\if@fira
+		\RequirePackage[math-style=french]{unicode-math}
+		\setmainfont{Fira Sans}
+		\setmonofont{Fira Mono}%[Scale=MatchLowercase]
+		\setmathfont{Fira Math}
+	\fi
+	\RequirePackage{realscripts}
+	\defaultfontfeatures{Ligatures={TeX}}
+	\RequirePackage[only,llbracket,rrbracket]{stmaryrd}
+\else %sinon pdflatex ou latex
+	\RequirePackage{babel}
+	\frenchsetup{StandardLists=true}
+	\RequirePackage[utf8]{inputenc}
+	\RequirePackage[T1]{fontenc}
+	\newcommand\hmmax{0} % patch pour les alphabets multiples
+	\newcommand\bmmax{0}
+	\RequirePackage[upright]{fourier}
+	\RequirePackage{mathtools}
+	\RequirePackage{amsmath,amssymb,amstext}
+	\RequirePackage[scaled=0.875]{helvet}
+	\renewcommand\ttdefault{lmtt}
+	\RequirePackage[scaled=1]{cabin} % sf
+\fi
+
+%============================packages de base
+\RequirePackage{shellesc}
+\ifthenelse{\isundefined{\euro}}%
+	{\newcommand\euro{\eurologo{}}}%
+	{\renewcommand\euro{\eurologo{}}}
+
+%\newcommand\euro{\eurologo{}}
+% polices de caractères cursives
+\DeclareSymbolFont{calletters}{OMS}{cmsy}{m}{n}
+\DeclareSymbolFontAlphabet{\mathcallig}{calletters}
+\RequirePackage[mathscr]{eucal}
+\RequirePackage{hvlogos}
+\RequirePackage{color}
+%\RequirePackage[table,svgnames]{xcolor}
+\RequirePackage{fontawesome5}
+\RequirePackage{adjustbox}
+\RequirePackage{xspace}
+\RequirePackage{fancybox}
+\RequirePackage{fbox}
+\RequirePackage{esvect}
+%back to normal
+\RequirePackage{nicematrix}
+\RequirePackage{colortbl}
+\RequirePackage{tabularx}
+\RequirePackage{multirow}
+\RequirePackage{multicol}
+\RequirePackage[normalem]{ulem}
+%\RequirePackage{pifont}
+\RequirePackage{enumitem}
+\RequirePackage{graphicx}
+\RequirePackage{cancel}
+\RequirePackage[np]{numprint}
+\RequirePackage{siunitx} %test avec v3
+\sisetup{%
+  locale=FR,%
+  mode = match, propagate-math-font = true,%
+  reset-math-version = false, reset-text-family = false,%
+  reset-text-series = false, reset-text-shape = false,%
+  text-family-to-math = true, text-series-to-math = true,%
+  output-decimal-marker={,},%
+  group-minimum-digits=4%
+}%
+%\sisetup{locale=FR}
+\RequirePackage{tkz-base}
+\RequirePackage{tkz-fct}
+\RequirePackage{tkz-euclide}
+\RequirePackage{tkz-tab}
+\usetikzlibrary{automata,positioning}
+\RequirePackage{fancyhdr}
+\RequirePackage{fp}
+\RequirePackage{xfp}
+\RequirePackage{xparse}
+\RequirePackage{xkeyval}
+\RequirePackage{xstring}
+\RequirePackage{xintexpr}
+\RequirePackage{xinttools}
+\RequirePackage{xintbinhex}
+\RequirePackage{simplekv}
+\RequirePackage{listofitems}
+\RequirePackage{shadowtext}
+\RequirePackage{nicefrac}
+\RequirePackage{fancyqr}
+%\RequirePackage{units} %pb avec siunitx ?
+\RequirePackage{wasysym}
+\RequirePackage{xargs}
+\RequirePackage{systeme}
+\RequirePackage{venndiagram}
+\RequirePackage{pas-tableur}
+\RequirePackage[most]{tcolorbox}
+\tcbuselibrary{skins}
+\RequirePackage{lastpage}
+\RequirePackage{currfile}
+\RequirePackage{tabto}
+\RequirePackage{tangente}
+\RequirePackage{bigstrut}
+\RequirePackage{pstricks}
+\RequirePackage{interval}
+\RequirePackage{textualicomma}
+%\RequirePackage{icomma} %pb avec hyperref
+\RequirePackage{lettrine}
+\RequirePackage{ccicons}
+\RequirePackage{epsdice}
+\RequirePackage{tasks}
+\newcommand\espcellule[1][3pt]{%
+	\RequirePackage[column=O]{cellspace}
+	\setlength\cellspacetoplimit{#1}
+	\setlength\cellspacebottomlimit{#1}
+	\addparagraphcolumntypes{X}
+}
+
+%\ifxetexorluatex %si moteur=lualatex ou xelatex
+%	\RequirePackage{lualatex-math}
+%\fi
+
+\ifpdf
+	\newcommand\logolycee{$\vcenter{\hbox{\includegraphics[height=0.9\baselineskip]{logo_lycee.png}}}$}
+	\newcommand\logopython{$\vcenter{\hbox{\includegraphics[height=0.9\baselineskip]{logopython.png}}}$}
+	\RequirePackage{hyperref}
+\else
+	\newcommand\logolycee{$\vcenter{\hbox{\includegraphics[height=0.9\baselineskip]{logo_lycee.eps}}}$}
+	\newcommand\logopython{$\vcenter{\hbox{\includegraphics[height=0.9\baselineskip]{logopython.eps}}}$}
+	\RequirePackage[dvips]{hyperref}
+\fi
+%patch textcolor math plus utile ??
+%https://tex.stackexchange.com/questions/21598/how-to-color-math-symbols
+%\def\mathcolor#1#{\@mathcolor{#1}}
+%\def\@mathcolor#1#2#3{%
+%	\protect\leavevmode
+%	\begingroup
+%	\color#1{#2}#3%
+%	\endgroup
+%}
+
+%================= qques options/pack. persos
+\if@breakable
+	\RequirePackage[breakable]{cp-tcbox}
+\else
+	\RequirePackage{cp-tcbox}
+\fi
+\RequirePackage{cp-tikztricks}
+
+% ===============env. python (sans proflycee)
+\newenvironment{consolepython}[1][\linewidth]{%
+	\begin{center}
+	\begin{minipage}{#1}
+	}
+	{
+	\end{minipage}
+	\end{center}
+}
+
+\newenvironment{envconsolepython}[1][\linewidth]{%
+	\VerbatimEnvironment
+	\begin{center}
+	\begin{minipage}{#1}
+	\begin{pyconsole}[][framesep=3mm,frame=single,label={[\scriptsize Début de la console \logopython]\scriptsize Fin de la console \logopython},fontsize=\footnotesize,framerule=1pt,rulecolor=\color{ForestGreen}]
+	}
+	{
+	\end{pyconsole}
+	\end{minipage}
+	\end{center}
+}
+%\fi
+
+% ==========================minipage/multcols
+\NewDocumentEnvironment{mulcols}{s O{\linewidth} m}
+	{%
+	\IfBooleanT{#1}{\begin{center}}%
+	\begin{minipage}{#2}%
+	\begin{multicols}{#3}%
+	}
+	{%
+	\end{multicols}%
+	\end{minipage}%
+	\IfBooleanT{#1}{\end{center}}
+	}
+
+% ===================================mycenter
+\newenvironment{mycenter}[1][\topsep]
+	{\setlength{\topsep}{#1}\par\kern\topsep\centering}% \begin{mycenter}[<len>]
+	{\par\kern\topsep}% \end{mycenter}
+	
+% ===========================mirror et images
+\newcommand\mirror[1]{%
+	\raisebox{\depth}{\scalebox{-1}[-1]{\footnotesize\textcolor{ForestGreen}{#1}}}
+}
+
+\newcommand\minicalc[2][0.8em]{%
+	\raisebox{-0.05em}{\includegraphics[height=#1]{#2}}
+}
+
+\newcommand\poker[2]{%
+	\includegraphics[width={#2}cm]{#1}
+}
+
+% ======================================Maths
+\renewcommand\i{\rm{i}} %pour hyperref !
+\newcommand\ssi{\Leftrightarrow}
+\newcommand\pp{\leqslant}
+\newcommand\pg{\geqslant}
+\newcommand\courbe[1]{\mathscr{C}_{#1}}
+\newcommand\loinorm[3]{#1 \hookrightarrow \mathcallig{N} \left(#2\mathpunct{};\mathpunct{}#3\right)}
+\newcommand\binomiale[2]{\mathcallig{B} \left(#1\mathpunct{};\mathpunct{}#2\right)}
+\newcommand\loibinom[3]{#1 \hookrightarrow \mathcallig{B} \left(#2\mathpunct{};\mathpunct{}#3\right)}
+\newcommand\normale[2]{\mathcallig{N} \left(#1\mathpunct{};\mathpunct{}#2\right)}
+\newcommand\suiten[1][u]{\left( #1_n \right)}
+\newcommand\suiteun{\left( u_n \right)}
+\newcommand\suitevn{\left( v_n \right)}
+\newcommand\matdeux[4]{\begin{pmatrix} #1 & #2 \\ #3 & #4 \end{pmatrix}}
+\newcommand\etprob[2]{\begin{pmatrix} #1 & #2 \end{pmatrix}}
+\newcommand\coordpl[2]{\left(#1\mathpunct{};#2\right)}
+\newcommand\coordes[3]{\left(#1\mathpunct{};#2\mathpunct{};#3\right)}
+\newcommand\coordeux[2]{\begin{pmatrix} #1 \\ #2 \end{pmatrix}}
+\newcommand\coordve[3]{\begin{pmatrix} #1 \\ #2 \\ #3 \end{pmatrix}}
+\newcommand\vect[1]{\vv{#1}}
+\newcommand\vekt[1]{\overrightarrow{#1}}
+\newcommand\mclp[2]{\underset{\mathclap{#2}}{#1}}
+
+% =================================Maths v2 ?
+%\newcommand\Courbe[1]{%
+%	\IfStrEq{#1}{}{\mathscr{C}}{\mathscr{C}_{#1}}%
+%}
+%\newcommand\LoiNormale[2]{%
+%	\mathcallig{N} \left(#2\mathpunct{};\mathpunct{}#3\right)%
+%}
+%\newcommand\LoiBinomiale[2]{%
+%	\mathcallig{B} \left(#1\mathpunct{};\mathpunct{}#2\right)%
+%}
+%\newcommand\CoordPP[2]{%
+%	\left(#1\mathpunct{};#2\right)%
+%}
+%\newcommand\CoordPE[3]{%
+%	\left(#1\mathpunct{};#2\mathpunct{};#3\right)%
+%}
+%\newcommand\CoordVP[2]{%
+%	\begin{pmatrix} #1 \\ #2 \end{pmatrix}%
+%}
+%\newcommand\CoordVE[3]{%
+%	\begin{pmatrix} #1 \\ #2 \\ #3 \end{pmatrix}%
+%}
+%\newcommand\MatDeux[4]{%
+%	\begin{pmatrix} #1 & #2 \\ #3 & #4 \end{pmatrix}%
+%}
+%\intervalconfig{separator symbol=\,;}
+%\newcommand\IntervalleFF[3][scaled]{\ensuremath{\interval[#1]{#2}{#3}}}
+%\newcommand\IntervalleOF[3][scaled]{\ensuremath{\interval[#1,open left]{#2}{#3}}}
+%\newcommand\IntervalleFO[3][scaled]{\ensuremath{\interval[#1,open right]{#2}{#3}}}
+%\newcommand\IntervalleOO[3][scaled]{\ensuremath{\interval[#1,open]{#2}{#3}}}
+%\DeclareDocumentCommand\Arrondi{ s O{3} m }{% * pour afficher signe / opt = précision / argument = nb
+%	\IfBooleanTF{#1}{\num[print-implicit-plus]{\fpeval{round(#3,#2)}}}{\num{\fpeval{round(#3,#2)}}}
+%}
+\newcommand\convdecbin[1]{%
+	\def\resbrut{\xintDecToBin{#1}}
+	\StrLen{\resbrut}[\nbchiffres]
+	\def\nbgrp{\fpeval{4*ceil(\nbchiffres/4,0)}}
+	\num[digit-group-size=4,minimum-integer-digits=\nbgrp]{\resbrut}
+}
+
+% ==============Styles persos et mise en page
+\newcommand\lycee{Lycée Edmé Bouchardon}
+\definecolor{marron}{rgb}{0.64,0.16,0.16}
+\definecolor{titrebleu}{rgb}{0,0,0.6}
+\setlength{\parindent}{0pt}
+\setlength{\headheight}{8mm}
+\setlength{\headsep}{4mm}
+\setlength{\footskip}{12mm}
+% numérotation des pages
+\newcommand\numeropage{%
+	\ifthenelse{\pageref{LastPage}>1}{- \thepage{} -}{}
+}
+\newcommand\numeropagetot[1][/]{%
+	\ifthenelse{\pageref{LastPage}>1}{- \thepage{}#1{}\pageref{LastPage} -}{}
+}
+
+% entêtes
+\if@entete
+	\RequirePackage[left=13mm,right=13mm,top=18mm,bottom=18mm,footskip=30pt]{geometry}
+\fi
+\if@noentete
+	\RequirePackage[left=13mm,right=13mm,top=13mm,bottom=18mm]{geometry}
+\fi
+\if@exambts
+	\renewcommand{\headrulewidth}{0pt}
+	\RequirePackage[left=13mm,right=13mm,top=13mm,bottom=18mm]{geometry}
+	\setlength{\textheight}{24.75cm}
+	\setlength{\footskip}{20mm}
+\fi
+
+%\newcommand\appelprof{\Ovalbox{\tuto{{\tiny \faUserTie} {\scriptsize Appel possible au professeur !}}}}
+
+% =================lignes, pointillés, écarts
+\newcommand\lignetitre{{\color{titrebleu}\hrule height1.1pt}}
+\newcommand\lignetitrenoire{{\hrule height1.1pt}}
+\newcommand\pointille[1][1cm]{\makebox[#1]{\dotfill}}
+\newcommand\ecartp{$\vphantom{A^{2^2}A_{2_2}}$}
+\newcommand\ecartg{$\vphantom{\left(\dfrac{A^{2^2}}{A_{2_2}}\right)}$}
+\newlength{\esptabul}
+\newcommand\tabulat[1][1]{%
+	\FPeval{\espt}{#1*5}
+	\setlength{\esptabul}{{\espt}mm}
+	\hspace{\esptabul}}
+
+%mises en forme
+\newcommand\nomprenom{\begin{Large} \texttt{NOM : \dotfill Prénom : \dotfill} \end{Large}}
+\newcommand\nomprenomtcbox{\begin{tcolorbox}[enhanced,size=title,boxsep=6pt,boxrule=1pt,colframe=gray,colback=lightgray!5,left=2pt,right=2pt,sharp corners,rounded corners=downhill,arc=8pt]\textbf{\textsf{\large NOM : \dotfill~Prénom : \dotfill}}\end{tcolorbox}}
+\newcommand\tabula{\hspace{5mm}}
+\newcommand\decalt{\hspace*{4ex}}
+\newcommand\ptno[1]{\textbf{\textcolor{red}{#1.}}}
+\newcommand\pta[1]{\textbf{\textcolor{blue}{#1.}}}
+\newcommand\pti[1]{\textbf{\textcolor{ForestGreen}{#1.}}}
+
+%polices entete/pied
+\newcommand\entete{\@ifstar{\entete@star}{\entete@nostar}}
+\newcommand\pied{\@ifstar{\pied@star}{\pied@nostar}}
+
+\newcommand\entete@nostar[2][0.85]{%
+	\textcolor{BlueViolet}{\scriptsize\sffamily\scalebox{#1}[#1]{#2}}
+}
+\newcommand\pied@nostar[2][0.85]{%
+	\textcolor{BlueViolet}{\scriptsize\sffamily\scalebox{#1}[#1]{#2}}
+}
+
+\newcommand\entete@star[1]{%
+	\textcolor{BlueViolet}{\scriptsize #1}
+}
+\newcommand\pied@star[1]{%
+	\textcolor{BlueViolet}{\scriptsize #1}
+}
+
+% ======================qcm (tabularray ?...)
+\newcommand\qcm[4]{
+	\begin{tabularx}{\linewidth}{XXXX}
+		\pta{a}~~#1 & \pta{b}~~#2 & \pta{c}~~#3 & \pta{d}~~#4 \\
+	\end{tabularx}}
+\newcommand\qcmdeux[4]{
+	\begin{tabularx}{\linewidth}{XX}
+		\pta{a}~~#1 & \pta{b}~~#2 \\ \pta{c}~~#3 & \pta{d}~~#4 \\
+	\end{tabularx}}
+\newcommand\qcmtrois[3]{
+	\begin{tabularx}{\linewidth}{XXX}
+		\pta{a}~~#1 & \pta{b}~~#2 & \pta{c}~~#3 \\
+	\end{tabularx}}
+
+% =============gestion du gras en mode math ?
+\ifxetexorluatex
+	\newcommand\grasmaths[1]{\symbf{#1}}
+	\newcommand\sfbmath[1]{\symbf{\symsfup{#1}}}
+	\newfontfamily\poltuto{QTSanDiego}
+	\newcommand\tuto[1]{{\poltuto #1}}
+\else
+	\usepackage{bm}
+	\newcommand\grasmaths[1]{\bm{#1}}
+	\newcommand\sfbmath[1]{\bm{\mathsf{#1}}}
+	\newcommand\tuto[1]{{\textsf #1}}
+\fi
+
+% ============================Exos/Titres/etc
+% données
+\RequirePackage{titlesec}
+\RequirePackage[fr-FR]{datetime2}
+\newcommand\nomfichier{\currfilebase}
+\newcommand\mois{\DTMfrenchMonthname{\@dtm@month}}
+\newcommand\annee{\@dtm@year}
+\newcommand\matiere{<matiere>}
+\newcommand\classe{<classe>}
+\newcommand\typedoc{DOC}
+\newcommand\numdoc{1}
+\newcommand\duree{<duree>}
+
+\define@key{donnees}{nomfichier}{\def\donnees@nomfichier{#1}}
+\define@key{donnees}{typedoc}{\def\donnees@typedoc{#1}}
+\define@key{donnees}{numdoc}{\def\donnees@numdoc{#1}}
+\define@key{donnees}{classe}{\def\donnees@classe{#1}}
+\define@key{donnees}{matiere}{\def\donnees@matiere{#1}}
+\define@key{donnees}{mois}{\def\donnees@mois{#1}}
+\define@key{donnees}{annee}{\def\donnees@annee{#1}}
+\define@key{donnees}{matiere}{\def\donnees@matiere{#1}}
+\define@key{donnees}{duree}{\def\donnees@duree{#1}}
+\define@key{donnees}{titre}{\def\donnees@titre{#1}}
+\define@key{donnees}{tailletitre}{\def\donnees@tailletitre{#1}}
+\define@key{donnees}{margetitre}{\def\donnees@margetitre{#1}}
+\setkeys{donnees}{nomfichier=\currfilebase,typedoc=DOC~,numdoc=1,classe={<classe>},matiere={<matiere>},mois={\DTMfrenchMonthname{\@dtm@month}},annee={\@dtm@year},duree={<duree>},titre=,tailletitre=\huge,margetitre=0cm}
+\newcommand\donnees[1][]{%
+	\setkeys{donnees}{#1}
+	\renewcommand\nomfichier{\donnees@nomfichier}
+	\renewcommand\typedoc{\donnees@typedoc}
+	\renewcommand\numdoc{\donnees@numdoc}
+	\setcounter{part}{\donnees@numdoc}
+	\addtocounter{part}{-1}
+	\renewcommand\thepart{\ifnum\value{part}<10\relax0\fi\arabic{part}}
+	\renewcommand\classe{\donnees@classe}
+	\renewcommand\matiere{\donnees@matiere}
+	\renewcommand\mois{\donnees@mois}
+	\renewcommand\annee{\donnees@annee}
+	\renewcommand\duree{\donnees@duree}
+	\newcommand\titredoc{\donnees@titre}
+}
+
+\titleformat{\part}[frame]
+	{\setlength\fboxrule{1pt}\color{marron}\bfseries\sffamily}
+	{\filright\:\typedoc\thepart\:}
+	{2pt}
+	{\donnees@tailletitre\bfseries\filcenter}
+	{}
+
+\titlespacing*{\part}
+	{\donnees@margetitre}
+	{-1.2\baselineskip}
+	{0.2\baselineskip}
+	[\donnees@margetitre]
+
+\titleformat{\section}[hang]{\color{titrebleu}\LARGE\bfseries\sffamily}{\Roman{section}.}{1ex}{}
+\titlespacing*{\section}{3mm}{2pt}{2pt}
+\titleformat{\subsection}[hang]{\color{ForestGreen}\Large\bfseries\sffamily}{\hspace{6mm}\Roman{section}.\arabic{subsection}.}{1ex}{}
+\titlespacing*{\subsection}{6mm}{2pt}{2pt}
+\titleformat{\subsubsection}[hang]{\color{purple}\large\bfseries\sffamily}{\hspace{9mm}\Roman{section}.\arabic{subsection}.\alph{subsubsection}.}{1ex}{}
+\titlespacing*{\subsubsection}{9mm}{2pt}{2pt}
+
+\newcommand{\invisiblesection}[1]{%
+	\phantomsection%
+	\stepcounter{section}%
+	\addcontentsline{toc}{section}{\protect\numberline{\thesection}#1}%
+}
+
+% ===============================listes et puces
+\setitemize[0]{noitemsep,topsep=1pt,itemsep=1pt}
+\setenumerate[1]{font=\color{red}\bfseries}
+\setenumerate[2]{font=\color{blue}\bfseries,label=\alph*.}
+\setenumerate[3]{font=\color{ForestGreen}\bfseries,label=\roman*.}
+
+\NewTasksEnvironment[item-indent=27.37498pt,before-skip=0.8\topsep,after-skip=0.5\topsep,label=\color{red}\bfseries\arabic*.]{enumulti}
+\NewTasksEnvironment[item-indent=24.08995pt,before-skip=0.8\topsep,after-skip=0.5\topsep,label=\color{blue}\bfseries\alph*.]{enumultia}
+
+\if@dense
+	\setitemize[0]{noitemsep,topsep=1pt,itemsep=1pt}
+	\setenumerate[1]{font=\color{red}\bfseries,topsep=1pt,itemsep=1pt,partopsep=1pt}
+	\setenumerate[2]{font=\color{blue}\bfseries,label=\alph*.,topsep=1pt,itemsep=1pt,partopsep=1pt}
+	\setenumerate[3]{font=\color{ForestGreen}\bfseries,label=\roman*.,topsep=1pt,itemsep=1pt,partopsep=1pt}
+\fi
+
+\if@exam
+	\setitemize[0]{noitemsep,topsep=1pt,itemsep=1pt}
+	\setenumerate[1]{font=\bfseries,itemsep=1pt}
+	\setenumerate[2]{font=\bfseries,label=\alph*.,itemsep=1pt}
+	\setenumerate[3]{font=\bfseries,label=\roman*.,itemsep=1pt}
+\fi
+
+% =======================================exos
+\newcounter{numexos}
+\setcounter{numexos}{0}
+\newcommand\exonum[1]{\addtocounter{numexos}{1}{\textbf{\Large \textcolor{titrebleu}{Exercice \thenumexos \hfill (#1 points)}}}}
+
+\newcommand\niveaudif[1]{$\vcenter{\hbox{\includegraphics[height=18pt]{goku_ssj#1}}}$}
+\if@revgoku
+	\renewcommand\exonum[2][]{%
+		\ifthenelse{\equal{#2}{}}%
+		{%
+			\def\hrulefill{\leavevmode\leaders\hrule height 1.1pt\hfill\kern\z@}%épaisseur
+			\addtocounter{numexos}{1}{\sffamily\textbf{\LARGE \textcolor{titrebleu}{Exercice \thenumexos{#1}~{\color{titrebleu}\hrulefill}}}}%
+			\def\hrulefill{\leavevmode\leaders\hrule height 0.4pt\hfill\kern\z@}
+		}%
+		{%
+			\def\hrulefill{\leavevmode\leaders\hrule height 1.1pt\hfill\kern\z@}%épaisseur
+			\addtocounter{numexos}{1}{\sffamily\textbf{\LARGE \textcolor{titrebleu}{Exercice \thenumexos{#1}~{\color{titrebleu}\hrulefill}\niveaudif{#2}}}}%
+			\def\hrulefill{\leavevmode\leaders\hrule height 0.4pt\hfill\kern\z@}
+		}
+	}
+\fi
+
+\newcommand\exogen[1]{
+	\def\hrulefill{\leavevmode\leaders\hrule height 1.1pt\hfill\kern\z@}%épaisseur
+	{\sffamily\textbf{\LARGE \textcolor{titrebleu}{Exercice#1~{\color{titrebleu}\hrulefill}}}}%
+	\def\hrulefill{\leavevmode\leaders\hrule height 0.4pt\hfill\kern\z@}
+}
+
+\newcommand\exotitre[1]{
+	\def\hrulefill{\leavevmode\leaders\hrule height 1.1pt\hfill\kern\z@}%épaisseur
+	{\sffamily\textbf{\LARGE \textcolor{titrebleu}{#1~{\color{titrebleu}\hrulefill}}}}%
+	\def\hrulefill{\leavevmode\leaders\hrule height 0.4pt\hfill\kern\z@}
+}
+
+\if@sujet
+	\renewcommand\exonum[2][]{
+		\def\hrulefill{\leavevmode\leaders\hrule height 1.1pt\hfill\kern\z@}%épaisseur
+		\ifthenelse{\equal{#2}{1}}%
+		{%
+			\def\pts{point}
+		}%
+		{%
+			\def\pts{points}
+		}
+		\addtocounter{numexos}{1}{\sffamily\textbf{\LARGE \textcolor{titrebleu}{Exercice \thenumexos#1~{\color{titrebleu}\hrulefill~(#2 \pts)}}}}%
+		\def\hrulefill{\leavevmode\leaders\hrule height 0.4pt\hfill\kern\z@}
+	}
+	\newcommand\exoannexe[1]{
+		\def\hrulefill{\leavevmode\leaders\hrule height 1.1pt\hfill\kern\z@}%épaisseur
+		{\sffamily\textbf{\LARGE \textcolor{titrebleu}{Annexe Exercice#1~{\color{titrebleu}\hrulefill}}}}%
+		\def\hrulefill{\leavevmode\leaders\hrule height 0.4pt\hfill\kern\z@}
+	}
+	\newcommand\exocours[1]{
+		\def\hrulefill{\leavevmode\leaders\hrule height 1.1pt\hfill\kern\z@}%épaisseur
+		{\sffamily\textbf{\LARGE \textcolor{titrebleu}{Questions de cours~{\color{titrebleu}\hrulefill~(#1 points)}}}}%
+		\def\hrulefill{\leavevmode\leaders\hrule height 0.4pt\hfill\kern\z@}
+	}
+	\newcommand\exogenerique[2]{
+		\def\hrulefill{\leavevmode\leaders\hrule height 1.1pt\hfill\kern\z@}%épaisseur
+		{\sffamily\textbf{\LARGE \textcolor{titrebleu}{#1~{\color{titrebleu}\hrulefill~(#2)}}}}%
+		\def\hrulefill{\leavevmode\leaders\hrule height 0.4pt\hfill\kern\z@}
+	}
+\fi
+
+\if@sujetl
+	\renewcommand\exonum[1]{\addtocounter{numexos}{1}{\textbf{\Large \textcolor{titrebleu}{Exercice \thenumexos #1}}}\strut\lignetitre\smallskip}
+\fi
+
+% ===========================tableaux de base
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash }b{#1}} 
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash }b{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash }b{#1}}
+\newcolumntype{M}[1]{>{\centering\arraybackslash }m{#1}} %doublecentrée
+\renewcommand{\tabularxcolumn}[1]{m{#1}}
+\newcolumntype{Y}{>{\centering\arraybackslash }X}
+
+% ========================tableau compétences
+\defKV[tblcomp]{%
+	liste=\def\COMPETliste{#1},%
+	largeurs=\def\COMPETlargeurs{#1},%
+	eval=\def\COMPETtitre{#1},%
+	poltitre=\def\COMPETlegende{#1},%
+	polcomp=\def\COMPETcomp{#1},%
+	lignesep=\def\COMPETsep{#1}
+}
+
+\setKVdefault[tblcomp]{%
+	liste={Compétence A § Compétence B § Compétence C § Compétence D § Compétence E},%
+	largeurs={8.5cm § 0.5cm § 1.5cm},%comp + niv + note
+	eval=DS01,%
+	poltitre=\small\sffamily\bfseries,%
+	polcomp=\small\sffamily,%
+	lignesep=2pt,%
+	centre=false
+}
+
+%pour créer le body du tableau (j'ai encore du mal avec ça...)
+\long\def\CPaddto#1#2{\expandafter\def\expandafter#1\expandafter{#1#2}}
+
+\NewDocumentCommand{\tblrcomp}{ O{} }{
+%\newcommand\tblrcomp[1][]{%
+	\useKVdefault[tblcomp]
+	\setKV[tblcomp]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\setsepchar{§}
+	\readlist*\ListeCompetences\COMPETliste
+	\readlist*\ListeLargeurs\COMPETlargeurs
+	%création du body v2
+	\def\CPtabledatacomp{}
+	\xintFor* ##1 in {\xintSeq{1}{\ListeCompetenceslen}}\do{%
+		\CPaddto\CPtabledatacomp{\ListeCompetences[\the\numexpr\therownum-1\relax] & & & & \\}%
+		}
+	%creation du tableau
+	\ifboolKV[tblcomp]{centre}{\begin{center}}{}
+	\begin{tblr}[expand=\CPtabledatacomp]%
+		{%
+			hlines,vlines,colspec={Q[l,m,\ListeLargeurs[1]]*{3}{Q[c,m,\ListeLargeurs[2]]}Q[c,m,\ListeLargeurs[3]]},%
+			rowsep=\COMPETsep,%
+			row{1}={font=\COMPETlegende,bg=lightgray!50},%
+			row{2-Y}={font=\COMPETcomp},%
+			row{Z}={font=\COMPETlegende,bg=white,fg=blue},%
+			cell{2}{Z}={r=\the\numexpr\ListeCompetenceslen+1\relax}{},%
+			cell{Z}{1}={c=4}{}
+		}
+		\COMPETtitre & NA & PA & A & Note \\
+		\CPtabledatacomp
+		NA : Non acquis  / PA : Partiellement acquis / A : Acquis & & & & \\
+	\end{tblr}
+	\ifboolKV[tblcomp]{centre}{\end{center}}{}
+}
+
+% =================================styles CCF
+\tcbset{boxnum/.style={%
+		nobeforeafter,boxsep=0pt,enhanced,width=0.8cm,top=3pt,bottom=3pt,arc=1mm,
+		width=0.8cm,colback=DarkCyan,colframe=DarkCyan,colupper=white,fontupper=\bfseries
+	}
+}
+
+\newcommand\deroulementccf{%
+	\begin{blocccf}[orange]{Déroulement de l'épreuve}
+		Cette épreuve de Contrôle en cours de Formation (\textbf{CCF}) se déroule en trois étapes :
+		
+		\begin{itemize}[label=--,leftmargin=*]
+			\item \textbf{Étape 1 : Écrit (30 minutes)}
+			
+			Vous devez traiter la partie A du sujet. Pour cette partie, l’ordinateur est interdit mais la calculatrice (type \og collège \fg{} ou en \og mode examen \fg) est autorisée.
+			
+			\bigskip
+			
+			\textbf{Vous inscrirez vos réponses dans le document réponse à la fin du sujet.}
+			
+			\bigskip
+			
+			Les algorithmes à écrire peuvent être rédigés en \calg{langage naturel} ou en \calgpythonccf{}.
+			
+			\bigskip
+			
+			\textbf{À la fin de l’étape 1, votre document réponse doit être remis à la personne surveillant l’épreuve.} Vous garderez le sujet.
+			
+			\medskip
+			
+			\item \textbf{Étape 2 : sur machine (30 minutes)}
+			
+			
+			Vous devez traiter la partie B du sujet à l’aide d’un ordinateur. Le langage utilisé est celui travaillé dans l’année, à savoir \calgpythonccf{}. Vous sauvegarderez votre travail sur la clé USB fournie.
+			
+			La durée totale pour effectuer les deux premières étapes est exactement d’une heure.
+			
+			\medskip
+			
+			\item \textbf{Étape 3 : oral (20 minutes au maximum)}
+			
+			Cette partie se déroule en deux temps. Tout d’abord, vous disposez de 10 minutes pour présenter votre travail de l’étape 2 puis, au cours des 10 minutes suivantes, un entretien permet de préciser votre démarche.
+		\end{itemize}
+		
+		\textbf{À la fin de l’épreuve le sujet devra être rendu à l’examinateur.}
+	\end{blocccf}%
+}
+
+\newcommand\numccf[1]{\tcbox[boxnum]{#1}}
+
+\newtcolorbox{blocccf}[2][orange]{%
+	enhanced,before skip=3mm,after skip=3mm,arc=0mm,top={\tcboxedtitleheight*3/4},
+	colback=#1!15,colframe=#1!15,coltitle=white,
+	attach boxed title to top left={xshift=12pt,yshift=-\tcboxedtitleheight/2},
+	boxed title style={colframe=#1!75,colback=#1!75,arc=1pt},
+	fonttitle=\bfseries\sffamily\large,
+	title={#2}}
+
+\newcommand\enteteccf[1]{%
+	\textcolor{DarkCyan}{\LARGE\bfseries\scshape{#1}}
+}
+
+\newcommand\titreccf[2][\Huge]{%
+	\textcolor{MediumPurple}{#1\bfseries\scshape{#2}}
+}
+
+\newcommand\str{\vphantom{ÉQ}}
+
+\newcommand\tablignecc[4][]{%
+	\begin{tblr}{rowsep=5pt,width=\linewidth,colspec={X[c]}}
+		\hline[1.5pt,DarkCyan]
+		\enteteccf{BTS SIO - Session {#4} \\ Sous-Épreuve E2 \\ \str{}Algorithmique Appliquée \\ \str{}Contrôle en Cours de Formation - #1} \\ \hline[1.5pt,DarkCyan]
+		\titreccf{Sujet n°#2} \\ \titreccf{$\looparrowright$ #3 $\looparrowleft$} \\ \hline[1.5pt,MediumPurple]
+	\end{tblr}
+}
+
+\newcommand\rappeltablignecc[2]{%
+	\begin{tblr}{rowsep=5pt,width=\linewidth,colspec={X[c]}}
+		\hline[1.5pt,MediumPurple]
+		\titreccf{Sujet n°#1} \\ \titreccf{$\looparrowright$ #2 $\looparrowleft$} \\ \hline[1.5pt,MediumPurple]
+	\end{tblr}
+}
+
+\tcbset{vignetteccfshell/.style={%
+		fontupper={\vphantom{pf}\small\fontencoding{T1}\fontfamily{lmss}\selectfont},%
+		vignettes,%
+		colframe=SaddleBrown,coltitle=white,colback=SaddleBrown!5,%
+		overlay={\begin{tcbclipinterior}%
+				\draw[color=lightgray!50,fill=lightgray!50]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{SaddleBrown}{\scalebox{0.55}[0.75]{\textbf{SHELL}}}}} ($(interior.north west)+(5pt,0pt)$);%
+		\end{tcbclipinterior}}
+	}
+}
+
+\newcommand\ccfshell[1]{\tcbox[vignetteccfshell]{#1}}
+
+\newcommand\ccfnph{\begin{tcolorbox}[enhanced,size=title,boxsep=6pt,boxrule=1pt,colframe=gray,colback=lightgray!5,left=2pt,right=2pt,sharp corners,rounded corners=downhill,arc=8pt]\textbf{\textsf{\large NOM Prénom : \dotfill~Heure de passage : \dotfill}}\end{tcolorbox}}
+
+\newcommand\ccfnp{\begin{tcolorbox}[enhanced,size=title,width=0.66\linewidth,boxsep=6pt,boxrule=1pt,colframe=gray,colback=lightgray!5,left=2pt,right=2pt,sharp corners,rounded corners=downhill,arc=8pt]\textbf{\textsf{\large NOM Prénom : \dotfill~}}\end{tcolorbox}}
+
+%listings CCF
+\lstdefinestyle{langnat}{%
+	inputencoding=utf8,
+	language=Natural,
+	aboveskip=0pt,belowskip=0pt,
+	basicstyle=\linespread{1.25}\small\ttfamily,
+	keywordstyle=\bfseries,
+	keepspaces=true,
+	tabsize=4,numbersep=10pt,
+	numbers=none,
+	showstringspaces=false,
+	escapeinside={(*}{*)},
+	keywords = {Alors,Algorithme,Afficher,Saisir,Faire,Si,Sinon,SinonSi,TantQue,Pour,allant,de,FinSi,FinPour,FinTantQue,ou,et,Fonctions,Fonction,Retourner,ALGORITHME,Type},
+	morecomment=[l][commentstyle]{\#},
+	commentstyle=\itshape\color{gray},
+	classoffset=0,
+	keywordstyle=\bfseries\color{blue!75},
+	classoffset=1, %les variables
+	morekeywords = {entier,entiers,liste,listes,tableau,tableaux,flottant,flottants},
+	keywordstyle=\bfseries\color{ForestGreen!75},
+	classoffset=2,
+	morekeywords = {Fin,Variable,Variables},
+	keywordstyle=\bfseries\color{FireBrick!75},
+	classoffset=0,
+	morestring=[b]",
+	morestring=[b]',
+	stringstyle=\color{red!75},
+	literate={>=}{$\geqslant$}1 {<=}{$\leqslant$}1%
+	{=}{\textleftarrow}1 {==}{=}1%
+	{á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1%
+	{ú}{{\'u}}1 {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1%
+	{à}{{\`a}}1 {è}{{\`e}}1 {ì}{{\`i}}1 {ò}{{\`o}}1 {ù}{{\`u}}1%
+	{À}{{\`A}}1 {È}{{\'E}}1 {Ì}{{\`I}}1 {Ò}{{\`O}}1 {Ù}{{\`U}}1%
+	{ä}{{\"a}}1 {ë}{{\"e}}1 {ï}{{\"i}}1 {ö}{{\"o}}1 {ü}{{\"u}}1%
+	{Ä}{{\"A}}1 {Ë}{{\"E}}1 {Ï}{{\"I}}1 {Ö}{{\"O}}1 {Ü}{{\"U}}1%
+	{â}{{\^a}}1 {ê}{{\^e}}1 {î}{{\^i}}1 {ô}{{\^o}}1 {û}{{\^u}}1%
+	{Â}{{\^A}}1 {Ê}{{\^E}}1 {Î}{{\^I}}1 {Ô}{{\^O}}1 {Û}{{\^U}}1%
+	{œ}{{\oe}}1 {Œ}{{\OE}}1 {æ}{{\ae}}1 {Æ}{{\AE}}1 {ß}{{\ss}}1%
+	{ű}{{\H{u}}}1 {Ű}{{\H{U}}}1 {ő}{{\H{o}}}1 {Ő}{{\H{O}}}1%
+	{ç}{{\c c}}1 {Ç}{{\c C}}1 {ø}{{\o}}1 {å}{{\r a}}1 {Å}{{\r A}}1%
+	{€}{{\texteuro}}1 {£}{{\pounds}}1%
+	{Rôle}{{{\bfseries\color{blue!75}R{\^o}le}}}4%
+	{Répéter}{{{\bfseries\color{blue!75}R\'{e}p\'{e}ter}}}7%
+	{Jusqu'à}{{{\bfseries\color{blue!75}Jusqu'\`a}}}7%
+	{à}{{{\bfseries\color{blue!75}\`a}}}1%
+	{Début}{{{\bfseries\color{FireBrick!75}D{\'e}but}}}5%
+	{utilisé}{{{\bfseries\color{blue!75}utilis{\'e}}}}7%
+	{retourné}{{{\bfseries\color{blue!75}retourn{\'e}}}}8%
+	{utilisés}{{{\bfseries\color{blue!75}utilis{\'e}s}}}8%
+	{utilisée}{{{\bfseries\color{blue!75}utilis{\'e}e}}}8%
+	{utilisées}{{{\bfseries\color{blue!75}utilis{\'e}es}}}9%
+	{Paramètre}{{{\bfseries\color{blue!75}Param\`etre}}}9%
+	{Paramètres}{{{\bfseries\color{blue!75}Param\`etres}}}{10}%
+	{booléen}{{{\bfseries\color{ForestGreen!75}bool{\'e}en}}}7%
+	{booléens}{{{\bfseries\color{ForestGreen!75}bool{\'e}ens}}}8%
+	{d'entiers}{{{\bfseries\color{ForestGreen!75}d'entiers}}}9%
+}
+
+% ========================conversionfractions
+\DeclareDocumentCommand\convertfraction{ O{} m }{%
+	\def\argument{#2}
+	\def\calculargument{\xintPRaw{\xintIrr{\argument}}}
+	\IfSubStr{\calculargument}{/}%SI FRACTION
+	{\StrBefore{\calculargument}{/}[\numerateur]%
+		\StrBehind{\calculargument}{/}[\denominateur]%
+		\ifblank{#1}{\frac{\numerateur}{\denominateur}}{}%
+		\IfStrEq{#1}{d}{\dfrac{\numerateur}{\denominateur}}{}%
+		\IfStrEq{#1}{t}{\tfrac{\numerateur}{\denominateur}}{}%
+	}
+	{\num{\calculargument}}%SI ENTIER
+}
+
+%\newcommand\apmun[1]{%
+%	\def\coeffa{#1}
+%	\IfStrEq{\coeffa}{1}{}{\IfStrEq{\coeffa}{-1}{-}{\num{\coeffa}}}
+%}
+%
+%\newcommand\bzero[1]{%
+%	\def\coeffb{#1}
+%	\IfStrEq{\coeffb}{0}{}{\num{\coeffb}}
+%}
+%\defKV[optstkztab]{hligne=\def\hlignetkztab{#1}}
+%\setKVdefault[optstkztab]{hligne=0.8}
+%
+%\DeclareDocumentCommand\TabSignesPL{ s O{} m m !O{} }{%
+%	\restoreKV[optstkztab]
+%	\setKV[optstkztab]{#5}	
+%	\ifdim#3 pt>0 pt \def\signav{-}\def\signap{+} \else \def\signav{+}\def\signap{-} \fi
+%	\ifdim#4 pt>0 pt \def\signb{+} \else \def\signb{} \fi
+%	\begin{tikzpicture}
+%		\tkzTabInit[#2]{$x$/\hlignetkztab,$\apmun{#3}x\signb\bzero{#4}$/\hlignetkztab}{$-\infty$,$\IfBooleanTF{#1}{\convertfracPL*{-#4/#3}}{\convertfracPL{-#4/#3}}$,$+\infty$};
+%		\tkzTabLine{,\signav,z,\signap,}
+%	\end{tikzpicture}
+%}
+
+% ===================================pas-math
+% Intervalles et ensembles
+\ifthenelse{\isundefined{\intervFF}}
+	{\newcommand*\intervFF[2]{\mbox{\ensuremath{\left[#1\mathpunct{};#2\right]}}}}
+	{\renewcommand*\intervFF[2]{\mbox{\ensuremath{\left[#1\mathpunct{};#2\right]}}}\typeout{La commande \string\intervFF\space a deja ete redefinie.}}
+
+\ifthenelse{\isundefined{\intervFO}}
+	{\newcommand*\intervFO[2]{\mbox{\ensuremath{\left[#1\mathpunct{};#2\right[}}}}
+	{\renewcommand*\intervFO[2]{\mbox{\ensuremath{\left[#1\mathpunct{};#2\right[}}}\typeout{La commande \string\intervFO\space a deja ete redefinie.}}
+
+\ifthenelse{\isundefined{\intervOF}}
+	{\newcommand*\intervOF[2]{\mbox{\ensuremath{\left]#1\mathpunct{};#2\right]}}}}
+	{\renewcommand*\intervOF[2]{\mbox{\ensuremath{\left]#1\mathpunct{};#2\right]}}}\typeout{La commande \string\intervOF\space a deja ete redefinie.}}
+
+\ifthenelse{\isundefined{\intervOO}}
+	{\newcommand*\intervOO[2]{\mbox{\ensuremath{\left]#1\mathpunct{};#2\right[}}}}
+	{\renewcommand*\intervOO[2]{\mbox{\ensuremath{\left]#1\mathpunct{};#2\right[}}}\typeout{La commande \string\intervOO\space a deja ete redefinie.}}
+
+% Ensembles N, Z, D, R, C, Q
+\ifthenelse{\isundefined{\N}}
+	{\newcommand*\N{\@ifstar{\n@star}{\n@nostar}}}
+	{\renewcommand*\N{\@ifstar{\n@star}{\n@nostar}}\typeout{La commande \string\N\space a ete redefinie par pas-math.}}
+	\newcommand*{\n@nostar}{\ensuremath{\mathbb{N}}\xspace}
+	\newcommand*{\n@star}{\ensuremath{\mathbb{N}^{*}}\xspace}
+
+\ifthenelse{\isundefined{\Z}}
+	{\newcommand*{\Z}{\@ifstar{\z@star}{\z@nostar}}}
+	{\renewcommand*{\Z}{\@ifstar{\z@star}{\z@nostar}}\typeout{La commande \string\Z\space a ete redefinie par pas-math.}}
+	\newcommand*{\z@nostar}{\ensuremath{\mathbb{Z}}\xspace}
+	\newcommand*{\z@star}{\ensuremath{\mathbb{Z}^{*}}\xspace}
+
+\ifthenelse{\isundefined{\D}}
+	{\newcommand*{\D}{\@ifstar{\d@star}{\d@nostar}}}
+	{\renewcommand*{\D}{\@ifstar{\d@star}{\d@nostar}}\typeout{La commande \string\D\space a ete redefinie par pas-math.}}
+	\newcommand*{\d@nostar}{\ensuremath{\mathbb{D}}\xspace}
+	\newcommand*{\d@star}{\ensuremath{\mathbb{D}^{*}}\xspace}
+
+\ifthenelse{\isundefined{\Q}}
+	{\newcommand*{\Q}{\@ifstar{\q@star}{\q@nostar}}}
+	{\renewcommand*{\Q}{\@ifstar{\q@star}{\q@nostar}}\typeout{La commande \string\Q\space a ete redefinie par pas-math.}}
+	\newcommand*{\q@nostar}{\ensuremath{\mathbb{Q}}\xspace}
+	\newcommand*{\q@star}{\ensuremath{\mathbb{Q}^{*}}\xspace}
+
+\ifthenelse{\isundefined{\R}}
+	{\newcommand*{\R}{\@ifstar{\r@star}{\r@nostar}}}
+	{\renewcommand*{\R}{\@ifstar{\r@star}{\r@nostar}}\typeout{La commande \string\R\space a ete redefinie par pas-math.}}
+	\newcommand*{\r@nostar}{\ensuremath{\mathbb{R}}\xspace}
+	\newcommand*{\r@star}{\ensuremath{\mathbb{R}^{*}}\xspace}
+
+\ifthenelse{\isundefined{\C}}
+	{\newcommand*{\C}{\@ifstar{\c@star}{\c@nostar}}}
+	{\renewcommand*{\C}{\@ifstar{\c@star}{\c@nostar}}\typeout{La commande \string\C\space a ete redefinie par pas-math.}}
+	\newcommand*{\c@nostar}{\ensuremath{\mathbb{C}}\xspace}
+	\newcommand*{\c@star}{\ensuremath{\mathbb{C}^{*}}\xspace}
+
+\ifthenelse{\isundefined{\H}}
+	{\newcommand*{\H}{\@ifstar{\h@star}{\h@nostar}}}
+	{\renewcommand*{\H}{\@ifstar{\h@star}{\h@nostar}}\typeout{La commande \string\H\space a ete redefinie par pas-math.}}
+	\newcommand*{\h@nostar}{\ensuremath{\mathbb{H}}\xspace}
+	\newcommand*{\h@star}{\ensuremath{\mathbb{H}^{*}}\xspace}
+
+% Repères et analyse fonctionnelle
+
+\ifthenelse{\isundefined{\Rij}}
+	{\newcommand*\Rij[1][O]{\ensuremath{\left(\mathrm{#1}\mathpunct{};\vv{\imath}\mathpunct{},\vv{\jmath} \right)}}}
+	{\renewcommand*\Rij[1][O]{\ensuremath{\left(\mathrm{#1}\mathpunct{};\vv{\imath}\mathpunct{},\vv{\jmath} \right)}}\typeout{La commande \string\Rij\space a ete redefinie par pas-math.}}
+
+\newcommand\pas@Rijk[1]{%
+	\begingroup	\setbox0\hbox{$\vcenter{\hbox{$\mathrm{#1}\mathpunct{};\vv{\imath}\mathpunct{},\vv{\jmath}\mathpunct{},\vv{k}$}}$}%
+	\setbox1\hbox{$\mathrm{#1}\mathpunct{};\vv{\imath}\mathpunct{},\vv{\jmath}\mathpunct{},\vv{k}$}%
+	\leavevmode\raise\dimexpr\dp0-\dp1\relax%
+	\hbox{$\left(\box0 \right)$}%
+	\endgroup
+}
+\ifthenelse{\isundefined{\Rijk}}
+	{\newcommand*\Rijk[1][O]{\pas@Rijk{#1}}}
+	{\renewcommand*\Rijk[1][O]{\pas@Rijk{#1}}\typeout{La commande \string\Rijk\space a ete redefinie par pas-math.}}
+
+\ifthenelse{\isundefined{\Ruv}}
+	{\newcommand*\Ruv[1][O]{\ensuremath{\left(\mathrm{O}\mathpunct{};\vv{u}\mathpunct{},\vv{v} \right)}}}
+	{\renewcommand*\Ruv[1][O]{\ensuremath{\left(\mathrm{O}\mathpunct{};\vv{u}\mathpunct{},\vv{v} \right)}}\typeout{La commande \string\Ruv\space a ete redefinie par pas-math.}}
+
+\ifthenelse{\isundefined{\dx}}
+	{\newcommand*\dx[1][x]{\ensuremath{~\text{d}#1}}}
+	{\renewcommand*\dx[1][x]{\ensuremath{~\text{d}#1}}\typeout{La commande \string\dx\space a ete redefinie par pas-math.}}
+
+\ifthenelse{\isundefined{\dint}}
+	{\newcommand*\dint{\displaystyle\int}}
+	{\renewcommand*\dint{\displaystyle\int}\typeout{La commande \string\dint\space a ete redefinie par pas-math.}}
+
+\ifthenelse{\isundefined{\e}}
+	{\newcommand*\e{{\rm e}}}
+	{\renewcommand*\e{{\rm e}}\typeout{La commande \string\e\space a ete redefinie par pas-math.}}
+
+\ifthenelse{\isundefined{\j}}
+	{\newcommand*\j{{\rm j}}}
+	{\renewcommand*\j{{\rm j}}\typeout{La commande \string\j\space a ete redefinie par pas-math.}}
+
+\ifthenelse{\isundefined{\jexp}}
+	{\newcommand*\jexp{\ensuremath{\e^{\i\frac{\pi}{3}}}}}
+	{\renewcommand*\jexp{\ensuremath{\e^{\i\frac{\pi}{3}}}}\typeout{La commande \string\jexp\space a ete redefinie par pas-math.}}
+
+\ifthenelse{\isundefined{\jalg}}
+	{\newcommand*\jalg{\ensuremath{\frac{1}{2}+\i\frac{\sqrt{3}}{2}}}}
+	{\renewcommand*\jalg{\ensuremath{\frac{1}{2}+\i\frac{\sqrt{3}}{2}}}\typeout{La commande \string\jalg\space a ete redefinie par pas-math.}}
+
+\ifthenelse{\isundefined{\esp}}
+	{\newcommand*\esp[2][\mathbb{E}]{\ensuremath{#1\left({#2}\right)}}}
+	{\renewcommand*\esp[2][\mathbb{E}]{\ensuremath{#1\left({#2}\right)}}\typeout{La commande \string\esp\space a ete redefinie par pas-math.}}
+
+\ifthenelse{\isundefined{\var}}
+	{\newcommand*\var[2][\mathbb{V}]{\ensuremath{#1\left({#2}\right)}}}
+	{\renewcommand*\var[2][\mathbb{V}]{\ensuremath{#1\left({#2}\right)}}\typeout{La commande \string\var\space a ete redefinie par pas-math.}}
+
+\ifthenelse{\isundefined{\ectype}}
+	{\newcommand*\ectype[1]{\ensuremath{\sigma\left({#1}\right)}}}
+	{\renewcommand*\ectype[1]{\ensuremath{\sigma\left({#1}\right)}}\typeout{La commande \string\ectype\space a ete redefinie par pas-math.}}
+
+\endinput

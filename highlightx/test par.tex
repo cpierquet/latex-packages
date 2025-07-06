@@ -1,0 +1,49 @@
+% !TeX TXS-program:compile = txs:///pdflatex
+
+\documentclass[french]{article}
+\usepackage[margin=1cm]{geometry}
+\usepackage{highlightx}
+\usepackage{tcolorbox}
+\usepackage{babel}
+
+\begin{document}
+
+\verb|\SurlignerText[Fond=...,Bord=...,Offset=...]<options tikz>|
+
+\verb|\TextHighlight[bg=...,border=...,offset=...]<tikz options>|
+
+\medskip
+
+\section{In a tcbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+Et on peut même mettre en forme un paragraphe, généré aléatoirement grâce au site ipsum.one par exemple : " \SurlignerTexte{Enfin, comme le dernier coup de dix heures retentissait encore, il étendit la main et prit celle de Mme Rênal, qui la retira aussitôt. Julien, sans trop savoir ce qu’il faisait, la saisit de nouveau. Quoique bien ému lui-même, il fut frappé de la froideur glaciale de la main qu’il prenait ; il la serrait avec une force convulsive ; on fit un dernier effort pour la lui ôter, mais enfin cette main lui resta et avec une formule du genre $f(x)=\displaystyle\frac{1}{x+1}$ ?} "
+\end{tcolorbox}
+
+\section{English command}
+
+Lorem ipsum {\Huge\TextHighlight{dolor sit amet ; consectetur adipis-icing elit, sed do
+eiusmod tempor}} incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+veniam, quis nostrud exercitation \TextHighlight[bg=red]{ullamco $laboris$ nisi ut
+aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit} in
+voluptate velit esse cillum dolore eu fugiat nulla pariatur.  Excepteur sint
+occaecat \TextHighlight[bg=green,border=blue]<thick>{cupidatat non proident,
+suntinculpaquiofficiadeseruntmollitanimidestlaborum.
+Loremipsumdolorsitametconsecteturadipisicingelitseddoeiusmodtemporincididuntutlabore-etdoloremagnaaliqua.}
+I suppose I could write some more text here.
+
+\bigskip
+
+\section{French command}
+
+Lorem ipsum {\Huge\SurlignerTexte{dolor sit amet ; consectetur adipis-icing elit, sed do
+	eiusmod tempor}} incididunt ut labore et dolore magna aliqua. Ut enim ad minim
+veniam, quis nostrud exercitation \SurlignerTexte[Fond=red]{ullamco $laboris$ nisi ut
+aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit} in
+voluptate velit esse cillum dolore eu fugiat nulla pariatur.  Excepteur sint
+occaecat \SurlignerTexte[Fond=orange,Bord=teal]<thick>{cupidatat non proident,
+suntinculpaquiofficiadeseruntmollitanimidestlaborum.
+Loremipsumdolorsitametconsecteturadipisicingelitseddoeiusmodtemporincididuntutlabore-etdoloremagnaaliqua.}
+I suppose I could write some more text here.
+
+\end{document}

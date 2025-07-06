@@ -1,0 +1,60 @@
+\begin{Centrage}
+	\textbf{Partie A : étude d'une fonction.}
+\end{Centrage}
+
+On considère la fonction $f$ définie sur $\R$ par $f(x)=x-\ln\big(x^2+1\big)$, où $\ln$ désigne la fonction logarithme népérien.
+
+\begin{enumerate}
+	\item On admet que $f$ est dérivable sur $\R$ et on note $f'$ sa fonction dérivée.
+	\begin{enumerate}
+		\item Montrer que pour tout nombre réel $x$, on a : \[ f'(x)=\frac{(x-1)^2}{x^2+1}. \]
+		\item En déduire le sens de variation de la fonction $f$ sur $\R$.
+	\end{enumerate}
+	\item Montrer que pour tout nombre réel $x>0$, on a : \[ f(x) = x-2\,\ln(x)-\ln\left(1+\frac{1}{x^2}\right). \]
+	\item Calculer la limite de la fonction $f$ en $+\infty$.
+\end{enumerate}
+
+\begin{Centrage}
+	\textbf{Partie B : étude d'une suite.}
+\end{Centrage}
+
+On considère la suite $\Suite{u}$ définie par : \[ \begin{dcases}u_0=7 \\ u_{n+1}=f\big(u_n\big)=u_n - \ln\big(u_n^2+1\big) \text{ pour tout } n \in \N.\end{dcases} \]
+%
+\begin{enumerate}
+	\item Montrer, en utilisant un raisonnement par récurrence, que pour tout entier naturel $n$ : \[ u_n \geqslant 0. \]
+	\item Montrer que la suite $\Suite{u}$ est décroissante.
+	\item En déduire la convergence de la suite $\Suite{u}$.
+	\item On note $\ell$ la limite de la suite $\Suite{u}$. Déterminer la valeur de $\ell$.
+	\item 
+	\begin{enumerate}
+		\item Recopier et compléter le script ci-dessous écrit en langage \textsf{Python} afin qu'il renvoie la plus petite valeur de l'entier $n$ à partir de laquelle $u_n \leqslant h$, où $h$ est un nombre réel strictement positif.
+
+\begin{CodePythonLstAlt}*[Largeur=10cm]{center}
+from math import log as ln
+#permet d'utiliser la fonction ln :
+#Le Logarithme népérien
+
+def seuil(h) :
+	n = 0
+	u = 7
+	while ... :
+		n = n + 1
+		u = ...
+	return n
+\end{CodePythonLstAlt}
+	
+	\item Déterminer la valeur renvoyée lorsqu'on saisit \texttt{seuil(0.01)} dans la console \textsf{Python}. Justifier la réponse.
+	\end{enumerate}
+\end{enumerate}
+
+
+\begin{Centrage}
+	\textbf{Partie C : étude d'une intégrale.}
+\end{Centrage}
+
+\begin{enumerate}
+	\item Étudier le signe de la fonction $f$ sur $\IntervalleFO{0}{+\infty}$.
+	\item Interpréter l'intégrale : \[ I=\int_2^4 f(x)\dx. \]
+	\item On admet dans cette question que, pour tout nombre réel $x \in \IntervalleFF{2}{4}$, on a l'encadrement : \[ 0,5x-1 \leqslant f(x) \leqslant 0,25x+0,25. \]
+	En déduire l'encadrement : \[ 1 \leqslant I \leqslant 2. \]
+\end{enumerate}

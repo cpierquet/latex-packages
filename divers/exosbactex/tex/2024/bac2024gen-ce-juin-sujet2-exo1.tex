@@ -1,0 +1,38 @@
+Un sac opaque contient huit jetons numérotés de 1 à 8, indiscernables au toucher.
+
+À trois reprises, un joueur pioche un jeton dans ce sac, note son numéro, puis le remet dans le sac.
+
+Dans ce contexte, on appelle « tirage » la liste ordonnée des trois numéros obtenus.
+
+Par exemple, si le joueur pioche le jeton numéro 4, puis le jeton numéro 5, puis le jeton numéro 1, alors le tirage correspondant est $(4;5;1)$.
+
+\begin{enumerate}
+	\item Déterminer le nombre de tirages possibles.
+	\item 
+	\begin{enumerate}
+		\item Déterminer le nombre de tirages sans répétition de numéro.
+		\item En déduire le nombre de tirages contenant au moins une répétition de numéro.
+	\end{enumerate}
+\end{enumerate}
+
+On note $X_1$ la variable aléatoire égale au numéro du premier jeton pioché, $X_2$ celle égale au numéro du deuxième jeton pioché et $X_3$ celle égale au numéro du troisième jeton pioché.
+
+Puisqu’il s’agit d’un tirage avec remise, les variables aléatoires $X_1$, $X_2$ et $X_3$ sont indépendantes et suivent la même loi de probabilité.
+
+\begin{enumerate}[resume]
+	\item Établir la loi de probabilité de la variable aléatoire $X_1$.
+	\item Déterminer l’espérance de la variable aléatoire $X_1$.
+\end{enumerate}
+
+On note $S = X_1 + X_2 + X_3$ la variable aléatoire égale à la somme des numéros des trois
+jetons piochés.
+
+\begin{enumerate}[resume]
+	\item Déterminer l’espérance de la variable aléatoire $S$.
+	\item Déterminer $P(S=24)$.
+	\item Si un joueur obtient une somme supérieure ou égale à 22, alors il gagne un lot.
+	\begin{enumerate}
+		\item Justifier qu’il existe exactement 10 tirages permettant de gagner un lot.
+		\item En déduire la probabilité de gagner un lot.
+	\end{enumerate}
+\end{enumerate}

@@ -1,0 +1,44 @@
+Dans la figure ci-dessous, $ABCDEFGH$ est un parallélépipède rectangle tel que $AB=5$, $AD=3$ et $AE=2$.
+
+L'espace est muni d'un repère orthonormé d'origine $A$ dans lequel les points $B$, $D$ et $E$ ont respectivement pour coordonnées $(5;0;0)$, $(0;3;0)$ et $(0;0;2)$.
+
+\begin{center}
+	\begin{tikzpicture}[line join=bevel]
+		\PaveTikz[Aff,Largeur=7,Profondeur=3,Hauteur=2.8,Angle=43]
+		\coordinate (M) at ($(H)!0.22!(G)$) ;
+		\draw (M) node[above] {$M$} ;
+		\draw[dotted,thick] (A)--(M)--(C)--cycle ;
+	\end{tikzpicture}
+\end{center}
+
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Donner, dans le repère considéré, les coordonnées des points $H$ et $G$.
+		\item Donner une représentation paramétrique de la droite $(GH)$.
+	\end{enumerate}
+	\item Soit $M$ un point du segment $[GH]$ tel que $\vect{HM} =k\vect{HG}$ avec $k$ un nombre réel de l'intervalle $[0;1]$.
+	\begin{enumerate}
+		\item Justifier que les coordonnées de $M$ sont $(5k;3;2)$.
+		\item En déduire que $\vect{AM} \cdot \vect{CM} = 25k^2  - 25k + 4$.
+		\item Déterminer les valeurs de $k$ pour lesquelles $AMC$ est un triangle rectangle en $M$.
+	\end{enumerate}
+\end{enumerate}
+
+Dans toute la suite de l'exercice, on considère que le point $M$ a pour coordonnées $(1;3;2)$.
+
+On admet que le triangle $AMC$ est rectangle en $M$.
+
+On rappelle que le volume d'un tétraèdre est donné par la formule $\dfrac13 \times\text{Aire de la base}  \times h$ où $h$ est la hauteur relative à la base.
+
+\begin{enumerate}[resume]
+	\item On considère le point $K$ de coordonnées $(1;3;0)$.
+	\begin{enumerate}
+		\item Déterminer une équation cartésienne du plan $(ACD)$.
+		\item Justifier que le point K est le projeté orthogonal du point $M$ sur le plan $(ACD)$.
+		\item En déduire le volume du tétraèdre $MACD$.
+	\end{enumerate}
+	\item On note $P$ le projeté orthogonal du point $D$ sur le plan $(AMC)$.
+	
+	Calculer la distance $DP$ ; en donner une valeur arrondie à $10^{-1}$.
+\end{enumerate}

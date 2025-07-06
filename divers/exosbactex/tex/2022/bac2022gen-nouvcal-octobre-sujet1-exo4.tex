@@ -1,0 +1,71 @@
+\emph{Cet exercice est un questionnaire à choix multiples.\\
+	Pour chacune des questions suivantes, une seule des quatre réponses proposées est exacte.\\
+	Une réponse fausse, une réponse multiple ou l'absence de réponse à une question ne rapporte ni n'enlève de point.\\
+	Pour répondre, indiquer sur la copie le numéro de la question et la lettre de la réponse choisie. Aucune justification n'est demandée.}
+
+\medskip
+
+\begin{wrapstuff}[r,leftsep=1.5em,rightsep=1em,top=1]
+	\def\ArbreDeuxDeux{
+		$E_0$/\num{0.4}/above,$R_0$/$\ldots$/above,$R_1$/\num{0.01}/below,
+		$E_1$/$\ldots$/below,$R_1$/\num{0.02}/above,$R_1$/$\ldots$/below
+	}
+	\ArbreProbasTikz[EspaceNiveau=2.25,EspaceFeuille=1]{\ArbreDeuxDeux}
+\end{wrapstuff}
+On considère un système de communication binaire transmettant des $0$ et des $1$.
+
+Chaque $0$ ou $1$ est appelé bit.
+
+En raison d'interférences, il peut y avoir des erreurs de transmission:
+
+un $0$ peut être reçu comme un $1$ et, de même, un $1$ peut être reçu comme un $0$.
+
+Pour un bit choisi au hasard dans le message, on note les évènements :
+
+\begin{itemize}
+	\item $E_0$ : \og le bit envoyé est un $0$ \fg{} ;
+	\item $E_1$ : \og le bit envoyé est un 1 \fg{} ;
+	\item $R_0$ : \og le bit reçu est un $0$\fg{} 
+	\item $R_1$ : \og le bit reçu est un $1$ \fg.
+\end{itemize}
+
+On sait que $p\left(E_0\right) = 0,4$ ; $p_{R_0}\left(R_1\right) = 0,01$ et $p_{R_1}\left(R_0\right) = 0,02$.
+
+\smallskip
+
+On rappelle que la probabilité conditionnelle de $A$ sachant $B$ est notée $p_B(A)$.
+
+\smallskip
+
+On peut ainsi représenter la situation par l'arbre de probabilités ci-contre.
+
+\begin{enumerate}
+	\item La probabilité que le bit envoyé soit un $0$ et que le bit reçu soit un $0$ est égale à :
+	
+	\smallskip
+	
+	\begin{tblr}{width=\linewidth,colspec={*{4}{X[m,l]}}}
+		(a)~~$0,99$ &(b)~~$0,396$ &(c)~~$0,01$ &(d)~~$0,4$ \\
+	\end{tblr}
+	\item La probabilité  $p\left(R_0\right)$ est égale à :
+	
+	\smallskip
+	
+	\begin{tblr}{width=\linewidth,colspec={*{4}{X[m,l]}}}
+		(a)~~$0,99$ &(b)~~$0,02$ &(c)~~$0,408$ &(d)~~$0,931$ \\
+	\end{tblr}
+	\item Une valeur, approchée au millième, de la probabilité $p_{R_1}\left(R_0\right)$ est :
+	
+	\smallskip
+	
+	\begin{tblr}{width=\linewidth,colspec={*{4}{X[m,l]}}}
+		(a)~~$0,004$ &(b)~~$0,001$ &(c)~~$0,007$ &(d)~~$0,010$ \\
+	\end{tblr}
+	\item La probabilité de l'évènement \og il y a une erreur de transmission \fg{} est égale à :
+	
+	\smallskip
+	
+	\begin{tblr}{width=\linewidth,colspec={*{4}{X[m,l]}}}
+		(a)~~$0,03$ &(b)~~$0,016$ &(c)~~$0,16$ &(d)~~$0,015$ \\
+	\end{tblr}
+\end{enumerate}

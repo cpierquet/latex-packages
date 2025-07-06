@@ -1,0 +1,46 @@
+La population d'une espèce en voie de disparition est surveillée de près dans une réserve naturelle.
+
+Les conditions climatiques ainsi que le braconnage font que cette population diminue de 10\,\% chaque année.
+
+Afin de compenser ces pertes, on réintroduit dans la réserve $100$ individus à la fin de chaque année.
+
+On souhaite étudier l'évolution de l'effectif de cette population au cours du temps. Pour cela, on modélise l'effectif de la population de l'espèce par la suite $\left(u_n\right)$ où $u_n$ représente l'effectif de la population au début de l'année $2020 + n$. 
+
+On admet que pour tout entier naturel $n$, $u_n \geqslant 0$.
+
+Au début de l'année 2020, la population étudiée compte \num{2000} individus, ainsi $u_0 = \num{2000}$.
+
+\begin{enumerate}
+	\item Justifier que la suite $\left(u_n\right)$ vérifie la relation de récurrence :\[u_{n+1} = 0,9u_n + 100.\]
+	\item Calculer $u_1$ puis $u_2$.
+	\item Démontrer par récurrence que pour tout entier naturel $n$, $\num{1000} < u_{n+1}  \leqslant u_n$.
+	\item La suite $\left(u_n\right)$ est-elle convergente ? Justifier la réponse.
+	\item On considère la suite $\left(v_n\right)$ définie pour tout entier naturel $n$ par $v_n = u_n - \num{1000}$.
+	\begin{enumerate}
+		\item Montrer que la suite $\left(v_n\right)$ est géométrique de raison $0,9$.
+		\item En déduire que, pour tout entier naturel $n$, $u_n = \num{1000} \left(1 + 0,9^n\right)$.
+		\item Déterminer la limite de la suite $\left(u_n\right)$.
+		
+		En donner une interprétation dans le contexte de cet exercice.
+	\end{enumerate}
+	\item On souhaite déterminer le nombre d'années nécessaires pour que l'effectif de la population passe en dessous d'un certain seuil $S$ (avec $S > \num{1000}$).
+	\begin{enumerate}
+		\item Déterminer le plus petit entier $n$ tel que $u_n \leqslant \num{1020}$.
+		
+		Justifier la réponse par un calcul.
+		\item Dans le programme \textsf{Python} ci-dessous, la variable \texttt{n} désigne le nombre d'années écoulées depuis 2020, la variable \texttt{u} désigne l'effectif de la population. 
+		
+		Recopier et compléter ce programme afin qu'il retourne le nombre d'années nécessaires pour que l'effectif de la population passe en dessous du seuil $S$.
+		
+\begin{CodePythonLstAlt}*[Largeur=6cm]{center}
+def population(S) :
+	n = 0
+	u = 2000
+	while ...... :
+		u = ......
+		n = ......
+	return ......
+\end{CodePythonLstAlt}
+	\end{enumerate}
+\end{enumerate}
+

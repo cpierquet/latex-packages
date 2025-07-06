@@ -1,0 +1,63 @@
+\textbf{Partie A}
+
+\medskip
+
+On définit la fonction $f$ sur l'intervalle $\IntervalleFF{0}{1}$ par \[ f(x)=\frac{0,96x}{0,93x+0,03}. \]
+
+\begin{enumerate}
+	\item Démontrer que, pour tout $x$ appartenant à l'intervalle $\IntervalleFF{0}{1}$, \[ f'(x)=\frac{\num{0,0288}}{(0,93x+0,03)^2}. \]
+	\item Déterminer le sens de variation de la fonction $f$ sur l'intervalle $\IntervalleFF{0}{1}$.
+\end{enumerate}
+
+\smallskip
+
+\textbf{Partie B}
+
+\medskip
+
+
+La lutte contre le dopage passe notamment par la réalisation de contrôles antidopage qui visent à déterminer si un sportif a fait usage de substances interdites.
+
+Lors d'une compétition rassemblant \num{1000} sportifs, une équipe médicale teste tous les concurrents. On propose d'étudier la fiabilité de ce test.
+
+\medskip
+
+On appelle $x$ le réel compris entre 0 et 1 qui désigne la proportion de sportifs dopés.
+
+\medskip
+
+Lors de l'élaboration de ce test, on a pu déterminer que :
+
+\begin{itemize}
+	\item la probabilité qu'un sportif soit déclaré positif sachant qu'il est dopé est égale à $0,96$ ;
+	\item la probabilité qu'un sportif déclaré positif sachant qu' il n'est pas dopé est égale à $0,03$.
+\end{itemize}
+
+On note :
+
+\begin{itemize}
+	\item $D$ l'événement: « le sportif est dopé » ;
+	\item $T$ l'événement : « le test est positif » 
+\end{itemize}
+
+\begin{enumerate}
+	\item Recopier et compléter l'arbre de probabilité ci-dessous :
+	
+	\begin{Centrage}
+		\ArbreProbasTikz[PositionProbas=auto]{$D$/$x$/,$T$/\numdots/,$\overline{T}$/\numdots/,$\overline{D}$/$1-x$/,$T$/\numdots/,$\overline{T}$/\numdots/}
+	\end{Centrage}
+	\item Déterminer, en fonction de $x$ la probabilité qu'un sportif soit dopé et ait un test positif.
+	\item Démontrer que la probabilité de l'événement $T$ est égale à $0,93x + 0,03$.
+	\item Pour cette question uniquement, on suppose qu'il y a 50 sportifs dopés parmi les \num{1000} testés.
+	
+	La fonction $f$ désigne la fonction définie à la \textbf{partie A}.
+	
+	Démontrer que la probabilité qu'un sportif soit dopé sachant que son test est positif est égale à $f(0,05)$. En donner une valeur arrondie au centième.
+	\item On appelle valeur prédictive positive d'un test la probabilité que le sportif soit réellement dopé lorsque le résultat du test est positif.
+	\begin{enumerate}
+		\item Déterminer à partir de quelle valeur de $x$ la valeur prédictive positive du test étudié sera supérieure ou égale à $0,9$. \textit{Arrondir le résultat au centième.}
+		\item Un responsable de la compétition décide de ne plus tester l'ensemble des sportifs, mais de cibler les sportifs les plus performants supposés être plus fréquemment dopés.
+		
+		Quelle est la conséquence de cette décision sur la valeur prédictive positive du test ? \textit{Argumenter en utilisant un résultat de la \textbf{Partie A}.}
+	\end{enumerate}
+\end{enumerate}

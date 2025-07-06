@@ -1,0 +1,173 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+
+\documentclass[a4paper,french,11pt]{article}
+\usepackage{iftex}
+\ifluatex
+	\usepackage{fontspec}
+	\newfontfamily{\qtancienolive}{QTAncientOlive}
+	%\renewcommand\sffamily{\qtancienolive}
+\else
+	\usepackage[T1]{fontenc}
+	\usepackage{cabin}
+\fi
+\usepackage[margin=1cm]{geometry}
+\usepackage{babel}
+\usepackage{codehigh}
+\setlength\parindent{0pt}
+
+\usepackage{framamemes}
+\ifluatex
+	\setKVdefault[framameme]{Police=\bfseries\qtancienolive}
+\fi
+
+\begin{document}
+
+\begin{demohigh}[language=latex/latex2]
+\FramaMeme
+[%
+GrilleAide,
+TexteA={FRAMAMÈMES},EchelleA=1.35,
+TexteB={MOI},EchelleB=1.5,
+TexteC={LES AUTRES \\ GÉNÉRATEURS},
+][height=6cm]{petitami}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\FramaMeme
+[%
+TexteA={PARTAGER \\ DES MÈMES},EchelleA=0.62,
+TexteB={RESPECTER LE \\ DROIT D'AUTEUR},EchelleB=0.4,
+TexteC={MOI AVANT \\ L'OUVERTURE DE \\ FRAMAMÈMES},EchelleC=0.8
+][height=8cm]{deuxboutons}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\FramaMeme
+[%
+TexteA={UTILISER \\ UN GÉNÉRATEUR \\ PROPRIÉTAIRE},
+TexteB={UTILISER \\ FRAMAMÈMES},
+][height=8cm]{aimeaimepas}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\FramaMeme
+[%
+TexteA={MÈMES},EchelleA=2,
+TexteB={FRAMAMÈMES},EchelleB=2,
+TexteC={LICENCE \\ LIBRE},EchelleC=2,
+][height=8cm]{poigneemains}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\FramaMeme
+[%
+TexteA={AUTRES GÉNÉRATEURS \\ DE MÈMES},EchelleA=0.55,
+TexteB={FRAMAMÈMES},EchelleB=0.85,
+TexteC={MOI},EchelleC=1.5,
+][height=8cm]{sortieroute}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\FramaMeme
+[%
+TexteA={JE VAIS PARTAGER \\ UN MÈME !},EchelleA=0.85,
+TexteB={EN UTILISANT \\ FRAMAMÈME !},EchelleB=0.85,
+TexteC={EN UTILISANT \\ FRAMAMÈME, HEIN ?},EchelleC=0.85,
+][height=8cm]{anakinpadme}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\FramaMeme
+[%
+TexteA={UTILISE UN AUTRE \\ GÉNÉRATEUR QUE \\ FRAMAMÈMES},EchelleA=0.5,
+TexteB={MOI},EchelleB=2,
+][height=8cm]{unopioche}
+\end{demohigh}
+
+\pagebreak
+
+\begin{demohigh}[language=latex/latex2]
+\def\VignetteA{J'AI DÉMONTRÉ QUE LE \\ TRIANGLE ÉTAIT RECTANGLE \\ AVEC PYTHAGORE}
+\def\VignetteB{EN FAISANT DES CALCULS \\ SÉPARÉS ET EN APPLIQUANT \\ LA RÉCIPROQUE DU \\ THÉORÈME DE PYTHAGORE...}
+\def\VignetteC{TU AS AU-MOINS \\ FAIT DES CALCULS \\ SÉPARÉS, HEIN ?}
+\FramaMeme
+[%
+TexteA={\VignetteA},EchelleA=1,
+TexteB={\VignetteB},EchelleB=1,
+TexteC={\VignetteC},EchelleC=1,
+][width=10cm]{anakinpadme}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\def\VignetteA{J'AI UNE CENTAINE\\DE COPIES À CORRIGER}
+\def\VignetteB{OH !\\UNE NOUVELLE\\APPLI SUR LA FORGE !}
+\FramaMeme
+[%
+TexteA={\VignetteA},EchelleA=1,
+TexteB={\VignetteB},EchelleB=0.75
+][width=10cm]{toutvabien}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\def\VignetteA{1. PRENDRE\\UNE IMAGE\\AU HASARD}
+\def\VignetteB{2. FAIRE UN\\MÈME TRÈS\\DRÔLE AVEC}
+\def\VignetteC{3. SE POSER\\LA QUESTION\\DU DROIT\\D'AUTEUR}
+\FramaMeme
+[%
+TexteA={\VignetteA},EchelleA=0.85,
+TexteB={\VignetteB},EchelleB=0.85,
+TexteC={\VignetteC},EchelleC=0.85
+][width=10cm]{plangru}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\def\VignetteA{FRAMAMÈMES}
+\def\VignetteB{LES AUTRES\\GÉNÉRATEURS}
+\def\VignetteC{LES GENS QUI SE FOUTENT\\DES LICENCES}
+\FramaMeme
+[%
+TexteA={\VignetteA},EchelleA=1.5,
+TexteB={\VignetteB},EchelleB=1.5,
+TexteC={\VignetteC},EchelleC=1.25
+][width=10cm]{memeimage}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\def\VignetteA{JE PRÉFÈRE LES\\MÈMES ORIGINAUX…}
+\def\VignetteB{LE DÉTOURNEMENT,\\C'EST LA BASE\\DES MÈMES !}
+\FramaMeme
+[%
+TexteA={\VignetteA},EchelleA=1,
+TexteB={\VignetteB},EchelleB=1
+][width=10cm]{batmanrobin}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\def\VignetteA{NOUS AVONS BESOIN D'UNE IMAGE\\VIRALE POUR ILLUSTRER NOTRE ARTICLE.}
+\def\VignetteB{ON EN PREND UNE AU HASARD\\SUR GOOGLE IMAGES !}
+\def\VignetteC{ON UTILISE UNE IA\\POUR LA GÉNÉRER !}
+\def\VignetteD{SINON, ON PEUT UTILISER\\FRAMAMÈMES…}
+\FramaMeme
+[%
+TexteA={\VignetteA},EchelleA=0.75,
+TexteB={\VignetteB},EchelleB=0.5,
+TexteC={\VignetteC},EchelleC=0.5,
+TexteD={\VignetteD},EchelleD=0.5
+][width=10cm]{boardroom}
+\end{demohigh}
+%
+%%\pagebreak
+%%
+%%\begin{demohigh}[language=latex/latex2]
+%%\FramaMeme
+%%	[%
+%%	TexteA={FRAMAMÈMES},EchelleA=1.25,
+%%	TexteB={MOI},EchelleB=1.5,
+%%	TexteC={LES AUTRES \\ GÉNÉRATEURS},
+%%	]
+%%	<height=6cm>{petitami}
+%%\end{demohigh}
+%%%\imagememe[height=6cm]{boyfriend}{distractedboyfriend}
+
+\end{document}

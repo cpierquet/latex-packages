@@ -1,0 +1,114 @@
+Dans un examen, une épreuve notée sur dix points est constituée de deux exercices : le premier est noté sur deux points, le deuxième sur huit points.
+
+\medskip
+
+\textbf{\large Partie I}
+
+\medskip
+
+Le premier exercice est constitué de deux questions Q1 et Q2.
+
+\smallskip
+
+Chaque question est notée sur un point. Une réponse correcte rapporte un point ; une réponse incorrecte, incomplète ou une absence de réponse rapporte zéro point.
+
+\smallskip
+
+On considère que :
+
+\begin{itemize}
+	\item Un candidat pris au hasard a une probabilité $0,8$ de répondre correctement à la question Q1.
+	\item Si le candidat répond correctement à Q1, il a une probabilité $0,6$ de répondre correctement à
+	Q2 ; s’il ne répond pas correctement à Q1, il a une probabilité $0,1$ de répondre correctement
+	à Q2.
+\end{itemize}
+
+On prend un candidat au hasard et on note :
+
+\begin{itemize}
+	\item $A$ l’événement : « le candidat répond correctement à la question Q1 » ;
+	\item $B$ l’événement : « le candidat répond correctement à la question Q2 ».
+\end{itemize}
+
+On note $\overline{A}$ et $\overline{B}$ les événements contraires de $A$ et de $B$.
+
+\begin{enumerate}
+	\item Recopier et compléter les pointillés de l’arbre pondéré ci-dessous.
+	
+	\begin{center}
+		\ArbreProbasTikz{$A$/\ldots/above,$B$/\ldots/above,$\overline{B}$/\ldots/below,
+			$\overline{A}$/\ldots/below,$B$/\ldots/above,$\overline{B}$/\ldots/below}
+	\end{center}
+	\item Calculer la probabilité que le candidat réponde correctement aux deux questions Q1 et Q2.
+	\item Calculer la probabilité que le candidat réponde correctement à la question Q2.
+\end{enumerate}
+
+On note :
+
+\begin{itemize}
+	\item $X_1$ la variable aléatoire qui, à un candidat, associe sa note à la question Q1 ;
+	\item $X_2$ la variable aléatoire qui, à un candidat, associe sa note à la question Q2 ;
+	\item $X$ la variable aléatoire qui, à un candidat, associe sa note à l’exercice, c’est-à-dire $X=X_1+X_2$.
+\end{itemize}
+
+\begin{enumerate}[resume]
+	\item Déterminer l’espérance de $X_1$ et de $X_2$. En déduire l’espérance de $X$. Donner une interprétation de l’espérance de $X$ dans le contexte de l’exercice.
+	\item On souhaite déterminer la variance de $X$.
+	\begin{enumerate}
+		\item Déterminer $P(X=0)$ et $P(X=2)$. En déduire $P(X=1)$.
+		\item Montrer que la variance de $X$ vaut $0,57$.
+		\item A-t-on $\Varianc{X} = \Varianc{X_1} + \Varianc{X_2}$ ? Est-ce surprenant ?
+	\end{enumerate}
+\end{enumerate}
+
+\medskip
+
+\textbf{\large Partie II}
+
+\medskip
+
+Le deuxième exercice est constitué de huit questions indépendantes.
+
+\smallskip
+
+Chaque question est notée sur un point. Une réponse correcte rapporte un point ; une réponse incorrecte et une absence de réponse rapporte zéro point.
+
+\smallskip
+
+Les huit questions sont de même difficulté : pour chacune des questions, un candidat a une probabilité $\nicefrac{3}{4}$ de répondre correctement, indépendamment des autres questions.
+
+\smallskip
+
+On note $Y$ la variable aléatoire qui, à un candidat, associe sa note au deuxième exercice, c’est-à-dire le nombre de bonnes réponses.
+
+\begin{enumerate}
+	\item Justifier que $Y$ suit une loi binomiale dont on précisera les paramètres.
+	\item Donner la valeur exacte de $P(Y=8)$.
+	\item Donner l’espérance et la variance de $Y$..
+\end{enumerate}
+
+\medskip
+
+\textbf{\large Partie III}
+
+\medskip
+
+On suppose que les deux variables aléatoires $X$ et $Y$ sont indépendantes. On note la variable aléatoire qui, à un candidat, associe sa note totale à l’examen : $Z=X+Y$.
+
+\begin{enumerate}
+	\item Calculer l’espérance et la variance de $Z$.
+	\item Soit $n$ un nombre entier strictement positif.
+	
+	Pour $i$ entier variant de 1 à $n$, on note $Z_i$ la variable aléatoire qui, à un échantillon de $n$ élèves, associe la note de l’élève numéro $i$ à l’examen.
+	
+	On admet que les variables aléatoires $Z_1$, $Z_2$, \ldots, $Z_n$ sont identiques à $Z$ et indépendantes.
+	
+	\smallskip
+	
+	On note $M_n$ la variable aléatoire qui, à un échantillon de $n$ élèves, associe la moyenne de leurs $n$ notes, c’est-à-dire \[ M_n = \frac{Z_1+Z_2+\ldots+Z_n}{n}. \]
+	\begin{enumerate}
+		\item Quelle est l’espérance de $M_n$ ?
+		\item Quelles sont les valeurs de $n$ telles que l’écart type de $M_n$ soit inférieur ou égal à $0,5$ ?
+		\item Pour les valeurs trouvées en (b), montrer que la probabilité que $6,3 \leqslant M_n \leqslant 8,3$ est supérieure ou égale à $0,75$.
+	\end{enumerate}
+\end{enumerate}

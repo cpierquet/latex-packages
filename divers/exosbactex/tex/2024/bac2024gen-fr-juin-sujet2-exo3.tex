@@ -1,0 +1,64 @@
+Soit $a$ un nombre réel strictement supérieur à 1.
+
+\smallskip
+
+On considère la suite $\Suite{u}$ définie par $u_0=a$ et, pour tout entier naturel $n$ : \[ u_{n+1}=u_n^2-2u_n+2. \]
+%
+On admet que pour tout entier naturel $n$, $u_n > 1$.
+
+\smallskip
+
+L'objectif de cet exercice est d'étudier la suite $\Suite{u}$ pour différentes valeurs du nombre $a$.
+
+\begin{Centrage}
+	\textbf{Partie A : étude de la suite $\bm{\left(u_n\right)}$ dans le cas $\bm{1 < a < 2}$.}
+\end{Centrage}
+
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Montrer que, pour tout entier naturel $n$, on a $u_{n+1}-2 = u_n \big(u_n-2\big)$.
+		\item Montrer que, pour tout entier naturel $n$, on a $u_{n+1}-u_n = \big(u_n-1\big)\big(u_n-2\big)$.
+	\end{enumerate}
+	\item Dans cette question, on pourra utiliser les égalités établies dans la question précédente.
+	\begin{enumerate}
+		\item En utilisant un raisonnement par récurrence démontrer que, pour tout entier naturel $n$ : \[ u_n < 2. \]
+		\item Montrer que la suite $\Suite{u}$ est convergente et déterminer sa limite.
+	\end{enumerate}
+\end{enumerate}
+
+\begin{Centrage}
+	\textbf{Partie B : étude dans le cas particulier $\bm{a = 2}$.}
+\end{Centrage}
+
+\begin{wrapstuff}[r]
+\begin{minipage}{6cm}
+\begin{CodePythonLstAlt}*[Largeur=5.95cm]{flush right}
+def u(a, n) :
+	u = a
+	for k in range(n) :
+		u = u**2 - 2 * u + 2
+	return u
+\end{CodePythonLstAlt}
+\end{minipage}
+\end{wrapstuff}
+
+\begin{enumerate}
+	\item On donne ci-contre la fonction \texttt{u} écrite en langage \textsf{Python}.
+	
+	Déterminer les valeurs renvoyées par le programme lorsque l'on saisit \texttt{u(2, 1)} et \texttt{u(2, 2)} dans la console \textsf{Python}.
+	\item Quelle conjecture peut-on formuler concernant la suite $\Suite{u}$ dans le cas où $a = 2$ ? On admettra ce résultat sans démonstration. 
+\end{enumerate}
+
+\begin{Centrage}
+	\textbf{Partie C : étude dans le cas général.}
+\end{Centrage}
+
+\begin{enumerate}
+	\item On considère la suite $\Suite{v}$ définie pour tout enter naturel $n$, par $v_n = \ln\big(u_n-1\big)$.
+	\begin{enumerate}
+		\item Montrer que la suite $\Suite{v}$ est une suite géométrique de raison 2 dont on précisera le premier terme en fonction de $a$.
+		\item En déduire que, pour tout entier naturel $n$, $u_n = 1+\e^{2^n \times \ln(a-1)}$.
+	\end{enumerate}
+	\item Déterminer, suivant les valeurs du réel $a$ strictement supérieur à 1, la limite de la suite $\Suite{u}$.
+\end{enumerate}

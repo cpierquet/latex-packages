@@ -1,0 +1,83 @@
+Un commerçant vend deux types de matelas: matelas RESSORTS et matelas MOUSSE. 
+
+On suppose que chaque client achète un seul matelas.
+
+On dispose des informations suivantes :
+
+\begin{itemize}
+	\item 20\,\% des clients achètent un matelas RESSORTS. 
+	
+	Parmi eux, 90\,\% sont satisfaits de leur achat.
+	\item 82\,\% des clients sont satisfaits de leur achat.
+\end{itemize}
+
+\emph{Les deux parties peuvent être traitées de manière indépendante.}
+
+\medskip
+
+\textbf{Partie A}
+
+\medskip
+
+On choisit au hasard un client et on note les évènements :
+
+\begin{itemize}
+	\item $R$ : \og le client achète un matelas RESSORTS \fg,
+	\item $S$ : \og le client est satisfait de son achat \fg.
+\end{itemize}
+
+On note $x = P_{\overline{R}}(S)$, où $P_{\overline{R}}(S)$ désigne la probabilité de $S$ sachant que $R$ n'est pas réalisé.
+
+\begin{wrapstuff}[r]
+\begin{forest} for tree = {grow'=0,math content,l=2.5cm,s sep=0.5cm},
+	[,name=Omega
+		[R , fleche , aproba=\ldots , name=A11
+			[S , fleche , aproba=\ldots , name=A21]
+			[\overline{S} , fleche , bproba=\ldots , name=A22]
+		]
+		[\overline{R} , fleche , bproba=\ldots , name=A12
+			[S , fleche , aproba=x , name=A23]
+			[\overline{S} , fleche , bproba=\ldots , name=A24]
+		]
+	]
+\end{forest}
+\end{wrapstuff}
+
+\begin{enumerate}
+	\item Recopier et compléter l'arbre pondéré ci-contre décrivant la situation.
+	\item Démontrer que $x = 0,8$.
+	\item On choisit un client satisfait de son achat.
+	
+	Quelle est la probabilité qu'il ait acheté un matelas RESSORTS ?
+	
+	On arrondira le résultat à $10^{-2}$.
+\end{enumerate}
+
+\medskip
+
+\textbf{Partie B}
+
+\smallskip
+
+\begin{enumerate}
+	\item On choisit 5 clients au hasard. 
+	
+	On considère la variable aléatoire $X$ qui donne le nombre de clients satisfaits de leur achat parmi ces 5 clients.
+	\begin{enumerate}
+		\item On admet que $X$ suit une loi binomiale. Donner ses paramètres.
+		\item Déterminer la probabilité qu'au plus trois clients soient satisfaits de leur achat.
+		
+		On arrondira le résultat à $10^{-3}$.
+	\end{enumerate}
+	\item Soit $n$ un entier naturel non nul.
+	
+	On choisit à présent $n$ clients au hasard. Ce choix peut être assimilé à un tirage au sort avec remise.
+	\begin{enumerate}
+		\item On note $p_n$ la probabilité que les $n$ clients soient tous satisfaits de leur achat.
+		
+		Démontrer que $p_n = 0,82^n$.
+		\item Déterminer les entiers naturels $n$ tels que $p_n < 0,01$. 
+		
+		Interpréter dans le contexte de l'exercice.
+	\end{enumerate}
+\end{enumerate}

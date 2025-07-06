@@ -1,0 +1,12 @@
+\begin{center}
+	\begin{tikzpicture}[x={(-10:4cm)},y={(15:2.75cm)},z={(90:4cm)},line join=bevel]
+		\coordinate (A) at (0,0,0) ; \coordinate (B) at (1,0,0) ;
+		\coordinate (C) at (1,1,0) ; \coordinate (D) at (0,1,0) ;
+		\coordinate (E) at (0,0,1) ; \coordinate (F) at (1,0,1) ;
+		\coordinate (G) at (1,1,1) ; \coordinate (H) at (0,1,1) ;
+		\draw[thick] (A)--(B)--(F)--(E)--cycle (B)--(C)--(G)--(F)--cycle (G)--(H)--(E) ;
+		\draw[thick,densely dashed] (D)--(H) (D)--(A) (D)--(C) ;
+		\foreach \point/\pos in {A/left,B/below,C/right,D/below,E/left,F/above,G/right,H/above}
+			{\draw (\point) node[\pos] {$\point$} ;}
+	\end{tikzpicture}
+\end{center}

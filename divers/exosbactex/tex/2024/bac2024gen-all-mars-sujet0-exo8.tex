@@ -1,0 +1,35 @@
+\emph{Pour chacune des affirmations suivantes, indiquer si elle est vraie ou fausse.\\
+Chaque réponse doit être justifiée.\\
+Une réponse non justifiée ne rapporte aucun point.}
+
+\bigskip
+
+On considère la suite $\Suite{u}$ définie par $u_0 = 0$ et $u_{n+1} = 3u_n+1$ pour tout entier naturel $n$.
+
+\begin{enumerate}
+	\item On considère la fonction \piton{calcul} écrite dans le langage \textsf{Python} qui renvoie la valeur de $u_n$.
+	
+	\begin{CodePiton}[Alignement=center,Largeur=8cm,Gobble=tabs]{}
+	def calcul(n) :
+		u = 0
+		for i in range(n) :
+			u = 3*u + 1
+		return u
+	\end{CodePiton}
+	
+	On considère par ailleurs la fonction \piton{liste} écrite dans le langage \textsf{Python} :
+	
+	\begin{CodePiton}[Alignement=center,Largeur=8cm,Gobble=tabs]{}
+	def liste(n) :
+		l = [ ]
+		for i in range(n) :
+			l.append( calcul(i) )
+		return l
+	\end{CodePiton}
+	
+	\medskip
+	
+	\textbf{Affirmation 1 :} \og L'appel \piton{liste(6)} renvoie la liste \piton{[0, 1, 4, 13, 42, 121]}. \fg
+	\item \textbf{Affirmation 2 :} « Pour tout entier naturel $n$, $u_n = \dfrac12 \times 3^n - \dfrac12$. »
+	\item \textbf{Affirmation 3 :} « Pour tout entier naturel $n$, $u_{n+1}-u_n$ est une puissance de 3. »
+\end{enumerate}

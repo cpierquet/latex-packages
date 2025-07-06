@@ -1,0 +1,54 @@
+%----tkz-grapheur----
+On désigne par $f$ la fonction définie sur l'intervalle $\IntervalleFF{0}{\pi}$ par $f(x)=\e^{x}\,\sin (x)$.
+
+On note $\mathcal{C}_{f}$ la courbe représentative de $f$ dans un repère.
+
+\medskip
+
+\textbf{PARTIE A}
+
+\begin{enumerate}
+	\item
+	\begin{enumerate}
+		\item Démontrer que pour tout réel $x$ de l'intervalle $\IntervalleFF{0}{\pi}$, $f^{\prime}(x)=\e^{x}\,(\sin (x)+\cos (x))$.
+		\item Justifier que la fonction $f$ est strictement croissante sur l'intervalle $\IntervalleFF{0}{\frac{\pi}{2}}$.
+	\end{enumerate}
+	\item
+	\begin{enumerate}
+		\item Déterminer une équation de la tangente $T$ à la courbe $\mathcal{C}_{f}$ au point d'abscisse 0 .
+		\item Démontrer que la fonction $f$ est convexe sur l'intervalle $\IntervalleFF{0}{\frac{\pi}{2}}$.
+		\item En déduire que pour tout réel $x$ de l'intervalle $\IntervalleFF{0}{\frac{\pi}{2}}$, $\e^{x}\,\sin (x) \geqslant x$.
+	\end{enumerate}
+	\item Justifier que le point d'abscisse $\frac{\pi}{2}$ de la courbe représentative de la fonction $f$ est un point d'inflexion.
+\end{enumerate}
+
+\textbf{PARTIE B}
+
+\medskip
+
+On note $I=\int_{0}^{\frac{\pi}{2}} \e^{x}\,\sin (x) \dx$ et $J=\int_{0}^{\frac{\pi}{2}} \e^{x}\,\cos(x) \dx$.
+
+\begin{enumerate}
+	\item En intégrant par parties l'intégrale I de deux manières différentes, établir les deux relations suivantes : $\quad I=1+J \quad$ et $\quad I=\e^{\frac{\pi}{2}}-J$.
+	\item En déduire que $I=\frac{1+\e^{\frac{\pi}{2}}}{2}$.
+	\item On note $g$ la fonction définie sur $\R$ par $g(x)=x$.
+	
+	Les courbes représentatives des fonctions $f$ et $g$ sont tracées dans le repère orthogonal ci-dessous sur l'intervalle $\IntervalleFF{0}{\pi}$.
+	
+	Calculer la valeur exacte de l'aire du domaine hachuré situé entre les courbes $\mathcal{C}_{f}$ et $\mathcal{C}_{g}$ et les droites d'équation $x=0$ et $x=\frac{\pi}{2}$.
+	
+	\begin{Centrage}
+		\begin{GraphiqueTikz}[x=1cm,y=0.5cm,Xmin=-1.25,Xmax=4,Xgrille=1,Xgrilles=1,Ymin=-1.5,Ymax=8.75,Ygrille=1,Ygrilles=1]
+			\TracerAxesGrilles[Grille=false,Police=\small,Elargir=2.5mm]{-1,1,2,3,4}{2,4,6,8}
+			\draw (-2pt,-2pt) node[below left] {$0$} ;
+			\DefinirCourbe[Nom=cf]< f >{exp(x)*sin(x)}
+			\DefinirCourbe[Nom=cg]< g >{x}
+			\TracerIntegrale[Type=fct/fct,Style=hachures,Couleur=darkgray]{f(x)}[g(x)]{0}{pi/2}
+			\draw[darkgray,pfltraitantec] ({pi/2},{pi/2})--({pi/2},0) node[below,font=\small] {$\frac{\pi}{2}$} ;
+			\TracerCourbe[Couleur=red,Debut=0,Fin=pi]{f(x)}
+			\TracerCourbe[Couleur=blue,Debut=0,Fin=pi]{g(x)}
+			\PlacerTexte[Police=\large,Couleur=red]{(3,7)}{$\mathcal{C}_{f}$}
+			\PlacerTexte[Police=\large,Couleur=blue]{(2.25,3)}{$\mathcal{C}_{g}$}
+		\end{GraphiqueTikz}
+	\end{Centrage}
+\end{enumerate}

@@ -1,0 +1,40 @@
+Dans cet exercice, on considère la suite $\left(T_n\right)$ définie par : \[T_0 = 180 \text{ et, pour tout entier naturel }n \text{, }T_{n+1} = 0,9555T_n + 0,9.\]%
+%
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Démontrer par récurrence que, pour tout entier naturel $n$, $T_n > 20$.
+		\item Vérifier que pour tout entier naturel $n$, $T_{n+1} -  T_n  = - 0,045\left(T_n - 20\right)$. En déduire le sens de variation de la suite $\left(T_n\right)$.
+		\item Conclure de ce qui précède que la suite $\left(T_n\right)$ est convergente. Justifier.
+	\end{enumerate}
+	\item Pour tout entier naturel $n$, on pose : $u_n =  T_n - 20$.
+	\begin{enumerate}
+		\item Montrer que la suite $\left(u_n\right)$ est une suite géométrique dont on précisera la raison.
+		\item En déduire que pour tout entier naturel $n$, $T_n =  20 + 160 \times  0,955^n$.
+		\item Calculer la limite de la suite $\left(T_n\right)$.
+		\item Résoudre l'inéquation $T_n < 120$ d'inconnue $n$ entier naturel.
+	\end{enumerate}	
+	\item Dans cette partie, on s'intéresse à l'évolution de la température au centre d'un gâteau après sa sortie du four. 
+	
+	On considère qu'à la sortie du four, la température au centre du gâteau est de $180\textdegree$ C et celle de l'air ambiant de $20\textdegree$ C.
+	
+	La loi de refroidissement de Newton permet de modéliser la température au centre du gâteau par la suite précédente $\left(T_n\right)$. Plus précisément, $T_n$ représente la température au centre du gâteau, exprimée en degré Celsius, $n$ minutes après sa sortie du four.
+	\begin{enumerate}
+		\item Expliquer pourquoi la limite de la suite $\left(T_n\right)$ déterminée à la question 2.(c) était prévisible dans le contexte de l'exercice.
+		\item On considère la fonction \textsf{Python} ci-dessous :
+
+\begin{CodePythonLstAlt}*[Largeur=8cm]{center}
+def temp(X) :
+	T = 180
+	n = 0
+	while T > X :
+		T = 0.955*T + 0.9
+		n = n+1
+	return n
+\end{CodePythonLstAlt}
+		Donner le résultat obtenu en exécutant la commande \texttt{temp(120)}.
+		
+		Interpréter le résultat dans le contexte de l'exercice.
+	\end{enumerate}
+\end{enumerate}
+

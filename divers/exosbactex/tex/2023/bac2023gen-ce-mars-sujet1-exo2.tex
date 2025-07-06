@@ -1,0 +1,75 @@
+Les deux parties de cet exercice sont indépendantes.
+
+\smallskip
+
+Dans une grande ville française, des trottinettes électriques sont mises à disposition des usagers. Une entreprise, chargée de l'entretien du parc de trottinettes, contrôle leur état chaque lundi.
+
+\bigskip
+
+\textbf{Partie A}
+
+\medskip
+
+On estime que :
+
+\begin{itemize}
+	\item lorsqu'une trottinette est en bon état un lundi, la probabilité qu'elle soit encore en bon état le lundi suivant est $0,9$ ;
+	\item lorsqu'une trottinette est en mauvais état un lundi, la probabilité qu'elle soit en bon
+	état le lundi suivant est $0,4$ 
+\end{itemize}
+
+On s'intéresse à l'état d'une trottinette lors des phases de contrôle.
+
+Soit $n$ un entier naturel. On note $B_n$ l'évènement « la trottinette est en bon état $n$ semaines
+après sa mise en service » et $p_n$ la probabilité de $B_n$.
+
+Lors de sa mise en service, la trottinette est en bon état. On a donc $p_0 = 1$.
+
+\begin{enumerate}
+	\item Donner $p_1$, et montrer que $p_2 = 0,85$. On pourra s'appuyer sur un arbre pondéré.
+	\item Recopier et compléter l'arbre pondéré ci-dessous :
+	
+	\begin{center}
+		\def\ArbreDeuxDeux{
+			$B_n$/$p_n$/above,$B_{n+1}$//above,$\overline{B_{n+1}}$//above,
+			$\overline{B_n}$//below,$B_{n+1}$//below,$\overline{B_{n+1}}$//below
+		}
+		\ArbreProbasTikz{\ArbreDeuxDeux}
+	\end{center}
+	\item En déduire que, pour tout entier naturel $n$, $p_{n+1} = 0,5p_n + 0,4$.
+	\item 
+	\begin{enumerate}
+		\item Démontrer par récurrence que pour tout entier naturel $n$, $p_n \geqslant 0,8$.
+		\item À partir de ce résultat, quelle communication l'entreprise peut-elle envisager pour valoriser la fiabilité du parc ?
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item On considère la suite $\left(u_n\right)$ définie pour tout entier naturel $n$ par $u_n = p_n - 8$.
+		
+		Montrer que $\left(u_n\right)$ est une suite géométrique dont on donnera le premier terme et la raison.
+		\item En déduire l’expression de $u_n$, puis de $p_n$ en fonction de $n$.
+		\item En déduire la limite de la suite $\left(p_n\right)$.
+	\end{enumerate}
+\end{enumerate}
+
+\smallskip
+
+\textbf{Partie B}
+
+\medskip
+
+Dans cette partie, on modélise la situation de la façon suivante :
+
+\begin{itemize}
+	\item l'état d'une trottinette est indépendant de celui des autres ;
+	\item la probabilité qu'une trottinette soit en bon état est égale à $0,8$.
+\end{itemize}
+
+On note $X$ la variable aléatoire qui, à un lot de 15 trottinettes, associe le nombre de trottinettes en bon état. Le nombre de trottinettes du parc étant très important, le prélèvement de 15 trottinettes peut être assimilé à un tirage avec remise.
+
+\begin{enumerate}
+	\item Justifier que $X$ suit une loi binomiale et préciser les paramètres de cette loi.
+	\item Calculer la probabilité que les 15 trottinettes soient en bon état.
+	\item Calculer la probabilité qu'au moins 10 trottinettes soient en bon état dans un lot de 15.
+	\item On admet que $\mathbb{E}(X) = 12$. Interpréter le résultat 
+\end{enumerate}

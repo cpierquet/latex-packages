@@ -1,0 +1,30 @@
+Soit $\left(u_n\right)$ la suite définie par $u_0 = 1$ et pour tout entier naturel $n$, $u_{n+1} = \dfrac{u_n}{1 + u_n}$.
+
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Calculer les termes $u_1$, $u_2$  et $u_3$. On  donnera les résultats sous forme de fractions irréductibles.
+		\item Recopier le script \textsf{Python} ci-dessous et compléter les lignes 3 et 6 pour que \texttt{liste(k)} prenne un paramètre un entier naturel \texttt{k} et renvoie la liste des premières valeurs de la suite $\left(u_n\right)$ de $u_0$ ou à $u_k$.
+		
+\begin{CodePythonLstAlt}[Largeur=8cm]{center}
+def liste(k):
+	L = []
+	u = ...
+	for i in range(0,k+1) :
+		L.append(u)
+		u = ...
+	return(L)
+\end{CodePythonLstAlt}
+	\end{enumerate}
+	\item On admet que, pour tout entier naturel $n$, $u_n$ est strictement positif.
+	
+	Déterminer le sens de variation de la suite $\left(u_n\right)$.
+	\item En déduire que la suite $\left(u_n\right)$ converge.
+	\item Déterminer la valeur de sa limite.
+	\item 
+	\begin{enumerate}
+		\item Conjecturer une expression de $u_n$ en fonction de $n$.
+		\item Démontrer par récurrence la conjecture précédente.
+	\end{enumerate}
+\end{enumerate}
+

@@ -1,0 +1,51 @@
+\emph{Cet exercice est un questionnaire à choix multiples. Pour chacune des questions suivantes, une seule des quatre réponses proposées est exacte. Une réponse exacte rapporte un point. Une réponse fausse, une réponse multiple ou l’absence de réponse à une question ne rapporte ni n’enlève de point. Pour répondre, indiquer sur la copie le numéro de la question et la lettre de la réponse choisie. Aucune justification n’est demandée.}
+
+\begin{center}
+	\begin{tikzpicture}[line join=round]
+		\coordinate (A) at (0,0) ; \coordinate (B) at (6.2,0) ; \coordinate (C) at (3,-2) ;
+		\coordinate (D) at (-3.2,-2) ; \coordinate (S) at (1.5,2.8) ; \coordinate (I) at (1.5,-1) ;
+		\coordinate (K) at (-0.85,0.4) ; \coordinate (L) at (2.25,0.4) ; \coordinate (M) at (3.85,1.4) ;
+		\draw[very thick] (S) -- (B) -- (C) --(S) -- (D) -- (C) ;
+		\draw[very thick,dashed] (D) -- (A) -- (S) (S) -- (I) (A) -- (C) (D) -- (B) (A) -- (B) ;
+		\foreach \Point/\Pos in {A/above left,B/right,C/below,D/left,S/above,K/above left,L/above right,I/below,M/above right} \draw (\Point) node[\Pos,font=\sffamily] {\Point} ;
+		\foreach \Point in {K,L,M} \draw[very thick] (\Point) node[cross=3.5pt,blue] {} ;
+	\end{tikzpicture}
+\end{center}
+
+$SABCD$ est une pyramide régulière à base carrée $ABCD$ dont toutes les arêtes ont la même longueur.
+
+Le point $I$ est le centre du carré $ABCD$. On suppose que : $IC=IB=IS=1$.
+
+Les points $K$, $L$ et $M$ sont les milieux respectifs des arêtes $[SD]$, $[SC]$ et $[SB]$.
+
+\begin{enumerate}
+	\item Les droites suivantes ne sont pas coplanaires :
+	
+	\qcm{$(DK)$ et $(SD)$}{$(AS)$ et $(IC)$}{$(AC)$ et $(SB)$}{$(LM)$ et $(AD)$}
+\end{enumerate}
+
+Pour les questions suivantes, on se place dans le repère orthonormé de l’espace $\left( I;\vect{IC},\vect{IB},\vect{IS} \right)$.
+
+Dans ce repère, on donne les coordonnées des points suivants : 
+
+\hfill$I(0;0;0)$ ; $A(-1;0;0)$ ; $B(0;1;0)$ ; $C(1;0;0)$ ; $D(0;-1;0)$ ; $S(0;0;1)$.\hfill~
+
+\begin{enumerate}[resume]
+	\item Les coordonnées du milieu $N$ de $[KL]$ sont :
+	
+	\qcm{$\left(\tfrac14;\tfrac14;\tfrac12\right)$}{$\left(\tfrac14;-\tfrac14;\tfrac12\right)$}{$\left(-\tfrac14;\tfrac14;\tfrac12\right)$}{$\left(\tfrac12;-\tfrac12;1\right)$}
+	\item Les coordonnées du vecteur $\vect{AS}$ sont :
+	
+	\qcm{$\coordes{1}{1}{0}$}{$\coordes{1}{0}{1}$}{$\coordes{2}{1}{-1}$}{$\coordes{1}{1}{1}$}
+	\item Une représentation paramétrique de la droite $(AS)$ est :
+	
+	\def\repa{$\begin{dcases}x=-1-t\\y=t\\z=-t\end{dcases}\:(t\in\R)$}
+	\def\repb{$\begin{dcases}x=-1+2t\\y=0\\z=1+2t\end{dcases}\:(t\in\R)$}
+	\def\repc{$\begin{dcases}x=t\\y=0\\z=1+t\end{dcases}\:(t\in\R)$}
+	\def\repd{$\begin{dcases}x=-1-t\\y=1+t\\z=1-t\end{dcases}\:(t\in\R)$}
+	\qcm{\repa}{\repb}{\repc}{\repd}
+	\item Une équation cartésienne du plan $(SCB)$ est :
+	
+	\qcm{$y+z-1=0$}{$x+y+z-1=0$}{$x-y+z=0$}{$x+z-1=0$}
+\end{enumerate}
+

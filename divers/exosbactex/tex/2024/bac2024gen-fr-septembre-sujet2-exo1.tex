@@ -1,0 +1,63 @@
+On considère le cube $ABCDEFGH$ représenté ci-dessous.
+
+Les points $I$ et $J$ sont les milieux respectifs des segments $[AB]$ et $[CG]$.
+
+Le point $N$ est le milieu du segment $[IJ]$.
+
+\smallskip
+
+L'objectif de cet exercice est de calculer le volume du tétraèdre $HFIJ$.
+
+On se place dans le repère orthonormé $\RepereEspace*{A}{AB}{AD}{AE}$.
+
+\begin{Centrage}
+	\begin{EnvTikzEspace}[UniteX={0:4.8cm},UniteY={52.5:2.5cm},UniteZ={90:4.8cm}]
+		%placement des points avec labels
+		\coordinate (H) at (0,1,1) ;
+		\coordinate (F) at (1,0,1) ;
+		\coordinate (J) at (1,1,0.5) ;
+		\coordinate (I) at (0.5,0,0) ;
+		%coloriages
+		\fill[lightgray,opacity=0.7] (H)--(I)--(F)--cycle ;
+		\fill[lightgray,opacity=0.5] (H)--(F)--(J)--cycle ;
+		\fill[lightgray,opacity=0.9] (I)--(F)--(J)--cycle ;
+		\PlacePointsEspace{A/0,0,0/bg B/1,0,0/bd C/1,1,0/d D/0,1,0/g E/0,0,1/g F/1,0,1/bd G/1,1,1/d H/0,1,1/g I/0.5,0,0/b J/1,1,0.5/d N/0.75,0.5,0.25/h}
+		%segments pointillés
+		\TraceSegmentsEspace[semithick,dashed]{A/D D/H D/C}
+		\TraceSegmentsEspace[thick,dashed]{H/I H/J I/J}
+		%segments pleins
+		\TraceSegmentsEspace[semithick]{A/B B/C C/G G/H H/E E/A E/F B/F F/G}
+		\TraceSegmentsEspace[thick]{H/F F/I F/J}
+%		%Marques points
+		\MarquePointsEspace{A,B,C,D,E,F,G,H,I,J,N}
+	\end{EnvTikzEspace}
+\end{Centrage}
+
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Donner les coordonnées des points $I$ et $J$. En déduire les coordonnées de $N$.
+		\item Justifier que les vecteurs $\Vecteur{IJ}$ et $\Vecteur{NF}$ ont pour coordonnées respectives :%
+		\[ \Vecteur{IJ} \begin{pmatrix} 0,5 \\ 1 \\ 0,5 \end{pmatrix} \text{ et } \Vecteur{NF} \begin{pmatrix} 0,25 \\ -0,5 \\ -0,75\end{pmatrix}.\]
+		\item Démontrer que les vecteurs $\Vecteur{IJ}$ et $\Vecteur{NF}$ sont orthogonaux.
+		
+		\smallskip
+		
+		On admet que $NF=\frac{\sqrt{14}}{4}$.
+		\item En déduire que l'aire du triangle $FIJ$ est égale à $\frac{\sqrt{21}}{8}$.
+	\end{enumerate}
+	\item On considère le vecteur $\Vecteur{u} = \begin{pmatrix} 4 \\ -1 \\ -2 \end{pmatrix}$. 
+	\begin{enumerate}
+		\item Démontrer que le vecteur $\Vecteur{u}$ est normal au plan $(FIJ)$.
+		\item En déduire qu'une équation cartésienne du plan $(FIJ)$ est : $4x - y - 2z - 2 = 0$.
+		\item On note $d$ la droite orthogonale au plan $(FIJ)$ passant par le point $H$.
+		
+		Déterminer une représentation paramétrique de la droite $d$.
+		\item Montrer que la distance du point $H$ au plan $(FIJ)$ est égale à $\frac{5\sqrt{21}}{21}$.
+		\item On rappelle que le volume d’une pyramide est donné par la formule $\mathcal{V} = \frac13 \times \mathcal{B} \times h$ où $\mathcal{B}$ est l’aire d’une base et $h$ la longueur de la hauteur relative à cette base.
+		
+		\smallskip
+		
+		Calculer le volume du tétraèdre $HFIJ$. On donnera la réponse sous la forme d'une fraction irréductible.
+	\end{enumerate}
+\end{enumerate}

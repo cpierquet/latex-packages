@@ -1,0 +1,59 @@
+On considère le prisme droit $ABFEDCGH$, de base $ABFE$, trapèze rectangle en $A$.
+
+On associe à ce prisme le repère orthonormé $\left(A;\vect{\imath},\vect{\jmath},\vect{k}\right)$ tel que : \[ \vect{\imath} = \dfrac{1}{4} \vect{AB} \: ; \: \vect{\jmath} = \dfrac{1}{4} \vect{AD} \: ; \: \vect{k} = \dfrac{1}{8} \vect{AE}.\]%
+De plus on a $\vect{BF} = \dfrac{1}{2} \vect{AE}$.
+
+\begin{center}
+	\begin{tikzpicture}[x={(-15:5mm)},y={(25:4mm)},z={(90:6mm)},line join=bevel]
+		\coordinate (A) at (0,0,0) ;
+		\coordinate (B) at (4,0,0) ;
+		\coordinate (C) at (4,4,0) ;
+		\coordinate (D) at (0,4,0) ;
+		\coordinate (E) at (0,0,8) ;
+		\coordinate (F) at (4,0,4) ;
+		\coordinate (G) at (4,4,4) ;
+		\coordinate (H) at (0,4,8) ;
+		\coordinate (J) at ($(A)!0.5!(E)$) ;
+		\coordinate (I) at ($(E)!0.5!(F)$) ;
+		\draw[->,>=latex,semithick] (A)--(8,0,0) ;
+		\draw[->,>=latex,semithick] (A)--(0,0,9) ;
+		\fill[draw=none,semithick,fill opacity=0.75,fill=lightgray!50] (A)--(B)--(C)--(G)--(H)--(E)--cycle ;
+		\fill[draw=none,semithick,fill opacity=0.75,fill=gray!75] (J)--(G)--(H)--cycle ;
+		\draw[semithick,gray,densely dashed,] (D)--(0,9.35,0) ;
+		\draw[->,>=latex,semithick] (0,9.35,0)--(0,11.5,0) ;
+		\draw[thick] (A)--(B)--(F)--(E)--cycle (B)--(C)--(G)--(F)--cycle (F)--(G)--(H)--(E)--cycle;
+		\draw[thick,densely dashed] (A)--(D) (D)--(C) (D)--(H) ;
+		\draw[thick,densely dashed,darkgray] (G)--(J)--(H) ;
+		\draw[thick,darkgray] (J)--(I) (I)--(G) (I)--(H) ;
+		\foreach \point/\pos in {A/below left,B/below,C/right,D/above left,E/left,F/below left,G/right,H/above,I/below,J/left}
+			{\filldraw (\point) circle[radius=1.5pt] node[font=\small,\pos] {$\point$} ;}
+		\draw[->,>=latex] (A)--(1,0,0) node[below,font=\scriptsize] {$\vect{\imath}$} ;
+		\draw[->,>=latex] (A)--(0,1,0) node[above,font=\scriptsize] {$\vect{\jmath}$} ;
+		\draw[->,>=latex] (A)--(0,0,1) node[left,font=\scriptsize] {$\vect{k}$} ;
+	\end{tikzpicture}
+\end{center}
+
+\smallskip
+
+On note $I$ le milieu du segment $[EF]$.
+
+On note $J$ le milieu du segment $[AE]$.
+
+\begin{enumerate}
+	\item Donner les coordonnées des points $I$ et $J$.
+	\item Soit $\vect{d}$ le vecteur de coordonnées $\begin{pmatrix} -1\\1\\1 \end{pmatrix}$.
+	\begin{enumerate}
+		\item Montrer que le vecteur $\vect{d}$ est normal au plan $(IGJ)$.
+		\item Déterminer une équation cartésienne du plan $(IGJ)$.
+	\end{enumerate}
+	\item Déterminer une représentation paramétrique de la droite $d$, perpendiculaire au plan 
+	$(IGJ)$ et passant par $H$.
+	\item On note $L$ le projeté orthogonal du point $H$ sur le plan $(IGJ)$.
+	
+	Montrer que les coordonnées de $L$ sont $\left( \dfrac83 ; \dfrac{4}{3} ; \dfrac{16}{3} \right)$.
+	\item Calculer la distance du point $H$ au plan $(IGJ)$.
+	\item Montrer que le triangle $IGJ$ est rectangle en $I$.
+	\item En déduire le volume du tétraèdre $IGJH$.
+	
+	On rappelle que le volume $\mathcal{V}$ d'un tétraèdre est donné par la formule : $\mathcal{V} = \dfrac13 \times (\text{aire de la base}) \times \text{hauteur}$.
+\end{enumerate}

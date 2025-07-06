@@ -1,0 +1,54 @@
+Le but de cet exercice est d'étudier la fonction $f$ définie sur l'intervalle $\intervOO{0}{+\infty}$ par : \[ f(x)=x\,\ln{\big(x^2\big)}-\frac1x. \]
+
+\textbf{\large\underline{Partie A : lectures graphiques}}
+
+\medskip
+
+On a tracé ci-dessous la courbe représentative $\left(C_f\right)$ de la fonction $f$, ainsi que la droite $(T)$, tangente à la courbe $\left(C_f\right)$ au point $A$ de coordonnées $(1;-1)$. Cette tangente passe également par le point $B(0;-4)$.
+
+\begin{Centrage}
+	\begin{tikzpicture}[x=2cm,y=0.5cm,xmin=0,xmax=4,xgrille=1,ymin=-7,ymax=7,ygrille=1]
+		\FenetreSimpleTikz(ElargirOx=0,ElargirOy=0)<HautGrad=1.5pt>{1,2,3}<HautGrad=1.5pt>{-6,-5,...,6}
+		\begin{scope}
+			\FenetreTikz
+			\draw[line width=1.1pt,red,samples=250,domain=0.05:4] plot (\x,{\x*ln((\x)^2)-1/(\x)}) ;
+			\draw[line width=1.1pt,blue,samples=2,domain=0:4] plot (\x,{3*\x-4}) ;
+		\end{scope}
+		\draw (0,-4) pic[line width=0.8pt] {ptcroix=3pt} node[below right] {$B$} ;
+		\draw (1,-1) pic[line width=0.8pt] {ptcroix=3pt} node[below right] {$A$} ;
+		\draw (2.25,4.5) node[red] {$\left(C_f\right)$} ;
+		\draw (2.75,3.5) node[blue] {$(T)$} ;
+	\end{tikzpicture}
+\end{Centrage}
+
+\begin{enumerate}
+	\item Lire graphiquement $f'(1)$ et donner l'équation réduite de la tangente $(T)$.
+	\item Donner les intervalles sur lesquels la fonction $f$ semble convexe ou concave.
+	
+	Que semble représenter le point A pour la courbe $\left(C_f\right)$ ?
+\end{enumerate}
+
+\textbf{\large\underline{Partie A : étude analytique}}
+
+\smallskip
+
+\begin{enumerate}
+	\item Déterminer, en justifiant, la limite de $f$ en $+\infty$, puis sa limite en 0.
+	\item On admet que la fonction $f$ est deux fois dérivable sur l'intervalle $\intervOO{0}{+\infty}$.
+	\begin{enumerate}
+		\item Déterminer $f'(x)$ pour $x$ appartenant à l'intervalle $\intervOO{0}{+\infty}$.
+		\item Montrer que pour tout $x$ appartenant à l'intervalle $\intervOO{0}{+\infty}$, \[ f''(x) = \frac{2(x+1)(x-1)}{x^3}. \]
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Étudier la convexité de la fonction $f$ sur l'intervalle $\intervOO{0}{+\infty}$.
+		\item Étudier les variations de la fonction $f'$, puis le signe de $f'(x)$ pour $x$ appartenant à l'intervalle $\intervOO{0}{+\infty}$.
+		
+		En déduire le sens de variation de la fonction $f$ sur l'intervalle $\intervOO{0}{+\infty}$.
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Montrer que l'équation $f(x)=0$ admet une unique solution $\alpha$ sur l'intervalle $\intervOO{0}{+\infty}$.
+		\item Donner la valeur arrondie au centième de $\alpha$ et montrer que $\alpha$ vérifie : \[ \alpha^2 = \text{exp}{\left(\frac{1}{\alpha^2}\right)} \]
+	\end{enumerate}
+\end{enumerate}

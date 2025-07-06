@@ -1,0 +1,71 @@
+\textit{Les parties A et B sont indépendantes.}
+
+\smallskip
+
+\begin{Centrage}
+	\textbf{Partie A}
+\end{Centrage}
+
+Une société de vente en ligne procède à une étude du niveau de fidélité de ses clients. Elle définit pour cela comme \og régulier \fg\ un client qui a fait des achats chaque année depuis trois ans. Elle constate que 60\,\% de ses clients sont des clients réguliers, et que parmi eux, 47\,\% ont acheté la carte de fidélité.
+
+Par ailleurs, parmi l'ensemble de tous les clients de la société, 38\,\% ont acheté la carte de fidélité.
+
+On interroge au hasard un client et on considère les évènements suivants :
+
+\begin{itemize}
+	\item R : \og le client est un client régulier \fg\ ;
+	\item F : \og le client a acheté la carte de fidélité \fg.
+\end{itemize}
+
+Pour un évènement $E$ quelconque, on note $\overline{E}$ sont évènement contraire et $P(E)$ sa probabilité.
+
+\begin{wrapstuff}[r]
+\ArbreProbasTikz[PositionProbas=auto,EspaceNiveau=2]{$R$/\numdots/,$F$/\numdots/,$\overline{F}$/\numdots/,$\overline{R}$/\numdots/,$F$/\numdots/,$\overline{F}$/\numdots/}
+\end{wrapstuff}
+
+\begin{enumerate}
+	\item 
+	
+	\begin{enumerate}
+		\item Reproduire l'arbre ci-contre et compléter les pointillés.
+		\item Calculer la probabilité que le client interrogé soit un client régulier et qu'il ait acheté la carte de fidélité.
+		\item Déterminer la probabilité que le client ait acheté la carte de fidélité sachant que ce n'est pas un client régulier.
+		\item Le directeur du service des ventes affirme que parmi les clients qui ont acheté la carte de fidélité, plus de 80\,\% sont des clients réguliers. Cette affirmation est-elle exacte ?
+	\end{enumerate}
+\end{enumerate}
+
+\begin{Centrage}
+	\textbf{Partie B}
+\end{Centrage}
+
+La société demande à un institut de sondage de faire une enquête sur le profil de ses clients réguliers. L'institut a élaboré un questionnaire en ligne constitué d'un nombre variable de questions.
+
+On choisit au hasard un échantillon de \num{1000} clients réguliers, à qui le questionnaire est proposé. On considère que ces \num{1000} clients répondent.
+
+\begin{itemize}
+	\item Pour les remercier, la société offre un bon d'achat à chacun des clients de l'échantillon.
+	
+	Le montant de ce bon d'achat dépend du nombre de questions posées au client.
+	\item La société souhaite récompenser particulièrement les clients de l'échantillon qui ont acheté une carte de fidélité et, en plus du bon d'achat, offre à chacun d'eux une prime d'un montant de 50 euros versée sur la carte de fidélité.
+\end{itemize}
+
+On note $Y_1$ la variable aléatoire qui, à chaque échantillon de \num{1000} clients réguliers, associe le total, en euros, des montants du bon d'achat des \num{1000} clients. On admet que son espérance $E\big(Y_1\big)$ est égale à \num{30000} et que sa variance $V\big(Y_1\big)$ est égale à \num{10000}.
+
+\smallskip
+
+On note $X_2$ la variable aléatoire qui, à chaque échantillon de \num{1000} clients réguliers, associe le nombre de clients ayant acheté la carte de fidélité parmi eux, et on note $Y_2$ la variable aléatoire qui, à chaque échantillon de \num{1000} clients, associe le total, en euros, des montants de la prime de fidélité versée.
+
+On admet que $X_2$ suit la loi binomiale de paramètres \num{1000} et $0,47$ et que $Y_2 = 50X_2$.
+
+\begin{enumerate}
+	\item Calculer l'espérance $E\big(X_2\big)$ de la variable $X_2$ et interpréter le résultat dans le contexte de l'exercice.
+\end{enumerate}
+
+On note $Y=Y_1+Y_2$ la variable aléatoire égale au total général, en euros, des montants offerts (bon d'achat et prime de fidélité) aux \num{1000} clients. On admet que les variables aléatoires $Y_1$ et $Y_2$ sont indépendantes.
+
+On note $Z$ la variable aléatoire définie par $Z=\frac{Y}{\num{1000}}$.
+
+\begin{enumerate}[resume]
+	\item Préciser ce que modélise la variable aléatoire $Z$ dans le contexte de l'exercice. Vérifier que son espérance $E(Z)$ est égale à $53,5$ et que sa variance $V(Z)$ est égale à \num{0.72275}.
+	\item À l'aide de l'inégalité de Bienaymé-Tchebychev, vérifier que la probabilité que $Z$ soit strictement compris entre $51,7$ euros et $55,3$ euros est supérieure à $0,75$.
+\end{enumerate}

@@ -1,0 +1,17 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: lualatex: {shell: no, synctex: no, interaction: batchmode}
+
+\documentclass[margin=1mm,12pt]{standalone}
+\usepackage[xelua]{calculatoritems}
+
+\begin{document}
+
+\begin{tabular}{l}
+	\CalcKeyNwks{left+right+up+down+home+power+ok+back}\\
+	\CalcKeyNwks{shift+alpha+x+var+tools+clear+exp+ln+log+i+,+pow+sin+cos+tan+sqrt+sqr}\\
+	\CalcKeyNwks*{shift+alpha+x+var+tools+clear+exp+ln+log+i+,+pow+sin+cos+tan+sqrt+sqr}\\
+	\CalcKeyNwks{0+1+2+3+4+5+6+7+8+9+dot+plus+minus+times+div+lp+rp+10p+ans+exe}\\
+	\CalcKeyNwks*{0+1+2+3+4+5+6+7+8+9+dot+plus+minus+times+div+lp+rp+10p+ans+exe}\\
+\end{tabular}
+
+\end{document}

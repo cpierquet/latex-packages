@@ -1,0 +1,73 @@
+Dans l’espace rapporté à un repère orthonormé $\left(O;\vect{\imath},\,\vect{\jmath}, \vect{k} \right)$, on considère : 
+
+\begin{itemize}
+	\item le plan $\mathcal{P}_1$ dont une équation cartésienne est $2x + y - z + 2 = 0$,
+	\item le plan $\mathcal{P}_2$ passant par le point $B(1;1;2)$ et dont un vecteur normal est $\vv*{n}{2}$ $\begin{pmatrix}1\\-1\\1\end{pmatrix}$.
+\end{itemize}
+
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Donner les coordonnées d’un vecteur $\vv*{n}{1}$ normal au plan $\mathcal{P}_1$.
+		\item On rappelle que deux plans sont perpendiculaires si un vecteur normal à l’un des plans est orthogonal à un vecteur normal à l’autre plan.
+		
+		Montrer que les plans $\mathcal{P}_1$ et $\mathcal{P}_2$ sont perpendiculaires. 
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Déterminer une équation cartésienne du plan $\mathcal{P}_2$.
+		\item On note $\Delta$ la droite dont une représentation paramétrique est : $\begin{dcases} x=0 \\ y=-2+t \\ z=4 \end{dcases}$, $t \in \mathbb{R}$.
+		
+		Montrer que la droite $\Delta$ est l’intersection des plans $\mathcal{P}_1$ et $\mathcal{P}_2$. 
+	\end{enumerate}
+\end{enumerate}
+
+On considère le point $A(1;1;1)$ et on admet que le point $A$ n’appartient ni à  $\mathcal{P}_1$ ni à $\mathcal{P}_2$.
+
+On note $H$ le projeté orthogonal du point $A$ sur la droite $\Delta$.
+
+\begin{enumerate}[resume]
+	\item On rappelle que, d’après la question \textbf{2.b}, la droite $\Delta$ est l’ensemble des points $M_t$ de coordonnées $(0;-2+t;t)$ où $t$ désigne un nombre réel quelconque.
+	\begin{enumerate}
+		\item Montrer que, pour tout réel $t$, $AM_t = \sqrt{2t^2-8t+11}$.
+		\item En déduire que $AH = \sqrt{3}$. 
+	\end{enumerate}
+	\item On note $\mathcal{D}_1$ la droite orthogonale au plan $\mathcal{P}_1$ passant par le point $A$ et $H$ le projeté orthogonal du point $A$ sur le plan $\mathcal{P}_1$.
+	\begin{enumerate}
+		\item Déterminer une représentation paramétrique de la droite $\mathcal{D}_1$. 
+		\item En déduire que le point $H_1$ a pour coordonnées $\left(-\frac13;\frac13;\frac53\right)$.
+	\end{enumerate}
+	\begin{wrapstuff}[r,abovesep=-1cm]
+		\begin{tikzpicture}[x={(-20:5cm)},y={(65:3.33cm)},z={(90:1cm)},line join=bevel]
+			\tikzstyle{labelddd} = [inner sep=1.5pt,font=\tiny]
+			\coordinate (A) at (0,0,0) ; \coordinate (B) at (1,0,0) ;
+			\coordinate (C) at (1,1,0) ; \coordinate (D) at (0,1,0) ;
+			\coordinate (V) at ($(D)!0.29!(C)$) ;% \filldraw (V) circle[radius=2pt] ;
+			\coordinate (W) at (0.5,1,0) ;% \filldraw (W) circle[radius=2pt] ;
+			\coordinate (E) at (0.5,0,-1.5) ; \coordinate (F) at (0.5,0,2.5) ;
+			\coordinate (K) at (0.5,{5/7},-3.5) ;
+			\coordinate (G) at (0.5,1,2.5) ; \coordinate (H) at (0.5,1,-3.5) ;
+			\draw[semithick] (W)--(G)--(F)--(E) (H)--(K) ;
+			\draw[semithick] (V)--(D)--(A)--(B)--(C)--(W) ;
+			\coordinate (HH) at (0.5,0.29,0) ;% \filldraw (HH) circle[radius=2pt] ;
+			\coordinate (HHH) at (0.5,0.57,0) ;% \filldraw (HHH) circle[radius=2pt] ;
+			\draw[semithick] (HH) node[labelddd,left] {$H$} --++(0,0,1) node[labelddd,left] {$H_1$} --++(0.28,0,0) node[right,labelddd] {$A$} --++(0,0,-1) node[right,labelddd] {$H_2$}--cycle ;
+			\draw[semithick] (0.5,-0.5,0) -- (HH) (HHH)--(0.5,1.85,0) ;
+			\draw[semithick,densely dashed] (V)--(W) (W)--(H) (HH)--(HHH) ;
+			\draw (0.5,-0.2,0) node[inner sep=1.5pt,font=\footnotesize,left=3pt] {$\Delta$} ;
+			\draw (0.025,0,0) node[inner sep=1.5pt,font=\scriptsize,above right] {$\mathcal{P}_2$} ;
+			\draw (0.5,1,1.5) node[inner sep=0.5pt,font=\scriptsize,left] {$\mathcal{P}_1$} ;
+		\end{tikzpicture}
+	\end{wrapstuff}
+	\item Soit $H_2$ le projeté orthogonal de $A$ sur le plan $\mathcal{P}_2$.
+	
+	On admet que $H_2$ a pour coordonnées $\left(\frac43;\frac23;\frac43\right)$ et que $H$ a pour coordonnées $(0;0;2)$.
+	
+	\medskip
+	
+	Sur le schéma ci-dessous, les plans $\mathcal{P}_1$ et $\mathcal{P}_2$ sont représentés, ainsi que les points $A$, $H_1$, $H_2$ et $H$.
+	
+	\medskip
+	
+	Montrer que $AH_1HH_2$ est un rectangle.
+\end{enumerate}

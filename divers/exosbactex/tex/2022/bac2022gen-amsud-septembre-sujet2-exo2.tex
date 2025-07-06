@@ -1,0 +1,59 @@
+Le but de cet exercice est d'étudier la fonction $f$, définie sur $]0;+\infty[$, par : \[f(x) =3x - x \ln (x) - 2 \ln (x).\]
+
+\textbf{Partie A : Étude d'une fonction auxiliaire $\mathbf{g}$}
+
+\medskip
+
+Soit $g$ la fonction définie sur $]0;+\infty[$ par \[g(x) = 2(x - 1) - x \ln (x).\]
+%
+On note $g'$ la fonction dérivée de $g$. On admet que $\displaystyle\lim_{x \to + \infty} g(x) = - \infty$.
+
+\begin{enumerate}
+	\item Calculer $g(1)$ et $g(\e)$.
+	\item Déterminer $\displaystyle\lim_{x \to + 0} g(x)$ en justifiant votre démarche.
+	\item Montrer que, pour tout $x > 0$, $g'(x) = 1 - \ln (x)$.
+	
+	En déduire le tableau des variations de $g$ sur $]0;+\infty[$.
+	\item Montrer que l'équation $g(x) = 0$ admet exactement deux solutions distinctes sur
+	$]0;+\infty[$ : 1 et $\alpha$ avec $\alpha$ appartenant à l'intervalle $[\e;+\infty[$.
+	
+	On donnera un encadrement de $\alpha$ à $0,01$ près.
+	\item En déduire le tableau de signes de $g$ sur $]0;+\infty[$.
+\end{enumerate}
+
+\textbf{Partie B : Étude de la fonction $\mathbf{f}$}
+
+\medskip
+
+On considère dans cette partie la fonction $f$, définie sur $]0;+\infty[$,par \[f(x) = 3x - x \ln (x)- 2\ln (x).\]
+%
+On note $f'$ la fonction dérivée de $f$.
+
+La représentation graphique $\mathcal{C}_f$ de cette fonction $f$ est donnée dans le repère $\Rij$ ci-dessous.
+
+On admet que : $\lim_{x \to 0} f(x) = + \infty$.
+
+\begin{center}
+	\begin{tikzpicture}[x=0.82cm,y=0.82cm,xmin=0,xmax=16,xgrille=1,xgrilles=0.5,ymin=-2,ymax=6,ygrille=1,ygrilles=0.5]
+		\GrilleTikz \AxesTikz[ElargirOx=0/0,ElargirOy=0/0]
+		\AxexTikz{0,1,...,15} \AxeyTikz{-1,0,...,5}
+		\draw (16,0) node[above left,font=\small] {$x$} ;
+		\draw (0,6) node[left,font=\small] {$y$} ;
+		\clip (\xmin,\ymin) rectangle (\xmax,\ymax) ;
+		\draw[very thick,blue,domain=0.01:16,samples=500] plot (\x,{3*\x-\x*ln(\x)-2*ln(\x)}) ;
+		\draw (10.5,2) node[blue,above right,font=\large] {$\mathcal{C}_f$} ;
+	\end{tikzpicture}
+\end{center}
+
+\begin{enumerate}
+	\item Déterminer la limite de $f$ en $+\infty$ en justifiant votre démarche.
+	\item 
+	\begin{enumerate}
+		\item Justifier que pour tout $x > 0$, $f'(x) = \dfrac{g(x)}{x}$.
+		\item En déduire le tableau des variations de $f$ sur $]0;+\infty[$.
+	\end{enumerate}
+	\item On admet que, pour tout $x > 0$, la dérivée seconde de $f$, notée $f''$, est définie par $f''(x) = \dfrac{2 - x}{x^2}$.
+	
+	Étudier la convexité de $f$ et préciser les coordonnées du point d'inflexion de $\mathcal{C}_f$.
+\end{enumerate}
+

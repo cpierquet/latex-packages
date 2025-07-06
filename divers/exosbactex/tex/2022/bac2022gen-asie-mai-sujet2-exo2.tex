@@ -1,0 +1,51 @@
+\textbf{Partie A}
+
+\begin{center}
+	\begin{tikzpicture}[x=0.6cm,y=0.6cm,xmin=-4,xmax=15,xgrille=1,xgrilles=0.5,ymin=-5,ymax=8,ygrille=1,ygrilles=0.5]
+		\GrilleTikz \AxesTikz[ElargirOx=0/0,ElargirOy=0/0]
+		\AxexTikz[Police=\footnotesize]{-4,-3,...,14}
+		\AxeyTikz[Police=\footnotesize]{-5,-4,...,7}
+		\draw[red] (3.1,7.7) node[right,font=\large] {$\mathcal{C}_2$} ;
+		\draw[blue] (3.1,-4) node[right,font=\large] {$\mathcal{C}_1$} ;
+		\clip (\xmin,\ymin) rectangle (\xmax,\ymax) ;
+		\draw[very thick,red,dashed,domain=3.1:15.5,samples=500] plot (\x,{(2*\x-1)/(\x*\x-\x-6)}) ;
+		\draw[very thick,blue,domain=3.001:15.5,samples=500] plot (\x,{ln(\x*\x-\x-6)}) ;
+	\end{tikzpicture}
+\end{center}
+
+Dans le repère orthonormé ci-dessus, sont tracées les courbes représentatives d'une fonction $f$ et de sa fonction dérivée, notée $f'$, toutes deux définies sur $]3;+\infty[$.
+
+\begin{enumerate}
+	\item Associer à chaque courbe la fonction qu'elle représente. Justifier.
+	\item Déterminer graphiquement la ou les solutions éventuelles de l'équation $f(x) = 3$.
+	\item Indiquer, par lecture graphique, la convexité de la fonction $f$.
+\end{enumerate}
+
+\textbf{Partie B}
+
+\begin{enumerate}
+	\item Justifier que la quantité $\ln \left(x^2- x- 6\right)$ est bien définie pour les valeurs $x$ de l'intervalle $]3;+\infty[$, que l'on nommera $I$ dans la suite.
+	\item On admet que la fonction $f$ de la \textbf{Partie A} est définie par $f(x) = \ln \left(x^2- x- 6\right)$ sur $I$. 
+	
+	Calculer les limites de la fonction $f$ aux deux bornes de l'intervalle $I$.
+	
+	En déduire une équation d'une asymptote à la courbe représentative de la fonction $f$ sur $I$.
+	\item 
+	\begin{enumerate}
+		\item Calculer $f'(x)$ pour tout $x$ appartenant à $I$.
+		\item Étudier le sens de variation de la fonction $f$ sur $I$.
+		
+		Dresser le tableau des variations de la fonction $f$ en y faisant figurer les limites aux bornes de $I$.
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Justifier que l'équation $f(x) = 3$ admet une unique solution $\alpha$ sur l'intervalle $]5;6[$.
+		\item Déterminer, à l'aide de la calculatrice, un encadrement de $\alpha$ à $10^{-2}$ près.
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Justifier que $f''(x) = \dfrac{- 2x^2 + 2x - 13}{\left(x^2 - x - 6\right)^2}$.
+		\item Étudier la convexité de la fonction $f$ sur $I$.
+	\end{enumerate}
+\end{enumerate}
+

@@ -1,0 +1,87 @@
+\textit{Les parties A et B sont indépendantes.}
+
+\medskip
+
+
+Alain possède une piscine qui contient $50~\text{m}^{3}$ d'eau. On rappelle que $1~\text{m}^{3}=\num{1000}~\text{L}$.
+
+Pour désinfecter l'eau, il doit ajouter du chlore.
+
+\smallskip
+
+Le taux de chlore dans l'eau, exprimé en $\text{mg.L}^{-1}$, est défini comme la masse de chlore par unité de volume d'eau. Les piscinistes préconisent un taux de chlore compris entre 1 et 3~$\text{mg.L}^{-1}$.
+
+\smallskip
+
+Sous l'action du milieu ambiant, notamment des ultraviolets, le chlore se décompose et disparaît peu à peu.
+
+Alain réalise certains jours, à heure fixe, des mesures avec un appareil qui permet une précision à $0,01~\text{mg.L}^{-1}$. Le mercredi 19 juin, il mesure un taux de chlore de $0,70~\text{mg.L}^{-1}$.
+
+\medskip
+
+\textbf{Partie A : étude d'un modèle discret.}
+
+\medskip
+
+Pour maintenir le taux de chlore dans sa piscine, Alain décide, à partir du jeudi 20 juin, d'ajouter chaque jour une quantité de 15~g de chlore. On admet que ce chlore se mélange uniformément dans l'eau de la piscine.
+
+\begin{enumerate}
+	\item Justifier que cet ajout de chlore fait augmenter le taux de $0,3~\text{mg.L}^{-1}$.
+	\item Pour tout entier naturel $n$, on note $v_{n}$ le taux de chlore, en $\text{mg.L}^{-1}$, obtenu avec ce nouveau protocole $n$ jours après le mercredi 19 juin. Ainsi $v_{0}=0,7$.
+	
+	On admet que pour tout entier naturel $n$, $v_{n+1}=0,92v_{n}+0,3$.
+	\begin{enumerate}
+		\item Montrer par récurrence que pour tout entier naturel $n, v_{n} \leqslant v_{n+1} \leqslant 4$.
+		\item Montrer que la suite $\left(v_{n}\right)$ est convergente et calculer sa limite.
+	\end{enumerate}
+\end{enumerate}
+
+\begin{wrapstuff}[r]
+\begin{minipage}{5.75cm}
+\begin{CodePythonLstAlt}*[Largeur=5.7cm]{center}
+def alerte_chlore(s) :
+	n = 0
+	v = 0.7
+	while ................. :
+		n = ......
+		v = ......
+	return n
+\end{CodePythonLstAlt}
+\end{minipage}
+\end{wrapstuff}
+
+\begin{enumerate}[resume]
+	\item À long terme, le taux de chlore sera-t-il conforme à la préconisation des piscinistes ? Justifier la réponse.
+	\item Reproduire et compléter l'algorithme ci-contre écrit en langage \textsf{Python} pour que la fonction \texttt{alerte\_chlore} renvoie, lorsqu'il existe, le plus petit entier $n$ tel que $v_{n}>s$.
+	\item Quelle valeur obtient-on en saisissant l'instruction :
+	
+	\hfill\texttt{alerte\_chlore(3)} ?\hfill~
+	
+	Interpréter ce résultat dans le contexte de l'exercice.
+\end{enumerate}
+
+\medskip
+
+\textbf{Partie B : étude d'un modèle continu.}
+
+\medskip
+
+Alain décide de faire appel à un bureau d'études spécialisées. Celui-ci utilise un modèle continu pour décrire le taux de chlore dans la piscine.
+
+\smallskip
+
+Dans ce modèle, pour une durée $x$ (en jours écoulés à compter du mercredi 19 juin), $f(x)$ représente le taux de chlore, en $\text{mg.L}^{-1}$, dans la piscine.
+
+\smallskip
+
+On admet que la fonction $f$ est solution de l'équation différentielle $(E)$ : $y^{\prime}=-0,08 y+\frac{q}{50}$, où $q$ est la quantité de chlore, en gramme, rajoutée dans la piscine chaque jour.
+
+\begin{enumerate}
+	\item Justifier que la fonction $f$ est de la forme $f(x)=C \e^{-0,08 x}+\frac{q}{4}$ où $C$ est une constante réelle.
+	\item 
+	
+	\begin{enumerate}
+		\item Exprimer en fonction de $q$ la limite de $f$ en $+\infty$.
+		\item On rappelle que le taux de chlore observé le mercredi 19 juin est égal à $0,7~\text{mg.L}^{-1}$. On souhaite que le taux de chlore se stabilise à long terme autour de $2~\text{mg.L}^{-1}$. Déterminer les valeurs de $C$ et $q$ afin que ces deux conditions soient respectées.
+	\end{enumerate}
+\end{enumerate}

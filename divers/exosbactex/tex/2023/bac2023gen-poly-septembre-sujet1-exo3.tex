@@ -1,0 +1,40 @@
+On considère la fonction $f$ définie sur $\R$ par \[ f(x)=\dfrac34x^2-2x+3. \]
+
+\begin{enumerate}
+	\item Dresser le tableau de variations de $f$ sur $\R$.
+	\item En déduire, que pour tout $x$ appartenant à l'intervalle $\IntervalleFF{\frac43}{2}$, $f(x)$ appartient à l'intervalle $\IntervalleFF{\frac43}{2}$.
+	\item Démontrer que pour tout $x$ réel, $x \leqslant f(x)$.
+	
+	Pour cela, on pourra démontrer que pour tout réel $x$ : \[ f(x)-x = \dfrac34(x-2)^2. \]
+\end{enumerate}
+
+On considère la suite $\Suite{u}$ définie par un réel $u_0$ et pour tout entier naturel $n$ : \[ u_{n+1} = f\big(u_n\big).\]
+
+On a donc, pour tout entier naturel $n$, $u_{n+1} = \dfrac34u_n^2-2u_n+3.$
+
+\begin{enumerate}[resume]
+	\item Étude du cas : $\frac34 \leqslant u_0 \leqslant 2$.
+	\begin{enumerate}
+		\item Démontrer par récurrence que, pour tout entier naturel $n$, \[ u_{n+1} \leqslant u_n \leqslant 2. \]
+		\item En déduire que la suite $\Suite{u}$ est convergente.
+		\item Prouver que la limite de la suite est égale à 2.
+	\end{enumerate}
+	\item Étude du cas particulier $u_0=3$.
+	
+	On admet que dans ce cas la suite $\Suite{u}$ tend vers $+\infty$.
+	
+	Recopier et compléter la fonction « \texttt{seuil} » suivante écrite en \textsf{Python}, afin qu'elle renvoie la plus petite valeur de $n$ telle que $u_n$ soit supérieur ou égal à 100.
+	
+\begin{CodePythonLstAlt}*[Largeur=7cm]{center}
+def seuil() :
+	u = 3
+	n = 0
+	while ......... :
+		u = .........
+		n = .........
+	return n
+\end{CodePythonLstAlt}
+	\item Étude du cas : $u_0 > 2$.
+	
+	À l'aide d'un raisonnement par l'absurde, montrer que $\Suite{u}$ n'est pas convergente.
+\end{enumerate}

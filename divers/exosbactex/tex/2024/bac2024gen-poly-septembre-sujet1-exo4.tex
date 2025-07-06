@@ -1,0 +1,48 @@
+On considère un cube $ABCDEFGH$ et l’espace est rapporté au repère orthonormal \RepereEspace{A}{AB}{AD}{AE}.
+
+Pour tout réel $m$ appartenant à l'intervalle $\IntervalleFF{0}{1}$, on considère les points $K$ et $L$ de coordonnées : \[ K \CoordPtEsp{m}{0}{0} \text{ et } L \CoordPtEsp{1-m}{1}{1}. \]
+
+\begin{Centrage}
+	\begin{EnvTikzEspace}[UniteX={-5:0.9cm},UniteY={25:0.5cm},UniteZ={90:1cm}]
+		\def\LCB{4.8}
+		%placement des points avec labels
+		\PlacePointsEspace{A/0,0,0/bg B/\LCB,0,0/b C/\LCB,\LCB,0/d D/0,\LCB,0/hg E/0,0,\LCB/g F/\LCB,0,\LCB/bd G/\LCB,\LCB,\LCB/d H/0,\LCB,\LCB/h}
+		\PlacePointsEspace{K/1.37,0,0/b L/3.43,\LCB,\LCB/h}
+		%section
+		\fill[orange,opacity=0.25] (E)--(L)--(C)--(K)--cycle ;
+		\TraceSegmentsEspace[very thick,dashed,orange]{K/C C/L}
+		\TraceSegmentsEspace[very thick,orange]{K/E E/L}
+		%segments pointillés
+		\TraceSegmentsEspace[very thick,dashed]{A/D D/C D/H}
+		%segments pleins
+		\TraceSegmentsEspace[very thick]{A/B B/C C/G G/H H/E E/A E/F B/F F/G}
+		%Marques points
+		\MarquePointsEspace{A,B,C,D,E,F,G,H,K,L}
+	\end{EnvTikzEspace}
+\end{Centrage}
+
+\begin{enumerate}
+	\item Donner les coordonnées des points $E$ et $C$ dans ce repère.
+	\item Dans cette question, $m=0$. Ainsi, le point $L\CoordPtEsp{1}{1}{1}$ est confondu avec le point $G$, le
+	point $K\CoordPtEsp{0}{0}{0}$ est confondu avec le point $A$ et le plan $(LEK)$ est donc le plan $(GEA)$.
+	\begin{enumerate}
+		\item Justifier que le vecteur $\Vecteur{DB} \CoordVecEsp{1}{-1}{0}$ est normal au plan $(GEA)$.
+		\item Déterminer une équation cartésienne du plan $(GEA)$.
+	\end{enumerate}
+\end{enumerate}
+
+On s’intéresse désormais à la nature de $CKEL$ en fonction du paramètre $m$.
+
+\begin{enumerate}[resume]
+	\item Dans cette question, $m$ est un réel quelconque de l’intervalle $\IntervalleFF{0}{1}$.
+	\begin{enumerate}
+		\item Démontrer que $CKEL$ est un parallélogramme.
+		\item Justifier que $\Vecteur{KC}\cdot\Vecteur{KE}=m(m-1)$.
+		\item Démontrer que $CKEL$ est un rectangle si, et seulement si, $m = 0$ ou $m = 1$.
+	\end{enumerate}
+	\item Dans cette question, $m=\frac12$. Ainsi $L$ a pour coordonnées \CoordPtEsp{\frac12}{1}{1} et $K$ a pour coordonnées \CoordPtEsp{\frac12}{0}{0}.
+	\begin{enumerate}
+		\item Démontrer que le parallélogramme $CKEL$ est alors un losange.
+		\item À l’aide de la question {3.(b)}, déterminer une valeur approchée au degré près de la mesure de l’angle $\widehat{CKE}$.
+	\end{enumerate}
+\end{enumerate}

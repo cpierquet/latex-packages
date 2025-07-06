@@ -1,0 +1,51 @@
+Dans cet exercice, les réponses seront arrondies à $10^{-4}$ près.
+
+\bigskip
+
+Durant la saison hivernale, la circulation d'un virus a entraîné la contamination de $2\,\%$ de la population d'un pays. Dans ce pays, $90\,\%$ de la population a été vaccinée contre ce virus.
+
+On constate que $62\,\%$ des personnes contaminées avaient été vaccinées.
+
+\bigskip
+
+On interroge au hasard une personne, et on note les évènements suivants :
+
+\begin{itemize}
+	\item[] $C$ : \og la personne a été contaminée \fg{}
+	\item[] $V$ : \og la personne a été vaccinée \fg{}.
+\end{itemize}
+
+Les évènements contraires des évènements $C$ et $V$ sont notés respectivement $\overline{C}$ et $\overline{V}$.
+
+\begin{enumerate}
+	\item À partir de l'énoncé, donner, sans calcul, les probabilités $P(C)$, $P(V)$ et la probabilité conditionnelle $P_C(V)$.
+	%de : ce "de" est sur le sujet, ça me semble être une erreur de français. (cf remarque APMEP)
+	\item
+	\begin{enumerate}
+		\item Calculer $P(C \cap V)$.
+		\item En déduire $P\big(\overline{C} \cap V\big)$.
+	\end{enumerate}
+	\item Recopier l'arbre des probabilités ci-dessous et le compléter.
+	
+	\begin{Centrage}
+		\ArbreProbasTikz[PositionProbas=auto]{$C$/\numdots/,$V$/\numdots/,$\overline{V}$/\numdots/,$\overline{C}$/\numdots/,$V$/\numdots/,$\overline{V}$/\numdots/}
+	\end{Centrage}
+	\item Calculer $P_V(C)$ et interpréter le résultat dans le contexte de l'exercice.
+	\item Déterminer si les affirmations suivantes sont vraies ou fausses en justifiant votre réponse.
+	\begin{enumerate}
+		\item \og Parmi les personnes non contaminées, il y a dix fois plus de personnes vaccinées que de personnes non vaccinées.\fg
+		
+		\item \og Plus de 98\,\% de la population vaccinée n'a pas été contaminée.\fg{}
+	\end{enumerate}
+	\item On s'intéresse à un échantillon de $20$ personnes choisies au hasard dans la population.
+	
+	La population du pays est assez importante pour qu'on puisse assimiler ce choix à des tirages successifs avec remise.
+	
+	On note $X$ la variable aléatoire qui à chaque tirage associe le nombre de personnes contaminées.
+	
+	\emph{On rappelle que, pour une personne choisie au hasard, la probabilité d'être contaminée est} $p = 0,02$.
+	\begin{enumerate}
+		\item Quelle est la loi suivie par la variable aléatoire $X$ ? Justifier et donner ses paramètres.
+		\item Calculer, en rappelant la formule, la probabilité que 4 personnes exactement soient contaminées dans ce groupe de 20 personnes.
+	\end{enumerate}
+\end{enumerate}

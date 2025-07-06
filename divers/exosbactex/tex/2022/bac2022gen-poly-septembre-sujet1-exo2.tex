@@ -1,0 +1,83 @@
+Soit $k$ un nombre réel.
+
+On considère la suite $\left(u_n\right)$ définie par son premier terme $u_0$ et pour tout entier naturel $n$, \[u_{n+1} = ku_n\left(1- u_n\right).\]
+%
+Les deux parties de cet exercice sont indépendantes. 
+
+On y étudie deux cas de figure selon les valeurs de $k$.
+
+\medskip
+
+\textbf{Partie 1}
+
+\medskip
+
+Dans cette partie, $k = 1,9$ et $u_0 = 0,1$.
+
+On a donc, pour tout entier naturel $n$, $u_{n+1} = 1,9u_n\left(1 - u_n\right)$.
+
+\begin{enumerate}
+	\item On considère la fonction $f$ définie sur $[0;1]$ par $f(x) = 1,9x(1 - x)$.
+	\begin{enumerate}
+		\item Étudier les variations de $f$ sur l'intervalle $[0;1]$.
+		\item En déduire que si $x \in [0;1]$ alors $f(x) \in [0;1]$.
+	\end{enumerate}
+	\item Ci-dessous sont représentés les premiers termes de la suite $\left(u_n\right)$ construits à partir de la courbe $\mathcal{C}_f$ de la fonction $f$ et de la droite $D$ d'équation $y = x$.
+	
+	Conjecturer le sens de variation de la suite $\left(u_n\right)$ et sa limite éventuelle.
+	
+	\begin{center}
+		\begin{tikzpicture}[x=10cm,y=10cm,xmin=0,xmax=1.05,xgrille=1,xgrilles=0.5,ymin=0,ymax=0.65,ygrille=1,ygrilles=0.5]
+			\AxesTikz[ElargirOx=0/0,ElargirOy=0/0]
+			\AxexTikz{0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1}
+			\AxeyTikz{0,0.1,0.2,0.3,0.4,0.5,0.6}
+			%labels
+			\draw (0.1,0) node[below=20pt,font=\small] {$u_0$} ;
+			\draw[thick,densely dashed] (0.171,0.171)--(0.171,0) node[below=20pt,font=\small] {$u_1$} ;
+			\draw[thick,densely dashed] (0.269,0.269)--(0.269,0) node[below=20pt,font=\small] {$u_2$} ;
+			\draw[thick,densely dashed] (0.374,0.374)--(0.374,0) node[below=20pt,font=\small] {$u_3$} ;
+			\draw[thick,densely dashed] (0.1,0.171)--(0,0.171) node[left=20pt,font=\small] {$u_1 = f\left(u_0\right)$} ;
+			\ToileRecurrence[Fct={1.9*\x*(1-\x)},No=1,Uno=0.1,Nb=4,AffTermes=false]
+			\draw[thick,magenta] (0.1,0)--(0.1,0.1);
+			%courbe(s)
+			\clip (\xmin,\ymin) rectangle (\xmax,\ymax) ;
+			\draw[very thick,blue,samples=250,domain=0:1] plot (\x,{1.9*\x*(1-\x)}) ;
+			\draw[blue] (0.8,0.3) node[above right,font=\large] {$\mathcal{C}_f$} ;
+			\draw[CouleurVertForet,very thick] (0,0)--(0.65,0.65) node[below right,font=\large] {$D : y=x$} ;
+		\end{tikzpicture}
+	\end{center}
+	\item 
+	\begin{enumerate}
+		\item En utilisant les résultats de la question 1., démontrer par récurrence que pour tout entier naturel $n$ : \[0 \leqslant u_n \leqslant u_{n+1} \leqslant \dfrac12.\]
+		\item En déduire que la suite $\left(u_n\right)$ converge.
+		\item Déterminer sa limite.
+	\end{enumerate}
+\end{enumerate}
+
+\textbf{Partie 2}
+
+\medskip
+
+Dans cette partie, $k= \dfrac12$  et $u_0 = \dfrac14$.
+
+On a donc, pour tout entier naturel $n$, $u_{n+1} = \dfrac12 u_n \left(1 - u_n\right)$ et $u_0 = \dfrac14$.
+
+On admet que pour tout entier naturel $n$ : $0 \leqslant u_n \leqslant \left(\dfrac12\right)^n$.
+
+\begin{enumerate}
+	\item Démontrer que la suite $\left(u_n\right)$ converge et déterminer sa limite.
+	\item On considère la fonction \textsf{Python} \texttt{algo(p)} où \texttt{p} désigne un entier naturel non nul :
+	
+\begin{CodePythonLstAlt}*[Largeur=6cm]{center}
+def algo(p) :
+	u = 1/4
+	n = 0
+	while u > 10**(-p) :
+		u = 1/2*u*(1-u)
+		n = n+1
+	return(u)
+\end{CodePythonLstAlt}
+
+	Expliquer pourquoi, pour tout entier naturel non nul \texttt{p}, la boucle \texttt{while} ne tourne pas indéfiniment, ce qui permet à la commande \texttt{algo(p)} de renvoyer une valeur.
+\end{enumerate}
+

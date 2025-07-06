@@ -1,0 +1,413 @@
+% Author                         : C. Pierquet
+% licence                        : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+% Copyright                      : Scrabble, TradeMark by Hasbro or Mattel
+% Inspiration                    : Mark Wibrow in https://tex.stackexchange.com/questions/194780/tikz-drawing-a-rectangle-with-spikes-on-borders
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ScrabbleT}[2023/01/09 v0.1.3 Scrabble]
+% 0.1.3		Refonte des commandes fr/en
+% 0.1.2		Clé <EchelleLabels> pour les labels des cases
+% 0.1.1		Option [fr] pour franciser les commandes
+% 0.1		Version initiale
+
+%------Packages utiles
+\RequirePackage{tikz}
+\RequirePackage{pgf,pgffor}
+\RequirePackage{xstring}
+\RequirePackage{xparse}
+\RequirePackage{simplekv}
+\RequirePackage{listofitems}
+%librairies tikz
+\usetikzlibrary{calc,shapes.geometric}
+
+%score par lettre
+%idées de https://tex.stackexchange.com/questions/194780/tikz-drawing-a-rectangle-with-spikes-on-borders
+\newcommand\lettrescorescrabble[2][EN]{%avec gestion du Joker par *
+	\IfStrEq{#2}{*}%
+		{}%
+		{%
+			\def\tmp{#2}%
+			\expandafter\count\expandafter0\expandafter`#2\relax\advance\count0 by-65\relax%
+			\IfStrEq{#1}{FR}%
+				{\ifcase\count0\relax1\or3\or3\or2\or1\or4\or2\or4\or1\or8\or10\or1\or1\or1\or1\or3\or8\or1\or1\or1\or1\or4\or10\or10\or10\or10\else\fi}{}%
+			\IfStrEq{#1}{EN}%
+				{\ifcase\count0\relax1\or3\or3\or2\or1\or4\or2\or4\or1\or8\or5\or1\or3\or1\or1\or3\or10\or1\or1\or1\or1\or4\or4\or8\or4\or10\else\fi}{}%
+			\IfStrEq{#1}{GE}%
+				{\ifcase\count0\relax1\or3\or4\or1\or1\or2\or2\or2\or2\or1\or6\or4\or2\or3\or2\or4\or10\or1\or1\or1\or1\or6\or3\or8\or10\or3\else\fi}{}%
+			\IfStrEq{#1}{SP}%
+				{\ifcase\count0\relax1\or3\or3\or2\or1\or4\or2\or4\or1\or8\or0\or1\or3\or1\or1\or3\or5\or1\or1\or1\or1\or4\or0\or8\or4\or10\else\fi}{}%
+		}%
+}
+
+\xdef\AlphabetMajuscule{ABCDEFGHIJKLMNOPQRSTUVWXYZ}
+\xdef\AlphabetMinuscule{abcdefghijklmnopqrstuvwxyz}
+\xdef\PointsScrabbleFR{1,3,3,2,1,4,2,4,1,8,10,1,1,1,1,3,8,1,1,1,1,4,10,10,10,10}
+\readlist*{\PtsScrbFR}{\PointsScrabbleFR}
+\xdef\PointsScrabbleEN{1,3,3,2,1,4,2,4,1,8,5,1,3,1,1,3,10,1,1,1,1,4,4,8,4,10}
+\readlist*{\PtsScrbEN}{\PointsScrabbleEN}
+\xdef\PointsScrabbleGE{1,3,4,1,1,2,2,2,2,1,6,4,2,3,2,4,10,1,1,1,1,6,3,8,10,3}
+\readlist*{\PtsScrbGE}{\PointsScrabbleGE}
+\xdef\PointsScrabbleSP{1,3,3,2,1,4,2,4,1,8,0,1,3,1,1,3,5,1,1,1,1,4,0,8,4,10}
+\readlist*{\PtsScrbSP}{\PointsScrabbleSP}
+
+\newcommand\scrabblescorelettre[2][EN]{%avec gestion du Joker par *
+	\IfStrEq{#2}{*}%
+		{}%
+		{%
+			\IfSubStr{\AlphabetMajuscule}{#2}%
+				{\StrPosition{\AlphabetMajuscule}{#2}[\pos]}%
+				{\StrPosition{\AlphabetMinuscule}{#2}[\pos]}%
+			\IfStrEq{#1}{FR}%
+				{\PtsScrbFR[\pos]}{}%
+			\IfStrEq{#1}{EN}%
+				{\PtsScrbEN[\pos]}{}%
+			\IfStrEq{#1}{GE}%
+				{\PtsScrbGE[\pos]}{}%
+			\IfStrEq{#1}{SP}%
+				{\PtsScrbSP[\pos]}{}%
+		}%
+}
+
+%commandes localisées des cases
+\newcommand\SCRBMCTFR[1][FR]{%
+	\IfStrEq{#1}{FR}{MOT\\COMPTE\\TRIPLE}{}%
+	\IfStrEq{#1}{EN}{TRIPLE\\WORD\\SCORE}{}%
+	\IfStrEq{#1}{GE}{\scalebox{2}[2]{3W}}{}%
+	\IfStrEq{#1}{SP}{TRIPLE\\TANTO\\DE\\PALABRA}{}%
+}
+\newcommand\SCRBMCDFR[1][FR]{%
+	\IfStrEq{#1}{FR}{MOT\\COMPTE\\DOUBLE}{}%
+	\IfStrEq{#1}{EN}{DOUBLE\\WORD\\SCORE}{}%
+	\IfStrEq{#1}{GE}{\scalebox{2}[2]{2W}}{}%
+	\IfStrEq{#1}{SP}{DOBLE\\TANTO\\DE\\PALABRA}{}%
+}
+\newcommand\SCRBLCTFR[1][FR]{%
+	\IfStrEq{#1}{FR}{LETTRE\\COMPTE\\TRIPLE}{}%
+	\IfStrEq{#1}{EN}{TRIPLE\\LETTER\\SCORE}{}%
+	\IfStrEq{#1}{GE}{\scalebox{2}[2]{3B}}{}%
+	\IfStrEq{#1}{SP}{TRIPLE\\TANTO\\DE\\LETRA}{}%
+}
+\newcommand\SCRBLCDFR[1][FR]{%
+	\IfStrEq{#1}{FR}{LETTRE\\COMPTE\\DOUBLE}{}%
+	\IfStrEq{#1}{EN}{DOUBLE\\LETTER\\SCORE}{}%
+	\IfStrEq{#1}{GE}{\scalebox{2}[2]{2B}}{}%
+	\IfStrEq{#1}{SP}{DOBLE\\TANTO\\DE\\LETRA}{}%
+}
+\newcommand\SCRBMCTEN[1][EN]{%
+	\IfStrEq{#1}{FR}{MOT\\COMPTE\\TRIPLE}{}%
+	\IfStrEq{#1}{EN}{TRIPLE\\WORD\\SCORE}{}%
+	\IfStrEq{#1}{GE}{\scalebox{2}[2]{3W}}{}%
+	\IfStrEq{#1}{SP}{TRIPLE\\TANTO\\DE\\PALABRA}{}%
+}
+\newcommand\SCRBMCDEN[1][EN]{%
+	\IfStrEq{#1}{FR}{MOT\\COMPTE\\DOUBLE}{}%
+	\IfStrEq{#1}{EN}{DOUBLE\\WORD\\SCORE}{}%
+	\IfStrEq{#1}{GE}{\scalebox{2}[2]{2W}}{}%
+	\IfStrEq{#1}{SP}{DOBLE\\TANTO\\DE\\PALABRA}{}%
+}
+\newcommand\SCRBLCTEN[1][EN]{%
+	\IfStrEq{#1}{FR}{LETTRE\\COMPTE\\TRIPLE}{}%
+	\IfStrEq{#1}{EN}{TRIPLE\\LETTER\\SCORE}{}%
+	\IfStrEq{#1}{GE}{\scalebox{2}[2]{3B}}{}%
+	\IfStrEq{#1}{SP}{TRIPLE\\TANTO\\DE\\LETRA}{}%
+}
+\newcommand\SCRBLCDEN[1][EN]{%
+	\IfStrEq{#1}{FR}{LETTRE\\COMPTE\\DOUBLE}{}%
+	\IfStrEq{#1}{EN}{DOUBLE\\LETTER\\SCORE}{}%
+	\IfStrEq{#1}{GE}{\scalebox{2}[2]{2B}}{}%
+	\IfStrEq{#1}{SP}{DOBLE\\TANTO\\DE\\LETRA}{}%
+}
+
+%styles case + jetons
+%idées de https://tex.stackexchange.com/questions/194780/tikz-drawing-a-rectangle-with-spikes-on-borders
+\tikzset{%fr
+	scorelettrefr/.style={
+		font=\sffamily\bfseries\tiny,align=center,scale=\fpeval{\PLSCRBBLEechelleLabelFR*0.8},draw=none,fill=none
+	},
+	pics/.cd,
+	pointesfr/.style args={#1#2#3}{
+		code={
+			\fill [#3,scale=0.5*0.9] (-1,1) {\foreach \i in {0,1,2,3}{%
+			[rotate=-\i*90] -- (-#1*#2,1) {\foreach \j in {1,...,#1} {-- ++(#2,#2) -- ++(#2,-#2)} -- (1,1)}}} -- cycle;
+		}
+	},
+	casecentralefr/.style={
+		code={
+			\path pic {pointesfr={2}{0.15}{red!25}};
+			\node [star,fill,star point ratio=2.35] {};%
+		}
+	},
+	jetonfr/.style={
+		code={
+			\IfStrEq{#1}{*}{\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelleEN*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {};}%
+				{%
+					\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelleFR*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\expandafter\MakeUppercase\expandafter{#1}};%
+					\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangueFR]{#1} };%
+				}%
+		}
+	},
+	placemotHfr/.style={
+		code={
+			\foreach \l [count=\x from 0] in {#1} {\path ({\x-1},-1) pic {jetonfr={\l}};}
+		}
+	},
+	placemotaltHfr/.style={
+		code={
+			\StrLen{#1}[\lgmot]%
+			\foreach \l in {1,2,...,\lgmot} {\StrChar{#1}{\l}[\ll] \path ({\l-2},-1) pic {jetonfr={\ll}};}
+		}
+	},
+	placemotVfr/.style={
+		code={
+			\foreach \l [count=\y from 0] in {#1} {\path (-1,-{\y-1}) pic {jetonfr={\l}};}
+		}
+	},
+	placemotaltVfr/.style={
+		code={
+			\StrLen{#1}[\lgmot]%
+			\foreach \l in {1,2,...,\lgmot} {\StrChar{#1}{\l}[\ll] \path (-1,-{\l}) pic {jetonfr={\ll}};}
+		}
+	},
+	motcomptetriplefr/.style={
+		code={
+			\path pic {pointesfr={3}{0.15}{red!75}};%
+			\ifboolKV[PLSCRABBLETIKZFR]{Labels}%
+				{\node [scorelettrefr] { \SCRBMCTFR[\PLSCRBBLElangueFR] };}{}
+		}
+	},
+	motcomptedoublefr/.style={
+		code={
+			\path pic {pointesfr={2}{0.15}{red!25}};%
+			\ifboolKV[PLSCRABBLETIKZFR]{Labels}%
+				{\node [scorelettrefr] { \SCRBMCDFR[\PLSCRBBLElangueFR] };}
+				{}%
+		}
+	},
+	lettrecomptetriplefr/.style={
+		code={
+			\path pic {pointesfr={3}{0.15}{blue!50!cyan!75}};%
+			\ifboolKV[PLSCRABBLETIKZFR]{Labels}%
+				{\node [scorelettrefr] { \SCRBLCTFR[\PLSCRBBLElangueFR] };}{}
+		}
+	},
+	lettrecomptedoublefr/.style={
+		code={
+			\path pic {pointesfr={2}{0.15}{blue!50!cyan!50}};%
+			\ifboolKV[PLSCRABBLETIKZFR]{Labels}%
+				{\node [scorelettrefr] { \SCRBLCDFR[\PLSCRBBLElangueFR] };}{}
+		}
+	}
+}
+\tikzset{%en
+	scorelettreen/.style={
+		font=\sffamily\bfseries\tiny,align=center,scale=\fpeval{\PLSCRBBLEechelleLabelEN*0.8},draw=none,fill=none
+	},
+	pics/.cd,
+	pointesen/.style args={#1#2#3}{
+		code={
+			\fill [#3,scale=0.5*0.9] (-1,1) {\foreach \i in {0,1,2,3}{%
+			[rotate=-\i*90] -- (-#1*#2,1) {\foreach \j in {1,...,#1} {-- ++(#2,#2) -- ++(#2,-#2)} -- (1,1)}}} -- cycle;
+		}
+	},
+	casecentraleen/.style={
+		code={
+			\path pic {pointesen={2}{0.15}{red!25}};
+			\node [star,fill,star point ratio=2.35] {};%
+		}
+	},
+	jetonen/.style={
+		code={
+			\IfStrEq{#1}{*}{\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelleEN*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {};}%
+				{%
+					\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelleEN*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\expandafter\MakeUppercase\expandafter{#1}};%
+					\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangueEN]{#1} };%
+				}%
+		}
+	},
+	placemotHen/.style={
+		code={
+			\foreach \l [count=\x from 0] in {#1} {\path ({\x-1},-1) pic {jetonen={\l}};}
+		}
+	},
+	placemotaltHen/.style={
+		code={
+			\StrLen{#1}[\lgmot]%
+			\foreach \l in {1,2,...,\lgmot} {\StrChar{#1}{\l}[\ll] \path ({\l-2},-1) pic {jetonen={\ll}};}
+		}
+	},
+	placemotVen/.style={
+		code={
+			\foreach \l [count=\y from 0] in {#1} {\path (-1,-{\y-1}) pic {jetonen={\l}};}
+		}
+	},
+	placemotaltVen/.style={
+		code={
+			\StrLen{#1}[\lgmot]%
+			\foreach \l in {1,2,...,\lgmot} {\StrChar{#1}{\l}[\ll] \path (-1,-{\l}) pic {jetonen={\ll}};}
+		}
+	},
+	motcomptetripleen/.style={
+		code={
+			\path pic {pointesen={3}{0.15}{red!75}};%
+			\ifboolKV[PLSCRABBLETIKZEN]{Labels}%
+				{\node [scorelettreen] { \SCRBMCTEN[\PLSCRBBLElangueEN] };}{}
+		}
+	},
+	motcomptedoubleen/.style={
+		code={
+			\path pic {pointesfr={2}{0.15}{red!25}};%
+			\ifboolKV[PLSCRABBLETIKZEN]{Labels}%
+				{\node [scorelettreen] { \SCRBMCDEN[\PLSCRBBLElangueEN] };}
+				{}%
+		}
+	},
+	lettrecomptetripleen/.style={
+		code={
+			\path pic {pointesen={3}{0.15}{blue!50!cyan!75}};%
+			\ifboolKV[PLSCRABBLETIKZEN]{Labels}%
+				{\node [scorelettreen] { \SCRBLCTEN[\PLSCRBBLElangueEN] };}{}
+		}
+	},
+	lettrecomptedoubleen/.style={
+		code={
+			\path pic {pointesen={2}{0.15}{blue!50!cyan!50}};%
+			\ifboolKV[PLSCRABBLETIKZEN]{Labels}%
+				{\node [scorelettreen] { \SCRBLCDEN[\PLSCRBBLElangueEN] };}{}
+		}
+	}
+}
+
+%commande pour placer un mot
+\newcommand\ScrabblePlaceMot[3][H]{%
+	\IfStrEq{#1}{H}%
+		{\path (#3) pic {placemotaltHfr={#2}};}
+		{\path (#3) pic {placemotaltVfr={#2}};}
+}
+\newcommand\ScrabblePutWord[3][H]{%
+	\IfStrEq{#1}{H}%
+		{\path (#3) pic {placemotaltHen={#2}};}
+		{\path (#3) pic {placemotaltVen={#2}};}
+}
+
+%clés
+\defKV[PLSCRABBLETIKZFR]{%
+	Echelle=\xdef\PLSCRBBLEechelleFR{#1},%
+	EchelleLabels=\xdef\PLSCRBBLEechelleLabelFR{#1}
+}
+\defKV[PLSCRABBLETIKZEN]{%
+	Scale=\xdef\PLSCRBBLEechelleEN{#1},%
+	ScaleLabels=\xdef\PLSCRBBLEechelleLabelEN{#1}
+}
+\setKVdefault[PLSCRABBLETIKZFR]{%
+	Echelle=1,%
+	EchelleLabels=1,%
+	Cadre=true,%
+	Labels=true,%
+	Aide=false
+}
+\setKVdefault[PLSCRABBLETIKZEN]{%
+	Scale=1,%
+	ScaleLabels=1,%
+	Border=true,%
+	Labels=true,%
+	Help=false
+}
+
+%commandes génériques autonomes pour plateau
+\NewDocumentCommand\PlateauScrabble{ D<>{FR} O{} }{%1=lng,2=options
+	\xdef\PLSCRBBLElangueFR{#1}%
+	\useKVdefault[PLSCRABBLETIKZFR]%
+	\setKV[PLSCRABBLETIKZFR]{#2}%
+	\begin{tikzpicture}[scale=\PLSCRBBLEechelleFR,every node/.style={scale=\PLSCRBBLEechelleFR}]%
+		%plateau
+		\fill[gray!25] (-.5,-.5) rectangle ++(15,15);%
+		\draw[white,line width=\fpeval{\PLSCRBBLEechelleFR*0.1} cm, shift={(-.5,-.5)}] grid (15,15);%
+		\foreach \scrcase in{(\x,\y),(\y,14-\x),(14-\x,14-\y),(14-\y,\x)}{%
+			\foreach \x/\y in {0/0,7/0}{\path \scrcase pic {motcomptetriplefr};}
+			\foreach \x/\y in {1/1,2/2,3/3,4/4}{\path \scrcase pic {motcomptedoublefr};}
+			\foreach \x/\y in {1/5,5/1,5/5}{\path \scrcase pic {lettrecomptetriplefr};}
+			\foreach \x/\y in {3/0,0/3,2/6,6/2,6/6}{\path \scrcase pic {lettrecomptedoublefr};}
+		}%
+		\path (7,7) pic {casecentralefr};%
+		\ifboolKV[PLSCRABBLETIKZFR]{Cadre}{\draw[line width=\fpeval{\PLSCRBBLEechelleFR*0.075} cm] (-0.6,-0.6) rectangle (14.6,14.6) ;}{}
+	\end{tikzpicture}%
+}
+\NewDocumentCommand\ScrabbleBoard{ D<>{EN} O{} }{%1=lng,2=options
+	\xdef\PLSCRBBLElangueEN{#1}%
+	\useKVdefault[PLSCRABBLETIKZEN]%
+	\setKV[PLSCRABBLETIKZEN]{#2}%
+	\begin{tikzpicture}[scale=\PLSCRBBLEechelleEN,every node/.style={scale=\PLSCRBBLEechelleEN}]%
+		%plateau
+		\fill[gray!25] (-.5,-.5) rectangle ++(15,15);%
+		\draw[white,line width=\fpeval{\PLSCRBBLEechelleEN*0.1} cm, shift={(-.5,-.5)}] grid (15,15);%
+		\foreach \scrcase in{(\x,\y),(\y,14-\x),(14-\x,14-\y),(14-\y,\x)}{%
+			\foreach \x/\y in {0/0,7/0}{\path \scrcase pic {motcomptetripleen};}
+			\foreach \x/\y in {1/1,2/2,3/3,4/4}{\path \scrcase pic {motcomptedoubleen};}
+			\foreach \x/\y in {1/5,5/1,5/5}{\path \scrcase pic {lettrecomptetripleen};}
+			\foreach \x/\y in {3/0,0/3,2/6,6/2,6/6}{\path \scrcase pic {lettrecomptedoubleen};}
+		}%
+		\path (7,7) pic {casecentraleen};%
+		\ifboolKV[PLSCRABBLETIKZEN]{Border}{\draw[line width=\fpeval{\PLSCRBBLEechelleEN*0.075} cm] (-0.6,-0.6) rectangle (14.6,14.6) ;}{}%
+	\end{tikzpicture}%
+}
+
+%environnement pour plateau, pour placer des mots
+\NewDocumentEnvironment{EnvScrabble}{ r<> O{} }%1=LANG,2=options
+{%
+	\IfStrEq{#1}{FR}%
+		{%plateau fr
+			\xdef\PLSCRBBLElangueFR{#1}%
+			\useKVdefault[PLSCRABBLETIKZFR]%
+			\setKV[PLSCRABBLETIKZFR]{#2}%
+			\begin{tikzpicture}[scale=\PLSCRBBLEechelleFR,every node/.style={scale=\PLSCRBBLEechelleFR}]%
+				%plateau
+				\fill[gray!25] (-.5,-.5) rectangle ++(15,15);%
+				\draw[white,line width=\fpeval{\PLSCRBBLEechelleFR*0.1} cm, shift={(-.5,-.5)}] grid (15,15);%
+				\foreach \scrcase in{(\x,\y),(\y,14-\x),(14-\x,14-\y),(14-\y,\x)}{%cases spéciales
+					\foreach \x/\y in {0/0,7/0} {\path \scrcase pic {motcomptetriplefr};}
+					\foreach \x/\y in {1/1,2/2,3/3,4/4} {\path \scrcase pic {motcomptedoublefr};}
+					\foreach \x/\y in {1/5,5/1,5/5} {\path \scrcase pic {lettrecomptetriplefr};}
+					\foreach \x/\y in {3/0,0/3,2/6,6/2,6/6} {\path \scrcase pic {lettrecomptedoublefr};}
+				}%
+				\path (7,7) pic {casecentralefr};%
+				\ifboolKV[PLSCRABBLETIKZFR]{Cadre}%
+					{\draw[line width=\fpeval{\PLSCRBBLEechelleFR*0.075} cm] (-0.6,-0.6) rectangle (14.6,14.6) ;}%
+					{}%
+				\ifboolKV[PLSCRABBLETIKZFR]{Aide}%
+					{%
+						\foreach \numberscr in {1,2,...,15}
+							{\draw[gray] ({\numberscr-1},-0.65) node[below,font=\sffamily] {\numberscr};\draw[gray] (-0.65,{\numberscr-1}) node[left,font=\sffamily] {\numberscr};}%
+					}%
+					{}%
+		}%
+		{%plateau version internationale
+			\xdef\PLSCRBBLElangueEN{#1}%
+			\useKVdefault[PLSCRABBLETIKZEN]%
+			\setKV[PLSCRABBLETIKZEN]{#2}%
+			\begin{tikzpicture}[scale=\PLSCRBBLEechelleEN,every node/.style={scale=\PLSCRBBLEechelleEN}]%
+				%plateau
+				\fill[gray!25] (-.5,-.5) rectangle ++(15,15);%
+				\draw[white,line width=\fpeval{\PLSCRBBLEechelleEN*0.1} cm, shift={(-.5,-.5)}] grid (15,15);%
+				\foreach \scrcase in{(\x,\y),(\y,14-\x),(14-\x,14-\y),(14-\y,\x)}{%cases spéciales
+					\foreach \x/\y in {0/0,7/0} {\path \scrcase pic {motcomptetripleen};}
+					\foreach \x/\y in {1/1,2/2,3/3,4/4} {\path \scrcase pic {motcomptedoubleen};}
+					\foreach \x/\y in {1/5,5/1,5/5} {\path \scrcase pic {lettrecomptetripleen};}
+					\foreach \x/\y in {3/0,0/3,2/6,6/2,6/6} {\path \scrcase pic {lettrecomptedoubleen};}
+				}%
+				\path (7,7) pic {casecentraleen};%
+				\ifboolKV[PLSCRABBLETIKZEN]{Border}%
+					{\draw[line width=\fpeval{\PLSCRBBLEechelleEN*0.075} cm] (-0.6,-0.6) rectangle (14.6,14.6) ;}%
+					{}%
+				\ifboolKV[PLSCRABBLETIKZEN]{Help}%
+					{%
+						\foreach \numberscr in {1,2,...,15}
+							{\draw[gray] ({\numberscr-1},-0.65) node[below,font=\sffamily] {\numberscr};\draw[gray] (-0.65,{\numberscr-1}) node[left,font=\sffamily] {\numberscr};}%
+					}%
+					{}%
+		}%
+}%
+{%
+	\end{tikzpicture}%
+}
+
+\endinput

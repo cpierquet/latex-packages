@@ -1,0 +1,35 @@
+Au début de l'année 2021, une colonie d'oiseaux comptait 40 individus. L'observation
+conduit à modéliser l'évolution de la population par la suite $\suiten$ définie pour tout entier naturel $n$ par : \[ \begin{dcases} u_0 = 40 \\ u_{n+1} = 0,008u_n(200-u_n) \end{dcases} \]%
+où $u_n$ désigne le nombre d'individus au début de l'année $(2021+n)$.
+
+\begin{enumerate}
+	\item Donner une estimation, selon ce modèle, du nombre d'oiseaux dans la colonie au début de l'année 2022.
+\end{enumerate}
+
+On considère la fonction $f$ définie sue $\intervFF{0}{100}$ par $f(x)=0,008x(200-x)$.
+
+\begin{enumerate}[resume]
+	\item Résoudre dans l'intervalle $\intervFF{0}{100}$ l'équation $f(x)= x$.
+	\item 
+	\begin{enumerate}
+		\item Démontrer que la fonction $f$ est croissante sur l'intervalle $\intervFF{0}{100}$ et dresser son tableau de variations.
+		\item En remarquant que, pour tout entier naturel $n$, $u_{n+1}=f(u_n)$, démontrer par récurrence que, pour tout entier naturel $n$ : \[ 0 \leqslant u_n \leq slantu_{n+1} \leqslant 100.\]
+		\item En déduire que la suite$\suiten$ est convergente.
+		\item Déterminer la limite $\ell$ de la suite $\suiten$. Interpréter le résultat dans le contexte de l'exercice.
+	\end{enumerate}
+	\item On considère l'algorithme suivant :
+	
+\begin{CodePythonLstAlt}[Largeur=10cm]{center}
+def seuil(p) : 
+	n = 0
+	u = 40
+	while u < p :
+		n = n+1
+		u = 0.008*u*(200-u)
+	return(n+2021)
+\end{CodePythonLstAlt}
+	
+	L'exécution de \texttt{seuil(100)} ne renvoie aucune valeur. Expliquer pourquoi à
+	l'aide de la question 3..
+\end{enumerate}
+

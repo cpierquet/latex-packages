@@ -1,0 +1,121 @@
+On considère une fonction $f$ définie et deux fois dérivable sur $\IntervalleOO{-2}{+\infty}$. On note $\mathcal{C}_{f}$ sa courbe représentative dans un repère orthogonal du plan, $f^{\prime}$ sa dérivée et $f^{\prime \prime}$ sa dérivée seconde.
+
+\smallskip
+
+On a tracé ci-dessous la courbe $\mathcal{C}_{f}$ et sa tangente $T$ au point $B$ d'abscisse $-1$.
+
+\smallskip
+
+On précise que la droite $T$ passe par le point $A(0;-1)$.
+
+\begin{Centrage}
+	\begin{GraphiqueTikz}[x=4.7cm,y=2.3cm,Xmin=-1.85,Xmax=1.25,Xgrille=0.2,Xgrilles=0.2,Ymin=-3.35,Ymax=1.15,Ygrille=0.5,Ygrilles=0.5]
+		\TracerAxesGrilles[Grads=false]{-1.8,-1.6,...,1.2}{-3,-2.5,...,1}
+		\RajouterValeursAxeX{0.2,1}{${0,2}$,$1$}
+		\RajouterValeursAxeY{0.5,1}{${0,5}$,$1$}
+		\draw (0,0) node[below left=1.414pt] {$0$} ;
+		\DefinirCourbe[Nom=cf]{x^2+2*x-1+log(x+2)}
+		\TracerCourbe[Couleur=red]{f(x)}
+		\TracerCourbe[Couleur=blue]{x-1}
+		\MarquerPts{(0,-1)/A/below right,(-1,-2)/B/below right}
+		\draw[red] (0.3,1) node[font=\large,below] {$\mathcal{C}_{f}$} ;
+		\draw[blue] (1.1,0.25) node[font=\large] {$T$} ;
+	\end{GraphiqueTikz}
+\end{Centrage}
+
+\begin{Centrage}
+	\textbf{Partie A : exploitation du graphique.}
+\end{Centrage}
+
+\smallskip
+
+À l'aide du graphique, répondre aux questions ci-dessous.
+
+\begin{enumerate}
+	\item Préciser $f(-1)$ et $f^{\prime}(-1)$.
+	\item La courbe $\mathcal{C}_{f}$ est-elle convexe sur son ensemble de définition ? Justifier.
+	\item Conjecturer le nombre de solutions de l'équation $f(x)=0$ et donner une valeur arrondie à $10^{-1}$ près d'une solution.
+\end{enumerate}
+
+\begin{Centrage}
+	\textbf{Partie B : étude de la fonction $\bm{f}$.}
+\end{Centrage}
+
+\smallskip
+
+On considère que la fonction $f$ est définie sur $\IntervalleOO{-2}{+\infty}$ par $f(x)=x^{2}+2x-1+\ln(x+2)$, où $\ln$ désigne la fonction logarithme népérien.
+
+\begin{enumerate}
+	\item Déterminer par le calcul la limite de la fonction $f$ en $-2$. Interpréter graphiquement ce résultat.
+	
+	On admet que $\lim\limits_{x \to +\infty} f(x)=+\infty$.
+	\item Montrer que pour tout $x>-2$, $f^{\prime}(x)=\dfrac{2 x^{2}+6 x+5}{x+2}$.
+	\item Étudier les variations de la fonction $f$ sur $\IntervalleOO{-2}{+\infty}$ puis dresser son tableau de variations complet.
+	\item Montrer que l'équation $f(x)=0$ admet une unique solution $\alpha$ sur $\IntervalleOO{-2}{+\infty}$ et donner une valeur arrondie de $\alpha$ à $10^{-2}$ près.
+	\item En déduire le signe de $f(x)$ sur $\IntervalleOO{-2}{+\infty}$.
+	\item Montrer que $\mathcal{C}_{f}$ admet un unique point d'inflexion et déterminer son abscisse.
+\end{enumerate}
+
+\begin{Centrage}
+	\textbf{Partie C : une distance minimale.}
+\end{Centrage}
+
+\smallskip
+
+\begin{wrapstuff}[r]
+\begin{GraphiqueTikz}[x=5cm,y=5cm,Xmin=-0.3,Xmax=1.075,Xgrille=0.2,Xgrilles=0.2,Ymin=0,Ymax=1.075,Ygrille=0.2,Ygrilles=0.2]
+	\TracerAxesGrilles[Police=\footnotesize]{-0.2,0,0.2,0.4,0.6,0.8,1}{0.2,0.4,0.6,0.8,1}
+	\DefinirCourbe[Trace,Nom=cg,Couleur=teal]<fctg>{log(x+2)}
+	\DefinirPts{A/0.3125/0,M/0.3125/{ln(0.3125+2)},J/0/1}
+	\draw[teal] (-0.2,0.45) node[font=\large,left] {$\mathcal{C}_{g}$} ;
+	\MarquerPts{(A)/$\vphantom{M}x$/below,(M)/$M$/below right,(J)/$J$/above right}
+	\draw[pfltraitantec] (A)--(M);
+	\draw[pflpoint] (M)--(J);
+\end{GraphiqueTikz}
+\end{wrapstuff}
+
+Soit $g$ la fonction définie sur $\IntervalleOO{-2}{+\infty}$ par $g(x)=\ln(x+2)$.
+
+\smallskip
+
+On note $\mathcal{C}_{g}$ sa courbe représentative dans un repère orthonormé $(O;I,J)$, représentée ci-contre.
+
+
+\smallskip
+
+Soit $M$ un point de $\mathcal{C}_{g}$ d'abscisse $x$.
+
+\smallskip
+
+Le but de cette partie est de déterminer pour quelle valeur de $x$ la distance $JM$ est minimale.
+
+\smallskip
+
+On considère la fonction $h$ définie sur $\IntervalleOO{-2}{+\infty}$ par
+
+$h(x)=JM^{2}$.
+
+\begin{enumerate}
+	\item Justifier que pour tout $x>-2$, on a :
+	
+	$h(x)=x^{2}+[\ln (x+2)-1]^{2}$.
+	\item On admet que la fonction $h$ est dérivable sur $\IntervalleOO{-2}{+\infty}$ et on note $h^{\prime}$ sa fonction dérivée.
+	
+	On admet également que pour tout réel $x>-2$, \[ h^{\prime}(x)=\frac{2 f(x)}{x+2} \]
+	où $f$ est la fonction étudiée en \textbf{partie B}.
+
+	\begin{enumerate}
+		\item Dresser le tableau de variations de $h$ sur $\IntervalleOO{-2}{+\infty}$.
+		
+		\textit{Les limites ne sont pas demandées.}
+		\item En déduire que la valeur de $x$ pour laquelle la distance $JM$ est minimale est $\alpha$ où $\alpha$ est le nombre réel défini à la question (4) de la \textbf{partie B}.
+	\end{enumerate}
+	\item On notera $M_{\alpha}$ le point de $\mathcal{C}_{g}$ d'abscisse $\alpha$.
+	
+	\begin{enumerate}
+		\item Montrer que $\ln(\alpha+2)=1-2\alpha-\alpha^{2}$.
+		\item En déduire que la tangente à $\mathcal{C}_{g}$ au point $M_{\alpha}$ et la droite $\left(JM_{\alpha}\right)$ sont perpendiculaires.
+		
+		On pourra utiliser le fait que, dans un repère orthonormé, deux droites sont perpendiculaires lorsque le produit de leurs coefficients directeurs est égal à $-1$.
+	\end{enumerate}
+\end{enumerate}

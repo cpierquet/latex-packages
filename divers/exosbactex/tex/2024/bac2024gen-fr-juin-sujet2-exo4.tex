@@ -1,0 +1,95 @@
+Soit $f$ une fonction définie et deux fois dérivable sur $\R$. On note $f'$ sa fonction dérivée et $f''$ sa dérivée seconde.
+
+Dans le repère orthonormé ci-dessous ont été représentés :
+
+\begin{itemize}
+	\item la courbe représentative $\mathcal{C}_f$ de la fonction $f$ ;
+	\item la tangente $T$ à $\mathcal{C}_f$ en son point $N(0;2)$ ;
+	\item le point $M(-2;0)$ appartenant à $\mathcal{C}_f$ et $P(2;0)$ appartenant à $T$.
+\end{itemize}
+
+On précise que la fonction $f$ est strictement positive sur l'intervalle $\IntervalleFO{0}{+\infty}$ et qu'elle est strictement croissante sur l'intervalle $\IntervalleOF{-\infty}{-1}$.
+
+\begin{Centrage}
+	\begin{GraphiqueTikz}[x=1.5cm,y=1.5cm,Xmin=-2.5,Xmax=5.5,Xgrilles=1,Ymin=-1.55,Ymax=3.25,Ygrilles=1]
+		\TracerAxesGrilles*{-2,-1,...,5}{-1,0,...,3}
+		\draw (-6pt,-3pt) node[below] {$0$} ;
+		\TracerCourbe[Couleur=red]{(x+2)*exp(-x)}
+		\TracerCourbe[Couleur=blue]{-x+2}
+		\MarquerPts{(-2,0)/$M$/above left,(0,2)/$N$/above right,(2,0)/$P$/above right}
+		\draw[red] (-2.15,-1) node[font=\large,below left] {$\mathcal{C}_f$} ;
+		\draw[blue] (3,-1) node[font=\large,below left] {$T$} ;
+	\end{GraphiqueTikz}
+\end{Centrage}
+
+\begin{Centrage}
+	\textbf{Partie A : étude graphique.}
+\end{Centrage}
+
+On répondra aux questions suivantes en utilisant le graphique.
+
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Donner $f(0)$.
+		\item Déterminer $f'(0)$.
+	\end{enumerate}
+	\item Résoudre l'équation $f(x)=0$.
+	\item La fonction $f$ est-elle convexe sur $\R$ ? Justifier.
+	\item Parmi les courbes suivantes, indiquer laquelle peut représenter une  primitive de la  fonction $f$ sur $\R$. Justifier.
+\end{enumerate}
+
+\begin{tblr}{width=\linewidth,colspec={*{3}{X[c]}},hlines,vlines}
+	Courbe 1 & Courbe 2 & Courbe 3 \\
+	\begin{GraphiqueTikz}[x=0.375cm,y=0.375cm,Xmin=-4,Xmax=9,Xgrille=2,Xgrilles=1,Ymin=-8,Ymax=4,Ygrille=2,Ygrilles=1]<TailleGrad=1.75pt>
+		\TracerAxesGrilles*[Police=\footnotesize]{-2,0,...,8}{-8,-6,...,2}
+		\draw (-6pt,-1.75pt) node[below,font=\footnotesize] {$0$} ;
+		\TracerCourbe[Couleur=purple]{(-1-x)*exp(-x)}
+	\end{GraphiqueTikz}
+	&
+	\begin{GraphiqueTikz}[x=0.375cm,y=0.375cm,Xmin=-4,Xmax=9,Xgrille=2,Xgrilles=1,Ymin=-8,Ymax=4,Ygrille=2,Ygrilles=1]<TailleGrad=1.75pt>
+		\TracerAxesGrilles*[Police=\footnotesize]{-2,0,...,8}{-8,-6,...,2}
+		\draw (-6pt,-1.75pt) node[below,font=\footnotesize] {$0$} ;
+		\TracerCourbe[Couleur=purple]{(-3-x)*exp(-x)}
+	\end{GraphiqueTikz}
+	&
+	\begin{GraphiqueTikz}[x=0.375cm,y=0.375cm,Xmin=-4,Xmax=9,Xgrille=2,Xgrilles=1,Ymin=-8,Ymax=4,Ygrille=2,Ygrilles=1]<TailleGrad=1.75pt>
+		\TracerAxesGrilles*[Police=\footnotesize]{-2,0,...,8}{-8,-6,...,2}
+		\draw (-6pt,-1.75pt) node[below,font=\footnotesize] {$0$} ;
+		\TracerCourbe[Couleur=purple]{(x)*exp(-x)}
+	\end{GraphiqueTikz}
+	\\
+\end{tblr}
+
+\begin{Centrage}
+	\textbf{Partie B : recherche d'une expression algébrique.}
+\end{Centrage}
+
+On admet que la fonction $f$ est de la forme $f(x)=(ax+b)\,\e^{-x}$, où $a$ et $b$ sont des constantes réelles. Pour répondre aux questions suivantes, on utilisera les résultats de la \textbf{partie A}.
+
+\begin{enumerate}
+	\item Justifier que $b=2$.
+	\item Justifier que $-2a+b=0$ puis en déduire la valeur de $a$.
+	\item Déterminer une expression algébrique de $f$. Justifier.
+\end{enumerate}
+
+\begin{Centrage}
+	\textbf{Partie C : étude algébrique.}
+\end{Centrage}
+
+On admet que la fonction $f$ est définie sur $\R$ par $f(x) = (x + 2)\,\e^{-x}$.
+
+\begin{enumerate}
+	\item Déterminer la limite de $f$ en $-\infty$.
+	\item On admet que $f'(x)=(-x-1)\,\e^{-x}$. Dresser le tableau de variations complet de $f$. Justifier.
+	\item 
+	\begin{enumerate}
+		\item Étudier la convexité de $f$.
+		\item Préciser les coordonnées des éventuels points d'inflexion de la courbe $\mathcal{C}_f$.
+	\end{enumerate}
+	\item Pour tout nombre réel $t \geqslant 0$, on pose : \[ I(t)=\int_{-2}^t f(x)\dx. \]
+	\begin{enumerate}
+		\item En utilisant une intégration  par parties, montrer que : \[ I(t)=(-t-3)\,\e^{-t}+\e^2. \]
+		\item En déduire un exemple de surface non limitée dont l'aire est finie.
+	\end{enumerate}
+\end{enumerate}

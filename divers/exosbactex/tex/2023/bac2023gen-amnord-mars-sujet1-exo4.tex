@@ -1,0 +1,57 @@
+On considère la suite $\left(u_{n}\right)$ définie par $u_{0}=5$ et pour tout entier naturel $n$, \[u_{n+1}=\frac{1}{2}\left(u_{n}+\frac{11}{u_{n}}\right).\]
+%
+On admet que la suite $\left(u_{n}\right)$ est bien définie.
+
+\medskip
+
+\textbf{Partie A - Étude de la suite} $\bm{\left(u_{n}\right)}$
+
+\medskip
+
+\begin{enumerate}
+	\item Donner $u_{1}$ et $u_{2}$ sous forme de fractions irréductibles.
+	\item On considère la fonction $f$ définie sur l'intervalle $]0 ; +\infty [$ par : \[f(x)=\frac{1}{2}\left(x+\frac{11}{x}\right).\]
+	%
+	Démontrer que la fonction $f$ est croissante sur l'intervalle $\left[\sqrt{11};+\infty\right[$.
+	\item Démontrer par récurrence que pour tout entier naturel $n$, on a $u_{n} \geqslant u_{n+1} \geqslant \sqrt{11}$.
+	\item En déduire que la suite $\left(u_{n}\right)$ converge vers une limite réelle. On note $a$ cette limite.
+	\item Après avoir déterminé et résolu une équation dont $a$ est solution, préciser la valeur exacte de $a$.
+\end{enumerate}
+
+\medskip
+
+\textbf{Partie B - Application géométrique}
+
+\medskip
+
+Pour tout entier naturel $n$, on considère un rectangle $R_{n}$ d'aire 11 dont la largeur est notée $\ell_{n}$ et longueur $L_{n}$.
+
+La suite $\left(L_{n}\right)$ est définie par $L_{0}=5$ et, pour tout entier naturel $n$, \[L_{n+1}=\frac{L_{n}+\ell_{n}}{2}.\]
+
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Expliquer pourquoi $\ell_{0}=2,2$.
+		\item Établir que pour tout entier naturel $n$, \[\ell_{n}=\frac{11}{L_{n}}.\]
+	\end{enumerate}
+	\item Vérifier que la suite $\left(L_{n}\right)$ correspond à la suite $\left(u_{n}\right)$ de la \textbf{partie A}.
+	\item Montrer que pour tout entier naturel $n$, on a $\ell_{n} \leqslant \sqrt{11} \leqslant L_{n}$.
+	\item On admet que les suites $\left(L_{n}\right)$ et $\left(\ell_{n}\right)$ convergent toutes les deux vers $\sqrt{11}$. Interpréter géométriquement ce résultat dans le contexte de la \textbf{partie B}.
+	\item Voici un script, écrit en langage \textsf{Python}, relatif aux suites étudiées dans cette partie :
+
+\begin{CodePythonLstAlt}[Largeur=8cm]{center}
+def heron(n) :
+	L = 5
+	ell = 2.2
+	for i in range(n) :
+		L = (L + ell) / 2
+		ell = 11 / L
+	return round(ell, 6), round(L, 6)
+\end{CodePythonLstAlt}
+
+	On rappelle que la fonction Python \texttt{round(x, k)} renvoie une version arrondie du nombre \texttt{x} avec \texttt{k} décimales.
+	\begin{enumerate}
+		\item Si l'utilisateur tape \texttt{heron(3)} dans une console d'exécution \textsf{Python}, qu'obtient-il comme valeurs de sortie pour \texttt{ell} et \texttt{L} ?
+		\item Donner une interprétation de ces deux valeurs.
+	\end{enumerate}
+\end{enumerate}

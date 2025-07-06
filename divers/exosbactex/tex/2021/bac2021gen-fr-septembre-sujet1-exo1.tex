@@ -1,0 +1,75 @@
+\emph{Cet exercice est un questionnaire à choix multiples. Pour chacune des questions suivantes, une seule des quatre réponses proposées est exacte. Une réponse exacte rapporte un point. Une réponse fausse, une réponse multiple ou l'absence de réponse à une question ne rapporte ni n'enlève de point. \\Pour répondre, indiquer sur la copie le numéro de la question et la lettre de la réponse choisie.\\Aucune justification n'est demandée.}
+
+\medskip
+
+Le graphique ci-dessous donne la représentation graphique $\mathcal{C}_f$ dans un repère orthogonal d'une fonction $f$ définie et dérivable sur $\R$.
+
+On notera $f'$ la fonction dérivée de $f$.
+
+On donne les points $A$ de coordonnées $(0;5)$ et $B$ de coordonnées $(1;20)$. Le point $C$ est le point de la courbe $\mathcal{C}_f$ ayant pour abscisse $-2,5$.
+
+La droite $(AB)$ est la tangente à la courbe $\mathcal{C}_f$ au point $A$.
+
+\smallskip
+
+Les questions 1. à 3. se rapportent à cette même fonction $f$.
+
+\begin{center}
+	\begin{tikzpicture}[x=1.2cm,y=0.25cm,xmin=-5,xmax=2,xgrille=1,ymin=-4,ymax=22,ygrille=1]
+		\GrilleTikz[Affs=false]
+		\AxesTikz[ElargirOx=0/0,ElargirOy=0/0]
+		\AxexTikz{-5,-4,...,1} \AxeyTikz{0,5,...,20}
+		\clip (\xmin,\ymin) rectangle (\xmax,\ymax) ;
+		\draw[line width=1.25pt,red,domain=-5:1,samples=2000] plot (\x,{(10*\x+5)*exp(\x)}) ;
+		\draw[line width=1pt,densely dotted,domain=-0.7:1,samples=2] plot (\x,{15*\x+5}) ;
+		\draw[line width=1pt,densely dotted,domain=-5:0,samples=2] plot (\x,{-0.82085*\x-3.694}) ;
+		\filldraw (1,20) circle[radius=2pt] node[right] {$B$} ;
+		\filldraw (0,5) circle[radius=2pt] node[right] {$A$} ;
+		\filldraw (-2.5,-1.6417) circle[radius=2pt] node[below] {$C$} ;
+	\end{tikzpicture}
+\end{center}
+
+\begin{enumerate}
+	\item On peut affirmer que:
+	\begin{enumerate}
+		\item $f'(-0,5) = 0$
+		\item si $x \in ]- \infty;-0,5[$, alors $f'(x) < 0$
+		\item $f'(0) = 15$
+		\item la fonction dérivée $f'$ ne change pas de
+		signe sur $\R$.
+	\end{enumerate}
+	\item On admet que la fonction $f$ représentée ci-dessus est définie sur $\R$ par $f(x) = (ax + b)\text{e}^x$, où $a$ et $b$ sont deux nombres réels et que sa courbe coupe l'axe des abscisses en son point de coordonnées $(-0,5; 0)$.
+	
+	On peut affirmer que:
+	\begin{enumerate}
+		\item $a = 10$ et $b = 5$ 
+		\item $a = 2,5$ et $b = -0,5$ 
+		\item $a = -1,5$ et $b = 5$ 
+		\item $a = 0$ et $b = 5$
+	\end{enumerate}
+	\item On admet que la dérivée seconde de la fonction $f$ est définie sur $]- \infty;-0,5[$ par : \[f''(x) = (10x + 25)\text{e}^x.\]
+	%
+	On peut affirmer que :
+	\begin{enumerate}
+		\item La fonction $f$ est convexe sur $\R$
+		\item La fonction $f$ est concave sur $\R$
+		\item Le point C est l'unique point d'inflexion de $\mathcal{C}_f$
+		\item $\mathcal{C}_f$ n'admet pas de point d'inflexion
+	\end{enumerate}
+	\item On considère deux suites $\left(U_n\right)$ et  $\left(V_n\right)$ définies sur $\N$ telles que : 
+	%
+	\begin{itemize}
+		\item pour tout entier naturel $n$, $U_n \leqslant V_n$ ;
+		\item $\displaystyle\lim_{n \to+ \infty}  V_n= 2$.
+	\end{itemize}
+	%
+	On peut affirmer que:
+	
+	\begin{enumerate}
+		\item la suite $\left(U_n\right)$ converge 
+		\item pour tout entier naturel $n$, $V_n \leqslant 2$
+		\item la suite $\left(U_n\right)$ diverge
+		\item la suite $\left(U_n\right)$ est majorée
+	\end{enumerate} 
+\end{enumerate}
+

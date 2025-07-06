@@ -1,0 +1,46 @@
+On considère les suites $\left(u_n\right)$ et $\left(v_n\right)$ définies par : \[u_0 = 16 \quad ;\quad  v_0 = 5 ;\] et pour tout entier naturel $n$ :
+%
+\renewcommand\arraystretch{2}
+\[\begin{dcases}
+	u_{n+1}=\dfrac{3u_n + 2v_n}{5}\\
+	v_{n+1}=\dfrac{u_n + v_n}{2}
+\end{dcases}\]
+\renewcommand\arraystretch{1}
+
+\begin{enumerate}
+	\item Calculer $u_1$ et $v_1$.
+	\item On considère la suite $\left(w_n\right)$ définie pour tout entier naturel $n$ par : $w_n = u_n - v_n$.
+	\begin{enumerate}
+		\item Démontrer que la suite $\left(w_n\right)$ est géométrique de raison $0,1$.
+		
+		En déduire, pour tout entier naturel $n$, l'expression de $w_n$ en fonction de $n$.
+		\item Préciser le signe de la suite $\left(w_n\right)$  et la limite de cette suite.
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Démontrer que, pour tout entier naturel $n$, on a : $u_{n+1} - u_n = - 0,4 w_n$.
+		\item En déduire que la suite $\left(u_n\right)$ est décroissante.
+		On peut démontrer de la même manière que la suite $\left(v_n\right)$ est croissante.
+		
+		On admet ce résultat, et on remarque qu'on a alors : pour tout entier naturel $n$, $v_n \geqslant v_0 = 5$.
+		\item Démontrer par récurrence que, pour tout entier naturel $n$, on a : $u_n \geqslant 5$. 
+		
+		En déduire que la suite $\left(u_n\right)$ est convergente. On appelle $\ell$ la limite de $\left(u_n\right)$.
+	\end{enumerate}
+\end{enumerate}
+%
+On peut démontrer de la même manière que la suite $\left(v_n\right)$ est convergente. On admet ce résultat, et on appelle $\ell'$ la limite de $\left(v_n\right)$.
+%
+\begin{enumerate}[resume]
+	\item 
+	\begin{enumerate}
+		\item Démontrer que $\ell = \ell'$.
+		\item On considère la suite $\left(c_n\right)$ définie pour tout entier naturel $n$ par : $c_n = 5u_n + 4v_n$.
+		
+		Démontrer que la suite $\left(c_n\right)$ est constante, c'est-à-dire que pour tout entier naturel $n$, on a : $c_{n+1} = c_n$. 
+		
+		En déduire que, pour tout entier naturel $n$, $c_n = 100$.
+		\item Déterminer la valeur commune des limites  $\ell$ et $\ell'$.
+	\end{enumerate}
+\end{enumerate}
+

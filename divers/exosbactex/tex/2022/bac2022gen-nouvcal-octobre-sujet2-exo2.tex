@@ -1,0 +1,45 @@
+Soit $f$ la fonction définie sur l'intervalle $\intervOO{0}{+\infty}$ par : \[f(x) = x \ln (x) - x - 2.\]
+%
+On admet que la fonction $f$ est deux fois dérivable sur $\intervOO{0}{+\infty}$.
+
+On note $f'$ sa dérivée, $f''$ sa dérivée seconde et $\mathcal{C}_f$ sa courbe représentative dans un repère.
+
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Démontrer que, pour tout $x$ appartenant à $\intervOO{0}{+\infty}$, on a $f'(x) = \ln(x)$.
+		\item Déterminer une équation de la tangente $T$ à la courbe $\mathcal{C}_f$ au point
+		d'abscisse $x = \e$.
+		\item Justifier que la fonction $f$ est convexe sur l'intervalle $\intervOO{0}{+\infty}$.
+		\item En déduire la position relative de la courbe $\mathcal{C}_f$ et de la tangente $T$.
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Calculer la limite de la fonction $f$ en $0$.
+		\item Démontrer que la limite de la fonction $f$ en $+\infty$ est égale à $+\infty$.
+	\end{enumerate}
+	\item Dresser le tableau de variations de la fonction $f$ sur l'intervalle $\intervOO{0}{+\infty}$.
+	\item 
+	\begin{enumerate}
+		\item Démontrer que l'équation $f(x) = 0$ admet une unique solution dans l'intervalle $\intervOO{0}{+\infty}$. On note $\alpha$ cette solution.
+		\item Justifier que le réel $\alpha$ appartient à l'intervalle $\intervOO{4,3}{4,4}$.
+		\item En déduire le signe de la fonction $f$ sur l'intervalle $\intervOO{0}{+\infty}$.
+	\end{enumerate}
+	\item On considère la fonction \texttt{seuil} suivante écrite dans le langage \textsf{Python} :
+	
+	On rappelle que la fonction \texttt{log} du module \texttt{math} (que l'on suppose importé)
+	désigne la fonction logarithme népérien $\ln$.
+	
+\begin{CodePythonLstAlt}*[Largeur=8cm]{center}
+def seuil(pas) :
+	x = 4.3
+	while x*log(x) - x - 2 < 0 :
+		x = x + pas
+	return x
+\end{CodePythonLstAlt}
+	
+	Quelle est la valeur renvoyée à l'appel de la fonction \texttt{seuil(0.01)} ?
+	
+	Interpréter ce résultat dans le contexte de l'exercice.
+\end{enumerate}
+

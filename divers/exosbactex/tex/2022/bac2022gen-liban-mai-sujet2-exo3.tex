@@ -1,0 +1,93 @@
+\textit{Cet exercice est un questionnaire à choix multiples.\\
+	Pour chacune des questions suivantes, une seule des quatre réponses proposées est exacte.\\
+	Une réponse fausse, une réponse multiple ou l'absence de réponse à une question ne rapporte ni n'enlève de point.\\
+	Pour répondre, indiquer sur la copie le numéro de la question et la lettre de la réponse choisie. Aucune justification n'est demandée.}
+
+\begin{enumerate}
+	\item Soit $g$ la fonction définie sur $\R$ par $g(x)=x^{1000}+x$.
+	
+	On peut affirmer que :
+	
+	\begin{tblr}{width=\linewidth,colspec={X[l]}}
+		(a)~~la fonction $g$ est concave sur $\R$.\\
+		(b)~~la fonction $g$ est convexe sur $\R$.\\
+		(c)~~la fonction $g$ possède exactement un point d'inflexion.\\
+		(d)~~la fonction $g$ possède exactement deux points d'inflexion.
+	\end{tblr}
+	%
+	\item On considère une fonction $f$ définie et dérivable sur $\R$. On note $f'$ sa fonction dérivée.
+	
+	On note $\mathcal{C}$ la courbe représentative de $f$.
+	
+	On note $\Gamma$ la courbe représentative de $f'$.
+	
+	On a tracé ci-dessous la courbe $\Gamma$.
+	
+	\begin{center}
+		\begin{tikzpicture}[x=1cm,y=1cm,xmin=-1.75,xmax=3.25,xgrille=1,xgrilles=0.5,ymin=-1.75,ymax=1.5,ygrille=1,ygrilles=0.5]
+			\GrilleTikz \AxesTikz[ElargirOx=0/0,ElargirOy=0/0]
+			\AxexTikz{-1,1,2,3} \AxeyTikz{-1,1}
+			\draw (0,0) node[below left=2pt] {0} ;
+			\clip (\xmin,\ymin) rectangle (\xmax,\ymax) ;
+			\draw[very thick,blue,domain=\xmin:\xmax,samples=500] plot (\x,{(\x+1)*exp(-\x)}) ;
+			\draw[blue] (1.75,0.75) node[font=\large] {$\Gamma$} ;
+		\end{tikzpicture}
+	\end{center}
+	
+	On note $T$ la tangente à la \textbf{courbe} $\bm{\mathcal{C}}$ au point d'abscisse $0$.
+	
+	On peut affirmer que la tangente $T$ est parallèle à la droite d'équation :
+	
+	\begin{tblr}{width=\linewidth,colspec={X[l]X[l]}}
+		(a)~~$y=x$&(b)~~$y=0$\\
+		(c)~~$y=1$&(d)~~$x=0$
+	\end{tblr}
+	%
+	\item On considère la suite $\suiten$ définie pour tout entier naturel $n$ par $u_n=\dfrac{(-1)^n}{n+1}$.
+	
+	On peut affirmer que la suite $\suiten$ est :
+	
+	\begin{tblr}{width=\linewidth,colspec={X[l]X[l]}}
+		(a)~~majorée et non minorée.&(b)~~minorée et non majorée.\\
+		(c)~~bornée.&(d)~~non majorée et non minorée.
+	\end{tblr}
+	%
+	\item Soit $k$ un nombre réel non nul.
+	
+	Soit $\suiten[v]$ une suite définie pour tout entier naturel $n$.
+	
+	On suppose que $v_0=k$ et que pour tout $n$, on a $v_n \times v_{n+1} < 0$.
+	
+	On peut affirmer que $v_{10}$ est :
+	
+	\begin{tblr}{width=\linewidth,colspec={X[l]X[l]}}
+		(a)~~positif.&(b)~~négatif.\\
+		(c)~~du signe de $k$.&(d)~~du signe de $-k$.
+	\end{tblr}
+	%
+	\item On considère la suite $\suiten[w]$ définie pour tout entier naturel $n$ par : \[ w_{n+1}=2w_n-4 \text{ et } w_2=8. \]%
+	On peut affirmer que :
+	
+	\begin{tblr}{width=\linewidth,colspec={X[l]X[l]}}
+		(a)~~$w_0=0$.&(b)~~$w_0=5$.\\
+		(c)~~$w_0=10$.&(d)~~Il n'est pas possible de calculer $w_0$.
+	\end{tblr}
+	%
+	\item On considère la suite $\suiten[a]$ définie pour tout entier naturel $n$ par : \[ a_{n+1}=\dfrac{\e^n}{\e^n+1}a_n \text{ et } a_0=1. \]%
+	On peut affirmer que :
+	
+	\begin{tblr}{width=\linewidth,colspec={X[l]X[l]}}
+		(a)~~la suite $\suiten[a]$ est strictement croissante.&(b)~~la suite $\suiten[a]$ est strictement décroissante.\\
+		(c)~~la suite $\suiten[a]$ n'est pas monotone.&(d)~~la suite $\suiten[a]$ est constante.
+	\end{tblr}
+	%
+	\item Une cellule se reproduit en se divisant en deux cellules identiques, qui se divisent à leur tour, et ainsi de suite. On appelle temps de génération le temps nécessaire pour qu'une cellule donnée se divise en deux cellules. On a mis en culture 1 cellule. Au bout de 4 heures, il y a environ 4\,000 cellules.
+	
+	On peut affirmer que le temps de génération est environ égal à :
+	
+	\begin{tblr}{width=\linewidth,colspec={X[l]X[l]}}
+		(a)~~moins d'une minute.&(b)~~12 minutes.\\
+		(c)~~20 minutes.&(d)~~1 heure.
+	\end{tblr}
+\end{enumerate}
+

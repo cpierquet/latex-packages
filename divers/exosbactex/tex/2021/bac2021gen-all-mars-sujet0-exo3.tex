@@ -1,0 +1,60 @@
+Pour préparer l’examen du permis de conduire, on distingue deux types de formation :
+
+\begin{itemize}
+	\item la formation avec conduite accompagnée ;
+	\item la formation traditionnelle. 
+\end{itemize}
+
+On considère un groupe de 300 personnes venant de réussir l’examen du permis de conduire. Dans ce groupe :
+
+\begin{itemize}
+	\item 75 personnes ont suivi une formation avec conduite accompagnée ; parmi elles, 50 ont réussi l’examen à leur première présentation et les autres ont réussi à leur deuxième présentation.
+	\item 225 personnes se sont présentées à l’examen suite à une formation traditionnelle ; parmi elles, 100 ont réussi l’examen à la première présentation, 75 à la deuxième et 50 à la troisième présentation.
+\end{itemize}
+
+On interroge au hasard une personne du groupe considéré.
+On considère les événements suivants :
+
+\begin{itemize}
+	\item $A$ : « la personne a suivi une formation avec conduite accompagnée » ;
+	\item $R_1$ : « la personne a réussi l’examen à la première présentation » ;
+	\item $R_2$ : « la personne a réussi l’examen à la deuxième présentation » ;
+	\item $R_3$ : « la personne a réussi l’examen à la troisième présentation ».
+\end{itemize}
+
+\begin{enumerate}
+	\item Modéliser la situation par un arbre pondéré.
+	
+	\textit{Dans les questions suivantes, les probabilités demandées seront données sous forme d’une fraction irréductible.}
+	\item 
+	\begin{enumerate}
+		\item Calculer la probabilité que la personne interrogée ait suivi une formation avec conduite
+		accompagnée et réussi l’examen à sa deuxième présentation.
+		\item Montrer que la probabilité que la personne interrogée ait réussi l’examen à sa deuxième présentation est égale à $\dfrac13$.
+		\item La personne interrogée a réussi l’examen à sa deuxième présentation. Quelle est la probabilité qu’elle ait suivi une formation avec conduite accompagnée ? 
+	\end{enumerate}
+	\item On note $X$ la variable aléatoire qui, à toute personne choisie au hasard dans le groupe, associe le nombre de fois où elle s’est présentée à l’examen jusqu'à sa réussite.
+	
+	Ainsi, $\left\lbrace X=1 \right\rbrace$ correspond à l’événement $R_1$.
+	\begin{enumerate}
+		\item Déterminer la loi de probabilité de la variable aléatoire $X$.
+		\item Calculer l’espérance de cette variable aléatoire. Interpréter cette valeur dans le contexte de l’exercice. 
+	\end{enumerate}
+	\item On choisit, successivement et de façon indépendante, $n$ personnes parmi les 300 du groupe étudié, où $n$ est un entier naturel non nul. On assimile ce choix à un tirage avec remise de $n$ personnes parmi les 300 personnes du groupe.
+	
+	On admet que la probabilité de l’événement $R_3$ est égale à $\dfrac16$.
+	\begin{enumerate}
+		\item Dans le contexte de cette question, préciser un événement dont la probabilité est égale à \mbox{$1-\left(\dfrac56\right)^n$}.
+		
+		On considère la fonction \textsf{Python} \texttt{seuil} ci-dessous, où \texttt{p} est un nombre réel appartenant à l'intervalle $\intervOO{0}{1}$.
+\begin{CodePythonLstAlt}[Largeur=6cm]{center}
+def seuil(p):
+	n = 1
+	while 1-(5/6)**n <= p: 
+		n = n + 1 
+	return n 
+\end{CodePythonLstAlt}
+		\item Quelle est la valeur renvoyée par la commande \texttt{seuil(0.9)} ? Interpréter cette valeur dans le contexte de l’exercice.
+	\end{enumerate}
+\end{enumerate}
+

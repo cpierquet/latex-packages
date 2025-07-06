@@ -1,0 +1,53 @@
+On considère la fonction $f$ définie sur $\mathbb{R}$ par $f(x)= = \ln \big(1+\text{e}^{-x}\big)$ , où $\ln$ désigne la fonction logarithme népérien.
+
+\smallskip
+
+On note $\mathcal{C}$ sa courbe représentative dans un repère orthonormé $\left(O;\vect{\imath},\,\vect{\jmath}\right)$.
+
+La courbe $\mathcal{C}$ est tracée ci-dessous. 
+
+\begin{center}
+	\begin{tikzpicture}[x=1.5cm,y=1.5cm]
+		\draw[semithick] (-3,0)--(3.5,0) (0,-0.5)--(0,3) ;
+		\draw (0,0) node[below left=0pt] {0} ;
+		\draw[semithick] (1,2pt)--++(0,-4pt) node[below=1pt] {1} ;
+		\draw[semithick] (2pt,1)--++(-4pt,0) node[left=1pt] {1} ;
+		\draw[black,fill=gray] (0,{ln(2)}) circle[radius=1.5pt] ;
+		\draw[thick,red,samples=250,domain=-3:3.5] plot (\x,{ln(1+exp(-\x))}) ;
+		\draw (3.25,0) node[above=3pt,red,font=\large] {$\mathcal{C}$} ;
+		\draw (1.875,-0.44) node {$T_0$} ;
+		\def\AA{2}
+		\coordinate (Na) at ({\AA},{ln(1+exp(-\AA)}) ;
+		\coordinate (Ma) at ({-\AA},{ln(1+exp(\AA)}) ;
+		\coordinate (V) at ($(Ma)!-1!(Na)$) ;
+		\coordinate (W) at ($(Na)!-1!(Ma)$) ;
+		\clip (-3,-0.5) rectangle (3.5,3) ;
+		\draw[semithick,densely dashed,samples=2,domain=-3:3.5] plot (\x,{-0.5*\x+ln(2)}) ;
+		\draw[semithick,densely dashed] (V)--(W) ;
+		\filldraw[black] (Na) circle[radius=2pt] node[above right] {$N_a$} ;
+		\filldraw[black] (Ma) circle[radius=2pt] node[above right] {$M_a$} ;
+	\end{tikzpicture}
+\end{center}
+
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Déterminer la limite de la fonction $f$ en $-\infty$.
+		\item Déterminer la limite de la fonction $f$ en $+\infty$. Interpréter graphiquement ce résultat.
+		\item On admet que la fonction $f$ est dérivable sur $\mathbb{R}$ et on note $f'$ sa fonction dérivée.
+		
+		Calculer $f'(x)$ puis montrer que, pour tout nombre réel $x$, $f'(x)=\frac{-1}{1+\text{e}^{x}}$.
+		\item Dresser le tableau de variations complet de la fonction $f$ sur $\mathbb{R}$.
+	\end{enumerate}
+	\item On note $T_0$ la tangente à la courbe $\mathcal{C}$ en son point d’abscisse 0.
+	\begin{enumerate}
+		\item Déterminer une équation de la tangente $T_0$.
+		\item Montrer que la fonction $f$ est convexe sur $\mathbb{R}$.
+		\item En déduire que, pour tout nombre réel $x$, on a : $f(x) \geqslant -\frac12 x + \ln(2)$.
+	\end{enumerate}
+	\item Pour tout nombre réel $a$ différent de 0, on note $M_a$ et $N_a$ les points de la courbe $\mathcal{C}$ d’abscisses respectives $-a$ et $a$. On a donc : $M_a \big(-a;f(-a)\big)$ et $N_a \big(a;f(a)\big)$.
+	\begin{enumerate}
+		\item Montrer que, pour tout nombre réel $x$, on a : $f(x)-f(-x)=-x$.
+		\item En déduire que les droites $T_0$ et $(M_aN_a)$ sont parallèles. 
+	\end{enumerate}
+\end{enumerate}

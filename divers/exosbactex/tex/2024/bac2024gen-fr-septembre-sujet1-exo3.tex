@@ -1,0 +1,44 @@
+\textit{Pour chacune des affirmations suivantes, indiquer si elle est vraie ou fausse. Chaque réponse doit être justifiée. Une réponse non justifiée ne rapporte aucun point.}
+
+\smallskip
+
+\textit{Les cinq questions de cet exercice sont indépendantes.}
+
+\begin{enumerate}
+	\item On considère une suite $\Suite{t}$ vérifiant la relation de récurrence : \[ \text{pour tout entier naturel } n,~t_{n+1}=-0,8t_n+18. \]
+	%
+	\textbf{Affirmation 1} : La suite $\Suite{w}$ définie pour tout entier naturel $n$ par $w_n=t_n-10$ est géométrique.
+	
+	\smallskip
+	\item On considère une suite $\Suite{S}$ qui vérifie pour tout entier naturel $n$ non nul : \[ 3n-4 \leqslant S_n \leqslant 3n+4. \]
+	%
+	La suite $\Suite{u}$ est définie, pour tout entier naturel $n$ non nul, par : $u_n=\frac{S_n}{n}$.
+	
+	\textbf{Affirmation 2} : La suite $\Suite{u}$ converge.
+	
+	\smallskip
+	\item On considère la suite $\Suite{v}$ définie par :%
+	\[ v_1=2 \text{ et pour tout entier naturel } n\geqslant1,~v_{n+1}=2-\frac{1}{v_n}. \]
+	%
+	\textbf{Affirmation 3} : Pour tout entier naturel $n \geqslant 1$, $v_{n}=\frac{n+1}{n}$.
+	
+	\smallskip
+	\item On considère la suite $\Suite{u}$ définie pour tout entier naturel $n$ par $u_n = \e^n-n$.
+	
+	\textbf{Affirmation 4} : La suite $\Suite{u}$ converge.
+	
+	\smallskip
+	\item On considère la suite $\Suite{u}$ définie à l'aide du script écrit ci-dessous en langage \textsf{Python}, qui renvoie la valeur de $u_n$.
+	
+\begin{CodePythonLstAlt}*[Largeur=10cm]{center}
+def u(n) :
+	valeur = 2
+	for k in range(n) :
+		valeur = 0.5 * (valeur + 2/valeur)
+	return valeur
+\end{CodePythonLstAlt}
+
+	On admet que $\Suite{u}$ est décroissante et vérifie pour tout entier naturel $n$ : \[ \sqrt{2} \leqslant u_n \leqslant 2. \]
+	%
+	\textbf{Affirmation 5} : La suite $\Suite{u}$ converge vers $\sqrt{2}$.
+\end{enumerate}

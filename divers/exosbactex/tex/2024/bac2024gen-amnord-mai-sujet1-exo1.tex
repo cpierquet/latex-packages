@@ -1,0 +1,55 @@
+Un jeu vidéo récompense par un objet tiré au sort les joueurs ayant remporté un défi. L'objet tiré peut être « commun » ou « rare ». Deux types d'objets communs ou rares sont disponibles, des épées et des boucliers.
+
+\smallskip
+
+Les concepteurs du jeu vidéo ont prévu que :
+
+\begin{itemize}
+	\item la probabilité de tirer un objet rare est de 7\,\% ;
+	\item si on tire un objet rare, la probabilité que ce soit une épée est de 80\,\% ;
+	\item si on tire un objet commun, la probabilité que ce soit une épée est de 40\,\%. 
+\end{itemize}
+
+\textit{Les parties A et B sont indépendantes.}
+
+\medskip
+
+\textbf{\large\underline{Partie A}}
+
+\medskip
+
+Un joueur vient de remporter un défi et tire au sort un objet.
+
+On note:
+
+\begin{itemize}
+	\item $R$ l'événement « le joueur tire un objet rare » ;
+	\item $E$ l'événement « le joueur tire une épée » ;
+	\item $\overline{R}$ et $\overline{E}$ les événements contraires des événements $R$ et $E$.
+\end{itemize}
+
+\begin{enumerate}
+	\item Dresser un arbre pondéré modélisant la situation, puis calculer $P(R \cap E)$.
+	\item Calculer la probabilité de tirer une épée.
+	\item Le joueur a tiré une épée. Déterminer la probabilité que ce soit un objet rare. Arrondir le résultat au millième.
+\end{enumerate}
+
+\textbf{\large\underline{Partie B}}
+
+\medskip
+
+Un joueur remporte 30 défis.
+On note $X$ la variable aléatoire correspondant au nombre d'objets rares que le joueur obtient après avoir remporté 30 défis. Les tirages successifs sont considérés comme indépendants.
+
+\begin{enumerate}
+	\item Déterminer, en justifiant, la loi de probabilité suivie par la variable aléatoire $X$.
+	
+	Préciser ses paramètres, ainsi que son espérance.
+	\item Déterminer $P(X < 6)$. \textit{Arrondir le résultat au millième.}
+	\item Déterminer la plus grande valeur de $k$ telle que $P(X \geqslant k) \geqslant 0,5$. Interpréter le résultat dans le contexte de l'exercice.
+	\item Les développeurs du jeu vidéo veulent proposer aux joueurs d'acheter un « ticket d'or » qui permet de tirer $N$ objets. La probabilité de tirer un objet rare reste de 7\,\%.
+	
+	Les développeurs aimeraient qu'en achetant un ticket d'or, la probabilité qu'un joueur obtienne au moins un objet rare lors de ces $N$ tirages soit supérieure ou égale à $0,95$.
+	
+	Déterminer le nombre minimum d'objets à tirer pour atteindre cet objectif. \textit{On veillera à détailler la démarche mise en œuvre.} 
+\end{enumerate}

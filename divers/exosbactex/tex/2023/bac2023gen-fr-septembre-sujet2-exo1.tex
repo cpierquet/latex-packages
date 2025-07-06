@@ -1,0 +1,76 @@
+La paratuberculose est une maladie digestive infectieuse qui touche les vaches. Elle est due à la présence d’une bactérie dans l’intestin de la vache.
+
+On réalise une étude dans une région dont \num{0,4}\,\% de la population de vaches est infectée.
+
+Il existe un test qui met en évidence la réaction immunitaire de l’organisme infecté par la bactérie.
+
+Le résultat de ce test peut être soit « positif », soit « négatif ».
+
+On choisit une vache au hasard dans la région.
+
+Compte tenu des caractéristiques du test, on sait que :
+
+\begin{itemize}
+	\item si la vache est atteinte par l’infection, la probabilité que son test soit positif est de \num{0,992} ;
+	\item si la vache n’est pas atteinte par l’infection, la probabilité que son test soit négatif est de \num{0,984}.
+\end{itemize}
+
+On désigne par :
+
+\begin{itemize}
+	\item $I$ l’évènement « la vache est atteinte par l’infection » ;
+	\item $T$ l’évènement « la vache présente un test positif ».
+\end{itemize}
+
+On note $\overline{I}$ l’évènement contraire de $I$ et $\overline{T}$ l’évènement contraire de $T$.
+
+\medskip
+
+\textbf{Les parties A et B sont indépendantes.}
+
+\medskip
+
+\textbf{Partie A}
+
+\smallskip
+
+\begin{enumerate}
+	\item Reproduire et compléter l’arbre pondéré ci-dessous modélisant la situation.
+	
+	\begin{center}
+		\ArbreProbasTikz[InclineProbas=false,EspaceNiveau=2.25]{$I$/\num{0.004}/,$T$/$\ldots$/,$\overline{T}$/$\ldots$/,$\overline{I}$/$\ldots$/,$T$/$\ldots$/,$\overline{T}$/$\ldots$/}
+	\end{center}
+	\item 
+	\begin{enumerate}
+		\item Calculer la probabilité que la vache ne soit pas atteinte par l’infection et que son test soit négatif. On donnera le résultat à $10^{-3}$ près.
+		\item Montrer que la probabilité, à $10^{-3}$ près, que la vache présente un test positif est environ égale à \num{0,020}.
+		\item La « valeur prédictive positive du test » est la probabilité que la vache soit atteinte par l’infection sachant que son test est positif. Calculer la valeur prédictive positive de ce test.
+		
+		On donnera le résultat à $10^{-3}$ près.
+		\item Le test donne une information erronée sur l’état de santé de la vache lorsque la vache n’est pas infectée et présente un résultat positif au test ou lorsque la vache est infectée et présente un résultat négatif au test.
+		
+		Calculer la probabilité que ce test donne une information erronée sur l’état de santé de la vache. On donnera un résultat à $10^{-3}$ près.
+	\end{enumerate}
+\end{enumerate}
+
+\medskip
+
+\textbf{Partie B}
+
+\smallskip
+
+\begin{enumerate}
+	\item Lorsqu'on choisit au hasard dans la région un échantillon de 100 vaches, on assimile ce choix à un tirage avec remise.
+	
+	On rappelle que, pour une vache choisie au hasard dans la région, la probabilité que le test soit positif est égale à \num{0,02}.
+	
+	On note $X$ la variable aléatoire qui à un échantillon de 100 vaches de la région choisies au hasard associe le nombre de vaches présentant un test positif dans cet échantillon.
+	\begin{enumerate}
+		\item Quelle est la loi de probabilité suivie par la variable aléatoire $X$ ? Justifier la réponse et préciser les paramètres de cette loi.
+		\item Calculer la probabilité que dans un échantillon de 100 vaches, il y ait exactement 3 vaches présentant un test positif. On donnera un résultat à $10^{-3}$ près.
+		\item Calculer la probabilité que dans un échantillon de 100 vaches, il y ait au plus 3 vaches présentant un test positif. On donnera un résultat à $10^{-3}$ près.
+	\end{enumerate}
+	\item On choisit à présent un échantillon de $n$ vaches dans cette région, $n$ étant un entier naturel non nul. On admet que l’on peut assimiler ce choix à un tirage avec remise.
+	
+	Déterminer la valeur minimale de n pour que la probabilité qu’il y ait, dans l’échantillon, au moins une vache testée positive, soit supérieure ou égale à \num{0,99}.
+\end{enumerate}

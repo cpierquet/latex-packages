@@ -1,0 +1,54 @@
+\textit{Les deux parties sont indépendantes.}
+
+\smallskip
+
+Un laboratoire fabrique un médicament conditionné sous forme de cachets. 
+
+\begin{Centrage}
+	\textbf{Partie A}
+\end{Centrage}
+
+Un contrôle de qualité, portant sur la masse des cachets, a montré que 2\,\% des cachets ont une masse non conforme. Ces cachets sont conditionnés par boîtes de 100 choisis au hasard dans la chaîne de production. On admet que la conformité d'un cachet est indépendante de celle des autres. 
+
+\smallskip
+
+On note $N$ la variable aléatoire qui à chaque boîte de 100 cachets associe le nombre de cachets non conformes dans cette boîte.
+
+\begin{enumerate}
+	\item Justifier que la variable aléatoire $N$ suit une loi binomiale dont on précisera les paramètres.
+	\item Calculer l'espérance de $N$ et en donner une interprétation dans le contexte de l'exercice.
+	\item \textit{On arrondira les résultats à $10^{-3}$ près.}
+	\begin{enumerate}
+		\item Calculer la probabilité qu'une boîte contienne exactement trois cachets non
+		conformes.
+		\item Calculer la probabilité qu'une boîte contienne au moins 95 cachets conformes.
+	\end{enumerate}
+	\item Le directeur du laboratoire veut modifier le nombre de cachets par boîte pour pouvoir affirmer : « La probabilité qu'une boîte ne contienne que des cachets conformes est supérieure à 0,5.».
+	
+	Combien de cachets une boîte doit-elle contenir au maximum pour respecter ce critère ? Justifier.
+\end{enumerate}
+
+\begin{Centrage}
+	\textbf{Partie B}
+\end{Centrage}
+
+On admet que les masses des cachets sont indépendantes les unes des autres. On prélève 100 cachets et on note $M_i$, pour $i$ entier naturel compris entre 1 et 100, la variable aléatoire qui donne la masse en gramme du $i$-ème cachet prélevé.
+
+\smallskip
+
+On considère la variable aléatoire $S$ définie par : \[ S=M_1+M_1+\ldots+M_{100}. \]
+%
+On admet que les variables aléatoires $M_1$, $M_2$, \ldots, $M_{100}$ suivent la même loi de probabilité d'espérance $\mu=2$ et d'écart-type $\sigma$.
+
+\begin{enumerate}
+	\item Déterminer $\Esper{S}$ et interpréter le résultat dans le contexte de l'exercice.
+	\item On note $s$ l'écart type de la variable aléatoire $S$.
+	
+	Montrer que : $s = 10\sigma$.
+	\item On souhaite que la masse totale, en gramme, des comprimés contenus dans une boîte
+	soit strictement comprise entre 199 et 201 avec une probabilité au moins égale à $0,9$.
+	\begin{enumerate}
+		\item Montrer que cette condition est équivalente à : \[ P(|S-200| \geqslant 1) \leqslant 0,1. \]
+		\item En déduire la valeur maximale de $\sigma$ qui permet, à l'aide de l'inégalité de Bienaymé­-Tchebychev, d'assurer cette condition. 
+	\end{enumerate}
+\end{enumerate}

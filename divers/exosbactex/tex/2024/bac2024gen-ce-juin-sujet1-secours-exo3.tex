@@ -1,0 +1,75 @@
+Un organisme certificateur est missionné pour évaluer deux appareils de chauffage, l’un d’une marque A et l’autre d’une marque B.
+
+\begin{Centrage}
+	\textit{Les parties 1 et 2 sont indépendantes.}
+\end{Centrage}
+
+\medskip
+
+\textbf{\underline{Partie 1 :} appareil de la marque A}
+
+\medskip
+
+À l’aide d’une sonde, on a mesuré la température à l’intérieur du foyer d’un appareil de la marque A.
+
+On a représenté, ci-dessous, la courbe de la température en degrés Celsius à l’intérieur du foyer en fonction du temps écoulé, exprimé en minutes, depuis l’allumage du foyer.
+
+\begin{Centrage}
+	\begin{GraphiqueTikz}[x=0.01cm,y=0.02cm,Xmin=0,Xmax=1200,Xgrille=50,Xgrilles=50,Ymin=0,Ymax=400,Ygrille=25,Ygrilles=25]
+		\TracerAxesGrilles[Police=\small]{0,100,...,1100}{0,50,...,350}
+		\PlacerTexte[Position=below,Police=\large]{(\pflxmax,-25)}{Temps (en min)}
+		\PlacerTexte[Position=above,Police=\large]{(0,\pflymax)}{Température (en °C)}
+		%définition de la fonction + tracé de la courbe
+		\DefinirCourbe[Nom=cf,Debut=0,Fin=1200,Trace,Couleur=red]<f>{20+4.485*x*exp(-0.005*x)}
+	\end{GraphiqueTikz}
+\end{Centrage}
+
+\underline{Par lecture graphique :}
+
+\begin{enumerate}
+	\item Donner le temps au bout duquel la température maximale est atteinte à l’intérieur du foyer.
+	\item Donner une valeur approchée, en minutes, de la durée pendant laquelle la température à l’intérieur du foyer dépasse 300°C.
+	\item On note $f$ la fonction représentée sur le graphique.
+	
+	Estimer la valeur de $\dfrac{1}{600} \displaystyle\int_0^{600} f(t) \dx[t]$. Interpréter le résultat.
+\end{enumerate}
+
+\smallskip
+
+\textbf{\underline{Partie 2 :}  étude d’une fonction}
+
+\medskip
+
+Soit la fonction $g$ définie sur l’intervalle $\IntervalleFO{0}{+\infty}$ par $g(t)=10t\,\e^{-0,01t}+20$.
+
+\begin{enumerate}
+	\item Déterminer la limite de $g$ en $+\infty$.
+	\item 
+	\begin{enumerate}
+		\item Montrer que pour tout $t \in \IntervalleFO{0}{+\infty}$, $g'(t)=(-0,1t+10)\e^{-0,01t}$.
+		\item Étudier les variations de la fonction $g$ sur $\IntervalleFO{0}{+\infty}$ et construire son tableau de variations.
+	\end{enumerate}
+	\item Démontrer que l’équation $g(t)=300$ admet exactement deux solutions distinctes sur $\IntervalleFO{0}{+\infty}$. En donner des valeurs approchées à l’unité.
+	\item À l’aide d’une intégration par parties, calculer $\displaystyle\int_0^{600} g(t) \dx[t]$.
+\end{enumerate}
+
+\smallskip
+
+\textbf{\underline{Partie 3 :}  évaluation}
+
+\medskip
+
+Pour un appareil de la marque B, la température en degrés Celsius à l’intérieur du foyer $t$ minutes après l’allumage est modélisée sur $\IntervalleFF{0}{600}$ par la fonction $g$.
+
+\smallskip
+
+L’organisme certificateur attribue une étoile par critère validé parmi les quatre suivants :
+
+\begin{itemize}
+	\item Critère 1 : la température maximale est supérieure à 320°C.
+	\item Critère 2 : la température maximale est atteinte en moins de 2 heures.
+	\item Critère 3 : la température moyenne durant les 10 premières heures après l’allumage dépasse 250°C.
+	\item Critère 4 : la température à l’intérieur du foyer ne doit pas dépasser 300°C pendant plus de 5 heures.
+\end{itemize}
+
+Chaque appareil obtient-il exactement trois étoiles ? Justifier votre réponse.

@@ -1,0 +1,183 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{pfcmonstre}[2025/03/17 Monstres, en METAPOST, via Christophe Poulain, v1.0a]
+% 1.0a	Version initiale, avec le méga-grooooos boulot de Christophe ;-)
+
+% ============options
+\newif\if@nonpfc \@nonpfctrue
+\DeclareOption{pfc}{\@nonpfcfalse}
+\DeclareOption*{}%si option(s) inconnue(s) ;-)
+\ProcessOptions\relax
+
+% ============suivant PfC
+\if@nonpfc
+	\RequirePackage{luamplib}
+	\everymplib{input PfCSvgnames; input PfCConstantes; input PfCGeometrie; input PfCAfficheur; beginfig(1);}%
+	\everyendmplib{endfig;}%
+	\RequirePackage{simplekv}
+	\RequirePackage{xstring}
+\fi
+
+% ============macro/monstres
+\defKV[mpmonstre]{%
+	Corps=\def\mpmonstrecorps{#1},%
+	Oreilles=\def\mpmonstreoreille{#1},%
+	Yeux=\def\mpmonstreoeil{#1},%
+	Nez=\def\mpmonstrenez{#1},%
+	Bouche=\def\mpmonstrebouche{#1},%
+	Moustache=\def\mpmonstremoustache{#1},%
+	Unite=\def\mpmonstreunite{#1},%
+	Type=\def\mpmonstretype{#1},%
+	Couleur=\def\mpmonstrecoul{#1},%
+	CouleurCorps=\def\mpmonstrecoulcorps{#1}
+}
+\setKVdefault[mpmonstre]{%
+	Corps=1,%
+	Unite=1,%
+	Type=COYNBM,%
+	Oreilles=1,%
+	Yeux=1,%
+	Nez=1,%
+	Bouche=1,%
+	Moustache=1,%
+	Hasard=false,%
+	Couleur=black,%
+	CouleurCorps=white
+}
+
+% =====couleurs svg (151)
+\RequirePackage{randomlist}
+\NewList{listesvgcouleurs}
+\SetList{listesvgcouleurs}{AliceBlue,AntiqueWhite,Aqua,Aquamarine,Azure,Beige,Bisque,Black,BlanchedAlmond,Blue,BlueViolet,Brown,BurlyWood,CadetBlue,Chartreuse,Chocolate,Coral,CornflowerBlue,Cornsilk,Crimson,Cyan,DarkBlue,DarkCyan,DarkGoldenrod,DarkGray,DarkGreen,DarkGrey,DarkKhaki,DarkMagenta,DarkOliveGreen,DarkOrange,DarkOrchid,DarkRed,DarkSalmon,DarkSeaGreen,DarkSlateBlue,DarkSlateGray,DarkSlateGrey,DarkTurquoise,DarkViolet,DeepPink,DeepSkyBlue,DimGray,DimGrey,DodgerBlue,FireBrick,FloralWhite,ForestGreen,Fuchsia,Gainsboro,GhostWhite,Gold,Goldenrod,Gray,Green,GreenYellow,Grey,Honeydew,HotPink,IndianRed,Indigo,Ivory,Khaki,Lavender,LavenderBlush,LawnGreen,LemonChiffon,LightBlue,LightCoral,LightCyan,LightGoldenrod,LightGoldenrodYellow,LightGray,LightGreen,LightGrey,LightPink,LightSalmon,LightSeaGreen,LightSkyBlue,LightSlateBlue,LightSlateGray,LightSlateGrey,LightSteelBlue,LightYellow,Lime,LimeGreen,Linen,Magenta,Maroon,MediumAquamarine,MediumBlue,MediumOrchid,MediumPurple,MediumSeaGreen,MediumSlateBlue,MediumSpringGreen,MediumTurquoise,MediumVioletRed,MidnightBlue,MintCream,MistyRose,Moccasin,NavajoWhite,Navy,NavyBlue,OldLace,Olive,OliveDrab,Orange,OrangeRed,Orchid,PaleGoldenrod,PaleGreen,PaleTurquoise,PaleVioletRed,PapayaWhip,PeachPuff,Peru,Pink,Plum,PowderBlue,Purple,Red,RosyBrown,RoyalBlue,SaddleBrown,Salmon,SandyBrown,SeaGreen,Seashell,Sienna,Silver,SkyBlue,SlateBlue,SlateGray,SlateGrey,Snow,SpringGreen,SteelBlue,Tan,Teal,Thistle,Tomato,Turquoise,Violet,VioletRed,Wheat,White,WhiteSmoke,Yellow,YellowGreen}
+
+\NewDocumentCommand\mpmonstre{ O{} }{%
+	\restoreKV[mpmonstre]%
+	\setKV[mpmonstre]{#1}%
+	\IfSubStr{\mpmonstretype}{C}{\def\mpmonstrec{1}}{\def\mpmonstrec{0}}%
+	\IfSubStr{\mpmonstretype}{O}{\def\mpmonstreo{1}}{\def\mpmonstreo{0}}%
+	\IfSubStr{\mpmonstretype}{Y}{\def\mpmonstrey{1}}{\def\mpmonstrey{0}}%
+	\IfSubStr{\mpmonstretype}{N}{\def\mpmonstren{1}}{\def\mpmonstren{0}}%
+	\IfSubStr{\mpmonstretype}{B}{\def\mpmonstreb{1}}{\def\mpmonstreb{0}}%
+	\IfSubStr{\mpmonstretype}{M}{\def\mpmonstrem{1}}{\def\mpmonstrem{0}}%
+	\ifboolKV[mpmonstre]{Hasard}%
+		{%
+			\xdef\mpmonstrecorps{\fpeval{randint(1,5)}}%
+			\xdef\mpmonstreoreille{\fpeval{randint(1,5)}}%
+			\xdef\mpmonstreoeil{\fpeval{randint(1,5)}}%
+			\xdef\mpmonstrebouche{\fpeval{randint(1,5)}}%
+			\xdef\mpmonstrenez{\fpeval{randint(1,5)}}%
+			\xdef\mpmonstremoustache{\fpeval{randint(1,4)}}%
+		}%
+		{}%
+	\IfEq{\mpmonstrecoul}{*}%
+		{%
+			\GetRandomItem{listesvgcouleurs}{mpmonstrecouleur}%
+		}%
+		{%
+			\def\mpmonstrecouleur{\mpmonstrecoul}%
+		}%
+	\IfStrEq{\mpmonstrecoulcorps}{*}%
+		{%
+			\GetRandomItem{listesvgcouleurs}{mpmonstrecouleurcorps}%
+		}%
+		{%
+			\def\mpmonstrecouleurcorps{\mpmonstrecoulcorps}%
+		}%
+	\mplibforcehmode%
+	\begin{mplibcode}
+		path tmpcorps;
+		numeric u,penunita,penunitb,NumC,NumO,NumY,NumN,NumB,NumM,BoolC,BoolO,BoolY,BoolN,BoolB,BoolM,BoolCoul;
+		color couleurmonstre,couleurmonstrecorps;
+		u=\mpmonstreunite*0.5cm;
+		%input PfCMonstreAlt;
+		input PfCMonstreNew;
+		%Couleurs
+		couleurmonstre=\mpmonstrecouleur;
+		couleurmonstrecorps=\mpmonstrecouleurcorps;
+		%Style cartoon
+		penunita=\mpmonstreunite*1.5bp;%init 2bp
+		penunitb=\mpmonstreunite*0.1875bp; %init 0.25bp
+		pickup pencircle xscaled penunita yscaled penunitb rotated 60 ;
+		%booléens
+		BoolC=\mpmonstrec;
+		BoolO=\mpmonstreo;
+		BoolY=\mpmonstrey;
+		BoolN=\mpmonstren;
+		BoolB=\mpmonstreb;
+		BoolM=\mpmonstrem;
+		NumC=\mpmonstrecorps;
+		NumO=\mpmonstreoreille;
+		NumY=\mpmonstreoeil;
+		NumN=\mpmonstrenez;
+		NumB=\mpmonstrebouche;
+		NumM=\mpmonstremoustache;
+		Couleurs=true;
+		%si le corps est présent, on positionne les éléments en fonction
+		if BoolC=1:
+			if NumC=3:%le cas du corps 3 (œuf)
+				if BoolO=1:
+					trace Oreille(NumO) shifted ((Or1--iso(Or1,Or2)) intersectionpoint (Corps(3) xscaled 2u yscaled ((6.75/2.5)*u))) withcolor couleurmonstre;
+					trace symetrie(Oreille(NumO) shifted ((Or1--iso(Or1,Or2)) intersectionpoint (Corps(3) xscaled 2u yscaled ((6.75/2.5)*u))),(2.5u,0),(2.5u,0.5u)) withcolor couleurmonstre;
+					fill (Corps(3) xscaled 2u yscaled ((6.75/2.5)*u)) withcolor couleurmonstrecorps;
+					trace (Corps(3) xscaled 2u yscaled ((6.75/2.5)*u)) withcolor couleurmonstre;
+				fi;
+				fill (Corps(3) xscaled 2u yscaled ((6.75/2.5)*u)) withcolor couleurmonstrecorps;
+				trace (Corps(3) xscaled 2u yscaled ((6.75/2.5)*u)) withcolor couleurmonstre;
+			else:
+				if BoolO=1:
+					trace Oreille(NumO) shifted ((Or1--iso(Or1,Or2)) intersectionpoint Corps(NumC)) withcolor couleurmonstre;
+					trace symetrie(Oreille(NumO) shifted ((Or1--iso(Or1,Or2)) intersectionpoint Corps(NumC)),(2.5u,0),(2.5u,0.5u)) withcolor couleurmonstre;
+				fi;
+				tmpcorps=Corps(NumC);
+				fill tmpcorps withcolor couleurmonstrecorps;
+				trace tmpcorps withcolor couleurmonstre;
+			fi;
+			if BoolY=1:
+				trace Yeux(NumY) shifted(Ye-center Yeux(NumY));
+			fi;
+			if BoolB=1:
+				trace Bouche(NumB) shifted(Bo-center Bouche(NumB));
+			fi;
+			if BoolN=1:
+				trace Nez(NumN) shifted(Ne-center Nez(NumN));
+			fi;
+			if BoolM=1:
+				trace Moustache(NumM) shifted(Mo);
+			fi;
+		else :%sinon on place juste un élément (notice par exemple)
+			if BoolO=1:
+				trace Oreille(NumO) withcolor couleurmonstre;
+				trace symetrie(Oreille(NumO),(1.15u,0),(1.15u,0.5u)) withcolor couleurmonstre;
+			fi;
+			if BoolY=1:
+				trace Yeux(NumY);
+			fi;
+			if BoolB=1:
+				trace Bouche(NumB);
+			fi;
+			if BoolN=1:
+				trace Nez(NumN);
+			fi;
+			if BoolM=1:
+				trace Moustache(NumM);
+			fi;
+		fi;
+	\end{mplibcode}\relax
+}
+
+\NewDocumentCommand\monstresimple{ O{} m }{%
+	\StrChar{#2}{1}[\monstreC]%
+	\StrChar{#2}{2}[\monstreO]%
+	\StrChar{#2}{3}[\monstreY]%
+	\StrChar{#2}{4}[\monstreN]%
+	\StrChar{#2}{5}[\monstreB]%
+	\StrChar{#2}{6}[\monstreM]%
+	\IfStrEq{\monstreC}{*}{\xdef\monstreC{\fpeval{randint(1,5)}}}{}%
+	\IfStrEq{\monstreO}{*}{\xdef\monstreO{\fpeval{randint(1,5)}}}{}%
+	\IfStrEq{\monstreY}{*}{\xdef\monstreY{\fpeval{randint(1,5)}}}{}%
+	\IfStrEq{\monstreN}{*}{\xdef\monstreN{\fpeval{randint(1,5)}}}{}%
+	\IfStrEq{\monstreB}{*}{\xdef\monstreB{\fpeval{randint(1,5)}}}{}%
+	\IfStrEq{\monstreM}{*}{\xdef\monstreM{\fpeval{randint(1,4)}}}{}%
+	\mpmonstre[Corps=\monstreC,Oreilles=\monstreO,Yeux=\monstreY,Nez=\monstreN,Bouche=\monstreB,Moustache=\monstreM,#1]%
+}
+
+\endinput

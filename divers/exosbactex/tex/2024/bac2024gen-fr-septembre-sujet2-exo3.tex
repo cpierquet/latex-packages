@@ -1,0 +1,64 @@
+\begin{Centrage}
+	\textbf{Partie A}
+\end{Centrage}
+
+On considère la fonction $f$ définie sur $\R$ par : \[ f(x) = \frac{6}{1 + 5\e^{-x}}.\]
+
+On a représenté sur le schéma ci-dessous la courbe représentative $\Courbe[f]$ de la fonction $f$.
+
+\begin{Centrage}
+	\begin{GraphiqueTikz}[x=0.75cm,y=0.75cm,Xmin=-4.75,Xmax=8.25,Xgrille=1,Xgrilles=1,Ymin=-1.25,Ymax=7.75,Ygrille=1,Ygrilles=1]
+		\TracerAxesGrilles[Elargir=1mm]{1}{1}
+		\draw (-2pt,-2pt) node[below left] {$0$} ;
+		\DefinirCourbe[Couleur=red,Trace,Nom=cf,Debut=\pflxmin,Fin=\pflxmax]<f>{6/(1+5*exp(-x))}
+		\MarquerPts[Couleur=darkgray,Police=\large]{({ln(5)},3)/A/above left}
+		\PlacerTexte[Couleur=red,Police=\large]{(6.5,6.33)}{$\Courbe[f]$}
+	\end{GraphiqueTikz}
+\end{Centrage}
+
+\begin{enumerate}
+	\item Montrer que le point $A$ de coordonnées $\big(\ln(5);3\big)$ appartient à la courbe $\Courbe[f]$.
+	\item Montrer que la droite d'équation $y=6$ est une asymptote à la courbe $\Courbe[f]$.
+	\item 
+	\begin{enumerate}
+		\item On admet que $f$ est dérivable sur $\R$ et on note $f'$ sa fonction dérivée.
+		
+		Montrer que pour tout réel $x$, on a : \[ f'(x) = \frac{30 \e^{-x}}{\big(1 + 5 \e^{-x}\big)^2}. \]
+		\item En déduire le tableau de variation complet de $f$ sur $\R$.
+	\end{enumerate}
+	\item On admet que :
+	
+	\begin{itemize}
+		\item $f$ est deux fois dérivable sur $\R$, on note $f''$ sa dérivée seconde ;
+		\item pour tout réel $x$, \[ f''(x) = \frac{30 \e^{-x} \big(5 \e^{-x} - 1\big)}{\big(1 + 5 \e^{-x}\big)^3}. \]
+	\end{itemize}
+	\begin{enumerate}
+		\item Étudier la convexité de $f$ sur $\R$. On montrera en particulier que la courbe $\Courbe[f]$ admet un point d'inflexion.
+		\item Justifier que pour tout réel $x$ appartenant à $\IntervalleOF{-\infty}{\ln(5)} $, on a : $f(x) \geqslant \frac{5}{6} x + 1$.
+	\end{enumerate}
+	\item On considère une fonction $F_k$ définie sur $\R$ par $F_k(x) = k \ln\big(\e^x + 5\big)$, où $k$ est une constante réelle.
+	\begin{enumerate}
+		\item Déterminer la valeur du réel $k$ de sorte que $F_k$ soit une primitive de $f$ sur $\R$.
+		\item En déduire que l'aire, en unité d'aire, du domaine délimité par la courbe $\Courbe[f]$, l'axe des abscisses, l'axe des ordonnées et la droite d'équation $x = \ln(5)$ est égale à $6 \ln\left(\frac{5}{3}\right)$.
+	\end{enumerate}
+\end{enumerate}
+
+\begin{Centrage}
+	\textbf{Partie B}
+\end{Centrage}
+
+L'objectif de cette partie est d'étudier l'équation différentielle suivante : \[ (E)~:~y' = y - \frac{1}{6} y^2. \]
+
+On rappelle qu’une solution de l’équation $(E)$ est une fonction $u$ définie et dérivable sur $\R$ telle que pour tout $x$ réel, on a : \[ u'(x) = u(x) - \frac16 u(x)^2. \]
+
+\begin{enumerate}
+	\item Montrer que la fonction $f$ définie dans la \textbf{partie A} est une solution de l'équation différentielle $(E)$.
+	\item Résoudre l'équation différentielle $y' = -y + \frac{1}{6}$.
+	\item On désigne par $g$ une fonction dérivable sur $\R$ qui ne s'annule pas. On note $h$ la fonction définie sur $\R$ par $h(x) = \frac{1}{g(x)}$. On admet que $h$ est dérivable sur $R$. On note $g'$ et $h'$ les fonctions dérivées de $g$ et $h$.
+	\begin{enumerate}
+		\item Montrer que si $h$ est solution de l'équation différentielle $y' = -y + \frac{1}{6}$, alors $g$ est solution de l'équation différentielle $y' = y - \frac{1}{6} y^2$.
+		\item Pour tout réel positif $m$, on considère les fonctions $g_m$ définie sur $\R$ par : \[ g_m(x) = \frac{6}{1 + 6m\,\e^{-x}}. \]
+		
+		Montrer que pour tout réel positif $m$, la fonction $g_m$ est solution de l'équation différentielle $(E)~:~y' = y - \frac{1}{6} y^2$.
+	\end{enumerate}
+\end{enumerate}

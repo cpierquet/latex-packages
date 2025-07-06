@@ -1,0 +1,98 @@
+\emph{Cet exercice est un questionnaire à choix multiples. Pour chacune des questions suivantes, une seule des quatre réponses proposées est exacte.\\Une réponse fausse, une réponse multiple ou l'absence de réponse à une question ne rapporte ni n'enlève de point.\\Pour répondre, indiquer sur la copie le numéro de la question et la lettre de la réponse choisie. Aucune justification n'est demandée.}
+
+\begin{enumerate}
+	\item On considère les suites $\left(a_n\right)$ et $\left(b_n\right)$ définie par $a_0 = 1$ et, pour tout entier naturel $n$ :
+	
+	\hfill$a_{n+1} = 0,5a_n + 1$ et $b_n = a_n - 2$.\hfill~
+	
+	On peut affirmer que :
+	
+	\medskip
+	
+	\begin{tblr}{width=\linewidth,colspec={*{2}{X[l,m]}}}
+		(a)~~$\left(a_n\right)$ est arithmétique ; & (b)~~$\left(b_n\right)$ est géométrique ; \\
+		(c)~~$\left(a_n\right)$ est géométrique ; & (d)~~$\left(b_n\right)$ est arithmétique. \\
+	\end{tblr}
+\end{enumerate}
+%
+Dans les questions 2. et 3., on considère les suites $\left(u_n\right)$ et $\left(v_n\right)$ définies par : \[u_0 = 2,\: v_0 = 1 \text{ et, pour tout entier naturel } n \text{, } \begin{dcases} u_{n+1} = u_n + 3v_n \\ v_{n+1} = u_n + v_n. \end{dcases}\]
+%
+\begin{enumerate}[resume]
+	\item On peut affirmer que :
+	
+	\medskip
+	
+	\begin{tblr}{width=\linewidth,colspec={*{4}{X[l,m]}}}
+		(a)~~$\begin{dcases} u_{2} = 5 \\ v_{2} = 3 \end{dcases}$ ; & (b)~~$u_2^2 - 3v_2^2 = - 2^2$ ; &
+		(c)~~$\dfrac{u_2}{v_2} = 1,75$ ; & (d)~~$5u_1 = 3v_1$. \\
+	\end{tblr}
+	\item On considère le programme ci-dessous écrit en langage \textsf{Python} :
+	%
+\begin{CodePythonLstAlt}*[Largeur=8cm]{center}
+def valeurs() :
+	u = 2
+	v = 1
+	for k in range(1,11) :
+		c = u
+		u = u + 3*v
+		v = c + v
+	return (u, v)
+\end{CodePythonLstAlt}
+	%
+	Ce programme renvoie :
+	
+	\medskip
+	
+	\begin{tblr}{width=\linewidth,colspec={*{2}{X[l,m]}}}
+		(a)~~$u_{11}$ et $v_{11}$ ; & (b)~~$u_{10}$ et $v_{11}$ ; \\
+		(c)~~les valeurs de $u_n$ et $v_n$ pour $n$ allant de 1 à 10 ; & (d)~~$u_{0 }$ et $v_{10}$. \\
+	\end{tblr}
+\end{enumerate}
+
+Pour les questions 4. et 5., on considère une fonction $f$ deux fois dérivable sur l'intervalle $[-4;2]$. On note $f'$ la fonction dérivée de $f$ et $f''$  la dérivée seconde de $f$.
+
+On donne ci-dessous la courbe représentative $\mathcal{C}'$ de la fonction dérivée $f'$ dans un repère du plan. On donne de plus les points $A(-2;0)$, $B(1;0)$ et $C(0;5)$.
+
+\begin{center}
+	\begin{tikzpicture}[x=1cm,y=1cm,xmin=-4,xmax=2,xgrille=1,xgrilles=0.5,ymin=-2,ymax=6,ygrille=1,ygrilles=0.5]
+		\AxesTikz[ElargirOx=0/0,ElargirOy=0/0]
+		\draw[line width=1.25pt] (1,4pt)--(1,-4pt) node[below] {$1$} ;
+		\draw[line width=1.25pt] (-4,4pt)--(-4,-4pt) node[below] {$-4$} ;
+		\draw[line width=1.25pt] (4pt,1)--(-4pt,1) node[left] {$1$} ;
+		\draw (0,0) node[below left] {$0$} ;
+		\draw (-2,0) node[below] {A} (1,0) node[above right] {B} (0,5) node[left] {C} ;
+		\clip (\xmin,\ymin) rectangle (\xmax,\ymax) ;
+		\draw[very thick,red,samples=250,domain=-4:2] plot (\x,{(1-\x)*(\x+2)*exp(0.5*\x)}) ;
+		\draw[very thick,blue,samples=2,domain=-4:2] plot (\x,{5-5*\x}) ;
+	\end{tikzpicture}
+\end{center}
+
+\begin{enumerate}[resume]
+	\item La fonction $f$ est :
+	
+	\medskip
+	
+	\begin{tblr}{width=\linewidth,colspec={*{4}{X[l,m]}}}
+		(a)~~concave sur $[-2;1]$ ; & (b)~~convexe sur $[-4;0]$ ; &
+		(c)~~convexe sur $[-2;1]$ ; & (d)~~convexe sur $[0;2]$. \\
+	\end{tblr}
+	\item On admet que la droite $(BC)$ est la tangente à la courbe $\mathcal{C}'$ au point B. On a :
+	
+	\medskip
+	
+	\begin{tblr}{width=\linewidth,colspec={*{4}{X[l,m]}}}
+		(a)~~$f'(1) < 0$ ; & (b)~~$f'(1) = 5$ ; &
+		(c)~~$f''(1) > 0$ ; & (d)~~$f''(1) = - 5$. \\
+	\end{tblr}
+	\item Soit $f$ la fonction définie sur $\R$ par $f(x) = \left(x^2 + 1\right)\text{e}^x$.
+	
+	La primitive $F$ de $f$ sur $\R$  telle que $F(0) = 1$ est définie par:
+	
+	\medskip
+	
+	\begin{tblr}{width=\linewidth,colspec={*{2}{X[l,m]}}}
+		(a)~~$F(x) = \left(x^2 - 2x +3\right)\text{e}^x$ ; & (b)~~$F(x) = \left(x^2 - 2x + 3\right)\text{e}^x - 2$ ; \\
+		(c)~~$F(x) = \left(\dfrac13 x^3 + x\right)\text{e}^x + 1$ ; & (d)~~$F(x) = \left(\dfrac13 x^3 + x \right) \text{e}^x$. \\
+	\end{tblr}
+\end{enumerate}
+

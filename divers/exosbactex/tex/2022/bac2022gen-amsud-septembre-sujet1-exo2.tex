@@ -1,0 +1,41 @@
+Soit $\left(u_n\right)$ la suite définie par $u_0 = 4$ et, pour tout entier naturel $n$, $u_{n+1} = \dfrac15 u_n^2$.
+
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Calculer $u_1$ et $u_2$.
+		\item Recopier et compléter la fonction ci-dessous écrite en langage \textsf{Python}.
+		Cette fonction est nommée \texttt{suite\_u} et prend pour paramètre l'entier naturel \texttt{p}.
+		
+		Elle renvoie la valeur du terme de rang $p$ de la suite $\left(u_n\right)$.
+
+\begin{CodePythonLstAlt}[Largeur=8cm]{center}
+def suite_u(p) :
+	u = ...
+	for i in range(1,...) :
+		u = ...
+	return u
+\end{CodePythonLstAlt}
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Démontrer par récurrence que pour tout entier naturel $n$, $0 < u_n \leqslant 4$.
+		\item Démontrer que la suite $\left(u_n\right)$ est décroissante.
+		\item En déduire que la suite $\left(u_n\right)$ est convergente.
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Justifier que la limite $\ell$ de la suite $\left(u_n\right)$ vérifie l'égalité $\ell = \dfrac15 \ell^2$.
+		\item En déduire la valeur de $\ell$.
+	\end{enumerate}
+	\item Pour tout entier naturel $n$, on pose $v_n = \ln \left(u_n\right)$ et $w_n = v_n - \ln (5)$.
+	\begin{enumerate}
+		\item Montrer que, pour tout entier naturel $n$, $v_{n+1} = 2v_n - \ln (5)$.
+		\item Montrer que la suite $\left(w_n\right)$ est géométrique de raison 2.
+		\item Pour tout entier naturel $n$, donner l'expression de $w_n$ en fonction de $n$ et montrer que :
+		
+		\hfill$v_n = \ln \left(\dfrac45 \right) \times 2^n + \ln (5)$.\hfill~
+	\end{enumerate}
+	\item Calculer $\displaystyle\lim_{n \to + \infty} v_n$ et retrouver $\displaystyle\lim_{n \to + \infty} u_n$.
+\end{enumerate}
+

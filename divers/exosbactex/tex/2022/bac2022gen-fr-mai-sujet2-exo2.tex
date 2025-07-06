@@ -1,0 +1,98 @@
+\textit{Cet exercice est un questionnaire à choix multiple.\\
+	Pour chaque question, une seule des quatre réponses proposées est exacte. Le candidat indiquera sur sa copie le numéro de la question et la réponse choisie. Aucune justification n’est demandée.\\
+	Une réponse fausse, une réponse multiple ou l’absence de réponse à une question ne rapporte ni n’enlève de point.\\
+	Les six questions sont indépendantes.}
+
+\smallskip
+
+Pour les questions \textbf{1} à \textbf{3} ci-dessous, on considère une fonction $f$ définie et deux fois dérivable sur $\R$.
+
+La \textbf{courbe de sa fonction dérivée} $f'$ est donnée ci-dessous. On admet que $f'$ admet un maximum en $-\dfrac32$ et que sa courbe coupe l'axe des abscisses au point de coordonnées $\left( -\dfrac12;0 \right)$
+
+\begin{center}
+	\begin{tikzpicture}[x=1.1cm,y=1.1cm,xmin=-5.25,xmax=1.25,xgrille=1,xgrilles=0.25,ymin=-2.75,ymax=1.5,ygrille=1,ygrilles=0.25]
+		\GrilleTikz \AxesTikz[ElargirOx=0/0,ElargirOy=0/0] \AxexTikz{-5,-4,-3,-2,-1,1} \AxeyTikz{-2,-1,1}
+		\draw (0,0) node[below left=2pt] {0} ;
+		\clip (\xmin,\ymin) rectangle (\xmax,\ymax) ;
+		\draw[red,very thick,samples=250,domain=\xmin:\xmax] plot (\x,{(-2*\x-1)*exp(\x)}) ;
+	\end{tikzpicture}
+\end{center}
+
+\textbf{Question 1 :}
+%
+\begin{enumerate}[label=(\alph*)]
+	\item La fonction $f$ admet un maximum en $-\dfrac32$.
+	\item La fonction $f$ admet un maximum en $-\dfrac12$.
+	\item La fonction $f$ admet un minimum en $-\dfrac12$.
+	\item Au point d’abscisse $-1$, la courbe de la fonction $f$ admet une tangente horizontale.
+\end{enumerate}
+
+\textbf{Question 2 :}
+%
+\begin{enumerate}[label=(\alph*)]
+	\item La fonction $f$ est convexe sur $\left] -\infty ; -\dfrac32 \right[$.
+	\item La fonction $f$ est convexe sur $\left] -\infty ; -\dfrac12 \right[$.
+	\item La courbe $\mathcal{C}_f$ représentant la fonction $f$ n’admet pas de point d’inflexion.
+	\item La fonction $f$ est concave sur $\left] -\infty ; -\dfrac12 \right[$.
+\end{enumerate}
+
+\textbf{Question 3 :}
+
+\smallskip
+
+La dérivée seconde $f''$ de la fonction $f$ vérifie :
+%
+\begin{enumerate}[label=(\alph*)]
+	\item $f''(x) \geqslant 0$ pour $x \in \left] -\infty ; -\dfrac12 \right[$.
+	\item $f''(x) \geqslant 0$ pour $x \in [-2;-1]$.
+	\item $f''\left(\frac{-3}{2}\right)=0$.
+	\item $f''(-3)=0$.
+\end{enumerate}
+
+\textbf{Question 4 :} :
+
+\smallskip
+
+On considère trois suites $\suiten$, $\suiten[v]$ et $\suiten[w]$.
+
+On sait que, pour tout entier naturel $n$, on a : $u_n \leqslant v_n \leqslant w_n$ et de plus : $\lim_{n \to +\infty} u_n=1$ et $\lim_{n \to +\infty} w_n=3$.
+
+On peut alors affirmer que :
+%
+\begin{enumerate}[label=(\alph*)]
+	\item La suite $\suiten[v]$ converge.
+	\item Si la suite $\suiten$ est croissante alors la suite $\suiten[v]$ est minorée par $u_0$.
+	\item $1 \leqslant v_0 \leqslant 3$.
+	\item La suite $\suiten[v]$ diverge.
+\end{enumerate}
+
+\textbf{Question 5 :}
+
+\smallskip
+
+On considère une suite $\suiten$ telle que, pour tout entier naturel $n$ non nul : $u_n \leqslant u_{n+1} \leqslant \dfrac{1}{n}$.
+
+On peut alors affirmer que :
+%
+\begin{enumerate}[label=(\alph*)]
+	\item La suite $\suiten$ diverge.
+	\item La suite $\suiten$ converge.
+	\item $\lim_{n \to +\infty} u_n=0$.
+	\item $\lim_{n \to +\infty} u_n=1$.
+\end{enumerate}
+
+\textbf{Question 6 :}
+
+\smallskip
+
+On considère $\suiten$ une suite réelle telle que pour tout entier naturel $n$, on a : $n < u_n < n + 1$.
+
+On peut affirmer que :
+%
+\begin{enumerate}[label=(\alph*)]
+	\item Il existe un entier naturel $N$ tel que $u_N$ est un entier.
+	\item La suite $\suiten$ est croissante.
+	\item La suite $\suiten$ est convergente.
+	\item La suite $\suiten$ n'a pas de limite.
+\end{enumerate}
+

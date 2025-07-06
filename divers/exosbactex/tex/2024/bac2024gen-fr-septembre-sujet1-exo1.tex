@@ -1,0 +1,65 @@
+On considère un cube $ABCDEFGH$ de côté 1.
+
+\begin{Centrage}
+	\begin{EnvTikzEspace}[UniteX={-5:3.1cm},UniteY={25:1.8cm},UniteZ={90:3.2cm}]<scale=0.9>
+		%placement des points avec labels
+		\PlacePointsEspace{A/0,0,0/bg B/1,0,0/b C/1,1,0/d D/0,1,0/hg E/0,0,1/g F/1,0,1/bd G/1,1,1/d H/0,1,1/hg}
+		\PlacePointsEspace{I/0.5,0.5,0/g K/0,0,{13/8}/hd L/{7/8},{7/8},{3/4}/b}
+		\PlacePointsEspace*{W/0,{5/13},1/ Y/0.625,0.625,1/ Z/1,1,0.625/ U/-0.375,-0.375,2/ V/0,0,1.85/ T/1.125,1.125,0.5/}
+		%segments pointillés
+		\TraceSegmentsEspace[thick,dashed]{A/D D/C D/H}
+		%segments pleins
+		\TraceSegmentsEspace[thick]{A/B B/C C/G G/H H/E E/A E/F B/F F/G}
+		%Constructions auxiliaires
+		\draw[thick,darkgray] (U)--(Y) (Z)--(T) (E)--(V) (K)--(B) (B)--(G) (K)--(W)  ;
+		\draw[dashed,thick,darkgray] (Y)--(Z) (W)--(D) (D)--(G) (G)--(I)  ;
+		\draw[densely dashed,thick,darkgray] (D)--(B) ;
+		%Marques points
+		\MarquePointsEspace{A,B,C,D,E,F,G,H,I,K,L}
+		\draw[darkgray] (U) node[below right=6pt] {$\Delta$} ;
+	\end{EnvTikzEspace}
+\end{Centrage}
+
+Le point $I$ est le milieu du segment $[BD]$. On définit le point $L$ tel que $\Vecteur{IL}=\frac34\Vecteur{IG}$.
+
+On se place dans le repère orthonormé $\RepereEspace{A}{AB}{AD}{AE}$.
+
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Préciser les coordonnées des points $D$, $B$, $I$ et $G$. Aucune justification n'est attendue 
+		\item Montrer que le point $L$ a pour coordonnées $\CoordPtEsp{\frac78}{\frac78}{\frac34}$.
+	\end{enumerate}
+	\item Vérifier qu'une équation cartésienne du plan $(BDG)$ est $x+y-z-1=0$.
+	\item On considère la droite $\Delta$ perpendiculaire au plan $(BDG)$ passant par $L$.
+	\begin{enumerate}
+		\item Justifier qu'une représentation paramétrique de la droite $\Delta$ est : \[ \begin{dcases} x=\tfrac78+t \\ y=\tfrac78+t \\ z=\tfrac34 -t \end{dcases} \text{ où } t \in \R. \]
+		\item Montrer que les droites $\Delta$ et $(AE)$ sont sécantes au point $K$ de coordonnées $\CoordPtEsp{0}{0}{\frac{13}{8}}$.
+		\item Que représente le point $L$ pour le point $K$ ? Justifier la réponse . 
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Calculer la distance $KL$.
+		\item On admet que le triangle $DBG$ est équilatéral. Montrer que son aire est égale à $\frac{\sqrt{3}}{2}$.
+		\item En déduire le volume du tétraèdre $KDBG$.
+	\end{enumerate}
+\end{enumerate}
+
+On rappelle que :
+
+\begin{itemize}
+	\item le volume d'une pyramide est donné par la formule $\mathcal{V} = \frac13 \times \mathcal{B} \times h$ où $\mathcal{B}$  est l'aire d'une base et $h$ la longueur de la
+	hauteur relative a cette base ;
+	\item un tétraèdre est une pyramide à base triangulaire.
+\end{itemize}
+
+\begin{enumerate}[resume]
+	\item On désigne par $a$ un réel appartenant à l'intervalle $\IntervalleOO{0}{+\infty}$ et on note $K_a$ le point de coordonnées $\CoordPtEsp{0}{0}{a}$.
+	\begin{enumerate}
+		\item Exprimer le volume $\mathcal{V}_a$ de la pyramide $ABCDK_a$ en fonction de $a$.
+		\item On note $\Delta_a$ la droite de représentation paramétrique $\begin{dcases} x=t' \\ y=t' \\ z=t'+a \end{dcases} \text{ où } t' \in \R$.
+		
+		On appelle $I_a$ le point d'intersection de la droite $\Delta_a$ avec le plan $(BDG)$. Montrer que les coordonnées du point $I_a$ sont $\CoordPtEsp{\frac{a+1}{3}}{\frac{a+1}{3}}{\frac{2a-1}{3}}$.
+		\item Déterminer, s'il existe, un réel strictement positif $a$ tel que le tétréèdre $GDBK_a$ et la pyramide $ABCDK_a$ sont de même volume.
+	\end{enumerate}
+\end{enumerate}

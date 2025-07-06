@@ -1,0 +1,56 @@
+L'espace est muni d'un repère orthonormé $\Rijk$.
+
+On considère les trois points $A(3;0;0)$, $B(0;2;0)$ et $C(0;0;2)$.
+
+\begin{Centrage}
+	\begin{EnvTikzEspace}[UniteX={-145:0.875cm},UniteY={0:0.9cm},UniteZ={90:0.9cm}]
+		\draw[semithick] (0,0,0)--(3.5,0,0) ;
+		\draw[semithick] (0,0,0)--(0,3.5,0) ;
+		\draw[semithick] (0,0,0)--(0,0,3.5) ;
+		\draw[thick,->,>=latex] (0,0,0)--(1,0,0) node[pos=0.66,above,font=\footnotesize] {$\Vecteur{\imath}$} ;
+		\draw[thick,->,>=latex] (0,0,0)--(0,1,0) node[pos=0.66,above,font=\footnotesize] {$\Vecteur{\jmath}$} ;
+		\draw[thick,->,>=latex] (0,0,0)--(0,0,1) node[pos=0.66,left,font=\footnotesize] {$\Vecteur{k}$} ;
+		\draw (0,0,0) node[below,font=\footnotesize] {$O$} ;
+		\foreach \i in {1,2,3}{%
+			\filldraw (\i,0,0) circle[radius=0.6pt] ;
+			\filldraw (0,\i,0) circle[radius=0.6pt] ;
+			\filldraw (0,0,\i) circle[radius=0.6pt] ;
+		}
+		\PlacePointsEspace{A/3,0,0,/hg B/0,2,0/h C/0,0,2/g}
+		\MarquePointsEspace[StyleMarque=x]{A,B,C}
+	\end{EnvTikzEspace}
+\end{Centrage}
+
+L'objectif de cet exercice est de démontrer la propriété suivante :
+
+\textbf{\emph{\og Le carré de l'aire du triangle \emph{ABC} est égal a la somme des carrés des aires des 3 autres faces du tétraèdre \emph{OABC} \fg.}}
+
+\medskip
+
+\textbf{Partie 1 : Distance du point $\bm{O}$ au plan $\bm{(ABC)}$}
+
+\smallskip
+
+\begin{enumerate}
+	\item Démontrer que le vecteur $\Vecteur{n} \CoordVecEsp{2}{3}{3}$ est normal au plan $(ABC)$.
+	\item Démontrer qu'une équation cartésienne du plan $(ABC)$ est: $2 x+3 y+3 z-6=0$.
+	\item Donner une représentation paramétrique de la droite $d$ passant par $O$ est de vecteur directeur $\Vecteur{n}$.
+	\item On note $H$ le point d'intersection de la droite $d$ du plan $(ABC)$. Déterminer les coordonnées du point $H$.
+	\item En déduire que la distance du point $O$ au plan $(ABC)$ est égale à $\frac{3 \sqrt{22}}{11}$.
+\end{enumerate}
+
+\medskip
+
+\textbf{Partie 2: Démonstration de la propriété}
+
+\smallskip
+
+\begin{enumerate}
+	\item Démontrer que le volume du tétraèdre $OABC$ est égal à 2.
+	\item En déduire que l'aire du triangle $ABC$ est égale sa $\sqrt{22}$.
+	\item Démontrer que pour le tétraèdre $OABC$, \emph{\og le carré de l'aire de triangle \emph{ABC} est égal à la somme des carres des aires des 3 autres faces du tétraèdre \fg}.
+	
+	\medskip
+	
+	\textit{On rappelle que le volume d'un tétraèdre est donné par $V=\frac{1}{3} \mathcal{B} \times h$ où $\mathcal{B}$ est l'aire d'une base du tétraèdre et $h$ est la hauteur relative à cette base.}
+\end{enumerate}

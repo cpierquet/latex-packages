@@ -1,0 +1,86 @@
+$ABCDEFGH$ est un cube. $I$ est le centre de la face $ADHE$ et $J$ est un point du segment $[CG]$.
+
+Il existe donc $a \in \intervFF{0}{1}$ tel que $\vect{CJ} = a \vect{CG}$.
+
+On note $(d)$ la droite passant par $I$ et parallèle à $(FJ)$.
+
+On note $K$ et $L$ les points d’intersection de la droite $(d)$ et des droites $(AE)$ et $(DH)$.
+
+On se place dans le repère $\big(A;\vect{AB},\vect{AD},\vect{AE}\big)$.
+
+\medskip
+
+\textbf{Partie A :} Dans cette partie $a=\dfrac23$
+
+\smallskip
+
+\begin{center}
+	\begin{tikzpicture}[scale=1,font=\small]
+		\tkzDefPoint(0,0){A}\tkzDefPoint(4,0){B}\tkzDefPoint(0,4){E}\tkzDefPoint(4,4){F}
+		\begin{scope}[shift=(A)]\tkzDefPoint(2,1.6){D}\end{scope}
+		\begin{scope}[shift=(B)]\tkzDefPoint(2,1.6){C}\end{scope}
+		\begin{scope}[shift=(E)]\tkzDefPoint(2,1.6){H}\end{scope}
+		\begin{scope}[shift=(F)]\tkzDefPoint(2,1.6){G}\end{scope}
+		\begin{scope}[shift=(A)]\tkzDefPoint(0,2.667){K}\end{scope}
+		\begin{scope}[shift=(C)]\tkzDefPoint(0,2.667){J}\end{scope}
+		\begin{scope}[shift=(C)]\tkzDefPoint(0,1.333){P}\end{scope}
+		\begin{scope}[shift=(D)]\tkzDefPoint(0,1.333){L}\end{scope}
+		\tkzDefMidPoint(A,H) \tkzGetPoint{I}
+		\tkzInterLL(K,L)(C,G) \tkzGetPoint{W}
+		\tkzDefLine[parallel=through W](K,L) \tkzGetPoint{W'}
+		\tkzDrawLine[line width=1pt](W,W')
+		\tkzDefLine[parallel=through K](L,K) \tkzGetPoint{K'}
+		\tkzDrawLine[line width=1pt](K,K')
+		\tkzDrawSegment[line width=1pt,dashed](K,W)
+		\tkzDrawPolygon[line width=1pt,brown,fill=brown!25](K,L,J,F)
+		\tkzDrawPolygon[line width=1pt](A,B,F,E)
+		\tkzDrawPolygon[line width=1pt](B,C,G,F)
+		\tkzDrawPolygon[line width=1pt](E,F,G,H)
+		\tkzDrawSegment[line width=1pt,dashed](A,D)
+		\tkzDrawSegment[line width=1pt,dashed](D,C)
+		\tkzDrawSegment[line width=1pt,dashed](H,D)
+		\tkzMarkSegments[mark=||,size=4pt](C,P P,J J,G)
+		\tkzDrawPoints[fill=blue,size=3.5](A,B,E,F,C,D,G,H,I,J,K,L,P)
+		\tkzLabelPoints[left](D)
+		\tkzLabelPoints[above left](K)
+		\tkzLabelPoints[below right](L)
+		\tkzLabelPoints[right](C,P,J)
+		\tkzLabelPoints[above](G,H,E,F)
+		\tkzLabelPoints[below](I,A,B)
+		\draw(-1.5,2.25) node{$(d)$} ;
+	\end{tikzpicture}
+\end{center}
+
+\begin{enumerate}
+	\item Donner les coordonnées des points $F$, $I$ et $J$.
+	\item Déterminer une représentation paramétrique de la droite $(d)$.
+	\item 
+	\begin{enumerate}
+		\item Montrer que le point de coordonnées $\left(0;0;\dfrac23\right)$ est le point $K$.
+		\item Déterminer les coordonnées du point $L$, intersection des droites $(d)$ et $(DH)$.
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Démontrer que le quadrilatère $FJLK$ est un parallélogramme.
+		\item Démontrer que le quadrilatère $FJLK$ est un losange.
+		\item Le quadrilatère $FJLK$ est-il un carré ?
+	\end{enumerate}
+\end{enumerate}
+
+\smallskip
+
+\textbf{Partie B : Cas général}
+
+\medskip
+
+On admet que les coordonnées des points $K$ et $L$ sont : $K\left(0;0;1-\dfrac{a}{2}\right)$ et $L\left(0;1;\dfrac{a}{2}\right)$.
+
+On rappelle que $a \in \intervFF{0}{1}$.
+
+\begin{enumerate}
+	\item Déterminer les coordonnées de $J$ en fonction de $a$.
+	\item Montrer que le quadrilatère $FJLK$ est un parallélogramme.
+	\item Existe-t-il des valeurs de $a$ telles que le quadrilatère $FJLK $soit un losange ? Justifier.
+	\item Existe-t-il des valeurs de $a$ telles que le quadrilatère $FJLK$ soit un carré ? Justifier.
+\end{enumerate}
+

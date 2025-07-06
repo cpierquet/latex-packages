@@ -1,0 +1,7 @@
+\defaultfontfeatures[AnimeAce]
+   {Extension=.otf,
+    UprightFont=animeace2_reg,
+    ItalicFont=animeace2_ital,
+    BoldFont=animeace2_bld,
+    BoldItalicFont=animeace2_bld
+}

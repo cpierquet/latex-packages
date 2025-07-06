@@ -1,0 +1,46 @@
+On considère la suite $\suiten$ définie par : $u_0 = 1$ et, pour tout entier naturel $n$, \[ u_{n+1}=\dfrac{4u_n}{u_n+4}. \]
+
+\begin{enumerate}
+	\item La copie d’écran ci-dessous présente les valeurs, calculées à l’aide d’un tableur, des
+	termes de la suite $\suiten$ pour $n$ variant de 0 à 12, ainsi que celles du quotient $\dfrac{4}{u_n}$ (avec, pour les valeurs de $u_n$, affichage de deux chiffres pour les parties décimales).
+	
+	\begin{center}
+		%TABLEUR
+		\begin{tikzpicture}
+			\tableur*[14]{A/2cm,B/2cm,C/2cm}
+			\celtxt*[c]{A}{1}{$n$}
+			\celtxt*[c]{B}{1}{$u_n$}
+			\celtxtmulti{C}{1}{1.75cm}{$\nicefrac{4}{u_n}$}
+			\foreach \A in {2,3,...,14}{%
+				\FPeval{nba}{clip(\A-2)}
+				\celtxt*[c]{A}{\A}{$\nba$}
+			}
+			\foreach \C in {2,3,...,14}{%
+				\FPeval{nbc}{clip(\C+2)} 
+				\celtxt*[c]{C}{\C}{$\nbc$}
+			}
+			\foreach \B/\val in {2/{1,00},3/{0,80},4/{0,67},5/{0,57},6/{0,50},7/{0,44},8/{0,40},9/{0,36},10/{0,33},11/{0,29},12/{0,27},13/{0,27},14/{0,25}}{%
+				\celtxt*[c]{B}{\B}{$\val$}} 
+		\end{tikzpicture}
+	\end{center}
+	
+	\smallskip
+	
+	À l’aide de ces valeurs, conjecturer l’expression de $\dfrac{4}{u_n}$ en fonction de $n$.
+	
+	\smallskip
+	
+	Le but de cet exercice est de démontrer cette conjecture (question 5.), et d’en déduire la limite de la suite $\suiten$ (question 6.).
+	\item Démontrer par récurrence que, pour tout entier naturel $n$, on a : $u_n > 0$.
+	\item Démontrer que la suite $\suiten$ est décroissante.
+	\item Que peut-on conclure des questions 2. et 3. concernant la suite $\suiten$ ?
+	\item On considère la suite $\suiten[v]$ définie pour tout entier naturel $n$ par : $v_n = \dfrac{4}{u_n}$.
+	
+	Démontrer que $\suiten[v]$ est une suite arithmétique. Préciser sa raison et son premier terme.
+	
+	En déduire, pour tout entier naturel $n$, l’expression de $v_n$ en fonction de $n$.
+	\item Déterminer, pour tout entier naturel $n$, l’expression de $u_n$ en fonction de $n$.
+	
+	En déduire la limite de la suite $\suiten$.
+\end{enumerate}
+

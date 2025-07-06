@@ -1,0 +1,72 @@
+\textit{La partie \textbf{C} est indépendante des parties \textbf{A} et \textbf{B}.} 
+
+\medskip
+
+Un robot est positionné sur un axe horizontal et se déplace plusieurs fois d'un mètre sur cet axe, aléatoirement vers la droite ou vers la gauche.
+
+Lors du premier déplacement, la probabilité que le robot se déplace à droite est égale à $\frac{1}{3}$.
+
+S'il se déplace à droite, la probabilité que le robot se déplace de nouveau à droite lors du déplacement suivant est égale à $\frac{3}{4}$.
+
+S'il se déplace à gauche, la probabilité que le robot se déplace de nouveau à gauche lors du déplacement suivant est égale à $\frac{1}{2}$.
+
+\smallskip
+
+Pour tout entier naturel $n \geqslant 1$, on note :
+
+\begin{itemize}
+	\item $D_n$ l'événement : « le robot se déplace à droite lors du $n$-ième déplacement » ;
+	\item $\overline{D_n}$ l'évènement contraire de $D_n$ ;
+	\item $p_n$ la probabilité de l'événement $D_n$.
+\end{itemize}
+
+On a donc $p_1 = \frac{1}{3}$.
+
+\medskip
+
+\begin{Centrage}
+	\textbf{Partie A : étude du cas particulier où} $\bm{n=2}$\textbf{.}
+\end{Centrage}
+
+Dans cette partie, le robot réalise deux déplacements successifs.
+
+\begin{enumerate}
+	\item Reproduire et compléter l'arbre pondéré suivant :
+	
+	\begin{Centrage}
+		\ArbreProbasTikz[PositionProbas=auto]{$D_1$/\numdots/,$D_2$/\numdots/,$\overline{D_2}$/\numdots/,$\overline{D_1}$/\numdots/,$D_2$/\numdots/,$\overline{D_2}$/\numdots/}
+	\end{Centrage}
+	\item Déterminer la probabilité que le robot se déplace deux fois à droite.
+	\item Montrer que $p_2 = \frac{7}{12}$.
+	\item Le robot s'est déplacé à gauche lors du deuxième déplacement. Quelle est la probabilité qu'il se soit déplacé à droite lors du premier déplacement ?
+\end{enumerate}
+
+\begin{Centrage}
+	\textbf{Partie B : étude de la suite} $\bm{\left(p_n\right)}$\textbf{.}
+\end{Centrage}
+
+On souhaite estimer le déplacement du robot au bout d'un nombre important d'étapes.
+
+\begin{enumerate}
+	\item Démontrer que pour tout entier naturel $n \geqslant 1$, on a : \[ p_{n+1} = \frac{1}{4} p_n + \frac{1}{2}. \]
+	
+	On pourra s'aider d'un arbre.
+	\item 
+	\begin{enumerate}
+		\item Montrer par récurrence que pour tout entier naturel $n \geqslant 1$, on a : $p_n \leqslant p_{n+1} < \frac{2}{3}$.
+		\item La suite $\Suite{p}$ est-elle convergente ? Justifier.
+	\end{enumerate}
+	\item On considère la suite $\Suite{u}$ définie pour tout entier naturel $n \geq 1$, par $u_n = p_n - \frac{2}{3}$.
+	\begin{enumerate}
+		\item Montrer que la suite $\Suite{u}$ est géométrique et préciser son premier terme et sa raison.
+		\item Déterminer la limite de la suite $\Suite{p}$ et interpréter le résultat dans le contexte de l'exercice.
+	\end{enumerate}
+\end{enumerate}
+
+\begin{Centrage}
+	\textbf{Partie C}
+\end{Centrage}
+
+Dans cette partie, on considère un autre robot qui réalise dix déplacements d'un mètre indépendants les uns des autres, chaque déplacement vers la droite ayant une probabilité fixe égale à $\frac{3}{4}$.
+
+Quelle est la probabilité qu'il revienne à son point de départ au bout des dix déplacements ? On arrondira le résultat à $10^{-3}$ près.

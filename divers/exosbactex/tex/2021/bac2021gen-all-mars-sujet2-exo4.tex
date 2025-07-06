@@ -1,0 +1,46 @@
+Le graphique ci-dessous représente, dans un repère orthogonal, les courbes $\mathcal{C}_f$ et $\mathcal{C}_g$ des fonctions $f$ et $g$ définies sur $\R$ par : $$f(x)=x^2 \e^{-x} \quad \text{et} \quad g(x)=\e^{-x}.$$
+
+\begin{center}
+	\begin{tikzpicture}[x=1.5cm,y=0.75cm,xmin=-2.4,xmax=2.2,xgrilles=0.2,ymin=-1.2,ymax=9.2,ygrille=2,ygrilles=0.4]
+		\GrilleTikz
+		\AxesTikz[ElargirOx=0/0,ElargirOy=0/0]
+		\AxexTikz[Police=\footnotesize]{-2,-1,1,2} \AxeyTikz[Police=\footnotesize]{2,4,6,8} ;
+		\draw (-1pt,-1pt) node[below left,font=\footnotesize] {$0$} ;
+		\clip (\xmin,\ymin) rectangle (\xmax,\ymax) ;
+		\draw[very thick,red,domain=\xmin:\xmax,samples=250] plot (\x,{\x*\x*exp(-\x)}) ;
+		\draw[very thick,blue,domain=\xmin:\xmax,samples=250] plot (\x,{exp(-\x)}) ;
+		\draw[very thick,dashed,darkgray] (-0.59,\ymin) -- (-0.59,\ymax) ;
+		\filldraw[darkgray] (-0.59,{0.59*0.59*exp(0.59)}) circle[radius=2pt] node[above right,font=\sffamily\footnotesize] {$M$} ;
+		\filldraw[darkgray] (-0.59,{exp(0.59)}) circle[radius=2pt] node[above right,font=\sffamily\footnotesize] {$N$} ;
+		\draw (-1,6) node[red,font=\large] {$\mathcal{C}_f$} ;
+		\draw (-1.6,4) node[blue,font=\large] {$\mathcal{C}_g$} ;
+	\end{tikzpicture}
+\end{center}
+
+\textbf{La question 3. est indépendante des questions 1. et 2.}
+
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Déterminer les coordonnées des points d’intersection de $\mathcal{C}_f$ et $\mathcal{C}_g$.
+		\item Étudier la position relative des courbes $\mathcal{C}_f$ et $\mathcal{C}_f$.
+	\end{enumerate}
+	\item Pour tout nombre réel $x$ de l’intervalle $\intervFF{-1}{1}$, on considère les points $M$ de coordonnées $(x;f(x))$ et $N$ de coordonnées $(x;g(x))$, et on note $d(x)$ la distance $MN$.
+	
+	On admet que $d(x)=\e^{-x}-x^2\e^{-x}$.
+	
+	\smallskip
+	
+	On admet que la fonction $d$ est dérivable sur l’intervalle $\intervFF{-1}{1}$ et on note $d'$ sa fonction dérivée.
+	\begin{enumerate}
+		\item Montrer que $d'(x)=\e^{-x} \big(x^2-2x-1\big)$.
+		\item En déduire les variations de la fonction $d$ sur l’intervalle $\intervFF{-1}{1}$. 
+		\item Déterminer l’abscisse commune $x_0$ des points $M_0$ et $N_0$ permettant d’obtenir une distance $d(x_0)$ maximale, et donner une valeur approchée à 0,1 près de la distance $M_0N_0$.
+	\end{enumerate}
+	\item Soit $\Delta$ la droite d’équation $y=x+2$.
+	
+	On considère la fonction $h$ dérivable sur $\R$ et définie par : $h(x)=\e^{-x}-x-2$.
+	
+	En étudiant le nombre de solutions de l’équation $h(x)=0$, déterminer le nombre de points d’intersection de la droite $\Delta$ et de la courbe $\mathcal{C}_f$.
+\end{enumerate}
+

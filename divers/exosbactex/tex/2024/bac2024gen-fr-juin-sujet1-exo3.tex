@@ -1,0 +1,52 @@
+\begin{wrapstuff}[r]
+\begin{tikzpicture}[scale=0.9]
+	\draw[semithick] (-1.25,0)--(6,0) ;
+	\draw[semithick] (0,-2)--(0,7.25) ;
+	\DefinirPoints{A/5.2,1.4/d B/40:2.2/g C/0,6.8/g H/2.55,0.7/b D/0,-1.7/g}
+	\draw[thick,fill=lightgray!25] (C)--(B)--(H)--(A)--cycle;
+	\draw[thick] (C)--(H) ;
+	\draw[thick,densely dotted] (B)--(A) ;
+	\draw[thick,semithick] (40:-1.4)--(B) (40:4.7)--++(40:1) ;
+	\draw[thick,dashed] (40:4.7)--(B) ;
+	\draw[thick,->,>=latex] (0,0)--++(0.6,0) node[below,font=\small] {$\Vecteur{\imath}$} ;
+	\draw[thick,->,>=latex] (0,0)--++(0,0.6) node[left,font=\small] {$\Vecteur{k}$} ;
+	\draw[thick,->,>=latex] (0,0)--++(40:0.4) node[above,font=\small,inner sep=1pt] {$\Vecteur{\jmath}$} ;
+	\MarquerPoints{A,B,C,H,D}
+\end{tikzpicture}
+\end{wrapstuff}
+
+L'espace est muni d'un repère orthonormé $\Rijk$.
+
+\smallskip
+
+On considère les points $A(5;5;0)$, $B(0;5;0)$, $C(0;0;10)$ et $D\left(0;0;-\frac{5}{2}\right)$.
+
+\begin{enumerate}
+	\item 
+	
+	\begin{enumerate}
+		\item Montrer que $\Vecteur*{n}[1]\begin{pmatrix}1\\-1\\0\end{pmatrix}$ est un vecteur normal au plan $(CAD)$.
+		\item En déduire que le plan $(CAD)$ a pour équation cartésienne : $x-y=0$.
+	\end{enumerate}
+	\item On considère la droite $\mathcal{D}$ de représentation paramétrique $\begin{dcases} x=\tfrac52t\\y=5-\tfrac52t\\z=0\end{dcases}$ où $t \in \R$.
+	
+	\begin{enumerate}
+		\item On admet que la droite $\mathcal{D}$ et le plan $(CAD)$ sont sécants en un point $H$. Justifier que les coordonnées de $H$ sont $\left(\frac{5}{2};\frac{5}{2};0\right)$.
+		\item Démontrer que le point $H$ est le projeté orthogonal de $B$ sur le plan $(CAD)$.
+	\end{enumerate}
+	\item 
+	
+	\begin{enumerate}
+		\item Démontrer que le triangle $ABH$ est rectangle en $H$.
+		\item En déduire que l'aire du triangle $ABH$ est égale à $\frac{25}{4}$.
+	\end{enumerate}
+	\item 
+	
+	\begin{enumerate}
+		\item Démontrer que $(CO)$ est la hauteur du tétraèdre $ABCH$ issue de $C$.
+		\item En déduire le volume du tétraèdre $ABCH$.
+		
+		\textit{On rappelle que le volume d'un tétraèdre est donné par : $\mathcal{V}=\frac{1}{3} \mathcal{B}h$ où $\mathcal{B}$ est l'aire d'une base et $h$ la hauteur relative à cette base.}
+	\end{enumerate}
+	\item On admet que le triangle $ABC$ est rectangle en $B$. Déduire des questions précédentes la distance du point $H$ au plan $(ABC)$.
+\end{enumerate}

@@ -1,0 +1,71 @@
+\emph{L’exercice est constitué de deux parties indépendantes.}
+
+\medskip
+
+\textbf{\large Partie I}
+
+\medskip
+
+Pour tout entier $n$ supérieur ou égal à 1, on désigne par $f_n$ la fonction définie sur $\IntervalleFF{0}{1}$ par : \[ f_n(x)=x^n\,\e^{x}. \]
+%
+On note $\Courbe[n]$ la courbe représentative de la fonction $f_n$ dans un repère \RepereOij{} du plan.
+
+On désigne par $\Suite{I}$ la suite définie pour tout entier $n$ supérieur ou égal à 1 par : \[ I_n = \int_0^1 f_n(x)\dx. \]
+
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item On désigne par $F_1$  la fonction définie sur $\IntervalleFF{0}{1}$ par : \[ F_1(x)=(x-1)\,\e^{x}.\]
+		%
+		Vérifier que $F_1$ est une primitive de la fonction $f_1$.
+		\item Calculer $I_1$.
+	\end{enumerate}
+	\item À l’aide d’une intégration par parties, établir la relation pour tout $n$ supérieur ou égal à 1, \[ I_{n+1} = \e - (n+1)I_n. \]
+	\item Calculer $I_2$
+	\item On considère la fonction \piton{mystere} écrite dans le langage \textsf{Python} :
+	
+	\begin{CodePiton}[Alignement=center,Largeur=13cm,Gobble=tabs]{}
+	from math import e # la constante d'Euler e
+	
+	def mystere(n):
+		a = 1
+		L = [a]
+		for i in range(1, n) :
+			a = e - (i+1)*a
+			L.append(a)
+		return L
+	\end{CodePiton}
+	
+	À l’aide des questions précédentes, expliquer ce que renvoie l’appel \piton{mystere(5)}.
+\end{enumerate}
+
+\pagebreak
+
+\textbf{\large Partie II}
+
+\begin{enumerate}
+	\item Sur le graphique ci-dessous, on a représenté les courbes $\Courbe[1]$, $\Courbe[2]$, $\Courbe[3]$, $\Courbe[10]$, $\Courbe[20]$ et $\Courbe[30]$.
+	
+	\begin{center}
+		\begin{tikzpicture}[x=12cm,y=2.4cm,xmin=-0.1,xmax=1.1,xgrille=0.1,xgrilles=0.025,ymin=-0.5,ymax=3,ygrille=0.5,ygrilles=0.1]
+			\GrilleTikz\AxesTikz[ElargirOx=0,ElargirOy=0]\OrigineTikz[Police=\small]
+			\AxexTikz[Police=\small]{-0.1,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1}
+			\AxeyTikz[Police=\small]{-0.5,0.5,1,1.5,2,2.5}
+			\FenetreTikz
+			\foreach \k in {1,2,3,10,20,30}{%
+				\CourbeTikz[thick,darkgray,samples=250]{\x^\k*exp(\x)}{0:1}
+			}
+			\foreach \k/\absCk in {1/0.16,2/0.4,3/0.56,10/0.8,20/0.88,30/0.98}{%
+				\draw[darkgray] (\absCk,0.45) node {$\Courbe[\k]$} ;
+			}
+			%\CourbeTikz[thick,darkgray,samples=250]{\x^1*exp(\x)}{0:1}
+			%\CourbeTikz[thick,darkgray,samples=250]{\x^1*exp(\x)}{0:1}
+		\end{tikzpicture}
+	\end{center}
+	\begin{enumerate}
+		\item Donner une interprétation graphique de $I_n$.
+		\item Quelle conjecture peut-on émettre sur la limite de la suite $\Suite{I}$ ?
+	\end{enumerate}
+	\item Montrer que pour tout $n$ supérieur ou égal à 1, \[ 0 \leqslant I_n \leqslant \e\int_0^1 x^n \dx. \]
+	\item En déduire $\displaystyle\lim\limits_{n \to +\infty} I_n$.
+\end{enumerate}

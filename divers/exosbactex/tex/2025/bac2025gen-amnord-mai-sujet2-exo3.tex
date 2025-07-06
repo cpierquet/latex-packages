@@ -1,0 +1,68 @@
+%----tikz3d-fr----
+Pour chacune des affirmations suivantes, indiquer si elle est vraie ou fausse. Chaque réponse doit être justifiée.
+
+\smallskip
+
+Une réponse non justifiée ne rapporte aucun point.
+
+\bigskip
+
+\textbf{PARTIE A}
+
+\medskip
+
+$ABCDEFGH$ est un cube d'arête de longueur 1. Les points $I$, $J$, $K$, $L$ et $M$ sont les milieux respectifs des arêtes $[AB]$, $[BF]$, $[AE]$, $[CD]$ et $[DH]$.
+
+\begin{Centrage}
+	\begin{tikzpicture}[x={(5:3.5cm)},y={(145:1.5cm)},z={(90:3.5cm)}]
+		%placement des points avec labels
+		\PlacePointsEspace{A/0,0,0/bg B/1,0,0/bd C/1,1,0/hd D/0,1,0/g E/0,0,1/bg F/1,0,1/d G/1,1,1/hd H/0,1,1/hg}
+		\PlacePointsEspace{I/0.5,0,0/bd J/1,0,0.5/d K/0,0,0.5/g L/0.5,1,0/h M/0,1,0.5/g}
+		%segments pointillés
+		\TraceSegmentsEspace[thick,dashed]{B/C C/D C/G}
+		%segments pleins
+		\TraceSegmentsEspace[thick]{A/B A/D A/E D/H B/F H/E E/F F/G G/H}
+		%Marques points
+		\MarquePointsEspace{A,B,C,D,E,F,G,H,I,J,K,L,M}
+	\end{tikzpicture}
+\end{Centrage}
+
+\textbf{Affirmation 1 :} « $\Vecteur{JH}=2 \Vecteur{BI}+\Vecteur{DM}-\Vecteur{CB}$. »
+
+\smallskip
+
+\textbf{Affirmation 2 :} « Le triplet de vecteurs $\big(\Vecteur{AB},\Vecteur{AH},\Vecteur{AG}\big)$ est une base de l'espace. »
+
+\smallskip
+
+\textbf{Affirmation 3} : « $\Vecteur{IB} \cdot \Vecteur{LM}=-\frac{1}{4}$. »
+
+\bigskip
+
+\textbf{PARTIE B}
+
+\medskip
+
+Dans l'espace muni d'un repère orthonormé, on considère :
+
+\begin{itemize}
+	\item le plan $\mathcal{P}$ d'équation cartésienne $2 x-y+3 z+6=0$ ;
+	
+	\item les points $A(2;0;-1)$ et $B(5;-3;7)$.
+\end{itemize}
+
+\textbf{Affirmation 4 :} « Le plan $\mathcal{P}$ et la droite $(AB)$ sont parallèles. »
+
+\smallskip
+
+\textbf{Affirmation 5 :} « Le plan $\mathcal{P}'$ parallèle à $\mathcal{P}$ passant par $B$ a pour équation cartésienne $-2 x+y-3 z+34=0$ »
+
+\smallskip
+
+\textbf{Affirmation 6 :} « La distance du point $A$ au plan $\mathcal{P}$ est égale à $\frac{\sqrt{14}}{2}$. »
+
+\medskip
+
+On note $(d)$ la droite de représentation paramétrique \[ \begin{cases}x=-12+2k\\y=6\\z=3-5k\end{cases}, \text { où } k \in R.\]
+
+\textbf{Affirmation 7 :} « Les droites $(AB)$ et $(d)$ ne sont pas coplanaires. »

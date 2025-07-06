@@ -1,0 +1,57 @@
+Une entreprise qui fabrique des jouets doit effectuer des contrôles de conformité avant leur commercialisation. Dans cet exercice, on s'intéresse à deux tests effectués par l'entreprise : un test dit de fabrication et un test dit de sécurité.
+
+À la suite d'un grand nombre de vérifications, l'entreprise affirme que :
+
+\begin{itemize}
+	\item $95\,\%$ des jouets réussissent le test de fabrication;
+	\item parmi les jouets qui réussissent le test de fabrication, $98\,\%$ réussissent le test de sécurité;
+	\item $1\,\%$ des jouets ne réussissent aucun des deux tests.
+\end{itemize}
+
+On choisit au hasard un jouet parmi les jouets produits. On note :
+\begin{itemize}
+	\item $F$ l'événement: « le jouet réussit le test de fabrication »;
+	\item $S$ l'événement: « le jouet réussit le test de sécurité ».
+\end{itemize}
+
+\textbf{Partie A}
+
+\begin{enumerate}
+	\item À partir des données de l'énoncé, donner les probabilités $P(F)$ et $P_{F}(S)$.
+	\item
+	\begin{enumerate}
+		\item Construire un arbre pondéré qui illustre la situation avec les données disponibles dans l'énoncé.
+		\item Montrer que $P_{\overline{F}}\big(\overline{S}\big)=0,2$.
+	\end{enumerate}
+	\item Calculer la probabilité que le jouet choisi réussisse les deux tests.
+	\item Montrer que la probabilité que le jouet réussisse le test de sécurité vaut $0,97$ arrondi au centième.
+	\item Lorsque le jouet a réussi le test de sécurité, quelle est la probabilité qu'il réussisse le test de fabrication ?
+	
+	Donner une valeur approchée du résultat au centième.
+\end{enumerate}
+
+\textbf{Partie B}
+
+\medskip
+
+On prélève au hasard dans la production de l'entreprise un lot de $n$ jouets, où $n$ est un entier strictement positif. On suppose que ce prélèvement se fait sur une quantité suffisamment grande de jouets pour être assimilé à une succession de $n$ tirages indépendants avec remise.
+
+\smallskip
+
+On rappelle que la probabilité qu'un jouet réussisse le test de fabrication est égale à $0,95$. Soit $S_{n}$ la variable aléatoire qui compte le nombre de jouets ayant réussi le test de fabrication. On admet que $S_{n}$ suit la loi binomiale de paramètres $n$ et $p=0,95$.
+
+\begin{enumerate}
+	\item Exprimer l'espérance et la variance de la variable aléatoire $S_{n}$ en fonction de $n$.
+	\item Dans cette question, on pose $n=150$.
+	\begin{enumerate}
+		\item Déterminer une valeur approchée à $10^{-3}$ près de $P\left(S_{150}=145\right)$. Interpréter ce résultat dans le contexte de l'exercice.
+		\item Déterminer la probabilité qu'au moins $94\%$ des jouets de ce lot réussissent le test de fabrication. Donner une valeur approchée du résultat à $10^{-3}$ près.
+	\end{enumerate}
+	\item Dans cette question, l'entier naturel non nul $n$ n'est plus fixé.
+	
+	Soit $F_{n}$ la variable aléatoire définie par : $F_{n}=\dfrac{S_{n}}{n}$. La variable aléatoire $F_{n}$ représente la proportion des jouets qui réussissent le test de fabrication dans un lot de $n$ jouets prélevés. On note $\Esper{F_{n}}$ l'espérance et $\Varianc{F_{n}}$ la variance de la variable aléatoire $F_{n}$.
+	\begin{enumerate}
+		\item Montrer que $\Esper{F_{n}}=0,95$ et que $\Varianc{F_{n}}=\dfrac{0,0475}{n}$.
+		\item On s'intéresse à l'événement $I$ suivant: « la proportion de jouets qui réussissent le test de fabrication dans un lot de $n$ jouets est strictement comprise entre $93\,\%$ et $97\,\%$ ». En utilisant l'inégalité de Bienaymé-Tchebychev, déterminer une valeur $n$ de la taille du lot de jouets à prélever, à partir de laquelle la probabilité de l'événement $I$ est supérieure ou égale à $0,96$.
+	\end{enumerate}
+\end{enumerate}

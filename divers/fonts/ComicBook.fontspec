@@ -1,0 +1,7 @@
+\defaultfontfeatures[ComicBook]
+   {Extension=.otf,
+    UprightFont=ComicBook,
+    ItalicFont=ComicBookItalic,
+    BoldFont=ComicBookBold,
+    BoldItalicFont=ComicBookBoldItalic
+}

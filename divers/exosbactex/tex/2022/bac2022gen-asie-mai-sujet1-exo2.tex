@@ -1,0 +1,70 @@
+Un médicament est administré à un patient par voie intraveineuse. 
+
+\bigskip
+
+\textbf{Partie A : modèle discret de la quantité médicamenteuse}
+
+\medskip
+
+Après une première injection de 1 mg de médicament, le patient est placé sous perfusion.
+
+On estime que, toutes les $30$~minutes, l'organisme du patient élimine 10\,\% de la quantité de médicament présente dans le sang et qu'il reçoit une dose supplémentaire de $0,25$ mg de la substance médicamenteuse.
+
+On étudie l'évolution de la quantité de médicament dans le sang avec le modèle suivant :
+
+pour tout entier naturel $n$, on note $u_n$ la quantité, en mg, de médicament dans le sang du patient au bout de $n$ périodes de trente minutes. On a donc $u_0 = 1$.
+
+\begin{enumerate}
+	\item Calculer la quantité de médicament dans le sang au bout d'une demi-heure.
+	\item Justifier que, pour tout entier naturel $n$, $u_{n+1} = 0,9u_n + 0,25$.
+	\item 
+	\begin{enumerate}
+		\item Montrer par récurrence sur $n$ que, pour tout entier naturel $n$, $u_n \leqslant  u_{n+1} < 5$.
+		\item En déduire que la suite $\left(u_n\right)$ est convergente.
+	\end{enumerate}
+	\item On estime que le médicament est réellement efficace lorsque sa quantité dans le sang du patient est supérieure ou égale à $1,8$ mg.
+	\begin{enumerate}
+		\item Recopier et compléter le script écrit en langage \textsf{Python} suivant de manière à déterminer au bout de combien de périodes de trente minutes le médicament commence à être réellement efficace.
+		
+\begin{CodePythonLstAlt}*[Largeur=8cm]{center}
+def efficace() :
+	u = 1
+	n = 0
+	while ...... :
+		u = ......
+		n = n+1
+	return n
+\end{CodePythonLstAlt}
+		\item Quelle est la valeur renvoyée par ce script ? Interpréter ce résultat dans le contexte de l'exercice.
+	\end{enumerate}
+	\item Soit $\left(v_n\right)$ la suite définie, pour tout entier naturel $n$, par $v_n = 2,5 - u_n$.
+	\begin{enumerate}
+		\item Montrer que $\left(v_n\right)$ est une suite géométrique dont on précisera la raison et le premier terme $v_0$.
+		\item Montrer que, pour tout entier naturel $n$, $u_n = 2,5 - 1,5 \times 0,9^n$.
+		\item Le médicament devient toxique lorsque sa quantité présente dans le sang du patient dépasse $3$ mg. 
+		
+		D'après le modèle choisi, le traitement présente-t-il un risque pour le patient? Justifier.
+	\end{enumerate}
+\end{enumerate}
+
+\textbf{Partie B : modèle continu de la quantité médicamenteuse}
+
+\medskip
+
+Après une injection initiale de $1$~mg de médicament, le patient est placé sous perfusion.
+
+Le débit de la substance médicamenteuse administrée au patient est de $0,5$ mg par heure.
+
+La quantité de médicament dans le sang du patient, en fonction du temps, est modélisée
+par la fonction $f$, définie sur $[0;+\infty[$, par \[f(t) = 2,5 - 1,5\text{e}^{-0,2t},\]%
+%
+où $t$ désigne la durée de la perfusion exprimée en heure.
+
+On rappelle que ce médicament est réellement efficace lorsque sa quantité dans le sang du patient est supérieure ou égale à $1,8$~mg.
+
+\begin{enumerate}
+	\item Le médicament est-il réellement efficace au bout de 3~h 45~min ?
+	\item Selon ce modèle, déterminer au bout de combien de temps le médicament devient réellement efficace.
+	\item Comparer le résultat obtenu avec celui obtenu à la question 4.(b) du modèle discret de la \textbf{Partie A}.
+\end{enumerate}
+

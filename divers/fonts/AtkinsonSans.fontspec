@@ -1,0 +1,8 @@
+\defaultfontfeatures[AtkinsonSans]
+   {Extension=.otf,
+    UprightFont=AtkinsonHyperlegibleNext-Regular,
+    ItalicFont=AtkinsonHyperlegibleNext-RegularItalic,
+    BoldFont=AtkinsonHyperlegibleNext-Bold,
+    BoldItalicFont=AtkinsonHyperlegibleNext-BoldItalic,
+    Ligatures=TeX
+}

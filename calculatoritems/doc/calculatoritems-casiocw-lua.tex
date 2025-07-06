@@ -1,0 +1,17 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: lualatex: {shell: no, synctex: no, interaction: batchmode}
+
+\documentclass[margin=1mm,12pt]{standalone}
+\usepackage[xelua]{calculatoritems}
+
+\begin{document}
+
+\begin{tabular}{l}
+\CalcKeyCasioCW{on+home+ok+up+down+left+right+pgup+pgdown+config+back}\\
+\CalcKeyCasioCW{shift+var+fx+ctlg+tools+x+frac+sqrt+pow+sqr+exp+comma}\\
+\CalcKeyCasioCW{sin+cos+tan+lp+rp+del+ac+times+div+plus+minus+sminus}\\
+\CalcKeyCasioCW{1+2+3+4+5+6+7+8+9+0+dot+x10p+format+exe}\\
+\CalcKeyCasioCW{semicol+ans}
+\end{tabular}
+
+\end{document}

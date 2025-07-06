@@ -1,0 +1,76 @@
+%% for specifying the derivative func
+\define@key{psset}{Derive}{\edef\psk@Derive{#1}}%
+\setkeys{psset}{Derive=default}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% #1 #2 theta interval
+%%% #3 description of rho depending upon theta
+\def\polarplot#1#2#3{\parametricplot{#1}{#2}{#3 dup t cos mul exch t sin mul}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #1 : abscisse
+%% #2 : func
+%% #3 : box
+\def\psplotput#1#2#3{\rput(!#1 dup /x exch def #2){#3}}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #1 : abscisse
+%% #2 : func
+%% #3 : box
+\def\parametricplotput#1#2#3{\rput(!/t #1 def #2){#3}}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #1 : abscisse
+%% #2 : func
+%% #3 : box
+\def\polarplotput#1#2#3{\rput(!/t #1 def #2 dup #1 cos mul exch #1 sin mul){#3}}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #1 : abscisse
+%% #2 : demi-longueur de la tangente
+%% #3 : fonction (code psplot)
+\def\psplottangent{\@ifnextchar[\Pst@psplottangent{\Pst@psplottangent[]}}%
+\def\Pst@psplottangent[#1]#2#3#4{%
+  \bgroup\setkeys{psset}{#1}%
+  \ifx\psk@Derive\@default%
+  \rput{!tx@EcldDict begin
+            1 #2 dup ZeroEq
+            \pslbrace dup 0.0005 add /x exch def #4 exch 0.0005 sub /x exch def #4 sub .001 div \psrbrace
+            \pslbrace dup dup 1.0005 mul /x exch def #4 exch
+                       .9995 mul /x exch def #4 sub exch .001 mul div \psrbrace ifelse
+         end exch atan}(!#2 dup /x exch def #4){\psline(-#3,0)(#3,0)}
+  \else%
+  \rput{!1 /x #2 def \psk@Derive\space exch atan}(!#2 dup /x exch def #4){\psline(-#3,0)(#3,0)}\fi%
+  \egroup%
+}%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #1 : abscisse
+%% #2 : demi-longueur de la tangente
+%% #3 : fonction (code psplot)
+\def\parametricplottangent{\@ifnextchar[\parametricplottangent@i{\parametricplottangent@i[]}}%
+\def\parametricplottangent@i[#1]#2#3#4{%
+  \bgroup\setkeys{psset}{#1}%
+  \ifx\psk@Derive\@default%
+  \rput{!tx@EcldDict begin
+            #2 dup ZeroEq
+            \pslbrace dup 0.0005 add /t exch def #4 3 -1 roll 0.0005 sub /x exch def
+                      #4 ABVect .001 div exch .001 div \psrbrace
+            \pslbrace dup dup 1.0005 mul /t exch def #4 3 -1 roll 
+                       .9995 mul /t exch def #4 ABVect 3 -1 roll .001 mul exch 1 index div 3 1
+                      roll div \psrbrace ifelse
+         end atan}(!/t #2 def #4){\psline(-#3,0)(#3,0)}
+  \else%
+  \rput{!/t #2 def \psk@Derive\space exch atan}(!/t #2 def #4){\psline(-#3,0)(#3,0)}\fi%
+  \egroup%
+}%
+%% reste à tester si le vecteur dérivé est nul -> point de rebroussement
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% #1 : abscisse
+%% #2 : demi-longueur de la tangente
+%% #3 : fonction (code psplot)
+\def\polarplottangent{\@ifnextchar[\polarplottangent@i{\polarplottangent@i[]}}%
+\def\polarplottangent@i[#1]#2#3#4{%
+  \bgroup\setkeys{psset}{#1}%
+  \ifx\psk@Derive\@default%
+  \parametricplottangent@i[]{#2}{#3}{#4 dup t cos mul exch t sin mul}%
+  \else%
+  \psset{Derive=\psk@Derive\space dup t cos mul exch t sin mul #4 dup t sin mul exch
+  t cos mul neg tx@EcldDict begin ABVect end}
+  \parametricplottangent@i[]{#2}{#3}{#4 dup t cos mul exch t sin mul}\fi%
+  \egroup%
+}%

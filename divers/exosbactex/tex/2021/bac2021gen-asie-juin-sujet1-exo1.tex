@@ -1,0 +1,33 @@
+En 2020, une influenceuse sur les réseaux sociaux compte \num{1000}~abonnés à son profil. On modélise le nombre d'abonnés ainsi: chaque année, elle perd 10\,\%de ses abonnés auxquels s'ajoutent $250$ nouveaux abonnés.
+
+Pour tout entier naturel $n$, on note $u_n$ le nombre d'abonnés à son profil en l'année $(2020 + n)$, suivant cette modélisation. Ainsi $u_0 = \num{1000}$.
+
+\begin{enumerate}
+	\item Calculer $u_1$.
+	\item Justifier que pour tout entier naturel $n,$, $u_{n+1} = 0,9u_n + 250$.
+	\item La fonction \textsf{Python} nommée \og suite \fg{} est définie ci-dessous. Dans le contexte de l'exercice, interpréter la valeur renvoyée par \texttt{suite(10)}.
+	
+\begin{CodePythonLstAlt}*[Largeur=8cm]{center}
+def suite(n) :
+	u = 1000
+	for i in range(n) :
+		u = 0,9*u + 250
+	return u
+\end{CodePythonLstAlt}
+	\item 
+	\begin{enumerate}
+		\item \hfuzz\maxdimen Montrer, à l'aide d'un raisonnement par récurrence, que pour tout entier naturel $n$, ${u_n \leqslant \num{2500}}$.
+		\item Démontrer que la suite $\left(u_n\right)$ est croissante.
+		\item Déduire des questions précédentes que la suite $\left(u_n\right)$ est convergente.
+	\end{enumerate}
+	\item Soit $\left(v_n\right)$ la suite définie par $v_n = u_n - \num{2500}$ pour tout entier naturel $n$.
+	\begin{enumerate}
+		\item Montrer que la suite $\left(v_n\right)$ est une suite géométrique de raison $0,9$ et de terme initial ${v_0 = \num{- 1500}}$.
+		\item Pour tout entier naturel $n$, exprimer $v_n$ en fonction de $n$ et montrer que : \[u_n = - \num{1500} \times  0,9^n + \num{2500}.\]
+		\item Déterminer la limite de la suite $\left(u_n\right)$ et interpréter dans le contexte de l'exercice.
+	\end{enumerate}
+	\item Écrire un programme qui permet de déterminer en quelle année le nombre d'abonnés dépassera \num{2200}.
+	
+	Déterminer cette année.
+\end{enumerate}
+

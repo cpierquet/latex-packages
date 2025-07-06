@@ -1,0 +1,58 @@
+Sur le graphique ci-dessous, on a représenté dans un repère orthonormé :
+
+\begin{itemize}
+	\item[$-$] la courbe représentative $\mathcal{C}_f$ d'une fonction $f$ définie et dérivable sur l'intervalle $\intervOO{0}{+\infty}$ ;
+	\item[$-$] la tangente $T_A$ à la courbe $\mathcal{C}_f$ au point $A$ de coordonnées $\left(\tfrac{1}{\e};\e\right)$ ;
+	\item[$-$] la tangente $T_B$ à la courbe $\mathcal{C}_f$ au point $B$ de coordonnées $(1;2)$.
+\end{itemize}
+
+La droite $T_A$ est parallèle à l’axe des abscisses. La droite $T_B$ coupe l’axe des abscisses au point
+de coordonnées $(3;0)$ et l’axe des ordonnées au point de coordonnées $(0;3)$.
+
+\begin{center}
+	\begin{tikzpicture}[x=2cm,y=2cm,xmin=0,xmax=7.5,xgrille=0.5,xgrilles=0.5,ymin=-1,ymax=3.5,ygrille=0.5,ygrilles=0.5]
+		\GrilleTikz[Affp=false]
+		\AxesTikz[ElargirOx=0/0,ElargirOy=0/0,Labelx=$x$,PosLabelx=above left,Labely=$y$,PosLabely=below right] ;
+		\AxexTikz[Police=\small]{0,0.5,...,7} ;
+		\AxeyTikz[Police=\small]{-0.5,0,...,3} ;
+		\clip (\xmin,\ymin) rectangle (\xmax,\ymax) ;
+		\draw[line width=1.25pt,red,samples=250,domain=0.1:7.5] plot (\x,{(2+ln(\x))/\x}) ;
+		\draw[line width=1pt,blue] (0,2.718)--(7.5,2.718);
+		\draw (6.5,2.718) node[below,blue,font=\large] {$T_A$} ;
+		\draw[line width=1pt,purple] (0,3)--(4,-1);
+		\draw (2.25,0.75) node[below,purple,font=\large] {$T_B$} ;
+		\draw (5.25,0.7) node[below,red,font=\large] {$\mathcal{C}_f$} ;
+		\foreach \Point/\Name/\Pos in {(0.368,2.718)/A/above right,(1,2)/B/above right}
+		\filldraw \Point circle(3pt) node[\Pos] {\Name} ; 
+	\end{tikzpicture}
+\end{center}
+
+On note $f'$ la fonction dérivée de $f$.
+
+\medskip
+
+\textbf{Partie I}
+
+\begin{enumerate}
+	\item Déterminer graphiquement les valeurs de $f' \left( \dfrac{1}{\e}\right)$ et de $f'(1)$.
+	\item En déduire une équation de la droite $T_B$.
+\end{enumerate}
+
+\textbf{Partie II}
+
+\medskip
+
+On suppose maintenant que la fonction $f$ est définie sur $\intervOO{0}{+\infty}$ par : \[ f(x)=\dfrac{2+\ln(x)}{x}. \]%
+
+\begin{enumerate}
+	\item Par le calcul, montrer que la courbe $\mathcal{C}_f$ passe par les points $A$ et $B$ et qu’elle coupe l’axe des abscisses en un point unique que l’on précisera.
+	\item Déterminer la limite de $f(x)$ quand $x$ tend vers $0^+$, et la limite de $f(x)$ quand $x$ tend vers $+\infty$.
+	\item Montrer que, pour tout $x \in \intervOO{0}{+\infty}$, \[ f'(x)=\dfrac{-1-\ln(x)}{x^2}.\]
+	\item Dresser le tableau de variations de $f$ sur $\intervOO{0}{+\infty}$.
+	\item On note $f''$ la fonction dérivée seconde de $f$.
+	
+	On admet que, pour tout $x \in \intervOO{0}{+\infty}$, \[ f''(x)=\dfrac{1+2\ln(x)}{x^3}. \]
+	
+	Déterminer le plus grand intervalle sur lequel $f$ est convexe.
+\end{enumerate}
+

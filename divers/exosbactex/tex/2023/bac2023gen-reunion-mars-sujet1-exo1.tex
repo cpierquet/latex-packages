@@ -1,0 +1,87 @@
+Une entreprise appelle des personnes par téléphone pour leur vendre un produit. 
+
+\begin{itemize}
+	\item L'entreprise appelle chaque personne une première fois:
+	\begin{itemize}
+		\item la probabilité que la personne ne décroche pas est égale à $0,6$ ;
+		\item si la personne décroche, la probabilité qu'elle achète le produit est égale à $0,3$.
+	\end{itemize}
+	\item Si la personne n'a pas décroché au premier appel, on procède à un second appel: 
+	\begin{itemize}
+		\item la probabilité que la personne ne décroche pas est égale à $0,3$ ;
+		\item si la personne décroche, la probabilité qu'elle achète le produit est égale à $0,2$.
+	\end{itemize}
+	\item Si une personne ne décroche pas au second appel, on cesse de la contacter.
+\end{itemize}
+
+\medskip
+
+On choisit une personne au hasard et on considère les évènements suivants : 
+
+\begin{itemize}
+	\item[] $D_1$ : \og la personne décroche au premier appel \fg{} ;
+	\item[] $D_2$ : \og la personne décroche au deuxième appel \fg{} ;
+	\item[] $A$ : \og la personne achète le produit \fg.
+\end{itemize}
+
+\medskip
+
+\hfill\emph{Les deux parties peuvent être traitées de manière indépendante.}\hfill~
+
+\medskip
+
+\textbf{Partie A}
+
+\begin{wrapstuff}[r,abovesep=-1.25\baselineskip]
+\begin{forest} for tree = {grow'=0,math content,l=2.5cm,s sep=0.75cm},
+	[,name=Omega
+		[D_1 , fleche , aproba=\ldots , name=A11
+			[A , fleche , aproba={0,3} , name=A21]
+			[\overline{A} , fleche , bproba=\ldots , name=A22]
+		]
+		[\overline{D_1} , fleche , bproba={0,6} , name=A12
+			[D_2 , fleche , aproba=\ldots , name=A23
+				[A , fleche , aproba=\ldots , name=A31]
+				[\overline{A} , fleche , bproba=\ldots , name=A32]
+			]
+			[\overline{D_2} , fleche , bproba=\ldots , name=A24]
+		]
+	]
+\end{forest}
+\end{wrapstuff}
+
+\begin{enumerate}
+	\item Recopier et compléter l'arbre pondéré ci-contre.
+	\item En utilisant l'arbre pondéré, montrer que la probabilité de l'évènement $A$ est 
+	
+	$P(A) = 0,204$.
+	\item On sait que la personne a acheté le produit.
+	
+	Quelle est la probabilité qu'elle ait décroché au premier appel ?
+\end{enumerate}
+
+\medskip
+
+\textbf{Partie B}
+
+\medskip
+
+On rappelle que, pour une personne donnée, la probabilité qu'elle achète le produit est égale à $0,204$.
+
+\begin{enumerate}
+	\item On considère un échantillon aléatoire de $30$ personnes.
+	
+	On note $X$ la variable aléatoire qui donne le nombre de personnes de l'échantillon qui achètent le produit.
+	\begin{enumerate}
+		\item On admet que X suit une loi binomiale. Donner, sans justifier, ses paramètres. 
+		\item Déterminer la probabilité qu'exactement 6 personnes de l'échantillon achètent
+		le produit. Arrondir le résultat au millième.
+		\item Calculer l'espérance de la variable aléatoire $X$.
+	\end{enumerate}
+	Interpréter le résultat.
+	\item Soit $n$ un entier naturel non nul.
+	
+	On considère désormais un échantillon de $n$ personnes. 
+	
+	Déterminer la plus petite valeur de $n$ telle que la probabilité qu'au moins l'une des personnes de l'échantillon achète le produit soit supérieure ou égale à $0,99$.
+\end{enumerate}

@@ -1,0 +1,430 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c
+% or later, see http://www.latex-project.org/lppl.txt
+% Poker cards Image's Licence : LGPL-2.1 license https://github.com/htdebeer/SVG-cards
+% Tarot cards Image's Licence : Public Domain https://freesvg.org/deck-of-french-tarot-playing-cards
+% Uno cards Image's Licence : CC1.0 https://alexder.itch.io/uno-card-game-asset-pack
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{JeuxCartes}[2022/11/11 v0.1.5 Jeux de cartes]
+% 0.1.5	Correction d'un bug sur les noms des images Uno
+% 0.1.4	Réduction de la taille des images
+% 0.1.3	Ajout de cartes Uno (CC1.0 par AlexDer) + modification des commandes + rami
+%		Amélioration de la qualité des cartes de Tarot (sans augmenter la taille)
+% 0.1.2	Modification du nom (et de la source) des images de Tarot (CC0)
+% 0.1.1	Ajout de commandes pour des mini-cartes
+% 0.1	Version initiale
+
+%------Packages utiles
+\RequirePackage{graphicx}
+\RequirePackage[table,svgnames]{xcolor}
+\RequirePackage{tikz}
+\RequirePackage{pgffor}
+%\RequirePackage{xfp}
+\RequirePackage{listofitems}
+\RequirePackage{xstring}
+\RequirePackage{xparse}
+\RequirePackage{simplekv}
+\RequirePackage{xinttools}
+\RequirePackage{randomlist}
+\RequirePackage{pifont}
+%librairies tikz
+\usetikzlibrary{calc,scopes}
+%images venant de https://github.com/htdebeer/SVG-cards
+%images venant de https://freesvg.org/deck-of-french-tarot-playing-cards
+%images venant de https://alexder.itch.io/uno-card-game-asset-pack
+
+%------Commande en ligne (includegraphics) via raisebox/rotatebox ou tikz
+\defKV[AffCarteJeu]{%
+	Hauteur=\def\AffCarteJeuHauteur{#1},%
+	DecalageX=\def\AffCarteJeuDecalageX{#1},%
+	DecalageY=\def\AffCarteJeuDecalageY{#1},%
+	Rotation=\def\AffCarteJeuRotation{#1},%
+	AlignementV=\def\AffCarteJeuAlignementV{#1},%
+	TypeJeu=\def\AffCarteJeuType{#1}
+}
+\setKVdefault[AffCarteJeu]{%
+	Hauteur=4.25,%
+	Tikz=false,%pour placer la commande dans un environnement tikz ou en raisebox,
+	TikzAutonome=true,%pour déjà mettre l'image dans du tikz
+	DecalageX=0,%
+	DecalageY=0,%
+	Rotation=0,%
+	AlignementV=0.5,%
+	TypeJeu=Poker
+}
+
+\NewDocumentCommand\AffCarteJeu{ O{} m }{%1=options,2=cartenommée
+	\useKVdefault[AffCarteJeu]%
+	\setKV[AffCarteJeu]{#1}%
+	%cas poker
+	\IfStrEq{\AffCarteJeuType}{Poker}%poker
+		{\def\CartePrefixe{CaJ-Poker-}}{}%
+	%cas tarot
+	\IfStrEq{\AffCarteJeuType}{Tarot}%tarot
+		{\def\CartePrefixe{CaJ-Tarot-}}{}%
+	%cas tarot
+	\IfStrEq{\AffCarteJeuType}{Uno}%tarot
+		{\def\CartePrefixe{CaJ-Uno-}}{}%
+	%transformation valign en tikz
+	\def\OptionTikzCBB{current bounding box.center}%
+	\IfStrEq{\AffCarteJeuAlignementV}{0}%
+		{\def\OptionTikzCBB{current bounding box.south}}{}%
+	\IfStrEq{\AffCarteJeuAlignementV}{1}%
+		{\def\OptionTikzCBB{current bounding box.north}}{}%
+	%affichage
+	\ifboolKV[AffCarteJeu]{Tikz}%
+		{%
+			\ifboolKV[AffCarteJeu]{TikzAutonome}%
+				{%
+					{\tikz[baseline=(\OptionTikzCBB)] \draw (\AffCarteJeuDecalageX,\AffCarteJeuDecalageY) node[above right=0pt,inner sep=0pt,outer sep=0pt,rotate=\AffCarteJeuRotation] {\includegraphics[height=\AffCarteJeuHauteur cm]{\CartePrefixe#2}} ;}%
+				}%
+				{%
+					\begin{scope}[shift={(\AffCarteJeuDecalageX,\AffCarteJeuDecalageY)}]%
+						\draw (0,0) node[above right=0pt,inner sep=0pt,outer sep=0pt,rotate=\AffCarteJeuRotation] {\includegraphics[height=\AffCarteJeuHauteur cm]{\CartePrefixe#2}} ;%
+					\end{scope}%
+				}%
+		}%
+		{%
+			\rotatebox[origin=c]{\AffCarteJeuRotation}{\raisebox{-\AffCarteJeuAlignementV\height}{\includegraphics[height=\AffCarteJeuHauteur cm]{\CartePrefixe#2}}}%
+		}%
+}
+
+%------commande main simple (cartes côte à côte)
+\defKV[AffMainSimpleCartes]{%
+	Hauteur=\def\MainSimpleHauteur{#1},%
+	TypeJeu=\def\MainSimpleJeuType{#1}
+}
+\setKVdefault[AffMainSimpleCartes]{%
+	Hauteur=4.25,%
+	TypeJeu=Poker
+}
+
+\NewDocumentCommand\AffCartesJeu{ O{} m }{%1=options,2=listecartes
+	\useKVdefault[AffMainSimpleCartes]%
+	\setKV[AffMainSimpleCartes]{#1}%
+	%calculs et traitement des variables
+	\setsepchar{§}%
+	\readlist*\ListeCartesMain{#2}%
+	\def\NbCartesMain{\ListeCartesMainlen}%nbcartes
+	%main côte à côte
+	\foreach \i in {1,2,...,\ListeCartesMainlen}{%
+		\itemtomacro\ListeCartesMain[\i]\CarteMain%
+		\AffCarteJeu[TypeJeu=\MainSimpleJeuType,Hauteur=\MainSimpleHauteur]{\CarteMain}%
+	}%
+}
+
+%------commande main cartes
+\defKV[AffMainCartes]{%
+	Hauteur=\def\MainHauteur{#1},%
+	EspH=\def\MainDecalH{#1},%
+	EspV=\def\MainDecalV{#1},%
+	Rotation=\def\MainRotation{#1},%
+	TypeJeu=\def\MainJeuType{#1},%
+	AlignementV=\def\MainAlignementV{#1}
+}
+\setKVdefault[AffMainCartes]{%
+	Hauteur=4.25,%
+	EspH=1,%
+	EspV=0,%
+	Rotation=10,%
+	Eventail=false,%
+	TypeJeu=Poker,%
+	AlignementV=0.5
+}
+
+\NewDocumentCommand\MainCartesJeu{ O{} m }{%1=options,2=listecartes
+	\useKVdefault[AffMainCartes]%
+	\setKV[AffMainCartes]{#1}%
+	%calculs et traitement des variables
+	\ignoreemptyitems%
+	\setsepchar{§}%
+	\readlist*\ListeCartesMain{#2}%
+	\def\NbCartesMain{\ListeCartesMainlen}%nbcartes
+	\IfStrEq{\MainJeuType}{Poker}%poker
+		{\def\HauteurGenerique{8.5}\def\CarteMainPrefixe{CaJ-Poker-}}{}%
+	\IfStrEq{\MainJeuType}{Tarot}%tarot
+		{\def\HauteurGenerique{5.5}\def\CarteMainPrefixe{CaJ-Tarot-}}{}%
+	\IfStrEq{\MainJeuType}{Uno}%uno
+		{\def\HauteurGenerique{8.5}\def\CarteMainPrefixe{CaJ-Uno-}}{}%
+	%echelle globale
+	\def\EchelleCarteDecalage{\fpeval{\MainHauteur/\HauteurGenerique}}%
+	%transformation valign en tikz
+	\def\OptionTikzCBB{current bounding box.center}%
+	\IfStrEq{\MainAlignementV}{0}%
+		{\def\OptionTikzCBB{current bounding box.south}}{}%
+	\IfStrEq{\MainAlignementV}{1}%
+		{\def\OptionTikzCBB{current bounding box.north}}{}%
+	%environnement tikzpicture
+	\begin{tikzpicture}[baseline=(\OptionTikzCBB)]%
+		\foreach \i in {1,2,...,\ListeCartesMainlen}{%
+		\itemtomacro\ListeCartesMain[\i]\CarteMain%
+		\ifboolKV[AffMainCartes]{Eventail}%
+			{%
+				\def\MainOffset{\fpeval{\EchelleCarteDecalage*\MainDecalV*(\i-1)}}%
+				\def\SecondOffset{\fpeval{\EchelleCarteDecalage*\MainDecalH*(\i-1)}}%
+				\def\DecAngleMain{\fpeval{0.5*\NbCartesMain*\MainRotation}}%
+				\AffCarteJeu[TypeJeu=\MainJeuType,Tikz,TikzAutonome=false,Hauteur=\MainHauteur,DecalageY=\MainOffset,DecalageX=\SecondOffset,Rotation={\DecAngleMain-(\i-1)*\MainRotation}]{\CarteMain}%
+			}%
+			{%
+				\def\MainOffset{\fpeval{\EchelleCarteDecalage*\MainDecalH*(\i-1)}}%
+				\def\SecondOffset{\fpeval{\EchelleCarteDecalage*\MainDecalV*(\i-1)}}%
+				\AffCarteJeu[TypeJeu=\MainJeuType,Tikz,TikzAutonome=false,Hauteur=\MainHauteur,DecalageX=\MainOffset,DecalageY=\SecondOffset]{\CarteMain}%
+			}%
+		}%finpour
+	\end{tikzpicture}%
+}
+
+%------commande main aléatoire
+\defKV[AffMainAleaCartes]{%
+	Hauteur=\def\MainHauteur{#1},%
+	EspH=\def\MainDecalH{#1},%
+	EspV=\def\MainDecalV{#1},%
+	Rotation=\def\MainRotation{#1},%
+	TypeJeu=\def\MainJeuType{#1},%
+	AlignementV=\def\MainAlignementV{#1}
+}
+\setKVdefault[AffMainAleaCartes]{%
+	Hauteur=4.25,%
+	EspH=1,%
+	EspV=0,%
+	Rotation=10,%
+	Eventail=false,%
+	TypeJeu=Poker,%
+	AlignementV=0.5
+}
+
+\xdef\CartesJeuPoker{2P,3P,4P,5P,6P,7P,8P,9P,10P,VP,DP,RP,AP,2T,3T,4T,5T,6T,7T,8T,9T,10T,VT,DT,RT,AT,2C,3C,4C,5C,6C,7C,8C,9C,10C,VC,DC,RC,AC,2K,3K,4K,5K,6K,7K,8K,9K,10K,VK,DK,RK,AK}%
+\xdef\CartesJeuBelote{7P,8P,9P,10P,VP,DP,RP,AP,7T,8T,9T,10T,VT,DT,RT,AT,7C,8C,9C,10C,VC,DC,RC,AC,7K,8K,9K,10K,VK,DK,RK,AK}%
+\xdef\CartesJeuBataille{2P,3P,4P,5P,6P,7P,8P,9P,10P,VP,DP,RP,AP,2T,3T,4T,5T,6T,7T,8T,9T,10T,VT,DT,RT,AT,2C,3C,4C,5C,6C,7C,8C,9C,10C,VC,DC,RC,AC,2K,3K,4K,5K,6K,7K,8K,9K,10K,VK,DK,RK,AK,JN,JR}%
+\xdef\CartesJeuRami{2P,3P,4P,5P,6P,7P,8P,9P,10P,VP,DP,RP,AP,2T,3T,4T,5T,6T,7T,8T,9T,10T,VT,DT,RT,AT,2C,3C,4C,5C,6C,7C,8C,9C,10C,VC,DC,RC,AC,2K,3K,4K,5K,6K,7K,8K,9K,10K,VK,DK,RK,AK,JN,JR,2P,3P,4P,5P,6P,7P,8P,9P,10P,VP,DP,RP,AP,2T,3T,4T,5T,6T,7T,8T,9T,10T,VT,DT,RT,AT,2C,3C,4C,5C,6C,7C,8C,9C,10C,VC,DC,RC,AC,2K,3K,4K,5K,6K,7K,8K,9K,10K,VK,DK,RK,AK,JN,JR}%
+\xdef\CartesJeuTarot{2P,3P,4P,5P,6P,7P,8P,9P,10P,VP,CP,DP,RP,AP,2T,3T,4T,5T,6T,7T,8T,9T,10T,VT,CT,DT,RT,AT,2C,3C,4C,5C,6C,7C,8C,9C,10C,VC,CC,DC,RC,AC,2K,3K,4K,5K,6K,7K,8K,9K,10K,VK,CK,DK,RK,AK,1AT,2AT,3AT,4AT,5AT,6AT,7AT,8AT,9AT,10AT,11AT,12AT,13AT,14AT,15AT,16AT,17AT,18AT,19AT,20AT,21AT,Exc}%
+\xdef\CartesJeuUno{0B,1B,1B,2B,2B,3B,3B,4B,4B,5B,5B,6B,6B,7B,7B,8B,8B,9B,9B,PTB,PTB,CSB,CSB,P2B,P2B,0V,1V,1V,2V,2V,3V,3V,4V,4V,5V,5V,6V,6V,7V,7V,8V,8V,9V,9V,PTV,PTV,CSV,CSV,P2V,P2V,0J,1J,1J,2J,2J,3J,3J,4J,4J,5J,5J,6J,6J,7J,7J,8J,8J,9J,9J,PTJ,PTJ,CSJ,CSJ,P2J,P2J,0R,1R,1R,2R,2R,3R,3R,4R,4R,5R,5R,6R,6R,7R,7R,8R,8R,9R,9R,PTR,PTR,CSR,CSR,P2R,P2R,P4,P4,P4,P4,Coul,Coul,Coul,Coul}%
+\NewList{CartesJeuMelange}
+
+\NewDocumentCommand\MainCartesJeuAleatoire{ O{} m }{%1=options,2=nbcartes
+	\useKVdefault[AffMainAleaCartes]%
+	\setKV[AffMainAleaCartes]{#1}%
+	%calculs et traitement des variables
+	\IfStrEq{\MainJeuType}{Poker}%poker
+		{\def\HauteurGenerique{8.5}\def\CarteMainType{Poker}\xdef\CarteDebutRand{\fpeval{randint(0,52-#2)}}}{}%
+	\IfStrEq{\MainJeuType}{Uno}%uno
+		{\def\HauteurGenerique{8.5}\def\CarteMainType{Uno}\xdef\CarteDebutRand{\fpeval{randint(0,108-#2)}}}{}%
+	\IfStrEq{\MainJeuType}{Bataille}%bataille
+		{\def\HauteurGenerique{8.5}\def\CarteMainType{Poker}\xdef\CarteDebutRand{\fpeval{randint(0,54-#2)}}}{}%
+	\IfStrEq{\MainJeuType}{Belote}%poker
+		{\def\HauteurGenerique{8.5}\def\CarteMainType{Poker}\xdef\CarteDebutRand{\fpeval{randint(0,32-#2)}}}{}%
+	\IfStrEq{\MainJeuType}{Rami}%rami
+	{\def\HauteurGenerique{8.5}\def\CarteMainType{Poker}\xdef\CarteDebutRand{\fpeval{randint(0,108-#2)}}}{}%
+	\IfStrEq{\MainJeuType}{Tarot}%tarot
+		{\def\HauteurGenerique{6.375}\def\CarteMainType{Tarot}\xdef\CarteDebutRand{\fpeval{randint(0,78-#2)}}}{}%
+	%échelle relative des cartes
+	\def\EchelleCarteDecalage{\fpeval{\MainHauteur/\HauteurGenerique}}%
+	%transformation valign en tikz
+	\def\OptionTikzCBB{current bounding box.center}%
+	\IfStrEq{\MainAlignementV}{0}%
+		{\def\OptionTikzCBB{current bounding box.south}}{}%
+	\IfStrEq{\MainAlignementV}{1}%
+		{\def\OptionTikzCBB{current bounding box.north}}{}%
+	%melange du jeu
+	\ClearList{CartesJeuMelange}%
+	\IfStrEq{\MainJeuType}{Poker}%si c'est le poker
+		{%
+			\xintFor* ##1 in {\xintCSVtoList{\CartesJeuPoker}}%
+			\do{\InsertRandomItem{CartesJeuMelange}{##1}}%
+		}%
+		{}%
+	\IfStrEq{\MainJeuType}{Bataille}%si c'est la bataille
+		{%
+			\xintFor* ##1 in {\xintCSVtoList{\CartesJeuBataille}}%
+			\do{\InsertRandomItem{CartesJeuMelange}{##1}}%
+		}%
+		{}%
+	\IfStrEq{\MainJeuType}{Rami}%si c'est le rami
+		{%
+			\xintFor* ##1 in {\xintCSVtoList{\CartesJeuRami}}%
+			\do{\InsertRandomItem{CartesJeuMelange}{##1}}%
+		}%
+		{}%
+	\IfStrEq{\MainJeuType}{Uno}%si c'est le uno
+		{%
+			\xintFor* ##1 in {\xintCSVtoList{\CartesJeuUno}}%
+			\do{\InsertRandomItem{CartesJeuMelange}{##1}}%
+		}%
+		{}%
+	\IfStrEq{\MainJeuType}{Belote}%si c'est le poker
+		{%
+			\xintFor* ##1 in {\xintCSVtoList{\CartesJeuBelote}}%
+			\do{\InsertRandomItem{CartesJeuMelange}{##1}}%
+		}%
+		{}%
+	\IfStrEq{\MainJeuType}{Tarot}%si c'est le tarot
+		{%
+			\xintFor* ##1 in {\xintCSVtoList{\CartesJeuTarot}}%
+			\do{\InsertRandomItem{CartesJeuMelange}{##1}}%
+		}%
+		{}%
+	%environnement tikzpicture
+	\begin{tikzpicture}[baseline=(\OptionTikzCBB)]%
+		\foreach \i in {1,2,...,#2}{%
+			\GetItem{CartesJeuMelange}{\inteval{\CarteDebutRand+\i-1}}{CarteMainChoisie}%
+			%\itemtomacro\ListeCartesMain[\i]\CarteMain%
+			\ifboolKV[AffMainAleaCartes]{Eventail}%
+			{%
+				\def\MainOffset{\fpeval{\EchelleCarteDecalage*\MainDecalV*(\i-1)}}%
+				\def\SecondOffset{\fpeval{\EchelleCarteDecalage*\MainDecalH*(\i-1)}}%
+				\def\DecAngleMain{\fpeval{0.5*#2*\MainRotation}}%
+				\AffCarteJeu[TypeJeu=\CarteMainType,Tikz,TikzAutonome=false,Hauteur=\MainHauteur,DecalageY=\MainOffset,DecalageX=\SecondOffset,Rotation={\DecAngleMain-(\i-1)*\MainRotation}]{\CarteMainChoisie}%
+			}%
+			{%
+				\def\MainOffset{\fpeval{\EchelleCarteDecalage*\MainDecalH*(\i-1)}}%
+				\def\SecondOffset{\fpeval{\EchelleCarteDecalage*\MainDecalV*(\i-1)}}%
+				\AffCarteJeu[TypeJeu=\CarteMainType,Tikz,TikzAutonome=false,Hauteur=\MainHauteur,DecalageX=\MainOffset,DecalageY=\SecondOffset]{\CarteMainChoisie}%
+			}%
+		}%finpour
+	\end{tikzpicture}%
+}
+
+%------commande mini-cartes
+\defKV[AffMiniCartes]{%
+	Largeur=\def\MiniCarteLargeur{#1},
+	FondAtout=\def\MiniCarteFondAtout{#1}
+}
+\setKVdefault[AffMiniCartes]{%
+	Largeur=0.55cm,%
+	FondAtout=PeachPuff
+}
+
+\NewDocumentCommand\AffMiniCarteJeu{ O{} m }{%1=options,2=nbcartes
+	\useKVdefault[AffMiniCartes]%
+	\setKV[AffMiniCartes]{#1}%
+	%découpage de l'argument
+	\StrCut{#2}{.}\csVal\csCplt%
+	%couleur de fond
+	\def\csFond{White}%
+	\def\csCoul{black}%
+	%le cas du 10.11...21
+	\IfStrEq{\csVal}{10}{\def\csVal{\scalebox{0.5}[1]{10}}}{}%
+	\IfStrEq{\csVal}{11}{\def\csVal{\scalebox{0.5}[1]{11}}}{}%
+	\IfStrEq{\csVal}{12}{\def\csVal{\scalebox{0.5}[1]{12}}}{}%
+	\IfStrEq{\csVal}{13}{\def\csVal{\scalebox{0.5}[1]{13}}}{}%
+	\IfStrEq{\csVal}{14}{\def\csVal{\scalebox{0.5}[1]{14}}}{}%
+	\IfStrEq{\csVal}{15}{\def\csVal{\scalebox{0.5}[1]{15}}}{}%
+	\IfStrEq{\csVal}{16}{\def\csVal{\scalebox{0.5}[1]{16}}}{}%
+	\IfStrEq{\csVal}{17}{\def\csVal{\scalebox{0.5}[1]{17}}}{}%
+	\IfStrEq{\csVal}{18}{\def\csVal{\scalebox{0.5}[1]{18}}}{}%
+	\IfStrEq{\csVal}{19}{\def\csVal{\scalebox{0.5}[1]{19}}}{}%
+	\IfStrEq{\csVal}{20}{\def\csVal{\scalebox{0.5}[1]{20}}}{}%
+	\IfStrEq{\csVal}{21}{\def\csVal{\scalebox{0.5}[1]{21}}}{}%
+	%le cas du Excuse
+	\IfStrEq{#2}{Exc}%
+	{\def\csSymb{\ding{168}}\def\csCoul{blue}%
+		\def\csVal{\scalebox{0.33}[1]{EXC}}}{}%
+	%le cas du Joker
+	\IfStrEq{\csVal}{J}%
+		{\def\csSymb{\ding{166}}\def\csVal{\scalebox{0.5}[1]{JO}}}{}%
+	%si c'est un coeur
+	\IfStrEq{\csCplt}{C}%
+		{\def\csSymb{\ding{170}}\def\csCoul{red}}{}%
+	%si c'est un carreau
+	\IfStrEq{\csCplt}{K}%
+		{\def\csSymb{\ding{169}}\def\csCoul{red}}{}%
+	%si c'est un coeur
+	\IfStrEq{\csCplt}{P}%
+		{\def\csSymb{\ding{171}}}{}%
+	%si c'est un trèfle
+	\IfStrEq{\csCplt}{T}%
+		{\def\csSymb{\ding{168}}}{}%
+	%si c'est un atout 68 
+	\IfStrEq{\csCplt}{AT}%
+		{\def\csFond{\MiniCarteFondAtout}\def\csSymb{\ding{88}}}{}%
+	%si c'est un rouge
+	\IfStrEq{\csCplt}{R}%
+		{\def\csCoul{red}}{}%
+	%minicarte
+	\tikz[baseline=(char.base)]\node[anchor=north west,line width=0.7pt,draw=Gray,rectangle,rounded corners,inner sep=1.6pt,fill=\csFond,text=\csCoul,font=\ttfamily,minimum width=\MiniCarteLargeur](char){\csVal\scalebox{0.75}[0.75]{\csSymb}};%
+}
+
+%------commande mini-main-cartes
+\defKV[AffMiniMainCartes]{%
+	Largeur=\def\MiniMainLargeur{#1},%
+	FondAtout=\def\MiniMainFondAtout{#1}
+}
+\setKVdefault[AffMiniMainCartes]{%
+	Largeur=0.55cm,%
+	FondAtout=PeachPuff
+}
+
+\NewDocumentCommand\MainMiniCartesJeu{ O{} m }{%1=options,2=liste
+	\useKVdefault[AffMiniMainCartes]%
+	\setKV[AffMiniMainCartes]{#1}%
+	\ignoreemptyitems%
+	\setsepchar{§}%
+	\readlist*\MiniCartesMain{#2}%
+	\foreachitem\MiniCarteAffich\in\MiniCartesMain{%
+		\AffMiniCarteJeu[FondAtout=\MiniMainFondAtout,Largeur=\MiniMainLargeur]{\MiniCarteAffich}%
+	}%
+}
+
+%------commande mini-main aléatoire
+\defKV[MiniMainAleaCartes]{%
+	Largeur=\def\MiniMainAleaLargeur{#1},%
+	TypeJeu=\def\MiniMainAleaType{#1},%
+	FondAtout=\def\MiniMainAleaFondAtout{#1}
+}
+\setKVdefault[MiniMainAleaCartes]{%
+	Largeur=0.55cm,%
+	TypeJeu=Poker,%
+	FondAtout=PeachPuff
+}
+
+\xdef\MiniCartesJeuPoker{2.P,3.P,4.P,5.P,6.P,7.P,8.P,9.P,10.P,V.P,D.P,R.P,A.P,2.T,3.T,4.T,5.T,6.T,7.T,8.T,9.T,10.T,V.T,D.T,R.T,A.T,2.C,3.C,4.C,5.C,6.C,7.C,8.C,9.C,10.C,V.C,D.C,R.C,A.C,2.K,3.K,4.K,5.K,6.K,7.K,8.K,9.K,10.K,V.K,D.K,R.K,A.K}%
+\xdef\MiniCartesJeuBelote{7.P,8.P,9.P,10.P,V.P,D.P,R.P,A.P,7.T,8.T,9.T,10.T,V.T,D.T,R.T,A.T,7.C,8.C,9.C,10.C,V.C,D.C,R.C,A.C,7.K,8.K,9.K,10.K,V.K,D.K,R.K,A.K}%
+\xdef\MiniCartesJeuBataille{2.P,3.P,4.P,5.P,6.P,7.P,8.P,9.P,10.P,V.P,D.P,R.P,A.P,2.T,3.T,4.T,5.T,6.T,7.T,8.T,9.T,10.T,V.T,D.T,R.T,A.T,2.C,3.C,4.C,5.C,6.C,7.C,8.C,9.C,10.C,V.C,D.C,R.C,A.C,2.K,3.K,4.K,5.K,6.K,7.K,8.K,9.K,10.K,V.K,D.K,R.K,A.K,J.N,J.R}%
+\xdef\MiniCartesJeuTarot{2.P,3.P,4.P,5.P,6.P,7.P,8.P,9.P,10.P,V.P,C.P,D.P,R.P,A.P,2.T,3.T,4.T,5.T,6.T,7.T,8.T,9.T,10.T,V.T,C.T,D.T,R.T,A.T,2.C,3.C,4.C,5.C,6.C,7.C,8.C,9.C,10.C,V.C,C.C,D.C,R.C,A.C,2.K,3.K,4.K,5.K,6.K,7.K,8.K,9.K,10.K,V.K,C.K,D.K,R.K,A.K,1.AT,2.AT,3.AT,4.AT,5.AT,6.AT,7.AT,8.AT,9.AT,10.AT,11.AT,12.AT,13.AT,14.AT,15.AT,16.AT,17.AT,18.AT,19.AT,20.AT,21.AT,Exc}%
+\xdef\MiniCartesJeuRami{2.P,3.P,4.P,5.P,6.P,7.P,8.P,9.P,10.P,V.P,D.P,R.P,A.P,2.T,3.T,4.T,5.T,6.T,7.T,8.T,9.T,10.T,V.T,D.T,R.T,A.T,2.C,3.C,4.C,5.C,6.C,7.C,8.C,9.C,10.C,V.C,D.C,R.C,A.C,2.K,3.K,4.K,5.K,6.K,7.K,8.K,9.K,10.K,V.K,D.K,R.K,A.K,J.N,J.R,2.P,3.P,4.P,5.P,6.P,7.P,8.P,9.P,10.P,V.P,D.P,R.P,A.P,2.T,3.T,4.T,5.T,6.T,7.T,8.T,9.T,10.T,V.T,D.T,R.T,A.T,2.C,3.C,4.C,5.C,6.C,7.C,8.C,9.C,10.C,V.C,D.C,R.C,A.C,2.K,3.K,4.K,5.K,6.K,7.K,8.K,9.K,10.K,V.K,D.K,R.K,A.K,J.N,J.R}%
+\NewList{MiniCartesJeuMelange}
+
+\NewDocumentCommand\MainMiniCartesJeuAleatoire{ O{} m }{%1=options,2=nbcartes
+	\useKVdefault[MiniMainAleaCartes]%
+	\setKV[MiniMainAleaCartes]{#1}%
+	%melange du jeu
+	\ClearList{MiniCartesJeuMelange}%
+	\IfStrEq{\MiniMainAleaType}{Poker}%si c'est le poker
+	{%
+		\xintFor* ##1 in {\xintCSVtoList{\MiniCartesJeuPoker}}%
+		\do{\InsertRandomItem{MiniCartesJeuMelange}{##1}}%
+	}%
+	{}%
+	\IfStrEq{\MiniMainAleaType}{Bataille}%si c'est la bataille
+	{%
+		\xintFor* ##1 in {\xintCSVtoList{\MiniCartesJeuBataille}}%
+		\do{\InsertRandomItem{MiniCartesJeuMelange}{##1}}%
+	}%
+	{}%
+	\IfStrEq{\MiniMainAleaType}{Belote}%si c'est le belote
+	{%
+		\xintFor* ##1 in {\xintCSVtoList{\MiniCartesJeuBelote}}%
+		\do{\InsertRandomItem{MiniCartesJeuMelange}{##1}}%
+	}%
+	{}%
+	\IfStrEq{\MiniMainAleaType}{Tarot}%si c'est le tarot
+	{%
+		\xintFor* ##1 in {\xintCSVtoList{\MiniCartesJeuTarot}}%
+		\do{\InsertRandomItem{MiniCartesJeuMelange}{##1}}%
+	}%
+	{}%
+	\IfStrEq{\MiniMainAleaType}{Rami}%si c'est le rami
+	{%
+		\xintFor* ##1 in {\xintCSVtoList{\MiniCartesJeuRami}}%
+		\do{\InsertRandomItem{MiniCartesJeuMelange}{##1}}%
+	}%
+	{}%
+	%création de la main
+	\foreach \i in {1,2,...,#2}{%
+		\GetItem{MiniCartesJeuMelange}{\inteval{\i-1}}{MiniCarteMainChoisie}%
+		\AffMiniCarteJeu[FondAtout=\MiniMainAleaFondAtout,Largeur=\MiniMainAleaLargeur]{\MiniCarteMainChoisie}%
+		}%finpour
+}
+
+\endinput

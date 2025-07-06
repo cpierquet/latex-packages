@@ -1,0 +1,56 @@
+\emph{Marie Sklodowska-Curie (1867-1934) est une physicienne (mais aussi chimiste et mathématicienne), polonaise naturalisée française. Deux Prix Nobel lui ont été décernés : un en Physique (partagé avec son mari et Henri Becquerel) en 1903 et un en Chimie en 1911 pour la découverte de deux nouveaux éléments, le polonium (nom donné en hommage à ses origines) et le radium.}
+
+\medskip
+
+On décide d'étudier le rayonnement radioactif du polonium lors de la désintégration des noyaux atomiques au cours du temps.
+
+\smallskip
+
+Au début de l'expérience, on dispose d'un morceau de 2~g de polonium.
+
+On sait que 1~g de polonium contient $3 \times 10^{21}$ noyaux atomiques.
+
+On admet que, au bout de 24 heures, 0,5\,\% des noyaux se sont désintégrés et que, pour compenser cette disparition, on ajoute alors 0,005~g de polonium. 
+
+\smallskip
+
+On modélise la situation à l'aide d'une suite  $\left(v_n\right)_{n \in \mathbb{N}}$ ; on note $v_0$ le nombre de noyaux contenus dans le polonium au début de l'expérience. Pour $n \geqslant 1$, $v_n$ désigne le nombre de noyaux contenus dans le polonium au bout de $n$ jours écoulés.
+
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Vérifier que $v_0 = 6 \times 10^{21}$.
+		\item Expliquer que, pour tout nombre entier naturel $n$, on a $v_{n+1} = 0,995v_n + 1,5 \times 10^{19}$.
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Démontrer, par récurrence sur $n$, que $0 \leqslant v_{n+1} \leqslant v_n$.
+		\item En déduire que la suite $\left(v_n\right)_{n \in \mathbb{N}}$ est convergente.
+	\end{enumerate}
+	\item On considère la suite $\left(u_n\right)_{n \in \mathbb{N}}$ définie, pour tout entier naturel $n$, par : $u_n = v_n - 3 \times 10^{21}$.
+	\begin{enumerate}
+		\item Montrer que la suite $\left(u_n\right)_{n \in \mathbb{N}}$ est géométrique de raison $0,995$.
+		\item En déduire que, pour tout entier naturel $n$, $v_n = 3 \times 10^{21} \big(0,0995^n+1\big)$.
+		\item En déduire la limite de la suite $\left(v_n\right)_{n \in \mathbb{N}}$ et interpréter le résultat dans le contexte de l'exercice.
+	\end{enumerate}
+	\item Déterminer, par le calcul, au bout de combien de jours le nombre de noyaux de polonium sera
+	inférieur à $4,5 \times 10^{21}$. Justifier la réponse.
+	\item On souhaite disposer de la liste des termes de la suite $\left(v_n\right)_{n \in \mathbb{N}}$.
+	
+	Pour cela, on utilise une fonction appelée \texttt{noyaux} programmée en langage \textsf{Python} et retranscrite partiellement ci-après.
+
+\begin{CodePythonLstAlt}[Largeur=10cm]{center}
+def noyaux(n) :
+	V = 6*10**21
+	L = [V]
+	for k in range(n) :
+		V = ......
+		L.append(V)
+	return L
+\end{CodePythonLstAlt}
+	\begin{enumerate}
+		\item À la lecture des questions précédentes, proposer deux solutions différentes pour compléter
+		la \texttt{ligne 5} de la fonction noyaux afin qu'elle réponde au problème.
+		\item Pour quelle valeur de l'entier \texttt{n} la commande \texttt{noyaux(n)} renverra-t-elle les relevés quotidiens du nombre de noyaux contenus dans l'échantillon de polonium pendant 52 semaines d'étude? 
+	\end{enumerate}
+\end{enumerate}

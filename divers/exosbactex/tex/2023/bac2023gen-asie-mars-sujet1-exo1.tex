@@ -1,0 +1,49 @@
+\textbf{Partie A}
+
+\medskip
+
+On considère la suite $\left(u_n\right)_{n \in \mathbb{N}}$ définie par $u_0 = 400$ et pour tout entier naturel $n$ : $u_{n+1} = 0,9u_n + 60$.
+
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Calculer $u_1$ et $u_2$.
+		\item Conjecturer le sens de variation de la suite $\left(u_n\right)_{n \in \mathbb{N}}$.
+	\end{enumerate}
+	\item Montrer, par récurrence, que pour tout entier naturel $n$, on a l'inégalité $0 \leqslant u_n \leqslant u_{n+1} \leqslant 600$.
+	\item 
+	\begin{enumerate}
+		\item Montrer que la suite $\left(u_n\right)_{n \in \mathbb{N}}$ est convergente.
+		\item Déterminer la limite de la suite $\left(u_n\right)_{n \in \mathbb{N}}$. Justifier.
+	\end{enumerate}
+	\item On donne une fonction écrite en langage \textsf{Python} :
+
+\begin{CodePythonLstAlt}*[Largeur=8cm]{center}
+def mystere(seuil) :
+	n = 0
+	u = 400
+	while u <= seuil :
+		n = n + l
+		u = 0.9*u + 60
+	return n
+\end{CodePythonLstAlt}
+	Quelle valeur obtient-on en tapant dans la console de \textsf{Python} : \texttt{mystere(500)} ?
+\end{enumerate}
+
+\medskip
+
+\textbf{Partie B}
+
+\medskip
+
+Un arboriculteur possède un verger dans lequel il a la place de cultiver au maximum 500 arbres.
+
+Chaque année il vend 10\,\% des arbres de son verger et puis il replante 60 nouveaux arbres. Le verger compte 400 arbres en 2023.
+
+\smallskip
+
+L'arboriculteur pense qu'il pourra continuer à vendre et à planter les arbres au même rythme pendant les années à venir.
+
+\medskip
+
+Va-t-il être confronté à un problème de place dans son verger ? Expliquer votre réponse.

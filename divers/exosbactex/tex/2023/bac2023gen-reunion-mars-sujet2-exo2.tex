@@ -1,0 +1,40 @@
+On considère la suite $\left(u_n\right)$ définie par $u_0 = 8$ et, pour tout entier naturel $n$, \[u_{n +1} = \dfrac{6u_n + 2}{u_n +5}.\]
+
+\begin{enumerate}
+	\item Calculer $u_1$.
+	\item Soit $f$ la fonction définie sur l'intervalle $[0;+\infty[$ par : \[f(x) = \dfrac{6x + 2 }{x +5}.\]
+	%
+	Ainsi, pour tout entier naturel $n$, on a : $u_{n+1} = f\left(u_n\right)$.
+	\begin{enumerate}
+		\item Démontrer que la fonction $f$ est strictement croissante sur l'intervalle $[0;+\infty[$.
+		
+		En déduire que pour tout réel $x > 2$, on a $f(x) > 2$.
+		\item Démontrer par récurrence que, pour tout entier naturel n, on a $u_n > 2$.
+	\end{enumerate}
+	\item On admet que, pour tout entier naturel $n$, on a : \[u_{n+1} - u_n = \dfrac{\left(2 - u_n\right)\left(u_n + 1\right)}{u_n +5}.\]
+	\begin{enumerate}
+		\item Démontrer que la suite $\left(u_n\right)$ est décroissante.
+		\item En déduire que la suite $\left(u_n\right)$ est convergente.
+	\end{enumerate}
+	\item On définit la suite $\left(v_n\right)$ pour tout entier naturel par : \[v_n = \dfrac{u_n - 2}{u_n + 1}.\]
+	\begin{enumerate}
+		\item Calculer $v_1$.
+		\item Démontrer que $\left(v_n\right)$ est une suite géométrique de raison $\dfrac47$.
+		\item Déterminer, en justifiant, la limite de $\left(v_n\right)$.
+		
+		En déduire la limite de $\left(u_n\right)$.
+	\end{enumerate}
+	\item On considère la fonction \textsf{Python} \texttt{seuil} ci-dessous, où \texttt{A} est un nombre réel strictement plus grand que 2.
+	
+\begin{CodePythonLstAlt}*[Largeur=7cm]{center}
+def seuil(A) :
+	n = 0
+	u = 8
+	while u > A :
+		u = (6*u + 2)/(u + 5)
+		n = n+1
+	return n
+\end{CodePythonLstAlt}
+	
+	Donner, sans justification, la valeur renvoyée par la commande \texttt{seuil(2.001)} puis interpréter cette valeur dans le contexte de l'exercice.
+\end{enumerate}

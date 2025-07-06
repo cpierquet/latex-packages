@@ -1,0 +1,41 @@
+%----scontents + ProfLycee (ecritures) + customenvs
+
+\begin{scontents}[overwrite,write-out=an2025j1exo2.py]
+def algo(p) :
+	u = 2
+	n = 0
+	while u-1 > p :
+		u = (2*u-1) / (u+2)
+	return (n, u)
+\end{scontents}
+
+On considère la suite numérique $\Suite{u}$ définie par son premier terme $u_{0}=2$ et pour tout entier naturel $n$, par : \[ u_{n+1}=\frac{2 u_{n}+1}{u_{n}+2}. \]
+%
+On admet que la suite $\Suite{u}$ est bien définie.
+
+\begin{enumerate}
+	\item Calculer le terme $u_{1}$.
+	\item On définit la suite $\Suite{a}$ pour tout entier naturel $n$, par : \[ a_{n}=\frac{u_{n}}{u_{n}-1}. \]
+	%
+	On admet que la suite $\Suite{a}$ est bien définie.
+	\begin{enumerate}
+		\item Calculer $a_{0}$ et $a_{1}$.
+		\item Démontrer que, pour tout entier naturel n, $a_{n+1}=3 a_{n}-1$.
+		\item Démontrer par récurrence que, pour tout entier naturel $n$ supérieur ou égal à 1, $a_{n} \geqslant 3 n-1$
+		\item En déduire la limite de la suite $\Suite{a}$.
+	\end{enumerate}
+	\item On souhaite étudier la limite de la suite $\Suite{u}$.
+	\begin{enumerate}
+		\item Démontrer que pour tout entier naturel $n$, $u_{n}=\frac{a_{n}}{a_{n}-1}$.
+		\item En déduire la limite de la suite $\Suite{u}$.
+	\end{enumerate}
+	\item On admet que la suite $\Suite{u}$ est décroissante.
+	
+	On considère le programme suivant écrit en langage \AffVignette[Type=py]{Python} :
+	
+	\CodePythonLstFichierAlt[0.75\linewidth]{center}{an2025j1exo2.py}
+	\begin{enumerate}
+		\item Interpréter les valeurs \AffVignette[Type=py]{n} et \AffVignette[Type=py]{u} renvoyées par l'appel de la fonction \AffVignette[Type=py]{algo(p)} dans le contexte de l'exercice.
+		\item Donner, sans justifier, la valeur de \AffVignette[Type=py]{n} pour \AffVignette[Type=py]{p = 0.001}.
+	\end{enumerate}
+\end{enumerate}

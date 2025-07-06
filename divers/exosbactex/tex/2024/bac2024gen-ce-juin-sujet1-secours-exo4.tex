@@ -1,0 +1,41 @@
+On modélise un passage de spectacle de voltige aérienne en duo de la manière suivante :
+
+\begin{itemize}
+	\item on se place dans un repère orthonormé $\Rijk$, une unité représentant un mètre ;
+	\item l’avion n°1 doit relier le point O au point $A(0; 200; 0)$ selon une trajectoire rectiligne, à la vitesse constante de 200 m/s ;
+	\item l’avion n°2 doit, quant à lui, relier le point $B(-33; 75; 44)$ au point $C(87; 75; -116)$ également selon une trajectoire rectiligne, et à la vitesse constante de 200 m/s.
+	\item au même instant, l’avion n°1 est au point $O$ et l’avion n°2 est au point $B$.
+\end{itemize}
+
+\begin{Centrage}
+	\begin{EnvTikzEspace}[UniteX={-155:0.0385cm},UniteY={0:0.0347cm},UniteZ={90:0.0341cm}]
+		%axes
+		\draw[semithick,->,>=latex] (0,0,0)--(150,0,0) node[left] {$x$} ; \draw[thin] (0,0,0)--(-150,0,0) ;
+		\draw[semithick,->,>=latex] (0,0,0)--(0,250,0) node[right] {$y$} ;
+		\draw[semithick,->,>=latex] (0,0,0)--(0,0,80) node[above] {$z$} ; \draw[thin] (0,0,0)--(0,0,-200) ;
+		\draw (0,0,2) node[above right] {$O$} ;
+		%figure dessus
+		\PlacePointsEspace*{O/0,0,0 A/0,75,44 B/-33,75,44 C/-33,75,0 D/0,75,0 E/0,0,44 F/-33,0,44 G/-33,0,0}
+		\TraceSegmentsEspace[very thick,CouleurVertForet,dashed]{A/B B/C C/D D/A O/E E/F F/G G/O E/A F/B G/C}
+		%figure dessus
+		\PlacePointsEspace*{K/87,0,0 L/87,0,-116 M/87,75,-116 N/0,75,-116 P/87,75,0 Q/0,0,-116}
+		\TraceSegmentsEspace[very thick,purple,dashed]{O/K K/P P/D Q/L L/M M/N O/Q K/L Q/N P/M D/N}
+		%labels
+		\draw (K) node[above left,font=\small,fill=white] {$87$} ;
+		\draw (E) node[left=2pt,font=\small,fill=white] {$44$} ;
+		\draw (Q) node[above left=2pt,font=\small,fill=white] {$-116$} ;
+		\draw (G) node[above left=2pt,font=\small,fill=white] {$-33$} ;
+		\draw (D) node[below right=2pt,font=\small,fill=white] {$75$} ;
+		\filldraw (0,200,0) circle[radius=2pt] node[above right] {$A$} ;
+		\filldraw (B) circle[radius=2pt] node[above right] {$B$} ;
+		\filldraw (M) circle[radius=2pt] node[below=2pt] {$C$} ;
+		%segments de contruction
+		\draw[ultra thick] (M)--(B) (O)--(0,200,0) ;
+	\end{EnvTikzEspace}
+\end{Centrage}
+
+\begin{enumerate}
+	\item Justifier que l’avion n°2 mettra autant de temps à parcourir le segment $[BC]$ que l’avion n°1 à parcourir le segment $[OA]$.
+	\item Montrer que les trajectoires des deux avions se coupent.
+	\item Les deux avions risquent-ils de se percuter lors de ce passage ? 
+\end{enumerate}

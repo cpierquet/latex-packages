@@ -1,0 +1,66 @@
+La directrice d'une école souhaite réaliser une étude auprès des étudiants qui ont passé l'examen de fin d'étude, pour analyser la façon dont ils pensent avoir réussi cet examen.
+
+\smallskip
+
+Pour cette étude, on demande aux étudiants à l'issue de l'examen de répondre individuellement à la question : \og Pensez-vous avoir réussi l'examen ? \fg. Seules les réponses \og oui \fg\ ou \og non \fg\ sont possibles, et on observe que 91,7\,\% des étudiants interrogés ont répondu \og oui \fg.
+
+\smallskip
+
+Suite à la publication des résultats à l'examen, on découvre que :
+
+\begin{itemize}
+	\item 65\,\% des étudiants ayant échoué ont répondu \og non \fg\ ;
+	\item 98\,\% des étudiants qui ont réussi on répondu \og oui \fg.
+\end{itemize}
+
+On interroge au hasard un étudiant qui a passé l'examen.
+
+\smallskip
+
+On note $R$ l'évènement \og l'étudiant a réussi l'examen \fg\ et $Q$ l'évènement \og l'étudiant a répondu \og oui \fg\ à la question \fg.
+
+\smallskip
+
+Pour un évènement $A$ quelconque, on note $P(A)$ sa probabilité et $\overline{A}$ sont évènement contraire.
+
+\medskip
+
+\textit{\textbf{Dans tout l'exercice, les probabilités seront, si besoin, arrondies à $\bm{10^{-3}}$ près.}}
+
+\begin{wrapstuff}[r]
+	\ArbreProbasTikz[PositionProbas=auto,EspaceNiveau=2,EspaceFeuille=0.75]{$R$/$x$/,$Q$/\numdots/,$\overline{Q}$/\numdots/,$\overline{R}$/\numdots/,$Q$/\numdots/,$\overline{Q}$/\numdots/}
+\end{wrapstuff}
+
+\begin{enumerate}
+	\item Préciser les valeurs des probabilités $P(Q)$ et $P_{\overline{R}} \big(\overline{Q}\big)$.
+	\item On note $x$ la probabilité que l'étudiant interrogé ait réussi l'examen.
+	
+	\begin{enumerate}
+		\item Recopier et compléter l'arbre pondéré ci-contre.
+		\item Montrer que $x=0,9$.
+	\end{enumerate}
+	\item L'étudiant interrogé a répondu « oui » à la question.
+	
+	Quelle est la probabilité qu'il ait réussi l'examen ?
+	\item La note obtenue par un étudiant interrogé au hasard est un nombre entier entre 0 et 20 . On suppose qu'elle est modélisée par une variable aléatoire $N$ qui suit la loi binomiale de paramètres $(20;0,615)$. La directrice souhaite attribuer une récompense aux étudiants ayant obtenu les meilleurs résultats.
+	
+	À partir de quelle note doit-elle attribuer les récompenses pour que 65\,\% des étudiants soient récompensés ?
+	\item On interroge au hasard dix étudiants.
+	
+	Les variables aléatoires $N_{1}$, $N_{2}$, \ldots, $N_{10}$ modélisent la note sur 20 obtenue à l'examen par chacun d'entre eux. On admet que ces variables sont indépendantes et suivent la même loi binomiale de paramètres $(20;0,615)$.
+	
+	Soit $S$ la variable définie par $S=N_{1}+N_{2}+\ldots+N_{10}$.
+	
+	Calculer l'espérance $E(S)$ et la variance $V(S)$ de la variable aléatoire $S$.
+	\item On considère la variable aléatoire $M=\frac{S}{10}$.
+	
+	\begin{enumerate}
+		\item Que modélise cette variable aléatoire $M$ dans le contexte de l'exercice ?
+		\item Justifier que $E(M)=12,3$ et $V(M)=\num{0,47355}$.
+		\item À l'aide de l'inégalité de Bienaymé-Tchebychev, justifier l'affirmation ci-dessous.
+		
+		\medskip
+		
+		« La probabilité que la moyenne des notes des dix étudiants pris au hasard soit strictement comprise entre 10,3 et 14,3 est d'au moins 80\,\% ».
+	\end{enumerate}
+\end{enumerate}

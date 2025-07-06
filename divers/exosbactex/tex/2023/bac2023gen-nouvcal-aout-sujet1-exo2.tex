@@ -1,0 +1,43 @@
+On considère la suite $\left(u_n\right)$ définie par $u_0=3$ et, pour tout entier naturel $n$, par :%
+\[ u_{n+1}=5u_n-4n-3. \]
+%
+\begin{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Démontrer que $u_1=12$.
+		\item Déterminer $u_2$ en détaillant le calcul.
+		\item À l'aide de la calculatrice, conjecturer le sens de variation ainsi que la limite de la suite $\left(u_n\right)$.
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Démontrer par récurrence que, pour tout entier naturel $n$, on a :%
+		\[ u_n \geqslant n+1. \]
+		\item En déduire la limite de la suite $\left(u_n\right)$.
+	\end{enumerate}
+	\item On considère la suite $\left(v_n\right)$ définie pour tout entier naturel $n$ par :%
+	\[ v_n = u_n - n - 1. \]
+	\begin{enumerate}
+		\item Démontrer que la suite $\left(v_n\right)$ est géométrique.
+		
+		Donner sa raison et son premier terme $v_0$.
+		\item En déduire, pour tout entier naturel $n$, l'expression de $v_n$ en fonction de $n$.
+		\item En déduire que pour tout entier naturel $n$ :%
+		\[ u_n = 2 \times 5^n + n + 1. \]
+		\item En déduire le sens de variation de la suite $\left(u_n\right)$.
+	\end{enumerate}
+	\item On considère la fonction ci-dessous, écrite de manière incomplète en langage Python et destinée à renvoyer le plus petit entier naturel $n$ tel que $u_n \geqslant 10^7$.
+	
+\begin{CodePythonLstAlt}*[Largeur=7cm]{center}
+def suite() :
+	u = 3
+	n = 0
+	while ......... :
+		u = .........
+		n = n+1
+	return n
+\end{CodePythonLstAlt}
+	\begin{enumerate}
+		\item Recopier le programme et compléter les deux instructions manquantes.
+		\item Quelle est la valeur renvoyée par cette fonction ?
+	\end{enumerate}
+\end{enumerate}

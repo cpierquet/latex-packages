@@ -1,0 +1,58 @@
+On étudie un groupe de 3\,000 sportifs qui pratiquent soit l'athlétisme dans le club A, soit le basketball dans le club B.
+
+\smallskip
+
+En 2023, le club A compte 1\,700 membres et le club B en compte 1\,300.
+
+\smallskip
+
+On décide de modéliser le nombre de membres du club A et du club B respectivement par deux suites $\suiten[a]$ et $\suiten[b]$, où $n$ désigne le rang de l'année à partir de 2023.
+
+L'année 2023 correspond au rang 0. On a alors $a_0 = \num{1700}$ et $b_0 = \num{1300}$.
+
+\smallskip
+
+Pour notre étude, on fait les hypothèses suivantes :
+
+\begin{itemize}
+	\item durant l'étude, aucun sportif ne quitte le groupe ;
+	\item chaque année, 15\,\% des sportifs du club A quittent ce club et adhèrent au club B ;
+	\item chaque année, 10\,\% des sportifs du club B quittent ce club et adhèrent au club A.
+\end{itemize}
+
+\begin{enumerate}
+	\item Calculer les nombres de membres de chaque club en 2024.
+	\item Pour tout entier naturel $n$, déterminer une relation liant $a_n$ et $b_n$.
+	\item Montrer que la suite $\suiten[a]$ vérifie la relation suivante pour tout entier naturel $n$ : \[ a_{n+1}=0,75a_n+300. \]
+	\item 
+	\begin{enumerate}
+		\item Démontrer par récurrence que pour tout entier naturel $n$, on a : \[ \num{1200} \leqslant a_{n+1} \leqslant a_n \leqslant \num{1700}. \]
+		\item En déduire que la suite $\suiten[a]$ converge.
+	\end{enumerate}
+	\item Soit $\suiten[v]$ la suite définie pour tout entier naturel $n$ par $v_n = a_n - \num{1200}$.
+	\begin{enumerate}
+		\item Démontrer que la suite $\suiten[v]$ est géométrique.
+		\item Exprimer $v_n$ en fonction de $n$.
+		\item En déduire que pour tout entier naturel $n$, $a_n = 500 \times 0,75^n + \num{1200}$.
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Déterminer la limite de la suite $\suiten[a]$.
+		\item Interpréter le résultat de la question précédente dans le contexte de l'exercice.
+	\end{enumerate}
+	\item 
+	\begin{enumerate}
+		\item Recopier et compléter le programme \textsf{Python} ci-dessous afin qu'il renvoie la plus petite valeur de \texttt{n} à partir de laquelle le nombre de membres du club A est strictement inférieur à 1\,280.
+
+\begin{CodePythonLstAlt}*[Largeur=7cm]{center}
+def seuil() :
+	n = 0 
+	A = 1700 
+	while ...... :
+		n = n+1
+		A = ......
+	return ......
+\end{CodePythonLstAlt}
+	\item Déterminer la valeur renvoyée lorsqu'on appelle la fonction \texttt{seuil()}. 
+	\end{enumerate}
+\end{enumerate}

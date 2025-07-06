@@ -1,0 +1,73 @@
+Une entreprise de location de bateaux de tourisme propose à ses clients deux types de bateaux : bateau à voile et bateau à moteur.
+
+\smallskip
+
+Par ailleurs, un client peut prendre l'option PILOTE. Dans ce cas, le bateau, qu'il soit à voile ou à moteur, est loué avec un pilote.
+
+\smallskip
+
+On sait que :
+
+\begin{itemize}
+	\item 60\,\% des clients choisissent un bateau à voile ; parmi eux, 20\,\% prennent l'option PILOTE.
+	\item 42\,\% des clients prennent l'option PILOTE.
+\end{itemize}
+
+On choisit un hasard un client et on considère les événements :
+
+\begin{itemize}
+	\item $V$ : \og le client un bateau à voile \fg{} ;
+	\item $L$ : \og le client prend l'option PILOTE \fg.
+\end{itemize}
+
+\medskip
+
+\hfill~\textit{Les trois parties peuvent être traitées de manière indépendante.}\hfill~
+
+\medskip
+
+\textbf{Partie A}
+
+\smallskip
+
+\begin{enumerate}
+	\item Traduire la situation par un arbre pondéré que l'on complètera au fur et à mesure.
+	\item Calculer la probabilité que le client choisisse un bateau à voile et qu'il ne prenne pas l'option PILOTE.
+	\item Démontrer que la probabilité que le client choisisse un bateau à moteur et qu'il prenne l'option PILOTE est égale à $0,30$.
+	\item En déduire $P_{\overline{V}}(L)$, probabilité de $L$ sachant que $V$ n'est pas réalisé.
+	\item Un client a pris l'option PILOTE.
+	
+	Quelle est la probabilité qu'il ait choisi un bateau à voile ? Arrondir à $0,01$ près.
+\end{enumerate}
+
+\smallskip
+
+\textbf{Partie B}
+
+\medskip
+
+Lorsqu'un client ne prend pas l'option PILOTE, la probabilité que son bateau subisse une avarie est égale à $0,12$. Cette probabilité n'est que de $\num{0,005}$ si le client prend l'option PILOTE.
+
+On considère un client. On note $A$ l'événement : \og son bateau subit une avarie \fg.
+
+\begin{enumerate}
+	\item Déterminer $P\big(L \cap A\big)$ et $P\big(\overline{L} \cap A\big)$.
+	\item L'entreprise loue \num{1000} bateaux. À combien d'avaries peut-on s'attendre ?
+\end{enumerate}
+
+\smallskip
+
+\textbf{Partie C}
+
+\medskip
+
+On rappelle que la probabilité qu'un client donné prenne l'option PILOTE est égale à $0,42$.
+
+On considère un échantillon aléatoire de 40 clients. On note $X$ la variable aléatoire comptant le nombre de clients de l'échantillon prenant l'option PILOTE.
+
+\begin{enumerate}
+	\item On admet que la variable aléatoire $X$ suit une loi binomiale.
+	
+	Donner sans justification ses paramètres.
+	\item Calculer la probabilité, arrondie à $10^{-3}$, qu'au moins 15 clients prennent l'option PILOTE.
+\end{enumerate}

@@ -1,0 +1,51 @@
+Dans cet exercice, on s'intéresse à la croissance du bambou Moso de taille maximale 20 mètres. 
+
+Le modèle de croissance de Ludwig von Bertalanffy suppose que la vitesse de croissance pour un tel bambou est proportionnelle à l'écart entre sa taille et la taille maximale.
+
+\bigskip
+
+\textbf{Partie I : modèle discret}
+
+\medskip
+
+Dans cette partie, on observe un bambou de taille initiale $1$~mètre.
+
+Pour tout entier naturel $n$, on note $u_n$ la taille, en mètre, du bambou $n$ jours après le début de l'observation. On a ainsi $u_0 = 1$.
+
+Le modèle de von Bertalanffy pour la croissance du bambou entre deux jours consécutifs se traduit par l'égalité : \[u_{n+1} = u_n + 0,05\left(20 - u_n\right) \text{ pour tout entier naturel } n.\]
+
+\begin{enumerate}
+	\item Vérifier que $u_1 = 1,95$.
+	\item 
+	\begin{enumerate}
+		\item Montrer que pour tout entier naturel $n$, $u_{n+1} = 0,95u_n + 1$.
+		\item On pose pour tout entier naturel $n$, $v_n = 20 - u_n$. 
+		
+		Démontrer que la suite $\left(v_n\right)$ est une suite géométrique dont on précisera le terme initial $v_0$ et la raison.
+		\item En déduire que, pour tout entier naturel $n$, $u_n = 20 - 19 \times 0,95^n$.
+	\end{enumerate}
+	\item Déterminer la limite de la suite $\left(u_n\right)$.
+\end{enumerate}
+
+\textbf{Partie II : modèle continu}
+
+\medskip
+
+Dans cette partie, on souhaite modéliser la taille du même bambou Moso par une fonction donnant sa taille, en mètre, en fonction du temps $t$ exprimé en jour. 
+
+D'après le modèle de von Bertalanffy, cette fonction est solution de l'équation différentielle \[(E) \qquad y' = 0,05(20 - y)\]%
+où $y$ désigne une fonction de la variable $t$, définie et dérivable sur $[0;+\infty[$ et $y'$ désigne sa fonction dérivée.
+
+Soit la fonction $L$ définie sur l'intervalle $[0;+\infty[$ par \[L(t) = 20 - 19\e^{-0,05t}.\]
+
+\begin{enumerate}
+	\item Vérifier que la fonction $L$ est une solution de $(E)$ et qu'on a également $L(0) = 1$.
+	\item On prend cette fonction $L$ comme modèle et on admet que, si on note $L'$ sa fonction dérivée, $L'(t)$ représente la vitesse de croissance du bambou à l'instant $t$.
+	\begin{enumerate}
+		\item Comparer $L'(0)$ et $L'(5)$.
+		\item Calculer la limite de la fonction dérivée $L'$ en $+\infty$. 
+		
+		Ce résultat est-il en cohérence avec la description du modèle de croissance exposé au début de l'exercice ?
+	\end{enumerate}
+\end{enumerate}
+
