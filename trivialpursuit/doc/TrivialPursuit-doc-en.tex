@@ -1,0 +1,244 @@
+% !TeX TXS-program:compile = txs:///pdflatex
+
+\documentclass[11pt,a4paper]{ltxdoc}
+\usepackage{TrivialPursuit}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [TrivialPursuit]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+\def\TPversion{0.1.5}
+\def\TPdate{24/06/2025}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,hooks,listingsutf8}
+\usepackage{soul}
+\sethlcolor{lightgray!25}
+\NewDocumentCommand\MontreCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{TrivialPursuit [en]}}\\
+				\\
+				{\LARGE Create a '\textit{Trivial Pursuit}' board,} \\
+				{\LARGE with customization.} \\
+				\\
+				{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{tabular}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}} \\
+	\\
+	\texttt{Trivial Pursuit\texttrademark, is a trademark of Hasbro.}
+\end{tabular}
+\end{center}
+
+\hrule
+
+\vfill
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\BoardTrivialPursuit
+\end{tcolorbox}
+
+\vfill~
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+\hrule
+
+\vspace*{5mm}
+
+\section{Introduction}
+
+\subsection{Description}
+
+This package provides a command to display a \textsf{Trivial Pursuit} (trademark of Hasbro) board, with some customization :
+
+\begin{itemize}
+	\item of lengths (radius + height cells) ;
+	\item of colors ;
+	\item of logos (with \MontreCode{fontawesome}).
+\end{itemize}
+
+Cells and colors are globally fixed, are came from an original board.
+
+\medskip
+
+For the moment, limitations are :
+
+\begin{itemize}
+	\item number of categories (6) ;
+	\item logos, given by a character, eg from package \MontreCode{fontawesome}.
+\end{itemize}
+
+\subsection{Loading}
+
+To load the package, simply add in the preamble :
+
+\begin{quote}
+\begin{verbatim}
+\usepackage{TrivialPursuit}                   %with fa5, default
+\usepackage[fa6]{TrivialPursuit}              %with fa6 (test)
+\end{verbatim}
+\end{quote}
+
+Loaded are useful package are :
+
+\begin{itemize}
+	\item \MontreCode{tikz} with libraries \MontreCode{calc,positioning} ;
+	\item \MontreCode{calc} and \item \MontreCode{fontawesome} ;
+	\item \MontreCode{simplekv} ; \MontreCode{xintexpr} and \MontreCode{listofitems}.
+\end{itemize}
+
+\vfill
+
+\subsection{History}
+
+\begin{quote}
+\begin{verbatim}
+0.1.5 : Bugfix (compatibility with twemoji)
+0.1.4 : Bugfix + pre-compatibility with fa6
+0.1.2 : Key [ShortVersion] in order to reduce number of border cells
+0.1.1 : Adding two schemes of colors
+0.1.0 : Initial version
+\end{verbatim}
+\end{quote}
+
+\pagebreak
+
+\section{The macro}
+
+\subsection{General usage}
+
+The code draw the board, with optional logos.
+
+All the available keys are presented in the following paragraph, but concerning the dimensions, \textit{general} are proposed by default, but it is however possible to modify them :
+
+\begin{itemize}
+	\item either explicitly by the keys \MontreCode{[Radius=]} and \MontreCode{[BorderHeight=]};
+	\item or by specifying a particular unit using the \MontreCode{[Unit=]} key, in which case the general shape of the board will be preserved !
+\end{itemize}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\BoardTrivialPursuit[Unit=0.5]
+%
+\BoardTrivialPursuit[Radius=4,BorderHeight=1.25] %beware of the rendering...
+
+\BoardTrivialPursuit[Unit=0.33]
+%
+\BoardTrivialPursuit[Unit=0.33,ShortVersion]
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Keys and options}
+
+Available \textsf{keys} are :
+
+\begin{itemize}
+	\item \MontreCode{Radius} := radius of the board (in unit), and \MontreCode{8} by default ;
+	\item \MontreCode{BorderHeight} := height of ext cells, and \MontreCode{1.5} by default ;
+	\item \MontreCode{ListColors} := colors of the categories,
+	
+	\hfill{}and \MontreCode{yellow,orange,blue,brown,green,pink} by default ;
+	\item \MontreCode{ListIcons} := icons of categories,
+	
+	\hfill\MontreCode{\textbackslash faArchway,\textbackslash faTableTennis,\textbackslash faUmbrellaBeach,\textbackslash faGuitar,\textbackslash faTree,\textbackslash faMusic} by default ;
+	\item \MontreCode{Icons} := boolean for display icons, and \MontreCode{true} by default ;
+	\item \MontreCode{Center} := boolean for filling central hexagon, and \MontreCode{true} by default ;
+	\item \MontreCode{ColorCenter} := color of central hexagon, and \MontreCode{lightgray!25} by default ;
+	\item \MontreCode{Colors} := boolean fot printing colors, and \MontreCode{true} by default ;
+	\item \MontreCode{Logo} := boolean for displaying logo at the center, and \MontreCode{true} by default ;
+	\item \MontreCode{Jokers} := boolean for printing jokers, and \MontreCode{true} by default ;
+	\item \MontreCode{IconJoker} := icon for joker, and \MontreCode{\textbackslash faDice} by default ;
+	\item \MontreCode{Blank} := boolean for an empty board, and \MontreCode{false} by default ;
+	\item \MontreCode{Unit} := to precis an unit (better than a scale !), and \MontreCode{1} by default ;
+	\item \MontreCode{Thickness} := thickness of the borders, and \MontreCode{0.8pt} by default ;
+	\item \MontreCode{Rotation} := possible rotation of the board, and \MontreCode{0} by default ;
+	\item \MontreCode{ShortVersion} := use 5 cells instead 6 between 'big cells', and \MontreCode{false} by default.
+\end{itemize}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\BoardTrivialPursuit[Rotation=35,Unit=0.5]
+\BoardTrivialPursuit[Unit=0.5]
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\BoardTrivialPursuit[Unit=0.5,Icons=false]
+\BoardTrivialPursuit[Unit=0.5,Colors=false]
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\BoardTrivialPursuit[Unit=0.5,Blank]
+\BoardTrivialPursuit[Unit=0.5,Logo=false,Center=false,IconJoker=\faAward]
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\BoardTrivialPursuit[%
+	Jokers=false,%
+	ListColors={%
+		blue!25,red!25,teal!25,orange!25,gray!50,violet!25},%
+	ListIcons={
+		\faAddressCard,\faAngleDoubleRight,\faAngry[regular],%
+		\faAtom,\faBalanceScaleLeft,\faBell}
+]
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Schemes of colors}
+
+In addition (on a suggestion from \textsf{quark67}), two color styles have been defined internally :
+
+\begin{quote}
+\begin{verbatim}
+\TPColorsA
+\TPColorsB
+\end{verbatim}
+\end{quote}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\BoardTrivialPursuit[Unit=0.5,ListColors=\TPColorsA]
+\BoardTrivialPursuit[Unit=0.5,ListColors=\TPColorsB]
+\end{tcblisting}
+\end{document}

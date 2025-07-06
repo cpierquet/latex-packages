@@ -1,0 +1,108 @@
+% Author..........: C. Pierquet
+% licence.........: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+% Sources.........: I converted the logos from their original SVG or other forms, as found on the given urls, to PDF
+% Scratch.........: Public https://commons.wikimedia.org/wiki/File:Scratchlogo.svg
+% Scratch alt.....: Public https://commons.wikimedia.org/wiki/File:Scratchlogo.svg
+% Scratch cat.....: CC40 https://fr.scratch-wiki.info/wiki/Fichier:Scratch_Cat_(cat-a).svg
+% Texstudio.......: FREE https://en.m.wikipedia.org/wiki/File:TeXstudio_Logo.svg
+% Emacs...........: FREE https://commons.wikimedia.org/wiki/File:EmacsIcon.svg
+% Emacs alt.......: FREE https://fr.m.wikipedia.org/wiki/Fichier:Emacs-logo.svg
+% Geogebra........: CC30 https://wiki.geogebra.org/en/File:Geogebra-logo-name.svg
+% Geogebra icon...: CC30 https://fr.m.wikipedia.org/wiki/Fichier:Geogebra.svg
+% Texmaker........: FREE https://en.wikipedia.org/wiki/File:TeXmaker_Logo.svg
+% Texmaker alt....: FREE https://en.wikipedia.org/wiki/File:TeXmaker_New_Logo.svg
+% MikTex logo.....: Public https://fr.wikipedia.org/wiki/Fichier:Logo_MiKTeX.svg
+% Miktex icons....: FREE https://github.com/MiKTeX/miktex/tree/next/Resources/Icons/MiKTeX/scalable/apps
+% CTAN Lion.......: FREE CTAN lion drawing by Duane Bibby
+% LaTeX project...: CC40 https://github.com/latex3/latex3.github.io/tree/ba511d2fd43dc08ad301e31b2a32c472b252b76b/_site/img from Jonas Jacek (https://www.j15k.com/)
+% TeXworks........: GPL 2.0 https://github.com/TeXworks/texworks/blob/main/res/images/TeXworks.png
+
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{vectorlogos}[2024/03/30 0.1.3 Vectorial logos of 'classic' softwares, for inline use.]
+
+%====HISTORY
+% v 0.1.3	Miktex logo/icons + LaTeX-projext + CTAN lion + TeXworks (from png)
+% v 0.1.2	Alt command for manual insertion, with existing img
+% v 0.1.1	Licenses update
+% v 0.1.0	Initial Version
+
+%====BASE
+\RequirePackage{calc}
+\RequirePackage{graphicx}
+\RequirePackage{xstring}
+
+%====LENGTHS
+\newlength{\tmp@logosvg@total@height}
+\newlength{\tmp@logosvg@depth}
+
+%====MACRO CREATOR
+\NewDocumentCommand\GenMacroLogoVect{ m m }{%1=macro,2=base
+	\NewDocumentCommand#1{ O{} }{%
+		\settototalheight{\tmp@logosvg@total@height}{\hbox{ABCDEFGHIJKLMNOPQQRSTUVWXYZabcdefghijklmnopqqrstuvwxyz}}%
+		\settodepth{\tmp@logosvg@depth}{\hbox{q}}%
+		\IfFileExists{vectorlogo-#2-##1.pdf}%
+			{%
+				\raisebox{-\tmp@logosvg@depth+0.05\tmp@logosvg@total@height}{\includegraphics[height=0.9\tmp@logosvg@total@height]{vectorlogo-#2-##1.pdf}}%
+			}%
+			{%
+				\raisebox{-\tmp@logosvg@depth+0.05\tmp@logosvg@total@height}{\includegraphics[height=0.9\tmp@logosvg@total@height]{vectorlogo-#2.pdf}}%
+			}%
+	}%
+}
+
+%====SIMPLE MACRO
+\NewDocumentCommand\simplevectorlogo{ s O{} m }{%
+	\IfBooleanTF{#1}%
+		{%
+			\IfFileExists{vectorlogo-#3.pdf}%
+				{%
+					\includegraphics[#2]{vectorlogo-#3.pdf}%
+				}%
+				{}%
+		}%
+		{%
+			\IfStrEq{#2}{}%
+				{%
+					\def\tmp@raiseper@logo{0.9}%
+				}%
+				{%
+					\def\tmp@raiseper@logo{#2}%
+				}%
+			\IfFileExists{#3}%
+				{%
+					%2=percent of height of box qB
+					\def\tmp@raise@logo{\fpeval{(1-\tmp@raiseper@logo)*0.5}}%
+					\settototalheight{\tmp@logosvg@total@height}{\hbox{ABCDEFGHIJKLMNOPQQRSTUVWXYZabcdefghijklmnopqqrstuvwxyz}}%
+					\settodepth{\tmp@logosvg@depth}{\hbox{q}}%
+					\raisebox{-\tmp@logosvg@depth+\tmp@raise@logo\tmp@logosvg@total@height}{\includegraphics[height=\tmp@raiseper@logo\tmp@logosvg@total@height]{#3}}%
+				}%
+				{}%
+		}%
+}
+
+%====GENERIC MACROS
+\NewDocumentCommand\vectorlogo{ O{} m }{%
+	\IfEq{#2}{scratch}{\logoscratch[#1]}{}%
+	\IfEq{#2}{geogebra}{\logogeogebra[#1]}{}%
+	\IfEq{#2}{texstudio}{\logotexstudio[#1]}{}%
+	\IfEq{#2}{emacs}{\logoemacs[#1]}{}%
+	\IfEq{#2}{texmaker}{\logotexmaker[#1]}{}%
+	\IfEq{#2}{miktex}{\logomiktex[#1]}{}%
+	\IfEq{#2}{ctanlion}{\logoctanlion[#1]}{}%
+	\IfEq{#2}{latexproject}{\logolatexproject[#1]}{}%
+	\IfEq{#2}{texworks}{\logotexworks[#1]}{}%
+}
+
+%====SPECIFIC MACROS
+\GenMacroLogoVect{\logoscratch}{scratch}
+\GenMacroLogoVect{\logogeogebra}{geogebra}
+\GenMacroLogoVect{\logotexstudio}{texstudio}
+\GenMacroLogoVect{\logoemacs}{emacs}
+\GenMacroLogoVect{\logotexmaker}{texmaker}
+\GenMacroLogoVect{\logomiktex}{miktex}
+\GenMacroLogoVect{\logoctanlion}{ctanlion}
+\GenMacroLogoVect{\logolatexproject}{latexproject}
+\GenMacroLogoVect{\logotexworks}{texworks}
+
+\endinput

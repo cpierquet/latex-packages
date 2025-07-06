@@ -1,0 +1,27 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: yes, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: yes, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[a5paper,11pt]{article}
+\usepackage{WriteOnGrid}
+\usepackage{lipsum}
+\usepackage{frcursive}
+
+\begin{document}
+
+\thispagestyle{empty}
+
+\begin{PleinePageRuled}[FormatPapier=A5,NumLignes]
+%entête
+\LignePapierRuled[Echelle=1.25,Ligne=1]{C. PIERQUET \hfill \LaTeX}
+%titre
+\LignePapierRuled[Echelle=1.25,Ligne=2,Couleur=red]<center>{\underline{\cursive\bfseries Devoir 1}}
+%cadre de notes
+\CadreNoteRuled{3}
+%ligne pour un petit titre
+\LignePapierRuled[Echelle=1.25,Ligne=8,Couleur=green!50!black]{\sffamily\underline{Exercice 1 :}}
+%paragraphe lipsum avec une échelle de 1.15 := calcul de l'interligne
+\ParagraphePapierRuled[Ligne=10,Echelle=1.15,Espacement=\fpeval{9/1.15}]{\cursive\lipsum[1][1-7]}
+\end{PleinePageRuled}
+
+\end{document}

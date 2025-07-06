@@ -1,0 +1,448 @@
+% !TeX TXS-program:compile = txs:///pdflatex
+
+\documentclass[11pt,a4paper]{ltxdoc}
+\usepackage{crimson}
+\renewcommand*\ttdefault{cmvtt}
+\usepackage[T1]{fontenc}
+\usepackage[scale=0.875]{cabin}
+\usepackage{vectorlogos}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{tabularray}
+\usepackage{fontawesome5}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [vectorlogos]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+\def\TPversion{0.1.3}
+\def\TPdate{30/03/2024}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,hooks,listingsutf8}
+\usepackage{soul}
+\sethlcolor{lightgray!25}
+\NewDocumentCommand\MontreCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{vectorlogos}}\\
+				\\
+				{\LARGE Insert, 'inline', vectorial,} \\
+				{\LARGE logos of 'classic' softwares.} \\
+				\\
+				{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{tabular}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://github.com/cpierquet/vectorlogos}} \\
+\end{tabular}
+\end{center}
+
+\hrule
+
+\vfill
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\begin{center}
+\scalebox{4}[4]{\logogeogebra}\hspace{1cm}\scalebox{4}[4]{\logogeogebra[icon]}
+
+\medskip
+
+\scalebox{4}[4]{\logoscratch}\hspace{1cm}\scalebox{4}[4]{\logoscratch[alt]}\hspace{1cm}\scalebox{4}[4]{\logoscratch[cat]}
+
+\medskip
+
+\scalebox{4}[4]{\logotexstudio}
+
+\medskip
+
+\scalebox{4}[4]{\logoemacs}\hspace{1cm}\scalebox{4}[4]{\logoemacs[alt]}
+
+\medskip
+
+\scalebox{4}[4]{\logotexmaker}\hspace{1cm}\scalebox{4}[4]{\logotexmaker[alt]}
+
+\medskip
+
+\scalebox{4}[4]{\logomiktex}\hspace{1cm}\scalebox{4}[4]{\logomiktex[icon]}\hspace{1cm}\scalebox{4}[4]{\logomiktex[icon-alt]}
+
+\medskip
+
+\scalebox{4}[4]{\logoctanlion}
+
+\medskip
+
+\scalebox{4}[4]{\logolatexproject}
+
+\medskip
+
+\scalebox{4}[4]{\logotexworks}\hspace{1cm}\scalebox{4}[4]{\logotexworks[alt]}
+\end{center}
+\end{tcolorbox}
+
+\vfill~
+
+\hrule
+
+\medskip
+
+\emph{%
+Logos came with GNU GPL or CC BY-SA (3.0 or 4.0).\\
+Some brand icons/logos are trademarks of their respective owners. Please do not use brand icons/logos for any purpose except to represent the company, product, or service to which they refer.\\
+CTAN lion drawing by Duane Bibby.\\
+LaTeX project logo, from Jonas Jacek (\url{https://www.j15k.com/}).
+%"Python" and the Python Logo are trademarks of the Python Software Foundation (\url{https://www.python.org/psf/trademarks/}).%
+}
+
+\medskip
+
+\hrule
+
+\vspace*{5mm}
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+%\hrule
+
+\pagebreak
+
+\section{Introduction}
+
+\subsection{Description, loading}
+
+With this package you can insert inline (vectorial) logos of 'classic' softwares.
+
+The format of the logos is \textsf{pdf}, from \textsf{svg} files (given by \textsf{GNU GPL} or \textsf{CC-BY-3.0 / CC-BY-4.0} ot \textsf{MIT} licenses).
+
+\medskip
+
+Each logo can be integrated within a classic \MontreCode{\textbackslash includegraphics} command.
+
+The package provides macros to insert them \textit{inline}, with automatic height and alignment.
+
+\medskip
+
+To load the package, simply use :
+
+\begin{quote}
+\begin{verbatim}
+\usepackage{vectorlogos}
+\end{verbatim}
+\end{quote}
+
+\subsection{Available logos, by name, for manual insertion}
+
+Available logos are :
+
+\medskip
+
+\begin{tblr}{width=\linewidth,colspec={Q[m,l]Q[l,m]X[m,l]},cells={font=\LARGE\ttfamily,bg=teal!5},column{1}={font=\LARGE\bfseries\sffamily}}
+	\hline
+	emacs 		& vectorlogo-emacs.pdf 			& \logoemacs\ 			\\
+				& vectorlogo-emacs-alt.pdf		& \logoemacs[alt]		\\
+	\hline
+	geogebra	& vectorlogo-geogebra.pdf 		& \logogeogebra\		\\
+				& vectorlogo-geogebra-icon.pdf	& \logogeogebra[icon]	\\
+	\hline
+	scratch		& vectorlogo-scratch.pdf 			& \logoscratch\			\\
+				& vectorlogo-scratch-alt.pdf		& \logoscratch[alt]	\\
+				& vectorlogo-scratch-cat.pdf		& \logoscratch[cat]	\\
+	\hline
+	texmaker	& vectorlogo-texmaker.pdf			& \logotexmaker\		\\
+				& vectorlogo-texmaker-alt.pdf		& \logotexmaker[alt]	\\
+	\hline
+	texstudio	& vectorlogo-texstudio.pdf			& \logotexstudio\		\\
+	\hline
+	MiKTeX		& vectorlogo-miktex.pdf				& \logomiktex\		\\
+				& vectorlogo-miktex-icon.pdf		& \logomiktex[icon]\	\\
+				& vectorlogo-miktex-icon-alt.pdf	& \logomiktex[icon-alt]\	\\
+	\hline
+	CTAN lion	& vectorlogo-ctanlion.pdf			& \logoctanlion\		\\
+	\hline
+	LaTeX project	& vectorlogo-latexproject.pdf	& \logolatexproject\		\\
+	\hline
+	TeXworks	& vectorlogo-texworks.pdf	& \logotexworks\		\\
+				& vectorlogo-texworks-alt.pdf	& \logotexworks[alt]\	\\
+\end{tblr}
+
+\pagebreak
+
+\section{The macros}
+
+\subsection{A simple generic macro}
+
+In order to insert an \textit{existing} vectorial logo, simpy use :
+
+\begin{quote}
+\begin{verbatim}
+\simplevectorlogo*[options includegraphics]{name}
+\end{verbatim}
+\end{quote}
+
+There's no automatic height or raising, it's just an \textit{alias} of a classic \MontreCode{\textbackslash includegraphics} with the given names of the precedent tabular.
+
+\begin{tcblisting}{}
+\simplevectorlogo*[height=1.5cm]{scratch}\par
+\simplevectorlogo*[height=4cm]{scratch-cat}\par
+\simplevectorlogo*[scale=0.33]{texstudio}\par
+\simplevectorlogo*{emacs}\par
+\simplevectorlogo*[width=3cm]{geogebra-icon}\par
+\simplevectorlogo*[height=1cm]{miktex}\par
+\simplevectorlogo*[height=2cm]{ctanlion}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{A generic inline macro}
+
+In order to insert a vectorial logo inline, simpy use :
+
+\begin{quote}
+\begin{verbatim}
+\vectorlogo[option]{name}
+\end{verbatim}
+\end{quote}
+
+The height (automatically calculated) of the logo is given by :
+
+\begin{itemize}
+	\item 90\,\% of the box \fbox{abcd...xyzABCD...XYZ} in the current font ;
+	\item raised 5\,\% bottom of the depth of \fbox{q} in the current font.
+\end{itemize}
+
+Available \textsf{names} are :
+
+\begin{multicols}{3}
+	\begin{itemize}
+		\item \texttt{emacs}
+		\item \texttt{geogebra}
+		\item \texttt{scratch}
+		\item \texttt{texmaker}
+		\item \texttt{texstudio}
+		\item \texttt{miktex}
+		\item \texttt{ctanlion}
+		\item \texttt{texworks}
+		\item \texttt{latexproject}
+	\end{itemize}
+\end{multicols}
+
+Available \textsf{options} are given by the suffix of alt logos.
+
+\begin{tcblisting}{}
+%other font and other size
+{\Large\sffamily For example, it's a vectorial logo \vectorlogo[icon]{geogebra} with inline insertion.}
+\end{tcblisting}
+
+\begin{tcblisting}{}
+%other font and other size
+\scalebox{3.25}[3.25]{\ttfamily The cat \vectorlogo[cat]{scratch} logo, inline !}
+\end{tcblisting}
+
+\subsection{Special commands}
+
+There's an other (shortcut) way to insert logos, with a shortcut-name, like in \textsf{fontawesome5} :
+%\logopython[option]
+
+\begin{quote}
+\begin{verbatim}
+\logoscratch[option]
+\logogeogebra[option]
+\logotexstudio[option]
+\logoemacs[option]
+\logotexmaker[option]
+\logomiktex[option]
+\logoctanlion
+\logotexworks
+\logolatexproject
+\end{verbatim}
+\end{quote}
+
+Available options are given by the suffix of alt logos.
+
+\begin{tcblisting}{}
+A sample logo, \logoemacs[alt], inline.
+\end{tcblisting}
+
+\pagebreak
+
+\section{Samples and personal logos}
+
+\subsection{Samples}
+
+\begin{tcblisting}{listing only}
+%useful macro
+\newcommand\samplevectorlogo[1]{{\LARGE Inline {#1} logo}\par}
+\end{tcblisting}
+
+\newcommand\samplevectorlogo[1]{{\LARGE Inline {#1} logo}\par}
+
+\begin{tcblisting}{listing side text}
+\samplevectorlogo{\logogeogebra}
+\end{tcblisting}
+
+\begin{tcblisting}{listing side text}
+\samplevectorlogo{\logogeogebra[icon]}
+\end{tcblisting}
+
+\begin{tcblisting}{listing side text}
+\samplevectorlogo{\logoscratch}
+\end{tcblisting}
+
+\begin{tcblisting}{listing side text}
+\samplevectorlogo{\logoscratch[alt]}
+\end{tcblisting}
+
+\begin{tcblisting}{listing side text}
+\samplevectorlogo{\logoscratch[cat]}
+\end{tcblisting}
+
+\begin{tcblisting}{listing side text}
+\samplevectorlogo{\logotexstudio}
+\end{tcblisting}
+
+\begin{tcblisting}{listing side text}
+\samplevectorlogo{\logoemacs}
+\end{tcblisting}
+
+\begin{tcblisting}{listing side text}
+\samplevectorlogo{\logoemacs[alt]}
+\end{tcblisting}
+
+\begin{tcblisting}{listing side text}
+\samplevectorlogo{\logotexmaker}
+\end{tcblisting}
+
+\begin{tcblisting}{listing side text}
+\samplevectorlogo{\logotexmaker[alt]}
+\end{tcblisting}
+
+\begin{tcblisting}{listing side text}
+\samplevectorlogo{\logomiktex}
+\end{tcblisting}
+
+\begin{tcblisting}{listing side text}
+\samplevectorlogo{\logomiktex[icon]}
+\end{tcblisting}
+
+\begin{tcblisting}{listing side text}
+\samplevectorlogo{\logomiktex[icon-alt]}
+\end{tcblisting}
+
+\begin{tcblisting}{listing side text}
+\samplevectorlogo{\logoctanlion}
+\end{tcblisting}
+
+\begin{tcblisting}{listing side text}
+\samplevectorlogo{\logotexworks}
+\end{tcblisting}
+
+\begin{tcblisting}{listing side text}
+\samplevectorlogo{\logolatexproject}
+\end{tcblisting}
+
+\subsection{Personal logos}
+
+If you wan't to use, \textit{inline}, your personal logos (located in workdir or in a \textsf{texmf} folder), you can use the command :
+
+\begin{quote}
+\begin{verbatim}
+\simplevectorlogo[scale]{filename}
+\end{verbatim}
+\end{quote}
+
+\MontreCode{[scale]}, which is \MontreCode{0.9} by default, is the ratio between the height of the logo and the height of the current 'text'.
+
+\MontreCode{filename} is the fullname of the logo.
+
+\begin{tcblisting}{}
+{\Huge A perfect test \simplevectorlogo{example-image-16x10.pdf} inline.}
+\end{tcblisting}
+
+\begin{tcblisting}{}
+{\Huge A perfect test \simplevectorlogo[1]{example-image-16x10.pdf} inline.}
+\end{tcblisting}
+
+\begin{tcblisting}{}
+{\LARGE Another perfect test \simplevectorlogo[0.5]{example-image-16x10.pdf} inline.}
+\end{tcblisting}
+
+\begin{tcblisting}{}
+{\LARGE Another perfect test \simplevectorlogo[2]{example-image-16x10.pdf} inline.}
+\end{tcblisting}
+
+\subsection{Generate personal macro}
+
+Other vectorial logos (which cannot be included in the package due to rights issues, but which are still usable) can be downloaded from \url{https://packages.cpierquet.fr/?dir=/vectorlogos/bonus/}.
+
+\smallskip
+
+By this way, and with logo named \MontreCode{vectorlogo-<basename>-...}, a specific command can be used to create special macro.
+
+\begin{quote}
+\begin{verbatim}
+%macro to create the command
+\GenMacroLogoVect{\namemacro}{basename}
+
+%use of the command
+\namemacro[option]
+\end{verbatim}
+\end{quote}
+
+\begin{tcblisting}{}
+%with file vectorlogo-xcas.pdf in workdir or texmf
+\GenMacroLogoVect{\logoxcas}{xcas}
+{\LARGE A personal logo, with a personal macro to include \logoxcas\ inline.}
+\end{tcblisting}
+
+\pagebreak
+
+\section{History}
+
+\begin{quote}
+\begin{verbatim}
+0.1.3 : Logos for MikTeX + CTAN lion + LateX project
+0.1.2 : Alt command for manual insertion, with existing img
+0.1.1 : Update licenses
+0.1.0 : Initial version
+\end{verbatim}
+\end{quote}
+
+\end{document}

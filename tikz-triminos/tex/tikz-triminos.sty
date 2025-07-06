@@ -1,0 +1,185 @@
+% Author          : C. Pierquet
+% licences        : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+% Inspiration.....: https://schule.paul-matthies.de/Trimino.php (CC BY-NC-SA 4.0)
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{tikz-triminos}[2025/01/23 0.1.1 triminos, made with TikZ]
+
+%------History
+% 0.1.1	Macro with number with dot below (6/9)
+% 0.1.0	Initial version
+
+%------Packages and library
+\RequirePackage{tikz}
+\usetikzlibrary{calc,decorations.text}
+\RequirePackage{xstring}
+\RequirePackage{fontawesome5}
+\RequirePackage{ifthen}
+\RequirePackage{settobox}
+\RequirePackage{simplekv}
+\RequirePackage{listofitems}
+
+%------tikz styles
+\tikzset{tkztriminoside/.style={thick}}
+\tikzset{tkztriminolabel/.style={font=\tkztriminofont,inner sep=1pt}}
+\tikzset{tkztriminosidedeco/.style={semithick,draw=black,fill=\tkztriminocolor}}
+
+%------lengths
+\newlength{\tkztriminotmpnode}
+\newlength{\tkztriminosize}
+\newsavebox{\tkztriminobox}
+
+%------keys
+\defKV[tkztrimino]{%
+	size=\setlength\tkztriminosize{#1},
+	font=\def\tkztriminofont{#1},
+	decocolor=\def\tkztriminocolor{#1},
+	bgcolor=\def\tkztriminobgcolor{#1},%
+	txtlogo=\def\tkztriminotxtlogo{#1},%
+	iconlogo=\def\tkztriminoiconlogo{#1},%
+	scaledeco=\def\tkztriminostar{#1},%
+	fontdeco=\def\tkztriminodecofont{#1}
+}
+\setKVdefault[tkztrimino]{%
+	size=5cm,%
+	font=\Large,%
+	decocolor=lightgray,%
+	decoration=true,%
+	showtxtlogo=false,%
+	showiconlogo=false,%
+	bgcolor={},%
+	txtlogo={TriMino~TriMino~TriMino~},%
+	iconlogo={\scalebox{2}[2]{\textcolor{darkgray}{\faBahai}}},%
+	scaledeco=0.25,%
+	fontdeco={\tiny\sffamily}
+}
+
+%------6/9 with dot below
+\newcommand\dotbelownb[2][1pt]{%
+	\tikz[baseline=(char.base)]{\node[inner sep=0pt,outer sep=0pt](char){#2};\draw(char.south)node[below=#1,inner sep=0pt,outer sep=0pt]{.};}%
+}
+
+%------internal macro
+\NewDocumentCommand\inttrimino{ m m m }{%
+	\begin{scope}[shift={#1},rotate=#2,transform shape,line join=round]
+		\IfEq{\tkztriminobgcolor}{}%
+			{%
+				\draw[tkztriminoside] (0,0) --++ (60:{\tkztriminosize}) --++ (-60:{\tkztriminosize}) -- cycle ;
+			}%
+			{%
+				\draw[fill=\tkztriminobgcolor,tkztriminoside] (0,0) --++ (60:{\tkztriminosize}) --++ (-60:{\tkztriminosize}) -- cycle ;
+			}%
+		\ifboolKV[tkztrimino]{decoration}%
+			{%
+				\draw[tkztriminosidedeco] (0,0) --++ (60:{\tkztriminostar\tkztriminosize}) -- (30:{\tkztriminostaralt\tkztriminosize}) -- (0:{\tkztriminostar\tkztriminosize}) -- cycle ;
+				\begin{scope}[shift={(0:{\tkztriminosize})},rotate=120]
+					\fill[tkztriminosidedeco] (0,0) --++ (60:{\tkztriminostar\tkztriminosize}) -- (30:{\tkztriminostaralt\tkztriminosize}) -- (0:{\tkztriminostar\tkztriminosize}) -- cycle ;
+				\end{scope}
+				\begin{scope}[shift={(60:{\tkztriminosize})},rotate=-120]
+					\fill[tkztriminosidedeco] (0,0) --++ (60:{\tkztriminostar\tkztriminosize}) -- (30:{\tkztriminostaralt\tkztriminosize}) -- (0:{\tkztriminostar\tkztriminosize}) -- cycle ;
+				\end{scope}
+			}%
+			{}%
+		\ifboolKV[tkztrimino]{showtxtlogo}%
+			{%
+				\path[decorate,decoration={text along path,text={|\tkztriminodecofont|\tkztriminotxtlogo},text align=fit to path}] (30:{sqrt(3)/3*\tkztriminosize}) circle[radius=0.085\tkztriminosize];
+			}%
+			{}%
+		\ifboolKV[tkztrimino]{showiconlogo}%
+			{%
+				\draw (30:{sqrt(3)/3*\tkztriminosize}) node {\tkztriminoiconlogo};
+			}%
+			{}%
+		\foreach \tkztext [count=\i] in {#3}{
+			\ifnum\i=1
+				\sbox{\tkztriminobox}{\pgfinterruptpicture \tkztriminofont\tkztext\endpgfinterruptpicture}\settoboxwidth{\tkztriminotmpnode}{\tkztriminobox}
+				\ifthenelse{\lengthtest{\tkztriminotmpnode < \fpeval{1-2*\tkztriminostar}\tkztriminosize}}%
+					{%
+						\path (60:{\tkztriminosize}) -- (0,0) node[midway,sloped,above,tkztriminolabel,rotate=180] {\strut\tkztext} ;
+					}%
+					{%
+						\path (60:{\tkztriminosize}) -- (0,0) node[midway,sloped,above,tkztriminolabel,rotate=180] {\strut\resizebox{\fpeval{1-2*\tkztriminostar}\tkztriminosize}{!}{\tkztext}} ;
+					}%
+			\fi
+			\ifnum\i=2
+				\sbox{\tkztriminobox}{\pgfinterruptpicture \tkztriminofont\tkztext\endpgfinterruptpicture}\settoboxwidth{\tkztriminotmpnode}{\tkztriminobox}
+				\ifthenelse{\lengthtest{\tkztriminotmpnode < \fpeval{1-2*\tkztriminostar}\tkztriminosize}}%
+					{%
+						\path (0,0) -- ({\tkztriminosize},0) node[midway,sloped,above,tkztriminolabel] {\strut\tkztext} ;
+					}%
+					{%
+						\path (0,0) -- ({\tkztriminosize},0) node[midway,sloped,above,tkztriminolabel] {\strut\resizebox{\fpeval{1-2*\tkztriminostar}\tkztriminosize}{!}{\tkztext}} ;
+					}%
+			\fi
+			\ifnum\i=3
+				\sbox{\tkztriminobox}{\pgfinterruptpicture \tkztriminofont\tkztext\endpgfinterruptpicture}\settoboxwidth{\tkztriminotmpnode}{\tkztriminobox}
+				\ifthenelse{\lengthtest{\tkztriminotmpnode < \fpeval{1-2*\tkztriminostar}\tkztriminosize}}%
+					{%
+						\path ({\tkztriminosize},0) -- (60:{\tkztriminosize}) node[midway,sloped,above,tkztriminolabel,rotate=180] {\strut\tkztext} ;
+					}%
+					{%
+						\path ({\tkztriminosize},0) -- (60:{\tkztriminosize}) node[midway,sloped,above,tkztriminolabel,rotate=180] {\strut\resizebox{\fpeval{1-2*\tkztriminostar}\tkztriminosize}{!}{\tkztext}} ; ;
+					}%
+			\fi
+		}
+	\end{scope}
+}
+
+%------main macro
+\NewDocumentCommand\tkztriminos{ O{} D<>{} m }{%
+	\restoreKV[tkztrimino]%
+	\setKV[tkztrimino]{#1}%
+	\xdef\tkztriminostaralt{\fpeval{0.5*(\tkztriminostar)}}%
+	\setsepchar{§}%
+	\readlist*\listitemstrimino{#3}%
+	\begin{tikzpicture}[#2]
+		\ifnum\listitemstriminolen=3
+			%only one
+			\inttrimino{(0,0)}{0}{\listitemstrimino[1],\listitemstrimino[2],\listitemstrimino[3]}
+		\fi
+		\ifnum\listitemstriminolen=19
+			%with 9 triminos (5 jokers)
+			\inttrimino{(0,0)}{0}{\listitemstrimino[-1],\listitemstrimino[7],\listitemstrimino[3]}
+			\inttrimino{(0:{\tkztriminosize})}{60}{\listitemstrimino[4],\listitemstrimino[6],\listitemstrimino[2]}
+			\inttrimino{(0:{\tkztriminosize})}{0}{\listitemstrimino[5],\listitemstrimino[9],\listitemstrimino[-1]}
+			\inttrimino{(0,0)}{-60}{\listitemstrimino[8],\listitemstrimino[12],\listitemstrimino[14]}
+			\inttrimino{(0:{\tkztriminosize})}{-120}{\listitemstrimino[15],\listitemstrimino[13],\listitemstrimino[-1]}
+			\inttrimino{(0:{\tkztriminosize})}{-60}{\listitemstrimino[10],\listitemstrimino[16],\listitemstrimino[18]}
+			\inttrimino{(-60:{\tkztriminosize})}{-60}{\listitemstrimino[1],\listitemstrimino[-1],\listitemstrimino[-1]}
+			\inttrimino{(-60:{\tkztriminosize})}{-120}{\listitemstrimino[-1],\listitemstrimino[11],\listitemstrimino[-1]}
+			\inttrimino{(-30:{sqrt(3)*\tkztriminosize})}{-120}{\listitemstrimino[17],\listitemstrimino[-1],\listitemstrimino[-1]}
+		\fi
+		\ifnum\listitemstriminolen=25
+			%with 12 triminos (10 jokers)
+			\inttrimino{(0,0)}{0}{\listitemstrimino[13],\listitemstrimino[11],\listitemstrimino[1]}
+			\inttrimino{(0:{\tkztriminosize})}{60}{\listitemstrimino[2],\listitemstrimino[4],\listitemstrimino[16]}
+			\inttrimino{(0:{\tkztriminosize})}{0}{\listitemstrimino[3],\listitemstrimino[5],\listitemstrimino[17]}
+			\inttrimino{(0,0)}{-60}{\listitemstrimino[12],\listitemstrimino[24],\listitemstrimino[10]}
+			\inttrimino{(0:{\tkztriminosize})}{-120}{\listitemstrimino[7],\listitemstrimino[9],\listitemstrimino[21]}
+			\inttrimino{(0:{\tkztriminosize})}{-60}{\listitemstrimino[6],\listitemstrimino[8],\listitemstrimino[20]}
+			\inttrimino{(-60:{\tkztriminosize})}{-60}{\listitemstrimino[22],\listitemstrimino[-1],\listitemstrimino[-1]}
+			\inttrimino{(-60:{\tkztriminosize})}{-120}{\listitemstrimino[-1],\listitemstrimino[23],\listitemstrimino[-1]}
+			\inttrimino{(-30:{sqrt(3)*\tkztriminosize})}{-120}{\listitemstrimino[19],\listitemstrimino[-1],\listitemstrimino[-1]}
+			\inttrimino{(-60:{2*\tkztriminosize})}{-120}{\listitemstrimino[-1],\listitemstrimino[-1],\listitemstrimino[15]}
+			\inttrimino{(-60:{2*\tkztriminosize})}{-60}{\listitemstrimino[-1],\listitemstrimino[-1],\listitemstrimino[18]}
+			\inttrimino{(-60:{2*\tkztriminosize})}{-180}{\listitemstrimino[-1],\listitemstrimino[-1],\listitemstrimino[14]}
+		\fi
+		\ifnum\listitemstriminolen=36
+			%with 12 triminos tous remplis
+			\inttrimino{(0,0)}{0}{\listitemstrimino[13],\listitemstrimino[11],\listitemstrimino[1]}
+			\inttrimino{(0:{\tkztriminosize})}{60}{\listitemstrimino[2],\listitemstrimino[4],\listitemstrimino[16]}
+			\inttrimino{(0:{\tkztriminosize})}{0}{\listitemstrimino[3],\listitemstrimino[5],\listitemstrimino[17]}
+			\inttrimino{(0,0)}{-60}{\listitemstrimino[12],\listitemstrimino[24],\listitemstrimino[10]}
+			\inttrimino{(0:{\tkztriminosize})}{-120}{\listitemstrimino[7],\listitemstrimino[9],\listitemstrimino[21]}
+			\inttrimino{(0:{\tkztriminosize})}{-60}{\listitemstrimino[6],\listitemstrimino[8],\listitemstrimino[20]}
+			\inttrimino{(-60:{\tkztriminosize})}{-60}{\listitemstrimino[22],\listitemstrimino[31],\listitemstrimino[25]}
+			\inttrimino{(-60:{\tkztriminosize})}{-120}{\listitemstrimino[32],\listitemstrimino[23],\listitemstrimino[33]}
+			\inttrimino{(-30:{sqrt(3)*\tkztriminosize})}{-120}{\listitemstrimino[19],\listitemstrimino[26],\listitemstrimino[35]}
+			\inttrimino{(-60:{2*\tkztriminosize})}{-120}{\listitemstrimino[30],\listitemstrimino[28],\listitemstrimino[15]}
+			\inttrimino{(-60:{2*\tkztriminosize})}{-60}{\listitemstrimino[36],\listitemstrimino[29],\listitemstrimino[18]}
+			\inttrimino{(-60:{2*\tkztriminosize})}{-180}{\listitemstrimino[27],\listitemstrimino[34],\listitemstrimino[14]}
+		\fi
+	\end{tikzpicture}%
+}
+
+\endinput

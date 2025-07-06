@@ -1,0 +1,285 @@
+% Author        : C. Pierquet
+% licence       : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{timeop}[2025/05/05 0.1.1 Calculates and displays arithmetic operations with durations.]
+
+%====HISTORY
+% v 0.1.1	Bugfix
+% v 0.1.0	Initial version
+
+%====OPTION
+\newif\if@amsmath \@amsmathtrue
+\DeclareOption{noamsmath}{\@amsmathfalse}
+\DeclareOption*{}
+\ProcessOptions\relax
+
+%====BASE
+\if@amsmath
+	\RequirePackage{amsmath}
+\fi
+\RequirePackage{xstring}
+\RequirePackage{xintexpr}
+\RequirePackage{listofitems}
+\RequirePackage{tabularray}
+\RequirePackage{simplekv}
+\RequirePackage{tcolorbox}
+\tcbuselibrary{skins}
+
+%====SPECIAL
+\newlength\convhmsopecolsep
+\NewDocumentCommand\formathms{ m }{%
+	\ifboolKV[stohms]{zeros}{\xintifboolexpr{#1 < 10}{0#1}{#1}}{#1}%
+}
+\newtcbox\myopbox[1][black]{%
+	colframe=#1,colback=white,size=fbox,boxrule=0.8pt,arc=1.2pt,boxsep=-0.8pt,top=3pt,bottom=2.2pt,%
+	box align=base,nobeforeafter,opacityback=0,enhanced jigsaw%
+}
+\NewDocumentCommand\boxhms{ m }{%
+	\myopbox[#1]{\phantom{00}}%
+}
+
+%====CONVERSION (INTERNAL)
+\NewDocumentCommand\hmstos{ m O{\convtosec} }{%
+	\setsepchar{,}%
+	\readlist*\tmpophmsA{#1}%
+	\xdef#2{\fpeval{3600*(\tmpophmsA[1])+60*(\tmpophmsA[2])+(\tmpophmsA[3])}}%
+}
+\NewDocumentCommand\hmtos{ m O{\convtosec} }{%
+	\setsepchar{,}%
+	\readlist*\tmpophmsA{#1}%
+	\xdef#2{\fpeval{3600*(\tmpophmsA[1])+60*(\tmpophmsA[2])}}%
+}
+
+%====KEYS
+\defKV[stohms]{%
+	sys=\def\stohmssys{#1}
+}
+\setKVdefault[stohms]{%
+	zeros=true,%
+	raw=true,%
+	sys=eu
+}
+
+%====MACROS
+\NewDocumentCommand\stohms{ O{} m O{\convtohms} }{%
+	\restoreKV[stohms]%
+	\setKV[stohms]{#1}%
+	\ifboolKV[stohms]{raw}%
+		{%
+			\xdef#3{}%
+			\xdef#3{\fpeval{trunc((#2)/3600,0)},}%
+			\xdef\tmpHHrest{\fpeval{(#2)-trunc((#2)/3600,0)*3600}}%
+			\xdef#3{#3\fpeval{trunc((\tmpHHrest)/60,0)},\fpeval{(\tmpHHrest)-trunc((\tmpHHrest)/60,0)*60}}%
+		}%
+		{%
+			\IfEq{\stohmssys}{eu}%
+				{%
+					\xdef\tmpHH{\xintfloateval{trunc((#2)/3600,0)}}%
+					\xdef\tmpHHrest{\xintfloateval{(#2)-trunc((#2)/3600,0)*3600}}%
+					\xdef\tmpMM{\xintfloateval{trunc((\tmpHHrest)/60,0)}}%
+					\xdef\tmpSS{\xintfloateval{(\tmpHHrest)-trunc((\tmpHHrest)/60,0)*60}}%
+					\xintifboolexpr{\tmpHH !=0 'and' \tmpMM != 0 'and' \tmpSS != 0}%HMS
+						{\formathms{\tmpHH}\:\text{h}\:\formathms{\tmpMM}\:\text{min}\:\formathms{\tmpSS}\:\text{s}}{}%
+					\xintifboolexpr{\tmpHH ==0 'and' \tmpMM != 0 'and' \tmpSS != 0}%MS
+						{\formathms{\tmpMM}\:\text{min}\:\formathms{\tmpSS}\:\text{s}}{}%
+					\xintifboolexpr{\tmpHH !=0 'and' \tmpMM == 0 'and' \tmpSS != 0}%HS
+						{\formathms{\tmpHH}\:\text{h}\:\formathms{\tmpSS}\:\text{s}}{}%
+					\xintifboolexpr{\tmpHH !=0 'and' \tmpMM != 0 'and' \tmpSS == 0}%HM
+						{\formathms{\tmpHH}\:\text{h}\:\formathms{\tmpMM}\:\text{min}}{}%
+					\xintifboolexpr{\tmpHH != 0 'and' \tmpMM == 0 'and' \tmpSS == 0}%H
+						{\formathms{\tmpHH}\:\text{h}}{}%
+					\xintifboolexpr{\tmpHH == 0 'and' \tmpMM != 0 'and' \tmpSS == 0}%M
+						{\formathms{\tmpMM}\:\text{min}}{}%
+					\xintifboolexpr{\tmpHH == 0 'and' \tmpMM == 0 'and' \tmpSS != 0}%S
+						{\formathms{\tmpSS}\:\text{s}}{}%
+				}%
+				{%
+					\xdef\tmpHH{\xintfloateval{trunc((#2)/3600,0)}}%
+					\xdef\tmpHHrest{\xintfloateval{(#2)-trunc((#2)/3600,0)*3600}}%
+					\xdef\tmpMM{\xintfloateval{trunc((\tmpHHrest)/60,0)}}%
+					\xdef\tmpSS{\xintfloateval{(\tmpHHrest)-trunc((\tmpHHrest)/60,0)*60}}%
+					\formathms{\tmpHH}:\formathms{\tmpMM}:\formathms{\tmpSS}%
+				}%
+		}%
+}
+
+\defKV[convhms]{%
+	type=\def\convhmsope{#1},%
+	find=\def\convhmsaffval{#1},%
+	colsep=\setlength{\convhmsopecolsep}{#1}
+}
+\setKVdefault[convhms]{%
+	zeros=false,%
+	find={},%
+	type=+,%
+	colsep=1.5pt
+}
+
+\NewDocumentCommand\simpletimeop{ O{} m m m }{%
+	\restoreKV[convhms]%
+	\setKV[convhms]{#1}%
+	\setsepchar{,}%
+	\readlist*\tmpophmsA{#2}%
+	\readlist*\tmpophmsB{#3}%
+	\readlist*\tmpophmsC{#4}%
+	\ifnum\tmpophmsAlen=2\relax%
+		\begin{tblr}{colspec={crcrc},colsep=1pt}
+			&{\tmpophmsA[1]}&h&{\tmpophmsA[2]}&min\\
+			$\convhmsope$&{\tmpophmsB[1]}&h&{\tmpophmsB[2]}&min\\\hline
+			&{\tmpophmsC[1]}&h&{\tmpophmsC[2]}&min\\
+		\end{tblr}%
+	\else%
+		\begin{tblr}{colspec={crcrcrc},colsep=1pt}
+			&{\tmpophmsA[1]}&h&{\tmpophmsA[2]}&min&{\tmpophmsA[3]}&s\\
+			$\convhmsope$&{\tmpophmsB[1]}&h&{\tmpophmsB[2]}&min&{\tmpophmsB[3]}&s\\\hline
+			&{\tmpophmsC[1]}&h&{\tmpophmsC[2]}&min&{\tmpophmsC[3]}&s\\
+		\end{tblr}%
+	\fi%
+}
+
+\NewDocumentCommand\intaffhmsbox{ m m }{%
+	%1=\tmpophmsa
+	%2=i
+	\IfEq{\convhmsaffval}{}{#1}%
+		{%
+			\itemtomacro\tmpophmsaffvals[#2]{\tmpophcol}%
+			\IfEq{\tmpophcol}{-}%
+				{%
+					#1%
+				}%
+				{%
+					\boxhms{\tmpophcol}%
+				}%
+		}%
+}
+
+\NewDocumentCommand\calctimeop{ O{} m m }{%
+	\restoreKV[convhms]%
+	\setKV[convhms]{#1}%
+	\setsepchar{,}%
+	\readlist*\tmpophmsA{#2}%
+	\ifnum\tmpophmsAlen=2%just HM
+		\itemtomacro\tmpophmsA[1]\tmpophmsa%
+		\itemtomacro\tmpophmsA[2]\tmpophmsb%
+		\readlist*\tmpophmsB{#3}%
+		\itemtomacro\tmpophmsB[1]\tmpophmsd%
+		\itemtomacro\tmpophmsB[2]\tmpophmse%
+		\hmtos{#2}[\tmpHeureA]%
+		\hmtos{#3}[\tmpHeureB]%
+		\IfEq{\convhmsope}{+}%
+			{%
+				\xdef\tmpCalculHeureAB{\inteval{(\tmpHeureA)+(\tmpHeureB)}}%
+			}%
+			{%
+				\xdef\tmpCalculHeureAB{\inteval{(\tmpHeureA)-(\tmpHeureB)}}%
+			}%
+		\stohms{\tmpCalculHeureAB}%
+		\readlist*\tmpophmsC{\convtohms}%
+		\itemtomacro\tmpophmsC[1]\tmpophmsg%
+		\itemtomacro\tmpophmsC[2]\tmpophmsh%
+		%reading of 'findind boxes'
+		\IfEq{\convhmsaffval}{}{}%
+			{\readlist*\tmpophmsaffvals{\convhmsaffval}}%
+		%format
+		\begin{tblr}{colspec={crcrc},colsep=\convhmsopecolsep}
+			&
+			\intaffhmsbox{\tmpophmsa}{1}%
+			&
+			h
+			&
+			\intaffhmsbox{\tmpophmsb}{2}%
+			&
+			min
+			\\
+			$\convhmsope$
+			&
+			\intaffhmsbox{\tmpophmsd}{3}%
+			&
+			h
+			&
+			\intaffhmsbox{\tmpophmse}{4}%
+			&
+			min
+			\\\hline
+			&
+			\intaffhmsbox{\tmpophmsg}{5}%
+			&
+			h
+			&
+			\intaffhmsbox{\tmpophmsh}{6}%
+			&
+			min
+			\\
+		\end{tblr}%
+	\else%HMS
+		\itemtomacro\tmpophmsA[1]\tmpophmsa%
+		\itemtomacro\tmpophmsA[2]\tmpophmsb%
+		\itemtomacro\tmpophmsA[3]\tmpophmsc%
+		\readlist*\tmpophmsB{#3}%
+		\itemtomacro\tmpophmsB[1]\tmpophmsd%
+		\itemtomacro\tmpophmsB[2]\tmpophmse%
+		\itemtomacro\tmpophmsB[3]\tmpophmsf%
+		\hmstos{#2}[\tmpHeureA]%
+		\hmstos{#3}[\tmpHeureB]%
+		\IfEq{\convhmsope}{+}%
+			{%
+				\xdef\tmpCalculHeureAB{\inteval{(\tmpHeureA)+(\tmpHeureB)}}%
+			}%
+			{%
+				\xdef\tmpCalculHeureAB{\inteval{(\tmpHeureA)-(\tmpHeureB)}}%
+			}%
+		\stohms{\tmpCalculHeureAB}%
+		\readlist*\tmpophmsC{\convtohms}%
+		\itemtomacro\tmpophmsC[1]\tmpophmsg%
+		\itemtomacro\tmpophmsC[2]\tmpophmsh%
+		\itemtomacro\tmpophmsC[3]\tmpophmsi%
+		%reading of 'findind boxes'
+		\IfEq{\convhmsaffval}{}{}%
+			{\readlist*\tmpophmsaffvals{\convhmsaffval}}%
+		%format
+		\begin{tblr}{colspec={crcrcrc},colsep=\convhmsopecolsep}
+			&
+			\intaffhmsbox{\tmpophmsa}{1}%
+			&
+			h
+			&
+			\intaffhmsbox{\tmpophmsb}{2}%
+			&
+			min
+			&
+			\intaffhmsbox{\tmpophmsc}{3}%
+			&
+			s
+			\\
+			$\convhmsope$
+			&
+			\intaffhmsbox{\tmpophmsd}{4}%
+			&
+			h
+			&
+			\intaffhmsbox{\tmpophmse}{5}%
+			&
+			min
+			&
+			\intaffhmsbox{\tmpophmsf}{6}%
+			&
+			s
+			\\\hline
+			&
+			\intaffhmsbox{\tmpophmsg}{7}%
+			&
+			h
+			&
+			\intaffhmsbox{\tmpophmsh}{8}%
+			&
+			min
+			&
+			\intaffhmsbox{\tmpophmsi}{9}%
+			&
+			s\\
+		\end{tblr}%
+	\fi%
+}
+
+\endinput

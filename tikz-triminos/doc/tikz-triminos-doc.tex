@@ -1,0 +1,368 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+
+\documentclass[11pt,a4paper]{ltxdoc}
+\usepackage{amsmath}
+\usepackage{kpfonts}
+\usepackage{inconsolata}
+\usepackage[T1]{fontenc}
+\usepackage[scale=0.875]{cabin}
+\usepackage{tikz-triminos}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{tabularray}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [tikz-triminos]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\let\TikZ\tikzlogo
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+\def\TPversion{0.1.0}
+\def\TPdate{20/01/2025}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable,skins,hooks,listingsutf8}
+
+\lstset{
+	language=[LaTeX]TeX,%
+	basicstyle=\ttfamily,%
+	keywordstyle={\color{blue}},%
+	classoffset=0,%
+	keywords={},%
+	alsoletter={-},%
+	keywordstyle={\color{blue}},%
+	classoffset=1,%
+	alsoletter={-},%
+	morekeywords={tkz-triminos},%
+	keywordstyle={\color{violet}},%
+	classoffset=2,%
+	alsoletter={-},%
+	morekeywords={\tkztriminos},%
+	keywordstyle={\color{green!50!black}},%
+	classoffset=3,%
+	morekeywords={},%
+	keywordstyle={\color{orange}}
+}
+
+\newtcblisting{DemoCode}[1]{%
+	enhanced,width=\linewidth,%
+	bicolor,size=title,%
+	colback=cyan!10!white,%
+	colbacklower=cyan!5!white,%
+	colframe=cyan!75!black,%
+	listing options={%
+		breaklines=true,%
+		breakatwhitespace=true,%
+		style=tcblatex,basicstyle=\small\ttfamily,%
+		tabsize=4,%
+		commentstyle={\itshape\color{gray}},
+		keywordstyle={\color{blue}},%
+		classoffset=0,%
+		keywords={\usepackage,\includegraphics,xstring,listofitems,\tikzset,\readlist,\showitems,\xintFor,\xintSeq},%
+		alsoletter={-},%
+		keywordstyle={\color{blue}},%
+		classoffset=1,%
+		alsoletter={-},%
+		morekeywords={tikz-triminos},%
+		keywordstyle={\color{violet}},%
+		classoffset=2,%
+		alsoletter={-},%
+		morekeywords={\tkztriminos},%
+		keywordstyle={\color{green!50!black}},%
+		classoffset=3,%
+		morekeywords={size,font,decocolor,decoration,showtxtlogo,showiconlogo,bgcolor,txtlogo,iconlogo,scaledeco,fontdeco},%
+		keywordstyle={\color{orange}}
+	},%
+	#1
+}
+
+\newtcbinputlisting\DemoCodeFile[1]{%
+	enhanced,width=\linewidth,%
+	bicolor,size=title,%
+	colback=lightgray!10!white,%
+	colbacklower=lightgray!5!white,%
+	colframe=lightgray!75!black,%
+	listing options={%
+		breaklines=true,%
+		breakatwhitespace=true,%
+		style=tcblatex,
+		basicstyle=\scriptsize\ttfamily,%
+		tabsize=4,%
+		commentstyle={\itshape\color{gray}},%
+		%lastline=148
+	},%
+	breakable,
+	listing only,%
+	listing file={#1}
+}
+
+\NewDocumentCommand\ShowCode{ m }{%
+	\lstinline{#1}%
+}
+
+\begin{document}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+		\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+			\begin{center}
+				\renewcommand{\arraystretch}{1.25}%
+				\begin{tabular}{c}
+					{\Huge \texttt{tikz-triminos}}\\
+					\\
+					{\LARGE Single or several TriMinos,} \\
+					{\LARGE made with Ti\textit{k}Z\ldots} \\
+					\\
+					{\small \texttt{Version \TPversion{} -- \TPdate}}
+				\end{tabular}
+			\end{center}
+		\end{tcolorbox}
+	\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+		\texttt{Cédric Pierquet}\\
+		{\ttfamily c pierquet -- at -- outlook . fr}\\
+		\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}} \\
+	\end{tabular}
+\end{center}
+
+\hrule
+
+\vfill
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5,listing only}
+%single TriMino
+\tkztriminos{One § Two § \faHatWizard}~~\tkztriminos{\faHatWizard § Three § Two}
+\end{tcblisting}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\hfill\tkztriminos<scale=0.85,transform shape>{One § Two § \faHatWizard}~~\tkztriminos<scale=0.85,transform shape>{\faHatWizard § Three § Two}\hfill~
+\end{tcolorbox}
+
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5,listing only}
+%multiple TriMino (9 or 12)
+\tkztriminos[keys]<tikz options>{list of values}
+\end{tcblisting}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\hfill\tkztriminos%
+[size=5cm,showiconlogo,bgcolor=teal!15,font=\large,iconlogo={\scalebox{3}[3]{\textcolor{orange}{\faBahai}}},decocolor=orange]%
+<scale=0.5,rotate=90,transform shape>%
+{%
+	$1+1$ § $2$ §
+	$2+2$ § $4$ §
+	$3+3$ § ${6}$ §
+	{$x_{1}=\frac{-3-\sqrt{41}}{6}$ ; $x_{2}=\frac{-3+\sqrt{41}}{6}$} § $9x^{2}+9x-8$ §
+	$5+5$ § $10$ §
+	${6}+6$ § $12$ §
+	$7+7$ § $14$ §
+	$8+8$ § $16$ §
+	${9}+{9}$ § $18$ §
+	$10+10$ § $20$ §
+	$11+11$ § $22$ §
+	$12+12$ § $24$ §
+	$13+13$ § $26$ §
+	$14+14$ § $28$ §
+	$15+15$ § $30$ §
+	$16+16$ § $32$ §
+	$17+17$ § $34$ §
+	$18+18$ § $36$
+}\hfill~
+\end{tcolorbox}
+
+\vfill~
+
+\hrule
+
+\vspace*{2.5mm}
+
+\textit{Inspirations, with \texttt{CC\,BY-NC-SA\,4.0} license, come from  \url{https://schule.paul-matthies.de/Trimino.php}}.
+
+\vspace*{2.5mm}
+
+\hrule
+
+\vspace*{2.5mm}
+
+{\tiny\itshape Yes, it's -- again -- a package "clearly too limited which simply aligns, linearly and without any real programmation, the high-level macros of the packages \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|tikz|, \texttt{listofitems}, \texttt{xstring}, \texttt{settobox} and \texttt{simplekv}". But if you don't want to use it, it's easy\ldots don't load it ! If you want to take ownership of the package, with better programming, it's easy too\ldots just ask !}
+
+\vspace*{2.5mm}
+
+\hrule
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+%\hrule
+
+\pagebreak
+
+\section{Loading, useful packages, purposes and acknowledgments}
+
+\subsection{Loading and useful packages}
+
+In order to load \lstinline[language={[latex]TeX},basicstyle=\ttfamily]{tikz-triminos}, simply use:
+
+\begin{DemoCode}{listing only}
+\usepackage{tikz-triminos}
+\end{DemoCode}
+
+%Loaded packages are \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|tikz| (with librairies \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|calc| and \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|decorations text|), \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|ifthen|, \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|simplekv|, \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|listofitems|, \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|fontawesome5| and \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|settobox|.
+
+\subsection{Purposes and acknowledgments}
+
+The purposes of this small package is to provide simple tool to create \textsf{TriMinos} (1 or 9 or 12) with automatic positionning of texts.
+
+\smallskip
+
+\textit{Inspiration come from \url{https://schule.paul-matthies.de/Trimino.php} (CC BY-SA 4.0)}.
+
+\section{Usage}
+
+\subsection{Main macro}
+
+In order to create (single or multiple) \textsf{TriMinos}, simple use:
+
+\begin{DemoCode}{listing only}
+\tkztriminos[keys]<tikz options>{list of values}
+\end{DemoCode}
+
+For \texttt{list of values} argument (seperated with \texttt{§}):
+
+\begin{itemize}
+	\item 3 values can be given (so 1 \textsf{TriMino}) ;
+	\item 19 values can be given (so 9 \textsf{TriMinos}, with 5 \textit{jokers}) ;
+	\item 25 values can be given (so 12 \textsf{TriMinos}, with 10 \textit{jokers}) ;
+	\item 36 values can be given (so 12 full \textsf{TriMinos}).
+\end{itemize}
+
+Moreover:
+
+\begin{itemize}
+	\item if the text is too long for the \textsf{TriMino}, the code adjusts its width ;
+	\item icons of graphicx elements can be used ;
+	\item with \textit{jokers}, the final value is the \textit{joker}.
+\end{itemize}
+
+\begin{DemoCode}{}
+%default output
+\tkztriminos{value 1 § value 2 § a long long value 3}
+\end{DemoCode}
+
+\pagebreak
+
+\subsection{TikZ styles}
+
+Few \TikZ\ styles are available, and they can be modified.
+
+\begin{DemoCode}{listing only}
+%sides of TriMino
+\tikzset{tkztriminoside/.style={thick}}
+
+%labels (with \tkztriminofont given by key)
+\tikzset{tkztriminolabel/.style={font=\tkztriminofont,inner sep=1pt}}
+
+%decoration (with \tkztriminocolor given by key)
+\tikzset{tkztriminosidedeco/.style={semithick,draw=black,fill=\tkztriminocolor}}
+\end{DemoCode}
+
+\subsection{Keys}
+
+Available keys, to be given within \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|[...]| are:
+
+\begin{itemize}
+	\item \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|size| := size of \textsf{TriMino}\hfill(default \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|5cm|)
+	\item \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|font| := font for texts\hfill(default \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|\Large|)
+	\item \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|decoration| :=boolean for showing the \textit{inner} decoration\hfill(default \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|true|)
+	\item \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|decocolor| := color of the optional \textit{inner} decoration\hfill(default \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|lightgray|)
+	\item \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|showtxtlogo| := boolean for showing optional circular logo text\hfill(default \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|false|)
+	\item \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|txtlogo| := text for optional circular logo\hfill(default \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|TriMino~TriMino~TriMino~|)
+	\item \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|fontdeco| := font for optional circular logo\hfill(default \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|\tiny\sffamily|)
+	\item \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|showiconlogo| := boolean for showing optional graphic logo\hfill(default \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|false|)
+	\item \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|iconlogo| := graphic element for center logo
+	\item \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|bgcolor| := optional background color of \textsf{TriMino}
+	\item \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|scaledeco| :=scale for \textit{inner} decoration\hfill(default \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|0.25|)
+\end{itemize}
+
+\pagebreak
+
+\section{Examples}
+
+\subsection{One TriMino}
+
+\begin{DemoCode}{}
+\tkztriminos%
+	[showiconlogo,size=4cm,bgcolor=yellow!15,decocolor=teal!75,font=\large]
+	{$(x+1)(x+2)$ § $x^2+2x+1$ § $(x-7)^2-4$}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\tkztriminos[showtxtlogo]{%
+	\faHatWizard\,--\,\faHatWizard\,--\,\faHatWizard
+	§
+	\faPython\,--\,\faPython\,--\,\faPython
+	§
+	\faTimes\,--\,\faTimes\,--\,\faTimes
+}
+\end{DemoCode}
+
+\subsection{Several TriMinos}
+
+\begin{DemoCode}{}
+\tkztriminos%
+	[size=5cm,showiconlogo,bgcolor=orange!15,font=\large,decocolor=purple,%
+	iconlogo={\scalebox{2.15}[2.15]{\textcolor{blue!75!black}{\faPuzzlePiece}}}]%
+	<scale=0.75,transform shape>%
+	{%
+	$1+1$ § $2$ §
+	$2+2$ § $4$ §
+	$3+3$ § $6$ §
+	{$x_{1}=\frac{-3-\sqrt{41}}{6}$ ; $x_{2}=\frac{-3+\sqrt{41}}{6}$} § $9x^{2}+9x-8$ §
+	$5+5$ § $10$ §
+	$6+6$ § $12$ §
+	$7+7$ § $14$ §
+	$8+8$ § $16$ §
+	$9+9$ § $18$ §
+	$10+10$ § $20$ §
+	$11+11$ § $22$ §
+	$12+12$ § $24$ §
+	Joker
+}
+\end{DemoCode}
+
+\pagebreak
+
+\begin{DemoCode}{}
+\tkztriminos%
+	[showiconlogo,iconlogo={\includegraphics[height=0.75cm]{pfl-checked}}]%
+	{1a§1b§2a§2b§3a§3b§4a§4b§5a§5b§6a§6b§7a§7b§8a§8b§9a§9b§joker}
+\end{DemoCode}
+
+\pagebreak
+
+\section{History}
+
+\texttt{0.1.0: Initial version}
+
+\end{document}

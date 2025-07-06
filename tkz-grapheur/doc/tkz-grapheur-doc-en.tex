@@ -1,0 +1,1811 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[11pt,a4paper]{ltxdoc}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{tkz-grapheur}
+\pgfplotsset{compat=newest}
+\usepackage{amsmath}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{nicefrac}
+\usepackage{fontawesome5}
+\usepackage{tcolorbox}
+\usepackage{minted2}
+\tcbuselibrary{skins,minted}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [tkz-grapheur]}
+\rfoot{\sffamily\small - \thepage{} -}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+\def\TPversion{0.2.5}
+\def\TPdate{30/05/2025}
+\usepackage{soul}
+\usepackage{codehigh}
+\usepackage{tabularray}
+\usepackage{alphalph}
+\sethlcolor{lightgray!25}
+\NewDocumentCommand\MontreCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+\usepackage[english]{babel}
+
+\renewcommand{\footnoterule}{\vfill\kern -3pt \hrule width 0.4\columnwidth \kern 2.6pt}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{tkz-grapheur [en]}}\\
+				\\
+				{\LARGE A grapher, based}\\
+				\\
+				{\LARGE on \textsf{\TikZ} and \textsf{xint}.}\\
+				\\
+				{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{tabular}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}} \\
+\end{tabular}
+\end{center}
+
+\hrule
+
+\vfill
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5,halign=center]
+\begin{GraphTikz}[x=0.85cm,y=0.35cm,Xmin=0,Xmax=10,Ymin=0,Ymax=16]
+	%préparation de la fenêtre
+	\DrawAxisGrids[Enlarge=2.5mm,Font=\small]{0,1,...,10}{0,2,...,16}
+	%déf des fonctions avec nom courbe + nom fonction + expression
+	\DefineCurve[Name=cf]<f>{3*x-6}
+	\DefineCurve[Name=cg]<g>{-(x-6)^2+12}
+	%antécédents et intersection
+	\FindIntersections[Disp=false,Name=K]{cf}{cg}
+	\FindCounterimage[DispLine,Color=orange,Name=I]{cg}{8}
+	\FindCounterimage[Disp=false,Name=J]{cg}{0}
+	%intégrale sous une courbe, avec intersection
+	\DrawIntegral%
+	[Colors=blue/purple,Bounds=nodes,Style=hatch,Hatch=bricks]%
+		{g(x)}%
+		{(I-2)}{(J-2)}
+	%intégrale entre les deux courbes
+	\DrawIntegral[Bounds=nodes,Type=fct/fct]{f(x)}[g(x)]{(K-1)}{(K-2)}
+	%tracé des courbes et des points
+	\DrawCurve[Color=red]{f(x)}
+	\DrawCurve[Color=teal]{g(x)}
+	\MarkPts<\small>{(K-1)/below right/L,(K-2)/above left/M}%
+	\MarkPts[violet]<\small>{(I-1)/above left/D,(I-2)/above right/E}%
+	%essai de tangente
+	\DrawTangent[Colors=pink!75!black/yellow,OffsetL=2,OffsetR=2,DispPt]{g}{5}
+	%essai d'image
+	\DrawRanges[Colors=cyan]{g}{7,7.25,7.5}
+	%surimpression des axes
+	\DrawAxisGrids[Grads=false,Grid=false,Enlarge=2.5mm]{0,1,...,10}{0,2,...,16}
+\end{GraphTikz}
+\end{tcolorbox}
+
+\vspace*{5mm}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5,halign=center]
+\begin{GraphTikz}%
+	[x=3.5cm,y=4cm,
+	Xmin=0,Xmax=3.5,Xgrid=pi/12,Xgrids=pi/24,
+	Ymin=-1.05,Ymax=1.05,Ygrid=0.2,Ygrids=0.05]
+	%préparation de la fenêtre
+	\DrawAxisGrids[Grads=false,Enlarge=2.5mm,Format=ntrig/nsqrt]%
+	{pi/6,pi/4,pi/3,pi/2,2*pi/3,3*pi/4,5*pi/6,pi}
+	{0,sqrt(2)/2,1/2,sqrt(3)/2,1,-1,-sqrt(3)/2,-1/2,-sqrt(2)/2}
+	%rajouter des valeurs
+	\AddXvalues{0.25,1.4,3.3}{\num{0.25},\num{1.4},\num{3.3}}
+	%fonction trigo (déf + tracé)
+	\DefineCurve[Name=ccos,Start=0,End=pi]<fcos>{cos(x)}
+	\DefineCurve[Name=csin,Start=0,End=pi]<fsin>{sin(x)}
+	%intégrale
+	\FindIntersections[Disp=false,Name=JKL]{ccos}{csin}
+	%\DefinirPts{FIN/pi/0}
+	\DrawIntegral%
+	[Bounds=node/abs,Type=fct/fct,Colors=cyan/cyan!50]%
+		{fsin(x)}[fcos(x)]%
+		{(JKL-1)}{pi}
+	%tracé des courbes
+	\DrawCurve[Color=red,Start=0,End=pi]{fcos(x)}
+	\DrawCurve[Color=olive,Start=0,End=pi]{fsin(x)}
+	%antécédent(s)
+	\DrawCounterimage[Color=blue/teal!50!black,Lines]{ccos}{-0.25}
+	\DrawCounterimage[Colors=red/magenta!50!black,Lines]{csin}{0.5}
+	\DrawCounterimage[Colors=orange/orange!50!black,Lines]{csin}{sqrt(2)/2}
+	\DrawCounterimage[Colors=green!50!black/green,Lines]{csin}{sqrt(3)/2}
+	%surimpression axes
+	\DrawAxisGrids[Grid=false,Enlarge=2.5mm,Format=ntrig/nsqrt]%
+	{pi/6,pi/4,pi/3,pi/2,2*pi/3,3*pi/4,5*pi/6,pi}
+	{0,sqrt(2)/2,1/2,sqrt(3)/2,1,-1,-sqrt(3)/2,-1/2,-sqrt(2)/2}
+\end{GraphTikz}
+\end{tcolorbox}
+
+\vfill
+
+\hfill{\footnotesize\textit{\ttfamily To my Dad.}}
+
+\vspace*{5mm}
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+\hrule
+
+\vspace*{5mm}
+
+\pagebreak
+
+\section{Introduction}
+
+\subsection{Description and general ideas}
+
+With this modest package, far from the capabilities offered by the excellent packages \MontreCode{tkz-*}\footnote{for example tkz-base \url{https://ctan.org/pkg/tkz-base} and tkz- fct \url{https://ctan.org/pkg/tkz-fct}.} (by Alain Matthes) or \MontreCode{tzplot}\footnote{CTAN: \url{https://ctan.org/pkg/ tzplot}.} (by In-Sung Cho), it is possible to work on function graphs, in \TikZ\ language, in an \textit{intuitive} and \textit{explicit} way.
+
+\smallskip
+
+Concerning the overall operation:
+
+\smallskip
+
+\begin{itemize}
+	\item particular styles for the objects used have been defined, but they can be modified locally;
+	\item the name of the commands is in \textit{operational} form, so that the construction of the graphic elements has an almost \textit{algorithmic} form.
+\end{itemize}
+
+\subsection{Overall operation}
+
+To schematize, it \textit{is enough}:
+
+\smallskip
+
+\begin{itemize}
+	\item to declare the parameters of the graphics window (\textbf{units in cm !});
+	\item to display grid/axes/graduations;
+	\item to declare functions or interpolation curves;
+	\item to possibly declare particular points;
+	\item to place a point scatter.
+\end{itemize}
+
+\smallskip
+
+It will then be possible:
+
+\begin{itemize}
+	\item to draw curves;
+	\item to graphically determine images or backgrounds;
+	\item to add elements of derivation (tangents) or integration (domain);
+	\item to draw a linear fit line or the curve of another fit.
+\end{itemize}
+
+\subsection{Packages used, and package options}
+
+The package uses:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{tikz}, with the libraries \MontreCode{calc,intersections,patterns,patterns.meta,bbox};
+	\item \MontreCode{simplekv}, \MontreCode{xintexpr}, \MontreCode{xstring}, \MontreCode{listofitems};
+	\item \MontreCode{xint-regression}\footnote{CTAN: \url{https://ctan.org/pkg/xint-regression}.} (for regressions, switchable via \MontreCode{[noxintreg]}).
+\end{itemize}
+
+\smallskip
+
+The package also loads \MontreCode{siunitx} with the classic options, but it is possible not to load it using the \MontreCode{[nosiunitx]} option.
+
+\smallskip
+
+The package also loads the \TikZ\ \MontreCode{babel} library, but it is possible not to load it using the \MontreCode{[notikzbabel]} option.
+
+\smallskip
+
+The different options are obviously cumulative.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%loading by default, with french setup of siunitx
+\usepackage{tkz-grapheur}
+%loading by default, with normal setup of siunitx
+\usepackage[english]{tkz-grapheur}
+
+%loading without sinuitx, to be loaded manually
+\usepackage[nosiunitx]{tkz-grapheur}
+
+%loading without tikz.babel
+\usepackage[notikzbabel]{tkz-grapheur}
+\end{tcblisting}
+
+Also note that certain commands can use packages like \MontreCode{nicefrac}, which will therefore have to be loaded if necessary.
+
+\smallskip
+
+Concerning the \textit{calculations} and \textit{plots} part, the \MontreCode{xint} package takes care of it.
+
+\subsection{Warnings}
+
+It is possible, due to the (multiple) calculations carried out internally, that the compilation time may be a little \textit{long}.
+
+\smallskip
+
+The precision of the (determination) results seems to be around $10^{-4}$, which should normally guarantee \textit{satisfactory} plots and readings. It is still advisable to be cautious about the results obtained and those expected.
+
+\subsection{Introductory example}
+
+For example, we can start from the following example to \textit{illustrate} the flow of the commands for this package. The commands and syntax will be detailed in the following sections!
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\begin{GraphTikz}%
+	[x=7.5cm,y=7.5cm,Xmin=0,Xmax=1.001,Xgrid=0.1,Xgrids=0.02,
+	Ymin=0,Ymax=1.001,Ygrid=0.1,Ygrids=0.02]
+	\DrawAxisGrids[Enlarge=2.5mm,Font=\small]%
+		{0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1}
+		{0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1}
+	\DefineCurve[Name=cf,Start=0,End=1]<f>{x*exp(x-1)}
+	\DefineCurve[Name=delta,Start=0,End=1]<D>{x}
+	\DrawIntegral[Type=fct/fct]{f(x)}[D(x)]{0}{1}
+	\DrawCurve[Color=red]{f(x)}
+	\DrawCurve[Color=teal]{D(x)}
+	\DrawRanges[Colors=blue/cyan,Lines]{f}{0.8,0.9}
+	\DrawCounterimage[Colors=green!50!black/olive,Lines]{cf}{0.5}
+\end{GraphTikz}
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,text only}
+	\begin{GraphTikz}%
+		[x=7.5cm,y=7.5cm,Xmin=0,Xmax=1.001,Xgrid=0.1,Xgrids=0.02,
+		Ymin=0,Ymax=1.001,Ygrid=0.1,Ygrids=0.02]
+		\DrawAxisGrids[Enlarge=2.5mm,Font=\small]%
+		{0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1}
+		{0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1}
+		\DefineCurve[Name=cf,Start=0,End=1]<f>{x*exp(x-1)}
+		\DefineCurve[Name=delta,Start=0,End=1]<D>{x}
+		\DrawIntegral[Type=fct/fct]{f(x)}[D(x)]{0}{1}
+		\DrawCurve[Color=red]{f(x)}
+		\DrawCurve[Color=teal]{D(x)}
+		\DrawRanges[Colors=blue/cyan,Lines]{f}{0.8,0.9}
+		\DrawCounterimage[Colors=green!50!black/olive,Lines]{cf}{0.5}
+	\end{GraphTikz}
+\end{tcblisting}
+
+\newpage
+
+\section{Basic Styles and Environment Creation}
+
+\subsection{Basic Styles}
+
+The styles used for plots are given below.
+
+\smallskip
+
+For \textit{simplicity} purposes, only the color of the elements can be configured, but if the user wishes, he can redefine the proposed styles.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%parameters declared and stored (usable in the environment a posteriori)
+\tikzset{
+	Xmin/.store in=\pflxmin,Xmin/.default=-3,Xmin=-3,
+	Xmax/.store in=\pflxmax,Xmax/.default=3,Xmax=3,
+	Ymin/.store in=\pflymin,Ymin/.default=-3,Ymin=-3,
+	Ymax/.store in=\pflymax,Ymax/.default=3,Ymax=3,
+	Origx/.store in=\pflOx,Origx/.default=0,Origx=0,
+	Origy/.store in=\pflOy,Origy/.default=0,Origy=0,
+	Xgrid/.store in=\pflgrillex,Xgrid/.default=1,Xgrid=1,
+	Xgrids/.store in=\pflgrillexs,Xgrids/.default=0.5,Xgrids=0.5,
+	Ygrid/.store in=\pflgrilley,Ygrid/.default=1,Ygrid=1,
+	Ygrids/.store in=\pflgrilleys,Ygrids/.default=0.5,Ygrids=0.5
+}
+\end{tcblisting}
+
+We therefore find:
+
+\smallskip
+
+\begin{itemize}
+	\item the origin of the mark (\MontreCode{Origx}/\MontreCode{Origy});
+	\item the extreme values of the axes (\MontreCode{Xmin}/\MontreCode{Xmax}/\MontreCode{Ymin}/\MontreCode{Ymax});
+	\item the parameters of the main and secondary grids (\MontreCode{Xgrid}/\MontreCode{Xgrids}/\MontreCode{Ygrid}/\MontreCode{Ygrids}).
+\end{itemize}
+
+\smallskip
+
+Concerning the styles of \textit{objects}, they are given below.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\tikzset{tkzgrphnode/.style={}}
+\tikzset{tkzgrphpoint/.style={line width=0.95pt}}
+\tikzset{tkzgrphpointc/.style={radius=1.75pt}}
+\tikzset{tkzgrphscatter/.style={radius=1.75pt}}
+\tikzset{tkzgrphframe/.style={line width=0.8pt,gray}}
+\tikzset{tkzgrphcurve/.style={line width=1.05pt}}
+\tikzset{tkzgrphline/.style={line width=0.8pt}}
+\tikzset{tkzgrpharrowl/.style={<-,>=latex}}
+\tikzset{tkzgrpharrowr/.style={->,>=latex}}
+\tikzset{tkzgrpharrowlr/.style={<->,>=latex}}
+\tikzset{tkzgrphcounterimage/.style={line width=0.9pt,densely dashed}}
+\tikzset{tkzgrphrange/.style={line width=0.9pt,densely dashed,->,>=latex}}
+\tikzset{tkzgrphgridp/.style={thin,lightgray}}
+\tikzset{tkzgrphgrids/.style={very thin,lightgray}}
+\tikzset{tkzgrphaxes/.style={line width=0.8pt,->,>=latex}}
+\end{tcblisting}
+
+The idea is therefore to be able to redefine styles globally or locally, and possibly add elements, using \mintinline{latex}|mystyle/.append style={...}|.
+
+\subsection{Creating the environment}\label{creaenvt}
+
+The proposed environment is based on \TikZ, so that any \textit{classic} command linked to \TikZ\ can be used alongside the package commands!
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\begin{GraphTikz}[tikz options]<keys>
+	%code(s)
+\end{GraphTikz}
+\end{tcblisting}
+
+The \MontreCode{[tikz options]} are the \textit{classic} options that can be passed to a \TikZ\ environment, as well as the \textsf{axes/grids/window} keys presented previously.
+
+\smallskip
+
+The specific (and optional) \MontreCode{<keys>} are:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{ThickGrad}: size of the axis graduations (\MontreCode{3pt} for 3pt \textit{above} and 3pt \textit{below});
+	\item \MontreCode{Frame}: boolean (\MontreCode{false} by default) to display a frame which delimits the graphic window (excluding possible graduations).
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}
+	[x=0.075cm,y=0.03cm,Xmin=0,Xmax=160,Xgrid=20,Xgrids=10,
+	Origy=250,Ymin=250,Ymax=400,Ygrid=25,Ygrids=5]
+	<Frame>
+\end{GraphTikz}
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.9cm,y=0.425cm,Xmin=4,Xmax=20,Origx=4,
+	Ymin=40,Ymax=56,Ygrid=2,Ygrids=1,Origy=40]
+	<Frame>
+\end{GraphTikz}
+\end{tcblisting}
+
+It will obviously be more meaningful with the added graphic elements!
+
+\pagebreak
+
+\subsection{Grids and axes}\label{creaaxesgr}
+
+The first command \textit{useful} will allow you to create the grids, axes and graduations.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%in the GraphiqueTikz environment
+\DrawAxisGrids[keys]{gradX}{gradY}
+\end{tcblisting}
+
+The optional \MontreCode{[keys]} available are:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{Grid}: boolean (\MontreCode{true} by default) to display the grids (for a single grid, simply set the identical parameters for \MontreCode{Xgrid}/\MontreCode{Xgrids} or \MontreCode {Ygrid}/\MontreCode{Ygrids});
+	\item \MontreCode{Enlarge}: addition at the end of the axes (\MontreCode{0} by default);
+	\item \MontreCode{Grads}: boolean (\MontreCode{true} by default) for graduations;
+	\item \MontreCode{Font}: global font for graduations {\MontreCode{empty} by default};
+	\item \MontreCode{Format}: special formatting (see below) of the axis values.
+\end{itemize}
+
+\smallskip
+
+Concerning the \MontreCode{Format} key, it allows you to specify a specific setting for the axis values.
+
+\smallskip
+
+It can be given in the form \MontreCode{fmt} for combined formatting, or in the form \MontreCode{fmtX/fmtY} to differentiate the formatting.
+
+\smallskip
+
+The possible options are:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{num}: format with \textsf{siunitx};
+	\item \MontreCode{year}: format in year;
+	\item \MontreCode{frac}: format as fraction \textsf{frac};
+	\item \MontreCode{dfrac}: format as fraction \textsf{dfrac};
+	\item \MontreCode{nfrac}: format as fraction \textsf{nicefrac};\hfill (to load!)
+	\item \MontreCode{trig}: format in trig with \textsf{frac};
+	\item \MontreCode{dtrig}: format in trig with \textsf{dfrac};
+	\item \MontreCode{ntrig}: format in trig with \textsf{nfrac};
+	\item \MontreCode{sqrt}: format in root with \textsf{frac};
+	\item \MontreCode{dsqrt}: format in root with \textsf{dfrac};
+	\item \MontreCode{nsqrt}: format in root with \textsf{nicefrac}.
+\end{itemize}
+
+\smallskip
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}
+	[x=0.075cm,y=0.03cm,Xmin=0,Xmax=160,Xgrid=20,Xgrids=10,
+	Origy=250,Ymin=250,Ymax=400,Ygrid=25,Ygrids=5]
+	\DrawAxisGrids[Enlarge=2.5mm,Font=\small]{0,10,...,160}{250,275,...,400}
+\end{GraphTikz}
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.9cm,y=0.425cm,Xmin=4,Xmax=20,Origx=4,
+	Ymin=40,Ymax=56,Ygrid=2,Ygrids=1,Origy=40]
+	\DrawAxisGrids[Enlarge=2.5mm,Font=\small]{4,5,...,20}{40,42,...,56}
+\end{GraphTikz}
+\end{tcblisting}
+
+Note that there are the Boolean keys \MontreCode{[Behind]} (without the graduations) and \MontreCode{[Above]} (without the grid) to display the axes in \textit{under/over}-printing mode in the case of integrals for example.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=2.75cm,y=3cm,
+	Xmin=0,Xmax=3.5,Xgrid=pi/12,Xgrids=pi/24,
+	Ymin=-1.05,Ymax=1.05,Ygrid=0.2,Ygrids=0.05]
+	\DrawAxisGrids[Enlarge=2.5mm,Format=dtrig/nsqrt,Font=\footnotesize]%
+	{pi/6,pi/4,pi/3,pi/2,2*pi/3,3*pi/4,5*pi/6,pi}
+	{0,sqrt(2)/2,1/2,sqrt(3)/2,1,-1,-sqrt(3)/2,-1/2,-sqrt(2)/2}
+\end{GraphTikz}
+\end{tcblisting}
+
+In the case where the formatting does not give satisfactory result(s), it is possible to use a generic command for placing the graduations.
+
+\subsection{Adding values manually}\label{additionvals}
+
+It is also possible to use a specific command to place values on the axes, independently of an \textit{automated} formatting system.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+in the environment
+\AddXvalues[keys]{grads}{formatted values}
+\AddYvalues[keys]{grads}{formatted values}
+\end{tcblisting}
+
+The optional \MontreCode{[keys]} available are:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{Font}: global font for graduations {\MontreCode{empty} by default};
+	\item \MontreCode{Lines}: boolean to add the tick marks {\MontreCode{true} by default}.
+\end{itemize}
+
+\smallskip
+
+The mandatory arguments correspond to the x-coordinates (in \TikZ\ language) and to the labels (in \LaTeX\ language) of the graduations.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=2.75cm,y=3cm,
+	Xmin=0,Xmax=3.5,Xgrid=pi/12,Xgrids=pi/24,
+	Ymin=-1.05,Ymax=1.05,Ygrid=0.2,Ygrids=0.05]
+	\DrawAxisGrids[Grads=false,Enlarge=2.5mm]{}{}
+	\AddXvalues
+		{0.15,0.6,pi/2,2.8284}
+		{\num{0.15},$\frac35$,$\displaystyle\frac{\pi}{2}$,$\sqrt{8}$}
+	\AddYvalues
+		{-1,0.175,0.3,sqrt(3)/2}
+		{\num{-1},\num{0.175},$\nicefrac{3}{10}$,$\frac{\sqrt{3}}{2}$}
+\end{GraphTikz}
+\end{tcblisting}
+
+\pagebreak
+
+\section{Specific definition commands}
+
+\subsection{Draw a line}\label{tracstraight}
+
+The idea is to propose a command to draw a line (or an asymptote), from:
+
+\begin{itemize}
+	\item of two points (or nodes);
+	\item of a point (or node) and the slope.
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%in the GraphiqueTikz environment
+\DrawLine[keys]{point or node}{point or node or slope}
+\DrawAsymptote[keys]{x value}
+\end{tcblisting}
+
+The optional \MontreCode{[keys]} available are:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{Name}: possible name of the plot (for reuse);
+	\item \MontreCode{Slope}: boolean to specify that the slope is used (\MontreCode{false} by default);
+	\item \MontreCode{Start}: start of the plot (\MontreCode{\textbackslash pflxmin} by default);
+	\item \MontreCode{End}: end of the plot (\MontreCode{\textbackslash pflxmax} by default);
+	\item \MontreCode{Color}: color of the trace (\MontreCode{black} by default).
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\DrawAxisGrids[Enlarge=2.5mm]{auto}{auto}
+	\DefinePts[Mark,Color=gray]{A/-4/3,B/2/0,C/0/-1}
+	\DrawLine[Color=red]{(-2,-1)}{(2,4)}
+	\DrawLine[Color=blue,Start=-5,End=3]{(A)}{(B)}
+	\DrawLine[Color=olive,Slope]{(C)}{0.25}
+	\DrawAsymptote[Color=brown]{-6}
+\end{GraphTikz}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Define a function, draw the curve of a function}\label{deftracfct}
+
+The idea is to define a function, for later reuse. This command \textit{creates} the function, without tracing it, because in certain cases elements will have to be traced beforehand.
+
+\smallskip
+
+There is also a command to plot the curve of a previously defined function.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%in the GraphiqueTikz environment
+\DefineCurve[keys]<fct name>{xint formula}
+\DrawCurve[keys]{xint formula}
+\end{tcblisting}
+
+The optional \MontreCode{[keys]} for definition or tracing are:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{Start}: lower bound of the definition set (\MontreCode{\textbackslash pflxmin} by default);
+	\item \MontreCode{End}: lower bound of the definition set (\MontreCode{\textbackslash pflxmax} by default);
+	\item \MontreCode{Name}: name of the curve (important for the rest!);
+	\item \MontreCode{Color}: color of the trace (\MontreCode{black} by default);
+	\item \MontreCode{Step}: plot step (it is determined \textit{automatically} at the start but can be modified);
+	\item \MontreCode{Trace}: boolean to also trace the curve (\MontreCode{false} by default).
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.9cm,y=0.425cm,Xmin=4,Xmax=20,Origx=4,
+	Ymin=40,Ymax=56,Ygrid=2,Ygrids=1,Origy=40]
+	\DrawAxisGrids[Enlarge=2.5mm,Font=\small]{4,5,...,20}{40,42,...,56}
+	%definition of the function + drawing of the curve
+	\DefineCurve[Name=cf,Start=5,End=19]<f>{-2*x+3+24*log(2*x)}
+	\DrawCurve[Color=red,Start=5,End=19]{f(x)}
+	%or in a single command if "sufficient"
+	%\DefineCurve[Name=cf,Start=5,End=19,Trace]<f>{-2*x+3+24*log(2*x)}
+\end{GraphTikz}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Define/draw an interpolation curve (simple)}\label{deftracinterpo}
+
+It is also possible to define a curve via support points, therefore a simple interpolation curve.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%in the GraphiqueTikz environment
+\DefineInterpoCurve[keys]{list of support points}
+\DrawInterpoCurve[keys]{list of support points}
+\end{tcblisting}
+
+The optional \MontreCode{[keys]} for definition or tracing are:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{Name}: name of the interpolation curve (important for the rest!);
+	\item \MontreCode{Color}: color of the trace (\MontreCode{black} by default);
+	\item \MontreCode{Tension}: setting the \textit{tension} of the interpolation plot (\MontreCode{0.5} by default);
+	\item \MontreCode{Trace}: boolean to also trace the curve (\MontreCode{false} by default).
+\end{itemize}
+
+The mandatory argument allows you to specify the list of support points in the form \MontreCode{(x1,y1)(x2,y2)...}.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\DrawAxisGrids[Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	%simple interpolation curves (with diff tension)
+	\DefineInterpoCurve[Name=interpotest,Color=blue,Trace]%
+		{(-6,4)(-2,-2)(3,3.5)}
+	\DefineInterpoCurve[Name=interpotest,Color=red,Trace,Tension=1]%
+		{(-6,4)(-2,-2)(3,3.5)}
+\end{GraphTikz}
+\end{tcblisting}
+
+\newpage
+
+\subsection{Define/draw an interpolation curve (Hermite)}\label{deftracfctspline}
+
+It is also possible to define a curve via support points, therefore an interpolation curve with derivative control.
+
+\smallskip
+
+Some operations require different techniques depending on the type of function used, a \textsf{Boolean} key \MontreCode{Spline} will allow the code to adapt its calculations depending on the object used.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%in the GraphiqueTikz environment
+\DefineSplineCurve[keys]{list of support points}[\macronomspline]
+\DrawSplineCurve[keys]{list of support points}[\macronomspline]
+\end{tcblisting}
+
+The optional \MontreCode{[keys]} for definition or tracing are:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{Name}: name of the interpolation curve (important for the rest!);
+	\item \MontreCode{Coeffs}: modify (see the \textsf{ProfLycee}\footnote{CTAN documentation: \url{https://ctan.org/pkg/proflycee}} the \textit{coefficients} of the spline;
+	\item \MontreCode{Color}: color of the trace (\MontreCode{black} by default);
+	\item \MontreCode{Trace}: boolean to also trace the curve (\MontreCode{false} by default).
+\end{itemize}
+
+The mandatory argument allows you to specify the list of support points in the form \MontreCode{x1/y1/f'1§x2/y2/f'2§...} with:
+
+\begin{itemize}
+	\item \MontreCode{xi/yi} the coordinates of the point;
+	\item \MontreCode{f'i} the derivative at the support point.
+\end{itemize}
+
+\smallskip
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\DrawAxisGrids[Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	%definition of the list of spline support points
+	\def\LISTETEST{-6/4/-2§-5/2/-2§-4/0/-2§-2/-2/0§1/2/2§3/3.5/0.5}
+	%definition and plot of the cubic spline
+	\DefineSplineCurve[Name=splinetest,Trace,Color=olive]{\LISTETEST}
+\end{GraphTikz}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Define points as nodes}\label{defpts}
+
+The second idea is to work with \TikZ nodes, which could be useful for tangent plots, representations of integrals$\ldots$
+
+\smallskip
+
+It is also possible to define nodes for \textit{image} points.
+
+\smallskip
+
+Certain commands (explained later) allow you to determine particular points of curves in the form of nodes, so it seems interesting to be able to define them directly.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%by coordinates
+\DefinePts[keys]{Name1/x1/y1,Name2/x2/y2,...}
+\end{tcblisting}
+
+The optional \MontreCode{[keys]} available are:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{Mark}: boolean to mark points (\MontreCode{false} by default);
+	\item \MontreCode{Color}: color of the points, if \MontreCode{Mark=true} (\MontreCode{black} by default).
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%as image
+\DefineRange[keys]{object}{abscissa}
+\end{tcblisting}
+
+The optional \MontreCode{[keys]} available are:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{Name}: node name (\MontreCode{empty} by default);
+	\item \MontreCode{Spline}: boolean to specify that a spline is used (\MontreCode{false} by default).
+\end{itemize}
+
+The first mandatory argument is the \textit{object} considered (name of the curve for the spline, function otherwise); the second is the abscissa of the point considered.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.9cm,y=0.425cm,Xmin=4,Xmax=20,Origx=4,
+	Ymin=40,Ymax=56,Ygrid=2,Ygrids=1,Origy=40]
+	\DrawAxisGrids[Enlarge=2.5mm,Font=\small]{4,5,...,20}{40,42,...,56}
+	%definition of the function + drawing of the curve
+	\DefineFunction[Name=cf,Start=5,End=19,Trace,Color=red]<f>{-2*x+3+24*log(2*x)}
+	%manual nodes
+	\DefinePts[Mark,Color=brown]{A/7/42,B/16/49}
+	%imagenode
+	\DefineRange[Name=IMGf]{f}{14}
+	\MarkPts*[Style=x,Color=blue]{(IMGf)} %see next section;-)
+\end{GraphTikz}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Mark Points}\label{markpts}
+
+The idea is to offer something to score points with a particular style.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%in the GraphiqueTikz environment
+\MarkPts(*)[keys]<font>{list}
+\end{tcblisting}
+
+The \textit{starred} version scores the points without the \textit{names}, while the \textit{unstarred} version displays them:
+
+\begin{itemize}
+	\item in the case of the \textit{starred} version, the list should be given in the form \MontreCode{(ptA),(ptB),...};
+	\item otherwise, the list should be given in the form \MontreCode{(ptA)/poslabelA/labelA,...}.
+\end{itemize}
+
+\smallskip
+
+The optional \MontreCode{[keys]} available are:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{Color}: color (\MontreCode{black} by default);
+	\item \MontreCode{Style}: style of marks (\MontreCode{o} by default).
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}[x=1.5cm,y=1.5cm,Ymin=-2]
+	\DrawAxisGrids[Enlarge=2.5mm]{auto}{auto}
+	\DefinePts{A/1.75,-1.25}\MarkPts[Color=pink]{(A)/below/A} %round (default)
+	\MarkPts[Color=teal]{(1,1)/below/M}
+	\MarkPts[Color=red,Style=x]{(1.25,1)/below/$A$} %cross
+	\MarkPts[Color=orange,Style=+]<\small\sffamily>{(1.5,1)/below/K} %plus
+	\MarkPts[Color=blue,Style=c]{(1.75,1)/below/P} %square
+	\MarkPts[Color=gray,Style=d]{(2,1)/below/P} %diamond
+	\MarkPts*[Color=orange/yellow]{(2,2),(2.5,2.25)} %two-tone round
+	\MarkPts*[Style=+,Color=red]{(1,2)}
+	\MarkPts*[Style=x,Color=blue]{(2.25,1)}
+	\MarkPts*[Style=c,Color=magenta]{(-2,-1)}
+	\MarkPts[Color=red,Style=x]{(-1,1)/below/$A$,(-2,2)/below left/$B$}
+\end{GraphTikz}
+\end{tcblisting}
+
+Note that it is also possible to modify the size of the \MontreCode{o/x/+/c} marks via the \MontreCode{[keys]}:
+
+\begin{itemize}
+	\item \MontreCode{Sizex=...} (\MontreCode{2pt} by default) for points \textit{cross};
+	\item \MontreCode{Sizeo=...} (\MontreCode{1.75pt} by default) for the points \textit{circle};
+	\item \MontreCode{Sizec=...} (\MontreCode{2pt} by default) for the \textit{square} points.
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}[x=1cm,y=1cm,Xmin=0,Ymin=0]
+	\DrawAxisGrids[Enlarge=2.5mm]{auto}{auto}
+	\MarkPts[Color=red,Style=x,Size=3.5pt]{(1.25,1.25)/below/$A$}
+	\MarkPts[Color=teal,Size=2.5pt]{(2,2)/right/$A$}
+	\MarkPts*[Color=orange,Style=c,Size=4pt]{(0.5,2.5)}
+\end{GraphTikz}
+\end{tcblisting}
+
+\subsection{Retrieve node coordinates}\label{recupcoordo}
+
+It is also possible, with a view to reusing coordinates, to recover the coordinates of a node (defined or determined).
+
+\smallskip
+
+The calculations are carried out by floating according to the (re)calculated units, the values are therefore approximated !
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%in the GraphiqueTikz environment
+\GetXcoord{node}[\macrox]
+\GetYcoord{node}[\macroy]
+\GetXYcoord{node}[\macrox][\macroy]
+\end{tcblisting}
+
+\subsection{Place text}\label{placetxt}
+
+Note that a text placement command is available.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%in the GraphiqueTikz environment
+\DrawTxt[keys]{(node or coordinates)}{text}
+\end{tcblisting}
+
+The available \MontreCode{[keys]} are:
+
+\begin{itemize}
+	\item \MontreCode{Font=...} (\MontreCode{\textbackslash normalsize\textbackslash normalfont} by default) for the font;
+	\item \MontreCode{Color=...} (\MontreCode{black} by default) for the color;
+	\item \MontreCode{Position=...} (\MontreCode{empty} by default) for the position of the text relative to the coordinates.
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}[x=1cm,y=1cm,Xmin=0,Xmax=5,Ymin=0,Ymax=1]
+	\DrawAxisGrids[Enlarge=2.5mm]{auto}{auto}
+	\DrawTxt[Color=red,Font=\LARGE,Position=right]{(1.5,0.5)}{curve $C_1$}
+\end{GraphTikz}
+\end{tcblisting}
+
+\section{Specific commands for using curves}
+
+\subsection{Image placement}\label{images}
+
+It is possible to place points (images) on a curve, with possible construction lines.
+
+The function/curve used must have been declared previously for this command to work.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%in the GraphiqueTikz environment
+\DrawRanges[keys]{function or curve}{list of abscissa}
+\end{tcblisting}
+
+The optional \MontreCode{[keys]} available are:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{Lines}: boolean to display construction traits (\MontreCode{false} by default);
+	\item \MontreCode{Colors}: color of the points/lines, in the form \MontreCode{Couleurs} or \MontreCode{ColPoint/ColLines};
+	\item \MontreCode{Spline}: boolean to specify that the curve used is defined as a \textsf{spline} (\MontreCode{false} by default).
+\end{itemize}
+
+\smallskip
+
+The first mandatory argument allows you to specify:
+
+\smallskip
+
+\begin{itemize}
+	\item the name of the curve in the case \MontreCode{Spline=true};
+	\item the name of the function otherwise.
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.9cm,y=0.425cm,Xmin=4,Xmax=20,Origx=4,
+	Ymin=40,Ymax=56,Ygrid=2,Ygrids=1,Origy=40]
+	\DrawAxisGrids[Enlarge=2.5mm,Font=\small]{4,5,...,20}{40,42,...,56}
+	%definition of the function + drawing of the curve
+	\DefineCurve[Name=cf,Start=5,End=19,Trace,Color=red]<f>{-2*x+3+24*log(2*x)}
+	%images
+	\DrawRanges[Lines,Colors=teal/blue]{f}{6,7,8,9,10}
+\end{GraphTikz}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Antecedent determination}\label{defanteced}
+
+It is possible to graphically determine the antecedents of a given reality.
+
+The function/curve used must have been declared previously for this command to work.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%in the GraphiqueTikz environment
+\FindCounterimage[keys]{curve}{k}
+\end{tcblisting}
+
+The optional \MontreCode{[keys]} available are:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{Name}: base of the name of the \textbf{nodes} intersection (\MontreCode{S} by default, which will give \textsf{S-1}, \textsf{S-2}, etc);
+	\item \MontreCode{Disp}: boolean to display the points (\MontreCode{true} by default);
+	\item \MontreCode{Color}: color of the points (\MontreCode{black} by default);
+	\item \MontreCode{DispLine}: boolean to display the horizontal line (\MontreCode{false} by default).
+\end{itemize}
+
+\smallskip
+
+The first mandatory argument allows you to specify the \textbf{name} of the curve.
+
+\smallskip
+
+The second mandatory argument allows you to specify the value to reach.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.9cm,y=0.425cm,Xmin=4,Xmax=20,Origx=4,
+	Ymin=40,Ymax=56,Ygrid=2,Ygrids=1,Origy=40]
+	\DrawAxisGrids[Enlarge=2.5mm,Font=\small]{4,5,...,20}{40,42,...,56}
+	%definition of the function + drawing of the curve
+	\DefineCurve[Name=cf,Start=5,End=19,Trace,Color=red]<f>{-2*x+3+24*log(2*x)}
+	%history
+	\FindCounterimage[Color=teal,DispLine,Disp]{cf}{53}
+	%the two antecedents are at nodes (S-1) and (S-2)
+\end{GraphTikz}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Antecedent construction}\label{tracanteced}
+
+It is possible to graphically construct the antecedents.
+
+The function/curve used must have been declared previously for this command to work.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%in the GraphiqueTikz environment
+\DrawCounterimage[keys]{curve}{k}
+\end{tcblisting}
+
+The optional \MontreCode{[keys]} available are:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{Colors}: color of the points/lines, in the form \MontreCode{Color} or \MontreCode{ColPoint/ColLines};
+	\item \MontreCode{Name}: name \textit{possible} for the intersection points linked to the antecedents (\MontreCode{empty} by default);
+	\item \MontreCode{Lines}: boolean to display construction traits (\MontreCode{false} by default).
+\end{itemize}
+
+\smallskip
+
+The first mandatory argument allows you to specify the \textbf{name} of the curve.
+
+\smallskip
+
+The second mandatory argument allows you to specify the value to reach.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.9cm,y=0.425cm,Xmin=4,Xmax=20,Origx=4,
+	Ymin=40,Ymax=56,Ygrid=2,Ygrids=1,Origy=40]
+	\DrawAxisGrids[Enlarge=2.5mm,Font=\small]{4,5,...,20}{40,42,...,56}
+	%definition of the function + drawing of the curve
+	\DefineCurve[Name=cf,Start=5,End=19,Trace,Color=red]<f>{-2*x+3+24*log(2*x)}
+	%history
+	\DrawCounterimage[Colors=teal/cyan,Lines,Name=PO]{cf}{53}
+	\GetXcoord{(PO-1)}[\premsol]
+	\GetXcoord{(PO-2)}[\deuxsol]
+\end{GraphTikz}
+
+Graphically, the antecedents of 53 are (approximately):
+
+\begin{itemize}
+	\item \num{\premsol}
+	\item \num{\deuxsol}
+\end{itemize}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Intersections of two curves}\label{intersect}
+
+It is also possible to determine (in the form of nodes) the possible points of intersection of two previously defined curves.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%in the GraphiqueTikz environment
+\FindIntersections[keys]{curve1}{curve2}
+\end{tcblisting}
+
+The optional \MontreCode{[keys]} available are:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{Name}: base of the name of the \textbf{nodes} intersection (\MontreCode{S} by default, which will give \textsf{S-1}, \textsf{S-2}, etc);
+	\item \MontreCode{Disp}: boolean to display the points (\MontreCode{true} by default);
+	\item \MontreCode{Color}: color of the points (\MontreCode{black} by default).
+\end{itemize}
+
+\smallskip
+
+The first mandatory argument allows you to specify the \textbf{name} of the first curve.
+
+\smallskip
+
+The first mandatory argument allows you to specify the \textbf{name} of the second curve.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.9cm,y=0.425cm,Xmin=4,Xmax=20,Origx=4,
+	Ymin=40,Ymax=56,Ygrid=2,Ygrids=1,Origy=40]
+	\DrawAxisGrids[Enlarge=2.5mm,Font=\small]{4,5,...,20}{40,42,...,56}
+	\DefineCurve[Name=cf,Start=5,End=19,Trace,Color=red]<f>{-2*x+3+24*log(2*x)}
+	\DefineCurve[Name=cg,Start=5,End=19,Trace,Color=blue]<g>{0.25*(x-12)^2+46}
+	%intersections, named (TT-1) and (TT-2)
+	\FindIntersections[Name=TT,Color=darkgray,Display,Lines]{cf}{cg}
+	%recovery of intersection points
+	\GetXYcoord{(TT-1)}[\alphaA][\betaA]
+	\GetXYcoord{(TT-2)}[\alphaB][\betaB]
+\end{GraphTikz}\\
+The solutions of $f(x)=g(x)$ are $\alpha \approx \num{\alphaA}$ and
+$\beta \approx \num{\alphaB}$.\\
+The points of intersection of the curves of $f$ and $g$ are therefore
+$(\RoundNb[2]{\alphaA};\RoundNb[2]{\betaA})$ and
+$(\RoundNb[2]{\alphaB};\RoundNb[2]{\betaB})$.
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Extrema}\label{maximum}\label{minimum}
+
+The idea (still \textit{experimental}) is to offer commands to extract the extrema of a curve defined by the package.
+
+The command creates the corresponding node, and it is therefore possible to retrieve its coordinates for later use.
+
+\smallskip
+
+It is possible, by specifying it, to work on the different curves managed by the package (function, interpolation, spline).
+
+For singular curves, it is possible that the results are not quite those expected\ldots
+
+\smallskip
+
+{\small\faBomb} For the moment, the \textit{limitations} are:
+
+\begin{itemize}
+	\item no management of multiple extrema (only the first will be processed)\ldots
+	\item no management of extrema at the boundaries of the route\ldots
+	\item no automatic recovery of curve definition parameters\ldots
+	\item compilation time may be longer\ldots
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%in the GraphiqueTikz environment
+\FindMax[keys]{object}[node created]
+\FindMin[keys]{object}[node created]
+\end{tcblisting}
+
+The optional \MontreCode{[keys]} available are:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{Method}: method, among \MontreCode{function/interpo/spline} for calculations (\MontreCode{function} by default);
+	\item \MontreCode{Start}: start of the plot (\MontreCode{\textbackslash pflxmin} by default);
+	\item \MontreCode{End}: end of the plot (\MontreCode{\textbackslash pflxmax} by default);
+	\item \MontreCode{Step}: not in the plot if \MontreCode{function} (it is determined \textit{automatically} at the start but can be modified);
+	\item \MontreCode{Coeffs}: modify the \textit{coefficients} of the spline if \MontreCode{spline};
+	\item \MontreCode{Tension}: setting the \textit{tension} of the interpolation plot if \MontreCode{interpo}(\MontreCode{0.5} by default).
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}[x=1cm,y=1cm,Xmin=-1,Xmax=5,Ymin=-1,Ymax=3]
+	\DrawAxisGrids[Enlarge=2.5mm]{auto}{auto}
+	\DefineCurve[Name=cf,Start=0.35,End=4.2,Trace]%
+		<f>{0.6*cos(4.5*(x-4)+2.1)-1.2*sin(x-4)+0.1*x+0.2}
+	\FindMax[Start=0.35,End=4.2]{f}[cf-max]
+	\FindMax[Start=3,End=4]{f}[cf-maxlocal]
+	\FindMin[Start=1,End=2]{f}[cf-minlocal]
+	\MarkPts*[Color=red,Lines]{(cf-max)}
+	\MarkPts*[Color=blue,Lines]{(cf-maxlocal)}
+	\MarkPts*[Color=olive,Lines]{(cf-minlocal)}
+	\GetXYcoord{(cf-max)}[\MyMaxX][\MyMaxY]
+\end{GraphTikz}\\
+The maximum is $M\approx\RoundNb{\MyMaxY}$, reached in $x\approx\RoundNb{\MyMaxX}$
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\DrawAxisGrids[Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefineInterpoCurve[Name=interpotest,Color=red,Trace,Tension=1]%
+		{(-6,4)(-2,-2)(3,3.5)}
+	\FindMin[Method=interpo,Tension=1]{(-6,4)(-2,-2)(3,3.5)}[interpo-min]
+	\MarkPts*[Color=blue]{(interpo-min)}
+	\GetXYcoord{(interpo-min)}[\MinInterpoX][\MinInterpoY]
+\end{GraphTikz}\\
+The minimum is $M\approx\RoundNb[3]{\MinInterpoY}$, reached at $x\approx\RoundNb[3]{\MinInterpoX}$
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=1.2cm,y=1.6cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=3,Ygrid=0.5,Ygrids=0.25]
+	\DrawAxisGrids[Enlarge=2.5mm]{auto}{auto}
+	\def\LISTETEST{-6/2/0§-1/-2/0§2/1/0§3.5/0/-1}
+	\DefineSplineCurve[Name=splinetest,Trace]{\LISTETEST}
+	\FindMin[Method=spline]{\LISTETEST}[spline-min]
+	\MarkPts*[Color=red]{(spline-min)}
+\end{GraphTikz}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Integrals (improved version)}\label{integr}
+
+We can also work with integrals.
+
+In this case it is preferable to highlight the domain \textbf{before} the plots, to avoid overprinting in relation to the curves/points.
+
+\smallskip
+
+It is possible to:
+
+\begin{itemize}
+	\item represent an integral \textbf{under} a defined curve;
+	\item represent an integral \textbf{between} two curves;
+	\item the integration limits can be x-coordinates and/or nodes.
+\end{itemize}
+
+\smallskip
+
+{\small\faBomb} Given the differences in processing between formula curves, simple interpolation curves or cubic interpolation curves, the arguments and keys may differ depending on the configuration!
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%in the GraphiqueTikz environment
+\DrawIntegral[keys]<specific options>{object1}[object2]{A}{B}
+\end{tcblisting}
+
+The optional \MontreCode{[keys]} for definition or tracing are:
+
+\begin{itemize}
+	\item \MontreCode{Colors} =: colors of the filling, in the form \MontreCode{Col} or \MontreCode{ColBorder/ColBg} (\MontreCode{gray} by default);
+	\item \MontreCode{Style}: type of filling, among \MontreCode{fill}/\MontreCode{hatch} (\MontreCode{fill} by default);
+	\item \MontreCode{Opacity}: opacity (\MontreCode{0.5} by default) of the filling;
+	\item \MontreCode{Hatch}: style (\MontreCode{north west lines} by default) of the hatch filling;
+	\item \MontreCode{Type}: type of integral among
+	\begin{itemize}
+		\item \MontreCode{fct} (default) for an integral under a curve defined by a formula;
+		\item \MontreCode{spl} for an integral under a curve defined by a cubic spline;
+		\item \MontreCode{itp} for an integral under a curve defined by interpolation;
+		\item \MontreCode{fct/fct} for an integral between two curves defined by a formula;
+		\item \MontreCode{fct/spl} for an integral between a curve (above) defined by a formula and a curve (below) defined by a spline cubic;
+		\item etc.
+	\end{itemize}
+	\item \MontreCode{Step}: steps (calculated by default otherwise) for the plot;
+	\item \MontreCode{Junction}: junction of segments (\MontreCode{bevel} by default);
+	\item \MontreCode{Bounds}: type of terminals among:
+	\begin{itemize}
+		\item \MontreCode{abs} for the limits given by the abscissa;
+		\item \MontreCode{nodes} for the limits given by the nodes;
+		\item \MontreCode{abs/node} for the limits given by abscissa and node;
+		\item \MontreCode{node/abs} for the limits given by node and abscissa;
+	\end{itemize}
+	\item \MontreCode{Border}: boolean (\MontreCode{true} by default) to display the side lines,%
+	\item \MontreCode{SplineName}: macro (important!) of the spline generated previously for a higher version spline;
+	\item \MontreCode{SplineNameB}: macro (important!) of the spline generated previously for a lower version spline;
+	\item \MontreCode{InterpoName}: name (important!) of the interpolation curve generated previously, in higher version;
+	\item \MontreCode{InterpoBName}: name (important!) of the interpolation curve generated previously, in lower version;
+	\item \MontreCode{Tension}: Tension for the interpolation curve generated previously, in higher version;
+	\item \MontreCode{TensionB}: Tension of the interpolation curve generated previously, in lower version.
+\end{itemize}
+
+\smallskip
+
+The first required argument is the spline function or curve or list of interpolation points.
+
+\smallskip
+
+The next optional argument is the spline function or curve or list of interpolation points.
+
+\smallskip
+
+The last two mandatory arguments are the limits of the integral, given in a form consistent with the key \MontreCode{Bounds}.
+
+\pagebreak
+
+In the case of curves defined by \textit{points}, it is necessary to work on intervals on which the first curve is \textbf{above} the second.
+
+It will undoubtedly be interesting to work with \textit{intersections} in this case.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.6cm,y=0.06cm,
+	Xmin=0,Xmax=21,Xgrid=1,Xgrids=0.5,
+	Ymin=0,Ymax=155,Ygrid=10,Ygrids=5]
+	\DrawAxisGrids[Grads=false,Enlarge=2.5mm]{}{}
+	\DefineCurve[Name=cf,Start=1,End=20,Color=red]<f>{80*x*exp(-0.2*x)}
+	\DrawIntegral
+		[Bounds=abs,Colors=blue/cyan!50]%
+		{f(x)}{3}{12}
+	\DrawCurve[Color=red,Start=1,End=20]{f(x)}
+	\DrawAxisGrids%
+		[Grid=false,Enlarge=2.5mm,Font=\small]{0,1,...,20}{0,10,...,150}
+\end{GraphTikz}
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=1.2cm,y=1.6cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=3,Ygrid=0.5,Ygrids=0.25]
+	\DrawAxisGrids[Grads=false,Enlarge=2.5mm]{}{}
+	\def\LISTETEST{-6/2/0§-1/-2/0§2/1/0§3.5/0/-1}
+	\DefineSplineCurve[Name=splinetest]{\LISTETEST}
+	\DrawIntegral[Type=spl,Style=hatch,Colors=purple]{splinetest}{-5.75}{-4.75}
+	\DrawIntegral[Type=spl,Colors=blue]{splinetest}{-2}{-1}
+	\DrawIntegral[Type=spl,Colors=orange]{splinetest}{1}{3}
+	\DrawSplineCurve[Color=olive]{\LISTETEST}
+	\DrawAxisGrids[Grid=false,Enlarge=2.5mm]
+		{-7,-6,...,4}%
+		{-3,-2.5,...,3}
+\end{GraphTikz}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Tangents}\label{tgte}
+
+The idea of this command is to draw the tangent to a previously defined curve, specifying:
+
+\begin{itemize}
+	\item the point (abscissa or node) at which we wish to work;
+	\item possibly the direction (in the case of a discontinuity or a terminal);
+	\item possibly the step ($h$) of the calculation;
+	\item the \textit{lateral spacings} to draw the tangent.
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%in the GraphiqueTikz environment
+\DrawTangent[keys]{function or curve}{point}<line options>
+\end{tcblisting}
+
+The optional \MontreCode{[keys]} for definition or tracing are:
+
+\begin{itemize}
+	\item \MontreCode{Colors} =: colors of the plots, in the form \MontreCode{Col} or \MontreCode{ColLine/ColPoint} (\MontreCode{black} by default);
+	\item \MontreCode{OffsetL} =: left horizontal spacing to start the trace (\MontreCode{1} by default);
+	\item \MontreCode{OffsetR} =: left horizontal spacing to start the trace (\MontreCode{1} by default);
+	\item \MontreCode{DispPt}: boolean to display the support point (\MontreCode{false} by default);
+	\item \MontreCode{Spline}: boolean to specify that a spline is used (\MontreCode{false} by default);
+	\item \MontreCode{h}: delta $h$ used for calculations (\MontreCode{0.01} by default);
+	\item \MontreCode{Direction}: allows you to specify the \textit{direction} of the tangent, among \MontreCode{lr}/\MontreCode{l}/\MontreCode{r} (\MontreCode{lr} by default);
+	\item \MontreCode{Node}: boolean to specify that a node is used (\MontreCode{false} by default).
+\end{itemize}
+
+\smallskip
+
+The first required argument is the spline function or curve (if applicable).
+
+\smallskip
+
+The last mandatory argument is the work point (abscissa version or node following the key \MontreCode{Node}).
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.9cm,y=0.425cm,Xmin=4,Xmax=20,Origx=4,
+	Ymin=40,Ymax=56,Ygrid=2,Ygrids=1,Origy=40]
+	\DrawAxisGrids[Enlarge=2.5mm,Font=\small]{4,5,...,20}{40,42,...,56}
+	\DefineCurve[Name=cf,Start=5,End=19,Color=red,Trace]<f>{-2*x+3+24*log(2*x)}
+	\FindCounterimage[Color=teal,Name=JKL,Disp=false]{cf}{53}
+	%tangent
+	\DrawTangent%
+		[Colors=cyan/gray,OffsetL=2.5,OffsetR=2.5,Node,DispPt]{f}{(JKL-1)}
+\end{GraphTikz}
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\DrawAxisGrids[Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\def\LISTETEST{-6/4/-0.5§-5/2/-2§-4/0/-2§-2/-2/0§1/2/2§3/3.5/0.5}
+	\DefineSplineCurve[Name=splinetest,Trace,Color=olive]{\LISTETEST}
+	\DrawTangent[Colors=red,Spline,DispPt]{splinetest}{1}
+	\DrawTangent%
+	[Colors=blue,Spline,OffsetL=1.5,OffsetR=1.5,DispPt]{splinetest}{-3}%
+		<tkzgrpharrowlr>
+	\DrawTangent[Direction=l,Colors=orange,Spline,OffsetL=1.5,DispPt]{splinetest}{3}
+	\DrawTangent[Direction=r,Colors=purple,Spline,OffsetR=1.5,DispPt]{splinetest}{-6}
+\end{GraphTikz}
+\end{tcblisting}
+
+\pagebreak
+
+%\section{Specific commands for density functions}
+%
+%\subsection{Normal distribution}\label{normal distribution}
+%
+%The idea is to provide something to work with standard deviation.
+%
+%\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%	%in the GraphiqueTikz environment
+%	\DefineNormalDistribution[keys]<fct name>{mu}{sigma}
+%	\TraceNormalDistribution[keys]{fct(x)}
+%\end{tcblisting}
+%
+%The optional \MontreCode{[keys]} available are:
+%
+%\smallskip
+%
+%\begin{itemize}
+%	\item \MontreCode{Name}: name of the plot (\MontreCode{Gaussian} by default);
+%	\item \MontreCode{Trace}: boolean to trace the curve (\MontreCode{false} by default);
+%	\item \MontreCode{Couleur}: color of the trace, if requested (\MontreCode{black} by default);
+%	\item \MontreCode{Debut}: lower bound of the definition set (\MontreCode{\textbackslash pflxmin} by default);
+%	\item \MontreCode{End}: lower bound of the definition set (\MontreCode{\textbackslash pflxmax} by default);
+%	\item \MontreCode{Pas}: plot step (it is determined \textit{automatically} at the start but can be modified).
+%\end{itemize}
+%
+%Note that the vertical axis must be adapted according to the parameters of the normal law.
+%
+%\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+%	\begin{GraphTikz}%
+%		[x=1.25cm,y=15cm,Origx=5,Xmin=5,Xmax=15,Ymin=0,Ymax=0.3,
+%		Ygrid=0.1,Ygrids=0.05]
+%		\DrawAxisGrids[Enlarge=2.5mm]{auto}{auto}
+%		\DefineNormalDistribution[Name=Gaussian]<phi>{10}{1.5}
+%		\TracerIntegral
+%		[Terminals=abs, Colors=blue/cyan!50]%
+%		{phi(x)}{7}{13}
+%		\TraceNormalLaw[Color=purple,Start=5,End=15]{phi(x)}
+%	\end{GraphTikz}
+%\end{tcblisting}
+%
+%\pagebreak
+%
+%\subsection{Chi-square law}\label{loikhideux}
+%
+%The idea is to provide something to work with normal laws.
+%
+%\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%	%in the GraphiqueTikz environment
+%	\DefineKhiTwoLaw[keys]<fct name>{k}
+%	\TraceLawKhiTwo[keys]{fct(x)}
+%\end{tcblisting}
+%
+%The optional \MontreCode{[keys]} available are:
+%
+%\smallskip
+%
+%\begin{itemize}
+%	\item \MontreCode{Name}: name of the plot (\MontreCode{Gaussian} by default);
+%	\item \MontreCode{Trace}: boolean to trace the curve (\MontreCode{false} by default);
+%	\item \MontreCode{Couleur}: color of the trace, if requested (\MontreCode{black} by default);
+%	\item \MontreCode{Debut}: lower bound of the definition set (\MontreCode{\textbackslash pflxmin} by default);
+%	\item \MontreCode{End}: lower bound of the definition set (\MontreCode{\textbackslash pflxmax} by default);
+%	\item \MontreCode{Pas}: plot step (it is determined \textit{automatically} at the start but can be modified).
+%\end{itemize}
+%
+%Note that the vertical axis must be adapted according to the parameter of the chi-square law.
+%
+%\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+%	\begin{GraphTikz}[
+%		x=1.5cm,y=7.5cm,
+%		Xmin=0,Xmax=8,Xgrid=1,Xgrids=0.5,
+%		Ymin=0,Ymax=0.5,Ygrid=0.1,Ygrids=0.05
+%		]
+%		\DrawAxisGrids[Enlarge=2.5mm]{auto}{auto}
+%		\DefineKhiTwoLaw[Color=red,Start=0.25,Trace]<phiA>{1}
+%		\DefineKhiTwoLaw[Color=blue,Trace]<phiB>{2}
+%		\DefineLawKhiDeux[Color=orange,Trace]<phiC>{3}
+%		\DefineKhiTwoLaw[Color=purple,Trace]<phiD>{4}
+%		\DefineKhiTwoLaw[Color=yellow,Trace]<phiE>{5}
+%		\DefineKhiTwoLaw[Color=teal,Trace]<phiF>{6}
+%	\end{GraphTikz}
+%\end{tcblisting}
+
+\pagebreak
+
+\section{Commands specific to two-variable statistics}
+
+\subsection{Limitations}
+
+Given the specific features of \TikZ, we advise you not to use values that are too \textit{large} at axis level (this can cause problems with years, for example), or else you'll have to \textit{transform} axis and/or data values so that everything is displayed as it should be (also beware of regressions, calculations, etc.).
+
+\subsection{The point scatter}\label{scatter}
+
+In addition to commands linked to functions, it is also possible to represent double statistical series.
+
+\smallskip
+
+The following paragraph shows that adding a key allows you to add the linear adjustment line.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%in the GraphiqueTikz environment
+\DrawScatter[keys]{ListX}{ListY}
+\end{tcblisting}
+
+The optional \MontreCode{[key]} is:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{ColorScatter}: color of the cloud points (\MontreCode{black} by default).
+\end{itemize}
+
+\smallskip
+
+The mandatory arguments allow you to specify:
+
+\smallskip
+
+\begin{itemize}
+	\item the list of x;
+	\item the list of y.
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.075cm,y=0.03cm,Xmin=0,Xmax=160,Xgrid=20,Xgrids=10,
+	Origy=250,Ymin=250,Ymax=400,Ygrid=25,Ygrids=5]
+	%window preparation
+	\DrawAxisGrids[Enlarge=2.5mm,Font=\small]{0,10,...,160}{250,275,...,400}
+	%A cloud of dots
+	\DrawScatter[Style=x,ColorScatter=red]{0,50,100,140}{275,290,315,350}
+\end{GraphTikz}
+\end{tcblisting}
+
+\subsection{The regression line}\label{reglin}
+
+The linear regression line (obtained by the least squares method) can easily be added, using the key \MontreCode{DrawLine}.
+
+\smallskip
+
+In this case, new keys are available:
+
+\smallskip
+
+\begin{itemize}
+	\item \MontreCode{ColorLine}: color of the line (\MontreCode{black} by default);
+	\item \MontreCode{Rounds}: precision of coefficients (\MontreCode{empty} by default);
+	\item \MontreCode{Start}: initial abscissa of the plot (\MontreCode{\textbackslash pflxmin} by default);
+	\item \MontreCode{End}: terminal abscissa of the plot (\MontreCode{\textbackslash pflxmax} by default);
+	\item \MontreCode{Name}: name of the line, for later use (\MontreCode{reglin} by default).
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.075cm,y=0.03cm,Xmin=0,Xmax=160,Xgrid=20,Xgrids=10,
+	Origy=250,Ymin=250,Ymax=400,Ygrid=25,Ygrids=5]
+	\DrawAxisGrids[Enlarge=2.5mm,Font=\small]{0,10,...,160}{250,275,...,400}
+	%cloud and right
+	\DrawScatter%
+		[ColorScatter=red,ColorLine=brown,DrawLine]%
+	{0,50,100,140}{275,290,315,350}
+	%picture
+	\DrawRanges[Colors=cyan/magenta,Lines]{d}{120}
+	%history
+	\DrawCounterimage[Style=x,Colors=blue/green!50!black,Lines]{reglin}{300}
+\end{GraphTikz}
+\end{tcblisting}
+
+\subsection{Other regressions}\label{regressions}
+
+In partnership with the \MontreCode{xint-regression} package, loaded by the package (but \textit{can be deactivated} via the \MontreCode{[noxintreg]} option), it is possible to work on other types of regression:
+
+\begin{itemize}
+	\item linear \fbox{$ax+b$};
+	\item quadratic \fbox{$ax^2+bx+c$};
+	\item cubic \fbox{$ax^3+bx^2+cx+d$};
+	\item power \fbox{$ax^b$};
+	\item exponential \fbox{$ab^x$} or \fbox{$e^{ax+b}$} or \fbox{$b e^{ax}$} or \fbox{$C + be^{ax} $};
+	\item logarithmic \fbox{$a+b\ln(x)$};
+	\item hyperbolic  \fbox{$a+\displaystyle\frac{b}{x}$}.
+\end{itemize}
+
+The command, similar to that of defining a curve, is:
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\DrawRegression[keys]<name fct>{type}<rounded>{listex}{listey}
+\end{tcblisting}
+
+The \MontreCode{[keys]} available are, classically:
+
+\begin{itemize}
+	\item \MontreCode{Start}: lower bound of the definition set (\MontreCode{\textbackslash pflxmin} by default);
+	\item \MontreCode{End}: lower bound of the definition set (\MontreCode{\textbackslash pflxmax} by default);
+	\item \MontreCode{Name}: name of the curve (important for the rest!);
+	\item \MontreCode{Color}: color of the trace (\MontreCode{black} by default);
+	\item \MontreCode{Step}: plot step (it is determined \textit{automatically} at the start but can be modified).
+\end{itemize}
+
+\pagebreak
+
+The second argument, optional and between \MontreCode{<...>}, allows you to name the regression function.
+
+The third argument, mandatory and between \MontreCode{\{...\}} allows you to choose the type of regression, among:
+
+\begin{itemize}
+	\item \MontreCode{lin}: linear \fbox{$ax+b$};
+	\item \MontreCode{quad}: quadratic \fbox{$ax^2+bx+c$};
+	\item \MontreCode{cub}: cubic \fbox{$ax^3+bx^2+cx+d$};
+	\item \MontreCode{pow}: power \fbox{$ax^b$};
+	\item \MontreCode{expab}: exponential \fbox{$ab^x$}
+	\item \MontreCode{hyp}: hyperbolic \fbox{$a+\displaystyle\frac{b}{x}$};
+	\item \MontreCode{log}: logarithmic \fbox{$a+b\ln(x)$};
+	\item \MontreCode{exp}: exponential \fbox{$e^{ax+b}$};
+	\item \MontreCode{expalt}: exponential \fbox{$be^{ax}$};
+	\item \MontreCode{expoff=C}: exponential \fbox{$C + be^{ax}$}.
+\end{itemize}
+
+The fourth argument, optional and between \MontreCode{<...>}, allows you to specify the rounding(s) for the coefficients of the regression function.
+
+The last two arguments are the lists of values of X and Y.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\def\LISTEXX{0,50,100,140}\def\LISTEYY{275,290,315,350}%
+ListX:= \LISTEXX\\
+ListY:= \LISTEYY
+
+\begin{GraphTikz}
+	[x=0.05cm,y=0.04cm,Xmin=0,Xmax=160,Xgrid=20,Xgrids=10,
+	Origy=250,Ymin=250,Ymax=400,Ygrid=25,Ygrids=5]
+	%window preparation
+	\DrawAxisGrids[Enlarge=2.5mm,Font=\footnotesize]{auto}{auto}
+	%A cloud of dots
+	\DrawScatter[Style=o,ColorScatter=red]{\LISTEXX}{\LISTEYY}
+	%adjustment expoffset
+	\DrawRegression[Color=blue,Name=adjust]<adjust>{expoff=250}{\LISTEXX}{\LISTEYY}
+	%holdings
+	\DrawRanges[Colors=cyan/magenta,Lines]{adjust}{80}
+	\DrawCounterimage[Style=x,Colors=blue/green!50!black,Lines]{adjust}{325}
+\end{GraphTikz}
+
+\xintexpoffreg[offset=250,round=3/1]{\LISTEXX}{\LISTEYY}%
+We obtain $y=250+\num{\expregoffb}\text{e}^{\num{\expregoffa}x}$
+\end{tcblisting}
+
+\newpage
+
+\section{Auxiliary commands}
+
+\subsection{Intro}
+
+In addition to purely \textit{graphic} commands, some auxiliary commands are available:
+
+\begin{itemize}
+	\item a to format a number with a given precision;
+	\item one for working on random numbers, with constraints.
+\end{itemize}
+
+\subsection{Formatted rounding}\label{round number}
+
+The \MontreCode{\textbackslash RoundNb} command allows you to format, using the \MontreCode{siunitx} package, a number (or a calculation), with a given precision. This can be \textit{useful} for formatting results obtained using coordinate retrieval commands, for example.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\RoundNb[precision]{xint calculation}
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\RoundNb{1/3}\\
+\RoundNb{16.1}\\
+\RoundNb[3]{log(10)}\\
+\end{tcblisting}
+
+\subsection{Random number under constraints}\label{nbalea}
+
+The idea of this second command is to be able to determine a random number:
+
+\begin{itemize}
+	\item integer or decimal;
+	\item under constraints (between two fixed values).
+\end{itemize}
+
+This can allow, for example, to work on curves with \textit{random} points, but respecting certain constraints.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\PickRandomNb(*)[precision (def 0)]{lower limit}{upper limit}[\macro]
+\end{tcblisting}
+
+The star version takes the constraints in strict form ($\text{lower bound} < \text{macro} < \text{upper bound}$) while the normal version takes the constraints in broad form ($\text{lower bound) } \leq \text{macro} \leq \text{upper bound}$).
+
+\smallskip
+
+Note that the \textit{terminals} can be existing \textit{macros}!
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+%a number (2 digits after the decimal point) between 0.75 and 0.95
+%a number (2 digits after the decimal point) between 0.05 and 0.25
+%a number (2 decimal places) between 0.55 and \YrandMax
+%a number (2 decimal places) between \YrandMin and 0.45
+\PickRandomNb[2]{0.75}{0.95}[\YrandMax]%
+\PickRandomNb[2]{0.05}{0.25}[\YrandMin]%
+\PickRandomNb*[2]{0.55}{\YrandMax}[\YrandA]%
+\PickRandomNb*[2]{\YrandMin}{0.45}[\YrandB]%
+%verification
+\num{\YrandMax} \& \num{\YrandMin} \& \num{\YrandA} \& \num{\YrandB}
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+%a number (2 digits after the decimal point) between 0.75 and 0.95
+%a number (2 digits after the decimal point) between 0.05 and 0.25
+%a number (2 decimal places) between 0.55 and \YrandMax
+%a number (2 decimal places) between \YrandMin and 0.45
+\PickRandomNb[2]{0.75}{0.95}[\YrandMax]%
+\PickRandomNb[2]{0.05}{0.25}[\YrandMin]%
+\PickRandomNb*[2]{0.55}{\YrandMax}[\YrandA]%
+\PickRandomNb*[2]{\YrandMin}{0.45}[\YrandB]%
+%verification
+\num{\YrandMax} \& \num{\YrandMin} \& \num{\YrandA} \& \num{\YrandB}
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+%the curve is designed so that there are 3 antecedents
+\PickRandomNb[2]{0.75}{0.95}[\YrandMax]%
+\PickRandomNb[2]{0.05}{0.25}[\YrandMin]%
+\PickRandomNb*[2]{0.55}{\YrandMax}[\YrandA]%
+\PickRandomNb*[2]{\YrandMin}{0.45}[\YrandB]%
+
+\begin{GraphTikz}
+	[x=0.075cm,y=7.5cm,Xmin=0,Xmax=150,Xgrid=10,Xgrids=5,
+	Ymin=0,Ymax=1,Ygrid=0.1,Ygrids=0.05]
+	\DrawAxisGrids[Last,Enlarge=2.5mm]{auto}{auto}
+	\DefineInterpoCurve[Color=red,Trace,Name=functiontest,Tension=0.75]
+		{(0,\YrandA)(40,\YrandMin)(90,\YrandMax)(140,\YrandB)}
+	\FindCounterimage[Disp=false,Name=ANTECED]{functiontest}{0.5}
+	\DrawCounterimage[Colors=blue/teal,Lines]{functiontest}{0.5}
+	\GetXcoord{(ANTECED-1)}[\Aalpha]
+	\GetXcoord{(ANTECED-2)}[\Bbeta]
+	\GetXcoord
+	{(ANTECED-3)}[\Cgamma]
+\end{GraphTikz}
+
+The solutions of $f(x)=\num{0.5}$ are, by graphic reading:
+$\begin{cases}
+	\alpha \approx \RoundNb[0]{\Aalpha} \\
+	\beta \approx \RoundNb[0]{\Bbeta} \\
+	\gamma \approx \RoundNb[0]{\Cgamma}
+\end{cases}$.
+\end{tcblisting}
+
+\subsection{Monte-Carle method}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%in the GraphiqueTikz environment
+\SimulateMonteCarlo[keys]<function>}{number of points}[\nbptsmcok][\nbptsmcko]
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=10cm,y=10cm,Xmin=0,Xmax=1,Xgrid=0.1,Xgrids=0.05,
+	Ymin=0,Ymax=1,Ygrid=0.1,Ygrids=0.05]
+	\DrawAxisGrids[Enlarge=2.5mm,Last]{auto}{auto}
+	\DefineCurve[Trace,Color=teal,Step=0.001]<f>{sqrt(1-x^2)}
+	\SimulateMonteCarlo<f>{5000}
+\end{GraphTikz}
+
+There is \textcolor{blue}{\num{\nbptsmcok}} blue points,
+there is \textcolor{red}{\num{\nbptsmcko}} red points.
+
+And $\frac{\num{\nbptsmcok}}{\num{\nbptsmc}}
+\approx \RoundNb[4]{\nbptsmcok/\nbptsmc}$
+et $\frac{\pi}{4} \approx \RoundNb[4]{pi/4}$.
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Some pgfplots macros}
+
+In addition to pgfplots/axis, there's few \textit{simple} macros in order to work with \MontreCode{pgfplots/axis} environment.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%find intersection of two [name path] objects defined
+\findintersectionspgf[nodename baises]{object1}{object2}[\myt]
+%global extraction of coordinates
+\gextractxnodepgf{node}[\myxcoord]
+\gextractynodepgf{node}[\myycoord]
+\gextractxynodepgf{node}[\myxcoord][\myycoord]
+%area between curves
+\fillbetweencurvespgf[tikz options]{curve1}{curve2}<soft domain options>
+%cubic splines
+\addplotspline(*)[tikz options]<coeffs>{list of points}[\myspline]
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%\usepackage{alphalph}
+
+\begin{tikzpicture}
+	\begin{axis}%
+		[%
+		axis y line=center,axis x line=middle,                                   %axis
+		axis line style={line width=0.8pt,-latex},
+		x=0.33cm,y=0.55cm,xmin=1985,xmax=2030,ymin=56,ymax=70,                   %units
+		grid=both,xtick distance=5,ytick distance=2,                             %gridp
+		minor x tick num=4,minor y tick num=1,                                   %grids
+		extra x ticks={1985},extra x tick style={grid=none},                     %origx
+		extra y ticks={56},extra y tick style={grid=none},                       %origy
+		x tick label style={/pgf/number format/.cd,use comma,1000 sep={}},       %year
+		major tick length={2*3pt},minor tick length={1.5*3pt},                   %grads
+		every tick/.style={line width=0.8pt},enlargelimits=false,                %style
+		enlarge x limits={abs=2.5mm,upper},enlarge y limits={abs=2.5mm,upper},   %énlarge
+		]
+		%spline + y=66
+		\addplot[name path global=eqtest,mark=none,red,line width=1.05pt,domain=1985:2030] {66} ;
+		\def\LISTETEST{1985/60/0§1995/68/0§2015/58/0§2025/69/0§2030/62/-2}
+		\addplotspline*[line width=1.05pt,violet,name path global=splinecubtest]{\LISTETEST}[\monsplineviolet]
+		%equation f(x)=66
+		\findintersectionspgf[MonItsc]{eqtest}{splinecubtest}
+		%extraction of coordinates
+		\gextractxnodepgf{(MonItsc-1)}[\xMonItscA]
+		\gextractxnodepgf{(MonItsc-2)}[\xMonItscB]
+		\gextractxnodepgf{(MonItsc-3)}[\xMonItscC]
+		\gextractxnodepgf{(MonItsc-4)}[\xMonItscD]
+		%vizualisation
+		\xintFor* #1 in {\xintSeq{1}{4}}\do{%
+			\draw[line width=0.9pt,densely dashed,olive,->,>=latex] (MonItsc-#1) -- (\csname xMonItsc\AlphAlph{#1}\endcsname,56) ;
+			\filldraw[olive] (MonItsc-#1) circle[radius=1.75pt] ;
+		}
+		%area
+		\path [name path=xaxis] (1985,56) -- (2030,56);
+		\fillbetweencurvespgf{splinecubtest}{xaxis}<domain={\xMonItscB:\xMonItscA}>
+		\fillbetweencurvespgf{splinecubtest}{xaxis}<domain={\xMonItscD:\xMonItscC}>
+	\end{axis}
+\end{tikzpicture}
+
+Solutions of  $f(x)=66$ are \RoundNb[0]{\xMonItscA} \&\ \RoundNb[0]{\xMonItscB} \&\ \RoundNb[0]{\xMonItscC} \&\ \RoundNb[0]{\xMonItscD}.
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,text only}
+\begin{tikzpicture}
+	\begin{axis}%
+		[%
+		axis y line=center,axis x line=middle,                                   %axis
+		axis line style={line width=0.8pt,-latex},
+		x=0.33cm,y=0.55cm,xmin=1985,xmax=2030,ymin=56,ymax=70,                   %units
+		grid=both,xtick distance=5,ytick distance=2,                             %gridp
+		minor x tick num=4,minor y tick num=1,                                   %grids
+		extra x ticks={1985},extra x tick style={grid=none},                     %origx
+		extra y ticks={56},extra y tick style={grid=none},                       %origy
+		x tick label style={/pgf/number format/.cd,use comma,1000 sep={}},       %year
+		major tick length={2*3pt},minor tick length={1.5*3pt},                   %grads
+		every tick/.style={line width=0.8pt},enlargelimits=false,                %style
+		enlarge x limits={abs=2.5mm,upper},enlarge y limits={abs=2.5mm,upper},   %énlarge
+		]
+		%spline + y=66
+		\addplot[name path global=eqtest,mark=none,red,line width=1.05pt,domain=1985:2030] {66} ;
+		\def\LISTETEST{1985/60/0§1995/68/0§2015/58/0§2025/69/0§2030/62/-2}
+		\addplotspline*[line width=1.05pt,violet,name path global=splinecubtest]{\LISTETEST}[\monsplineviolet]
+		%equation f(x)=66
+		\findintersectionspgf[MonItsc]{eqtest}{splinecubtest}
+		%extraction of coordinates
+		\gextractxnodepgf{(MonItsc-1)}[\xMonItscA]
+		\gextractxnodepgf{(MonItsc-2)}[\xMonItscB]
+		\gextractxnodepgf{(MonItsc-3)}[\xMonItscC]
+		\gextractxnodepgf{(MonItsc-4)}[\xMonItscD]
+		%vizualisation
+		\xintFor* #1 in {\xintSeq{1}{4}}\do{%
+			\draw[line width=0.9pt,densely dashed,olive,->,>=latex] (MonItsc-#1) -- (\csname xMonItsc\AlphAlph{#1}\endcsname,56) ;
+			\filldraw[olive] (MonItsc-#1) circle[radius=1.75pt] ;
+		}
+		%area
+		\path [name path=xaxis] (1985,56) -- (2030,56);
+		\fillbetweencurvespgf{splinecubtest}{xaxis}<domain={\xMonItscB:\xMonItscA}>
+		\fillbetweencurvespgf{splinecubtest}{xaxis}<domain={\xMonItscD:\xMonItscC}>
+	\end{axis}
+\end{tikzpicture}
+
+Solutions of  $f(x)=66$ are \RoundNb[0]{\xMonItscA} \&\ \RoundNb[0]{\xMonItscB} \&\ \RoundNb[0]{\xMonItscC} \&\ \RoundNb[0]{\xMonItscD}.
+\end{tcblisting}
+
+
+
+\section{History}
+
+\begin{quote}
+\begin{verbatim}
+0.2.5: Lagrange interpolation ([french] for the moment) + enhancements
+0.2.4: Bugfiw with [fr] version
+0.2.3: Bugfix with a length
+0.2.2: Bugfixes
+0.2.0: [Alt] key for Hermite spline + few pgfplots macros
+0.1.9: Bugfix
+0.1.8: New commands [in french doc] (binomial, cabweb,\ldots)
+0.1.6: Vertical asymptote + [in french doc] commands for integrals
+0.1.5: Initial version [en]
+\end{verbatim}
+\end{quote}
+
+\end{document}

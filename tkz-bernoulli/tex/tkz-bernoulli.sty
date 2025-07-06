@@ -1,0 +1,378 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{tkz-bernoulli}[2023/11/06 0.1.4 Draw Bernoulli tree with tikz]
+
+%====HISTORIQUE
+% v 0.1.4	Passage \tikzstyle vers \tikzset (merci à Sam C.)
+% v 0.1.3	Retour en arrière pour la clé, qui n'est pas utile en fait...
+% v 0.1.2	Ajout d'une clé pour forcer l'affichage d'un indice pour les succès/échecs (prudence quand même... epérimental)
+% v 0.1.1	Correction de bugs + ajout d'une commande pour une épreuve de Bernoulli
+% v 0.1.0	Version initiale [fr] et [en]
+
+%====BASE
+\RequirePackage{tikz,pgffor}
+\RequirePackage{xstring}
+\RequirePackage{simplekv}
+\RequirePackage{xintexpr,xintbinhex}
+\usetikzlibrary{calc}
+
+%====SCHÉMA DE BERNOULLI [FR]
+%styles par défaut
+\tikzset{BernBranche/.style={semithick}}
+\tikzset{BernRacine/.style={inner sep=2pt}}
+\tikzset{BernNoeudS/.style={inner sep=2pt}}
+\tikzset{BernNoeudE/.style={inner sep=2pt}}
+\tikzset{BernProbaS/.style={fill=white,midway,font=\footnotesize,inner sep=2pt}}
+\tikzset{BernProbaE/.style={fill=white,midway,font=\footnotesize,inner sep=2pt}}
+\tikzset{BernNotice/.style={inner sep=2pt,text=teal,right=1em}}
+% \tikzstyle{BernBranche} = [semithick]
+% \tikzstyle{BernRacine} = [inner sep=2pt]
+% \tikzstyle{BernNoeudS} = [inner sep=2pt]
+% \tikzstyle{BernNoeudE} = [inner sep=2pt]
+% \tikzstyle{BernProbaS} = [fill=white,midway,font=\footnotesize,inner sep=2pt]
+% \tikzstyle{BernProbaE} = [fill=white,midway,font=\footnotesize,inner sep=2pt]
+% \tikzstyle{BernNotice} = [inner sep=2pt,text=teal,right=1em]
+
+\NewDocumentCommand\tkzSchemBernStyleDefaut{ }{%
+	\tikzset{BernBranche/.style={semithick}}
+	\tikzset{BernRacine/.style={inner sep=2pt}}
+	\tikzset{BernNoeudS/.style={inner sep=2pt}}
+	\tikzset{BernNoeudE/.style={inner sep=2pt}}
+	\tikzset{BernProbaS/.style={fill=white,midway,font=\footnotesize,inner sep=2pt}}
+	\tikzset{BernProbaE/.style={fill=white,midway,font=\footnotesize,inner sep=2pt}}
+	\tikzset{BernNotice/.style={inner sep=2pt,text=teal,right=1em}}
+}
+
+%clés
+\defKV[ArbreBernoulli]{%
+	EspNiv=\def\ArBinIN{#1},%
+	EspFeuil=\def\ArBinIF{#1},%
+	Evts=\def\ArBinEvts{#1},%
+	Probas=\def\ArBinProbas{#1},%
+	Racine=\def\ArBinRacine{#1},%
+	Var=\def\ArBinVar{#1},%
+	N=\def\ArBinN{#1}
+}
+
+\setKVdefault[ArbreBernoulli]{%
+	EspNiv=2.25,%
+	EspFeuil=1,%
+	Evts={$S$/$E$},%
+	Probas={$p$/$1-p$},%
+	Grille=false,%
+	AffProbas=true,%
+	Racine=$\Omega$,%
+	Aide=false,%
+	Notice=false,%
+	Var=X,%
+	N=3
+}
+
+\NewDocumentCommand\tkzEpreuvBernoulli{ s O{} D<>{} }{%
+	\useKVdefault[ArbreBernoulli]%
+		\setKV[ArbreBernoulli]{#2}%
+		\saveexpandmode\expandarg
+		\StrCut{\ArBinEvts}{/}{\ArBinSucces}{\ArBinEchec}%
+		\StrCut{\ArBinProbas}{/}{\ArBinProbSucces}{\ArBinProbEchec}%
+		\restoreexpandmode
+		\IfBooleanT{#1}%
+			{%
+				\begin{tikzpicture}[#3]
+			}%
+		\IfStrEq{\ArBinRacine}{false}%
+			{%
+				\coordinate (A0-1) at (0,0) ;%
+				\coordinate (B0-1) at (0,0) ;%
+			}%
+			{%
+				\coordinate (A0-1) at (0,0) ;%
+				\node[BernRacine] (B0-1) at (A0-1) {\ArBinRacine} ;%
+			}%
+		\coordinate (A1-1) at ($(A0-1)+({\ArBinIN},{0.5*\ArBinIF})$) ;
+		\coordinate (A1-2) at ($(A0-1)+({\ArBinIN},{-0.5*\ArBinIF})$) ;
+		\node[BernNoeudS] (B1-1) at (A1-1) {\ArBinSucces} ;%succès
+		\node[BernNoeudE] (B1-2) at (A1-2) {\ArBinEchec} ;%échec
+		\ifboolKV[ArbreBernoulli]{AffProbas}%
+			{%
+				\draw[BernBranche] (B0-1) -- (B1-1) node[BernProbaS] {\ArBinProbSucces} ;
+				\draw[BernBranche] (B0-1) -- (B1-2) node[BernProbaE] {\ArBinProbEchec} ;
+			}%
+			{%
+				\draw[BernBranche] (B0-1) -- (B1-1) ;
+				\draw[BernBranche] (B0-1) -- (B1-2) ;
+			}%
+		\IfBooleanT{#1}%
+			{%
+				\end{tikzpicture}%
+			}%
+}
+
+\NewDocumentCommand\tkzSchemBernoulli{ s O{} D<>{} }{%
+	\useKVdefault[ArbreBernoulli]%
+	\setKV[ArbreBernoulli]{#2}%
+	\saveexpandmode\expandarg
+	\StrCut{\ArBinEvts}{/}{\ArBinSucces}{\ArBinEchec}%
+	\StrCut{\ArBinProbas}{/}{\ArBinProbSucces}{\ArBinProbEchec}%
+	\restoreexpandmode
+	\IfBooleanT{#1}%
+		{%
+			\begin{tikzpicture}[#3]
+		}%
+	%grille
+	\ifboolKV[ArbreBernoulli]{Grille}%
+		{%
+			\filldraw[red!25] (0,0) circle[radius=2pt] ;
+			\draw[very thin,lightgray] (0,{-0.5*\ArBinIF*2^(\ArBinN)}) grid ({\ArBinN*\ArBinIN},{0.5*\ArBinIF*2^(\ArBinN)}) ;%
+		}%
+		{}%
+	%Racine
+	\IfStrEq{\ArBinRacine}{false}%
+		{%
+			\coordinate (A0-1) at (0,0) ;%
+			\coordinate (B0-1) at (0,0) ;%
+		}%
+		{%
+			\coordinate (A0-1) at (0,0) ;%
+			\node[BernRacine] (B0-1) at (A0-1) {\ArBinRacine} ;%
+		}%
+	%Aide Racine
+	\ifboolKV[ArbreBernoulli]{Aide}%
+		{\draw[teal] (B0-1) node[below=4pt,font=\tiny\ttfamily] {B0-1} ;}%
+		{}%
+	%générations des nœuds du premier chemin
+	\foreach \i in {1,...,\ArBinN}{%
+		\def\j{\inteval{\i-1}}%
+		\def\ArBinTmpNiv{\fpeval{2**(\ArBinN-\i)}}%
+		\def\ArBinTmpNds{\fpeval{2**(\i)}}%
+		\coordinate (A\i-1) at ($(A\j-1)+({\ArBinIN},{0.5*\ArBinIF*\ArBinTmpNiv})$) ;
+		\foreach \k in {2,...,\ArBinTmpNds}{%
+			\def\l{\inteval{\k-1}}%
+			\coordinate (A\i-\k) at ($(A\i-\l)+(0,{-\ArBinIF*\ArBinTmpNiv})$) ;
+		}%
+	}%
+	%test des nœuds OK ^^
+	\foreach \i in {1,...,\ArBinN}{%
+		\def\ArBinTmpNds{\fpeval{2**(\i)}}%
+		\foreach \j in {1,...,\ArBinTmpNds}{%
+			\xintifboolexpr{\xintiiRem{\j}{2} != 0 }%
+				{\node[BernNoeudS] (B\i-\j) at (A\i-\j) {\ArBinSucces} ;}%succès
+				{\node[BernNoeudE] (B\i-\j) at (A\i-\j) {\ArBinEchec} ;}%échec
+			\ifboolKV[ArbreBernoulli]{Aide}%
+				{\draw[teal] (B\i-\j) node[below=4pt,font=\tiny\ttfamily] {B\i-\j} ;}%
+				{}%
+			}%
+		}%
+	%test des flèches...
+	\foreach \i in {0,...,\inteval{\ArBinN-1}}{%
+		\def\ipu{\inteval{\i+1}}%
+		\def\ArBinTmpNds{\fpeval{2**(\i)}}%
+		\foreach \j in {1,...,\ArBinTmpNds}{%
+			\def\ArBinTmpA{\inteval{2*\j-1}}%
+			\def\ArBinTmpB{\inteval{2*\j}}%
+			\ifboolKV[ArbreBernoulli]{AffProbas}%
+				{%
+					\draw[BernBranche] (B\i-\j) -- (B\ipu-\ArBinTmpA) node[BernProbaS] {\ArBinProbSucces} ;
+					\draw[BernBranche] (B\i-\j) -- (B\ipu-\ArBinTmpB) node[BernProbaE] {\ArBinProbEchec} ;
+				}%
+				{%
+					\draw[BernBranche] (B\i-\j) -- (B\ipu-\ArBinTmpA) ;
+					\draw[BernBranche] (B\i-\j) -- (B\ipu-\ArBinTmpB) ;
+				}%
+			}%
+		}%
+	\ifboolKV[ArbreBernoulli]{Notice}%
+		{%
+			\foreach \i in {1,...,\fpeval{2**\ArBinN}}{%
+				\def\itmp{\fpeval{2**\ArBinN-\i}}%
+				\def\ArBenTmpBin{\xintDecToBin{\itmp}}%
+				\draw (B\ArBinN-\i) node[BernNotice] {$\longrightarrow \ArBinVar=\StrCount{\ArBenTmpBin}{1}$} ;
+				}%
+		}%
+		{}%
+	\IfBooleanT{#1}%
+		{%
+			\end{tikzpicture}%
+		}%
+}
+
+%====SCHÉMA DE BERNOULLI [EN]
+%styles par défaut [en]
+\tikzset{BernEdge/.style={semithick}}
+\tikzset{BernRoot/.style={inner sep=2pt}}
+\tikzset{BernNodeS/.style={inner sep=2pt}}
+\tikzset{BernNodeF/.style={inner sep=2pt}}
+\tikzset{BernProbS/.style={fill=white,midway,font=\footnotesize,inner sep=2pt}}
+\tikzset{BernProbF/.style={fill=white,midway,font=\footnotesize,inner sep=2pt}}
+\tikzset{BernGuide/.style={inner sep=2pt,text=teal,right=1em}}
+% \tikzstyle{BernEdge} = [semithick]
+% \tikzstyle{BernRoot} = [inner sep=2pt]
+% \tikzstyle{BernNodeS} = [inner sep=2pt]
+% \tikzstyle{BernNodeF} = [inner sep=2pt]
+% \tikzstyle{BernProbS} = [fill=white,midway,font=\footnotesize,inner sep=2pt]
+% \tikzstyle{BernProbF} = [fill=white,midway,font=\footnotesize,inner sep=2pt]
+% \tikzstyle{BernGuide} = [inner sep=2pt,text=teal,right=1em]
+
+\NewDocumentCommand\tkzBernTreeStyleDefault{ }{%1=type,2=tikzstyle
+	\tikzset{BernEdge/.style={semithick}}
+	\tikzset{BernRoot/.style={inner sep=2pt}}
+	\tikzset{BernNodeS/.style={inner sep=2pt}}
+	\tikzset{BernNodeF/.style={inner sep=2pt}}
+	\tikzset{BernProbS/.style={fill=white,midway,font=\footnotesize,inner sep=2pt}}
+	\tikzset{BernProbF/.style={fill=white,midway,font=\footnotesize,inner sep=2pt}}
+	\tikzset{BernGuide/.style={inner sep=2pt,text=teal,right=1em}}
+}
+
+\defKV[BernoulliTree]{%
+	LevelSep=\def\ArBinIN{#1},%
+	NodeSep=\def\ArBinIF{#1},%
+	Events=\def\ArBinEvts{#1},%
+	Probs=\def\ArBinProbas{#1},%
+	Root=\def\ArBinRacine{#1},%
+	Var=\def\ArBinVar{#1},%
+	N=\def\ArBinN{#1}
+}
+
+\setKVdefault[BernoulliTree]{%
+	LevelSep=2.25,%
+	NodeSep=1,%
+	Events={$S$/$F$},%
+	Probs={$p$/$1-p$},%
+	Grid=false,%
+	ShowProbs=true,%
+	Root=$\Omega$,%
+	Help=false,%
+	Guide=false,%
+	Var=X,%
+	N=3
+}
+
+\NewDocumentCommand\tkzBernoulliTrial{ s O{} D<>{} }{%
+	\useKVdefault[BernoulliTree]%
+		\setKV[BernoulliTree]{#2}%
+		\saveexpandmode\expandarg
+		\StrCut{\ArBinEvts}{/}{\ArBinSucces}{\ArBinEchec}%
+		\StrCut{\ArBinProbas}{/}{\ArBinProbSucces}{\ArBinProbEchec}%
+		\restoreexpandmode
+		\IfBooleanT{#1}%
+			{%
+				\begin{tikzpicture}[#3]
+			}%
+		\IfStrEq{\ArBinRacine}{false}%
+			{%
+				\coordinate (A0-1) at (0,0) ;%
+				\coordinate (B0-1) at (0,0) ;%
+			}%
+			{%
+				\coordinate (A0-1) at (0,0) ;%
+				\node[BernRoot] (B0-1) at (A0-1) {\ArBinRacine} ;%
+			}%
+		\coordinate (A1-1) at ($(A0-1)+({\ArBinIN},{0.5*\ArBinIF})$) ;
+		\coordinate (A1-2) at ($(A0-1)+({\ArBinIN},{-0.5*\ArBinIF})$) ;
+		\node[BernNodeS] (B1-1) at (A1-1) {\ArBinSucces} ;%succès
+		\node[BernNodeF] (B1-2) at (A1-2) {\ArBinEchec} ;%échec
+		\ifboolKV[BernoulliTree]{ShowProbs}%
+			{%
+				\draw[BernEdge] (B0-1) -- (B1-1) node[BernProbS] {\ArBinProbSucces} ;
+				\draw[BernEdge] (B0-1) -- (B1-2) node[BernProbF] {\ArBinProbEchec} ;
+			}%
+			{%
+				\draw[BernEdge] (B0-1) -- (B1-1) ;
+				\draw[BernEdge] (B0-1) -- (B1-2) ;
+			}%
+		\IfBooleanT{#1}%
+			{%
+				\end{tikzpicture}%
+			}%
+}
+
+\NewDocumentCommand\tkzBernoulliTree{ s O{} D<>{} }{%
+	\useKVdefault[BernoulliTree]%
+	\setKV[BernoulliTree]{#2}%
+	\saveexpandmode\expandarg
+	\StrCut{\ArBinEvts}{/}{\ArBinSucces}{\ArBinEchec}%
+	\StrCut{\ArBinProbas}{/}{\ArBinProbSucces}{\ArBinProbEchec}%
+	\restoreexpandmode
+	\IfBooleanT{#1}%
+		{%
+			\begin{tikzpicture}[#3]
+		}%
+	%grille
+	\ifboolKV[BernoulliTree]{Grid}%
+		{%
+			\filldraw[red!25] (0,0) circle[radius=2pt] ;
+			\draw[very thin,lightgray] (0,{-0.5*\ArBinIF*2^(\ArBinN)}) grid ({\ArBinN*\ArBinIN},{0.5*\ArBinIF*2^(\ArBinN)}) ;%
+		}%
+		{}%
+	%Racine
+	\IfStrEq{\ArBinRacine}{false}%
+		{%
+			\coordinate (A0-1) at (0,0) ;%
+			\coordinate (B0-1) at (0,0) ;%
+		}%
+		{%
+			\coordinate (A0-1) at (0,0) ;%
+			\node[BernRoot] (B0-1) at (A0-1) {\ArBinRacine} ;%
+		}%
+	%Aide Racine
+	\ifboolKV[BernoulliTree]{Help}%
+		{\draw[teal] (B0-1) node[below=4pt,font=\tiny\ttfamily] {B0-1} ;}%
+		{}%
+	%générations des nœuds du premier chemin
+	\foreach \i in {1,...,\ArBinN}{%
+		\def\j{\inteval{\i-1}}%
+		\def\ArBinTmpNiv{\fpeval{2**(\ArBinN-\i)}}%
+		\def\ArBinTmpNds{\fpeval{2**(\i)}}%
+		\coordinate (A\i-1) at ($(A\j-1)+({\ArBinIN},{0.5*\ArBinIF*\ArBinTmpNiv})$) ;
+		\foreach \k in {2,...,\ArBinTmpNds}{%
+			\def\l{\inteval{\k-1}}%
+			\coordinate (A\i-\k) at ($(A\i-\l)+(0,{-\ArBinIF*\ArBinTmpNiv})$) ;
+		}%
+	}%
+	%test des nœuds OK ^^
+	\foreach \i in {1,...,\ArBinN}{%
+		\def\ArBinTmpNds{\fpeval{2**(\i)}}%
+		\foreach \j in {1,...,\ArBinTmpNds}{%
+			\xintifboolexpr{\xintiiRem{\j}{2} != 0 }%
+				{\node[BernNodeS] (B\i-\j) at (A\i-\j) {\ArBinSucces} ;}%succès
+				{\node[BernNodeF] (B\i-\j) at (A\i-\j) {\ArBinEchec} ;}%échec
+			\ifboolKV[BernoulliTree]{Help}%
+				{\draw[teal] (B\i-\j) node[below=4pt,font=\tiny\ttfamily] {B\i-\j} ;}%
+				{}%
+			}%
+		}%
+	%test des flèches...
+	\foreach \i in {0,...,\inteval{\ArBinN-1}}{%
+		\def\ipu{\inteval{\i+1}}%
+		\def\ArBinTmpNds{\fpeval{2**(\i)}}%
+		\foreach \j in {1,...,\ArBinTmpNds}{%
+			\def\ArBinTmpA{\inteval{2*\j-1}}%
+			\def\ArBinTmpB{\inteval{2*\j}}%
+			\ifboolKV[BernoulliTree]{ShowProbs}%
+				{%
+					\draw[BernEdge] (B\i-\j) -- (B\ipu-\ArBinTmpA) node[BernProbS] {\ArBinProbSucces} ;
+					\draw[BernEdge] (B\i-\j) -- (B\ipu-\ArBinTmpB) node[BernProbF] {\ArBinProbEchec} ;
+				}%
+				{%
+					\draw[BernEdge] (B\i-\j) -- (B\ipu-\ArBinTmpA) ;
+					\draw[BernEdge] (B\i-\j) -- (B\ipu-\ArBinTmpB) ;
+				}%
+			}%
+		}%
+	\ifboolKV[BernoulliTree]{Guide}%
+		{%
+			\foreach \i in {1,...,\fpeval{2**\ArBinN}}{%
+				\def\itmp{\fpeval{2**\ArBinN-\i}}%
+				\def\ArBenTmpBin{\xintDecToBin{\itmp}}%
+				\draw (B\ArBinN-\i) node[BernGuide] {$\longrightarrow \ArBinVar=\StrCount{\ArBenTmpBin}{1}$} ;
+				}%
+		}%
+		{}%
+	\IfBooleanT{#1}%
+		{%
+			\end{tikzpicture}%
+		}%
+}
+
+\endinput

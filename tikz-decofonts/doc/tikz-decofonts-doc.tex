@@ -1,0 +1,516 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+
+\documentclass[11pt,a4paper]{ltxdoc}
+\usepackage{amsmath}
+\usepackage{bera}
+\usepackage{inconsolata}
+\usepackage[T1]{fontenc}
+\usepackage[scale=0.875]{cabin}
+\usepackage{tikz-decofonts}
+\usepackage{fancyvrb}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{tabularray}
+\usepackage{fontawesome5}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [tikz-decofonts]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\let\TikZ\tikzlogo
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+\def\TPversion{0.1.3}
+\def\TPdate{28/03/2025}
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable,skins,hooks,listingsutf8}
+
+\lstset{
+	language=[LaTeX]TeX,%
+	basicstyle=\ttfamily,%
+	keywordstyle={\color{blue}},%
+	classoffset=0,%
+	keywords={},%
+	alsoletter={-},%
+	keywordstyle={\color{blue}},%
+	classoffset=1,%
+	alsoletter={-},%
+	morekeywords={commalists-tools},%
+	keywordstyle={\color{violet}},%
+	classoffset=2,%
+	alsoletter={-},%
+	morekeywords={\tkzbrush,\tkzink,\tkzpixl,\tkzpixletter,\tkzpixlquote,\tkzcomicbubble,\tkzunderline,\tkzsurround},%
+	keywordstyle={\color{green!50!black}},%
+	classoffset=3,%
+	morekeywords={},%
+	keywordstyle={\color{orange}}
+}
+
+\newtcblisting{DemoCode}[1]{%
+	enhanced,width=\linewidth,%
+	bicolor,size=title,%
+	colback=cyan!10!white,%
+	colbacklower=cyan!5!white,%
+	colframe=cyan!75!black,%
+	listing options={%
+		breaklines=true,%
+		breakatwhitespace=true,%
+		style=tcblatex,basicstyle=\small\ttfamily,%
+		tabsize=4,%
+		commentstyle={\itshape\color{gray}},
+		keywordstyle={\color{blue}},%
+		classoffset=0,%
+		keywords={\usepackage,\includegraphics,xstring,listofitems,\readlist,\showitems,\xintFor,\xintSeq},%
+		alsoletter={-},%
+		keywordstyle={\color{blue}},%
+		classoffset=1,%
+		alsoletter={-},%
+		morekeywords={euromoney},%
+		keywordstyle={\color{violet}},%
+		classoffset=2,%
+		alsoletter={-},%
+		morekeywords={\tkzbrush,\tkzink,\tkzpixl,\tkzpixletter,\tkzpixlquote,\tkzbicolor,\tkzcomicbubble,\tkzunderline,\tkzsurround},%
+		keywordstyle={\color{green!50!black}},%
+		classoffset=3,%
+		morekeywords={color,lines,scale,height,offseth,offsetv,thick,gridcolor,gridafter,nospaceafter,border,colors,style,intdelta,paralcolors,width,node},%
+		keywordstyle={\color{orange}}
+	},%
+	#1
+}
+
+\newtcbinputlisting\DemoCodeFile[1]{%
+	enhanced,width=\linewidth,%
+	bicolor,size=title,%
+	colback=lightgray!10!white,%
+	colbacklower=lightgray!5!white,%
+	colframe=lightgray!75!black,%
+	listing options={%
+		breaklines=true,%
+		breakatwhitespace=true,%
+		style=tcblatex,
+		basicstyle=\scriptsize\ttfamily,%
+		tabsize=4,%
+		commentstyle={\itshape\color{gray}},%
+		%lastline=148
+	},%
+	breakable,
+	listing only,%
+	listing file={#1}
+}
+
+\NewDocumentCommand\ShowCode{ m }{%
+	\lstinline{#1}%
+}
+
+\def\sampleformula{$\displaystyle\int_0^1 \dfrac{1+x}{1+x^2}\,\mathrm{d}x$}
+\def\sampletxt{But I must explain to you how all this mistaken idea of denouncing pleasure.}
+\def\samplenum{1500}
+
+\begin{document}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+		\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+			\begin{center}
+				\renewcommand{\arraystretch}{1.25}%
+				\begin{tabular}{c}
+					{\Huge \texttt{tikz-decofonts}}\\
+					\\
+					{\LARGE Simple "decoration" fonts or effects,} \\
+					{\LARGE made with Ti\textit{k}Z, for small texts\ldots} \\
+					\\
+					{\small \texttt{Version \TPversion{} -- \TPdate}}
+				\end{tabular}
+			\end{center}
+		\end{tcolorbox}
+	\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+		\texttt{Cédric Pierquet}\\
+		{\ttfamily c pierquet -- at -- outlook . fr}\\
+		\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}} \\
+	\end{tabular}
+\end{center}
+
+\hrule
+
+\vfill
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5,listing only}
+%paintbrush effect
+\tkzbrush[color=blue]{DECORATION}
+%paintink effect
+\tkzink[color=orange]{DECORATION}
+%pixeletter effect
+\tkzpixl[color=violet]{DECORATION}
+%bicolor effect
+\tkzbicolor[colors=blue/red,style=ndiag]{\Huge\sffamily DECORATION}
+\tkzbicolor[colors=teal/orange,style=ellips]{\Huge\sffamily DECORATION}
+%surround effect
+\tkzsurround[color=orange]{$I= \displaystyle\int_{a}^{b} f(x) \textrm{d}x = F(b)-F(a)$}
+\end{tcblisting}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\tkzbrush[color=blue]{DECORATION}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\hfill\tkzink[color=orange]{DECORATION}\hfill~
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\hfill\tkzpixl[color=violet]{Decoration}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\hfill\tkzbicolor[colors=blue/red,style=ndiag]{\Huge\sffamily DECORATION}~~\tkzbicolor[colors=teal/orange,style=ellips]{\Huge\sffamily DECORATION}\hfill~
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\hfill\tkzsurround[color=orange]{$I= \displaystyle\int_{a}^{b} f(x) \textrm{d}x = F(b)-F(a)$}\hfill~
+\end{tcolorbox}
+
+\vfill~
+
+\hrule
+
+\vspace*{5mm}
+
+\textit{Ideas and parts of codes, with \texttt{CC\,BY-SA\,4.0} licenses, come from :}
+
+\begin{itemize}
+	\item \href{https://tex.stackexchange.com/questions/475141/simulating-paintbrush-strokes-in-tikz}{[link on tex.stackexchange]} from \textsf{user121799} for paintbrush;
+	\item \href{https://tex.stackexchange.com/questions/460836/custom-line-cap-to-simulate-inked-line-in-tikz/460842#460842}{[link on tex.stackexchange]} from \textsf{user121799} for inkbrush.
+\end{itemize}
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+%\hrule
+
+\pagebreak
+
+\section{Loading, useful packages, purposes and acknowledgments}
+
+\subsection{Loading and useful packages}
+
+In order to load \texttt{tikz-decofonts}, simply use:
+
+\begin{DemoCode}{listing only}
+\usepackage{tikz-decofonts}
+\end{DemoCode}
+
+Loaded packages are \texttt{tikz}, \texttt{xintexpr}, \texttt{simplekv}, \texttt{listofitems} and \texttt{xstring}.
+
+Loaded \texttt{tikz.librairies} are \texttt{decorations}, \texttt{decorations.pathreplacing}, \texttt{calc}, \texttt{positioning}, \texttt{bbox}, \texttt{arrows.meta}, \texttt{shapes.callouts} and \texttt{bending}.
+
+\smallskip
+
+Globally, height of rendering is about 1cm, but some customization are available.
+
+\subsection{Purposes and acknowledgments}
+
+The purposes of this small package is not to provide full fonts, with all characters, but give restricted possibility to present \textbf{short} texts of title with \textit{cute} effects.
+
+\smallskip
+
+These decorations are not destined to be use for whole paragraphs or texts, but just for fun for small titles or small texts.
+
+\smallskip
+
+Since many calculations are required internally, compilation time can be increased, so be careful with intensive use!
+
+\smallskip
+
+\textit{Ideas and parts of codes, with \texttt{CC\,BY-SA\,4.0} licenses, come from:}
+
+\begin{itemize}
+	\item \href{https://tex.stackexchange.com/questions/475141/simulating-paintbrush-strokes-in-tikz}{[link on tex.stackexchange]} from \textsf{user121799} for paintbrush;
+	\item \href{https://tex.stackexchange.com/questions/460836/custom-line-cap-to-simulate-inked-line-in-tikz/460842#460842}{[link on tex.stackexchange]} from \textsf{user121799} for inkbrush.
+\end{itemize}
+
+Some adjustments (keys, paths) are maid from original code, but the global usage is due to the links above !
+
+\pagebreak
+
+\section{The different effects}
+
+\subsection{Paint brush}
+
+{\small\faBomb} The effect is \textbf{very} \textit{time-consuming} to compile !!
+
+\begin{DemoCode}{listing only}
+%only uppercase letters allowed
+\tkzbrush[color=...,lines=...,scale=...]<tikzpicture options>{short text}
+
+%color = black by default
+%lines = 12 by default
+%scale = 1 by default
+\end{DemoCode}
+
+\begin{DemoCode}{listing only}
+%default output
+\tkzbrush{TIKZ DECORATION}
+\end{DemoCode}
+
+\begin{DemoCode}{text only}
+%default output
+\tkzbrush{TIKZ DECORATION}
+
+\end{DemoCode}
+
+\begin{DemoCode}{listing only}
+%customization(s) (external file for speeding rendering ^^)
+\tkzbrush[color=red,lines=20,scale=1.5]{CUSTOM TEXT}
+\end{DemoCode}
+
+\begin{DemoCode}{text only}
+%customization(s) (external file for speeding rendering ^^)
+\includegraphics{tkzbrushA.pdf}
+\end{DemoCode}
+
+\pagebreak
+
+\subsection{Ink brush}
+
+\begin{DemoCode}{listing only}
+%only uppercase letters allowed
+\tkzink[color=...,thick=...,scale=...]<tikzpicture options>{short text}
+
+%color = black by default
+%thick = 3 by default
+%scale = 1 by default
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%default output
+\tkzink{TIKZ DECORATION}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%customization(s)
+\tkzink[color=olive,thick=5,scale=2]{TIKZ DECORATION}
+\end{DemoCode}
+
+\pagebreak
+
+\subsection{Pixl brush}
+
+\begin{DemoCode}{listing only}
+%regular letters allowed (upper and/or lower), rendered characters are 5 columns x 7 lines
+\tkzpixl%
+    [height=...,thick=...,color=...,gridcolor=...,border=...,
+    offseth=...,offsetv=...,gridafter=...,nospaceafter=...]
+    <tikzpicture options>{short text}
+
+\tkzpixletter%
+    [height=...,thick=...,color=...,gridcolor=...,border=...,
+    offseth=...,offsetv=...,gridafter=...,nospaceafter=...]
+    <tikzpicture options>{letter}
+
+\tkzpixlquote%if problem with '...
+    [height=...,thick=...,color=...,gridcolor=...,
+    offseth=...,offsetv=...,gridafter=...,nospaceafter=...]
+    <tikzpicture options>
+
+%height = 11mm by default, thick = 0.1mm by default
+%color = black by default, gridcolor = gray by default
+%offseth = 1 by default (squares left/right of regular character)
+%offsetv = 2 by default (squares above/below of regular character)
+%boder = false by default (boolean for adding border)
+%gridafter = false by default (boolean for showing grid after pixls)
+%nospaceafter = false by default (boolean for removeing hspace after pixls)
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%default output, comparaison with character w/o offsets (5*7)
+\tkzpixl{And then, 1+1=2 !?!} and \tkzpixletter[offseth=0,offsetv=0]{*}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%customization(s)
+\tkzpixl[color=violet,height=1.75cm,gridafter,offsetv=3,border]{Small custo'm text}
+\end{DemoCode}
+
+\pagebreak
+
+\subsection{Bicolor effect}
+
+\begin{DemoCode}{listing only}
+%compatible with all fonts and/or sizes
+\tkzbicolor%
+    [colors=...,style=...,intdelta=...]
+    {text}
+
+\tkzbicolor%with paral style
+    [paralcolors=...,style=paral,intdelta=...]
+    {text}
+
+%style = midh/midv/rect/ellips/paral (paral by default)
+%colors = red/blue by default,
+%paralcolors = red/blue/orange/gray by default
+%intdelta = 0.66 by default, percentage of int dim for ellips/rect
+\end{DemoCode}
+
+\begin{DemoCode}{listing only}
+\def\sampleformula{$\displaystyle\int_0^1 \dfrac{1+x}{1+x^2}\,\mathrm{d}x$}
+\def\sampletxt{But I must explain to you how all this mistaken idea of denouncing pleasure.}
+\def\samplenum{1500}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\tkzbicolor[style=midh]{\sampleformula} 
+or \tkzbicolor[colors=violet/magenta,style=midv]{\sampleformula}
+or \tkzbicolor[colors=darkgray/olive,style=ndiag]{\sampleformula}
+or \tkzbicolor[colors=orange/teal,style=sdiag]{\sampleformula}
+or \tkzbicolor[colors=orange/teal,style=ellips]{\sampleformula}
+or \tkzbicolor[colors=pink/violet,style=rect]{\sampleformula}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\tkzbicolor[style=midh]{\sampletxt}\par
+\tkzbicolor[colors=violet/magenta,style=midv]{\sampletxt}\par
+\tkzbicolor[colors=darkgray/olive,style=ndiag]{\sampletxt}\par
+\tkzbicolor[colors=orange/teal,style=sdiag]{\sampletxt}\par
+\tkzbicolor[colors=orange/teal,style=ellips]{\sampletxt}\par
+\tkzbicolor[colors=pink/violet,style=rect]{\sampletxt}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\tkzbicolor[style=midh]{\parbox{2.5cm}{\sampletxt}} 
+\tkzbicolor[colors=violet/gray,style=midv]{\parbox{2.5cm}{\sampletxt}} 
+\tkzbicolor[colors=darkgray/olive,style=ndiag]{\parbox{2.5cm}{\sampletxt}} 
+\tkzbicolor[colors=orange/cyan,style=sdiag]{\parbox{2.5cm}{\sampletxt}} 
+\tkzbicolor[colors=pink/violet,style=ellips]{\parbox{2.5cm}{\sampletxt}} 
+\tkzbicolor[colors=pink/violet,style=ellips,intdelta=0.85]{\parbox{2.5cm}{\sampletxt}} 
+\tkzbicolor[colors=cyan/darkgray,style=rect]{\parbox{2.5cm}{\sampletxt}}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\tkzbicolor[style=paral]{\parbox{6cm}{\large\sffamily\sampletxt}}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\tkzbicolor[style=midh]{\samplenum}\par
+\tkzbicolor[colors=violet/magenta,style=midv]{\samplenum}\par
+\tkzbicolor[colors=darkgray/olive,style=ndiag]{\samplenum}\par
+\tkzbicolor[colors=orange/teal,style=sdiag]{\samplenum}\par
+\tkzbicolor[colors=orange/teal,style=ellips]{\samplenum}
+\end{DemoCode}
+
+\pagebreak
+
+\subsection{Comic bubble}
+
+\begin{DemoCode}{listing only}
+%style tikz
+\tikzset{comicbubble/.style args={#1#2}{%
+	inner sep=1mm,line join=round,rectangle callout,draw,very thick,
+	text width=#1,align=flush center,callout relative pointer=#2}}
+\end{DemoCode}
+
+\begin{DemoCode}{listing only}
+%independant macro
+\tkzcomicbubble[%
+    width=...,coltxt=...,colbg=...,colframe=...,pospointer=(...),
+    font=...,rcorners=true/false]%
+    <tikz options>{text}
+
+%with tikzpicture environment
+\begin{tikzpicture}
+    %...
+    \tkzcomicbubble*[%
+        width=...,coltxt=...,colbg=...,colframe=...,pospointer=(...),
+        font=...,rcorners=true/false]%
+        <tikz options>{text}
+\end{tikzpicture}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\def\mytext{Let's play with Pythagoras !\relax}
+\tkzcomicbubble[font=\large\bfseries\itshape]{\mytext}~~
+\tkzcomicbubble%
+    [width=3cm,coltxt=red,colframe=teal,font=\bfseries,
+    colbg=yellow!15,pospointer={(150:1em)},rcorners]%
+    <thick>%
+    {\mytext}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%\usepackage{setspace}
+\def\mytext{Let's use Pythagoras !\relax}
+{\tikz[rotate=-15,transform shape]\tkzcomicbubble*[width=2.5cm,font=\large\sffamily]<execute at begin node={\setlength{\baselineskip}{0.75\baselineskip}}>{\mytext};}
+\end{DemoCode}
+
+\pagebreak
+
+\subsection{Surround effect}
+
+\begin{DemoCode}{listing only}
+\tkzsurround[width=...,node=...,color=...]{text}
+
+%width = width of line (1.25pt by default)
+%color = red by default
+%node  = name of node (AAAAZ by default)
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\tkzsurround[node=AAA]{This is a sample text} and we're trying to see what it does 
+by \tkzsurround[color=blue,width=1.5pt,node=BBB]{surrounding} certain portions of the text!
+
+{\tikz[remember picture,overlay] 
+    \draw[densely dashed,orange,<->,very thick,>=latex]
+    ([yshift=-1mm]AAA.south east) to[bend right] ([yshift=-1mm]BBB.south west) ;
+}
+\end{DemoCode}
+
+\subsection{Underline effect}
+
+\begin{DemoCode}{listing only}
+\tkzunderline[width=...,node=...,color=...,height=...]{text}
+
+%width  = width of line (1.25pt by default)
+%color  = red by default
+%height = global height of underlining (10mm by default)
+%node   = name of node (AAAAZ by default)
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\tkzunderline{This is a sample text} with
+\tkzunderline[color=blue,width=1.5pt,height=15mm]{underlining} certain
+\tkzunderline[color=yellow,width=1pt,height=15pt]{portions}!
+\end{DemoCode}
+
+\pagebreak
+
+\section{History}
+
+\texttt{0.1.3: Underline or surround effect}
+
+\texttt{0.1.2: Comic bubble}
+
+\texttt{0.1.1: Bicolor effect}
+
+\texttt{0.1.0: Initial version}
+
+\end{document}

@@ -1,0 +1,1094 @@
+% Author          : C. Pierquet
+% licences        : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+%                 : CC BY-SA 4.0 (https://tex.stackexchange.com/questions/475141/simulating-paintbrush-strokes-in-tikz from user121799)
+%                 :              (https://tex.stackexchange.com/questions/460836/custom-line-cap-to-simulate-inked-line-in-tikz/460842#460842 from user121799)
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{tikz-decofonts}[2025/03/28 0.1.3 Custom fonts, made with TikZ, with effects]
+
+%------History
+% 0.1.3	Underline/surround small texts
+% 0.1.2	Bd fonts (with callout.shapes)
+% 0.1.1	Bicolor txt
+% 0.1.0	Initial version
+
+%------Packages and library
+\RequirePackage{tikz}
+\RequirePackage{xstring}
+\RequirePackage{xintexpr}
+\RequirePackage{listofitems}
+\RequirePackage{simplekv}
+\usetikzlibrary{decorations,decorations.pathreplacing,decorations.pathmorphing,calc,positioning,bbox,arrows.meta,bending,shapes.callouts}
+
+%------Paintbrush
+\pgfmathdeclarerandomlist{randcolor}{{black}{white}}
+\pgfkeys{/brush pars/.cd,
+	lines/.initial={\tkzbrushlines},
+	distance/.initial=0.25pt
+}
+\tikzset{
+	brush/.style={
+		decorate,
+		decoration={
+			show path construction,
+			lineto code={
+				\foreach\Xbrush in{1,...,\pgfkeysvalueof{/brush pars/lines}}{
+					\pgfmathrandomitem{\c}{randcolor}
+					\pgfmathtruncatemacro{\mix}{100-24*rnd}
+					\draw[color=brushcolor!\mix!\c,
+					shorten >={(3-4*rnd)*1pt
+						-0.5*\pgfkeysvalueof{/brush pars/lines}*\pgfkeysvalueof{/brush pars/distance}},
+					shorten <={(3-4*rnd)*1pt
+						-0.5*\pgfkeysvalueof{/brush pars/lines}*\pgfkeysvalueof{/brush pars/distance}}]
+					let \p1=($(\tikzinputsegmentlast)-(\tikzinputsegmentfirst)$),
+					\n1={90+atan2(\y1,\x1)} in
+					($(\tikzinputsegmentfirst)+(\n1:{((1.02-0.04*rnd)*\Xbrush-\pgfkeysvalueof{/brush pars/lines}/2)*\pgfkeysvalueof{/brush pars/distance}})$)
+					--
+					($(\tikzinputsegmentlast)+(\n1:{((1.02-0.04*rnd)*\Xbrush-\pgfkeysvalueof{/brush pars/lines}/2)*\pgfkeysvalueof{/brush pars/distance}})$);
+				}
+			},
+			curveto code={
+				\foreach\Xbrush in{1,...,\pgfkeysvalueof{/brush pars/lines}}{
+					\pgfmathrandomitem{\c}{randcolor}
+					\pgfmathtruncatemacro{\mix}{100-24*rnd}
+					\draw[color=brushcolor!\mix!\c,shorten >={(3-4*rnd)*1pt
+						-0.5*\pgfkeysvalueof{/brush pars/lines}*\pgfkeysvalueof{/brush pars/distance}},
+					shorten <={(3-4*rnd)*1pt
+						-0.5*\pgfkeysvalueof{/brush pars/lines}*\pgfkeysvalueof{/brush pars/distance}}]
+					let \p1=($(\tikzinputsegmentsupporta)-(\tikzinputsegmentfirst)$),
+					\p2=($(\tikzinputsegmentsupportb)-(\tikzinputsegmentsupporta)$),
+					\p3=($(\tikzinputsegmentlast)-(\tikzinputsegmentsupportb)$),
+					\n1={90+atan2(\y1,\x1)}, \n2={90+atan2(\y2,\x2)}, 
+					\n3={90+atan2(\y3,\x3)} in
+					($(\tikzinputsegmentfirst)+(\n1:{((1.02-0.04*rnd)*\Xbrush-\pgfkeysvalueof{/brush pars/lines}/2)*\pgfkeysvalueof{/brush pars/distance}})$)
+					.. controls ($(\tikzinputsegmentsupporta)+(\n2:{((1.02-0.04*rnd)*\Xbrush-\pgfkeysvalueof{/brush pars/lines}/2)*\pgfkeysvalueof{/brush pars/distance}})$)
+					and ($(\tikzinputsegmentsupportb)+(\n3:{((1.02-0.04*rnd)*\Xbrush-\pgfkeysvalueof{/brush pars/lines}/2)*\pgfkeysvalueof{/brush pars/distance}})$) ..
+					($(\tikzinputsegmentlast)+(\n3:{((1.02-0.04*rnd)*\Xbrush-\pgfkeysvalueof{/brush pars/lines}/2)*\pgfkeysvalueof{/brush pars/distance}})$);
+				}
+			},
+		}
+	}
+}
+\tikzset{pics/.cd,
+	brushA/.style={code={%
+				\draw[brush] (0,-0.5) -- (0.25,0.5) -- (0.5,-0.5);
+				\draw[brush] (0.125,-0.15) -- (0.375,-0.15);
+				%\path (0.725,0);%
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}%
+		},
+	brushB/.style={code={%
+				\draw[brush] (0,-0.5) -- (0,0.5) to[out=0,in=0,looseness=2.5] (0,0) to[out=0,in=0,looseness=3] cycle;
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushC/.style={code={%
+				\draw[brush] (0,0) to[out=90,in=180] (0.25,0.5) to[out=0,in=110] (0.5,0.325) ;
+				\draw[brush] (0,0) to[out=-90,in=180] (0.25,-0.5) to[out=0,in=-110] (0.5,-0.325) ;
+				%\draw[brush] (0,0) to[out=90,in=110,looseness=2]  (0.5,0.325);
+				%\draw[brush](0,0) to[out=-90,in=-110,looseness=2]  (0.5,-0.2325);
+				%\path (0.7,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushD/.style={code={%
+				\draw[brush] (0,-0.5) -- (0,0.5) to[out=0,in=0,looseness=1.75] cycle;
+				%\path (0.675,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushE/.style={code={%
+				\draw[brush] (0.425,-0.5) --(0,-0.5) -- (0,0.5) -- (0.425,0.5);
+				\draw[brush] (0,0) -- (0.425,0);
+				\path (0.5,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushF/.style={code={%
+				\draw[brush] (0,-0.5) -- (0,0.5) -- (0.425,0.5);
+				\draw[brush] (0,0) -- (0.425,0);
+				\path (0.5,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushG/.style={code={%
+				\draw[brush] (0,0) to[out=90,in=180] (0.25,0.5) to[out=0,in=100] (0.475,0.325) ;
+				\draw[brush] (0,0) to[out=-90,in=180] (0.25,-0.5) to[out=0,in=-110] (0.475,-0.1) ;
+				\draw[brush] (0.475,-0.1) to (0.275,-0.1);
+				%\draw[brush] (0,0) to[out=90,in=110,looseness=2] (0.5,0.25);
+				%\draw[brush] (0,0) to[out=-90,in=-110,looseness=2] (0.5,-0.25);
+				%\draw[brush] (0.5,-0.25) to (0.25,-0.25);
+				%\path (0.7,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushH/.style={code={%
+				\draw[brush] (0,-0.5) -- (0,0.5);
+				\draw[brush] (0.5,-0.5) -- (0.5,0.5);
+				\draw[brush] (0,0) -- (0.5,0);
+				%\path (0.7,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushI/.style={code={%
+				\draw[brush] (0,-0.5) -- (0,0.5);
+				%\path (0.25,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushJ/.style={code={%
+				\draw[brush] (0.35,0.5) -- (0.35,-0.35) to[out=-90,in=0] (0.175,-0.5) to[out=180,in=-90] (0,-0.3);
+				%\path (0.45,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushK/.style={code={%
+				\draw[brush] (0,-0.5) -- (0,0.5); 
+				\draw[brush] (0.4,0.475) -- (0.02,0) --  (0.4,-0.475);
+				%\path (0.6,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushL/.style={code={
+				\draw[brush]  (0,0.5) -- (0,-0.5) -- (0.5,-0.5);
+				%\path (0.6,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushM/.style={code={
+				\draw[brush] (0,-0.5) -- (0,0.5) -- (0.25,0.25) -- (0.5,0.5) -- (0.5,-0.5);
+				%\path (0.8,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushN/.style={code={
+				\draw[brush] (0,-0.5) -- (0,0.5) -- (0.5,-0.5) -- (0.5,0.5);
+				%\path (0.8,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushO/.style={code={
+				\draw[brush] (0.25,0) circle(0.25 and 0.5);
+				%\path (0.8,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushP/.style={code={
+				\draw[brush] (0,-0.5) -- (0,0.5) to[out=0,in=0,looseness=2.5] (0,0);
+				%\path (0.6,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushQ/.style={code={
+				\draw[brush] (0.25,0) circle(0.25 and 0.5);
+				\draw[brush](0.35,-0.25) -- (0.475,-0.45);
+				%\path (0.8,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushR/.style={code={
+				\draw[brush] (0,-0.5) -- (0,0.5)  to[out=0,in=0,looseness=2.5]  (0.05,0) -- (0.5,-0.5);
+				%\path (0.6,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushS/.style={code={
+				\draw[brush] (0.475,0.475) to[out=150,in=165,looseness=2.25] (0.25,0) to[out=-15,in=-30,looseness=2.25] (0.025,-0.475);
+				%\path (0.65,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushT/.style={code={
+				\draw[brush] (0.25,-0.5) -- (0.25,0.5) (0,0.5) -- (0.5,0.5);
+				%\path (0.85,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushU/.style={code={
+				\draw[brush] (0,0.5) -- (0,0) to[out=-90,in=-90,looseness=4] (0.5,0) -- (0.5,0.5);
+				%\path (0.8,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushV/.style={code={
+				\draw[brush] (0,0.5) -- (0.25,-0.5) -- (0.5,0.5);
+				%\path (0.8,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushW/.style={code={
+				\draw[brush] (0,0.5) -- (0.15,-0.5) -- (0.3,-0.25) -- (0.45,-0.5) -- (0.6,0.5);
+				%\path (1.1,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushX/.style={code={
+				\draw[brush] (0,0.5) -- (0.5,-0.5);
+				\draw[brush] (0.5,0.5) -- (0,-0.5);
+				%\path (0.8,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushY/.style={code={
+				\draw[brush] (0,0.5) -- (0.25,0);  
+				\draw[brush] (0.5,0.5) -- (0,-0.5);
+				%\path (0.8,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushZ/.style={code={
+				\draw[brush] (0,0.5) --(0.5,0.5) -- (0,-0.5) -- (0.5,-0.5);
+				%\path (0.8,0);
+				%\filldraw[blue] (0,0) circle[radius=2pt] ;
+			}
+		},
+	brushspace/.style={code={\path (0,0) (0.2,0);}},
+}
+
+
+\defKV[tkzbrush]{%
+	scale=\def\tkzbrushscale{#1},%
+	color=\colorlet{brushcolor}{#1},%
+	lines=\def\tkzbrushlines{#1},%
+	thick=\def\tkzbrushthick{#1}
+}
+
+\setKVdefault[tkzbrush]{%
+	scale=1,%
+	color=black,%
+	lines=12,%
+	thick=3
+}
+
+%------inkbrush
+\pgfdeclarearrow{
+	name=ink,
+	parameters= {\the\pgfarrowlength},
+	setup code={
+		\pgfarrowssettipend{0pt}
+		\pgfarrowssetlineend{-\pgfarrowlength}
+		\pgfarrowlinewidth=\pgflinewidth
+		\pgfarrowssavethe\pgfarrowlength
+	},
+	drawing code={
+		\pgfpathmoveto{\pgfpoint{-\pgfarrowlength}{0.5\pgflinewidth}}
+		\pgfpathcurveto{\pgfpoint{-0.75\pgfarrowlength}{0.6\pgflinewidth}}{%
+			\pgfpoint{-0.01\pgfarrowlength}{0.6\pgflinewidth}}{%
+			\pgfpoint{0pt}{0pt}}
+		\pgfpathcurveto{\pgfpoint{-0.01\pgfarrowlength}{-0.5\pgflinewidth}}{%
+			\pgfpoint{-0.2\pgfarrowlength}{-(1+0.3*rnd)*\pgflinewidth}}{%
+			\pgfpoint{-0.3\pgfarrowlength}{-0.8*(1+0.3*rnd)*\pgflinewidth}}
+		\pgfpathcurveto{\pgfpoint{-0.4\pgfarrowlength}{-0.6*(1+0.3*rnd)*\pgflinewidth}}{%
+			\pgfpoint{-0.6\pgfarrowlength}{-0.3*(1+0.3*rnd)*\pgflinewidth}}{%
+			\pgfpoint{-1\pgfarrowlength}{-0.5\pgflinewidth}}
+		\pgfusepathqfill
+	},
+	defaults={length=8pt}
+}
+
+\tikzset{pics/.cd,
+	inkA/.style={code={%
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,-0.5) -- (0.25,0.5) -- (0.5,-0.5);
+			\draw[line width={\tkzbrushthick}] (0.125,-0.15) -- (0.375,-0.15);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0,-0.55) -- (0.3,0.4) -- (0.6,-0.55);
+			%\draw[line width=5](0.1,1/3-0.45) -- (0.5,1/3-0.45);
+			%\path (0.7,0);
+			}
+		},
+	inkB/.style={code={
+			\draw[line width={\tkzbrushthick},{ink[bend]}-{ink[bend]}] (0,-0.5) -- (0,0.5) to[out=0,in=0,looseness=2.5] (0,0) to[out=0,in=0,looseness=3] cycle;
+			%\draw[line width=5] (0,-0.45) -- (0,0.45) to[out=0,in=0,looseness=2.5]  (0,0)  to[out=0,in=0,looseness=3] cycle;
+			}
+		},
+	inkC/.style={code={
+			\draw[line width={\tkzbrushthick}] (0,0) to[out=90,in=180] (0.25,0.5) to[out=0,in=110] (0.5,0.325) ;
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,0) to[out=-90,in=180] (0.25,-0.5) to[out=0,in=-110] (0.5,-0.325) ;
+			%\draw[line width=5,-{ink[bend]}] (0,0) to[out=90,in=110,looseness=2]  (0.5,0.25);
+			%\draw[line width=5,-{ink[bend]}] (0,0) to[out=-90,in=-110,looseness=2]  (0.5,-0.25);
+			%\path (0.7,0);
+			}
+		},
+	inkD/.style={code={%
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,-0.5) -- (0,0.5) to[out=0,in=0,looseness=1.75] (0.075,-0.5) ;
+			%\draw[line width=5] (0,-0.45) -- (0,0.45) to[out=0,in=0,looseness=2.25]   cycle;
+			%\path (0.7,0);
+			}
+		},
+	inkE/.style={code={%
+			\draw[line width={\tkzbrushthick},{ink[bend]}-] (0.5,0.5) -- (0,0.5) -- (0,-0.5) ;
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,0) -- (0.425,0) ;
+			\draw[line width={\tkzbrushthick}] (0,-0.5) -- (0.4,-0.5);
+			%\draw[line width={\tkzbrushthick},{ink[bend]}-{ink[bend]}] (0.5,-0.45) --(0,-0.45) -- (0,0.45)  -- (0.5,0.45);
+			%\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,0) -- (0.5,0);
+			%\path (0.7,0);
+			}
+		},
+	inkF/.style={code={%
+			\draw[line width={\tkzbrushthick},{ink[bend]}-] (0.5,0.5) -- (0,0.5) -- (0,-0.5) ;
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,0) -- (0.425,0) ;
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0,-0.45) -- (0,0.45)  -- (0.5,0.45);
+			%\draw[line width=5,-{ink[bend]}] (0,0) -- (0.5,0);
+			%\path (0.7,0);
+			}
+		},
+	inkG/.style={code={%
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,0) to[out=90,in=180] (0.25,0.5) to[out=0,in=100] (0.475,0.325) ;
+			\draw[line width={\tkzbrushthick}] (0,0) to[out=-90,in=180] (0.25,-0.5) to[out=0,in=-110] (0.475,-0.1) ;
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0.475,-0.1) to (0.275,-0.1);
+			%\draw[line width=5,-{ink[bend]}] (0,0) to[out=90,in=110,looseness=2]  (0.5,0.25);
+			%\draw[line width=5] (0,0) to[out=-90,in=-110,looseness=2] (0.5,-0.25);
+			%\draw[line width=5,-{ink[bend]}] (0.54,-0.25) to (0.3,-0.25);
+			%\path (0.7,0);
+			}
+		},
+	inkH/.style={code={%
+			\draw[line width={\tkzbrushthick},{ink[bend]}-] (0,-0.5) -- (0,0.5);
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0.5,-0.5) -- ([yshift=1pt]0.5,0.5);
+			\draw[line width={\tkzbrushthick}] (0,0) -- (0.5,0);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0,-0.5) -- (0,0.5);  
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0.5,-0.5) -- (0.5,0.5);
+			%\draw[line width=5] (0,0) -- (0.5,0);
+			\path (0.7,0);
+			}
+		},
+	inkI/.style={code={
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] ([yshift=-0.5pt]0,-0.5) -- ([yshift=1pt]0,0.5);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0,-0.45) -- (0,0.45);
+			\path (0.075,0);
+			}
+		},
+	inkJ/.style={code={%
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0.35,0.5) -- (0.35,-0.35) to[out=-90,in=0] (0.175,-0.5) to[out=180,in=-90] (0,-0.3);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0.2,0.45) -- (0.2,-0.35) to[out=-90,in=0] (0.1,-0.45) to[out=180,in=-90] (0,-0.35);
+			%\path (0.45,0);
+			}
+		},
+	inkK/.style={code={%
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,-0.5) -- ([yshift=1pt]0,0.5); 
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0.4,0.5) -- (0.02,0) -- (0.4,-0.5);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0,-0.45) -- (0,0.45); 
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0.4,0.45) -- (0.02,0) --  (0.4,-0.45);
+			%\path (0.6,0);
+			}
+		},
+	inkL/.style={code={%
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,0.5) -- (0,-0.5) -- (0.5,-0.5);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0,0.5) -- (0,-0.45) -- (0.4,-0.45);
+			%\path (0.6,0);
+			}
+		},
+	inkM/.style={code={%
+			\draw[line width={\tkzbrushthick}] (0,-0.5)--(0,0.45) ;
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,0.475) -- (0.25,0.25) -- (0.5,0.45) -- (0.5,-0.5);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0,-0.45) -- (0,0.45) --  (0.3,0.25) -- (0.6,0.45) -- (0.6,-0.45);
+			%\path (0.8,0);%
+			}
+		},
+	inkN/.style={code={%
+			\draw[line width={\tkzbrushthick}] (0,-0.5)--(0,0.45) ;
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,0.475) -- (0.5,-0.51) -- (0.5,0.515);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0,-0.45) -- (0,0.45) -- (0.6,-0.4) -- (0.6,0.45);
+			%\path (0.8,0);
+			}
+		},
+	inkO/.style={code={%
+			\draw[line width={\tkzbrushthick}] (0.25,0) circle(0.25 and 0.5);
+			%\path (0.8,0);
+			}
+		},
+	inkP/.style={code={%
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,-0.5) -- (0,0.5) to[out=0,in=0,looseness=2.5] (0,0);
+			%\draw[line width=5,{ink[bend]}-] (0,-0.45) -- (0,0.45) to[out=0,in=0,looseness=2.5]  (0,0);
+			%\path (0.6,0);
+			}
+		},
+	inkQ/.style={code={%
+			\draw[line width={\tkzbrushthick}] (0.25,0) circle(0.25 and 0.5);
+			\draw[line width={\tkzbrushthick},{ink[bend]}-{ink[bend]}](0.35,-0.25) -- (0.5,-0.5);
+			%\draw[line width=5] (0.3,0) circle(0.3 and 0.48);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}](0.35,-0.25) -- (0.6,-0.45);
+			%\path (0.8,0);
+			}
+		},
+	inkR/.style={code={%
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,-0.5) -- (0,0.5)  to[out=0,in=0,looseness=2.5]  (0.05,0) -- (0.5,-0.5);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0,-0.45) -- (0,0.45) to[out=0,in=0,looseness=2.5]  (0.05,0) -- (0.4,-0.45);
+			%\path (0.6,0);
+			}
+		},
+	inkS/.style={code={%
+			\draw[line width={\tkzbrushthick},{ink[bend]}-] (0.475,0.475) to[out=150,in=165,looseness=2.25] (0.25,0) to[out=-15,in=-30,looseness=2.25] (0.025,-0.475);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0.5,0.4) to[out=160,in=165,looseness=2]  (0.3,0) to[out=-15,in=-20,looseness=2] (0.1,-0.4);
+			%\path (0.65,0);
+			}
+		},
+	inkT/.style={code={%
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0.25,-0.5) -- (0.25,0.5) ;
+			\draw[line width={\tkzbrushthick}] (0,0.5) -- (0.5,0.5);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0.35,-0.45) -- (0.35,0.45) (0,0.45) -- (0.7,0.45);
+			%\path (0.85,0);
+			}
+		},
+	inkU/.style={code={%
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,0.5) -- (0,0.25) to[out=-90,in=180] (0.25,-0.5) to[out=0,in=-90] (0.5,0.25) -- (0.5,0.5);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0,0.5) -- (0,0) to[out=-90,in=-90,looseness=2.5] (0.6,0) -- (0.6,0.5);
+			%\path (0.8,0);
+			}
+		},
+	inkV/.style={code={%
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,0.5) -- (0.25,-0.5) -- (0.5,0.5);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0,0.5) -- (0.3,-0.4) -- (0.6,0.5);
+			%\path (0.8,0);
+			}
+		},
+	inkW/.style={code={%
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,0.5) -- (0.15,-0.5) -- (0.3,-0.25) -- (0.45,-0.5) -- (0.6,0.5);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0,0.45) -- (0.3,-0.4) -- (0.45,-0.1) -- (0.6,-0.4) -- (0.9,0.45);
+			%\path (1.1,0);
+			}
+		},
+	inkX/.style={code={%
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,0.5) -- (0.5,-0.5);
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0.5,0.5) -- (0,-0.5);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0,0.45) -- (0.6,-0.45);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0.6,0.45) -- (0,-0.45);
+			%\path (0.8,0);
+			}
+		},
+	inkY/.style={code={
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,0.5) -- (0.25,0);  
+			\draw[line width={\tkzbrushthick},{ink[bend]}-{ink[bend]}] (0.5,0.5) -- (0,-0.5);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0,0.45) -- (0.3,0);  
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0.6,0.45) -- (0,-0.45);
+			%\path (0.8,0);
+			}
+		},
+	inkZ/.style={code={%
+			\draw[line width={\tkzbrushthick},-{ink[bend]}] (0,0.5) --(0.5,0.5) -- (0,-0.5) -- (0.5,-0.45);
+			%\draw[line width=5,{ink[bend]}-{ink[bend]}] (0,0.45) --(0.6,0.45) -- (0,-0.45)  -- (0.6,-0.45);
+			%\path (0.8,0);
+			}
+		},
+	inkspace/.style={code={\path (0,0) (0.2,0);}},
+}
+
+%------macros
+\NewDocumentCommand\tkzbrush{ O{} D<>{} m }{%
+	\restoreKV[tkzbrush]%
+	\setKV[tkzbrush]{#1}%
+	\StrChar{#3}{1}[\myfisrtchar]%
+	\StrLen{#3}[\mynbofchars]%
+	\begin{tikzpicture}%[bezier bounding box]
+		\pic[bezier bounding box,local bounding box=box1,scale={\tkzbrushscale},#2] at (0,0) {brush\myfisrtchar} ;%
+		%on boucle les lettres une par une ??
+		\foreach \i [count=\Y,evaluate=\Y as \Z using {int(\Y+1)}] in {2,...,\mynbofchars}{%
+			\StrChar{#3}{\i}[\mytmpchar]%
+			\IfStrEq{\mytmpchar}{ }%
+				{%
+					\edef\temp{\noexpand\pic[bezier bounding box,right=2mm of box\Y,local bounding box=box\Z,scale={\tkzbrushscale},#2] {brushspace};}
+					\temp%
+				}%
+				{%
+					\edef\temp{\noexpand\pic[bezier bounding box,right=2mm of box\Y,local bounding box=box\Z,scale={\tkzbrushscale},#2] {brush\mytmpchar};}
+					\temp%
+				}%
+		}%
+	\end{tikzpicture}%
+}
+
+\NewDocumentCommand\tkzink{ O{} D<>{} m }{%
+	\restoreKV[tkzbrush]%
+	\setKV[tkzbrush]{#1}%
+	\StrChar{#3}{1}[\myfisrtchar]%
+	\StrLen{#3}[\mynbofchars]%
+	\begin{tikzpicture}[brushcolor,line join=round,line cap=round]%,bezier bounding box]
+		\pic[bezier bounding box,local bounding box=box1,scale={\tkzbrushscale},#2] at (0,0) {ink\myfisrtchar} ;%
+		\foreach \i [count=\Y,evaluate=\Y as \Z using {int(\Y+1)}] in {2,...,\mynbofchars}{%
+			\StrChar{#3}{\i}[\mytmpchar]%
+			\IfStrEq{\mytmpchar}{ }%
+				{%
+					\edef\temp{\noexpand\pic[bezier bounding box,right=2mm of box\Y,local bounding box=box\Z,scale={\tkzbrushscale},#2] {inkspace};}
+					\temp%
+				}%
+				{%
+					\edef\temp{\noexpand\pic[bezier bounding box,right=2mm of box\Y,local bounding box=box\Z,scale={\tkzbrushscale},#2] {ink\mytmpchar};}
+					\temp%
+				}%
+		}%
+	\end{tikzpicture}%
+}
+
+
+%====PixlArt Words
+\def\lsteightbittikzA{0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1}%7C*5L
+\def\lsteightbittikzB{1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0}%7C*5L
+\def\lsteightbittikzC{0,1,1,1,0,1,0,0,0,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,1,1,0}
+\def\lsteightbittikzD{1,1,1,0,0,1,0,0,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,1,0,1,1,1,0,0}
+\def\lsteightbittikzE{1,1,1,1,1,1,0,0,0,0,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,0,0,0,0,1,1,1,1,1}
+\def\lsteightbittikzF{1,1,1,1,1,1,0,0,0,0,1,0,0,0,0,1,1,1,1,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0}
+\def\lsteightbittikzG{0,1,1,1,0,1,0,0,0,1,1,0,0,0,0,1,0,1,1,1,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0}
+\def\lsteightbittikzH{1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1}
+\def\lsteightbittikzI{1,1,1,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,1,1,1}
+\def\lsteightbittikzJ{0,0,1,1,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,1,0,0,1,0,0,1,1,0,0}
+\def\lsteightbittikzK{1,0,0,0,1,1,0,0,1,0,1,0,1,0,0,1,1,0,0,0,1,0,1,0,0,1,0,0,1,0,1,0,0,0,1}
+\def\lsteightbittikzL{1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,1,1,1,1}
+\def\lsteightbittikzM{1,0,0,0,1,1,1,0,1,1,1,0,1,0,1,1,0,1,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1}
+\def\lsteightbittikzN{1,0,0,0,1,1,0,0,0,1,1,1,0,0,1,1,0,1,0,1,1,0,0,1,1,1,0,0,0,1,1,0,0,0,1}
+\def\lsteightbittikzO{0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0}
+\def\lsteightbittikzP{1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0}
+\def\lsteightbittikzQ{0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,1,0,1,1,0,0,1,0,0,1,1,0,1}
+\def\lsteightbittikzR{1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0,1,0,1,0,0,1,0,0,1,0,1,0,0,0,1}
+\def\lsteightbittikzS{0,1,1,1,1,1,0,0,0,0,1,0,0,0,0,0,1,1,1,0,0,0,0,0,1,0,0,0,0,1,1,1,1,1,0}
+\def\lsteightbittikzT{1,1,1,1,1,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0}
+\def\lsteightbittikzU{1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0}
+\def\lsteightbittikzV{1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0}
+\def\lsteightbittikzW{1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,0,1,0,1,0}
+\def\lsteightbittikzX{1,0,0,0,1,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,1,0,0,0,1}
+\def\lsteightbittikzY{1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0}
+\def\lsteightbittikzZ{1,1,1,1,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,1,1,1,1}
+\def\lsteightbittikza{0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,0,1,1,1,1,1,0,0,0,1,0,1,1,1,1}
+\def\lsteightbittikzaaccent{0,1,1,1,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,0,1,1,1,1,1,0,0,0,1,0,1,1,1,1}
+\def\lsteightbittikzaaigu{0,1,0,1,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,0,1,1,1,1,1,0,0,0,1,0,1,1,1,1}
+\def\lsteightbittikzb{1,0,0,0,0,1,0,0,0,0,1,0,1,1,0,1,1,0,0,1,1,0,0,0,1,1,0,0,0,1,1,1,1,1,0}
+\def\lsteightbittikzc{0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,1,1,0}
+\def\lsteightbittikzd{0,0,0,0,1,0,0,0,0,1,0,1,1,0,1,1,0,0,1,1,1,0,0,0,1,1,0,0,0,1,0,1,1,1,1}
+\def\lsteightbittikze{0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,0}
+\def\lsteightbittikzeaccent{0,1,1,1,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,0}
+\def\lsteightbittikzeaigu{0,1,0,1,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,0}
+\def\lsteightbittikzf{0,0,1,1,0,0,1,0,0,1,0,1,0,0,0,1,1,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0}
+\def\lsteightbittikzg{0,0,0,0,0,0,1,1,1,1,1,0,0,0,1,1,0,0,0,1,0,1,1,1,1,0,0,0,0,1,0,1,1,1,0}
+\def\lsteightbittikzh{1,0,0,0,0,1,0,0,0,0,1,0,1,1,0,1,1,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1}
+\def\lsteightbittikzi{0,1,0,0,0,0,1,1,0,0,1,0,0,1,0,0,1,0,1,1,1}
+\def\lsteightbittikziaccent{1,1,1,0,0,0,1,1,0,0,1,0,0,1,0,0,1,0,1,1,1}
+\def\lsteightbittikziaigu{1,0,1,0,0,0,1,1,0,0,1,0,0,1,0,0,1,0,1,1,1}
+\def\lsteightbittikzj{0,0,0,1,0,0,0,0,0,0,1,1,0,0,0,1,0,0,0,1,1,0,0,1,0,1,1,0}
+\def\lsteightbittikzk{1,0,0,0,1,0,0,0,1,0,0,1,1,0,1,0,1,1,0,0,1,0,1,0,1,0,0,1}
+\def\lsteightbittikzl{1,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,1,1,1}
+\def\lsteightbittikzm{0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,1,0,1,0,1,1,0,1,0,1,1,0,0,0,1,1,0,0,0,1}
+\def\lsteightbittikzn{0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,1,1,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1}
+\def\lsteightbittikzo{0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0}
+\def\lsteightbittikzp{0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,1,0,0,0,1,1,1,1,1,0,1,0,0,0,0,1,0,0,0,0}
+\def\lsteightbittikzq{0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,0,0,1,1,0,1,1,1,1,0,0,0,0,1,0,0,0,0,1}
+\def\lsteightbittikzr{0,0,0,0,0,0,0,0,0,0,1,0,1,1,0,1,1,0,0,1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0}
+\def\lsteightbittikzs{0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,1,0}
+\def\lsteightbittikzt{0,1,0,0,0,0,1,0,0,0,1,1,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,1,1,0}
+\def\lsteightbittikzu{0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,1,1,0,1,1,0,1}
+\def\lsteightbittikzv{0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0,0,0,1,0,0}
+\def\lsteightbittikzw{0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,1,0,1,0,1,0,1,1,1,0}
+\def\lsteightbittikzx{0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0,1}
+\def\lsteightbittikzy{0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,1,0,0,0,0,1,0,1,1,1,0}
+\def\lsteightbittikzz{0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,1,1,1,1}
+\def\lsteightbittikzzero{0,1,1,1,0,1,0,0,0,1,1,0,0,1,1,1,0,1,0,1,1,1,0,0,1,1,0,0,0,1,0,1,1,1,0}
+\def\lsteightbittikzun{0,1,0,1,1,0,0,1,0,0,1,0,0,1,0,0,1,0,1,1,1}
+\def\lsteightbittikzdeux{0,1,1,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,1,1,1,1}
+\def\lsteightbittikztrois{1,1,1,1,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,1,0,0,0,1,0,1,1,1,0}
+\def\lsteightbittikzquatre{0,0,0,1,0,0,0,1,1,0,0,1,0,1,0,1,0,0,1,0,1,1,1,1,1,0,0,0,1,0,0,0,0,1,0}
+\def\lsteightbittikzcinq{1,1,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,1,0,0,0,0,1,1,0,0,0,1,0,1,1,1,0}
+\def\lsteightbittikzsix{0,0,1,1,0,0,1,0,0,0,1,0,0,0,0,1,1,1,1,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0}
+\def\lsteightbittikzsept{1,1,1,1,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0}
+\def\lsteightbittikzhuit{0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,0}
+\def\lsteightbittikzneuf{0,1,1,1,0,1,0,0,0,1,1,0,0,0,1,0,1,1,1,1,0,0,0,0,1,0,0,0,1,0,0,1,1,0,0}
+\def\lsteightbittikzapostr{1,1,0,1,1,0,0,0,0,0,0,0,0}
+\def\lsteightbittikzparg{0,0,1,0,1,0,1,0,0,1,0,0,1,0,0,0,1,0,0,0,1}
+\def\lsteightbittikzpard{1,0,0,0,1,0,0,0,1,0,0,1,0,0,1,0,1,0,1,0,0}
+\def\lsteightbittikzfois{0,0,0,0,0,0,0,1,0,0,1,0,1,0,1,0,1,1,1,0,1,0,1,0,1,0,0,1,0,0,0,0,0,0,0}
+\def\lsteightbittikzplus{0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,1,1,1,1,1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0}
+\def\lsteightbittikzvirgule{0,0,0,0,0,0,0,0,1,1,0,1,1,0}
+\def\lsteightbittikzmoins{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+\def\lsteightbittikzpoint{0,0,0,0,0,0,0,0,0,0,1,1,1,1}
+\def\lsteightbittikzslash{0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0}
+\def\lsteightbittikzdeuxpoints{0,0,1,1,1,1,0,0,1,1,1,1,0,0}
+\def\lsteightbittikzpointvirg{0,0,1,1,1,1,0,0,1,1,0,1,1,0}
+\def\lsteightbittikzinf{0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0}
+\def\lsteightbittikzeggal{0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0}
+\def\lsteightbittikzsup{1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0}
+\def\lsteightbittikzinterro{0,1,1,1,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0}
+\def\lsteightbittikzexcla{1,1,1,1,1,0,1}
+\def\lsteightbittikzcrog{1,1,1,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,1,1}
+\def\lsteightbittikzgrod{1,1,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,1,1,1}
+\def\lsteightbittikzbarre{1,1,1,1,1,1,1}
+\def\lsteightbittikzspace{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+
+\newlength{\eightbitpartthick}
+\newlength{\eightbitpartheight}
+\newlength{\eightbitpartunit}
+\setlength{\eightbitpartthick}{0.1mm}
+\setlength{\eightbitpartheight}{11mm}
+\setlength{\eightbitpartunit}{1mm}
+
+\defKV[eightbitpart]{%
+	%unit=\def\eightbitpartunit{#1},%
+	height=\setlength{\eightbitpartheight}{#1},%
+	thick=\setlength{\eightbitpartthick}{#1},%
+	color=\def\eightbitpartcolor{#1},%
+	gridcolor=\def\eightbitpartgridcolor{#1},%
+	offseth=\def\eightbitpartoffseth{#1},%
+	offsetv=\def\eightbitpartoffsetv{#1}%
+}
+
+\setKVdefault[eightbitpart]{%
+	height=11mm,%
+	thick=0.1mm,%
+	color=black,%
+	gridcolor=gray,
+	offseth=1,%
+	offsetv=2,%
+	gridafter=false,%
+	nospaceafter=false,%
+	border=false
+}
+
+\NewDocumentCommand\tkzpixletter{ }{%
+	\begingroup
+	\catcode`\;=12
+	\catcode`\:=12
+	\catcode`\!=12
+	\catcode`\?=12
+	\PixlLetterAux
+}
+
+\NewDocumentCommand\PixlLetterAux{ O{} D<>{} m }{%
+	\endgroup
+	\restoreKV[eightbitpart]%
+	\setKV[eightbitpart]{#1}%
+	\xdef\tmplarg{5}%
+	%MAJUSCULE
+	\IfStrEq{#3}{A}{\xdef\TMPLIST{\lsteightbittikzA}}{}%
+	\IfStrEq{#3}{B}{\xdef\TMPLIST{\lsteightbittikzB}}{}%
+	\IfStrEq{#3}{C}{\xdef\TMPLIST{\lsteightbittikzC}}{}%
+	\IfStrEq{#3}{D}{\xdef\TMPLIST{\lsteightbittikzD}}{}%
+	\IfStrEq{#3}{E}{\xdef\TMPLIST{\lsteightbittikzE}}{}%
+	\IfStrEq{#3}{F}{\xdef\TMPLIST{\lsteightbittikzF}}{}%
+	\IfStrEq{#3}{G}{\xdef\TMPLIST{\lsteightbittikzG}}{}%
+	\IfStrEq{#3}{H}{\xdef\TMPLIST{\lsteightbittikzH}}{}%
+	\IfStrEq{#3}{I}{\xdef\TMPLIST{\lsteightbittikzI}\xdef\tmplarg{3}}{}%
+	\IfStrEq{#3}{J}{\xdef\TMPLIST{\lsteightbittikzJ}}{}%
+	\IfStrEq{#3}{K}{\xdef\TMPLIST{\lsteightbittikzK}}{}%
+	\IfStrEq{#3}{L}{\xdef\TMPLIST{\lsteightbittikzL}}{}%
+	\IfStrEq{#3}{M}{\xdef\TMPLIST{\lsteightbittikzM}}{}%
+	\IfStrEq{#3}{N}{\xdef\TMPLIST{\lsteightbittikzN}}{}%
+	\IfStrEq{#3}{O}{\xdef\TMPLIST{\lsteightbittikzO}}{}%
+	\IfStrEq{#3}{P}{\xdef\TMPLIST{\lsteightbittikzP}}{}%
+	\IfStrEq{#3}{Q}{\xdef\TMPLIST{\lsteightbittikzQ}}{}%
+	\IfStrEq{#3}{R}{\xdef\TMPLIST{\lsteightbittikzR}}{}%
+	\IfStrEq{#3}{S}{\xdef\TMPLIST{\lsteightbittikzS}}{}%
+	\IfStrEq{#3}{T}{\xdef\TMPLIST{\lsteightbittikzT}}{}%
+	\IfStrEq{#3}{U}{\xdef\TMPLIST{\lsteightbittikzU}}{}%
+	\IfStrEq{#3}{V}{\xdef\TMPLIST{\lsteightbittikzV}}{}%
+	\IfStrEq{#3}{W}{\xdef\TMPLIST{\lsteightbittikzW}}{}%
+	\IfStrEq{#3}{X}{\xdef\TMPLIST{\lsteightbittikzX}}{}%
+	\IfStrEq{#3}{Y}{\xdef\TMPLIST{\lsteightbittikzY}}{}%
+	\IfStrEq{#3}{Z}{\xdef\TMPLIST{\lsteightbittikzZ}}{}%
+	%minuscule
+	\IfStrEq{#3}{a}{\xdef\TMPLIST{\lsteightbittikza}}{}%
+	\IfStrEq{#3}{à}{\xdef\TMPLIST{\lsteightbittikzaaccent}}{}%
+	\IfStrEq{#3}{ä}{\xdef\TMPLIST{\lsteightbittikzaaigu}}{}%
+	\IfStrEq{#3}{b}{\xdef\TMPLIST{\lsteightbittikzb}}{}%
+	\IfStrEq{#3}{c}{\xdef\TMPLIST{\lsteightbittikzc}}{}%
+	\IfStrEq{#3}{d}{\xdef\TMPLIST{\lsteightbittikzd}}{}%
+	\IfStrEq{#3}{e}{\xdef\TMPLIST{\lsteightbittikze}}{}%
+	\IfStrEq{#3}{é}{\xdef\TMPLIST{\lsteightbittikzeaccent}}{}%
+	\IfStrEq{#3}{è}{\xdef\TMPLIST{\lsteightbittikzeaccent}}{}%
+	\IfStrEq{#3}{ê}{\xdef\TMPLIST{\lsteightbittikzeaccent}}{}%
+	\IfStrEq{#3}{ë}{\xdef\TMPLIST{\lsteightbittikzeaigu}}{}%
+	\IfStrEq{#3}{f}{\xdef\TMPLIST{\lsteightbittikzf}}{}%
+	\IfStrEq{#3}{g}{\xdef\TMPLIST{\lsteightbittikzg}}{}%
+	\IfStrEq{#3}{h}{\xdef\TMPLIST{\lsteightbittikzh}}{}%
+	\IfStrEq{#3}{i}{\xdef\TMPLIST{\lsteightbittikzi}\xdef\tmplarg{3}}{}%
+	\IfStrEq{#3}{î}{\xdef\TMPLIST{\lsteightbittikziaccent}\xdef\tmplarg{3}}{}%
+	\IfStrEq{#3}{ï}{\xdef\TMPLIST{\lsteightbittikziaigu}\xdef\tmplarg{3}}{}%
+	\IfStrEq{#3}{j}{\xdef\TMPLIST{\lsteightbittikzj}\xdef\tmplarg{4}}{}%
+	\IfStrEq{#3}{k}{\xdef\TMPLIST{\lsteightbittikzk}\xdef\tmplarg{4}}{}%
+	\IfStrEq{#3}{l}{\xdef\TMPLIST{\lsteightbittikzl}\xdef\tmplarg{3}}{}%
+	\IfStrEq{#3}{m}{\xdef\TMPLIST{\lsteightbittikzm}}{}%
+	\IfStrEq{#3}{n}{\xdef\TMPLIST{\lsteightbittikzn}}{}%
+	\IfStrEq{#3}{o}{\xdef\TMPLIST{\lsteightbittikzo}}{}%
+	\IfStrEq{#3}{p}{\xdef\TMPLIST{\lsteightbittikzp}}{}%
+	\IfStrEq{#3}{q}{\xdef\TMPLIST{\lsteightbittikzq}}{}%
+	\IfStrEq{#3}{r}{\xdef\TMPLIST{\lsteightbittikzr}}{}%
+	\IfStrEq{#3}{s}{\xdef\TMPLIST{\lsteightbittikzs}}{}%
+	\IfStrEq{#3}{t}{\xdef\TMPLIST{\lsteightbittikzt}}{}%
+	\IfStrEq{#3}{u}{\xdef\TMPLIST{\lsteightbittikzu}}{}%
+	\IfStrEq{#3}{v}{\xdef\TMPLIST{\lsteightbittikzv}}{}%
+	\IfStrEq{#3}{w}{\xdef\TMPLIST{\lsteightbittikzw}}{}%
+	\IfStrEq{#3}{x}{\xdef\TMPLIST{\lsteightbittikzx}}{}%
+	\IfStrEq{#3}{y}{\xdef\TMPLIST{\lsteightbittikzy}}{}%
+	\IfStrEq{#3}{z}{\xdef\TMPLIST{\lsteightbittikzz}}{}%
+	%chiffres
+	\IfStrEq{#3}{0}{\xdef\TMPLIST{\lsteightbittikzzero}}{}%
+	\IfStrEq{#3}{1}{\xdef\TMPLIST{\lsteightbittikzun}\xdef\tmplarg{3}}{}%
+	\IfStrEq{#3}{2}{\xdef\TMPLIST{\lsteightbittikzdeux}}{}%
+	\IfStrEq{#3}{3}{\xdef\TMPLIST{\lsteightbittikztrois}}{}%
+	\IfStrEq{#3}{4}{\xdef\TMPLIST{\lsteightbittikzquatre}}{}%
+	\IfStrEq{#3}{5}{\xdef\TMPLIST{\lsteightbittikzcinq}}{}%
+	\IfStrEq{#3}{6}{\xdef\TMPLIST{\lsteightbittikzsix}}{}%
+	\IfStrEq{#3}{7}{\xdef\TMPLIST{\lsteightbittikzsept}}{}%
+	\IfStrEq{#3}{8}{\xdef\TMPLIST{\lsteightbittikzhuit}}{}%
+	\IfStrEq{#3}{9}{\xdef\TMPLIST{\lsteightbittikzneuf}}{}%
+	%ponctuation
+	\IfStrEq{#3}{'}{\xdef\TMPLIST{\lsteightbittikzapostr}\xdef\tmplarg{2}}{}%
+	\IfStrEq{#3}{(}{\xdef\TMPLIST{\lsteightbittikzparg}\xdef\tmplarg{3}}{}%
+	\IfStrEq{#3}{)}{\xdef\TMPLIST{\lsteightbittikzpard}\xdef\tmplarg{3}}{}%
+	\IfStrEq{#3}{*}{\xdef\TMPLIST{\lsteightbittikzfois}}{}%
+	\IfStrEq{#3}{+}{\xdef\TMPLIST{\lsteightbittikzplus}}{}%
+	\IfStrEq{#3}{,}{\xdef\TMPLIST{\lsteightbittikzvirgule}\xdef\tmplarg{2}}{}%
+	\IfStrEq{#3}{-}{\xdef\TMPLIST{\lsteightbittikzmoins}}{}%
+	\IfStrEq{#3}{.}{\xdef\TMPLIST{\lsteightbittikzpoint}\xdef\tmplarg{2}}{}%
+	\IfStrEq{#3}{/}{\xdef\TMPLIST{\lsteightbittikzslash}}{}%
+	\IfStrEq{#3}{:}{\xdef\TMPLIST{\lsteightbittikzdeuxpoints}\xdef\tmplarg{2}}{}%
+	\IfStrEq{#3}{;}{\xdef\TMPLIST{\lsteightbittikzpointvirg}\xdef\tmplarg{2}}{}%
+	\IfStrEq{#3}{<}{\xdef\TMPLIST{\lsteightbittikzinf}}{}%
+	\IfStrEq{#3}{=}{\xdef\TMPLIST{\lsteightbittikzeggal}}{}%
+	\IfStrEq{#3}{>}{\xdef\TMPLIST{\lsteightbittikzsup}}{}%
+	\IfStrEq{#3}{?}{\xdef\TMPLIST{\lsteightbittikzinterro}}{}%
+	\IfStrEq{#3}{!}{\xdef\TMPLIST{\lsteightbittikzexcla}\xdef\tmplarg{1}}{}%
+	\IfStrEq{#3}{[}{\xdef\TMPLIST{\lsteightbittikzcrog}\xdef\tmplarg{3}}{}%
+	\IfStrEq{#3}{]}{\xdef\TMPLIST{\lsteightbittikzgrod}\xdef\tmplarg{3}}{}%
+	\IfStrEq{#3}{|}{\xdef\TMPLIST{\lsteightbittikzbarre}\xdef\tmplarg{1}}{}%
+	\IfStrEq{#3}{ }{\xdef\TMPLIST{\lsteightbittikzspace}\xdef\tmplarg{3}}{}%
+	%la case !
+	\xdef\tmpnumbercasesv{\inteval{7+2*\eightbitpartoffsetv}}%
+	\pgfmathsetlength{\eightbitpartunit}{\eightbitpartheight/\tmpnumbercasesv}%
+	%tikzpicture
+	\begin{tikzpicture}[line cap=rect,x=\eightbitpartunit,y=\eightbitpartunit,line width=\eightbitpartthick,#2]
+		%clipping ?
+		%\clip ([shift={(-0.5\eightbitpartthick,-0.5\eightbitpartthick)}]{-\eightbitpartoffseth},{-\eightbitpartoffsetv}) rectangle ([shift={(0.5\eightbitpartthick,0.5\eightbitpartthick)}]{\tmplarg+\eightbitpartoffseth},{7+\eightbitpartoffsetv}) ;
+		%gridbefore
+		\ifboolKV[eightbitpart]{gridafter}%
+			{}%
+			{%
+				\foreach \x in {-\eightbitpartoffseth,...,\numexpr\tmplarg+\eightbitpartoffseth\relax}
+					{%
+						\draw[line width=\eightbitpartthick,\eightbitpartgridcolor] (\x,{-\eightbitpartoffsetv}) --++ (0,{7+2*\eightbitpartoffsetv}) ;
+					}%
+				\foreach \y in {-\eightbitpartoffsetv,...,\numexpr7+\eightbitpartoffseth+\eightbitpartoffseth\relax}
+					{%
+						\draw[line width=\eightbitpartthick,\eightbitpartgridcolor] ({-\eightbitpartoffseth},\y) --++ ({\tmplarg+2*\eightbitpartoffseth},0) ;
+					}%
+			}%
+		\ifnum\tmplarg=1%
+			\foreach \i [count=\j] in \TMPLIST {%
+				\ifnum\i=1%
+					\fill[\eightbitpartcolor] (0,{7-\j}) rectangle++ (1,1) ; 
+				\fi%
+			}%
+		\fi%
+		\ifnum\tmplarg=2%
+			\foreach \i [count=\j] in \TMPLIST {%
+				\ifnum\i=1%
+					\xintifboolexpr{ \xintiiOdd{\j} == 1 }%
+						{%si c'est impair
+							\xdef\tmpX{0}%
+							\xdef\tmpY{\xintieval{(\j-1)/2}}%
+						}%
+						{%si c'est pair
+							\xdef\tmpX{1}%
+							\xdef\tmpY{\xintieval{(\j)/2-1}}%
+						}%
+					\fill[\eightbitpartcolor] ({\tmpX},{6-\tmpY}) rectangle++ (1,1) ;
+				\fi%
+			}%
+		\fi%
+		\ifnum\tmplarg>2%
+		\foreach \i [count=\j] in \TMPLIST {%
+			\ifnum\i=1%
+				\xdef\tmpX{\xintiiRem{\j-1}{\tmplarg}}%
+				\xdef\tmpY{\xintiiQuo{\j-1}{\tmplarg}}%
+				\fill[\eightbitpartcolor] ({\tmpX},{6-\tmpY}) rectangle++ (1,1) ;
+			\fi%
+		}%
+		\fi%
+		%gridafter
+		\ifboolKV[eightbitpart]{gridafter}%
+			{%
+				\foreach \x in {-\eightbitpartoffseth,...,\numexpr\tmplarg+\eightbitpartoffseth\relax}
+					{%
+						\draw[line width=\eightbitpartthick,\eightbitpartgridcolor] (\x,{-\eightbitpartoffsetv}) --++ (0,{7+2*\eightbitpartoffsetv}) ;
+					}%
+				\foreach \y in {-\eightbitpartoffsetv,...,\numexpr7+\eightbitpartoffseth+\eightbitpartoffseth\relax}
+					{%
+						\draw[line width=\eightbitpartthick,\eightbitpartgridcolor] ({-\eightbitpartoffseth},\y) --++ ({\tmplarg+2*\eightbitpartoffseth},0) ;
+					}%
+			}%
+			{}%
+		\end{tikzpicture}%
+	\ifboolKV[eightbitpart]{nospaceafter}{\hspace*{-\eightbitpartthick}}{}%
+}
+
+\NewDocumentCommand\tkzpixlquote{ O{} D<>{} }{%
+	\restoreKV[eightbitpart]%
+	\setKV[eightbitpart]{#1}%
+	\xdef\tmplarg{2}%
+	\xdef\tmpnumbercasesv{\inteval{7+2*\eightbitpartoffsetv}}%
+	\pgfmathsetlength{\eightbitpartunit}{\eightbitpartheight/\tmpnumbercasesv}%
+	\begin{tikzpicture}[line cap=rect,x=\eightbitpartunit,y=\eightbitpartunit,line width=\eightbitpartthick,#2]
+		%clipping ?
+		%\clip ({-\eightbitpartoffseth},{-\eightbitpartoffsetv}) rectangle ({\tmplarg+\eightbitpartoffseth},{7+\eightbitpartoffsetv}) ;
+		%gridbefore
+		\ifboolKV[eightbitpart]{gridafter}%
+			{}%
+			{%
+				\foreach \x in {-\eightbitpartoffseth,...,\numexpr\tmplarg+\eightbitpartoffseth\relax}
+					{%
+						\draw[line width=\eightbitpartthick,\eightbitpartgridcolor] (\x,{-\eightbitpartoffsetv}) --++ (0,{7+2*\eightbitpartoffsetv}) ;
+					}%
+				\foreach \y in {-\eightbitpartoffsetv,...,\numexpr7+\eightbitpartoffseth+\eightbitpartoffseth\relax}
+					{%
+						\draw[line width=\eightbitpartthick,\eightbitpartgridcolor] ({-\eightbitpartoffseth},\y) --++ ({\tmplarg+2*\eightbitpartoffseth},0) ;
+					}%
+			}%
+		\fill[\eightbitpartcolor] ({0},{6}) rectangle++ (1,1) ;
+		\fill[\eightbitpartcolor] ({1},{6}) rectangle++ (1,1) ;
+		\fill[\eightbitpartcolor] ({1},{5}) rectangle++ (1,1) ;
+		\fill[\eightbitpartcolor] ({0},{4}) rectangle++ (1,1) ;
+		%gridafter
+		\ifboolKV[eightbitpart]{gridafter}%
+			{%
+				\foreach \x in {-\eightbitpartoffseth,...,\numexpr\tmplarg+\eightbitpartoffseth\relax}
+					{%
+						\draw[line width=\eightbitpartthick,\eightbitpartgridcolor] (\x,{-\eightbitpartoffsetv}) --++ (0,{7+2*\eightbitpartoffsetv}) ;
+					}%
+				\foreach \y in {-\eightbitpartoffsetv,...,\numexpr7+\eightbitpartoffseth+\eightbitpartoffseth\relax}
+					{%
+						\draw[line width=\eightbitpartthick,\eightbitpartgridcolor] ({-\eightbitpartoffseth},\y) --++ ({\tmplarg+2*\eightbitpartoffseth},0) ;
+					}%
+			}%
+			{}%
+	\end{tikzpicture}%
+	\ifboolKV[eightbitpart]{nospaceafter}{\hspace*{-2\eightbitpartthick}}{}%
+}
+
+\NewDocumentCommand\tkzpixl{ }{%
+	\begingroup
+	\catcode`\;=12
+	\catcode`\:=12
+	\catcode`\!=12
+	\catcode`\?=12
+	\PixlLettersAux
+}
+
+\NewDocumentCommand\PixlLettersAux{ O{} D<>{} m }{%
+	\endgroup
+	\setKV[eightbitpart]{#1}%
+	\StrLen{#3}[\tmpnbcaract]%
+	\ifboolKV[eightbitpart]{border}%
+		{%
+			\setlength{\fboxrule}{1.75\eightbitpartthick}%
+			\setlength{\fboxsep}{-\eightbitpartthick}%
+			\fbox{%
+			\foreach \i in {1,...,\tmpnbcaract}{%
+				\StrChar{#3}{\i}[\tmpcaract]%
+				\tkzpixletter[#1]<#2>{\tmpcaract}%
+				\ifnum\i<\tmpnbcaract\hspace*{-\eightbitpartthick}\fi%
+				}%
+			}%
+			\ifboolKV[eightbitpart]{nospaceafter}{\hspace*{-\eightbitpartthick}}{}%
+			\fboxrule=0.4pt%
+			\fboxsep=3.0pt%
+		}%
+		{%
+			\foreach \i in {1,...,\tmpnbcaract}{%
+				\StrChar{#3}{\i}[\tmpcaract]%
+				\tkzpixletter[#1]<#2>{\tmpcaract}%
+				\ifnum\i<\tmpnbcaract\hspace*{-\eightbitpartthick}\fi%
+				\ifboolKV[eightbitpart]{nospaceafter}{\hspace*{-\eightbitpartthick}}{}%
+			}%
+		}%
+}
+
+%====BICOLORTXT
+\defKV[bicolortxt]{colors=\def\bicolortxtcols{#1},style=\def\bicolortxtsttyle{#1},intdelta=\def\bicolortxtdelta{#1},paralcolors=\def\bicolortxtcolstrapez{#1}}
+\setKVdefault[bicolortxt]{colors={red/blue},style=midh,intdelta=0.66,paralcolors={red/blue/orange/gray}}
+
+\NewDocumentCommand\tkzbicolor{ O{} m }{%
+	\restoreKV[bicolortxt]%
+	\setKV[bicolortxt]{#1}%
+	\IfStrEq{\bicolortxtsttyle}{paral}%
+		{%
+			\setsepchar[.]{/}%
+			\readlist*\bicolortrapez{\bicolortxtcolstrapez}%
+		}%
+		{%
+			\StrCut{\bicolortxtcols}{/}{\bicolorabove}{\bicolorbelow}%
+		}%
+	\tikz[baseline=(l.base),inner sep=0pt,outer sep=0pt]{%
+		\node[inner sep=0pt,outer sep=0pt](l){\phantom{#2}};
+		\coordinate (lnw) at ([shift={(-0.5\pgflinewidth,0.5\pgflinewidth)}]l.north west) ;
+		\coordinate (ln) at ([shift={(0,0.5\pgflinewidth)}]l.north) ;
+		\coordinate (lne) at ([shift={(0.5\pgflinewidth,0.5\pgflinewidth)}]l.north east) ;
+		\coordinate (le) at ([shift={(0.5\pgflinewidth,0)}]l.east) ;
+		\coordinate (lse) at ([shift={(0.5\pgflinewidth,-0.5\pgflinewidth)}]l.south east) ;
+		\coordinate (ls) at ([shift={(0,-0.5\pgflinewidth)}]l.south) ;
+		\coordinate (lsw) at ([shift={(-0.5\pgflinewidth,-0.5\pgflinewidth)}]l.south west) ;
+		\coordinate (lw) at ([shift={(-0.5\pgflinewidth,0)}]l.west) ;
+		\IfStrEqCase{\bicolortxtsttyle}{%
+			{ellips}%
+				{%
+					\coordinate (lcircn) at ($(l.center)!\bicolortxtdelta!(l.north)$) ;
+					\coordinate (lcirce) at ($(l.center)!\bicolortxtdelta!(l.east)$) ;
+				}%
+			{rect}%
+				{%
+					\coordinate (lrectnw) at ($(l.center)!\bicolortxtdelta!(l.north west)$) ;
+					\coordinate (lrectse) at ($(l.center)!\bicolortxtdelta!(l.south east)$) ;
+				}%
+			{paral}%
+				{%
+					\coordinate (ltrapna) at ($(l.north west)!0.333!(l.north east)$) ;
+					\coordinate (ltrapnb) at ($(l.north west)!0.666!(l.north east)$) ;
+					\coordinate (ltrapsa) at ($(l.south west)!0.333!(l.south east)$) ;
+					\coordinate (ltrapsb) at ($(l.south west)!0.666!(l.south east)$) ;
+				}%
+		}%
+		\begin{scope}
+			\IfStrEqCase{\bicolortxtsttyle}{%
+				{midh}{\clip(ls)rectangle(lnw);\node[\bicolorabove]at(l){#2};}%
+				{midv}{\clip(lnw)rectangle(le);\node[\bicolorabove]at(l){#2};}%
+				{ndiag}{\clip(lnw)--(lne)--(lse)--cycle;\node[\bicolorabove]at(l){#2};}%
+				{sdiag}{\clip(lsw)--(lnw)--(lne)--cycle;\node[\bicolorabove]at(l){#2};}%
+				{ellips}{\clip(lsw)rectangle(lne);\node[\bicolorabove]at(l){#2};}%
+				{rect}{\clip(lsw)rectangle(lne);\node[\bicolorabove]at(l){#2};}%
+				{paral}{\clip(lsw)--(lnw)--(ltrapna)--cycle;\node[{\bicolortrapez[1]}]at(l){#2};}%
+			}%
+		\end{scope}
+		\begin{scope}
+			\IfStrEqCase{\bicolortxtsttyle}{%
+				{midh}{\clip(ls)rectangle(lne);\node[\bicolorbelow]at(l){#2};}%
+				{midv}{\clip(lsw)rectangle(le);\node[\bicolorbelow]at(l){#2};}%
+				{ndiag}{\clip(lsw)--(lnw)--(lse)--cycle;\node[\bicolorbelow]at(l){#2};}%
+				{sdiag}{\clip(lsw)--(lne)--(lse)--cycle;\node[\bicolorbelow]at(l){#2};}%
+				{ellips}{\clip(lsw)rectangle(lne);\pgfpathellipse{\pgfpointanchor{l}{center}}{\pgfpointanchor{lcirce}{center}}{\pgfpointanchor{lcircn}{center}}\pgfusepath{clip}\node[\bicolorbelow]at(l){#2};}%
+				{rect}{\clip(lrectnw)rectangle(lrectse);\node[\bicolorbelow]at(l){#2};}%
+				{paral}{\clip(lsw)--(ltrapna)--(ltrapnb)--(ltrapsa)--cycle;\node[{\bicolortrapez[2]}]at(l){#2};}%
+			}%
+		\end{scope}
+		\IfStrEq{\bicolortxtsttyle}{paral}%
+			{%
+				\begin{scope}%3
+					\clip(ltrapsa)--(ltrapnb)--(lne)--(ltrapsb)--cycle;\node[{\bicolortrapez[3]}]at(l){#2};
+				\end{scope}
+				\begin{scope}%
+					\clip(ltrapsb)--(lne)--(lse)--cycle;\node[{\bicolortrapez[4]}]at(l){#2};
+				\end{scope}
+			}%
+			{}%
+	}%
+}
+
+%===CALLOUT
+\newlength\comicbubblelgt
+\defKV[comicbubble]{width=\setlength\comicbubblelgt{#1},coltxt=\def\comicbubblecolfont{#1},colbg=\def\comicbubblecolgb{#1},colframe=\def\comicbubblecolframe{#1},pospointer=\def\comicbubblepospointer{#1},font=\def\comicbubblefont{#1}}
+\setKVdefault[comicbubble]{width=4cm,coltxt=black,colbg={},colframe=black,pospointer=(-150:0.75),font={},rcorners=false}
+
+\tikzset{comicbubble/.style args={#1#2}{inner sep=1mm,line join=round,rectangle callout,draw,very thick,text width=#1,align=flush center,callout relative pointer=#2}}
+
+\NewDocumentCommand\tkzcomicbubble{ s O{} D<>{} m }{%
+	\restoreKV[comicbubble]%
+	\setKV[comicbubble]{#2}%
+	\ifboolKV[comicbubble]{rcorners}%
+		{%
+			\tikzset{comicbubble/.append style={rounded corners}}%
+		}%
+		{}%
+	\IfEq{\comicbubblecolgb}{}%
+		{%
+			\tikzset{comicbubblebg/.style={}}%
+		}%
+		{%
+			\tikzset{comicbubblebg/.style={fill=\comicbubblecolgb}}%
+		}%
+	\IfBooleanTF{#1}%independant macro
+		{%
+			\node[comicbubble={\comicbubblelgt}{\comicbubblepospointer},comicbubblebg,text=\comicbubblecolfont,font=\comicbubblefont,#3]{#4}%
+		}%
+		{%
+			{\tikz\node[comicbubble={\comicbubblelgt}{\comicbubblepospointer},comicbubblebg,text=\comicbubblecolfont,font=\comicbubblefont,#3]{#4};}%
+		}%
+}
+
+%====UNDERLINE/SURROUND
+\newcommand\calcwidthnodetikz[2]{%
+	\pgfpointdiff{\pgfpointanchor{#1}{east}}{\pgfpointanchor{#1}{west}}%
+	\pgf@xa=\pgf@x
+	\pgf@ya=\pgf@y
+	% to convert from pt to cm   
+	\pgfmathparse{veclen(\pgf@xa,\pgf@ya)/28.45274}%
+	\global\let#2\pgfmathresult%
+}
+\newcommand\calcheightnodetikz[2]{%
+	\pgfpointdiff{\pgfpointanchor{#1}{south}}{\pgfpointanchor{#1}{north}}%
+	\pgf@xa=\pgf@x
+	\pgf@ya=\pgf@y
+	% to convert from pt to cm   
+	\pgfmathparse{veclen(\pgf@xa,\pgf@ya)/28.45274}%
+	\global\let#2\pgfmathresult%
+}
+
+\newlength\tkzheightunderline
+
+\defKV[tkzundersurr]{%
+	width=\def\tkzsurroundthick{#1},%
+	color=\def\tkzsurroundcolor{#1},%
+	node=\def\tkzsurroundnode{#1},%
+	height=\setlength\tkzheightunderline{#1}
+}
+\setKVdefault[tkzundersurr]{%
+	width=1.25pt,%
+	color=red,%
+	node=AAAAZ,%
+	height=10mm
+}
+
+\NewDocumentCommand\tkzsurround{ O{} m }{%
+	%#1=options
+	%#2=text
+	\restoreKV[tkzundersurr]%
+	\setKV[tkzundersurr]{#1}%
+	{\tikz[remember picture,baseline=(\tkzsurroundnode.base)]%
+		{\node[shape=rectangle,inner sep=0pt](\tkzsurroundnode){#2};}%
+	}%
+	\begin{tikzpicture}[remember picture,overlay]
+		\calcwidthnodetikz{\tkzsurroundnode}{\mytmpwidthnode}%
+		\xdef\offsettmpdecoh{\fpeval{-0.15*\mytmpwidthnode}}%
+		\xdef\offsettmpdecohb{\fpeval{0.25*\mytmpwidthnode}}%
+		\path[draw,line width=\tkzsurroundthick,\tkzsurroundcolor,{ink[bend]}-{ink[bend]}] plot[smooth] coordinates {%
+			([yshift=1.5mm]\tkzsurroundnode.north)
+			([xshift=-0.25mm,yshift=0.1mm]\tkzsurroundnode.north west)
+			([yshift=-0.2mm]\tkzsurroundnode.south west)
+			([xshift=-\offsettmpdecoh cm,yshift=-1mm]\tkzsurroundnode.south)
+			([yshift=-0.15mm]\tkzsurroundnode.south east)
+			([xshift=0.25mm,yshift=0.2mm]\tkzsurroundnode.north east)
+			([xshift=\offsettmpdecohb cm,yshift=1mm]\tkzsurroundnode.north)
+			([xshift=\offsettmpdecoh cm,yshift=-0.1mm]\tkzsurroundnode.north)
+		};%
+	\end{tikzpicture}%
+}
+
+
+\NewDocumentCommand\tkzunderline{ O{} m }{%
+	%#1=options
+	%#4=text
+	\restoreKV[tkzundersurr]%
+	\setKV[tkzundersurr]{#1}%
+	{\tikz[remember picture,baseline=(\tkzsurroundnode.base)]%
+		{\node[shape=rectangle,inner sep=0pt](\tkzsurroundnode){#2};}%
+	}%
+	\begin{tikzpicture}[remember picture,overlay]
+		\calcwidthnodetikz{\tkzsurroundnode}{\mytmpwidthnode}%
+		\xdef\offsettmpdecoha{\fpeval{0.25*\mytmpwidthnode}}%
+		\xdef\offsettmpdecohb{\fpeval{0.175*\mytmpwidthnode}}%
+		\xdef\offsettmpdecohc{\fpeval{0.1*\mytmpwidthnode}}%
+		\xdef\offsettmpdecohd{\fpeval{0.005*\mytmpwidthnode}}%
+		\path[draw,line width=\tkzsurroundthick,\tkzsurroundcolor,{ink[bend]}-{ink[bend]}] plot[smooth] 
+			coordinates {%
+				([yshift=-0.5*\tkzsurroundthick]\tkzsurroundnode.south west)
+				([yshift=-\tkzsurroundthick]\tkzsurroundnode.south east)
+				([xshift=-\offsettmpdecoha cm,yshift=-0.15\tkzheightunderline]\tkzsurroundnode.south)
+				([xshift=\offsettmpdecohb cm,yshift=-0.275\tkzheightunderline]\tkzsurroundnode.south)
+				([xshift=-\offsettmpdecohc cm,yshift=-0.4\tkzheightunderline]\tkzsurroundnode.south)
+				([yshift=-0.525\tkzheightunderline]\tkzsurroundnode.south)}
+			to ([xshift=\offsettmpdecohd cm,yshift=-\tkzheightunderline]\tkzsurroundnode.south) ;
+	\end{tikzpicture}%
+}
+
+\endinput

@@ -1,0 +1,251 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode}
+
+\documentclass[a4paper,french,11pt]{article}
+\usepackage[margin=1cm,includefoot]{geometry}
+\usepackage{tkz-grapheur}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,minted}
+\usepackage{babel}
+
+\begin{document}
+
+\part*{Exemples des différents cas d'intégrales}
+
+\section{Sous courbe, par défaut}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+		[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\TracerAxesGrilles[Derriere,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefinirCourbe[Nom=ch]<h>{0.25*(x+2)^2+1}
+	\TracerIntegrale%
+		[Couleurs=blue/cyan,Style=remplissage]%
+		{h(x)} %formule
+		{-5.25}{1.5}
+	\TracerCourbe[Couleur=red]{h(x)}
+	\TracerAxesGrilles[Devant,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\section{Sous courbe d'interpolation}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+		[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\TracerAxesGrilles[Grads=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefinirListeInterpo{(-6,4)(-2,-2)(3,3.5)}[\interpoA]
+	\DefinirCourbeInterpo[Nom=interpotest,Tension=1.05]{\interpoA}
+	\TracerIntegrale%
+		[NomInterpo=interpotest,Couleurs=blue/cyan,Style=remplissage,Type=itp,Tension=1.05]%
+		{\interpoA} %pointsinterpo
+		{-5.25}{1.5}
+	\TracerCourbeInterpo[Couleur=red,Tension=1.05]{\interpoA}
+	\TracerAxesGrilles[Grille=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\section{Sous spline cubique}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+		[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\TracerAxesGrilles[Grads=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefinirListeSpline{-6/4/-2§-5/2/-2§-4/0/-2§-2/-2/0§1/2/2§3/3.5/0.5}[\lstsplineA]
+	\DefinirCourbeSpline[Nom=splinetest]{\lstsplineA}<\SplineTeal>
+	\TracerIntegrale%
+		[NomSpline=\SplineTeal,Type=spl,Couleurs=blue/purple,Style=hachures]%
+		{splinetest} %nomcourbespline
+		{-5}{2}
+	\TracerCourbeSpline[Couleur=teal]{\lstsplineA}
+	\TracerAxesGrilles[Grille=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\section{Entre courbes}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\TracerAxesGrilles[Grads=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefinirCourbe[Nom=ch]<h>{0.25*(x+2)^2-1}
+	\DefinirCourbe[Nom=ck]<k>{-0.25*x+1}
+	\TrouverIntersections[Nom=ITSC,Aff=false]{ch}{ck}
+	\TracerIntegrale%
+		[Couleurs=olive/pink,Style=remplissage,Type=fct/fct,Bornes=noeud/abs]%
+		{h(x)}[k(x)] %formules
+		{(ITSC-1)}{1.5}
+	\TracerCourbe[Couleur=red]{h(x)}
+	\TracerCourbe[Couleur=blue]{k(x)}
+	\TracerAxesGrilles[Grille=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\section{Entre splines}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+		[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\TracerAxesGrilles[Grads=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefinirListeSpline{-6/4/-2§-5/2/-2§-4/0/-2§-2/-2/0§1/2/2§3/3.5/0.5}[\lstsplineA]
+	\DefinirListeSpline{-6/-2/3§-2/4/0§3/-1/0}[\lstsplineB]
+	\DefinirCourbeSpline[Nom=splinetestolive]{\lstsplineA}<\SplineOlive>
+	\DefinirCourbeSpline[Nom=splinetestteal]{\lstsplineB}<\SplineTeal>
+	\TrouverIntersections[Nom=ITT,Aff=false]{splinetestteal}{splinetestolive}
+	\TracerIntegrale%
+		[NomSpline=\SplineTeal,NomSplineB=\SplineOlive,Type=spl/spl,Couleurs=blue/purple,Bornes=noeuds]%
+		{splinetestolive} %nomcourbespline
+		[splinetestteal]  %nomcourbespline
+		{(ITT-1)}{(ITT-2)}
+	\TracerCourbeSpline[Couleur=teal]{\lstsplineA}
+	\TracerCourbeSpline[Couleur=olive]{\lstsplineB}
+	\TracerAxesGrilles[Grille=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\section{Entre interpolations}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\TracerAxesGrilles[Grads=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefinirListeInterpo{(-6,4)(-2,-2)(3,3.5)}[\interpoA]
+	\DefinirCourbeInterpo[Nom=interpotest]{\interpoA}
+	\DefinirListeInterpo{(-6,-2)(-1,4)(3,0)}[\interpoB]
+	\DefinirCourbeInterpo[Nom=interpotesta]{\interpoB}
+	\TracerIntegrale%
+	[NomInterpo=interpotesta,NomInterpoB=interpotest,Type=itp/itp,Couleurs=olive/pink]%
+		{\interpoB} %pointsinterpo
+		[\interpoA] %pointsinterpo
+		{-2}{1}
+	\TracerCourbeInterpo[Couleur=red]{\interpoA}
+	\TracerCourbeInterpo[Couleur=blue]{\interpoB}
+	\TracerAxesGrilles[Grille=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\section{Entre fonction et spline}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\TracerAxesGrilles[Grads=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefinirCourbe[Nom=ch]<h>{-0.25*(x+2)^2+3.5}
+	\DefinirListeSpline{-6/4/-2§-5/2/-2§-4/0/-2§-2/-2/0§1/2/2§3/3.5/0.5}[\lstsplineA]
+	\DefinirCourbeSpline[Nom=splineblue]{\lstsplineA}<\Splineblue>
+	\TracerIntegrale%
+		[NomSplineB=\Splineblue,Type=fct/spl,Couleurs=olive/pink]%
+		{h(x)}       %formule
+		[splineblue] %nomcourbespline
+		{-3}{0}
+	\TracerCourbe[Couleur=red]{h(x)}
+	\TracerCourbeSpline[Couleur=blue]{\lstsplineA}
+	\TracerAxesGrilles[Grille=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\section{Entre spline et fonction}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\TracerAxesGrilles[Grads=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefinirCourbe[Nom=ch]<h>{0.25*(x+2)^2-2}
+	\DefinirListeSpline{-6/4/2§-5/-2/-2§-4/0/2§-2/2/0§1/-2/-2§3/3.5/-0.5}[\lstsplineA]
+	\DefinirCourbeSpline[Nom=splineblue]{\lstsplineA}<\Splineblue>
+	\TracerIntegrale%
+		[NomSpline=\Splineblue,Type=spl/fct,Couleurs=olive/pink]%
+		{splineblue} %nomcourbespline
+		[h(x)]       %formule
+		{-3}{-1}
+	\TracerCourbe[Couleur=red]{h(x)}
+	\TracerCourbeSpline[Couleur=blue]{\lstsplineA}
+	\TracerAxesGrilles[Grille=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\section{Entre fonction et interpo}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\TracerAxesGrilles[Grads=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefinirCourbe[Nom=cm]<m>{-0.25*(x+2)^2+4}
+	\DefinirListeInterpo{(-6,4)(-5,-2)(-2,1)(1,-2)(3,3)}[\interpoB]
+	\DefinirCourbeInterpo[Nom=interpotestb]{\interpoB}
+	\TracerIntegrale%
+	[NomInterpoB=interpotestb,Type=fct/itp,Couleurs=olive/pink]%
+		{m(x)}      %formule
+		[\interpoB] %pointsinterpo
+		{-4}{1}
+	\TracerCourbe[Couleur=red]{m(x)}
+	\TracerCourbeInterpo[Couleur=blue]{\interpoB}
+	\TracerAxesGrilles[Grille=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\section{Entre interpo et fonction}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\TracerAxesGrilles[Grads=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefinirCourbe[Nom=courbeQ]<q>{0.25*(x+2)^2-2.5}
+	\DefinirListeInterpo{(-6,-2)(-5,4)(-2,-1)(1,2)(3,-2)}[\interpoA]
+	\DefinirCourbeInterpo[Nom=interpotest]{\interpoA}
+	\TrouverIntersections[Nom=FGH,Aff]{interpotest}{courbeQ}
+	\TracerIntegrale%
+		[NomInterpo=interpotest,Type=itp/fct,Couleurs=olive/pink,Bornes=noeuds]%
+		{\interpoA} %pointsinterpo
+		[q(x)]      %formule
+		{(FGH-1)}{(FGH-2)}
+	\TracerCourbe[Couleur=red]{q(x)}
+	\TracerCourbeInterpo[Couleur=blue]{\interpoA}
+	\TracerAxesGrilles[Grille=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\section{Entre spline et interpo}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\TracerAxesGrilles[Grads=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefinirListeSpline{-6/-2/2§-3/4/0§3/-2/0}[\lstsplineA]
+	\DefinirCourbeSpline[Nom=splinered]{\lstsplineA}<\Splinered>
+	\DefinirListeInterpo{(-6,4)(-5,-2)(-2,1)(1,-2)(3,3)}[\interpoB]
+	\DefinirCourbeInterpo[Nom=interpotestb]{\interpoB}
+	\TracerIntegrale%
+		[NomInterpoB=interpotestb,NomSpline=\Splinered,Type=spl/itp,Couleurs=olive/pink]%
+		{splinered} %nomcourbespline
+		[\interpoB] %pointsinterpo
+		{-4}{-2}
+	\TracerCourbeSpline[Couleur=red]{\lstsplineA}
+	\TracerCourbeInterpo[Couleur=blue]{\interpoB}
+	\TracerAxesGrilles[Grille=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\section{Entre interpo et spline}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\TracerAxesGrilles[Grads=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefinirListeSpline{-6/4/-2§-3/-2.25/0§3/3/0}[\lstsplineB]
+	\DefinirCourbeSpline[Nom=splineblue]{\lstsplineB}<\Splineblue>
+	\DefinirListeInterpo{(-6,-2)(-5,4)(-2,-1)(1,2)(3,-2.5)}[\interpoA]
+	\DefinirCourbeInterpo[Nom=interpotest]{\interpoA}
+	\TrouverIntersections[Nom=UIO,Aff]{interpotest}{splineblue}
+	\TracerIntegrale%
+		[NomInterpo=interpotest,NomSplineB=\Splineblue,Type=itp/spl,Couleurs=olive/pink,Bornes=noeuds]%
+		{\interpoA}  %pointsinterpo
+		[splineblue] %nomcourbespline
+		{(UIO-1)}{(UIO-2)}
+	\TracerCourbeSpline[Couleur=blue]{\lstsplineB}
+	\TracerCourbeInterpo[Couleur=red]{\interpoA}
+	\TracerAxesGrilles[Grille=false,Elargir=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\end{document}

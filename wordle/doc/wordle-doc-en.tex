@@ -1,0 +1,426 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[english,a4paper,11pt]{article}
+\usepackage[margin=2cm,includefoot]{geometry}
+\def\TPversion{0.1.1}
+\def\TPdate{03/09/2023}
+\usepackage{amssymb,amsfonts,amsmath}
+\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
+\usepackage{wordle}
+\usepackage{awesomebox}
+\usepackage{fontawesome5}
+\usepackage{footnote}
+\makesavenoteenv{tabular}
+\usepackage{enumitem}
+\usepackage{tabularray}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [wordle]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+
+%\usepackage{hvlogos}
+\usepackage{xspace}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+\newcommand\TableauDocumentation{%
+	\begin{tblr}{width=\linewidth,colspec={X[c]X[c]X[c]X[c]X[c]X[c]},cells={font=\sffamily}}
+		{\LARGE \LaTeX} & & & & &\\
+		& {\LARGE \hologo{pdfLaTeX}} & & & & \\
+		& & {\LARGE \hologo{LuaLaTeX}} & & & \\
+		& & & {\LARGE \TikZ} & & \\
+		& & & & {\LARGE \TeXLive} & \\
+		& & & & & {\LARGE \hologo{MiKTeX}} \\
+	\end{tblr}
+}
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\setlength{\parindent}{0pt}
+\definecolor{LightGray}{gray}{0.9}
+
+\usepackage{babel}
+%\AddThinSpaceBeforeFootnotes
+%\FrenchFootnotes
+
+\usepackage{listings}
+
+\usepackage{newverbs}
+\newverbcommand{\motcletex}{\color{cyan!75!black}}{}
+\newverbcommand{\packagetex}{\color{violet!75!black}}{}
+
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{listingsutf8}
+\newtcblisting{DemoCode}[1][]{%
+	enhanced,width=0.95\linewidth,center,%
+	bicolor,size=title,%
+	colback=cyan!2!white,%
+	colbacklower=cyan!1!white,%
+	colframe=cyan!75!black,%
+	listing options={%
+		breaklines=true,%
+		breakatwhitespace=true,%
+		style=tcblatex,basicstyle=\small\ttfamily,%
+		tabsize=4,%
+		commentstyle={\itshape\color{gray}},
+		keywordstyle={\color{blue}},%
+		classoffset=0,%
+		keywords={},%
+		alsoletter={-},%
+		keywordstyle={\color{blue}},%
+		classoffset=1,%
+		alsoletter={-},%
+		morekeywords={center,justify},%
+		keywordstyle={\color{violet}},%
+		classoffset=2,%
+		alsoletter={-},%
+		morekeywords={WordleGrid},%
+		keywordstyle={\color{green!50!black}},%
+		classoffset=3,%
+		morekeywords={Colors,Rounded,Unit,Font,ColorLetters,Letters,Style,Thickness,BorderColor},%
+		keywordstyle={\color{orange}}
+	},%
+	#1
+}
+
+\tcbset{vignettes/.style={%
+	nobeforeafter,box align=base,boxsep=0pt,enhanced,sharp corners=all,rounded corners=southeast,%
+	boxrule=0.75pt,left=7pt,right=1pt,top=0pt,bottom=0.25pt,%
+	}
+}
+
+\tcbset{vignetteMaJ/.style={%
+	fontupper={\vphantom{pf}\footnotesize\ttfamily},
+	vignettes,colframe=purple!50!black,coltitle=white,colback=purple!10,%
+	overlay={\begin{tcbclipinterior}%
+			\fill[fill=purple!75]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{black}{\scalebox{0.66}[0.66]{\textbf{MàJ}}}}} ($(interior.north west)+(5pt,0pt)$);%
+	\end{tcbclipinterior}}
+	}
+}
+
+\newcommand\Cle[1]{{\small\sffamily\textlangle \textcolor{orange}{#1}\textrangle}}
+\newcommand\cmaj[1]{\tcbox[vignetteMaJ]{#1}\xspace}
+
+\begin{document}
+
+\setlength{\aweboxleftmargin}{0.07\linewidth}
+\setlength{\aweboxcontentwidth}{0.93\linewidth}
+\setlength{\aweboxvskip}{8pt}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\vspace{2cm}
+
+\begin{center}
+	\begin{minipage}{0.75\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{wordle} [en]}\\
+				\\
+				{\LARGE Grids of Wordle,} \\
+				\\
+				{\LARGE made with \textsf{Ti\textit{k}Z}.} \\
+			\end{tabular}
+			
+			\bigskip
+			
+			{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://github.com/cpierquet/wordle}}
+\end{tabular}
+\end{center}
+
+\vspace{0.25cm}
+
+{$\blacktriangleright$~~Create Wordle grids Wordle/Sutom\footnotemark\footnotetext{\url{https://en.wikipedia.org/wiki/Wordle}}.}
+
+\vspace{0.25cm}
+
+{$\blacktriangleright$~~Specify colors and font\footnotemark\footnotetext{Ideas from  \url{ttps://tex.stackexchange.com/questions/659860/wordle-like-colored-letter-boxes-in-latex}}.
+
+\vspace{0.5cm}
+
+\begin{center}
+\begin{WordleGrid}{CRAZE}
+	GRAIL TRACK CRAMP CRABS CRAZY CRAZE
+\end{WordleGrid}
+\end{center}
+
+\begin{center}
+\begin{WordleGrid}[Rounded=0,Colors={lightgray,orange,teal},Style=alt,Unit=0.5,Letters=false]{LADLE}
+	FLAIL LAPEL LADLE
+\end{WordleGrid}
+%
+\hspace{5mm}
+%
+\begin{WordleGrid}[Rounded=0,Colors={lightgray,orange,teal},Style=alt,Unit=0.5]{LADLE}
+	FLAIL LAPEL LADLE
+\end{WordleGrid}
+\end{center}
+
+\vspace{0.25cm}
+
+%\hfill{}\textit{Merci à Denis Bitouzé et à Gilles Le Bourhis pour leurs retours et idées !}
+
+\smallskip
+
+\vfill
+
+\hrule
+
+\medskip
+
+\TableauDocumentation
+
+\medskip
+
+\hrule
+
+\vspace*{1cm}
+
+\newpage
+
+\phantomsection
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vfill
+
+\section{History}
+
+\verb|v0.1.1|~:~~~~Bugfix with english version.
+
+\verb|v0.1.0|~:~~~~Initial version.
+
+\newpage
+
+\section{The wordle package}
+
+\subsection{The game}
+
+\begin{noteblock}
+Wordle is a web-based word game created and developed by Welsh software engineer Josh Wardle. Players have six attempts to guess a five-letter word, with feedback given for each guess in the form of colored tiles indicating when letters match or occupy the correct position.
+
+Every day, a five-letter word is chosen which players aim to guess within six tries. After every guess, each letter is marked as either green, yellow or gray: green indicates that letter is correct and in the correct position, yellow means it is in the answer but not in the right position, while gray indicates it is not in the answer at all. Multiple instances of the same letter in a guess, such as the "o"s in "robot", will be colored green or yellow only if the letter also appears multiple times in the answer; otherwise, excess repeating letters will be colored gray.
+
+\smallskip
+
+\hfill{\scriptsize \url{https://en.wikipedia.org/wiki/Wordle}}
+\end{noteblock}
+
+\subsection{The package}
+
+\begin{noteblock}
+This package can display, in a \textsf{tex} file, a wordle grid (with \TikZ{} and within a \motcletex!minipage!), with ability :
+
+\begin{itemize}
+	\item to change dimensions and colors ;
+	\item to pick style for misplaced letters ;
+	\item to change borders and corners ;
+	\item to print or not the letters.
+\end{itemize}
+
+It's possible to "play" with other words than five-letter words !
+\end{noteblock}
+
+\begin{importantblock}
+Most of source code, in \hologo{LaTeX3}, is given by thread from \texttt{tex.stackexchange}, proposed by user \textsf{3141592653589793238}.
+\end{importantblock}
+
+\subsection{Loading of the package, used packages}
+
+\begin{importantblock}
+The package \packagetex!wordle! loads within the preamble.
+
+There's no option, and \packagetex!xcolor! isn't loaded.
+\end{importantblock}
+
+\begin{DemoCode}[listing only]
+\documentclass{article}
+\usepackage{wordle}
+
+\end{DemoCode}
+
+\begin{noteblock}
+\packagetex!wordle! loads the following packages and libraries :
+
+\begin{itemize}
+	\item \packagetex!tikz!;
+	\item \packagetex!simplekv! ;
+	\item \packagetex!xstring!.
+\end{itemize}
+
+It’s mostly compatible with \textsf{latex}, \textsf{pdflatex}, \textsf{lualatex} or \textsf{xelatex} compilation !
+\end{noteblock}
+
+\vfill~
+
+\pagebreak
+
+\section{WordleGrid environment}
+
+\subsection{Environment}
+
+\begin{cautionblock}
+The environment to display a Wordle grid is \packagetex!WordleGrid!.
+
+It works with keys, between \texttt{[...]} and needs to know :
+
+\begin{itemize}
+	\item the good word ;
+	\item the different guesses.
+\end{itemize}
+
+The code create the grid and the colors !
+\end{cautionblock}
+
+\begin{DemoCode}[listing only]
+\begin{WordleGrid}[keys]{good word}
+	guess n°1
+	guess n°2
+	guess n°3
+\end{WordleGrid}
+\end{DemoCode}
+
+\begin{noteblock}
+the grid is created with a \motcletex!minipage!, with automatic width and spacings !
+\end{noteblock}
+
+\begin{DemoCode}[]
+%default output
+\begin{WordleGrid}{REBUS}
+	ARISE
+	ROUTE
+	RULES
+	REBUS
+\end{WordleGrid}
+\end{DemoCode}
+
+\subsection{Keys and options}
+
+\begin{tipblock}
+The first argument, mandatory and between \texttt{[...]}, proposes the following \Cle{keys} :
+
+\begin{itemize}
+	\item \Cle{Colors} : = colors of the boxes \Cle{back,misplaced,good} ;
+	
+	\hfill{}default : \Cle{WordleBack,WordleBad,WordleGood},%
+	\item \Cle{Rounded} := arc for corners, in mm ; \hfill{}default : \Cle{0.1}
+	\item \Cle{Unit} := width of cases, in cm ; \hfill{}default : \Cle{1}
+	\item \Cle{Font} := font for letters ; \hfill{}default : \Cle{\textbackslash LARGE\textbackslash bfseries\textbackslash sffamily}
+	\item \Cle{ColorLetters} := color for letters ; \hfill{}default : \Cle{white}
+	\item \Cle{BorderColor} := color fot the border ; \hfill{}default : \Cle{white}
+	\item \Cle{Letters} := boolean to print letters ; \hfill{}default : \Cle{true}
+	\item \Cle{Style} := style within \Cle{default / other} to change the style ; \hfill{}default : \Cle{default}
+	\item \Cle{Thick} := thickness of the borders, in mm. \hfill{}default : \Cle{0.25}
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{tipblock}
+The second argument, optional and between \texttt{\{...\}} is the correct word.
+
+\smallskip
+
+Different guesses are given within the body of the environment (line by line or space separated).
+\end{tipblock}
+
+\subsection{Examples}
+
+\begin{DemoCode}[]
+\begin{WordleGrid}{BURGH}
+	ABATE
+	HERBS
+	BURLY
+	BURGH
+\end{WordleGrid}
+%
+\hspace{5mm}
+%
+\begin{WordleGrid}[Style=alt]{BURGH}
+	ABATE HERBS BURLY BURGH
+\end{WordleGrid}
+\end{DemoCode}
+
+\begin{DemoCode}[]
+\begin{WordleGrid}
+		[Thickness=0.3,BorderColor=black,%
+		Colors={lightgray,orange,teal}]{BURGH}
+	ABATE
+	HERBS
+	BURLY
+	BURGH
+\end{WordleGrid}
+%
+\hspace{5mm}
+%
+\begin{WordleGrid}
+		[Rounded=0,Thickness=0.3,BorderColor=black,%
+		Colors={lightgray,orange,teal}]{BURGH}
+	ABATE
+	HERBS
+	BURLY
+	BURGH
+\end{WordleGrid}
+\end{DemoCode}
+
+\begin{DemoCode}[]
+\begin{WordleGrid}[Unit=2,Font=\Huge\ttfamily,ColorLetters=black]{BURGH}
+	ABATE
+	HERBS
+	BURLY
+	BURGH
+\end{WordleGrid}
+\end{DemoCode}
+
+\begin{DemoCode}[]
+\begin{WordleGrid}%
+		[Unit=0.75,Rounded=0,Colors={cyan,orange,violet},Letters=false]{BURGH}
+	ABATE
+	HERBS
+	BURLY
+	BURGH
+\end{WordleGrid}
+\hspace{5mm}
+\begin{WordleGrid}%
+		[Unit=0.75,Rounded=0,Colors={cyan,orange,violet},Style=alt]
+		{BURGH}
+	ABATE
+	HERBS
+	BURLY
+	BURGH
+\end{WordleGrid}
+\hspace{5mm}
+\begin{WordleGrid}%
+		[Unit=0.75,Rounded=0,Colors={cyan,orange,violet},Style=alt,Letters=false]
+		{BURGH}
+	ABATE
+	HERBS
+	BURLY
+	BURGH
+\end{WordleGrid}
+\end{DemoCode}
+
+\end{document}

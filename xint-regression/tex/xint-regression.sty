@@ -1,0 +1,672 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c
+% or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{xint-regression}[2025/05/05 0.1.1 Some classic regressions, with xint]
+%0.1.1	Bugfix
+%0.1.0	Initial version
+
+%------Packages utiles
+\RequirePackage{simplekv}
+\RequirePackage{xintexpr}
+\RequirePackage{listofitems}
+\RequirePackage{xstring}
+
+%régression linéaire
+\defKV[CoefRegLin]{%
+	coeffa=\def\RegLinCoefa{#1},%
+	coeffb=\def\RegLinCoefb{#1},%
+	round=\def\RegLinRound{#1}
+}
+
+\setKVdefault[CoefRegLin]{%
+	coeffa=linrega,%
+	coeffb=linregb,%
+	round={}
+}
+
+\newcommand\xintlinreg[3][]{%
+	\useKVdefault[CoefRegLin]%
+	\setKV[CoefRegLin]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%listes des données
+	\def\xliste{#2}%
+	\def\yliste{#3}%
+	\setsepchar{,}%
+	\readlist*\LX{\xliste}%
+	\readlist*\LY{\yliste}%
+	%taille des listes
+	\def\LNB{\inteval{\LXlen}}%
+	%somme des LX et des LY OK
+	\xdef\LXSomme{0}%
+	\xdef\LYSomme{0}%
+	\xintFor* ##1 in {\xintSeq{1}{\LNB}}\do{%
+		\xdef\LXSomme{\xintfloateval{\LXSomme+(\LX[##1])}}%
+		\xdef\LYSomme{\xintfloateval{\LYSomme+(\LY[##1])}}%
+	}%
+	%moyenne des LX et des LY OK
+	\xdef\LXmoy{\xintfloateval{\LXSomme/\LNB}}%
+	\xdef\LYmoy{\xintfloateval{\LYSomme/\LNB}}%
+	%variance des LX et des LY OK
+	\xdef\LXvar{0}%
+	\xintFor* ##1 in {\xintSeq{1}{\LNB}}\do{%
+		\xdef\LXvar{\xintfloateval{\LXvar+(\LX[##1]-(\LXmoy))*(\LX[##1]-(\LXmoy))}}%
+	}
+	\xdef\LXvar{\xintfloateval{\LXvar/\LNB}}%
+	\xdef\LYvar{0}%
+	\xintFor* ##1 in {\xintSeq{1}{\LNB}}\do{%
+		\xdef\LYvar{\xintfloateval{\LYvar+(\LY[##1]-(\LYmoy))*(\LY[##1]-(\LYmoy))}}%
+	}%
+	\xdef\LYvar{\xintfloateval{\LYvar/\LNB}}%
+	%covariance des XY OK
+	\xdef\LXYvar{0}%
+	\xintFor* ##1 in {\xintSeq{1}{\LNB}}\do{%
+		\xdef\LXYvar{\xintfloateval{\LXYvar+(\LX[##1]-(\LXmoy))*(\LY[##1]-(\LYmoy))}}%
+	}%
+	\xdef\LXYvar{\xintfloateval{\LXYvar/\LNB}}%
+	%COEFFS TEMPORAIRES OK
+	\xdef\tmp@reg@lin@a{\xintfloateval{\LXYvar/\LXvar}}%
+	\xdef\tmp@reg@lin@b{\xintfloateval{\LYmoy-(\tmp@reg@lin@a)*(\LXmoy)}}%
+	%STOCKAGE
+	\IfStrEq{\RegLinRound}{}%
+		{%
+			\expandafter\def\csname\RegLinCoefa\endcsname{\tmp@reg@lin@a}%
+			\expandafter\def\csname\RegLinCoefb\endcsname{\tmp@reg@lin@b}%
+		}%
+		{%
+			\IfSubStr{\RegLinRound}{/}%
+				{%
+					\StrCut{\RegLinRound}{/}{\xintarrondisreglina}{\xintarrondisreglinb}%
+				}%
+				{%
+					\xdef\xintarrondisreglina{\RegLinRound}\xdef\xintarrondisreglinb{\RegLinRound}%
+				}%
+			\expandafter\def\csname\RegLinCoefa\endcsname{\xintfloateval{round(\tmp@reg@lin@a,\xintarrondisreglina)}}%
+			\expandafter\def\csname\RegLinCoefb\endcsname{\xintfloateval{round(\tmp@reg@lin@b,\xintarrondisreglinb)}}%
+		}%
+}
+
+
+
+%régression quadratique
+\defKV[CoeffRegQuad]{%
+	coeffa=\def\RegQuadCoefa{#1},%
+	coeffb=\def\RegQuadCoefb{#1},%
+	coeffc=\def\RegQuadCoefc{#1},%
+	round=\def\RegQuadRound{#1}
+}
+
+\setKVdefault[CoeffRegQuad]{%
+	coeffa=quadrega,%
+	coeffb=quadregb,%
+	coeffc=quadregc,%
+	round={} 
+}
+
+\newcommand\xintquadreg[3][]{%
+	\useKVdefault[CoeffRegQuad]%
+	\setKV[CoeffRegQuad]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%listes des données
+	\def\xliste{#2}%
+	\def\yliste{#3}%
+	\setsepchar{,}%
+	\readlist*\LX{\xliste}%
+	\readlist*\LY{\yliste}%
+	%taille des listes
+	\def\LNB{\inteval{\LXlen}}%
+	%somme importantes
+	\xdef\LXSomme{0}%
+	\xdef\LXCSomme{0}%
+	\xdef\LYSomme{0}%
+	\xdef\LXXSomme{0}%
+	\xdef\LXYSomme{0}%
+	\xdef\LXXCSomme{0}%
+	\xdef\LXCXCSomme{0}%
+	\xdef\LXCYSomme{0}%
+	%calculs
+	\xintFor* ##1 in {\xintSeq{1}{\LNB}}\do{%
+		\xdef\LXSomme{\xintfloateval{\LXSomme+(\LX[##1])}}%
+		\xdef\LXCSomme{\xintfloateval{\LXCSomme+(\LX[##1])^2}}%
+	}%
+	\xintFor* ##1 in {\xintSeq{1}{\LNB}}\do{%
+		\xdef\LYSomme{\xintfloateval{\LYSomme+(\LY[##1])}}%
+	}%
+	\xdef\LXmoy{\xintfloateval{\LXSomme/\LNB}}%
+	\xdef\LYmoy{\xintfloateval{\LYSomme/\LNB}}%
+	\xdef\LXCmoy{\xintfloateval{\LXCSomme/\LNB}}%
+	%calculs suites
+	\xintFor* ##1 in {\xintSeq{1}{\LNB}}\do{%
+		\xdef\LXXSomme{\xintfloateval{\LXXSomme+(\LX[##1]-\LXmoy)^2}}%
+		\xdef\LXYSomme{\xintfloateval{\LXYSomme+(\LX[##1]-\LXmoy)*(\LY[##1]-\LYmoy)}}%
+		\xdef\LXXCSomme{\xintfloateval{\LXXCSomme+(\LX[##1]-\LXmoy)*((\LX[##1])*(\LX[##1])-\LXCmoy)}}%
+		\xdef\LXCXCSomme{\xintfloateval{\LXCXCSomme+((\LX[##1])^2-\LXCmoy)^2}}%
+		\xdef\LXCYSomme{\xintfloateval{\LXCYSomme+((\LX[##1])^2-\LXCmoy)*(\LY[##1]-\LYmoy)}}%
+	}%
+	%COEFFS TEMPORAIRES OK
+	\xdef\tmp@reg@quad@b{\xintfloateval{(\LXYSomme*\LXCXCSomme-\LXCYSomme*\LXXCSomme)/(\LXXSomme*\LXCXCSomme-(\LXXCSomme)^2)}}%
+	\xdef\tmp@reg@quad@a{\xintfloateval{(\LXCYSomme*\LXXSomme-\LXYSomme*\LXXCSomme)/(\LXXSomme*\LXCXCSomme-(\LXXCSomme)^2)}}%
+	\xdef\tmp@reg@quad@c{\xintfloateval{\LYmoy-(\tmp@reg@quad@b)*\LXmoy-(\tmp@reg@quad@a)*\LXCmoy}}%
+	%STOCKAGE
+	\IfStrEq{\RegQuadRound}{}%
+		{%
+			\expandafter\def\csname\RegQuadCoefb\endcsname{\tmp@reg@quad@b}%
+			\expandafter\def\csname\RegQuadCoefa\endcsname{\tmp@reg@quad@a}%
+			\expandafter\def\csname\RegQuadCoefc\endcsname{\tmp@reg@quad@c}%
+		}%
+		{%
+			\IfSubStr{\RegQuadRound}{/}%
+				{%
+					\StrBefore[1]{\RegQuadRound}{/}[\xintarrondisregquada]%
+					\StrBetween[1,2]{\RegQuadRound}{/}{/}[\xintarrondisregquadb]%
+					\StrBehind[2]{\RegQuadRound}{/}[\xintarrondisregquadc]%
+				}%
+				{%
+					\xdef\xintarrondisregquada{\RegQuadRound}%
+					\xdef\xintarrondisregquadb{\RegQuadRound}%
+					\xdef\xintarrondisregquadc{\RegQuadRound}%
+					
+				}%
+			\expandafter\def\csname\RegQuadCoefb\endcsname{\xintfloateval{round(\tmp@reg@quad@b,\xintarrondisregquadb)}}%
+			\expandafter\def\csname\RegQuadCoefa\endcsname{\xintfloateval{round(\tmp@reg@quad@a,\xintarrondisregquada)}}%
+			\expandafter\def\csname\RegQuadCoefc\endcsname{\xintfloateval{round(\tmp@reg@quad@c,\xintarrondisregquadc)}}%
+		}%
+}
+
+%régression puissance a*x^b
+\defKV[CoeffRegPuiss]{%
+	coeffa=\def\RegPuissCoefa{#1},%
+	coeffb=\def\RegPuissCoefb{#1},%
+	round=\def\RegPuissRound{#1}
+}
+
+\setKVdefault[CoeffRegPuiss]{%
+	coeffa=powrega,%
+	coeffb=powregb,%
+	round={}
+}
+
+\newcommand\xintpowreg[3][]{%
+	\useKVdefault[CoeffRegPuiss]%
+	\setKV[CoeffRegPuiss]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%listes des données
+	\def\xliste{#2}%
+	\def\yliste{#3}%
+	\setsepchar{,}%
+	\readlist*\LX{\xliste}%
+	\readlist*\LY{\yliste}%
+	%taille des listes
+	\def\LNB{\inteval{\LXlen}}%
+	%somme importantes
+	\xdef\LlnXSomme{0}%
+	\xdef\LlnYSomme{0}%
+	\xdef\LlnXlnYSomme{0}%
+	\xdef\LlncXSomme{0}%
+	%calculs
+	\xintFor* ##1 in {\xintSeq{1}{\LNB}}\do{%
+		\xdef\LlnXSomme{\xintfloateval{\LlnXSomme+log(\LX[##1])}}%
+		\xdef\LlnYSomme{\xintfloateval{\LlnYSomme+log(\LY[##1])}}%
+		\xdef\LlnXlnYSomme{\xintfloateval{\LlnXlnYSomme+log(\LX[##1])*log(\LY[##1])}}%
+		\xdef\LlncXSomme{\xintfloateval{\LlncXSomme+(log(\LX[##1]))^2}}%
+	}%
+	%COEFFS TEMPORAIRES OK
+	\xdef\tmp@reg@pow@b{\xintfloateval{(\LNB*\LlnXlnYSomme-\LlnXSomme*\LlnYSomme)/(\LNB*\LlncXSomme-(\LlnXSomme)^2)}}%
+	\xdef\tmp@reg@pow@a{\xintfloateval{exp(1/\LNB*\LlnYSomme-(\tmp@reg@pow@b)/\LNB*\LlnXSomme)}}%
+	%STOCKAGE
+	\IfStrEq{\RegPuissRound}{}%
+		{%
+			\expandafter\def\csname\RegPuissCoefb\endcsname{\xintfloateval{\tmp@reg@pow@b}}%
+			\expandafter\def\csname\RegPuissCoefa\endcsname{\xintfloateval{\tmp@reg@pow@a}}%
+		}%
+		{%
+			\IfSubStr{\RegPuissRound}{/}%
+				{%
+					\StrCut{\RegPuissRound}{/}{\xintarrondisregpowa}{\xintarrondisregpowb}%
+				}%
+				{%
+					\xdef\xintarrondisregpowa{\RegPuissRound}\xdef\xintrrondisregpowb{\RegPuissRound}%
+				}%
+			\expandafter\def\csname\RegPuissCoefb\endcsname{\xintfloateval{round(\tmp@reg@pow@b,\xintarrondisregpowb)}}%
+			\expandafter\def\csname\RegPuissCoefa\endcsname{\xintfloateval{round(\tmp@reg@pow@a,\xintarrondisregpowa)}}%
+		}%
+}
+
+%régression a*b^x
+\defKV[CoeffRegExpoAB]{%
+	coeffa=\def\RegExpoCoefa{#1},%
+	coeffb=\def\RegExpoCoefb{#1},%
+	round=\def\RegExpoRound{#1}
+}
+
+\setKVdefault[CoeffRegExpoAB]{%
+	coeffa=expabrega,%
+	coeffb=expabregb,%
+	round={}
+}
+
+\newcommand\xintexpabreg[3][]{%
+	\useKVdefault[CoeffRegExpoAB]%
+	\setKV[CoeffRegExpoAB]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%listes des données
+	\def\xliste{#2}%
+	\def\yliste{#3}%
+	\setsepchar{,}%
+	\readlist*\LX{\xliste}%
+	\readlist*\LY{\yliste}%
+	%taille des listes
+	\def\LNB{\inteval{\LXlen}}%
+	%somme importantes
+	\xdef\LXlnYSomme{0}%
+	\xdef\LXSomme{0}%
+	\xdef\LlnYSomme{0}%
+	\xdef\LXcSomme{0}%
+	%calculs
+	\xintFor* ##1 in {\xintSeq{1}{\LNB}}\do{%
+		\xdef\LXlnYSomme{\xintfloateval{\LXlnYSomme+\LX[##1]*log(\LY[##1])}}%
+		\xdef\LXSomme{\xintfloateval{\LXSomme+\LX[##1]}}%
+		\xdef\LlnYSomme{\xintfloateval{\LlnYSomme+log(\LY[##1])}}%
+		\xdef\LXcSomme{\xintfloateval{\LXcSomme+(\LX[##1])^2}}%
+	}%
+	%COEFFS TEMPORAIRES OK
+	\xdef\tmp@reg@expab@b{\xintfloateval{exp((\LNB*\LXlnYSomme-\LXSomme*\LlnYSomme)/(\LNB*\LXcSomme-(\LXSomme)^2))}}%
+	\xdef\tmp@reg@expab@a{\xintfloateval{exp(1/\LNB*\LlnYSomme-log(\tmp@reg@expab@b)/\LNB*\LXSomme)}}%
+	%STOCKAGE
+	\IfStrEq{\RegExpoRound}{}%
+		{%
+			\expandafter\def\csname\RegExpoCoefb\endcsname{\tmp@reg@expab@b}%
+			\expandafter\def\csname\RegExpoCoefa\endcsname{\tmp@reg@expab@a}%
+		}%
+		{%
+			\IfSubStr{\RegExpoRound}{/}%
+				{%
+					\StrCut{\RegExpoRound}{/}{\xintarrondisregexpoaba}{\xintarrondisregexpoabb}%
+				}%
+				{%
+					\xdef\xintarrondisregexpoaba{\RegExpoRound}\xdef\xintarrondisregexpoabb{\RegExpoRound}%
+				}%
+			\expandafter\def\csname\RegExpoCoefb\endcsname{\xintfloateval{round(\tmp@reg@expab@b,\xintarrondisregexpoabb)}}%
+			\expandafter\def\csname\RegExpoCoefa\endcsname{\xintfloateval{round(\tmp@reg@expab@a,\xintarrondisregexpoaba)}}%
+		}%
+}
+
+%régression a+b/x
+\defKV[CoeffRegHyperb]{%
+	coeffa=\def\RegHyperbCoefa{#1},%
+	coeffb=\def\RegHyperbCoefb{#1},%
+	round=\def\RegHyperbRound{#1}
+}
+
+\setKVdefault[CoeffRegHyperb]{%
+	coeffa=hyprega,%
+	coeffb=hypregb,%
+	round={}
+}
+
+\newcommand\xinthypreg[3][]{%
+	\useKVdefault[CoeffRegHyperb]%
+	\setKV[CoeffRegHyperb]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%listes des données
+	\def\xliste{#2}%
+	\def\yliste{#3}%
+	\setsepchar{,}%
+	\readlist*\LX{\xliste}%
+	\readlist*\LY{\yliste}%
+	%taille des listes
+	\def\LNB{\inteval{\LXlen}}%
+	%somme importantes
+	\xdef\LinvXSomme{0}%
+	\xdef\LYdivXSomme{0}%
+	\xdef\LYSomme{0}%
+	\xdef\LinvXcSomme{0}%
+	%calculs
+	\xintFor* ##1 in {\xintSeq{1}{\LNB}}\do{%
+		\xdef\LinvXSomme{\xintfloateval{\LinvXSomme+1/\LX[##1]}}%
+		\xdef\LYdivXSomme{\xintfloateval{\LYdivXSomme+\LY[##1]/\LX[##1]}}%
+		\xdef\LYSomme{\xintfloateval{\LYSomme+\LY[##1]}}%
+		\xdef\LinvXcSomme{\xintfloateval{\LinvXcSomme+1/(\LX[##1])^2}}%
+	}%
+	%COEFFS TEMPORAIRES OK
+	\xdef\tmp@reg@hyp@b{\xintfloateval{(\LNB*\LYdivXSomme-\LinvXSomme*\LYSomme)/(\LNB*\LinvXcSomme-(\LinvXSomme)^2)}}%
+	\xdef\tmp@reg@hyp@a{\xintfloateval{1/\LNB*\LYSomme-(\tmp@reg@hyp@b)/\LNB*\LinvXSomme}}%
+	%STOCKAGE
+	\IfStrEq{\RegHyperbRound}{}%
+		{%
+			\expandafter\def\csname\RegHyperbCoefb\endcsname{\tmp@reg@hyp@b}%
+			\expandafter\def\csname\RegHyperbCoefa\endcsname{\tmp@reg@hyp@a}%
+		}%
+		{%
+			\IfSubStr{\RegHyperbRound}{/}%
+				{%
+					\StrCut{\RegHyperbRound}{/}{\xintarrondisreghypa}{\xintarrondisreghypb}%
+				}%
+				{%
+					\xdef\xintarrondisreghypa{\RegHyperbRound}\xdef\xintarrondisreghypb{\RegHyperbRound}%
+				}%
+			\expandafter\def\csname\RegHyperbCoefb\endcsname{\xintfloateval{round(\tmp@reg@hyp@b,\xintarrondisreghypb)}}%
+			\expandafter\def\csname\RegHyperbCoefa\endcsname{\xintfloateval{round(\tmp@reg@hyp@a,\xintarrondisreghypa)}}%
+		}%
+}
+
+%régression a+b*ln(x)
+\defKV[CoeffRegLog]{%
+	coeffa=\def\RegLogCoefa{#1},%
+	coeffb=\def\RegLogCoefb{#1},%
+	round=\def\RegLogRound{#1}
+}
+
+\setKVdefault[CoeffRegLog]{%
+	coeffa=logrega,%
+	coeffb=logregb,%
+	round={}
+}
+
+\newcommand\xintlogreg[3][]{%
+	\useKVdefault[CoeffRegLog]%
+	\setKV[CoeffRegLog]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%listes des données
+	\def\xliste{#2}%
+	\def\yliste{#3}%
+	\setsepchar{,}%
+	\readlist*\LX{\xliste}%
+	\readlist*\LY{\yliste}%
+	%taille des listes
+	\def\LNB{\inteval{\LXlen}}%
+	%somme importantes
+	\xdef\LYlnXSomme{0}%
+	\xdef\LlnXSomme{0}%
+	\xdef\LYSomme{0}%
+	\xdef\LYlncXSomme{0}%
+	%calculs
+	\xintFor* ##1 in {\xintSeq{1}{\LNB}}\do{%
+		\xdef\LYlnXSomme{\xintfloateval{\LYlnXSomme+\LY[##1]*log(\LX[##1])}}%
+		\xdef\LlnXSomme{\xintfloateval{\LlnXSomme+log(\LX[##1])}}%
+		\xdef\LYSomme{\xintfloateval{\LYSomme+\LY[##1]}}%
+		\xdef\LYlncXSomme{\xintfloateval{\LYlncXSomme+log(\LX[##1])^2}}%
+	}%
+	%COEFFS TEMPORAIRES OK
+	\xdef\tmp@reg@log@b{\xintfloateval{(\LNB*\LYlnXSomme-\LlnXSomme*\LYSomme)/(\LNB*\LYlncXSomme-(\LlnXSomme)^2)}}%
+	\xdef\tmp@reg@log@a{\xintfloateval{1/\LNB*\LYSomme-(\tmp@reg@log@b)/\LNB*\LlnXSomme}}%
+	%STOCKAGE
+	\IfStrEq{\RegLogRound}{}%
+		{%
+			\expandafter\def\csname\RegLogCoefb\endcsname{\tmp@reg@log@b}%
+			\expandafter\def\csname\RegLogCoefa\endcsname{\tmp@reg@log@a}%
+		}%
+		{%
+			\IfSubStr{\RegLogRound}{/}%
+				{%
+					\StrCut{\RegLogRound}{/}{\xintarrondisregloga}{\xintarrondisreglogb}%
+				}%
+				{%
+					\xdef\xintarrondisregloga{\RegLogRound}\xdef\xintarrondisreglogb{\RegLogRound}%
+				}%
+			\expandafter\def\csname\RegLogCoefb\endcsname{\xintfloateval{round(\tmp@reg@log@b,\xintarrondisreglogb)}}%
+			\expandafter\def\csname\RegLogCoefa\endcsname{\xintfloateval{round(\tmp@reg@log@a,\xintarrondisregloga)}}%
+		}%
+}
+
+%régression e^(ax+b)
+\defKV[CoeffRegExpo]{%
+	coeffa=\def\RegExpoNCoefa{#1},%
+	coeffb=\def\RegExpoNCoefb{#1},%
+	round=\def\RegExpoNRound{#1}
+}
+
+\setKVdefault[CoeffRegExpo]{%
+	coeffa=exprega,%
+	coeffb=expregb,%
+	Alt=false,%
+	round={}
+}
+
+\newcommand\xintexpreg[3][]{%
+	\useKVdefault[CoeffRegExpo]%
+	\setKV[CoeffRegExpo]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%listes des données
+	\def\xliste{#2}%
+	\def\yliste{#3}%
+	\setsepchar{,}%
+	\readlist*\LX{\xliste}%
+	\readlist*\LY{\yliste}%
+	%taille des listes
+	\def\LNB{\inteval{\LXlen}}%
+	%somme importantes
+	\xdef\LXlnYSomme{0}%
+	\xdef\LXSomme{0}%
+	\xdef\LlnYSomme{0}%
+	\xdef\LXcSomme{0}%
+	%calculs
+	\xintFor* ##1 in {\xintSeq{1}{\LNB}}\do{%
+		\xdef\LXlnYSomme{\xintfloateval{\LXlnYSomme+\LX[##1]*log(\LY[##1])}}%
+		\xdef\LXSomme{\xintfloateval{\LXSomme+\LX[##1]}}%
+		\xdef\LlnYSomme{\xintfloateval{\LlnYSomme+log(\LY[##1])}}%
+		\xdef\LXcSomme{\xintfloateval{\LXcSomme+(\LX[##1])^2}}%
+	}%
+	%COEFFS TEMPORAIRES
+	\xdef\TmpCoeffExpoA{\xintfloateval{(\LNB*\LXlnYSomme-\LXSomme*\LlnYSomme)/(\LNB*\LXcSomme-(\LXSomme)^2)}}%
+	\xdef\TmpCoeffExpoB{\xintfloateval{1/\LNB*\LlnYSomme-(\TmpCoeffExpoA)/\LNB*\LXSomme}}%
+	\ifboolKV[CoeffRegExpo]{Alt}%
+		{%
+			%STOCKAGE
+			\IfStrEq{\RegExpoNRound}{}%
+				{%
+					\expandafter\def\csname\RegExpoNCoefb\endcsname{\xintfloateval{exp(\TmpCoeffExpoB)}}%
+					\expandafter\def\csname\RegExpoNCoefa\endcsname{\TmpCoeffExpoA}%
+				}%
+				{%
+					\IfSubStr{\RegExpoNRound}{/}%
+						{%
+							\StrCut{\RegExpoNRound}{/}{\xintarrondisregexpoa}{\xintarrondisregexpob}%
+						}%
+						{%
+							\xdef\xintarrondisregexpoa{\RegExpoNRound}\xdef\xintarrondisregexpob{\RegExpoNRound}%
+						}%
+					\expandafter\def\csname\RegExpoNCoefb\endcsname{\xintfloateval{round(exp(\TmpCoeffExpoB),\xintarrondisregexpob)}}%
+					\expandafter\def\csname\RegExpoNCoefa\endcsname{\xintfloateval{round(\TmpCoeffExpoA,\xintarrondisregexpoa)}}%
+				}%
+		}%
+		{%
+			%STOCKAGE
+			\IfStrEq{\RegExpoNRound}{}%
+				{%
+					\expandafter\def\csname\RegExpoNCoefb\endcsname{\TmpCoeffExpoB}%
+					\expandafter\def\csname\RegExpoNCoefa\endcsname{\TmpCoeffExpoA}%
+				}%
+				{%
+					\IfSubStr{\RegExpoNRound}{/}%
+						{%
+							\StrCut{\RegExpoNRound}{/}{\xintarrondisregexpoa}{\xintarrondisregexpob}%
+						}%
+						{%
+							\xdef\xintarrondisregexpoa{\RegExpoNRound}\xdef\xintarrondisregexpob{\RegExpoNRound}%
+						}%
+					\expandafter\def\csname\RegExpoNCoefb\endcsname{\xintfloateval{round(\TmpCoeffExpoB,\xintarrondisregexpob)}}%
+					\expandafter\def\csname\RegExpoNCoefa\endcsname{\xintfloateval{round(\TmpCoeffExpoA,\xintarrondisregexpoa)}}%
+				}%
+		}%
+}
+
+%régression C + b*e^(ax)
+\defKV[CoeffRegExpoOff]{%
+	coeffa=\def\RegExpoOffCoefa{#1},%
+	coeffb=\def\RegExpoOffCoefb{#1},%
+	offset=\def\RegExpoOffset{#1},%
+	round=\def\RegExpoOffRound{#1}
+}
+
+\setKVdefault[CoeffRegExpoOff]{%
+	coeffa=expregoffa,%
+	coeffb=expregoffb,%
+	offset=0,%
+	round={}
+}
+
+\newcommand\xintexpoffreg[3][]{%
+	\useKVdefault[CoeffRegExpoOff]%
+	\setKV[CoeffRegExpoOff]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%listes des données
+	\def\xliste{#2}%
+	\def\yliste{#3}%
+	\setsepchar{,}%
+	\readlist*\LX{\xliste}%
+	\readlist*\LY{\yliste}%
+	%taille des listes
+	\def\LNB{\inteval{\LXlen}}%
+	%somme importantes
+	\xdef\LXlnYSomme{0}%
+	\xdef\LXSomme{0}%
+	\xdef\LlnYSomme{0}%
+	\xdef\LXcSomme{0}%
+	%calculs
+	\xintFor* ##1 in {\xintSeq{1}{\LNB}}\do{%
+		\xdef\LXlnYSomme{\xintfloateval{\LXlnYSomme+\LX[##1]*log(\LY[##1]-\RegExpoOffset)}}%
+		\xdef\LXSomme{\xintfloateval{\LXSomme+\LX[##1]}}%
+		\xdef\LlnYSomme{\xintfloateval{\LlnYSomme+log(\LY[##1]-\RegExpoOffset)}}%
+		\xdef\LXcSomme{\xintfloateval{\LXcSomme+(\LX[##1])^2}}%
+	}%
+	%COEFFS TEMPORAIRES
+	\xdef\TmpCoeffExpoA{\xintfloateval{(\LNB*\LXlnYSomme-\LXSomme*\LlnYSomme)/(\LNB*\LXcSomme-(\LXSomme)^2)}}%
+	\xdef\TmpCoeffExpoB{\xintfloateval{1/\LNB*\LlnYSomme-(\TmpCoeffExpoA)/\LNB*\LXSomme}}%
+	%STOCKAGE
+	\IfStrEq{\RegExpoOffRound}{}%
+		{%
+			\expandafter\def\csname\RegExpoOffCoefb\endcsname{\xintfloateval{exp(\TmpCoeffExpoB)}}%
+			\expandafter\def\csname\RegExpoOffCoefa\endcsname{\xintfloateval{\TmpCoeffExpoA}}%
+		}%
+		{%
+			\IfSubStr{\RegExpoOffRound}{/}%
+				{%
+					\StrCut{\RegExpoOffRound}{/}{\xintarrondisregexpoffa}{\xintarrondisregexpoffb}%
+				}%
+				{%
+					\xdef\xintarrondisregexpoffa{\RegExpoOffRound}\xdef\xintarrondisregexpoffb{\RegExpoOffRound}%
+				}%
+			\expandafter\def\csname\RegExpoOffCoefb\endcsname{\xintfloateval{round(exp(\TmpCoeffExpoB),\xintarrondisregexpoffb)}}%
+			\expandafter\def\csname\RegExpoOffCoefa\endcsname{\xintfloateval{round(\TmpCoeffExpoA,\xintarrondisregexpoffa)}}%
+		}%
+}
+
+%régression cubique
+\defKV[CoeffRegCubic]{%
+	coeffa=\def\RegCubicCoefa{#1},%
+	coeffb=\def\RegCubicCoefb{#1},%
+	coeffc=\def\RegCubicCoefc{#1},%
+	coeffd=\def\RegCubicCoefd{#1},%
+	round=\def\RegCubicRound{#1}
+}
+
+\setKVdefault[CoeffRegCubic]{%
+	coeffa=cubrega,%
+	coeffb=cubregb,%
+	coeffc=cubregc,%
+	coeffd=cubregd,%
+	round={}
+}
+
+\newcommand\xintcubreg[3][]{%
+	\useKVdefault[CoeffRegCubic]%
+	\setKV[CoeffRegCubic]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%listes des données
+	\def\xliste{#2}%
+	\def\yliste{#3}%
+	\setsepchar{,}%
+	\readlist*\LX{\xliste}%
+	\readlist*\LY{\yliste}%
+	%taille des listes
+	\def\LNB{\inteval{\LXlen}}%
+	%somme importantes
+	\xdef\LXSomme{0}%
+	\xdef\LXdSomme{0}%
+	\xdef\LXtSomme{0}%
+	\xdef\LXqSomme{0}%
+	\xdef\LXcSomme{0}%
+	\xdef\LXsSomme{0}%
+	\xdef\LYSomme{0}%
+	\xdef\LXYSomme{0}%
+	\xdef\LXdYSomme{0}%
+	\xdef\LXtYSomme{0}%
+	%calculs
+	\xintFor* ##1 in {\xintSeq{1}{\LNB}}\do{%
+		\xdef\LXSomme{\xintfloateval{\LXSomme+\LX[##1]}}%
+		\xdef\LXdSomme{\xintfloateval{\LXdSomme+(\LX[##1])^2}}%
+		\xdef\LXtSomme{\xintfloateval{\LXtSomme+(\LX[##1])^3}}%
+		\xdef\LXqSomme{\xintfloateval{\LXqSomme+(\LX[##1])^4}}%
+		\xdef\LXcSomme{\xintfloateval{\LXcSomme+(\LX[##1])^5}}%
+		\xdef\LXsSomme{\xintfloateval{\LXsSomme+(\LX[##1])^6}}%
+		\xdef\LYSomme{\xintfloateval{\LYSomme+\LY[##1]}}%
+		\xdef\LXYSomme{\xintfloateval{\LXYSomme+\LX[##1]*\LY[##1]}}%
+		\xdef\LXdYSomme{\xintfloateval{\LXdYSomme+(\LX[##1])^2*\LY[##1]}}%
+		\xdef\LXtYSomme{\xintfloateval{\LXtYSomme+(\LX[##1])^3*\LY[##1]}}%
+	}%
+	%calculs suites, avec des matrices !!
+	\def\MatA{\LXtSomme}%
+	\def\MatB{\LXdSomme}%
+	\def\MatC{\LXSomme}%
+	\def\MatD{\LNB}%
+	\def\MatE{\LXqSomme}%
+	\def\MatF{\LXtSomme}%
+	\def\MatG{\LXdSomme}%
+	\def\MatH{\LXSomme}%
+	\def\MatI{\LXcSomme}%
+	\def\MatJ{\LXqSomme}%
+	\def\MatK{\LXtSomme}%
+	\def\MatL{\LXdSomme}%
+	\def\MatM{\LXsSomme}%
+	\def\MatN{\LXcSomme}%
+	\def\MatO{\LXqSomme}%
+	\def\MatP{\LXtSomme}%
+	\def\MatBA{\LYSomme}%
+	\def\MatBB{\LXYSomme}%
+	\def\MatBC{\LXdYSomme}%
+	\def\MatBD{\LXtYSomme}%
+	\def\DETMATRICE{\xintfloateval{\MatA*\MatF*\MatK*\MatP-\MatA*\MatF*\MatL*\MatO-\MatA*\MatG*\MatJ*\MatP+\MatA*\MatG*\MatL*\MatN+\MatA*\MatH*\MatJ*\MatO-\MatA*\MatH*\MatK*\MatN-\MatB*\MatE*\MatK*\MatP+\MatB*\MatE*\MatL*\MatO+\MatB*\MatG*\MatI*\MatP-\MatB*\MatG*\MatL*\MatM-\MatB*\MatH*\MatI*\MatO+\MatB*\MatH*\MatK*\MatM+\MatC*\MatE*\MatJ*\MatP-\MatC*\MatE*\MatL*\MatN-\MatC*\MatF*\MatI*\MatP+\MatC*\MatF*\MatL*\MatM+\MatC*\MatH*\MatI*\MatN-\MatC*\MatH*\MatJ*\MatM-\MatD*\MatE*\MatJ*\MatO+\MatD*\MatE*\MatK*\MatN+\MatD*\MatF*\MatI*\MatO-\MatD*\MatF*\MatK*\MatM-\MatD*\MatG*\MatI*\MatN+\MatD*\MatG*\MatJ*\MatM}}%
+	\def\MatInvA{(\MatF*\MatK*\MatP-\MatF*\MatL*\MatO-\MatG*\MatJ*\MatP+\MatG*\MatL*\MatN+\MatH*\MatJ*\MatO-\MatH*\MatK*\MatN)/\DETMATRICE}%
+	\def\MatInvB{(-\MatB*\MatK*\MatP+\MatB*\MatL*\MatO+\MatC*\MatJ*\MatP-\MatC*\MatL*\MatN-\MatD*\MatJ*\MatO+\MatD*\MatK*\MatN)/\DETMATRICE}%
+	\def\MatInvC{(\MatB*\MatG*\MatP-\MatB*\MatH*\MatO-\MatC*\MatF*\MatP+\MatC*\MatH*\MatN+\MatD*\MatF*\MatO-\MatD*\MatG*\MatN)/\DETMATRICE}%
+	\def\MatInvD{(-\MatB*\MatG*\MatL+\MatB*\MatH*\MatK+\MatC*\MatF*\MatL-\MatC*\MatH*\MatJ-\MatD*\MatF*\MatK+\MatD*\MatG*\MatJ)/\DETMATRICE}%
+	\def\MatInvE{(-\MatE*\MatK*\MatP+\MatE*\MatL*\MatO+\MatG*\MatI*\MatP-\MatG*\MatL*\MatM-\MatH*\MatI*\MatO+\MatH*\MatK*\MatM)/\DETMATRICE}%
+	\def\MatInvF{(\MatA*\MatK*\MatP-\MatA*\MatL*\MatO-\MatC*\MatI*\MatP+\MatC*\MatL*\MatM+\MatD*\MatI*\MatO-\MatD*\MatK*\MatM)/\DETMATRICE}%
+	\def\MatInvG{(-\MatA*\MatG*\MatP+\MatA*\MatH*\MatO+\MatC*\MatE*\MatP-\MatC*\MatH*\MatM-\MatD*\MatE*\MatO+\MatD*\MatG*\MatM)/\DETMATRICE}%
+	\def\MatInvH{(\MatA*\MatG*\MatL-\MatA*\MatH*\MatK-\MatC*\MatE*\MatL+\MatC*\MatH*\MatI+\MatD*\MatE*\MatK-\MatD*\MatG*\MatI)/\DETMATRICE}%
+	\def\MatInvI{(\MatE*\MatJ*\MatP-\MatE*\MatL*\MatN-\MatF*\MatI*\MatP+\MatF*\MatL*\MatM+\MatH*\MatI*\MatN-\MatH*\MatJ*\MatM)/\DETMATRICE}%
+	\def\MatInvJ{(-\MatA*\MatJ*\MatP+\MatA*\MatL*\MatN+\MatB*\MatI*\MatP-\MatB*\MatL*\MatM-\MatD*\MatI*\MatN+\MatD*\MatJ*\MatM)/\DETMATRICE}%
+	\def\MatInvK{(\MatA*\MatF*\MatP-\MatA*\MatH*\MatN-\MatB*\MatE*\MatP+\MatB*\MatH*\MatM+\MatD*\MatE*\MatN-\MatD*\MatF*\MatM)/\DETMATRICE}%
+	\def\MatInvL{(-\MatA*\MatF*\MatL+\MatA*\MatH*\MatJ+\MatB*\MatE*\MatL-\MatB*\MatH*\MatI-\MatD*\MatE*\MatJ+\MatD*\MatF*\MatI)/\DETMATRICE}%
+	\def\MatInvM{(-\MatE*\MatJ*\MatO+\MatE*\MatK*\MatN+\MatF*\MatI*\MatO-\MatF*\MatK*\MatM-\MatG*\MatI*\MatN+\MatG*\MatJ*\MatM)/\DETMATRICE}%
+	\def\MatInvN{(\MatA*\MatJ*\MatO-\MatA*\MatK*\MatN-\MatB*\MatI*\MatO+\MatB*\MatK*\MatM+\MatC*\MatI*\MatN-\MatC*\MatJ*\MatM)/\DETMATRICE}%
+	\def\MatInvO{(-\MatA*\MatF*\MatO+\MatA*\MatG*\MatN+\MatB*\MatE*\MatO-\MatB*\MatG*\MatM-\MatC*\MatE*\MatN+\MatC*\MatF*\MatM)/\DETMATRICE}%
+	\def\MatInvP{(\MatA*\MatF*\MatK-\MatA*\MatG*\MatJ-\MatB*\MatE*\MatK+\MatB*\MatG*\MatI+\MatC*\MatE*\MatJ-\MatC*\MatF*\MatI)/\DETMATRICE}%
+	%COEFFS TEMPORAIRES OK
+	\xdef\tmp@reg@cub@a{\xintfloateval{\MatInvA*\MatBA+\MatInvB*\MatBB+\MatInvC*\MatBC+\MatInvD*\MatBD}}%
+	\xdef\tmp@reg@cub@b{\xintfloateval{\MatInvE*\MatBA+\MatInvF*\MatBB+\MatInvG*\MatBC+\MatInvH*\MatBD}}%
+	\xdef\tmp@reg@cub@c{\xintfloateval{\MatInvI*\MatBA+\MatInvJ*\MatBB+\MatInvK*\MatBC+\MatInvL*\MatBD}}%
+	\xdef\tmp@reg@cub@d{\xintfloateval{\MatInvM*\MatBA+\MatInvN*\MatBB+\MatInvO*\MatBC+\MatInvP*\MatBD}}%
+	%STOCKAGE
+	\IfStrEq{\RegCubicRound}{}%
+		{%
+			\expandafter\def\csname\RegCubicCoefa\endcsname{\tmp@reg@cub@a}%
+			\expandafter\def\csname\RegCubicCoefb\endcsname{\tmp@reg@cub@b}%
+			\expandafter\def\csname\RegCubicCoefc\endcsname{\tmp@reg@cub@c}%
+			\expandafter\def\csname\RegCubicCoefd\endcsname{\tmp@reg@cub@d}%
+		}%
+		{%
+			\IfSubStr{\RegCubicRound}{/}%
+				{%
+					\StrBefore[1]{\RegCubicRound}{/}[\xintarrondisregcuba]%
+					\StrBetween[1,2]{\RegCubicRound}{/}{/}[\xintarrondisregcubb]%
+					\StrBetween[2,3]{\RegCubicRound}{/}{/}[\xintarrondisregcubc]%
+					\StrBehind[3]{\RegCubicRound}{/}[\xintarrondisregcubd]%
+				}%
+				{%
+					\xdef\xintarrondisregcuba{\RegCubicRound}%
+					\xdef\xintarrondisregcubb{\RegCubicRound}%
+					\xdef\xintarrondisregcubc{\RegCubicRound}%
+					\xdef\xintarrondisregcubd{\RegCubicRound}%
+				}%
+			\expandafter\def\csname\RegCubicCoefa\endcsname{\xintfloateval{round(\tmp@reg@cub@a,\xintarrondisregcuba)}}%
+			\expandafter\def\csname\RegCubicCoefb\endcsname{\xintfloateval{round(\tmp@reg@cub@b,\xintarrondisregcubb)}}%
+			\expandafter\def\csname\RegCubicCoefc\endcsname{\xintfloateval{round(\tmp@reg@cub@c,\xintarrondisregcubc)}}%
+			\expandafter\def\csname\RegCubicCoefd\endcsname{\xintfloateval{round(\tmp@reg@cub@d,\xintarrondisregcubd)}}%
+		}%
+}
+
+\endinput

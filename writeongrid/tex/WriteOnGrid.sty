@@ -1,0 +1,837 @@
+% Author                         : C. Pierquet
+% licence                        : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{WriteOnGrid}[2024/11/05 v0.1.8 package to write on grid lines]
+% 0.1.8		Option pour la taille des règlures (via style tikzset)
+% 0.1.7		Option pour régler la marge pour les PleinePageCinqCinq
+% 0.1.6		Commande pour calculer le nombre de lignes à insérer en fin de page / options Auto
+% 0.1.5		Choix de la réglure pour le seyes (en pretest) + amélioration de la gestion des paragraphes
+% 0.1.4		Suppression des options de xcolor (définition manuelle des couleurs)
+% 0.1.3		Ajout de commandes simples pour des mini-quadrillages autonomes, sans texte
+% 0.1.2		Modification locale des couleurs + raccourcis couleurs Seyes / Ruled
+% 0.1.1		Ajout de la couleur + modifications mineures + grille "Ruled" + grilles pleine page !
+% 0.1.0		Version initiale [fr] & [en]
+
+%------Packages utiles
+\RequirePackage{tikz}
+\RequirePackage{simplekv}
+\RequirePackage{xstring}
+%librairies tikz
+\usetikzlibrary{calc,positioning}
+
+%------Variables
+\newcounter{lgquadri}%compteur des lignes, qui sera incrémenté
+
+%------Styles
+\tikzset{WoGridp/.style={semithick}}
+\tikzset{WoGrids/.style={thin}}
+\tikzset{WoGridbar/.style={thick}}
+
+%-----Calcul du nombre de lignes/colonnes
+\NewDocumentCommand\GridCalcNbCols{ O{\ColAuto} m }{%
+	\IfStrEqCase{#2}{%
+		{Seyes}{\xdef#1{\fpeval{trunc((\the\linewidth)/(22.762192pt),0)}}}%
+		{5x5}{\xdef#1{\fpeval{trunc((\the\linewidth)/(14.22637pt),0)}}}%
+		{Ruled}{\xdef#1{\fpeval{trunc((\the\linewidth)/(25.607466pt),0)}}}%
+	}[\xdef#1{\fpeval{trunc((\the\linewidth)/(22.762192pt),0)}}]%
+}
+
+\NewDocumentCommand\GridCalcNbLignes{ O{\LgnAuto} m }{%
+	\edef\measurepage{\dimexpr\pagegoal-\pagetotal\relax}
+	\IfStrEqCase{#2}{%
+		{Seyes}{\xdef#1{\fpeval{trunc((\the\measurepage)/(22.762192pt),0)}}}%
+		{5x5}{\xdef#1{\fpeval{trunc((\the\measurepage)/(14.22637pt),0)}}}%
+		{Ruled}{\xdef#1{\fpeval{trunc((\the\measurepage)/(25.607466pt),0)}}}%
+	}[\xdef#1{\fpeval{trunc((\the\measurepage)/(22.762192pt),0)}}]%
+}
+
+\NewDocumentCommand\GridCalcAuto{ O{\LgnAuto} O{\ColAuto} m }{%
+	\edef\measurepage{\dimexpr\pagegoal-\pagetotal\relax}
+	\IfStrEqCase{#3}{%
+		{Seyes}{\xdef#1{\fpeval{trunc((\the\measurepage)/(22.762192pt),0)}}\xdef#2{\fpeval{trunc((\the\linewidth)/(22.762192pt),0)}}}%
+		{5x5}{\xdef#1{\fpeval{trunc((\the\measurepage)/(14.22637pt),0)}}\xdef#2{\fpeval{trunc((\the\linewidth)/(14.22637pt),0)}}}%
+		{Ruled}{\xdef#1{\fpeval{trunc((\the\measurepage)/(25.607466pt),0)}}\xdef#2{\fpeval{trunc((\the\linewidth)/(25.607466pt),0)}}}%
+	}[\xdef#1{\fpeval{trunc((\the\measurepage)/(22.762192pt),0)}}\xdef#2{\fpeval{trunc((\the\linewidth)/(22.762192pt),0)}}]%
+}
+
+%-----Couleurs utiles
+\definecolor{TyrianPurple}{rgb}{0.4,0.01,0.24}
+\definecolor{PapierRose}{HTML}{E6B8E6}
+\definecolor{PapierGris}{HTML}{D7E2EE}
+
+\def\CoulSeyes{PapierRose/PapierGris}
+\def\CoulRuled{PapierGris/TyrianPurple}
+
+\def\ColSeyes{PapierRose/PapierGris}
+\def\ColRuled{PapierGris/TyrianPurple}
+
+% \def\CoulSeyes{Plum!75/LightSteelBlue!50}
+% \def\CoulRuled{LightSteelBlue!50/TyrianPurple}
+% \def\ColSeyes{Plum!75/LightSteelBlue!50}
+% \def\ColRuled{LightSteelBlue!50/TyrianPurple}
+
+%------Commandes [fr]
+\newcommand\PasseLigne{\addtocounter{lgquadri}{1}}%passer une ligne
+
+\defKV[LigneQuadrill]{Echelle=\xdef\QuadEchelle{#1}}%déf des clés
+\setKVdefault[LigneQuadrill]{DecalV=0pt,DecalH=0,Sep=0pt,Echelle=1}%valeurs par défaut
+
+\NewDocumentCommand\EcrireLigne{ O{} D<>{left} m }{%écrire sur les lignes l'une après l'autre
+	\addtocounter{lgquadri}{1}
+	\useKVdefault[LigneQuadrill]
+	\setKV[LigneQuadrill]{#1}
+	\node[text width=\fpeval{\CoeffUnite*\ValeurCarreau*\QuadNbCol/\QuadEchelle-\CoeffUnite*\ValeurCarreau*\useKV[Quadrill]{Marge}/\QuadEchelle}cm,align=#2,scale=\QuadEchelle,anchor=base west,inner sep={\useKV[LigneQuadrill]{Sep}}] at ($({\ValeurCarreau*\useKV[Quadrill]{Marge}+\ValeurCarreau*\useKV[LigneQuadrill]{DecalH}},{-\ValeurCarreau*\thelgquadri})+(0.025,\useKV[LigneQuadrill]{DecalV})$) {\strut #3} ;
+}
+
+%déf des clés
+
+\defKV[Quadrill]{%
+	Grille=\xdef\QuadType{#1},%
+	NbCarreaux=\xdef\QuadNbCar{#1},%
+	Elargir=\xdef\QuadElar{#1},%
+	CouleurBarreSeyes=\xdef\QuadCoulSeyes{#1},%
+	ReglureSeyes=\xdef\QuadReglureSeyes{#1}
+}
+
+\setKVdefault[Quadrill]{%
+	NbCarreaux=17x5,%
+	Unite=1,%
+	Marge=0,%
+	Elargir=0,%
+	Cadre=false,%
+	Grille=5x5,%
+	AffBarre=true,%
+	CouleurBarreSeyes={red!75},%
+	ReglureSeyes=2
+}
+
+\NewDocumentCommand\AffQuadrillage{ O{} D<>{lightgray!66/lightgray!33} }{%affichage simple du quadrillage
+	\setcounter{lgquadri}{0}%on réinitialise les lignes
+	\useKVdefault[Quadrill]%on met les clés par défaut
+	\setKV[Quadrill]{#1}%on lit les clés
+	\IfSubStr{#2}{/}%on récupère les couleurs
+		{\StrCut{#2}{/}{\QuadCoulA}{\QuadCoulB}}
+		{\def\QuadCoulA{#2}\def\QuadCoulB{#2}}%
+	%détermination des nb de carreaux, sans unite... ? TEST !!!!!!
+	\IfSubStr{\QuadNbCar}{Auto}%
+		{%
+			\GridCalcAuto[\QuadNbLig][\QuadNbCol]{\QuadType}%
+			\IfSubStr{\QuadNbCar}{Auto*}%
+				{%
+					\StrCount{\QuadNbCar}{*}[\tmpnbetoiles]%
+					\xdef\QuadNbLig{\inteval{\QuadNbLig+\tmpnbetoiles}}%
+				}%
+				{}%
+		}%
+		{%
+			\IfBeginWith{\QuadNbCar}{C}%
+				{%
+					\GridCalcNbCols[\QuadNbCol]{\QuadType}%
+					\StrBehind{\QuadNbCar}{x}[\QuadNbLig]%
+				}%
+				{%
+					\IfEndWith{\QuadNbCar}{L}%
+						{%
+							\GridCalcNbLignes[\QuadNbLig]{\QuadType}%
+							\StrBefore{\QuadNbCar}{x}[\QuadNbCol]%
+						}%
+						{%
+							\StrCut{\QuadNbCar}{x}{\QuadNbCol}{\QuadNbLig}%
+						}%
+				}%
+		}%
+	%suite des calculs
+	\IfStrEq{\QuadType}{Seyes}%les types de quadrillages
+		{\xdef\ValeurCarreau{0.8}\xdef\CoeffUnite{\fpeval{(\QuadReglureSeyes)/2}}}%
+		{}%
+	\IfStrEq{\QuadType}{5x5}%
+		{\xdef\ValeurCarreau{0.5}\xdef\CoeffUnite{1}}%
+		{}%
+	\IfStrEq{\QuadType}{Ruled}%
+		{\xdef\ValeurCarreau{0.9}\xdef\CoeffUnite{1}}%
+		{}%
+	\IfSubStr{\QuadElar}{/}%on récupère les élargissements G et D
+		{\StrCut{\QuadElar}{/}{\QuadElarG}{\QuadElarD}}%
+		{\def\QuadElarG{\QuadElar}\def\QuadElarD{\QuadElar}}%
+	\begin{tikzpicture}[xscale={\CoeffUnite*\useKV[Quadrill]{Unite}},yscale={\CoeffUnite*\useKV[Quadrill]{Unite}}]
+		\useasboundingbox (0,0) rectangle ({\ValeurCarreau*\QuadNbCol},{-\ValeurCarreau*\QuadNbLig}) ;%on fixe la grille de base, avant élargissement éventuel
+		\IfStrEq{\QuadType}{Seyes}%
+			{%
+				\draw[xstep=0.8,ystep=0.2,WoGrids,\QuadCoulB] ({-\ValeurCarreau*\QuadElarG},0) grid ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\QuadNbLig}) ;%grille seyes
+				\draw[xstep=0.8,ystep=0.8,WoGridp,\QuadCoulA] ({-\ValeurCarreau*\QuadElarG},0) grid ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\QuadNbLig}) ;%grille seyes
+				\ifboolKV[Quadrill]{AffBarre}
+					{
+						\draw[WoGridbar,\QuadCoulSeyes] ({\ValeurCarreau*\useKV[Quadrill]{Marge}},0) -- ({\ValeurCarreau*\useKV[Quadrill]{Marge}},{-\ValeurCarreau*\QuadNbLig}) ;%barre Seyes
+					}{}
+			}%
+			{}%
+		\IfStrEq{\QuadType}{5x5}%
+			{%
+				\draw[xstep=0.5,ystep=0.5,WoGridp,\QuadCoulA] ({-\ValeurCarreau*\QuadElarG},0) grid ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\QuadNbLig}) ;%grille 5x5
+			}%
+			{}%
+		\IfStrEq{\QuadType}{Ruled}%
+		{%
+			\foreach \LLL in {0,1,...,\QuadNbLig} {\draw[WoGridp,\QuadCoulA] ({-\ValeurCarreau*\QuadElarG},{-\LLL*\ValeurCarreau}) -- ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\LLL}) ; }
+			%\draw[xstep={\ValeurCarreau*\QuadNbCol},ystep=0.9,thin,\QuadCoulA] ({-\ValeurCarreau*\QuadElarG},0) grid ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\QuadNbLig}) ;%grille college
+			\ifboolKV[Quadrill]{AffBarre}
+				{
+					\draw[WoGridbar,\QuadCoulB] ({\ValeurCarreau*\useKV[Quadrill]{Marge}},0) -- ({\ValeurCarreau*\useKV[Quadrill]{Marge}},{-\ValeurCarreau*\QuadNbLig}) ;%barre college
+				}{}
+		}%
+		{}%
+		\ifboolKV[Quadrill]{Cadre}%cadre pour visualiser la "marge" (officielle)
+			{\draw[thick] (0,0) rectangle ({\ValeurCarreau*\QuadNbCol},{-\ValeurCarreau*\QuadNbLig}) ;}%
+			{}%
+	\end{tikzpicture}%
+}
+
+\NewDocumentEnvironment{EnvQuadrillage}{ O{} D<>{lightgray!66/lightgray!33} }%créer le quadrillage, couleurs ?
+{%
+	\setcounter{lgquadri}{0}%on réinitialise les lignes
+	\useKVdefault[Quadrill]%on met les clés par défaut
+	\setKV[Quadrill]{#1}%on lit les clés
+	\IfSubStr{#2}{/}%on récupère les couleurs
+		{\StrCut{#2}{/}{\QuadCoulA}{\QuadCoulB}}
+		{\def\QuadCoulA{#2}\def\QuadCoulB{#2}}%
+	%détermination des nb de carreaux, sans unite... ? TEST !!!!!!
+	\IfSubStr{\QuadNbCar}{Auto}%
+		{%
+			\GridCalcAuto[\QuadNbLig][\QuadNbCol]{\QuadType}%
+			\IfSubStr{\QuadNbCar}{Auto*}%
+				{%
+					\StrCount{\QuadNbCar}{*}[\tmpnbetoiles]%
+					\xdef\QuadNbLig{\inteval{\QuadNbLig+\tmpnbetoiles}}%
+				}%
+				{}%
+		}%
+		{%
+			\IfBeginWith{\QuadNbCar}{C}%
+				{%
+					\GridCalcNbCols[\QuadNbCol]{\QuadType}%
+					\StrBehind{\QuadNbCar}{x}[\QuadNbLig]%
+				}%
+				{%
+					\IfEndWith{\QuadNbCar}{L}%
+						{%
+							\GridCalcNbLignes[\QuadNbLig]{\QuadType}%
+							\StrBefore{\QuadNbCar}{x}[\QuadNbCol]%
+						}%
+						{%
+							\StrCut{\QuadNbCar}{x}{\QuadNbCol}{\QuadNbLig}%
+						}%
+				}%
+		}%
+	%suite des calculs
+	\IfStrEq{\QuadType}{Seyes}%les types de quadrillages
+		{\xdef\ValeurCarreau{0.8}\xdef\CoeffUnite{\fpeval{(\QuadReglureSeyes)/2}}}%
+		{}%
+	\IfStrEq{\QuadType}{5x5}%
+		{\xdef\ValeurCarreau{0.5}\xdef\CoeffUnite{1}}%
+		{}%
+	\IfStrEq{\QuadType}{Ruled}%
+		{\xdef\ValeurCarreau{0.9}\xdef\CoeffUnite{1}}%
+		{}%
+	\IfSubStr{\QuadElar}{/}%on récupère les élargissements G et D
+		{\StrCut{\QuadElar}{/}{\QuadElarG}{\QuadElarD}}%
+		{\def\QuadElarG{\QuadElar}\def\QuadElarD{\QuadElar}}%
+	\begin{tikzpicture}[xscale={\CoeffUnite*\useKV[Quadrill]{Unite}},yscale={\CoeffUnite*\useKV[Quadrill]{Unite}}]
+		\useasboundingbox (0,0) rectangle ({\ValeurCarreau*\QuadNbCol},{-\ValeurCarreau*\QuadNbLig}) ;%on fixe la grille de base, avant élargissement éventuel
+		\IfStrEq{\QuadType}{Seyes}%
+			{%
+				\draw[xstep=0.8,ystep=0.2,WoGrids,\QuadCoulB] ({-\ValeurCarreau*\QuadElarG},0) grid ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\QuadNbLig}) ;%grille seyes
+				\draw[xstep=0.8,ystep=0.8,WoGridp,\QuadCoulA] ({-\ValeurCarreau*\QuadElarG},0) grid ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\QuadNbLig}) ;%grille seyes
+				\ifboolKV[Quadrill]{AffBarre}
+					{
+						\draw[WoGridbar,\QuadCoulSeyes] ({\ValeurCarreau*\useKV[Quadrill]{Marge}},0) -- ({\ValeurCarreau*\useKV[Quadrill]{Marge}},{-\ValeurCarreau*\QuadNbLig}) ;%barre Seyes
+					}{}
+			}%
+			{}%
+		\IfStrEq{\QuadType}{5x5}%
+			{%
+				\draw[xstep=0.5,ystep=0.5,WoGridp,\QuadCoulA] ({-\ValeurCarreau*\QuadElarG},0) grid ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\QuadNbLig}) ;%grille 5x5
+			}%
+			{}%
+		\IfStrEq{\QuadType}{Ruled}%
+		{%
+			\foreach \LLL in {0,1,...,\QuadNbLig} {\draw[WoGridp,\QuadCoulA] ({-\ValeurCarreau*\QuadElarG},{-\LLL*\ValeurCarreau}) -- ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\LLL}) ; }
+			%\draw[xstep={\ValeurCarreau*\QuadNbCol},ystep=0.9,thin,\QuadCoulA] ({-\ValeurCarreau*\QuadElarG},0) grid ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\QuadNbLig}) ;%grille college
+			\ifboolKV[Quadrill]{AffBarre}
+				{
+					\draw[WoGridbar,\QuadCoulB] ({\ValeurCarreau*\useKV[Quadrill]{Marge}},0) -- ({\ValeurCarreau*\useKV[Quadrill]{Marge}},{-\ValeurCarreau*\QuadNbLig}) ;%barre college
+				}{}
+		}%
+		{}%
+		\ifboolKV[Quadrill]{Cadre}%cadre pour visualiser la "marge" (officielle)
+			{\draw[thick] (0,0) rectangle ({\ValeurCarreau*\QuadNbCol},{-\ValeurCarreau*\QuadNbLig}) ;}%
+			{}%
+	}%
+	{%
+	\end{tikzpicture}%
+}%
+
+%------Commandes [en]
+\newcommand\PassLine{\addtocounter{lgquadri}{1}}%passer une ligne
+
+\defKV[LineQuadril]{Scale=\xdef\QuadEchelle{#1}}%déf des clés
+\setKVdefault[LineQuadril]{OffsetV=0pt,OffsetH=0,Sep=0pt,Scale=1}%valeurs par défaut
+
+\NewDocumentCommand\WriteLine{ O{} D<>{left} m }{%écrire sur les lignes l'une après l'autre
+	\addtocounter{lgquadri}{1}
+	\useKVdefault[LineQuadril]
+	\setKV[LineQuadril]{#1}
+	\node[text width=\fpeval{\ValeurCarreau*\QuadNbCol/\QuadEchelle-\ValeurCarreau*\useKV[Quadrill]{Marge}/\QuadEchelle}cm,align=#2,scale=\QuadEchelle,anchor=base west,inner sep={\useKV[LineQuadril]{Sep}}] at ($({\ValeurCarreau*\useKV[Quadril]{Margin}+\ValeurCarreau*\useKV[LineQuadril]{OffsetH}},{-\ValeurCarreau*\thelgquadri})+(0.025,\useKV[LineQuadril]{OffsetV})$) {\strut #3} ;
+}
+
+\defKV[Quadril]{Grid=\xdef\QuadType{#1},NumSquares=\xdef\QuadNbCar{#1},Enlarge=\xdef\QuadElar{#1}}%déf des clés
+\setKVdefault[Quadril]{Grid=5x5,NumSquares=17x5,Unit=1,Margin=0,Enlarge=0,Border=false,DispBar=true}%valeurs par défaut
+
+\NewDocumentCommand\DispGrid{ O{} D<>{lightgray!66/lightgray!33} }{%créer le quadrillage
+	\setcounter{lgquadri}{0}%on réinitialise les lignes
+	\useKVdefault[Quadril]%on met les clés par défaut
+	\setKV[Quadril]{#1}%on lit les clés
+	\IfSubStr{#2}{/}%on récupère les couleurs
+		{\StrCut{#2}{/}{\QuadCoulA}{\QuadCoulB}}
+		{\def\QuadCoulA{#2}\def\QuadCoulB{#2}}%
+	%détermination des nb de carreaux, sans unite... ? TEST !!!!!!
+	\IfSubStr{\QuadNbCar}{Auto}%
+		{%
+			\GridCalcAuto[\QuadNbLig][\QuadNbCol]{\QuadType}%
+			\IfSubStr{\QuadNbCar}{Auto*}%
+				{%
+					\StrCount{\QuadNbCar}{*}[\tmpnbetoiles]%
+					\xdef\QuadNbLig{\inteval{\QuadNbLig+\tmpnbetoiles}}%
+				}%
+				{}%
+		}%
+		{%
+			\IfBeginWith{\QuadNbCar}{C}%
+				{%
+					\GridCalcNbCols[\QuadNbCol]{\QuadType}%
+					\StrBehind{\QuadNbCar}{x}[\QuadNbLig]%
+				}%
+				{%
+					\IfEndWith{\QuadNbCar}{L}%
+						{%
+							\GridCalcNbLignes[\QuadNbLig]{\QuadType}%
+							\StrBefore{\QuadNbCar}{x}[\QuadNbCol]%
+						}%
+						{%
+							\StrCut{\QuadNbCar}{x}{\QuadNbCol}{\QuadNbLig}%
+						}%
+				}%
+		}%
+	%suite des calculs
+	\IfStrEq{\QuadType}{Seyes}%les types de quadrillages
+		{\xdef\ValeurCarreau{0.8}}%
+		{}%
+	\IfStrEq{\QuadType}{5x5}%
+		{\xdef\ValeurCarreau{0.5}}%
+		{}%
+	\IfStrEq{\QuadType}{Ruled}%
+		{\xdef\ValeurCarreau{0.9}}%
+		{}%
+	\IfSubStr{\QuadElar}{/}%on récupère les élargissements G et D
+		{\StrCut{\QuadElar}{/}{\QuadElarG}{\QuadElarD}}%
+		{\def\QuadElarG{\QuadElar}\def\QuadElarD{\QuadElar}}%
+	\begin{tikzpicture}[xscale={\useKV[Quadril]{Unit}},yscale={\useKV[Quadril]{Unit}}]
+		\useasboundingbox (0,0) rectangle ({\ValeurCarreau*\QuadNbCol},{-\ValeurCarreau*\QuadNbLig}) ;%on fixe la grille de base, avant élargissement éventuel
+		\IfStrEq{\QuadType}{Seyes}%
+			{%
+				\draw[xstep=0.8,ystep=0.2,WoGrids,\QuadCoulB] ({-\ValeurCarreau*\QuadElarG},0) grid ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\QuadNbLig}) ;%grille seyes
+				\draw[xstep=0.8,ystep=0.8,WoGridp,\QuadCoulA] ({-\ValeurCarreau*\QuadElarG},0) grid ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\QuadNbLig}) ;%grille seyes
+				\ifboolKV[Quadril]{DispBar}
+					{
+						\draw[WoGridbar,\QuadCoulSeyes] ({\ValeurCarreau*\useKV[Quadril]{Margin}},0) -- ({\ValeurCarreau*\useKV[Quadril]{Margin}},{-\ValeurCarreau*\QuadNbLig}) ;%barre Seyes
+					}{}
+			}%
+			{}%
+		\IfStrEq{\QuadType}{5x5}%
+			{%
+				\draw[xstep=0.5,ystep=0.5,WoGridp,\QuadCoulA] ({-\ValeurCarreau*\QuadElarG},0) grid ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\QuadNbLig}) ;%grille 5x5
+			}%
+			{}%
+		\IfStrEq{\QuadType}{Ruled}%
+		{%
+			\foreach \LLL in {0,1,...,\QuadNbLig} {\draw[WoGridp,\QuadCoulA] ({-\ValeurCarreau*\QuadElarG},{-\LLL*\ValeurCarreau}) -- ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\LLL}) ; }
+			%\draw[xstep={\ValeurCarreau*\QuadNbCol},ystep=0.9,thin,\QuadCoulA] ({-\ValeurCarreau*\QuadElarG},0) grid ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\QuadNbLig}) ;%grille college
+			\ifboolKV[Quadril]{DispBar}
+					{
+						\draw[WoGridbar,\QuadCoulB] ({\ValeurCarreau*\useKV[Quadril]{Margin}},0) -- ({\ValeurCarreau*\useKV[Quadril]{Margin}},{-\ValeurCarreau*\QuadNbLig}) ;%barre college
+					}{}
+		}%
+		{}%
+		\ifboolKV[Quadril]{Border}%cadre pour la "marge"
+			{\draw[thick] (0,0) rectangle ({\ValeurCarreau*\QuadNbCol},{-\ValeurCarreau*\QuadNbLig}) ;}%
+			{}%
+	\end{tikzpicture}%
+}%
+
+\NewDocumentEnvironment{EnvGrid}{ O{} D<>{lightgray!66/lightgray!33} }%créer le quadrillage
+{%
+	\setcounter{lgquadri}{0}%on réinitialise les lignes
+	\useKVdefault[Quadril]%on met les clés par défaut
+	\setKV[Quadril]{#1}%on lit les clés
+	\IfSubStr{#2}{/}%on récupère les couleurs
+		{\StrCut{#2}{/}{\QuadCoulA}{\QuadCoulB}}
+		{\def\QuadCoulA{#2}\def\QuadCoulB{#2}}%
+	%détermination des nb de carreaux, sans unite... ? TEST !!!!!!
+	\IfSubStr{\QuadNbCar}{Auto}%
+		{%
+			\GridCalcAuto[\QuadNbLig][\QuadNbCol]{\QuadType}%
+			\IfSubStr{\QuadNbCar}{Auto*}%
+				{%
+					\StrCount{\QuadNbCar}{*}[\tmpnbetoiles]%
+					\xdef\QuadNbLig{\inteval{\QuadNbLig+\tmpnbetoiles}}%
+				}%
+				{}%
+		}%
+		{%
+			\IfBeginWith{\QuadNbCar}{C}%
+				{%
+					\GridCalcNbCols[\QuadNbCol]{\QuadType}%
+					\StrBehind{\QuadNbCar}{x}[\QuadNbLig]%
+				}%
+				{%
+					\IfEndWith{\QuadNbCar}{L}%
+						{%
+							\GridCalcNbLignes[\QuadNbLig]{\QuadType}%
+							\StrBefore{\QuadNbCar}{x}[\QuadNbCol]%
+						}%
+						{%
+							\StrCut{\QuadNbCar}{x}{\QuadNbCol}{\QuadNbLig}%
+						}%
+				}%
+		}%
+	%suite des calculs
+	\IfStrEq{\QuadType}{Seyes}%les types de quadrillages
+		{\xdef\ValeurCarreau{0.8}}%
+		{}%
+	\IfStrEq{\QuadType}{5x5}%
+		{\xdef\ValeurCarreau{0.5}}%
+		{}%
+	\IfStrEq{\QuadType}{Ruled}%
+		{\xdef\ValeurCarreau{0.9}}%
+		{}%
+	\IfSubStr{\QuadElar}{/}%on récupère les élargissements G et D
+		{\StrCut{\QuadElar}{/}{\QuadElarG}{\QuadElarD}}%
+		{\def\QuadElarG{\QuadElar}\def\QuadElarD{\QuadElar}}%
+	\begin{tikzpicture}[xscale={\useKV[Quadril]{Unit}},yscale={\useKV[Quadril]{Unit}}]
+		\useasboundingbox (0,0) rectangle ({\ValeurCarreau*\QuadNbCol},{-\ValeurCarreau*\QuadNbLig}) ;%on fixe la grille de base, avant élargissement éventuel
+		\IfStrEq{\QuadType}{Seyes}%
+			{%
+				\draw[xstep=0.8,ystep=0.2,WoGrids,\QuadCoulB] ({-\ValeurCarreau*\QuadElarG},0) grid ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\QuadNbLig}) ;%grille seyes
+				\draw[xstep=0.8,ystep=0.8,WoGridp,\QuadCoulA] ({-\ValeurCarreau*\QuadElarG},0) grid ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\QuadNbLig}) ;%grille seyes
+				\ifboolKV[Quadril]{DispBar}
+					{
+						\draw[WoGridbar,\QuadCoulSeyes] ({\ValeurCarreau*\useKV[Quadril]{Margin}},0) -- ({\ValeurCarreau*\useKV[Quadril]{Margin}},{-\ValeurCarreau*\QuadNbLig}) ;%barre Seyes
+					}{}
+			}%
+			{}%
+		\IfStrEq{\QuadType}{5x5}%
+			{%
+				\draw[xstep=0.5,ystep=0.5,WoGridp,\QuadCoulA] ({-\ValeurCarreau*\QuadElarG},0) grid ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\QuadNbLig}) ;%grille 5x5
+			}%
+			{}%
+		\IfStrEq{\QuadType}{Ruled}%
+		{%
+			\foreach \LLL in {0,1,...,\QuadNbLig} {\draw[WoGridp,\QuadCoulA] ({-\ValeurCarreau*\QuadElarG},{-\LLL*\ValeurCarreau}) -- ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\LLL}) ; }
+			%\draw[xstep={\ValeurCarreau*\QuadNbCol},ystep=0.9,thin,\QuadCoulA] ({-\ValeurCarreau*\QuadElarG},0) grid ({\ValeurCarreau*\QuadNbCol+\ValeurCarreau*\QuadElarD},{-\ValeurCarreau*\QuadNbLig}) ;%grille college
+			\ifboolKV[Quadril]{DispBar}
+					{
+						\draw[WoGridbar,\QuadCoulB] ({\ValeurCarreau*\useKV[Quadril]{Margin}},0) -- ({\ValeurCarreau*\useKV[Quadril]{Margin}},{-\ValeurCarreau*\QuadNbLig}) ;%barre college
+					}{}
+		}%
+		{}%
+		\ifboolKV[Quadril]{Border}%cadre pour la "marge"
+			{\draw[thick] (0,0) rectangle ({\ValeurCarreau*\QuadNbCol},{-\ValeurCarreau*\QuadNbLig}) ;}%
+			{}%
+	}%
+	{%
+	\end{tikzpicture}%
+}%
+
+%------page entière seyes
+\defKV[SeyesFull]{%
+	CouleurP=\xdef\SeyesFullCoulP{#1},%
+	CouleurS=\xdef\SeyesFullCoulS{#1},%
+	CouleurMarge=\xdef\SeyesFullCoulM{#1},%
+	ReglureSeyes=\xdef\SeyesFullReglureSeyes{#1},%
+	FormatPapier=\xdef\SeyesFullFormatPapier{#1}
+}
+\setKVdefault[SeyesFull]{%
+	CouleurP=PapierRose,%
+	CouleurS=PapierGris,%
+	CouleurMarge=red!75,
+	NumLignes=false,%
+	ReglureSeyes=2,%
+	FormatPapier=A4
+}
+
+\NewDocumentEnvironment{PleinePageSeyes}{ O{} }%semble OK ^^, à tester avec modification de la taille de papier...
+{
+	\useKVdefault[SeyesFull]%
+	\setKV[SeyesFull]{#1}%
+	\IfEq{\SeyesFullFormatPapier}{A4}%
+		{\xdef\SeyesFullHautPap{29.7}\xdef\SeyesFullLargPap{21}\xdef\SeyesFullMargeH{3}\xdef\SeyesFullMargeG{4}\xdef\SeyesFullHautEff{24}}%
+		{}%
+	\IfEq{\SeyesFullFormatPapier}{A5}%
+		{\xdef\SeyesFullHautPap{21}\xdef\SeyesFullLargPap{14.8}\xdef\SeyesFullMargeH{2.5}\xdef\SeyesFullMargeG{2.5}\xdef\SeyesFullHautEff{17}}%
+		{}%
+	\IfSubStr{\SeyesFullFormatPapier}{x}%
+		{\StrCut{\SeyesFullFormatPapier}{x}{\SeyesFullLargPap}{\SeyesFullHautPap}\xdef\SeyesFullMargeH{3}\xdef\SeyesFullMargeG{3}\xdef\SeyesFullHautEff{\fpeval{\SeyesFullHautPap-6}}}%
+		{}%
+	%calcul du nombre de lignes /colonnes ?
+	\xdef\SeyesFullNbLignP{\fpeval{round(\SeyesFullHautEff/(0.4*\SeyesFullReglureSeyes),0)}}%
+	\xdef\SeyesFullNbLignS{\fpeval{round(\SeyesFullHautEff/(0.1*\SeyesFullReglureSeyes),0)+5}}%
+	\xdef\SeyesFullNbCol{\fpeval{round((\SeyesFullLargPap-\SeyesFullMargeG)/(0.4*\SeyesFullReglureSeyes),0)}}%
+	%création de la grille
+	\begin{tikzpicture}[remember picture,overlay,x=1cm,y=1cm]%
+		%grille secondaire
+		\foreach \L in {0,...,\SeyesFullNbLignS} {\draw[WoGrids,\SeyesFullCoulS] ($(current page.north west)+(0,{-(\SeyesFullMargeH-0.3*\SeyesFullReglureSeyes)-\L*0.1*\SeyesFullReglureSeyes})$)--++({\paperwidth},0) ;}
+		%grille principale
+		\foreach \C in {1,...,\SeyesFullNbCol} {\draw[WoGridp,\SeyesFullCoulP] ($(current page.north west)+({\SeyesFullMargeG+(0.4*\SeyesFullReglureSeyes)*\C},0)$)--($(current page.south west)+({\SeyesFullMargeG+(0.4*\SeyesFullReglureSeyes)*\C},0)$) ;}
+		\foreach \L in {0,...,\SeyesFullNbLignP} {\draw[WoGridp,\SeyesFullCoulP] ($(current page.north west)+(0,{-(\SeyesFullMargeH)-\L*(0.4*\SeyesFullReglureSeyes)})$)--++({\paperwidth},0) ;}
+		%marge
+		\draw[\SeyesFullCoulM,WoGridbar] ($(current page.north west)+({\SeyesFullMargeG},0)$)--($(current page.south west)+({\SeyesFullMargeG},0)$) ;
+		\coordinate (SeyesOrigine) at ($(current page.north west)+({\SeyesFullMargeG},{-\SeyesFullMargeH})$) ;
+		\ifboolKV[SeyesFull]{NumLignes}%
+			{%
+				\foreach \lig in {1,...,\inteval{\SeyesFullNbLignP+1}} {\node[gray,inner sep=0pt,anchor=base east] at ($(SeyesOrigine)+(-0.2,{-0.4*\SeyesFullReglureSeyes*(\lig-1)})$) {\scriptsize\sffamily\lig};}
+			}%
+			{}%
+}
+{
+	\end{tikzpicture}%
+}
+
+\newcommand\CadreNoteSeyes[2][3]{%on précise la {ligne de début} + [hauteur]
+	%cadre de note
+	\draw[thick] ($(SeyesOrigine)+(0,{(-#2+1)*0.4*\SeyesFullReglureSeyes})$) --++ ({\SeyesFullLargPap-\SeyesFullMargeG},{0}) ;
+	\draw[thick] ($(SeyesOrigine)+(0,{(-#2+1)*0.4*\SeyesFullReglureSeyes})$) --++ ({0},{-#1*0.4*\SeyesFullReglureSeyes}) ;
+	\draw[thick] ($(SeyesOrigine)+(0,{(-#2+1-#1)*0.4*\SeyesFullReglureSeyes})$) --++ ({\SeyesFullLargPap-\SeyesFullMargeG},{0}) ;
+	\draw[thick] ($(SeyesOrigine)+(0,{(-#2+1)*0.4*\SeyesFullReglureSeyes})$) rectangle++ ({#1*0.4*\SeyesFullReglureSeyes},{-#1*0.4*\SeyesFullReglureSeyes}) ;
+	\draw[thick] ($(SeyesOrigine)+(0,{(-#2+1-#1)*0.4*\SeyesFullReglureSeyes})$) --++ ({#1*0.4*\SeyesFullReglureSeyes},{#1*0.4*\SeyesFullReglureSeyes}) ;
+}
+
+\defKV[SeyesLigne]{%
+	Couleur=\xdef\SeyesLigneCouleur{#1},%
+	Echelle=\xdef\SeyesLigneEchelle{#1},%
+	Ligne=\xdef\SeyesLigne{#1},%
+	Largeur=\xdef\SeyesLigneLarg{#1}
+}
+\setKVdefault[SeyesLigne]{%
+	Couleur=black,%
+	Ligne=1,%
+	Echelle=1,%
+	Largeur=auto
+}
+
+\NewDocumentCommand\LignePapierSeyes{ O{} D<>{left} D(){0,0} m }{%
+	\useKVdefault[SeyesLigne]%
+	\setKV[SeyesLigne]{#1}%
+	\IfEq{\SeyesLigneLarg}{auto}%
+		{\xdef\SeyesLigneLarg{\fpeval{\SeyesFullLargPap-\SeyesFullMargeG-0.25}}}%
+		{}%
+	\node[\SeyesLigneCouleur,text width=\fpeval{\SeyesLigneLarg/\SeyesLigneEchelle}cm,align=#2,inner sep=0pt,anchor=base west,scale=\SeyesLigneEchelle] at ($(SeyesOrigine)+(0.05,{-(\SeyesLigne-1)*0.4*\SeyesFullReglureSeyes})+(#3)$) {#4} ;
+}
+
+\defKV[SeyesPar]{%
+	Couleur=\xdef\SeyesParCouleur{#1},%
+	Echelle=\xdef\SeyesParEchelle{#1},%
+	Espacement=\xdef\SeyesParBase{#1},%
+	Ligne=\xdef\SeyesPar{#1},%
+	Largeur=\xdef\SeyesParLarg{#1}
+}
+\setKVdefault[SeyesPar]{%
+	Couleur=black,%
+	Ligne=1,%
+	Echelle=1,%
+	Espacement=auto,%
+	Largeur=auto
+}
+
+\RequirePackage{setspace}
+
+\NewDocumentCommand\ParagraphePapierSeyes{ O{} D<>{justify} D(){0,0} m }{%essayer de passer à setspace ?
+	\useKVdefault[SeyesPar]%
+	\setKV[SeyesPar]{#1}%
+	\IfEq{\SeyesParLarg}{auto}%
+		{\xdef\SeyesParLarg{\fpeval{\SeyesFullLargPap-\SeyesFullMargeG-0.25}}}%
+		{}%
+	\IfStrEq{\SeyesParBase}{auto}%
+		{%
+			\def\SeyesStretchPar{\fpeval{4*\SeyesFullReglureSeyes/\SeyesParEchelle}}%
+		}%
+		{%
+			\def\SeyesStretchPar{\SeyesParBase}%
+		}%
+	\node[\SeyesParCouleur,text width=\fpeval{\SeyesParLarg/\SeyesParEchelle}cm,align=#2,inner sep=0pt,anchor=base west,scale=\SeyesParEchelle,execute at begin node=\setlength{\baselineskip}{\SeyesStretchPar mm}] at ($(SeyesOrigine)+(0.05,{-(\SeyesPar-1)*0.4*\SeyesFullReglureSeyes})+(#3)$) {#4} ;
+}
+
+%------page entière 5x5
+%les marges doivent valoir MargeH=0.2+k*0.5 et MargeV=0.3+k'*0.5
+\defKV[CxCFull]{%
+	Couleur=\xdef\CCFullCoul{#1},%
+	CouleurMarge=\xdef\CCFullCoulM{#1},%
+	FormatPapier=\xdef\CCFullFormatPap{#1},%
+	MargeG=\xdef\CCFullMargeG{#1},%
+	MargeH=\xdef\CCFullMargeH{#1}
+}
+\setKVdefault[CxCFull]{%
+	Couleur=lightgray!50,%
+	CouleurMarge=gray,%
+	NumLignes=false,%
+	FormatPapier=A4,%
+	MargeG=auto,%
+	MargeH=auto
+}
+
+\NewDocumentEnvironment{PleinePageCinqCinq}{ O{} }%semble OK ^^
+{
+	\useKVdefault[CxCFull]%
+	\setKV[CxCFull]{#1}%
+	\IfEq{\CCFullFormatPap}{A4}%
+		{%
+			\xdef\CCFullHautPap{29.7}\xdef\CCFullLargPap{21}%
+			\IfEq{\CCFullMargeG}{auto}%
+				{%
+					\xdef\CCFullMargeG{1.7}%
+				}%
+				{}%
+			\IfEq{\CCFullMargeH}{auto}%
+				{%
+					\xdef\CCFullMargeH{1.3}%
+				}%
+				{}%
+		}%
+		{}%
+	\IfEq{\CCFullFormatPap}{A5}%
+		{%
+			\xdef\CCFullHautPap{21}\xdef\CCFullLargPap{14.8}%
+			\IfEq{\CCFullMargeG}{auto}%
+				{%
+					\xdef\CCFullMargeG{1.2}%
+				}%
+				{}%
+			\IfEq{\CCFullMargeH}{auto}%
+				{%
+					\xdef\CCFullMargeH{0.8}%
+				}%
+				{}%
+		}%
+		{}%
+	\IfSubStr{\CCFullFormatPap}{x}%
+		{%
+			\StrCut{\CCFullFormatPap}{x}{\CCFullLargPap}{\CCFullHautPap}%
+			\IfEq{\CCFullMargeG}{auto}%
+				{%
+					\xdef\CCFullMargeG{1.7}%
+				}%
+				{}%
+			\IfEq{\CCFullMargeH}{auto}%
+				{%
+					\xdef\CCFullMargeH{1.3}%
+				}%
+				{}%
+		}%
+		{}%
+	%calcul du nombre de lignes /colonnes ?
+	\xdef\CCFullNbLign{\fpeval{round(\CCFullHautPap/(0.5),0)}}%
+	\xdef\CCFullNbCol{\fpeval{round((\CCFullLargPap)/(0.5),0)}}%
+	\begin{tikzpicture}[remember picture,overlay,x=1cm,y=1cm]
+		%lignes horizontales
+		\foreach \L in {0,1,...,\CCFullNbLign} {\draw[WoGridp,\CCFullCoul] ($(current page.north west)+(0,{-0.3-\L*0.5})$)--++({\paperwidth},0) ;}
+		%lignes verticales
+		\foreach \C in {0,1,...,\CCFullNbCol} {\draw[WoGridp,\CCFullCoul] ($(current page.north west)+({0.2+0.5*\C},0)$)--($(current page.south west)+({0.2+0.5*\C},0)$) ;}
+		%marge
+		\draw[\CCFullCoulM,WoGridbar] ($(current page.north west)+(\CCFullMargeG,0)$)--($(current page.south west)+(\CCFullMargeG,0)$) ;
+		\coordinate (CinqCinqOrigine) at ($(current page.north west)+({\CCFullMargeG},{-\CCFullMargeH})$) ;
+		\ifboolKV[CxCFull]{NumLignes}%
+		{%
+			\foreach \lig in {1,2,...,57} {\node[gray,inner sep=0pt,anchor=base east] at ($(CinqCinqOrigine)+(-0.2,{-0.5*(\lig-1)})$) {\tiny\sffamily \lig};}
+		}%
+		{}
+	}
+	{
+	\end{tikzpicture}%
+}
+
+\newcommand\CadreNoteCinqCinq[2][3]{%on précise la {ligne de début} + [hauteur]
+	%cadre de note
+	\draw[thick] ($(CinqCinqOrigine)+(0,{(-#2+1)*0.5})$) --++ ({\CCFullLargPap-\CCFullMargeG},{0}) ;
+	\draw[thick] ($(CinqCinqOrigine)+(0,{(-#2+1)*0.5})$) --++ ({0},{-#1*0.5}) ;
+	\draw[thick] ($(CinqCinqOrigine)+(0,{(-#2+1-#1)*0.5})$) --++ ({\CCFullLargPap-\CCFullMargeG},{0}) ;
+	\draw[thick] ($(CinqCinqOrigine)+(0,{(-#2+1)*0.5})$) rectangle++ ({#1.*0.5},{-#1*0.5}) ;
+	\draw[thick] ($(CinqCinqOrigine)+(0,{(-#2+1-#1)*0.5})$) --++ ({#1.*0.5},{#1*0.5}) ;
+}
+
+\defKV[CCLigne]{%
+	Couleur=\xdef\CCLigneCouleur{#1},%
+	Echelle=\xdef\CCLigneEchelle{#1},%
+	Ligne=\xdef\CCLigne{#1},%
+	Largeur=\xdef\CCLigneLarg{#1}
+}
+\setKVdefault[CCLigne]{%
+	Couleur=black,%
+	Ligne=1,%
+	Echelle=1,%
+	Largeur=auto
+}
+
+\NewDocumentCommand\LignePapierCinqCinq{ O{} D<>{left} D(){0,0} m }{%
+	\useKVdefault[CCLigne]%
+	\setKV[CCLigne]{#1}%
+	\IfEq{\CCLigneLarg}{auto}%
+		{\xdef\CCLigneLarg{\fpeval{\CCFullLargPap-\CCFullMargeG-0.25}}}%
+		{}%
+	\node[\CCLigneCouleur,text width=\fpeval{\CCLigneLarg/\CCLigneEchelle}cm,align=#2,inner sep=0pt,anchor=base west,scale=\CCLigneEchelle] at ($(CinqCinqOrigine)+(0.05,{-(\CCLigne-1)*0.5})+(#3)$) {#4} ;
+}
+
+\defKV[CCPar]{%
+	Couleur=\xdef\CCParCouleur{#1},%
+	Echelle=\xdef\CCParEchelle{#1},%
+	Espacement=\xdef\CCParBase{#1},%
+	Ligne=\xdef\CCPar{#1},%
+	Largeur=\xdef\CCParLarg{#1}
+}
+\setKVdefault[CCPar]{%
+	Couleur=black,%
+	Ligne=1,%
+	Echelle=1,%
+	Espacement=auto,%
+	Largeur=auto
+}
+
+\NewDocumentCommand\ParagraphePapierCinqCinq{ O{} D<>{justify} D(){0,0} m }{%
+	\useKVdefault[CCPar]
+	\setKV[CCPar]{#1}%
+	\IfEq{\CCParLarg}{auto}%
+		{\xdef\CCParLarg{\fpeval{\CCFullLargPap-\CCFullMargeG-0.25}}}%
+		{}%
+	\IfStrEq{\CCParBase}{auto}%
+		{%
+			\def\CCStretchPar{\fpeval{5/\CCParEchelle}}%
+		}%
+		{%
+			\def\CCStretchPar{\CCParBase}%
+		}
+	\node[\CCParCouleur,text width=\fpeval{\CCParLarg/\CCParEchelle}cm,align=#2,inner sep=0pt,anchor=base west,scale=\CCParEchelle,execute at begin node=\setlength{\baselineskip}{\CCStretchPar mm}] at ($(CinqCinqOrigine)+(0.05,{-(\CCPar-1)*0.5})+(#3)$) {#4} ;
+}
+
+%------page entière ruled
+\defKV[RuledFull]{%
+	Couleur=\xdef\RuledFullCoul{#1},%
+	CouleurMarge=\xdef\RuledFullCoulMarge{#1},%
+	FormatPapier=\xdef\RuledFullFormatPapier{#1}
+}
+\setKVdefault[RuledFull]{%
+	Couleur=PapierGris,%
+	CouleurMarge=TyrianPurple,%
+	NumLignes=false,%
+	FormatPapier=A4
+}
+
+\NewDocumentEnvironment{PleinePageRuled}{ O{} }%semble OK ^^
+{
+	\useKVdefault[RuledFull]%
+	\setKV[RuledFull]{#1}%
+	
+	\IfEq{\RuledFullFormatPapier}{A4}%
+		{\xdef\RuledFullHautPap{29.7}\xdef\RuledFullLargPap{21}\xdef\RuledFullMarge{3}\xdef\RuledFullMargeH{1.5}\xdef\RuledFullHautEff{26.1}}%
+		{}%
+	\IfEq{\RuledFullFormatPapier}{A5}%
+		{\xdef\RuledFullHautPap{21}\xdef\RuledFullLargPap{14.8}\xdef\RuledFullMarge{1.5}\xdef\RuledFullMargeH{1.25}\xdef\RuledFullHautEff{18.9}}%
+		{}%
+	\IfSubStr{\RuledFullFormatPapier}{x}%
+		{\StrCut{\RuledFullFormatPapier}{x}{\RuledFullLargPap}{\RuledFullHautPap}\xdef\RuledFullMarge{3}\xdef\RuledFullMargeH{3}\xdef\RuledFullHautEff{\fpeval{\RuledFullHautPap-3.5}}}%
+		{}%
+	%calcul du nombre de lignes /colonnes ?
+	\xdef\RuledFullNbLign{\fpeval{round(\RuledFullHautEff/(0.9),0)}}%
+	\begin{tikzpicture}[remember picture,overlay,x=1cm,y=1cm]
+		%lignes horizontales
+		\foreach \L in {1,...,\RuledFullNbLign} {\draw[WoGridp,\RuledFullCoul] ($(current page.north west)+(0,{-(\L-1)*0.9-\RuledFullMargeH})$)--++({\paperwidth},0) ;}
+		%\foreach \L in {1.5,2.4,...,27.6} {\draw[\RuledFullCoul] ($(current page.north west)+(0,{-\L})$)--++({\paperwidth},0) ;}
+		%lignes verticales
+		\draw[WoGridbar,\RuledFullCoulMarge] ($(current page.north west)+({\RuledFullMarge},0)$)--($(current page.south west)+({\RuledFullMarge},0)$) ;
+		\draw[WoGridbar,\RuledFullCoulMarge] ($(current page.north east)+({-\RuledFullMarge},0)$)--($(current page.south east)+({-\RuledFullMarge},0)$) ;
+		%\foreach \C in {3} {\draw[thick,\RuledFullCoulMarge] ($(current page.north west)+({\C},0)$)--($(current page.south west)+({\C},0)$) ;}
+		%origine
+		\coordinate (RuledOrigine) at ($(current page.north west)+({\RuledFullMarge},{-\RuledFullMargeH})$) ;
+		\ifboolKV[RuledFull]{NumLignes}%
+		{%
+			\foreach \lig in {1,...,\RuledFullNbLign} {\node[gray,inner sep=0pt,anchor=base east] at ($(RuledOrigine)+(-0.2,{-0.9*(\lig-1)})$) {\tiny\sffamily \lig};}
+		}%
+		{}
+	}
+	{
+	\end{tikzpicture}%
+}
+
+\newcommand\CadreNoteRuled[2][3]{%on précise la {ligne de début} + [hauteur]
+	%cadre de note
+	\draw[thick] ($(RuledOrigine)+(0,{(-#2+1)*0.9})$) --++ ({\RuledFullLargPap-2*\RuledFullMarge},{0}) ;
+	\draw[thick] ($(RuledOrigine)+(0,{(-#2+1)*0.9})$) --++ ({0},{-#1*0.9}) ;
+	\draw[thick] ($(RuledOrigine)+({\paperwidth-6},{(-#2+1)*0.9})$) --++ ({0},{-#1*0.9}) ;
+	\draw[thick] ($(RuledOrigine)+(0,{(-#2+1-#1)*0.9})$) --++ ({\RuledFullLargPap-2*\RuledFullMarge},{0}) ;
+	\draw[thick] ($(RuledOrigine)+(0,{(-#2+1)*0.9})$) rectangle++ ({#1.*0.9},{-#1*0.9}) ;
+	\draw[thick] ($(RuledOrigine)+(0,{(-#2+1-#1)*0.9})$) --++ ({#1.*0.9},{#1*0.9}) ;
+}
+
+\defKV[RuledLigne]{%
+	Couleur=\xdef\RuledLigneCouleur{#1},%
+	Echelle=\xdef\RuledLigneEchelle{#1},%
+	Ligne=\xdef\RuledLigne{#1},%
+	Largeur=\xdef\RuledLigneLarg{#1}
+}
+\setKVdefault[RuledLigne]{%
+	Couleur=black,%
+	Ligne=1,%
+	Echelle=1,%
+	Largeur=auto
+}
+
+\NewDocumentCommand\LignePapierRuled{ O{} D<>{left} D(){0,0} m }{%
+	\useKVdefault[RuledLigne]%
+	\setKV[RuledLigne]{#1}%
+	\IfEq{\RuledLigneLarg}{auto}%
+		{\xdef\RuledLigneLarg{\fpeval{\RuledFullLargPap-2*\RuledFullMarge-0.25}}}%
+		{}%
+	\node[\RuledLigneCouleur,text width=\fpeval{\RuledLigneLarg/\RuledLigneEchelle}cm,align=#2,inner sep=0pt,anchor=base west,scale=\RuledLigneEchelle] at ($(RuledOrigine)+(0.05,{-(\RuledLigne-1)*0.9})+(#3)$) {#4} ;
+}
+
+\defKV[RuledPar]{%
+	Couleur=\xdef\RuledParCouleur{#1},%
+	Echelle=\xdef\RuledParEchelle{#1},%
+	%TaillePolice=\xdef\RuledParEchelle{#1},%
+	Espacement=\xdef\RuledParBase{#1},%
+	Ligne=\xdef\RuledPar{#1},%
+	Largeur=\xdef\RuledParLarg{#1}
+}
+\setKVdefault[RuledPar]{%
+	Couleur=black,%
+	Ligne=1,%
+	%TaillePolice=11,%
+	Echelle=1,%
+	Espacement=auto,%
+	Largeur=auto
+}
+
+\NewDocumentCommand\ParagraphePapierRuled{ O{} D<>{justify} D(){0,0} m }{%
+	\useKVdefault[RuledPar]%
+	\setKV[RuledPar]{#1}%
+	\IfEq{\RuledParLarg}{auto}%
+		{\xdef\RuledParLarg{\fpeval{\RuledFullLargPap-2*\RuledFullMarge-0.25}}}%
+		{}%
+	\IfStrEq{\RuledParBase}{auto}%
+		{%
+			\def\RuledStretchPar{\fpeval{9/\RuledParEchelle}}%
+		}%
+		{%
+			\def\RuledStretchPar{\RuledParBase}%
+		}
+	\node[\RuledParCouleur,text width=\fpeval{\RuledParLarg/\RuledParEchelle}cm,align=#2,inner sep=0pt,anchor=base west,scale=\RuledParEchelle,execute at begin node=\setlength{\baselineskip}{\RuledStretchPar mm}] at ($(RuledOrigine)+(0.05,{-(\RuledPar-1)*0.9})+(#3)$) {#4} ;
+}
+
+\endinput

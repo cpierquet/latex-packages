@@ -1,0 +1,1644 @@
+% Author     : C. Pierquet
+% Copyright  : Trivial Pursuit, TradeMark by Hasbro 
+% licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{TrivialPursuit}[2025/06/24 0.1.5 Present a Trivial Pursuit Board]
+% 0.1.5	Bugfix
+% 0.1.4	Bugfix
+% 0.1.3	Compatibility with fa5/6
+% 0.1.2	'Short' version 
+% 0.1.1	Adding schemes of colors
+% 0.1.0	Initial version
+
+%====Warning := bug with tweoji... todo...
+
+%====Option
+\newif\if@fafive \@fafivetrue
+\newif\if@fasix \@fasixfalse
+\newif\if@fafivesix \@fafivesixfalse
+\DeclareOption{nonfa}{\@fafivefalse\@fasixfalse\@fafivesixfalse}
+\DeclareOption{nofa}{\@fafivefalse\@fasixfalse\@fafivesixfalse}
+\DeclareOption{fa6}{\@fafivefalse\@fafivesixfalse\@fasixtrue}
+\DeclareOption{fa5fa6}{\@fafivefalse\@fasixfalse\@fafivesixtrue}
+\DeclareOption*{}
+\ProcessOptions\relax
+
+%====PACKAGES
+\RequirePackage{tikz}
+\usetikzlibrary{calc,positioning}
+\RequirePackage{calc}
+%\RequirePackage{fontawesome5}
+\if@fafive
+	\RequirePackage{fontawesome5}
+	\def\faTennis{\faTableTennis}
+\fi
+\if@fasix
+	\RequirePackage{fontawesome6}
+	\def\faTennis{\faTableTennisPaddleBall}
+\fi
+\if@fafivesix
+	\RequirePackage[fa5alias]{fontawesome6}
+	\def\faTennis{\faTableTennisPaddleBall}
+\fi
+\RequirePackage{simplekv}
+\RequirePackage{xintexpr}
+\RequirePackage{listofitems}
+
+%====COLORS (tks to quark67)
+%styleA
+\definecolor{TPorangeA}{cmyk}{0,0.6,1,0}
+\definecolor{TPblueA}{cmyk}{0.7,0,0,0}
+\definecolor{TPbrownA}{cmyk}{0.3,0.5,0.7,0}
+\definecolor{TPgreenA}{cmyk}{0.7,0,0.8,0}
+\definecolor{TPpinkA}{cmyk}{0,0.6,0,0}
+\def\TPColorsA{yellow,TPorangeA,TPblueA,TPbrownA,TPgreenA,TPpinkA}
+%styleB
+\definecolor{TPyellowB}{cmyk}{0,0,0.75,0}
+\definecolor{TPorangeB}{cmyk}{0,0.25,0.95,0}
+\definecolor{TPblueB}{cmyk}{0.65,0.1,0.1,0}
+\definecolor{TPbrownB}{cmyk}{0.15,0.3,0.85,0}
+\definecolor{TPgreenB}{cmyk}{0.3,0,0.95,0}
+\definecolor{TPpinkB}{cmyk}{0.0,0.65,0.4,0}
+\def\TPColorsB{TPyellowB,TPorangeB,TPblueB,TPbrownB,TPgreenB,TPpinkB}
+
+%====KEYS [FR]
+\defKV[TrivPurs]{%
+	Rayon=\def\triv@purs@rayon{#1},%
+	HauteurCases=\def\triv@purs@hautcases{#1},
+	ListeCouleurs=\def\triv@purs@liste{#1},%
+	ListeIcones=\def\triv@purs@listeicones{#1},%
+	CouleurCentre=\def\triv@purs@coulcent{#1},%
+	Unite=\def\triv@purs@unit{#1},%
+	Epaisseur=\def\triv@purs@thick{#1},%
+	Rotation=\def\triv@purs@rotate{#1},%
+	IconeJoker=\def\triv@purs@iconjok{#1}
+}
+
+\setKVdefault[TrivPurs]{%
+	Rayon=8,%
+	HauteurCases=1.5,%
+	ListeCouleurs={yellow,orange,blue,brown,green,pink},%
+	ListeIcones={\faArchway,\faTennis,\faUmbrellaBeach,\faGuitar,\faTree,\faMusic},%
+	Icones=true,%
+	Centre=true,%
+	CouleurCentre=lightgray!25,%
+	Couleurs=true,%
+	Logo=true,%
+	Vide=false,%
+	Unite=1,%
+	Epaisseur=0.8pt,%
+	Rotation=0,%
+	Jokers=true,%
+	IconeJoker={\faDice},%
+	VersionCourte=false
+}
+
+%====INTERN COMMANDS
+\NewDocumentCommand\CreationNoeudsTrivial{}{%
+	%création des nœuds grand bord petit bord GB-i et PB-i
+	\foreach \i in {0,1,...,\triv@purs@nbcasesbord}{%
+		\coordinate (GB-\i) at ({\i*\triv@purs@anglecases}:{\triv@purs@rayon}) ;
+		\coordinate (PB-\i) at ({\i*\triv@purs@anglecases}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	}
+	%création des nb*2 nœuds des grands secteurs sous la forme (SA-i) et (SB-i)
+	\foreach \i in {1,...,\triv@purs@nbcat}{%
+		\xdef\j{\xinteval{1+(\i-1)*\triv@purs@ecart}}%
+		\coordinate (SB-\i) at (PB-\j) ;%
+	}
+	\coordinate (SA-1) at (PB-\triv@purs@numcasavant) ;
+	%\filldraw[red] (SA-1) circle[radius=2pt] node[font=\tiny\ttfamily] {SA-1} ;
+	\foreach \i in {2,...,\triv@purs@nbcat}{%
+		\xdef\j{\xinteval{-1+(\i-1)*\triv@purs@ecart}}%
+		\coordinate (SA-\i) at (PB-\j) ;
+	}
+	%création des nœuds pour la figure centrale, boucle pour les 1ers + le dernier
+	\foreach \i in {1,...,\triv@purs@nbcat}{%
+		\coordinate (OM-\i) at ({30+(\i-1)*60}:{\triv@purs@rayonhexag}) ;
+	}%
+	%les nœuds des cases verticales
+	\foreach \i in {1,...,\triv@purs@nbcat}{%
+		\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+			\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+			\coordinate (D-\i-\j) at ($(SB-\i)!\tmp@coeff!(OM-\i)$) ;
+		}%
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%cas C1-...
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (C-1-\j) at ($(SA-1)!\tmp@coeff!(OM-\triv@purs@nbcat)$) ;
+	}%
+	\foreach \i in {2,...,\triv@purs@nbcat}{%
+		\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%cas suivants
+			\xdef\k{\xinteval{\i-1}}
+			\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+			\coordinate (C-\i-\j) at ($(SA-\i)!\tmp@coeff!(OM-\k)$) ;
+		}%
+	}%
+}
+\NewDocumentCommand\RemplirCentreTrivial{ }{%OK
+	\ifboolKV[TrivPurs]{Couleurs}{\filldraw[\triv@purs@coulcent] (OM-1)--(OM-2)--(OM-3)--(OM-4)--(OM-5)--(OM-6)--cycle ;}{}%
+}
+\NewDocumentCommand\RemplirCamembertsTrivial{ }{%numéro des camemberts, en partant de la droite
+	\ifboolKV[TrivPurs]{Couleurs}%
+		{%
+			%Couleur du 1er camembert
+			\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (PB-47)--(GB-47) arc ({-\triv@purs@anglecases}:{\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-1) arc ({\triv@purs@anglecases}:{-\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+			%Couleur du 2ème
+			\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (PB-7)--(GB-7) arc ({7*\triv@purs@anglecases}:{9*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-9) arc ({9*\triv@purs@anglecases}:{7*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+			%Couleur du 3ème
+			\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (PB-15)--(GB-15) arc ({15*\triv@purs@anglecases}:{17*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-17) arc ({17*\triv@purs@anglecases}:{15*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+			%Couleur du 4ème
+			\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (PB-23)--(GB-23) arc ({23*\triv@purs@anglecases}:{25*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-25) arc ({25*\triv@purs@anglecases}:{23*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+			%Couleur du 5ème
+			\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (PB-31)--(GB-31) arc ({31*\triv@purs@anglecases}:{33*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-33) arc ({33*\triv@purs@anglecases}:{31*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+			%Couleur du 6ème
+			\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (PB-39)--(GB-39) arc ({39*\triv@purs@anglecases}:{41*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-41) arc ({41*\triv@purs@anglecases}:{39*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+		}%
+		{}%
+	%si on affiche les icones
+	\ifboolKV[TrivPurs]{Icones}%
+		{%
+			\node[rotate={90+0*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+8*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({8*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+16*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({16*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+24*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({24*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+32*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({32*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+40*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({40*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[6]} ;
+		}%
+		{}%
+}
+\NewDocumentCommand\RemplirCaseTrivial{ m m m }{%deb + fin + numcouleur
+	\ifboolKV[TrivPurs]{Couleurs}%
+		{%
+			\draw[EpTraits,fill={\triv@purs@lstcol[#3]}] (PB-#1)--(GB-#1) arc ({#1*\triv@purs@anglecases}:{#2*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-#2) arc ({#2*\triv@purs@anglecases}:{#1*\triv@purs@anglecases}:{\triv@purs@rayonint});
+		}%
+		{}%
+	\ifboolKV[TrivPurs]{Icones}%
+		{%
+			\xdef\tmp@aa{\xintfloateval{(#1+0.5)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({\tmp@aa}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[#3]} ;
+		}%
+		{}%
+}
+\NewDocumentCommand\RemplirCaseVertical{ m m m }{%niv + num + numcouleur
+	\ifboolKV[TrivPurs]{Couleurs}%
+		{%
+			\xdef\tmpnivav{\xinteval{#1-1}}%
+			\xdef\tmpnivap{\xinteval{#1+1}}%
+			\xdef\tmpcase{\xinteval{#2-1}}%
+			\xdef\tmpcaseap{\xinteval{#2+1}}%
+			\xintifboolexpr{#2 > 1 'and' #2 < 5}%
+				{%
+					\draw[EpTraits,fill={\triv@purs@lstcol[#3]}] (C-#1-\tmpcase)--(D-#1-\tmpcase)--(D-#1-#2)--(C-#1-#2)--cycle  ;
+				}%
+				{}%
+			\xintifboolexpr{#2 == 5}%
+				{%
+					\xintifboolexpr{#1 == 1}%
+						{%
+							\filldraw[{\triv@purs@lstcol[#3]}] (C-#1-\tmpcase)--(D-#1-\tmpcase)--(OM-#1)--(OM-6)--cycle  ;
+						}%
+						{%
+							\filldraw[{\triv@purs@lstcol[#3]}] (C-#1-\tmpcase)--(D-#1-\tmpcase)--(OM-#1)--(OM-\tmpnivav)--cycle  ;
+						}%
+				}%
+				{}%
+			\xintifboolexpr{#2 == 1}%
+				{%
+					\xintifboolexpr{#1 == 1}%
+						{%
+							\draw[EpTraits,fill={\triv@purs@lstcol[#3]}] (C-1-1)--(PB-\triv@purs@numcasavant) arc({-\triv@purs@anglecases}:{\triv@purs@anglecases}:{\triv@purs@rayonint}) --(D-1-1)--cycle ;
+						}%
+						{%
+							\xdef\tmp@ii{\xinteval{(-1+8*(#1-1))}}%
+							\xdef\tmp@jj{\xinteval{(\tmp@ii+2)}}%
+							\draw[EpTraits,fill={\triv@purs@lstcol[#3]}] (C-#1-1)--(PB-\tmp@ii) arc({\tmp@ii*\triv@purs@anglecases}:{\tmp@jj*\triv@purs@anglecases}:{\triv@purs@rayonint}) --(D-#1-1)--cycle ;
+						}%
+				}%
+				{}%
+		}%
+		{}%
+}
+\NewDocumentCommand\LogoCasesVerticalesTrivial{}{%
+	\ifboolKV[TrivPurs]{Icones}%
+		{%
+			%1er niveau (droite)
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-6)!0.5!(D-1-4)$) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-1-4)!0.5!(D-1-3)$) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-1-3)!0.5!(D-1-2)$) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-1-2)!0.5!(D-1-1)$) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-1-1)!0.5!(SB-1)$) {\triv@purs@lsticons[4]} ;
+			%2eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(8)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-1)!0.5!(D-2-4)$) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-2-4)!0.5!(D-2-3)$) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-2-3)!0.5!(D-2-2)$) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-2-2)!0.5!(D-2-1)$) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-2-1)!0.5!(SB-2)$) {\triv@purs@lsticons[5]} ;
+			%3eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(16)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-2)!0.5!(D-3-4)$) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-3-4)!0.5!(D-3-3)$) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-3-3)!0.5!(D-3-2)$) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-3-2)!0.5!(D-3-1)$) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-3-1)!0.5!(SB-3)$) {\triv@purs@lsticons[6]} ;
+			%4eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(24)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-3)!0.5!(D-4-4)$) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-4-4)!0.5!(D-4-3)$) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-4-3)!0.5!(D-4-2)$) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-4-2)!0.5!(D-4-1)$) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-4-1)!0.5!(SB-4)$) {\triv@purs@lsticons[1]} ;
+			%5eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(32)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-4)!0.5!(D-5-4)$) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-5-4)!0.5!(D-5-3)$) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-5-3)!0.5!(D-5-2)$) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-5-2)!0.5!(D-5-1)$) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-5-1)!0.5!(SB-5)$) {\triv@purs@lsticons[2]} ;
+			%6eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(40)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-5)!0.5!(D-6-4)$) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-6-4)!0.5!(D-6-3)$) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-6-3)!0.5!(D-6-2)$) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-6-2)!0.5!(D-6-1)$) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-6-1)!0.5!(SB-6)$) {\triv@purs@lsticons[3]} ;
+		}%
+		{}%
+}
+
+\NewDocumentCommand\RemplirCasesTour{}{%
+	%niveau 1 vertical
+	\RemplirCaseVertical{1}{1}{4}\RemplirCaseVertical{2}{1}{5}\RemplirCaseVertical{3}{1}{6}
+	\RemplirCaseVertical{4}{1}{1}\RemplirCaseVertical{5}{1}{2}\RemplirCaseVertical{6}{1}{3}
+	%secteur1
+	\RemplirCaseTrivial{1}{2}{4}\RemplirCaseTrivial{3}{4}{3}\RemplirCaseTrivial{4}{5}{6}\RemplirCaseTrivial{6}{7}{5}
+	%secteur2
+	\RemplirCaseTrivial{9}{10}{5}\RemplirCaseTrivial{11}{12}{4}\RemplirCaseTrivial{12}{13}{1}\RemplirCaseTrivial{14}{15}{6}
+	%secteur3
+	\RemplirCaseTrivial{17}{18}{6}\RemplirCaseTrivial{19}{20}{5}\RemplirCaseTrivial{20}{21}{2}\RemplirCaseTrivial{22}{23}{1}
+	%secteur4
+	\RemplirCaseTrivial{25}{26}{1}\RemplirCaseTrivial{27}{28}{6}\RemplirCaseTrivial{28}{29}{3}\RemplirCaseTrivial{30}{31}{2}
+	%secteur5
+	\RemplirCaseTrivial{33}{34}{2}\RemplirCaseTrivial{35}{36}{1}\RemplirCaseTrivial{36}{37}{4}\RemplirCaseTrivial{38}{39}{3}
+	%secteur5
+	\RemplirCaseTrivial{41}{42}{3}\RemplirCaseTrivial{43}{44}{2}\RemplirCaseTrivial{44}{45}{5}\RemplirCaseTrivial{46}{47}{4}
+	%montées à partir des cases n°2
+	\RemplirCaseVertical{1}{2}{3}\RemplirCaseVertical{1}{3}{5}\RemplirCaseVertical{1}{4}{6}\RemplirCaseVertical{1}{5}{2}
+	\RemplirCaseVertical{2}{2}{4}\RemplirCaseVertical{2}{3}{6}\RemplirCaseVertical{2}{4}{1}\RemplirCaseVertical{2}{5}{3}
+	\RemplirCaseVertical{3}{2}{5}\RemplirCaseVertical{3}{3}{1}\RemplirCaseVertical{3}{4}{2}\RemplirCaseVertical{3}{5}{4}
+	\RemplirCaseVertical{4}{2}{6}\RemplirCaseVertical{4}{3}{2}\RemplirCaseVertical{4}{4}{3}\RemplirCaseVertical{4}{5}{5}
+	\RemplirCaseVertical{5}{2}{1}\RemplirCaseVertical{5}{3}{3}\RemplirCaseVertical{5}{4}{4}\RemplirCaseVertical{5}{5}{6}
+	\RemplirCaseVertical{6}{2}{2}\RemplirCaseVertical{6}{3}{4}\RemplirCaseVertical{6}{4}{5}\RemplirCaseVertical{6}{5}{1}
+	%les icones
+	\ifboolKV[TrivPurs]{Icones}%
+		{%
+			%1er niveau (droite)
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-6)!0.5!(D-1-4)$) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-1-4)!0.5!(D-1-3)$) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-1-3)!0.5!(D-1-2)$) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-1-2)!0.5!(D-1-1)$) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-1-1)!0.5!(SB-1)$) {\triv@purs@lsticons[4]} ;
+			%2eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(8)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-1)!0.5!(D-2-4)$) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-2-4)!0.5!(D-2-3)$) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-2-3)!0.5!(D-2-2)$) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-2-2)!0.5!(D-2-1)$) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-2-1)!0.5!(SB-2)$) {\triv@purs@lsticons[5]} ;
+			%3eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(16)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-2)!0.5!(D-3-4)$) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-3-4)!0.5!(D-3-3)$) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-3-3)!0.5!(D-3-2)$) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-3-2)!0.5!(D-3-1)$) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-3-1)!0.5!(SB-3)$) {\triv@purs@lsticons[6]} ;
+			%4eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(24)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-3)!0.5!(D-4-4)$) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-4-4)!0.5!(D-4-3)$) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-4-3)!0.5!(D-4-2)$) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-4-2)!0.5!(D-4-1)$) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-4-1)!0.5!(SB-4)$) {\triv@purs@lsticons[1]} ;
+			%5eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(32)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-4)!0.5!(D-5-4)$) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-5-4)!0.5!(D-5-3)$) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-5-3)!0.5!(D-5-2)$) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-5-2)!0.5!(D-5-1)$) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-5-1)!0.5!(SB-5)$) {\triv@purs@lsticons[2]} ;
+			%6eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(40)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-5)!0.5!(D-6-4)$) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-6-4)!0.5!(D-6-3)$) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-6-3)!0.5!(D-6-2)$) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-6-2)!0.5!(D-6-1)$) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-6-1)!0.5!(SB-6)$) {\triv@purs@lsticons[3]} ;
+		}%
+		{}%
+	%les jokers
+	\ifboolKV[TrivPurs]{Icones}%
+		{%
+			\ifboolKV[TrivPurs]{Jokers}%
+				{%
+					\foreach \i in {1,...,\triv@purs@nbcat}{%
+						\xdef\tmp@aa{\xintfloateval{(8*(\i-1)+2+0.5)*\triv@purs@anglecases}}%
+						\xdef\tmp@ab{\xintfloateval{(8*(\i-1)+5+0.5)*\triv@purs@anglecases}}%
+						\node[rotate=\tmp@aa,scale={\triv@purs@scaleicons*\triv@purs@hautcases}] at ({(0.5+8*(\i-1)+2)*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@iconjok} ;
+						\node[rotate=\tmp@ab,scale={\triv@purs@scaleicons*\triv@purs@hautcases}] at ({(0.5+8*(\i-1)+5)*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@iconjok} ;
+					}%
+				}%
+				{}%
+		}%
+		{}%
+}
+\NewDocumentCommand\TraceBorduresTrivial{ }{%
+	%les tracés des cases
+	\draw[EpTraits] (0,0) circle[radius=\triv@purs@rayon] ;
+	\draw[EpTraits] (0,0) circle[radius={\triv@purs@rayon-\triv@purs@hautcases}] ;
+	\foreach \i in {0,...,\triv@purs@nbcasesbord}{%
+		\xintifboolexpr{\xintiiRem{\i}{\triv@purs@ecart} == 0}%
+		{}%
+		{%
+			\draw[EpTraits] (PB-\i)--(GB-\i) ;
+		}%
+	}%
+	\draw[EpTraits] (SB-1)--(OM-1)--(OM-\triv@purs@nbcat)--(SA-1) ;
+	\foreach \i in {2,...,\triv@purs@nbcat}{%
+		\xdef\j{\xinteval{\i-1}}%
+		\draw[EpTraits] (SB-\i)--(OM-\i)--(OM-\j)--(SA-\i) ;
+	}%
+	\foreach \i in {1,...,\triv@purs@nbcat}{%
+		\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+			\draw[EpTraits] (C-\i-\j)--(D-\i-\j) ;
+		}%
+	}%
+}
+\NewDocumentCommand\LogoTrivialPursuit{}{%
+	\draw[EpTraitsPlusPlus] (0,0) circle[radius=\triv@purs@lgcamemb] ;
+	\foreach \i in {-30,30,...,270}{\draw[EpTraitsPlusPlus] (0,0)--(\i:{\triv@purs@lgcamemb}) ;}
+	\begin{scope}[shift={(0:{0.15*\triv@purs@lgcamemb})}]
+		\ifboolKV[TrivPurs]{Couleurs}%
+			{%
+				\filldraw[{\triv@purs@lstcol[1]}] (0,0)--({-30}:{0.765*\triv@purs@lgcamemb}) arc (-30:30:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+			}%
+			{}%
+		\draw[EpTraitsPlus] (0,0)--({-30}:{0.765*\triv@purs@lgcamemb}) arc (-30:30:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+	\end{scope}
+	\begin{scope}[shift={(60:{0.15*\triv@purs@lgcamemb})}]
+		\ifboolKV[TrivPurs]{Couleurs}%
+			{%
+				\filldraw[{\triv@purs@lstcol[2]}] (0,0)--({30}:{0.765*\triv@purs@lgcamemb}) arc (30:90:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+			}%
+			{}%
+		\draw[EpTraitsPlus] (0,0)--({30}:{0.765*\triv@purs@lgcamemb}) arc (30:90:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+	\end{scope}
+	\begin{scope}[shift={(120:{0.15*\triv@purs@lgcamemb})}]
+		\ifboolKV[TrivPurs]{Couleurs}%
+			{%
+				\filldraw[{\triv@purs@lstcol[3]}] (0,0)--({90}:{0.765*\triv@purs@lgcamemb}) arc (90:150:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+			}%
+			{}%
+		\draw[EpTraitsPlus] (0,0)--({90}:{0.765*\triv@purs@lgcamemb}) arc (90:150:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+	\end{scope}
+	\begin{scope}[shift={(180:{0.15*\triv@purs@lgcamemb})}]
+		\ifboolKV[TrivPurs]{Couleurs}%
+			{%
+				\filldraw[{\triv@purs@lstcol[4]}] (0,0)--({150}:{0.765*\triv@purs@lgcamemb}) arc (150:210:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+			}%
+			{}%
+		\draw[EpTraitsPlus] (0,0)--({150}:{0.765*\triv@purs@lgcamemb}) arc (150:210:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+	\end{scope}
+	\begin{scope}[shift={(240:{0.15*\triv@purs@lgcamemb})}]
+		\ifboolKV[TrivPurs]{Couleurs}%
+			{%
+				\filldraw[{\triv@purs@lstcol[5]}] (0,0)--({210}:{0.765*\triv@purs@lgcamemb}) arc (210:270:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+			}%
+			{}%
+		\draw[EpTraitsPlus] (0,0)--({210}:{0.765*\triv@purs@lgcamemb}) arc (210:270:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+	\end{scope}
+	\begin{scope}[shift={(300:{0.15*\triv@purs@lgcamemb})}]
+		\ifboolKV[TrivPurs]{Couleurs}%
+			{%
+				\filldraw[{\triv@purs@lstcol[6]}] (0,0)--({270}:{0.765*\triv@purs@lgcamemb}) arc (270:330:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+			}%
+			{}%
+		\draw[EpTraitsPlus] (0,0)--({270}:{0.765*\triv@purs@lgcamemb}) arc (270:330:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+	\end{scope}
+}
+
+%courte
+\NewDocumentCommand\CreationNoeudsTrivialCourt{}{%OK !!!!!!!!!!!!!!
+	%création des nœuds grand bord petit bord GB-i (et PB-i)
+	\coordinate (GB-1) at ({7.5}:{\triv@purs@rayon}) ;
+	\coordinate (PB-1) at ({7.5}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-2) at ({7.5+9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-2) at ({7.5+9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-3) at ({7.5+2*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-3) at ({7.5+2*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-4) at ({7.5+3*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-4) at ({7.5+3*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-5) at ({7.5+4*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-5) at ({7.5+4*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-6) at ({7.5+5*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-6) at ({7.5+5*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-7) at ({67.5}:{\triv@purs@rayon}) ;
+	\coordinate (PB-7) at ({67.5}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-8) at ({67.5+9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-8) at ({67.5+9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-9) at ({67.5+2*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-9) at ({67.5+2*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-10) at ({67.5+3*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-10) at ({67.5+3*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-11) at ({67.5+4*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-11) at ({67.5+4*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-12) at ({67.5+5*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-12) at ({67.5+5*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-13) at ({127.5}:{\triv@purs@rayon}) ;
+	\coordinate (PB-13) at ({127.5}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-14) at ({127.5+9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-14) at ({127.5+9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-15) at ({127.5+2*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-15) at ({127.5+2*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-16) at ({127.5+3*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-16) at ({127.5+3*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-17) at ({127.5+4*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-17) at ({127.5+4*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-18) at ({127.5+5*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-18) at ({127.5+5*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-19) at ({187.5}:{\triv@purs@rayon}) ;
+	\coordinate (PB-19) at ({187.5}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-20) at ({187.5+9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-20) at ({187.5+9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-21) at ({187.5+2*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-21) at ({187.5+2*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-22) at ({187.5+3*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-22) at ({187.5+3*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-23) at ({187.5+4*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-23) at ({187.5+4*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-24) at ({187.5+5*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-24) at ({187.5+5*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-25) at ({247.5}:{\triv@purs@rayon}) ;
+	\coordinate (PB-25) at ({247.5}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-26) at ({247.5+9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-26) at ({247.5+9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-27) at ({247.5+2*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-27) at ({247.5+2*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-28) at ({247.5+3*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-28) at ({247.5+3*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-29) at ({247.5+4*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-29) at ({247.5+4*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-30) at ({247.5+5*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-30) at ({247.5+5*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-31) at ({307.5}:{\triv@purs@rayon}) ;
+	\coordinate (PB-31) at ({307.5}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-32) at ({307.5+9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-32) at ({307.5+9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-33) at ({307.5+2*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-33) at ({307.5+2*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-34) at ({307.5+3*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-34) at ({307.5+3*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-35) at ({307.5+4*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-35) at ({307.5+4*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-36) at ({307.5+5*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-36) at ({307.5+5*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	%tests ?!?!
+%	\foreach \i in {1,...,36}{%OK
+%		\filldraw[teal] (GB-\i) circle[radius=1.75pt] node[font=\tiny\ttfamily] {GB-\i};
+%		\filldraw[purple] (PB-\i) circle[radius=1.75pt] node[font=\tiny\ttfamily] {PB-\i};
+%	}
+	%création des nœuds pour la figure centrale, boucle pour les 1ers + le dernier
+	\foreach \i in {1,...,\triv@purs@nbcat}{%
+		\coordinate (OM-\i) at ({30+(\i-1)*60}:{\triv@purs@rayonhexag}) ;
+		%\filldraw[orange] (OM-\i) circle[radius=1.75pt] node[font=\tiny\ttfamily] {OM-\i};
+	}%
+	%les nœuds des cases verticales
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-1-\j) at ($(PB-1)!\tmp@coeff!(OM-1)$) ;
+		%\filldraw[yellow] (D-1-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-1-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-2-\j) at ($(PB-6)!\tmp@coeff!(OM-1)$) ;
+		%\filldraw[yellow] (D-2-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-2-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-3-\j) at ($(PB-7)!\tmp@coeff!(OM-2)$) ;
+		%\filldraw[yellow] (D-3-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-3-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-4-\j) at ($(PB-12)!\tmp@coeff!(OM-2)$) ;
+		%\filldraw[yellow] (D-4-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-4-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-5-\j) at ($(PB-13)!\tmp@coeff!(OM-3)$) ;
+		%\filldraw[yellow] (D-5-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-5-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-6-\j) at ($(PB-18)!\tmp@coeff!(OM-3)$) ;
+		%\filldraw[yellow] (D-6-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-5-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-7-\j) at ($(PB-19)!\tmp@coeff!(OM-4)$) ;
+		%\filldraw[yellow] (D-7-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-7-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-8-\j) at ($(PB-24)!\tmp@coeff!(OM-4)$) ;
+		%\filldraw[yellow] (D-8-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-8-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-9-\j) at ($(PB-25)!\tmp@coeff!(OM-5)$) ;
+		%\filldraw[yellow] (D-9-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-9-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-10-\j) at ($(PB-30)!\tmp@coeff!(OM-5)$) ;
+		%\filldraw[yellow] (D-10-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-10-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-11-\j) at ($(PB-31)!\tmp@coeff!(OM-6)$) ;
+		%\filldraw[yellow] (D-11-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-11-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-12-\j) at ($(PB-36)!\tmp@coeff!(OM-6)$) ;
+		%\filldraw[yellow] (D-12-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-12-\j};
+	}%
+}
+
+\NewDocumentCommand\RemplirCasesTourCourt{}{%
+	%-------Vertical
+	%niveau 1 vertical
+	\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (OM-6)--(OM-1)--(D-1-4)--(D-12-4)--cycle  ;
+	\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-6)!0.5!(D-1-4)$) {\triv@purs@lsticons[2]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (D-12-4)--(D-1-4)--(D-1-3)--(D-12-3)--cycle  ;
+	\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-12-4)!0.5!(D-1-3)$) {\triv@purs@lsticons[6]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (D-12-3)--(D-1-3)--(D-1-2)--(D-12-2)--cycle  ;
+	\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-12-3)!0.5!(D-1-2)$) {\triv@purs@lsticons[5]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (D-12-2)--(D-1-2)--(D-1-1)--(D-12-1)--cycle  ;
+	\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-12-2)!0.5!(D-1-1)$) {\triv@purs@lsticons[3]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (D-1-1)--(PB-1) arc({\triv@purs@anglecases}:{-\triv@purs@anglecases}:{\triv@purs@rayonint}) --(D-12-1)--cycle ;
+	\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-12-1)!0.5!(PB-1)$) {\triv@purs@lsticons[4]} ;
+	%niveau 2 vertical
+	\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (OM-1)--(OM-2)--(D-3-4)--(D-2-4)--cycle  ;
+	\node[rotate={90+(8)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-1)!0.5!(D-3-4)$) {\triv@purs@lsticons[3]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (D-2-4)--(D-3-4)--(D-3-3)--(D-2-3)--cycle  ;
+	\node[rotate={90+(8)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-2-4)!0.5!(D-3-3)$) {\triv@purs@lsticons[1]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (D-2-3)--(D-3-3)--(D-3-2)--(D-2-2)--cycle  ;
+	\node[rotate={90+(8)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-2-3)!0.5!(D-3-2)$) {\triv@purs@lsticons[6]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (D-2-2)--(D-3-2)--(D-3-1)--(D-2-1)--cycle  ;
+	\node[rotate={90+(8)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-2-2)!0.5!(D-3-1)$) {\triv@purs@lsticons[4]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (D-3-1)--(PB-7) arc({67.5}:{52.5}:{\triv@purs@rayonint}) --(D-2-1)--cycle ;
+	\node[rotate={90+(8)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-2-1)!0.5!(PB-7)$) {\triv@purs@lsticons[5]} ;
+	%niveau 3 vertical
+	\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (OM-2)--(OM-3)--(D-5-4)--(D-4-4)--cycle  ;
+	\node[rotate={90+(16)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-2)!0.5!(D-5-4)$) {\triv@purs@lsticons[4]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (D-4-4)--(D-5-4)--(D-5-3)--(D-4-3)--cycle  ;
+	\node[rotate={90+(16)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-4-4)!0.5!(D-5-3)$) {\triv@purs@lsticons[2]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (D-4-3)--(D-5-3)--(D-5-2)--(D-4-2)--cycle  ;
+	\node[rotate={90+(16)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-4-3)!0.5!(D-5-2)$) {\triv@purs@lsticons[1]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (D-4-2)--(D-5-2)--(D-5-1)--(D-4-1)--cycle  ;
+	\node[rotate={90+(16)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-4-2)!0.5!(D-5-1)$) {\triv@purs@lsticons[5]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (D-5-1)--(PB-13) arc({127.5}:{112.5}:{\triv@purs@rayonint}) --(D-4-1)--cycle ;
+	\node[rotate={90+(16)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-4-1)!0.5!(PB-13)$) {\triv@purs@lsticons[6]} ;
+	%niveau 4 vertical
+	\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (OM-3)--(OM-4)--(D-7-4)--(D-6-4)--cycle  ;
+	\node[rotate={90+(24)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-3)!0.5!(D-7-4)$) {\triv@purs@lsticons[5]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (D-6-4)--(D-7-4)--(D-7-3)--(D-6-3)--cycle  ;
+	\node[rotate={90+(24)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-6-4)!0.5!(D-7-3)$) {\triv@purs@lsticons[3]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (D-6-3)--(D-7-3)--(D-7-2)--(D-6-2)--cycle  ;
+	\node[rotate={90+(24)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-6-3)!0.5!(D-7-2)$) {\triv@purs@lsticons[2]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (D-6-2)--(D-7-2)--(D-7-1)--(D-6-1)--cycle  ;
+	\node[rotate={90+(24)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-6-2)!0.5!(D-7-1)$) {\triv@purs@lsticons[6]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (D-7-1)--(PB-19) arc({187.5}:{172.5}:{\triv@purs@rayonint}) --(D-6-1)--cycle ;
+	\node[rotate={90+(24)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-6-1)!0.5!(PB-19)$) {\triv@purs@lsticons[1]} ;
+	%niveau 5 vertical
+	\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (OM-4)--(OM-5)--(D-9-4)--(D-8-4)--cycle  ;
+	\node[rotate={90+(32)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-4)!0.5!(D-9-4)$) {\triv@purs@lsticons[6]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (D-8-4)--(D-9-4)--(D-9-3)--(D-8-3)--cycle  ;
+	\node[rotate={90+(32)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-8-4)!0.5!(D-9-3)$) {\triv@purs@lsticons[4]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (D-8-3)--(D-9-3)--(D-9-2)--(D-8-2)--cycle  ;
+	\node[rotate={90+(32)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-8-3)!0.5!(D-9-2)$) {\triv@purs@lsticons[3]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (D-8-2)--(D-9-2)--(D-9-1)--(D-8-1)--cycle  ;
+	\node[rotate={90+(32)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-8-2)!0.5!(D-9-1)$) {\triv@purs@lsticons[1]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (D-9-1)--(PB-25) arc({247.5}:{232.5}:{\triv@purs@rayonint}) --(D-8-1)--cycle ;
+	\node[rotate={90+(32)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-8-1)!0.5!(PB-25)$) {\triv@purs@lsticons[2]} ;
+	%niveau 6 vertical
+	\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (OM-5)--(OM-6)--(D-11-4)--(D-10-4)--cycle  ;
+	\node[rotate={90+(40)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-5)!0.5!(D-11-4)$) {\triv@purs@lsticons[1]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (D-10-4)--(D-11-4)--(D-11-3)--(D-10-3)--cycle  ;
+	\node[rotate={90+(40)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-10-4)!0.5!(D-11-3)$) {\triv@purs@lsticons[5]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (D-10-3)--(D-11-3)--(D-11-2)--(D-10-2)--cycle  ;
+	\node[rotate={90+(40)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-10-3)!0.5!(D-11-2)$) {\triv@purs@lsticons[4]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (D-10-2)--(D-11-2)--(D-11-1)--(D-10-1)--cycle  ;
+	\node[rotate={90+(40)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-10-2)!0.5!(D-11-1)$) {\triv@purs@lsticons[2]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (D-11-1)--(PB-31) arc({307.5}:{292.5}:{\triv@purs@rayonint}) --(D-10-1)--cycle ;
+	\node[rotate={90+(40)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-10-1)!0.5!(PB-31)$) {\triv@purs@lsticons[3]} ;
+	%--------BORDS !!!
+	\ifboolKV[TrivPurs]{Couleurs}%
+		{%
+			%Secteur1
+			\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (PB-1)--(GB-1) arc ({7.5+0*9}:{7.5+1*9}:{\triv@purs@rayon})--(PB-2) arc ({7.5+1*9}:{7.5+0*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (PB-2)--(GB-2) arc ({7.5+1*9}:{7.5+2*9}:{\triv@purs@rayon})--(PB-3) arc ({7.5+2*9}:{7.5+1*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (PB-4)--(GB-4) arc ({7.5+3*9}:{7.5+4*9}:{\triv@purs@rayon})--(PB-5) arc ({7.5+4*9}:{7.5+3*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (PB-5)--(GB-5) arc ({7.5+4*9}:{7.5+5*9}:{\triv@purs@rayon})--(PB-6) arc ({7.5+5*9}:{7.5+4*9}:{\triv@purs@rayonint});
+			%Secteur2
+			\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (PB-7)--(GB-7) arc ({7.5+60+0*9}:{7.5+60+1*9}:{\triv@purs@rayon})--(PB-8) arc ({7.5+60+1*9}:{7.5+60+0*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (PB-8)--(GB-8) arc ({7.5+60+1*9}:{7.5+60+2*9}:{\triv@purs@rayon})--(PB-9) arc ({7.5+60+2*9}:{7.5+60+1*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (PB-10)--(GB-10) arc ({7.5+60+3*9}:{7.5+60+4*9}:{\triv@purs@rayon})--(PB-11) arc ({7.5+60+4*9}:{7.5+60+3*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (PB-11)--(GB-11) arc ({7.5+60+4*9}:{7.5+60+5*9}:{\triv@purs@rayon})--(PB-12) arc ({7.5+60+5*9}:{7.5+60+4*9}:{\triv@purs@rayonint});
+			%Secteur3
+			\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (PB-13)--(GB-13) arc ({7.5+120+0*9}:{7.5+120+1*9}:{\triv@purs@rayon})--(PB-14) arc ({7.5+120+1*9}:{7.5+120+0*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (PB-14)--(GB-14) arc ({7.5+120+1*9}:{7.5+120+2*9}:{\triv@purs@rayon})--(PB-15) arc ({7.5+120+2*9}:{7.5+120+1*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (PB-16)--(GB-16) arc ({7.5+120+3*9}:{7.5+120+4*9}:{\triv@purs@rayon})--(PB-17) arc ({7.5+120+4*9}:{7.5+120+3*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (PB-17)--(GB-17) arc ({7.5+120+4*9}:{7.5+120+5*9}:{\triv@purs@rayon})--(PB-18) arc ({7.5+120+5*9}:{7.5+120+4*9}:{\triv@purs@rayonint});
+			%Secteur4
+			\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (PB-19)--(GB-19) arc ({7.5+180+0*9}:{7.5+180+1*9}:{\triv@purs@rayon})--(PB-20) arc ({7.5+180+1*9}:{7.5+180+0*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (PB-20)--(GB-20) arc ({7.5+180+1*9}:{7.5+180+2*9}:{\triv@purs@rayon})--(PB-21) arc ({7.5+180+2*9}:{7.5+180+1*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (PB-22)--(GB-22) arc ({7.5+180+3*9}:{7.5+180+4*9}:{\triv@purs@rayon})--(PB-23) arc ({7.5+180+4*9}:{7.5+180+3*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (PB-23)--(GB-23) arc ({7.5+180+4*9}:{7.5+180+5*9}:{\triv@purs@rayon})--(PB-24) arc ({7.5+180+5*9}:{7.5+180+4*9}:{\triv@purs@rayonint});
+			%Secteur5
+			\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (PB-25)--(GB-25) arc ({7.5+240+0*9}:{7.5+240+1*9}:{\triv@purs@rayon})--(PB-26) arc ({7.5+240+1*9}:{7.5+240+0*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (PB-26)--(GB-26) arc ({7.5+240+1*9}:{7.5+240+2*9}:{\triv@purs@rayon})--(PB-27) arc ({7.5+240+2*9}:{7.5+240+1*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (PB-28)--(GB-28) arc ({7.5+240+3*9}:{7.5+240+4*9}:{\triv@purs@rayon})--(PB-29) arc ({7.5+240+4*9}:{7.5+240+3*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (PB-29)--(GB-29) arc ({7.5+240+4*9}:{7.5+240+5*9}:{\triv@purs@rayon})--(PB-30) arc ({7.5+240+5*9}:{7.5+240+4*9}:{\triv@purs@rayonint});
+			%Secteur6
+			\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (PB-31)--(GB-31) arc ({7.5+300+0*9}:{7.5+300+1*9}:{\triv@purs@rayon})--(PB-32) arc ({7.5+300+1*9}:{7.5+300+0*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (PB-32)--(GB-32) arc ({7.5+300+1*9}:{7.5+300+2*9}:{\triv@purs@rayon})--(PB-33) arc ({7.5+300+2*9}:{7.5+300+1*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (PB-34)--(GB-34) arc ({7.5+300+3*9}:{7.5+300+4*9}:{\triv@purs@rayon})--(PB-35) arc ({7.5+300+4*9}:{7.5+300+3*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (PB-35)--(GB-35) arc ({7.5+300+4*9}:{7.5+300+5*9}:{\triv@purs@rayon})--(PB-36) arc ({7.5+300+5*9}:{7.5+300+4*9}:{\triv@purs@rayonint});
+		}%
+		{}%
+	\ifboolKV[TrivPurs]{Icones}%
+		{%
+			%secteur1
+			\node[rotate={90+0.5*(7.5+0*9+7.5+1*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(7.5+7.5+1*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+0.5*(7.5+1*9+7.5+2*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(7.5+1*9+7.5+2*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+0.5*(7.5+3*9+7.5+4*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(7.5+3*9+7.5+4*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+0.5*(7.5+5*9+7.5+5*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(7.5+4*9+7.5+5*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[5]} ;
+			%secteur2
+			\node[rotate={90+0.5*(2*60+7.5+0*9+7.5+1*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*60+7.5+7.5+1*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+0.5*(2*60+7.5+1*9+7.5+2*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*60+7.5+1*9+7.5+2*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+0.5*(2*60+7.5+3*9+7.5+4*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*60+7.5+3*9+7.5+4*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+0.5*(2*60+7.5+5*9+7.5+5*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*60+7.5+4*9+7.5+5*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[6]} ;
+			%secteur3
+			\node[rotate={90+0.5*(2*120+7.5+0*9+7.5+1*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*120+7.5+7.5+1*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+0.5*(2*120+7.5+1*9+7.5+2*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*120+7.5+1*9+7.5+2*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+0.5*(2*120+7.5+3*9+7.5+4*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*120+7.5+3*9+7.5+4*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+0.5*(2*120+7.5+5*9+7.5+5*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*120+7.5+4*9+7.5+5*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[1]} ;
+			%secteur4
+			\node[rotate={90+0.5*(2*180+7.5+0*9+7.5+1*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*180+7.5+7.5+1*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+0.5*(2*180+7.5+1*9+7.5+2*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*180+7.5+1*9+7.5+2*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+0.5*(2*180+7.5+3*9+7.5+4*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*180+7.5+3*9+7.5+4*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+0.5*(2*180+7.5+5*9+7.5+5*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*180+7.5+4*9+7.5+5*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[2]} ;
+			%secteur5
+			\node[rotate={90+0.5*(2*240+7.5+0*9+7.5+1*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*240+7.5+7.5+1*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+0.5*(2*240+7.5+1*9+7.5+2*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*240+7.5+1*9+7.5+2*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+0.5*(2*240+7.5+3*9+7.5+4*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*240+7.5+3*9+7.5+4*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+0.5*(2*240+7.5+5*9+7.5+5*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*240+7.5+4*9+7.5+5*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[3]} ;
+			%secteur6
+			\node[rotate={90+0.5*(2*300+7.5+0*9+7.5+1*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*300+7.5+7.5+1*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+0.5*(2*300+7.5+1*9+7.5+2*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*300+7.5+1*9+7.5+2*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+0.5*(2*300+7.5+3*9+7.5+4*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*300+7.5+3*9+7.5+4*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+0.5*(2*300+7.5+5*9+7.5+5*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*300+7.5+4*9+7.5+5*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[4]} ;
+		}%
+		{}%
+
+	%les jokers
+	\ifboolKV[TrivPurs]{Icones}%
+		{%
+			\ifboolKV[TrivPurs]{Jokers}%
+				{%
+					\node[rotate=30,scale={\triv@purs@scaleicons*\triv@purs@hautcases}] at ({30}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@iconjok} ;
+					\node[rotate=90,scale={\triv@purs@scaleicons*\triv@purs@hautcases}] at ({90}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@iconjok} ;
+					\node[rotate=150,scale={\triv@purs@scaleicons*\triv@purs@hautcases}] at ({150}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@iconjok} ;
+					\node[rotate=210,scale={\triv@purs@scaleicons*\triv@purs@hautcases}] at ({210}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@iconjok} ;
+					\node[rotate=270,scale={\triv@purs@scaleicons*\triv@purs@hautcases}] at ({270}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@iconjok} ;
+					\node[rotate=330,scale={\triv@purs@scaleicons*\triv@purs@hautcases}] at ({330}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@iconjok} ;
+				}%
+				{}%
+		}%
+		{}%
+}
+\NewDocumentCommand\TraceBorduresTrivialCourt{ }{%OK Court
+	%les tracés des cases
+	\draw[EpTraits] (0,0) circle[radius=\triv@purs@rayon] ;
+	\draw[EpTraits] (0,0) circle[radius={\triv@purs@rayon-\triv@purs@hautcases}] ;
+	\foreach \i in {1,...,36}{%
+		\draw[EpTraits] (PB-\i)--(GB-\i) ;
+	}
+	\draw[EpTraits] (PB-1)--(OM-1)--(OM-6)--(PB-36) ;
+	\draw[EpTraits] (PB-6)--(OM-1)--(OM-2)--(PB-7) ;
+	\draw[EpTraits] (PB-12)--(OM-2)--(OM-3)--(PB-13) ;
+	\draw[EpTraits] (PB-18)--(OM-3)--(OM-4)--(PB-19) ;
+	\draw[EpTraits] (PB-24)--(OM-4)--(OM-5)--(PB-25) ;
+	\draw[EpTraits] (PB-30)--(OM-5)--(OM-6)--(PB-31) ;
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\draw[EpTraits] (D-2-\j)--(D-3-\j) ;
+		\draw[EpTraits] (D-4-\j)--(D-5-\j) ;
+		\draw[EpTraits] (D-6-\j)--(D-7-\j) ;
+		\draw[EpTraits] (D-8-\j)--(D-9-\j) ;
+		\draw[EpTraits] (D-10-\j)--(D-11-\j) ;
+		\draw[EpTraits] (D-12-\j)--(D-1-\j) ;
+	}%
+}
+
+\NewDocumentCommand\RemplirCamembertsTrivialCourt{ }{%numéro des camemberts, en partant de la droite
+	\ifboolKV[TrivPurs]{Couleurs}%
+	{%
+		%Couleur du 1er camembert
+		\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (PB-36)--(GB-36) arc ({-\triv@purs@anglecases}:{\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-1) arc ({\triv@purs@anglecases}:{-\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+		%Couleur du 2ème
+		\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (PB-6)--(GB-6) arc ({7*\triv@purs@anglecases}:{9*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-7) arc ({9*\triv@purs@anglecases}:{7*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+		%Couleur du 3ème
+		\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (PB-12)--(GB-12) arc ({15*\triv@purs@anglecases}:{17*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-13) arc ({17*\triv@purs@anglecases}:{15*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+		%Couleur du 4ème
+		\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (PB-18)--(GB-18) arc ({23*\triv@purs@anglecases}:{25*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-19) arc ({25*\triv@purs@anglecases}:{23*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+		%Couleur du 5ème
+		\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (PB-24)--(GB-24) arc ({31*\triv@purs@anglecases}:{33*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-25) arc ({33*\triv@purs@anglecases}:{31*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+		%Couleur du 6ème
+		\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (PB-30)--(GB-30) arc ({39*\triv@purs@anglecases}:{41*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-31) arc ({41*\triv@purs@anglecases}:{39*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+	}%
+	{}%
+	%si on affiche les icones
+	\ifboolKV[TrivPurs]{Icones}%
+	{%
+		\node[rotate={90+0*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[1]} ;
+		\node[rotate={90+8*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({8*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[2]} ;
+		\node[rotate={90+16*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({16*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[3]} ;
+		\node[rotate={90+24*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({24*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[4]} ;
+		\node[rotate={90+32*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({32*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[5]} ;
+		\node[rotate={90+40*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({40*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[6]} ;
+	}%
+	{}%
+}
+
+%====CREATION
+\NewDocumentCommand\PlateauTrivialPursuit{ O{} D<>{} }{%
+	\restoreKV[TrivPurs]% revenir au valeurs par défaut
+	\setKV[TrivPurs]{#1}% lit les arguments optionnels
+	\xdef\triv@purs@nbcat{6}%6 catégories, d'office !!
+	\setsepchar{,}%
+	\readlist*\triv@purs@lstcol{\triv@purs@liste}%
+	\readlist*\triv@purs@lsticons{\triv@purs@listeicones}%
+	%calculs utiles
+	\xdef\triv@purs@scale{\xintfloateval{\triv@purs@unit}}%
+	\xdef\triv@purs@scaleicons{\xintfloateval{(\triv@purs@rayon/8)}}%
+	\xdef\triv@purs@rayonint{\xintfloateval{(\triv@purs@rayon-\triv@purs@hautcases)}}%
+	\xdef\triv@purs@rayonhexag{\xintfloateval{2*\triv@purs@rayonint*sin(Pi/24)}}%
+	\xdef\triv@purs@nbcasesbord{\xintieval{(\triv@purs@nbcat)**2+2*(\triv@purs@nbcat)}}%
+	\xdef\triv@purs@numcasavant{\xinteval{\triv@purs@nbcasesbord-1}}%
+	\xdef\triv@purs@anglesect{\xintfloateval{360/(\triv@purs@nbcat)}}%
+	\xdef\triv@purs@angletheta{\xintfloateval{90-180/(\triv@purs@nbcat)}}%
+	\xdef\triv@purs@anglecases{\xintfloateval{360/(\triv@purs@nbcasesbord)}}%
+	\xdef\triv@purs@ecart{\xinteval{\triv@purs@nbcat+2}}%8 pour 6 catégories
+	\xdef\triv@purs@lgcamemb{\xintfloateval{2*Pi*\triv@purs@rayon/(\triv@purs@nbcasesbord)}}%
+	%si vide
+	\ifboolKV[TrivPurs]{Vide}%
+		{%
+			\setKV[TrivPurs]{Couleurs=false,Icones=false,Logo=false}
+		}%
+		{}%
+	%environnement
+	\begin{tikzpicture}[x=\triv@purs@unit cm,y=\triv@purs@unit cm,every node/.style={scale=\triv@purs@scale,inner sep=0pt},transform shape,#2]%
+		%style
+		\tikzset{EpTraits/.style={line width={\triv@purs@unit*\triv@purs@scaleicons*\triv@purs@thick}}}
+		\tikzset{EpTraitsPlus/.style={line width={1.5*\triv@purs@unit*\triv@purs@scaleicons*\triv@purs@thick}}}
+		\tikzset{EpTraitsPlusPlus/.style={line width={2*\triv@purs@unit*\triv@purs@scaleicons*\triv@purs@thick}}}
+		%clip pour la Rotation
+		\useasboundingbox (0,0) circle[radius={\triv@purs@rayon}] ;
+		%création
+		\begin{scope}[rotate=\triv@purs@rotate]
+			\ifboolKV[TrivPurs]{VersionCourte}%
+				{%
+					%les nœuds OK
+					\CreationNoeudsTrivialCourt
+					%test avec centre OK
+					\ifboolKV[TrivPurs]{Centre}{\RemplirCentreTrivial}{}
+					%camemberts OK
+					\RemplirCamembertsTrivialCourt
+					%cases OK
+					\RemplirCasesTourCourt
+					%bordures
+					\TraceBorduresTrivialCourt
+					%logo central
+					\ifboolKV[TrivPurs]{Logo}{\LogoTrivialPursuit}{}
+				}%
+				{%
+					%les nœuds OK
+					\CreationNoeudsTrivial
+					%test avec centre OK
+					\ifboolKV[TrivPurs]{Centre}{\RemplirCentreTrivial}{}
+					%camemberts OK
+					\RemplirCamembertsTrivial
+					%cases OK
+					\RemplirCasesTour
+					%bordures
+					\TraceBorduresTrivial
+					%logo central
+					\ifboolKV[TrivPurs]{Logo}{\LogoTrivialPursuit}{}
+				}%
+		\end{scope}
+	\end{tikzpicture}%
+}
+
+%====KEYS [EN]
+\defKV[TrivPursEN]{%
+	Radius=\def\triv@purs@rayon{#1},%
+	BorderHeight=\def\triv@purs@hautcases{#1},
+	ListColors=\def\triv@purs@liste{#1},%
+	ListIcons=\def\triv@purs@listeicones{#1},%
+	ColorCenter=\def\triv@purs@coulcent{#1},%
+	Unit=\def\triv@purs@unit{#1},%
+	Thickness=\def\triv@purs@thick{#1},%
+	Rotation=\def\triv@purs@rotate{#1},%
+	IconJoker=\def\triv@purs@iconjok{#1}
+}
+
+\setKVdefault[TrivPursEN]{%
+	Radius=8,%
+	BorderHeight=1.5,%
+	ListColors={yellow,orange,blue,brown,green,pink},%
+	ListIcons={\faArchway,\faTennis,\faUmbrellaBeach,\faGuitar,\faTree,\faMusic},%
+	Icons=true,%
+	Center=true,%
+	ColorCenter=lightgray!25,%
+	Colors=true,%
+	Logo=true,%
+	Blank=false,%
+	Unit=1,%
+	Thickness=0.8pt,%
+	Rotation=0,%
+	Jokers=true,%
+	IconJoker={\faDice},%
+	ShortVersion=false
+}
+
+%====INTERN COMMANDS
+\NewDocumentCommand\CreationNodesTrivial{}{%
+	%création des nœuds grand bord petit bord GB-i et PB-i
+	\foreach \i in {0,1,...,\triv@purs@nbcasesbord}{%
+		\coordinate (GB-\i) at ({\i*\triv@purs@anglecases}:{\triv@purs@rayon}) ;
+		\coordinate (PB-\i) at ({\i*\triv@purs@anglecases}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	}
+	%création des nb*2 nœuds des grands secteurs sous la forme (SA-i) et (SB-i)
+	\foreach \i in {1,...,\triv@purs@nbcat}{%
+		\xdef\j{\xinteval{1+(\i-1)*\triv@purs@ecart}}%
+		\coordinate (SB-\i) at (PB-\j) ;%
+	}
+	\coordinate (SA-1) at (PB-\triv@purs@numcasavant) ;
+	%\filldraw[red] (SA-1) circle[radius=2pt] node[font=\tiny\ttfamily] {SA-1} ;
+	\foreach \i in {2,...,\triv@purs@nbcat}{%
+		\xdef\j{\xinteval{-1+(\i-1)*\triv@purs@ecart}}%
+		\coordinate (SA-\i) at (PB-\j) ;
+	}
+	%création des nœuds pour la figure centrale, boucle pour les 1ers + le dernier
+	\foreach \i in {1,...,\triv@purs@nbcat}{%
+		\coordinate (OM-\i) at ({30+(\i-1)*60}:{\triv@purs@rayonhexag}) ;
+	}%
+	%les nœuds des cases verticales
+	\foreach \i in {1,...,\triv@purs@nbcat}{%
+		\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+			\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+			\coordinate (D-\i-\j) at ($(SB-\i)!\tmp@coeff!(OM-\i)$) ;
+		}%
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%cas C1-...
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (C-1-\j) at ($(SA-1)!\tmp@coeff!(OM-\triv@purs@nbcat)$) ;
+	}%
+	\foreach \i in {2,...,\triv@purs@nbcat}{%
+		\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%cas suivants
+			\xdef\k{\xinteval{\i-1}}
+			\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+			\coordinate (C-\i-\j) at ($(SA-\i)!\tmp@coeff!(OM-\k)$) ;
+		}%
+	}%
+}
+\NewDocumentCommand\FillCenterTrivial{ }{%OK
+	\ifboolKV[TrivPursEN]{Colors}{\filldraw[\triv@purs@coulcent] (OM-1)--(OM-2)--(OM-3)--(OM-4)--(OM-5)--(OM-6)--cycle ;}{}%
+}
+\NewDocumentCommand\FillCamembersTrivial{ }{%numéro des camemberts, en partant de la droite
+	\ifboolKV[TrivPursEN]{Colors}%
+		{%
+			%Couleur du 1er camembert
+			\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (PB-47)--(GB-47) arc ({-\triv@purs@anglecases}:{\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-1) arc ({\triv@purs@anglecases}:{-\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+			%Couleur du 2ème
+			\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (PB-7)--(GB-7) arc ({7*\triv@purs@anglecases}:{9*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-9) arc ({9*\triv@purs@anglecases}:{7*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+			%Couleur du 3ème
+			\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (PB-15)--(GB-15) arc ({15*\triv@purs@anglecases}:{17*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-17) arc ({17*\triv@purs@anglecases}:{15*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+			%Couleur du 4ème
+			\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (PB-23)--(GB-23) arc ({23*\triv@purs@anglecases}:{25*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-25) arc ({25*\triv@purs@anglecases}:{23*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+			%Couleur du 5ème
+			\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (PB-31)--(GB-31) arc ({31*\triv@purs@anglecases}:{33*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-33) arc ({33*\triv@purs@anglecases}:{31*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+			%Couleur du 6ème
+			\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (PB-39)--(GB-39) arc ({39*\triv@purs@anglecases}:{41*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-41) arc ({41*\triv@purs@anglecases}:{39*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+		}%
+		{}%
+	%si on affiche les icones
+	\ifboolKV[TrivPursEN]{Icons}%
+		{%
+			\node[rotate={90+0*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+8*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({8*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+16*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({16*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+24*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({24*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+32*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({32*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+40*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({40*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[6]} ;
+		}%
+		{}%
+}
+\NewDocumentCommand\FillCellTrivial{ m m m }{%deb + fin + numcouleur
+	\ifboolKV[TrivPursEN]{Colors}%
+		{%
+			\draw[EpTraits,fill={\triv@purs@lstcol[#3]}] (PB-#1)--(GB-#1) arc ({#1*\triv@purs@anglecases}:{#2*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-#2) arc ({#2*\triv@purs@anglecases}:{#1*\triv@purs@anglecases}:{\triv@purs@rayonint});
+		}%
+		{}%
+	\ifboolKV[TrivPursEN]{Icons}%
+		{%
+			\xdef\tmp@aa{\xintfloateval{(#1+0.5)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({\tmp@aa}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[#3]} ;
+		}%
+		{}%
+}
+\NewDocumentCommand\FillCellVertical{ m m m }{%niv + num + numcouleur
+	\ifboolKV[TrivPursEN]{Colors}%
+		{%
+			\xdef\tmpnivav{\xinteval{#1-1}}%
+			\xdef\tmpnivap{\xinteval{#1+1}}%
+			\xdef\tmpcase{\xinteval{#2-1}}%
+			\xdef\tmpcaseap{\xinteval{#2+1}}%
+			\xintifboolexpr{#2 > 1 'and' #2 < 5}%
+				{%
+					\draw[EpTraits,fill={\triv@purs@lstcol[#3]}] (C-#1-\tmpcase)--(D-#1-\tmpcase)--(D-#1-#2)--(C-#1-#2)--cycle  ;
+				}%
+				{}%
+			\xintifboolexpr{#2 == 5}%
+				{%
+					\xintifboolexpr{#1 == 1}%
+						{%
+							\draw[EpTraits,fill={\triv@purs@lstcol[#3]}] (C-#1-\tmpcase)--(D-#1-\tmpcase)--(OM-#1)--(OM-6)--cycle  ;
+						}%
+						{%
+							\draw[EpTraits,fill={\triv@purs@lstcol[#3]}] (C-#1-\tmpcase)--(D-#1-\tmpcase)--(OM-#1)--(OM-\tmpnivav)--cycle  ;
+						}%
+				}%
+				{}%
+			\xintifboolexpr{#2 == 1}%
+				{%
+					\xintifboolexpr{#1 == 1}%
+						{%
+							\draw[EpTraits,fill={\triv@purs@lstcol[#3]}] (C-1-1)--(PB-\triv@purs@numcasavant) arc({-\triv@purs@anglecases}:{\triv@purs@anglecases}:{\triv@purs@rayonint}) --(D-1-1)--cycle ;
+						}%
+						{%
+							\xdef\tmp@ii{\xinteval{(-1+8*(#1-1))}}%
+							\xdef\tmp@jj{\xinteval{(\tmp@ii+2)}}%
+							\draw[EpTraits,fill={\triv@purs@lstcol[#3]}] (C-#1-1)--(PB-\tmp@ii) arc({\tmp@ii*\triv@purs@anglecases}:{\tmp@jj*\triv@purs@anglecases}:{\triv@purs@rayonint}) --(D-#1-1)--cycle ;
+						}%
+				}%
+				{}%
+		}%
+		{}%
+}
+\NewDocumentCommand\LogoCellsVerticalTrivial{}{%
+	\ifboolKV[TrivPursEN]{Icons}%
+		{%
+			%1er niveau (droite)
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-6)!0.5!(D-1-4)$) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-1-4)!0.5!(D-1-3)$) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-1-3)!0.5!(D-1-2)$) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-1-2)!0.5!(D-1-1)$) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-1-1)!0.5!(SB-1)$) {\triv@purs@lsticons[4]} ;
+			%2eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(8)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-1)!0.5!(D-2-4)$) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-2-4)!0.5!(D-2-3)$) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-2-3)!0.5!(D-2-2)$) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-2-2)!0.5!(D-2-1)$) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-2-1)!0.5!(SB-2)$) {\triv@purs@lsticons[5]} ;
+			%3eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(16)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-2)!0.5!(D-3-4)$) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-3-4)!0.5!(D-3-3)$) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-3-3)!0.5!(D-3-2)$) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-3-2)!0.5!(D-3-1)$) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-3-1)!0.5!(SB-3)$) {\triv@purs@lsticons[6]} ;
+			%4eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(24)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-3)!0.5!(D-4-4)$) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-4-4)!0.5!(D-4-3)$) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-4-3)!0.5!(D-4-2)$) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-4-2)!0.5!(D-4-1)$) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-4-1)!0.5!(SB-4)$) {\triv@purs@lsticons[1]} ;
+			%5eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(32)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-4)!0.5!(D-5-4)$) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-5-4)!0.5!(D-5-3)$) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-5-3)!0.5!(D-5-2)$) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-5-2)!0.5!(D-5-1)$) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-5-1)!0.5!(SB-5)$) {\triv@purs@lsticons[2]} ;
+			%6eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(40)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-5)!0.5!(D-6-4)$) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-6-4)!0.5!(D-6-3)$) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-6-3)!0.5!(D-6-2)$) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-6-2)!0.5!(D-6-1)$) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-6-1)!0.5!(SB-6)$) {\triv@purs@lsticons[3]} ;
+		}%
+		{}%
+}
+
+\NewDocumentCommand\FillCellsBorder{}{%
+	%niveau 1 vertical
+	\FillCellVertical{1}{1}{4}\FillCellVertical{2}{1}{5}\FillCellVertical{3}{1}{6}
+	\FillCellVertical{4}{1}{1}\FillCellVertical{5}{1}{2}\FillCellVertical{6}{1}{3}
+	%secteur1
+	\FillCellTrivial{1}{2}{4}\FillCellTrivial{3}{4}{3}\FillCellTrivial{4}{5}{6}\FillCellTrivial{6}{7}{5}
+	%secteur2
+	\FillCellTrivial{9}{10}{5}\FillCellTrivial{11}{12}{4}\FillCellTrivial{12}{13}{1}\FillCellTrivial{14}{15}{6}
+	%secteur3
+	\FillCellTrivial{17}{18}{6}\FillCellTrivial{19}{20}{5}\FillCellTrivial{20}{21}{2}\FillCellTrivial{22}{23}{1}
+	%secteur4
+	\FillCellTrivial{25}{26}{1}\FillCellTrivial{27}{28}{6}\FillCellTrivial{28}{29}{3}\FillCellTrivial{30}{31}{2}
+	%secteur5
+	\FillCellTrivial{33}{34}{2}\FillCellTrivial{35}{36}{1}\FillCellTrivial{36}{37}{4}\FillCellTrivial{38}{39}{3}
+	%secteur5
+	\FillCellTrivial{41}{42}{3}\FillCellTrivial{43}{44}{2}\FillCellTrivial{44}{45}{5}\FillCellTrivial{46}{47}{4}
+	%montées à partir des cases n°2
+	\FillCellVertical{1}{2}{3}\FillCellVertical{1}{3}{5}\FillCellVertical{1}{4}{6}\FillCellVertical{1}{5}{2}
+	\FillCellVertical{2}{2}{4}\FillCellVertical{2}{3}{6}\FillCellVertical{2}{4}{1}\FillCellVertical{2}{5}{3}
+	\FillCellVertical{3}{2}{5}\FillCellVertical{3}{3}{1}\FillCellVertical{3}{4}{2}\FillCellVertical{3}{5}{4}
+	\FillCellVertical{4}{2}{6}\FillCellVertical{4}{3}{2}\FillCellVertical{4}{4}{3}\FillCellVertical{4}{5}{5}
+	\FillCellVertical{5}{2}{1}\FillCellVertical{5}{3}{3}\FillCellVertical{5}{4}{4}\FillCellVertical{5}{5}{6}
+	\FillCellVertical{6}{2}{2}\FillCellVertical{6}{3}{4}\FillCellVertical{6}{4}{5}\FillCellVertical{6}{5}{1}
+	%les icones
+	\ifboolKV[TrivPursEN]{Icons}%
+		{%
+			%1er niveau (droite)
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-6)!0.5!(D-1-4)$) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-1-4)!0.5!(D-1-3)$) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-1-3)!0.5!(D-1-2)$) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-1-2)!0.5!(D-1-1)$) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-1-1)!0.5!(SB-1)$) {\triv@purs@lsticons[4]} ;
+			%2eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(8)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-1)!0.5!(D-2-4)$) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-2-4)!0.5!(D-2-3)$) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-2-3)!0.5!(D-2-2)$) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-2-2)!0.5!(D-2-1)$) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-2-1)!0.5!(SB-2)$) {\triv@purs@lsticons[5]} ;
+			%3eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(16)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-2)!0.5!(D-3-4)$) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-3-4)!0.5!(D-3-3)$) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-3-3)!0.5!(D-3-2)$) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-3-2)!0.5!(D-3-1)$) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-3-1)!0.5!(SB-3)$) {\triv@purs@lsticons[6]} ;
+			%4eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(24)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-3)!0.5!(D-4-4)$) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-4-4)!0.5!(D-4-3)$) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-4-3)!0.5!(D-4-2)$) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-4-2)!0.5!(D-4-1)$) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-4-1)!0.5!(SB-4)$) {\triv@purs@lsticons[1]} ;
+			%5eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(32)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-4)!0.5!(D-5-4)$) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-5-4)!0.5!(D-5-3)$) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-5-3)!0.5!(D-5-2)$) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-5-2)!0.5!(D-5-1)$) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-5-1)!0.5!(SB-5)$) {\triv@purs@lsticons[2]} ;
+			%6eme niveau (droite)
+			\xdef\tmp@aa{\xintfloateval{(40)*\triv@purs@anglecases}}
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-5)!0.5!(D-6-4)$) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-6-4)!0.5!(D-6-3)$) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-6-3)!0.5!(D-6-2)$) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-6-2)!0.5!(D-6-1)$) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+\tmp@aa},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(C-6-1)!0.5!(SB-6)$) {\triv@purs@lsticons[3]} ;
+		}%
+		{}%
+	%les jokers
+	\ifboolKV[TrivPursEN]{Icons}%
+		{%
+			\ifboolKV[TrivPursEN]{Jokers}%
+				{%
+					\foreach \i in {1,...,\triv@purs@nbcat}{%
+						\xdef\tmp@aa{\xintfloateval{(8*(\i-1)+2+0.5)*\triv@purs@anglecases}}%
+						\xdef\tmp@ab{\xintfloateval{(8*(\i-1)+5+0.5)*\triv@purs@anglecases}}%
+						\node[rotate=\tmp@aa,scale={\triv@purs@scaleicons*\triv@purs@hautcases}] at ({(0.5+8*(\i-1)+2)*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@iconjok} ;
+						\node[rotate=\tmp@ab,scale={\triv@purs@scaleicons*\triv@purs@hautcases}] at ({(0.5+8*(\i-1)+5)*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@iconjok} ;
+					}%
+				}%
+				{}%
+		}%
+		{}%
+}
+\NewDocumentCommand\DrawBordersTrivial{ }{%
+	%les tracés des cases
+	\draw[EpTraits] (0,0) circle[radius=\triv@purs@rayon] ;
+	\draw[EpTraits] (0,0) circle[radius={\triv@purs@rayon-\triv@purs@hautcases}] ;
+	\foreach \i in {0,...,\triv@purs@nbcasesbord}{%
+		\xintifboolexpr{\xintiiRem{\i}{\triv@purs@ecart} == 0}%
+		{}%
+		{%
+			\draw[EpTraits] (PB-\i)--(GB-\i) ;
+		}%
+	}%
+	\draw[EpTraits] (SB-1)--(OM-1)--(OM-\triv@purs@nbcat)--(SA-1) ;
+	\foreach \i in {2,...,\triv@purs@nbcat}{%
+		\xdef\j{\xinteval{\i-1}}%
+		\draw[EpTraits] (SB-\i)--(OM-\i)--(OM-\j)--(SA-\i) ;
+	}%
+	\foreach \i in {1,...,\triv@purs@nbcat}{%
+		\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+			\draw[EpTraits] (C-\i-\j)--(D-\i-\j) ;
+		}%
+	}%
+}
+\NewDocumentCommand\LogoCenterTrivialPursuit{}{%
+	\draw[EpTraitsPlusPlus] (0,0) circle[radius=\triv@purs@lgcamemb] ;
+	\foreach \i in {-30,30,...,270}{\draw[EpTraitsPlusPlus] (0,0)--(\i:{\triv@purs@lgcamemb}) ;}
+	\begin{scope}[shift={(0:{0.15*\triv@purs@lgcamemb})}]
+		\ifboolKV[TrivPursEN]{Colors}%
+			{%
+				\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (0,0)--({-30}:{0.765*\triv@purs@lgcamemb}) arc (-30:30:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+			}%
+			{}%
+		\draw[EpTraitsPlus] (0,0)--({-30}:{0.765*\triv@purs@lgcamemb}) arc (-30:30:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+	\end{scope}
+	\begin{scope}[shift={(60:{0.15*\triv@purs@lgcamemb})}]
+		\ifboolKV[TrivPursEN]{Colors}%
+			{%
+				\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (0,0)--({30}:{0.765*\triv@purs@lgcamemb}) arc (30:90:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+			}%
+			{}%
+		\draw[EpTraitsPlus] (0,0)--({30}:{0.765*\triv@purs@lgcamemb}) arc (30:90:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+	\end{scope}
+	\begin{scope}[shift={(120:{0.15*\triv@purs@lgcamemb})}]
+		\ifboolKV[TrivPursEN]{Colors}%
+			{%
+				\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (0,0)--({90}:{0.765*\triv@purs@lgcamemb}) arc (90:150:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+			}%
+			{}%
+		\draw[EpTraitsPlus] (0,0)--({90}:{0.765*\triv@purs@lgcamemb}) arc (90:150:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+	\end{scope}
+	\begin{scope}[shift={(180:{0.15*\triv@purs@lgcamemb})}]
+		\ifboolKV[TrivPursEN]{Colors}%
+			{%
+				\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (0,0)--({150}:{0.765*\triv@purs@lgcamemb}) arc (150:210:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+			}%
+			{}%
+		\draw[EpTraitsPlus] (0,0)--({150}:{0.765*\triv@purs@lgcamemb}) arc (150:210:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+	\end{scope}
+	\begin{scope}[shift={(240:{0.15*\triv@purs@lgcamemb})}]
+		\ifboolKV[TrivPursEN]{Colors}%
+			{%
+				\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (0,0)--({210}:{0.765*\triv@purs@lgcamemb}) arc (210:270:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+			}%
+			{}%
+		\draw[EpTraitsPlus] (0,0)--({210}:{0.765*\triv@purs@lgcamemb}) arc (210:270:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+	\end{scope}
+	\begin{scope}[shift={(300:{0.15*\triv@purs@lgcamemb})}]
+		\ifboolKV[TrivPursEN]{Colors}%
+			{%
+				\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (0,0)--({270}:{0.765*\triv@purs@lgcamemb}) arc (270:330:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+			}%
+			{}%
+		\draw[EpTraitsPlus] (0,0)--({270}:{0.765*\triv@purs@lgcamemb}) arc (270:330:{0.765*\triv@purs@lgcamemb}) -- cycle ;
+	\end{scope}
+}
+
+%courte
+\NewDocumentCommand\CreationNodesTrivialShort{}{%OK !!!!!!!!!!!!!!
+	%création des nœuds grand bord petit bord GB-i (et PB-i)
+	\coordinate (GB-1) at ({7.5}:{\triv@purs@rayon}) ;
+	\coordinate (PB-1) at ({7.5}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-2) at ({7.5+9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-2) at ({7.5+9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-3) at ({7.5+2*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-3) at ({7.5+2*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-4) at ({7.5+3*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-4) at ({7.5+3*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-5) at ({7.5+4*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-5) at ({7.5+4*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-6) at ({7.5+5*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-6) at ({7.5+5*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-7) at ({67.5}:{\triv@purs@rayon}) ;
+	\coordinate (PB-7) at ({67.5}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-8) at ({67.5+9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-8) at ({67.5+9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-9) at ({67.5+2*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-9) at ({67.5+2*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-10) at ({67.5+3*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-10) at ({67.5+3*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-11) at ({67.5+4*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-11) at ({67.5+4*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-12) at ({67.5+5*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-12) at ({67.5+5*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-13) at ({127.5}:{\triv@purs@rayon}) ;
+	\coordinate (PB-13) at ({127.5}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-14) at ({127.5+9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-14) at ({127.5+9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-15) at ({127.5+2*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-15) at ({127.5+2*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-16) at ({127.5+3*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-16) at ({127.5+3*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-17) at ({127.5+4*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-17) at ({127.5+4*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-18) at ({127.5+5*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-18) at ({127.5+5*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-19) at ({187.5}:{\triv@purs@rayon}) ;
+	\coordinate (PB-19) at ({187.5}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-20) at ({187.5+9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-20) at ({187.5+9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-21) at ({187.5+2*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-21) at ({187.5+2*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-22) at ({187.5+3*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-22) at ({187.5+3*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-23) at ({187.5+4*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-23) at ({187.5+4*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-24) at ({187.5+5*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-24) at ({187.5+5*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-25) at ({247.5}:{\triv@purs@rayon}) ;
+	\coordinate (PB-25) at ({247.5}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-26) at ({247.5+9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-26) at ({247.5+9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-27) at ({247.5+2*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-27) at ({247.5+2*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-28) at ({247.5+3*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-28) at ({247.5+3*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-29) at ({247.5+4*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-29) at ({247.5+4*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-30) at ({247.5+5*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-30) at ({247.5+5*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-31) at ({307.5}:{\triv@purs@rayon}) ;
+	\coordinate (PB-31) at ({307.5}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-32) at ({307.5+9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-32) at ({307.5+9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-33) at ({307.5+2*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-33) at ({307.5+2*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-34) at ({307.5+3*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-34) at ({307.5+3*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-35) at ({307.5+4*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-35) at ({307.5+4*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	\coordinate (GB-36) at ({307.5+5*9}:{\triv@purs@rayon}) ;
+	\coordinate (PB-36) at ({307.5+5*9}:{\triv@purs@rayon-\triv@purs@hautcases}) ;
+	%tests ?!?!
+%	\foreach \i in {1,...,36}{%OK
+%		\draw[EpTraits,fill=teal] (GB-\i) circle[radius=1.75pt] node[font=\tiny\ttfamily] {GB-\i};
+%		\draw[EpTraits,fill=purple] (PB-\i) circle[radius=1.75pt] node[font=\tiny\ttfamily] {PB-\i};
+%	}
+	%création des nœuds pour la figure centrale, boucle pour les 1ers + le dernier
+	\foreach \i in {1,...,\triv@purs@nbcat}{%
+		\coordinate (OM-\i) at ({30+(\i-1)*60}:{\triv@purs@rayonhexag}) ;
+		%\draw[EpTraits,fill=orange] (OM-\i) circle[radius=1.75pt] node[font=\tiny\ttfamily] {OM-\i};
+	}%
+	%les nœuds des cases verticales
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-1-\j) at ($(PB-1)!\tmp@coeff!(OM-1)$) ;
+		%\draw[EpTraits,fill=yellow] (D-1-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-1-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-2-\j) at ($(PB-6)!\tmp@coeff!(OM-1)$) ;
+		%\draw[EpTraits,fill=yellow] (D-2-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-2-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-3-\j) at ($(PB-7)!\tmp@coeff!(OM-2)$) ;
+		%\draw[EpTraits,fill=yellow] (D-3-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-3-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-4-\j) at ($(PB-12)!\tmp@coeff!(OM-2)$) ;
+		%\draw[EpTraits,fill=yellow] (D-4-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-4-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-5-\j) at ($(PB-13)!\tmp@coeff!(OM-3)$) ;
+		%\draw[EpTraits,fill=yellow] (D-5-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-5-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-6-\j) at ($(PB-18)!\tmp@coeff!(OM-3)$) ;
+		%\draw[EpTraits,fill=yellow] (D-6-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-5-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-7-\j) at ($(PB-19)!\tmp@coeff!(OM-4)$) ;
+		%\draw[EpTraits,fill=yellow] (D-7-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-7-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-8-\j) at ($(PB-24)!\tmp@coeff!(OM-4)$) ;
+		%\draw[EpTraits,fill=yellow] (D-8-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-8-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-9-\j) at ($(PB-25)!\tmp@coeff!(OM-5)$) ;
+		%\draw[EpTraits,fill=yellow] (D-9-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-9-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-10-\j) at ($(PB-30)!\tmp@coeff!(OM-5)$) ;
+		%\draw[EpTraits,fill=yellow] (D-10-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-10-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-11-\j) at ($(PB-31)!\tmp@coeff!(OM-6)$) ;
+		%\draw[EpTraits,fill=yellow] (D-11-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-11-\j};
+	}%
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\xdef\tmp@coeff{\xintfloateval{\j/(\triv@purs@nbcat-1)}}%
+		\coordinate (D-12-\j) at ($(PB-36)!\tmp@coeff!(OM-6)$) ;
+		%\draw[EpTraits,fill=yellow] (D-12-\j) circle[radius=1.75pt] node[font=\tiny\ttfamily] {D-12-\j};
+	}%
+}
+
+\NewDocumentCommand\FillCellsBorderShort{}{%
+	%-------Vertical
+	%niveau 1 vertical
+	\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (OM-6)--(OM-1)--(D-1-4)--(D-12-4)--cycle  ;
+	\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-6)!0.5!(D-1-4)$) {\triv@purs@lsticons[2]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (D-12-4)--(D-1-4)--(D-1-3)--(D-12-3)--cycle  ;
+	\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-12-4)!0.5!(D-1-3)$) {\triv@purs@lsticons[6]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (D-12-3)--(D-1-3)--(D-1-2)--(D-12-2)--cycle  ;
+	\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-12-3)!0.5!(D-1-2)$) {\triv@purs@lsticons[5]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (D-12-2)--(D-1-2)--(D-1-1)--(D-12-1)--cycle  ;
+	\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-12-2)!0.5!(D-1-1)$) {\triv@purs@lsticons[3]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (D-1-1)--(PB-1) arc({\triv@purs@anglecases}:{-\triv@purs@anglecases}:{\triv@purs@rayonint}) --(D-12-1)--cycle ;
+	\node[rotate={90},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-12-1)!0.5!(PB-1)$) {\triv@purs@lsticons[4]} ;
+	%niveau 2 vertical
+	\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (OM-1)--(OM-2)--(D-3-4)--(D-2-4)--cycle  ;
+	\node[rotate={90+(8)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-1)!0.5!(D-3-4)$) {\triv@purs@lsticons[3]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (D-2-4)--(D-3-4)--(D-3-3)--(D-2-3)--cycle  ;
+	\node[rotate={90+(8)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-2-4)!0.5!(D-3-3)$) {\triv@purs@lsticons[1]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (D-2-3)--(D-3-3)--(D-3-2)--(D-2-2)--cycle  ;
+	\node[rotate={90+(8)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-2-3)!0.5!(D-3-2)$) {\triv@purs@lsticons[6]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (D-2-2)--(D-3-2)--(D-3-1)--(D-2-1)--cycle  ;
+	\node[rotate={90+(8)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-2-2)!0.5!(D-3-1)$) {\triv@purs@lsticons[4]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (D-3-1)--(PB-7) arc({67.5}:{52.5}:{\triv@purs@rayonint}) --(D-2-1)--cycle ;
+	\node[rotate={90+(8)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-2-1)!0.5!(PB-7)$) {\triv@purs@lsticons[5]} ;
+	%niveau 3 vertical
+	\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (OM-2)--(OM-3)--(D-5-4)--(D-4-4)--cycle  ;
+	\node[rotate={90+(16)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-2)!0.5!(D-5-4)$) {\triv@purs@lsticons[4]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (D-4-4)--(D-5-4)--(D-5-3)--(D-4-3)--cycle  ;
+	\node[rotate={90+(16)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-4-4)!0.5!(D-5-3)$) {\triv@purs@lsticons[2]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (D-4-3)--(D-5-3)--(D-5-2)--(D-4-2)--cycle  ;
+	\node[rotate={90+(16)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-4-3)!0.5!(D-5-2)$) {\triv@purs@lsticons[1]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (D-4-2)--(D-5-2)--(D-5-1)--(D-4-1)--cycle  ;
+	\node[rotate={90+(16)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-4-2)!0.5!(D-5-1)$) {\triv@purs@lsticons[5]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (D-5-1)--(PB-13) arc({127.5}:{112.5}:{\triv@purs@rayonint}) --(D-4-1)--cycle ;
+	\node[rotate={90+(16)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-4-1)!0.5!(PB-13)$) {\triv@purs@lsticons[6]} ;
+	%niveau 4 vertical
+	\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (OM-3)--(OM-4)--(D-7-4)--(D-6-4)--cycle  ;
+	\node[rotate={90+(24)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-3)!0.5!(D-7-4)$) {\triv@purs@lsticons[5]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (D-6-4)--(D-7-4)--(D-7-3)--(D-6-3)--cycle  ;
+	\node[rotate={90+(24)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-6-4)!0.5!(D-7-3)$) {\triv@purs@lsticons[3]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (D-6-3)--(D-7-3)--(D-7-2)--(D-6-2)--cycle  ;
+	\node[rotate={90+(24)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-6-3)!0.5!(D-7-2)$) {\triv@purs@lsticons[2]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (D-6-2)--(D-7-2)--(D-7-1)--(D-6-1)--cycle  ;
+	\node[rotate={90+(24)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-6-2)!0.5!(D-7-1)$) {\triv@purs@lsticons[6]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (D-7-1)--(PB-19) arc({187.5}:{172.5}:{\triv@purs@rayonint}) --(D-6-1)--cycle ;
+	\node[rotate={90+(24)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-6-1)!0.5!(PB-19)$) {\triv@purs@lsticons[1]} ;
+	%niveau 5 vertical
+	\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (OM-4)--(OM-5)--(D-9-4)--(D-8-4)--cycle  ;
+	\node[rotate={90+(32)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-4)!0.5!(D-9-4)$) {\triv@purs@lsticons[6]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (D-8-4)--(D-9-4)--(D-9-3)--(D-8-3)--cycle  ;
+	\node[rotate={90+(32)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-8-4)!0.5!(D-9-3)$) {\triv@purs@lsticons[4]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (D-8-3)--(D-9-3)--(D-9-2)--(D-8-2)--cycle  ;
+	\node[rotate={90+(32)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-8-3)!0.5!(D-9-2)$) {\triv@purs@lsticons[3]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (D-8-2)--(D-9-2)--(D-9-1)--(D-8-1)--cycle  ;
+	\node[rotate={90+(32)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-8-2)!0.5!(D-9-1)$) {\triv@purs@lsticons[1]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (D-9-1)--(PB-25) arc({247.5}:{232.5}:{\triv@purs@rayonint}) --(D-8-1)--cycle ;
+	\node[rotate={90+(32)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-8-1)!0.5!(PB-25)$) {\triv@purs@lsticons[2]} ;
+	%niveau 6 vertical
+	\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (OM-5)--(OM-6)--(D-11-4)--(D-10-4)--cycle  ;
+	\node[rotate={90+(40)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(OM-5)!0.5!(D-11-4)$) {\triv@purs@lsticons[1]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (D-10-4)--(D-11-4)--(D-11-3)--(D-10-3)--cycle  ;
+	\node[rotate={90+(40)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-10-4)!0.5!(D-11-3)$) {\triv@purs@lsticons[5]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (D-10-3)--(D-11-3)--(D-11-2)--(D-10-2)--cycle  ;
+	\node[rotate={90+(40)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-10-3)!0.5!(D-11-2)$) {\triv@purs@lsticons[4]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (D-10-2)--(D-11-2)--(D-11-1)--(D-10-1)--cycle  ;
+	\node[rotate={90+(40)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-10-2)!0.5!(D-11-1)$) {\triv@purs@lsticons[2]} ;
+	\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (D-11-1)--(PB-31) arc({307.5}:{292.5}:{\triv@purs@rayonint}) --(D-10-1)--cycle ;
+	\node[rotate={90+(40)*\triv@purs@anglecases},scale={0.75*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ($(D-10-1)!0.5!(PB-31)$) {\triv@purs@lsticons[3]} ;
+	%--------BORDS !!!
+	\ifboolKV[TrivPursEN]{Colors}%
+		{%
+			%Secteur1
+			\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (PB-1)--(GB-1) arc ({7.5+0*9}:{7.5+1*9}:{\triv@purs@rayon})--(PB-2) arc ({7.5+1*9}:{7.5+0*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (PB-2)--(GB-2) arc ({7.5+1*9}:{7.5+2*9}:{\triv@purs@rayon})--(PB-3) arc ({7.5+2*9}:{7.5+1*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (PB-4)--(GB-4) arc ({7.5+3*9}:{7.5+4*9}:{\triv@purs@rayon})--(PB-5) arc ({7.5+4*9}:{7.5+3*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (PB-5)--(GB-5) arc ({7.5+4*9}:{7.5+5*9}:{\triv@purs@rayon})--(PB-6) arc ({7.5+5*9}:{7.5+4*9}:{\triv@purs@rayonint});
+			%Secteur2
+			\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (PB-7)--(GB-7) arc ({7.5+60+0*9}:{7.5+60+1*9}:{\triv@purs@rayon})--(PB-8) arc ({7.5+60+1*9}:{7.5+60+0*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (PB-8)--(GB-8) arc ({7.5+60+1*9}:{7.5+60+2*9}:{\triv@purs@rayon})--(PB-9) arc ({7.5+60+2*9}:{7.5+60+1*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (PB-10)--(GB-10) arc ({7.5+60+3*9}:{7.5+60+4*9}:{\triv@purs@rayon})--(PB-11) arc ({7.5+60+4*9}:{7.5+60+3*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (PB-11)--(GB-11) arc ({7.5+60+4*9}:{7.5+60+5*9}:{\triv@purs@rayon})--(PB-12) arc ({7.5+60+5*9}:{7.5+60+4*9}:{\triv@purs@rayonint});
+			%Secteur3
+			\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (PB-13)--(GB-13) arc ({7.5+120+0*9}:{7.5+120+1*9}:{\triv@purs@rayon})--(PB-14) arc ({7.5+120+1*9}:{7.5+120+0*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (PB-14)--(GB-14) arc ({7.5+120+1*9}:{7.5+120+2*9}:{\triv@purs@rayon})--(PB-15) arc ({7.5+120+2*9}:{7.5+120+1*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (PB-16)--(GB-16) arc ({7.5+120+3*9}:{7.5+120+4*9}:{\triv@purs@rayon})--(PB-17) arc ({7.5+120+4*9}:{7.5+120+3*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (PB-17)--(GB-17) arc ({7.5+120+4*9}:{7.5+120+5*9}:{\triv@purs@rayon})--(PB-18) arc ({7.5+120+5*9}:{7.5+120+4*9}:{\triv@purs@rayonint});
+			%Secteur4
+			\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (PB-19)--(GB-19) arc ({7.5+180+0*9}:{7.5+180+1*9}:{\triv@purs@rayon})--(PB-20) arc ({7.5+180+1*9}:{7.5+180+0*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (PB-20)--(GB-20) arc ({7.5+180+1*9}:{7.5+180+2*9}:{\triv@purs@rayon})--(PB-21) arc ({7.5+180+2*9}:{7.5+180+1*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (PB-22)--(GB-22) arc ({7.5+180+3*9}:{7.5+180+4*9}:{\triv@purs@rayon})--(PB-23) arc ({7.5+180+4*9}:{7.5+180+3*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (PB-23)--(GB-23) arc ({7.5+180+4*9}:{7.5+180+5*9}:{\triv@purs@rayon})--(PB-24) arc ({7.5+180+5*9}:{7.5+180+4*9}:{\triv@purs@rayonint});
+			%Secteur5
+			\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (PB-25)--(GB-25) arc ({7.5+240+0*9}:{7.5+240+1*9}:{\triv@purs@rayon})--(PB-26) arc ({7.5+240+1*9}:{7.5+240+0*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (PB-26)--(GB-26) arc ({7.5+240+1*9}:{7.5+240+2*9}:{\triv@purs@rayon})--(PB-27) arc ({7.5+240+2*9}:{7.5+240+1*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (PB-28)--(GB-28) arc ({7.5+240+3*9}:{7.5+240+4*9}:{\triv@purs@rayon})--(PB-29) arc ({7.5+240+4*9}:{7.5+240+3*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (PB-29)--(GB-29) arc ({7.5+240+4*9}:{7.5+240+5*9}:{\triv@purs@rayon})--(PB-30) arc ({7.5+240+5*9}:{7.5+240+4*9}:{\triv@purs@rayonint});
+			%Secteur6
+			\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (PB-31)--(GB-31) arc ({7.5+300+0*9}:{7.5+300+1*9}:{\triv@purs@rayon})--(PB-32) arc ({7.5+300+1*9}:{7.5+300+0*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (PB-32)--(GB-32) arc ({7.5+300+1*9}:{7.5+300+2*9}:{\triv@purs@rayon})--(PB-33) arc ({7.5+300+2*9}:{7.5+300+1*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (PB-34)--(GB-34) arc ({7.5+300+3*9}:{7.5+300+4*9}:{\triv@purs@rayon})--(PB-35) arc ({7.5+300+4*9}:{7.5+300+3*9}:{\triv@purs@rayonint});
+			\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (PB-35)--(GB-35) arc ({7.5+300+4*9}:{7.5+300+5*9}:{\triv@purs@rayon})--(PB-36) arc ({7.5+300+5*9}:{7.5+300+4*9}:{\triv@purs@rayonint});
+		}%
+		{}%
+	\ifboolKV[TrivPursEN]{Icons}%
+		{%
+			%secteur1
+			\node[rotate={90+0.5*(7.5+0*9+7.5+1*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(7.5+7.5+1*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+0.5*(7.5+1*9+7.5+2*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(7.5+1*9+7.5+2*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+0.5*(7.5+3*9+7.5+4*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(7.5+3*9+7.5+4*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+0.5*(7.5+5*9+7.5+5*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(7.5+4*9+7.5+5*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[5]} ;
+			%secteur2
+			\node[rotate={90+0.5*(2*60+7.5+0*9+7.5+1*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*60+7.5+7.5+1*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+0.5*(2*60+7.5+1*9+7.5+2*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*60+7.5+1*9+7.5+2*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+0.5*(2*60+7.5+3*9+7.5+4*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*60+7.5+3*9+7.5+4*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+0.5*(2*60+7.5+5*9+7.5+5*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*60+7.5+4*9+7.5+5*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[6]} ;
+			%secteur3
+			\node[rotate={90+0.5*(2*120+7.5+0*9+7.5+1*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*120+7.5+7.5+1*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+0.5*(2*120+7.5+1*9+7.5+2*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*120+7.5+1*9+7.5+2*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+0.5*(2*120+7.5+3*9+7.5+4*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*120+7.5+3*9+7.5+4*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+0.5*(2*120+7.5+5*9+7.5+5*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*120+7.5+4*9+7.5+5*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[1]} ;
+			%secteur4
+			\node[rotate={90+0.5*(2*180+7.5+0*9+7.5+1*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*180+7.5+7.5+1*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+0.5*(2*180+7.5+1*9+7.5+2*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*180+7.5+1*9+7.5+2*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[6]} ;
+			\node[rotate={90+0.5*(2*180+7.5+3*9+7.5+4*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*180+7.5+3*9+7.5+4*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+0.5*(2*180+7.5+5*9+7.5+5*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*180+7.5+4*9+7.5+5*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[2]} ;
+			%secteur5
+			\node[rotate={90+0.5*(2*240+7.5+0*9+7.5+1*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*240+7.5+7.5+1*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+0.5*(2*240+7.5+1*9+7.5+2*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*240+7.5+1*9+7.5+2*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[1]} ;
+			\node[rotate={90+0.5*(2*240+7.5+3*9+7.5+4*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*240+7.5+3*9+7.5+4*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[4]} ;
+			\node[rotate={90+0.5*(2*240+7.5+5*9+7.5+5*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*240+7.5+4*9+7.5+5*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[3]} ;
+			%secteur6
+			\node[rotate={90+0.5*(2*300+7.5+0*9+7.5+1*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*300+7.5+7.5+1*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[3]} ;
+			\node[rotate={90+0.5*(2*300+7.5+1*9+7.5+2*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*300+7.5+1*9+7.5+2*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[2]} ;
+			\node[rotate={90+0.5*(2*300+7.5+3*9+7.5+4*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*300+7.5+3*9+7.5+4*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[5]} ;
+			\node[rotate={90+0.5*(2*300+7.5+5*9+7.5+5*9)},scale={\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0.5*(2*300+7.5+4*9+7.5+5*9)}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[4]} ;
+		}%
+		{}%
+
+	%les jokers
+	\ifboolKV[TrivPursEN]{Icons}%
+		{%
+			\ifboolKV[TrivPursEN]{Jokers}%
+				{%
+					\node[rotate=30,scale={\triv@purs@scaleicons*\triv@purs@hautcases}] at ({30}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@iconjok} ;
+					\node[rotate=90,scale={\triv@purs@scaleicons*\triv@purs@hautcases}] at ({90}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@iconjok} ;
+					\node[rotate=150,scale={\triv@purs@scaleicons*\triv@purs@hautcases}] at ({150}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@iconjok} ;
+					\node[rotate=210,scale={\triv@purs@scaleicons*\triv@purs@hautcases}] at ({210}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@iconjok} ;
+					\node[rotate=270,scale={\triv@purs@scaleicons*\triv@purs@hautcases}] at ({270}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@iconjok} ;
+					\node[rotate=330,scale={\triv@purs@scaleicons*\triv@purs@hautcases}] at ({330}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@iconjok} ;
+				}%
+				{}%
+		}%
+		{}%
+}
+\NewDocumentCommand\DrawBordersTrivialShort{ }{%OK Court
+	%les tracés des cases
+	\draw[EpTraits] (0,0) circle[radius=\triv@purs@rayon] ;
+	\draw[EpTraits] (0,0) circle[radius={\triv@purs@rayon-\triv@purs@hautcases}] ;
+	\foreach \i in {1,...,36}{%
+		\draw[EpTraits] (PB-\i)--(GB-\i) ;
+	}
+	\draw[EpTraits] (PB-1)--(OM-1)--(OM-6)--(PB-36) ;
+	\draw[EpTraits] (PB-6)--(OM-1)--(OM-2)--(PB-7) ;
+	\draw[EpTraits] (PB-12)--(OM-2)--(OM-3)--(PB-13) ;
+	\draw[EpTraits] (PB-18)--(OM-3)--(OM-4)--(PB-19) ;
+	\draw[EpTraits] (PB-24)--(OM-4)--(OM-5)--(PB-25) ;
+	\draw[EpTraits] (PB-30)--(OM-5)--(OM-6)--(PB-31) ;
+	\foreach \j in {1,...,\xinteval{\triv@purs@nbcat-2}}{%
+		\draw[EpTraits] (D-2-\j)--(D-3-\j) ;
+		\draw[EpTraits] (D-4-\j)--(D-5-\j) ;
+		\draw[EpTraits] (D-6-\j)--(D-7-\j) ;
+		\draw[EpTraits] (D-8-\j)--(D-9-\j) ;
+		\draw[EpTraits] (D-10-\j)--(D-11-\j) ;
+		\draw[EpTraits] (D-12-\j)--(D-1-\j) ;
+	}%
+}
+
+\NewDocumentCommand\FillCamembersTrivialShort{ }{%numéro des camemberts, en partant de la droite
+	\ifboolKV[TrivPursEN]{Colors}%
+	{%
+		%Couleur du 1er camembert
+		\draw[EpTraits,fill={\triv@purs@lstcol[1]}] (PB-36)--(GB-36) arc ({-\triv@purs@anglecases}:{\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-1) arc ({\triv@purs@anglecases}:{-\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+		%Couleur du 2ème
+		\draw[EpTraits,fill={\triv@purs@lstcol[2]}] (PB-6)--(GB-6) arc ({7*\triv@purs@anglecases}:{9*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-7) arc ({9*\triv@purs@anglecases}:{7*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+		%Couleur du 3ème
+		\draw[EpTraits,fill={\triv@purs@lstcol[3]}] (PB-12)--(GB-12) arc ({15*\triv@purs@anglecases}:{17*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-13) arc ({17*\triv@purs@anglecases}:{15*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+		%Couleur du 4ème
+		\draw[EpTraits,fill={\triv@purs@lstcol[4]}] (PB-18)--(GB-18) arc ({23*\triv@purs@anglecases}:{25*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-19) arc ({25*\triv@purs@anglecases}:{23*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+		%Couleur du 5ème
+		\draw[EpTraits,fill={\triv@purs@lstcol[5]}] (PB-24)--(GB-24) arc ({31*\triv@purs@anglecases}:{33*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-25) arc ({33*\triv@purs@anglecases}:{31*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+		%Couleur du 6ème
+		\draw[EpTraits,fill={\triv@purs@lstcol[6]}] (PB-30)--(GB-30) arc ({39*\triv@purs@anglecases}:{41*\triv@purs@anglecases}:{\triv@purs@rayon})--(PB-31) arc ({41*\triv@purs@anglecases}:{39*\triv@purs@anglecases}:{\triv@purs@rayonint})--cycle ;
+	}%
+	{}%
+	%si on affiche les icones
+	\ifboolKV[TrivPursEN]{Icons}%
+	{%
+		\node[rotate={90+0*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({0}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[1]} ;
+		\node[rotate={90+8*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({8*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[2]} ;
+		\node[rotate={90+16*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({16*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[3]} ;
+		\node[rotate={90+24*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({24*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[4]} ;
+		\node[rotate={90+32*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({32*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[5]} ;
+		\node[rotate={90+40*\triv@purs@anglecases},scale={1.5*\triv@purs@scaleicons*\triv@purs@hautcases},anchor=center] at ({40*\triv@purs@anglecases}:{\triv@purs@rayon-0.5*\triv@purs@hautcases}) {\triv@purs@lsticons[6]} ;
+	}%
+	{}%
+}
+
+%====CREATION
+\NewDocumentCommand\BoardTrivialPursuit{ O{} D<>{} }{%
+	\restoreKV[TrivPursEN]% revenir au valeurs par défaut
+	\setKV[TrivPursEN]{#1}% lit les arguments optionnels
+	\xdef\triv@purs@nbcat{6}%6 catégories, d'office !!
+	\setsepchar{,}%
+	\readlist*\triv@purs@lstcol{\triv@purs@liste}%
+	\readlist*\triv@purs@lsticons{\triv@purs@listeicones}%
+	%calculs utiles
+	\xdef\triv@purs@scale{\xintfloateval{\triv@purs@unit}}%
+	\xdef\triv@purs@scaleicons{\xintfloateval{(\triv@purs@rayon/8)}}%
+	\xdef\triv@purs@rayonint{\xintfloateval{(\triv@purs@rayon-\triv@purs@hautcases)}}%
+	\xdef\triv@purs@rayonhexag{\xintfloateval{2*\triv@purs@rayonint*sin(Pi/24)}}%
+	\xdef\triv@purs@nbcasesbord{\xintieval{(\triv@purs@nbcat)**2+2*(\triv@purs@nbcat)}}%
+	\xdef\triv@purs@numcasavant{\xinteval{\triv@purs@nbcasesbord-1}}%
+	\xdef\triv@purs@anglesect{\xintfloateval{360/(\triv@purs@nbcat)}}%
+	\xdef\triv@purs@angletheta{\xintfloateval{90-180/(\triv@purs@nbcat)}}%
+	\xdef\triv@purs@anglecases{\xintfloateval{360/(\triv@purs@nbcasesbord)}}%
+	\xdef\triv@purs@ecart{\xinteval{\triv@purs@nbcat+2}}%8 pour 6 catégories
+	\xdef\triv@purs@lgcamemb{\xintfloateval{2*Pi*\triv@purs@rayon/(\triv@purs@nbcasesbord)}}%
+	%si vide
+	\ifboolKV[TrivPursEN]{Blank}%
+		{%
+			\setKV[TrivPursEN]{Colors=false,Icons=false,Logo=false}
+		}%
+		{}%
+	%environnement
+	\begin{tikzpicture}[x=\triv@purs@unit cm,y=\triv@purs@unit cm,every node/.style={scale=\triv@purs@scale,inner sep=0pt},transform shape,#2]%
+		%style
+		\tikzset{EpTraits/.style={line width={\triv@purs@scaleicons*\triv@purs@unit*\triv@purs@thick}}}
+		\tikzset{EpTraitsPlus/.style={line width={1.5*\triv@purs@scaleicons*\triv@purs@unit*\triv@purs@thick}}}
+		\tikzset{EpTraitsPlusPlus/.style={line width={2*\triv@purs@scaleicons*\triv@purs@unit*\triv@purs@thick}}}
+		%clip pour la Rotation
+		\useasboundingbox (0,0) circle[radius={\triv@purs@rayon}] ;
+		%création
+		\begin{scope}[rotate=\triv@purs@rotate]
+			\ifboolKV[TrivPursEN]{ShortVersion}%
+				{%
+					%les nœuds OK
+					\CreationNodesTrivialShort
+					%test avec centre OK
+					\ifboolKV[TrivPursEN]{Center}{\FillCenterTrivial}{}
+					%camemberts OK
+					\FillCamembersTrivialShort
+					%cases OK
+					\FillCellsBorderShort
+					%bordures
+					\DrawBordersTrivialShort
+					%logo central
+					\ifboolKV[TrivPursEN]{Logo}{\LogoCenterTrivialPursuit}{}
+				}%
+				{%
+					%les nœuds OK
+					\CreationNodesTrivial
+					%test avec centre OK
+					\ifboolKV[TrivPursEN]{Center}{\FillCenterTrivial}{}
+					%camemberts OK
+					\FillCamembersTrivial
+					%cases OK
+					\FillCellsBorder
+					%bordures
+					\DrawBordersTrivial
+					%logo central
+					\ifboolKV[TrivPursEN]{Logo}{\LogoCenterTrivialPursuit}{}
+				}%
+		\end{scope}
+	\end{tikzpicture}%
+}
+
+\endinput

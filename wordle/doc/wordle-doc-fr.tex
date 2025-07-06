@@ -1,0 +1,422 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[french,a4paper,11pt]{article}
+\usepackage[margin=2cm,includefoot]{geometry}
+\def\TPversion{0.1.1}
+\def\TPdate{3 septembre 2023}
+\usepackage{amssymb,amsfonts,amsmath}
+\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
+\usepackage{wordle}
+\usepackage{awesomebox}
+\usepackage{fontawesome5}
+\usepackage{footnote}
+\makesavenoteenv{tabular}
+\usepackage{enumitem}
+\usepackage{tabularray}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [wordle]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+
+%\usepackage{hvlogos}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+\newcommand\TableauDocumentation{%
+	\begin{tblr}{width=\linewidth,colspec={X[c]X[c]X[c]X[c]X[c]X[c]},cells={font=\sffamily}}
+		{\LARGE \LaTeX} & & & & &\\
+		& {\LARGE \hologo{pdfLaTeX}} & & & & \\
+		& & {\LARGE \hologo{LuaLaTeX}} & & & \\
+		& & & {\LARGE \TikZ} & & \\
+		& & & & {\LARGE \TeXLive} & \\
+		& & & & & {\LARGE \hologo{MiKTeX}} \\
+	\end{tblr}
+}
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\setlength{\parindent}{0pt}
+\definecolor{LightGray}{gray}{0.9}
+
+\usepackage{babel}
+\AddThinSpaceBeforeFootnotes
+\FrenchFootnotes
+
+\usepackage{listings}
+
+\usepackage{newverbs}
+\newverbcommand{\motcletex}{\color{cyan!75!black}}{}
+\newverbcommand{\packagetex}{\color{violet!75!black}}{}
+
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{listingsutf8}
+\newtcblisting{DemoCode}[1][]{%
+	enhanced,width=0.95\linewidth,center,%
+	bicolor,size=title,%
+	colback=cyan!2!white,%
+	colbacklower=cyan!1!white,%
+	colframe=cyan!75!black,%
+	listing options={%
+		breaklines=true,%
+		breakatwhitespace=true,%
+		style=tcblatex,basicstyle=\small\ttfamily,%
+		tabsize=4,%
+		commentstyle={\itshape\color{gray}},
+		keywordstyle={\color{blue}},%
+		classoffset=0,%
+		keywords={},%
+		alsoletter={-},%
+		keywordstyle={\color{blue}},%
+		classoffset=1,%
+		alsoletter={-},%
+		morekeywords={center,justify},%
+		keywordstyle={\color{violet}},%
+		classoffset=2,%
+		alsoletter={-},%
+		morekeywords={GrilleSutom},%
+		keywordstyle={\color{green!50!black}},%
+		classoffset=3,%
+		morekeywords={Couleurs,Arrondi,Unite,Police,CouleurLettres,Lettres,Style,Epaisseur,CouleurBordure},%
+		keywordstyle={\color{orange}}
+	},%
+	#1
+}
+
+\tcbset{vignettes/.style={%
+	nobeforeafter,box align=base,boxsep=0pt,enhanced,sharp corners=all,rounded corners=southeast,%
+	boxrule=0.75pt,left=7pt,right=1pt,top=0pt,bottom=0.25pt,%
+	}
+}
+
+\tcbset{vignetteMaJ/.style={%
+	fontupper={\vphantom{pf}\footnotesize\ttfamily},
+	vignettes,colframe=purple!50!black,coltitle=white,colback=purple!10,%
+	overlay={\begin{tcbclipinterior}%
+			\fill[fill=purple!75]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{black}{\scalebox{0.66}[0.66]{\textbf{MàJ}}}}} ($(interior.north west)+(5pt,0pt)$);%
+	\end{tcbclipinterior}}
+	}
+}
+
+\newcommand\Cle[1]{{\small\sffamily\textlangle \textcolor{orange}{#1}\textrangle}}
+\newcommand\cmaj[1]{\tcbox[vignetteMaJ]{#1}\xspace}
+
+\begin{document}
+
+\setlength{\aweboxleftmargin}{0.07\linewidth}
+\setlength{\aweboxcontentwidth}{0.93\linewidth}
+\setlength{\aweboxvskip}{8pt}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\vspace{2cm}
+
+\begin{center}
+	\begin{minipage}{0.75\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{wordle} [fr]}\\
+				\\
+				{\LARGE Des grilles de Wordle (Sutom),} \\
+				\\
+				{\LARGE avec \textsf{Ti\textit{k}Z}.} \\
+			\end{tabular}
+			
+			\bigskip
+			
+			{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://github.com/cpierquet/wordle}}
+\end{tabular}
+\end{center}
+
+\vspace{0.25cm}
+
+{$\blacktriangleright$~~Créer des grilles de Wordle/Sutom\footnotemark\footnotetext{\url{https://fr.wikipedia.org/wiki/Wordle}}.}
+
+\vspace{0.25cm}
+
+{$\blacktriangleright$~~Gestion des couleurs, de la taille\footnotemark\footnotetext{Idées venant de  \url{ttps://tex.stackexchange.com/questions/659860/wordle-like-colored-letter-boxes-in-latex}}.
+
+\vspace{1cm}
+
+\begin{center}
+\begin{GrilleSutom}{LUCIOLE}
+	LAPINES
+	LUMIERE
+	LOURDES
+	LUCIOLE
+\end{GrilleSutom}
+\end{center}
+
+\medskip
+
+\begin{center}
+\begin{GrilleSutom}[Arrondi=0,Couleurs={lightgray,orange,teal},Style=alt,Unite=0.5,Lettres=false]{REBUS}
+	ABRIS
+	ROUTE
+	RUDES
+	REBUS
+\end{GrilleSutom}
+%
+\hspace{5mm}
+%
+\begin{GrilleSutom}[Arrondi=0,Couleurs={lightgray,orange,teal},Style=alt,Unite=0.5]{REBUS}
+	ABRIS
+	ROUTE
+	RUDES
+	REBUS
+\end{GrilleSutom}
+\end{center}
+
+\vspace{0.5cm}
+
+%\hfill{}\textit{Merci à Denis Bitouzé et à Gilles Le Bourhis pour leurs retours et idées !}
+
+\smallskip
+
+\vfill
+
+\hrule
+
+\medskip
+
+\TableauDocumentation
+
+\medskip
+
+\hrule
+
+\vspace*{1cm}
+
+\newpage
+
+\phantomsection
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vfill
+
+\section{Historique}
+
+\verb|v0.1.0|~:~~~~Correction d'un bug avec la version anglaise.
+
+\verb|v0.1.0|~:~~~~Version initiale.
+
+\newpage
+
+\section{Le package wordle}
+
+\subsection{Le principe du jeu}
+
+\begin{noteblock}
+Wordle est un jeu de lettres en ligne gratuit développé en 2021 par Josh Wardle. Ce jeu est une adaptation directe du jeu télévisé américain Lingo (Motus en France) qui propose de faire deviner un mot par plusieurs tentatives, en indiquant pour chacune d'entre-elles la position des lettres bien placées et mal placées.
+
+Le but du jeu est de deviner un mot spécifique de cinq lettres en un maximum de six tentatives, en tapant des lettres sur un écran de six lignes de cinq cases chacune. La personne qui joue inscrit sur la première ligne un mot de cinq lettres de son choix et entre sa proposition. Après chaque proposition, les lettres apparaissent en couleurs : le fond gris représente les lettres qui ne se trouvent pas dans le mot recherché, le fond jaune représente les lettres qui se trouvent ailleurs dans le mot, et le fond vert représente les lettres qui se trouvent à la bonne place dans le mot à trouver.
+
+\smallskip
+
+\hfill{\scriptsize \url{https://fr.wikipedia.org/wiki/Wordle}}
+\end{noteblock}
+
+\subsection{Le package}
+
+\begin{noteblock}
+Le package propose de quoi afficher, dans son document \LaTeX, une grille de Wordle (ou de Sutom) à l'aide de \TikZ{} et d'une \motcletex!minipage!, avec la possibilité :
+
+\begin{itemize}
+	\item de spécifier les dimensions, la couleur ;
+	\item de choisir le style des lettres mal placées ;
+	\item de personnaliser les bordure et les coins ;
+	\item d'afficher ou non les lettres.
+\end{itemize}
+
+Contrairement au jeu \og initial \fg, il est possible de travailler avec des mots de longueur différente de 5 !
+\end{noteblock}
+
+\begin{importantblock}
+Une bonne partie du code, en \hologo{LaTeX3}, est issu d'un fil sur \texttt{tex.stackexchange}, et proposé par l'internaute \textsf{3141592653589793238}.
+\end{importantblock}
+
+\subsection{Chargement du package, packages utilisés}
+
+\begin{importantblock}
+Le package se charge, de manière classique, dans le préambule.
+
+Il n'existe pas d'option pour le package, et \packagetex!xcolor! n'est pas chargé.
+\end{importantblock}
+
+\begin{DemoCode}[listing only]
+\documentclass{article}
+\usepackage{wordle}
+
+\end{DemoCode}
+
+\begin{noteblock}
+\packagetex!wordle! charge les packages suivants :
+
+\begin{itemize}
+	\item \packagetex!tikz!;
+	\item \packagetex!simplekv! ;
+	\item \packagetex!xstring!.
+\end{itemize}
+
+Il est compatible avec les compilations usuelles en \textsf{latex}, \textsf{pdflatex}, \textsf{lualatex} ou \textsf{xelatex}.
+\end{noteblock}
+
+\vfill~
+
+\pagebreak
+
+\section{Environnement GrilleSutom}
+
+\subsection{Fonctionnement global}
+
+\begin{cautionblock}
+L'environnement dédié à la création de la grille du Sutom est \packagetex!GrilleSutom!.
+
+Il fonctionne avec un système de clés, entre \texttt{[...]}, et nécessite de préciser :
+
+\begin{itemize}
+	\item le bon mot ;
+	\item les différentes propositions.
+\end{itemize}
+
+Le code se charge de mettre en forme (grâce à une \motcletex!minipage!) la grille et les différentes couleurs d'aide.
+\end{cautionblock}
+
+\begin{DemoCode}[listing only]
+\begin{GrilleSutom}[clés]{mot à trouver}
+	proposition n°1
+	proposition n°2
+	proposition n°3
+\end{GrilleSutom}
+\end{DemoCode}
+
+\begin{noteblock}
+Comme indiqué dans l'introduction, la grille est créée à l'aide d'un environnement \motcletex!minipage!, avec gestion automatique de la largeur et des espacements.
+\end{noteblock}
+
+\begin{DemoCode}[]
+%sortie par défaut
+\begin{GrilleSutom}{SUTOM}
+	SAUCE
+	SAUTS
+	SUTOM
+\end{GrilleSutom}
+\end{DemoCode}
+
+\subsection{Clés et options}
+
+\begin{tipblock}
+Le premier argument, optionnel et entre \texttt{[...]}, propose les \Cle{clés} suivantes :
+
+\begin{itemize}
+	\item \Cle{Couleurs} : = couleur des cases, sous la forme \Cle{fond,mal placée,bien placée} ;
+	
+	\hfill{}défaut : \Cle{cyan!75!black,yellow,red},%
+	\item \Cle{Arrondi} := arrondi des coins, en mm ; \hfill{}défaut : \Cle{0.1}
+	\item \Cle{Unite} := largeur des cases, en cm ; \hfill{}défaut : \Cle{1}
+	\item \Cle{Police} := police des lettres ; \hfill{}défaut : \Cle{\textbackslash LARGE\textbackslash bfseries\textbackslash sffamily}
+	\item \Cle{CouleurLettres} := couleur des lettres ; \hfill{}défaut : \Cle{white}
+	\item \Cle{CouleurBordure} := couleur de la bordure des cases ; \hfill{}défaut : \Cle{white}
+	\item \Cle{Lettres} := booléen pour afficher les lettre ; \hfill{}défaut : \Cle{true}
+	\item \Cle{Style} := style parmi \Cle{rond / autre} pour changer le style ; \hfill{}défaut : \Cle{rond}
+	\item \Cle{Epaisseur} := épaisseur des traits, en mm. \hfill{}défaut : \Cle{0.25}
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{tipblock}
+Le second argument, obligatoire et entre \texttt{\{...\}} correspond au mot correct à trouver.
+
+\smallskip
+
+Les différentes propositions sont à donner (ligne par ligne ou séparées par des espaces) dans le corps de l'environnement.
+\end{tipblock}
+
+\subsection{Exemples}
+
+\begin{DemoCode}[]
+\begin{GrilleSutom}{BOURDON}
+	BALEINE
+	BOURBON
+	BROMURE
+	BOURDON
+\end{GrilleSutom}
+%
+\hspace{5mm}
+%
+\begin{GrilleSutom}[Style=alt]{BOURDON}
+	BALEINE BOURBON BROMURE BOURDON
+\end{GrilleSutom}
+\end{DemoCode}
+
+\begin{DemoCode}[]
+\begin{GrilleSutom}
+		[Style=alt,Epaisseur=0.3,CouleurBordure=black,%
+		Couleurs={lightgray,orange,teal}]%
+		{BOURDON}
+	BALEINE BOURBON BROMURE BOURDON
+\end{GrilleSutom}
+%
+\hspace{5mm}
+%
+\begin{GrilleSutom}
+	[Arrondi=0,Epaisseur=0.3,CouleurBordure=black,%
+	Couleurs={lightgray,orange,teal}]%
+	{BOURDON}
+	BALEINE BOURBON BROMURE BOURDON
+\end{GrilleSutom}
+\end{DemoCode}
+
+\begin{DemoCode}[]
+\begin{GrilleSutom}[Unite=2,Police=\Huge\ttfamily,CouleurLettres=black]{BOURDON}
+	BALEINE
+	BOURBON
+	BROMURE
+	BOURDON
+\end{GrilleSutom}
+\end{DemoCode}
+
+\begin{DemoCode}[]
+\begin{GrilleSutom}%
+		[Unite=0.75,Arrondi=0,Couleurs={cyan,orange,violet},%
+		Style=alt,Lettres=false]{REBUS}
+	ABRIS
+	ROUTE
+	RUDES
+	REBUS
+\end{GrilleSutom}
+\hspace{5mm}
+\begin{GrilleSutom}%
+		[Unite=0.75,Arrondi=0,Couleurs={cyan,orange,violet},Style=alt]{REBUS}
+	ABRIS
+	ROUTE
+	RUDES
+	REBUS
+\end{GrilleSutom}
+\end{DemoCode}
+
+\end{document}

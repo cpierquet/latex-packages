@@ -1,0 +1,376 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+
+\documentclass[11pt,a4paper]{ltxdoc}
+%\usepackage{kpfonts}
+%\usepackage{bera}
+%\usepackage{inconsolata}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+%\usepackage[scale=0.875]{cabin}
+\usepackage{timeop}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{fontawesome5}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [timeop]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\let\TikZ\tikzlogo
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+\def\TPversion{0.1.1}
+\def\TPdate{05/05/2025}
+\usepackage{enumitem}
+\tcbuselibrary{hooks,listingsutf8,breakable}
+
+\lstdefinestyle{packagestyle}
+{
+	language=[LaTeX]TeX,%
+	columns=fullflexible,%
+	extendedchars=true,%
+	basicstyle=\small\ttfamily,%
+	keywordstyle={\color{black}},%
+	classoffset=0,%
+	keywords={},%
+	alsoletter={-},%
+	keywordstyle={\color{blue}},%
+	classoffset=1,%
+	alsoletter={-},%
+	morekeywords={},%
+	keywordstyle={\color{violet}},%
+	classoffset=2,%
+	alsoletter={-},%
+	morekeywords={\hmstos,\hmtos,\stohms,\simpletimeop,\calctimeop,\boxhms},%
+	keywordstyle={\color{green!50!black}},%
+	classoffset=3,%
+	morekeywords={zeros,raw,sys,noamsmath,find,type,colsep,sys},%
+	keywordstyle={\color{orange}},%
+	inputencoding=utf8/latin1
+}
+
+\lstset{
+%	language=[LaTeX]TeX,%
+	basicstyle=\small\ttfamily,%
+	keywordstyle={},%
+%	classoffset=0,%
+%	keywords={},%
+%	alsoletter={-},%
+%	keywordstyle={\color{blue}},%
+%	classoffset=1,%
+%	alsoletter={-},%
+%	morekeywords={},%
+%	keywordstyle={\color{violet}},%
+%	classoffset=2,%
+%	alsoletter={-},%
+%	morekeywords={calculatoritems,\CalcItemMenu,nwkstri,tidots,casiodots},%
+%	keywordstyle={\color{green!50!black}},%
+%	classoffset=3,%
+%	morekeywords={xelua,noamssymb,model,type,fsep,font,len,bg,rightsymb},%
+%	keywordstyle={\color{orange}}
+}
+
+\newtcblisting{DemoCode}[1]{%
+	enhanced,width=\linewidth,%
+	bicolor,size=title,%
+	colback=cyan!10!white,%
+	colbacklower=cyan!5!white,%
+	colframe=cyan!75!black,%
+	listing options={%
+		columns=fullflexible,%
+		breaklines=true,%
+		breakatwhitespace=true,%
+		style=packagestyle,%
+		basicstyle=\footnotesize\ttfamily,%
+		tabsize=4,%
+		commentstyle={\itshape\color{gray}},
+		keywordstyle={\color{blue}},%
+		classoffset=0,%
+		keywords={\newfontfamily},%
+		alsoletter={-},%
+		keywordstyle={\color{blue}},%
+		classoffset=1,%
+		alsoletter={-},%
+		morekeywords={timeop},%
+		keywordstyle={\color{violet}},%
+		classoffset=2,%
+		alsoletter={-},%
+		morekeywords={\hmstos,\hmtos,\stohms,\simpletimeop,\calctimeop,\boxhms},%
+		keywordstyle={\color{green!50!black}},%
+		classoffset=3,%
+		morekeywords={zeros,raw,sys,noamsmath,find,type,colsep,sys},%
+		keywordstyle={\color{orange}}
+	},%
+	#1
+}
+
+\newtcbinputlisting\DemoCodeFile[1]{%
+	enhanced,width=\linewidth,%
+	bicolor,size=title,%
+	colback=lightgray!10!white,%
+	colbacklower=lightgray!5!white,%
+	colframe=lightgray!75!black,%
+	listing options={%
+		breaklines=true,%
+		breakatwhitespace=true,%
+		style=tcblatex,
+		extendedchars=true,%
+		basicstyle=\tiny\ttfamily,%
+		keywordstyle={},%
+		tabsize=2,%
+		commentstyle={\itshape\color{gray}},%
+		inputencoding=utf8/latin1
+	},%
+	breakable,
+	listing only,%
+	listing file={#1}
+}
+
+\NewDocumentCommand\ShowCode{ m }{%
+	\colorbox{lightgray!50}{\lstinline!#1!}%
+}
+
+\begin{document}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+		\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+			\begin{center}
+				\renewcommand{\arraystretch}{1.25}%
+				\begin{tabular}{c}
+					{\Huge \texttt{timeop}}\\
+					\\
+					{\LARGE Calculates and displays arithmetic} \\
+					{\LARGE operations with durations.} \\
+					\\
+					{\small \texttt{Version \TPversion{} -- \TPdate}}
+				\end{tabular}
+			\end{center}
+		\end{tcolorbox}
+	\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+		\texttt{Cédric Pierquet}\\
+		{\ttfamily c pierquet -- at -- outlook . fr}\\
+		\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}} \\
+	\end{tabular}
+\end{center}
+
+\hrule
+
+\vfill
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\simpletimeop{9,45,54}{4,28,57}{14,14,51}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\calctimeop%
+  [type=-]%
+  {9,45,54}%
+  {9,28,57}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\calctimeop%
+  [find={-,-,-,-,-,-,blue,yellow,red}]%
+  {9,45,54}%
+  {4,28,57}
+\end{tcblisting}
+
+\vfill~
+
+%\hrule
+%
+%\medskip
+
+%\emph{%
+%	The \textsf{luarandom} package do the same things, but with the obligation to compile with \hologo{LuaLaTeX}.
+%}
+%
+%\medskip
+
+\hrule
+
+\vspace*{5mm}
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+\vfill
+
+\section{History \& Future}
+
+\texttt{0.1.1: Bugfix}
+
+\texttt{0.1.0: Initial version}
+
+\vspace*{5mm}
+
+%\hrule
+
+\pagebreak
+
+\section{Introduction}
+
+\subsection{Loading, useful packages}
+
+In order to load \ShowCode{timeop}, simply use:
+
+\begin{DemoCode}{listing only}
+\usepackage{timeop}
+\end{DemoCode}
+
+Loaded packages are \ShowCode{xstring}, \ShowCode{xintexpr}, \ShowCode{listofitems}, \ShowCode{tabularray}, \ShowCode{simplekv} and \ShowCode{tcolorbox}.
+
+Loaded libraries are \ShowCode{skins}.
+
+\smallskip
+
+If \ShowCode{amsmath} doen't need to be loaded (useful for int. macro), just add \ShowCode{[noamssymb]} to the loading.
+
+\begin{DemoCode}{listing only}
+%w/o amsmath loading
+\usepackage[noamsmath]{timeop}
+\end{DemoCode}
+
+\subsection{Special macro}
+
+Special macros are available, to mark a \textit{finding number}, which is adapted to current font.
+
+\begin{DemoCode}{}
+\boxhms{red} / \boxhms{yellow} / \boxhms{orange} / \boxhms{teal}
+\end{DemoCode}
+
+\section{Usage}
+
+\subsection{Conversion s--hms or hm(s)--s}
+
+First available macros can convert times within hms and s.
+
+\begin{DemoCode}{listing only}
+%convert hm to s
+\hmtos{h,m}[\macro]
+%convert hms to s
+\hmstos{h,min,s}[\macro]
+%convert and/or print s to hms
+\stohms[keys]{s}[\macro]
+\end{DemoCode}
+
+Available keys are:
+
+\begin{itemize}[leftmargin=*]
+	\item \ShowCode{sys} : version of formatting system (\texttt{eu} by default);
+	\item \ShowCode{zeros} : boolean for leading zeros (\texttt{true} by default);
+	\item \ShowCode{raw} : boolean for storing raw result into \ShowCode{[\\macro]} (\texttt{true} by default).
+\end{itemize}
+
+If \ShowCode{[raw=false]}, the code format the result within \ShowCode{hh h mm min ss s} main format (zero value are not printed).
+
+\begin{DemoCode}{}
+\hmtos{1,45}\convtosec\\
+\hmstos{9,45,54}\convtosec\\
+\stohms{35154}\convtohms
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\stohms[raw=false]{1000}\\
+\stohms[raw=false]{36000}\\
+\stohms[raw=false,zeros=false]{36120}\\
+\stohms[raw=false]{36010}\\
+\stohms[raw=false]{3599}\\
+\stohms[raw=false,sys=en]{3599}
+\end{DemoCode}
+
+\subsection{Addition, subtraction}
+
+The purpose of the second macro is to present addition or subtraction of duration, within \textit{hms} format.
+
+Two methods are given:
+
+\begin{itemize}
+	\item the \textit{simple} way, with result given;
+	\item the \textit{compute} way, with result calculated.
+\end{itemize}
+
+\begin{DemoCode}{listing only}
+%simple way
+\simpletimeop[keys]{h1,m1,s1}{h2,m2,s2}{h3,m3,s3}
+
+%compute way
+\calctimeop[keys]{h1,m1,s1}{h2,m2,s2}
+\end{DemoCode}
+
+Available keys are:
+
+\begin{itemize}[leftmargin=*]
+	\item \ShowCode{zeros} : boolean for leading zeros (\texttt{false} by default);
+	\item \ShowCode{type} : \texttt{+} for addition, \texttt{-} for subtraction \ShowCode{+} (\texttt{true} by default);
+	\item \ShowCode{colsep} : length of \texttt{colsep} for columns (\texttt{1.5pt} by default);
+	\item \ShowCode{find} : list of \texttt{colors} for 'finding boxes' (\texttt{empty} by default).
+\end{itemize}
+
+So:
+
+\begin{itemize}
+	\item for the \textit{simple way}, arguments can be given with \ShowCode{\\boxhms} or integer values ;
+	\item for the \textit{compute way}, the code adapt result for hms or hm format, and \ShowCode{find} can be given with \texttt{-} fir ignoring finding items.
+\end{itemize}
+
+\begin{DemoCode}{}
+\simpletimeop{9,45,54}{4,28,57}{14,14,51}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\simpletimeop{9,45,54}{4,28,57}{\boxhms{red},\boxhms{blue},\boxhms{purple}}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\simpletimeop[type=-]{9,45}{4,28}{\boxhms{red},\boxhms{blue}}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\calctimeop%
+	[type=-]%
+	{9,45,54}%
+	{9,28,57}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\calctimeop%
+	[find={blue,-,-,-,green,-,-,-,orange}]%
+	{9,45,54}%
+	{4,28,57}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+{\LARGE\ttfamily\calctimeop[find={-,-,-,-,orange,teal},type=-,colsep=3pt]{9,45}{4,28}}
+\end{DemoCode}
+
+\pagebreak
+
+\section{The code}
+
+\DemoCodeFile{timeop.sty}
+
+\end{document}

@@ -1,0 +1,449 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[11pt,a4paper]{ltxdoc}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{xint-regression}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{tkz-grapheur}
+\usepackage{tcolorbox}
+\usepackage{minted2}
+\tcbuselibrary{skins,minted}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [xint-regression]}
+\rfoot{\sffamily\small - \thepage{} -}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+\def\TPversion{0.1.1}
+\def\TPdate{05/05/2025}
+\usepackage{soul}
+\usepackage{tabularray}
+\sethlcolor{lightgray!25}
+\NewDocumentCommand\MontreCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+\usepackage{babel}
+
+\renewcommand{\footnoterule}{\vfill\kern -3pt \hrule width 0.4\columnwidth \kern 2.6pt}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{xint-regression}}\\
+				\\
+				{\LARGE Classic regressions, with \textsf{xint}.}\\
+				\\
+				{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{tabular}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}} \\
+\end{tabular}
+\end{center}
+
+\hrule
+
+\vfill
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\def\LISTEX{1,2,3,4,5,6}
+\def\LISTEY{8.74,8.80,9.52,10.42,11.83,14.62}
+
+\xintexpreg[Alt]{\LISTEX}{\LISTEY}             %raw results
+$a \approx \exprega$ and $b \approx \expregb$
+
+\xintexpreg[Alt,round=2]{\LISTEX}{\LISTEY}     %rounded results
+$a \approx \exprega$ and $b \approx \expregb$\\
+
+So $y \approx \exprega x+\expregb$.
+\end{tcblisting}
+
+\vspace*{5mm}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\def\LISTEXX{0,50,100,140}
+\def\LISTEYY{275,290,315,350}
+
+\xintexpoffreg[offset=250]{\LISTEXX}{\LISTEYY}             %raw results
+$a \approx \expregoffa$ and $b \approx \expregoffb$
+
+\xintexpoffreg[offset=250,round=2/1]{\LISTEXX}{\LISTEYY}   %rounded results
+$a \approx \expregoffa$ and $b \approx \expregoffb$\\
+
+So $y \approx 250+\expregoffb e^{\expregoffa x}$
+\end{tcblisting}
+
+\vfill
+
+\vspace*{5mm}
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+\hrule
+
+\vspace*{5mm}
+
+\pagebreak
+
+\section{Introduction}
+
+\subsection{Global usage}
+
+This package offers \textsf{xint}-based commands for working with classical regressions :
+
+\begin{itemize}
+	\item linear regression $ax+b$ ;
+	\item quadratic regression $ax^2+bx+c$ ;
+	\item cubic regression $ax^3+bx^2+cx+d$ ;
+	\item power regression $ax^b$ ;
+	\item exponential regression $ab^x$ or $e^{ax+b}$ or $be^{ax}$ or $C + be^{ax}$ ;
+	\item logarithmic regression $a+b\log(x)$ ;
+	\item hyperbolic regression $a+\displaystyle\frac{b}{x}$.
+\end{itemize}
+
+For each type of regression, results can be stored in macros, either raw or with rounding (with individuals \MontreCode{[optional keys]}).
+
+\subsection{Packages used}
+
+This package uses \MontreCode{simplekv}, \MontreCode{xintexpr}, \MontreCode{listofitems} and \MontreCode{xstring}.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%loading
+\usepackage{xint-regression}
+\end{tcblisting}
+
+\subsection{Warnings}
+
+The precision of the (determination) results seems to be good, which should normally guarantee satisfactory calculations and plots.
+
+Nevertheless, it is advisable to be cautious about the results obtained and those expected.
+
+\pagebreak
+
+\section{The commands}
+
+\subsection{Linear regression}
+
+The equation is \fbox{$ax+b$}.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\xintlinreg[coeffa=...,coeffa=...,round=...]{xlist}{ylist}
+\end{tcblisting}
+
+By default, \MontreCode{coeffa=linrega} ; \MontreCode{coeffb=linregb} and \MontreCode{round} is empty.
+
+\MontreCode{round=...} can be given within \MontreCode{round=global} or \MontreCode{round=a/b/...}.
+
+\def\LLX{83,71,64,69,69,64,68,59,81,91,57,65,58,62}%
+\def\LLY{183,168,171,178,176,172,165,158,183,182,163,175,164,175}%
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\def\LLX{83,71,64,69,69,64,68,59,81,91,57,65,58,62}%
+\def\LLY{183,168,171,178,176,172,165,158,183,182,163,175,164,175}%
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+%default output
+\xintlinreg{\LLX}{\LLY}%
+$a \approx \linrega$ and $b \approx \linregb$
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+%personal macros + global rounding
+\xintlinreg[coeffa=LINa,coeffb=LINb,round=2]{\LLX}{\LLY}%
+$a \approx \LINa$ and $b \approx \LINb$
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+%personal macros + individual rounding
+\xintlinreg[coeffa=LINEARa,coeffb=LINEARb,round=2/0]{\LLX}{\LLY}%
+$a \approx \LINEARa$ and $b \approx \LINEARb$
+\end{tcblisting}
+
+\subsection{Quadratic regression}
+
+The equation is \fbox{$ax^2+bx+c$}.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\xintquadreg[coeffa=...,coeffb=...,coeffc=...,round=...]{xlist}{ylist}
+\end{tcblisting}
+
+By default, \MontreCode{coeffa=quadrega} ; \MontreCode{coeffb=quadregb}, \MontreCode{coeffc=quadrega} and \MontreCode{round} is empty.
+
+\MontreCode{round=...} can be given within \MontreCode{round=global} or \MontreCode{round=a/b/...}.
+
+\def\LLX{83,71,64,69,69,64,68,59,81,91,57,65,58,62}%
+\def\LLY{183,168,171,178,176,172,165,158,183,182,163,175,164,175}%
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\def\LLX{83,71,64,69,69,64,68,59,81,91,57,65,58,62}%
+\def\LLY{183,168,171,178,176,172,165,158,183,182,163,175,164,175}%
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+%default output
+\xintquadreg{\LLX}{\LLY}%
+$a \approx \quadrega$ ; $b \approx \quadregb$ and $c \approx \quadregc$
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+%personal macros + global rounding
+\xintquadreg[coeffa=QUADa,coeffb=QUADb,coeffc=QUADc,round=2]{\LLX}{\LLY}%
+$a \approx \QUADa$ ; $b \approx \QUADb$ and $c \approx \QUADc$
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+%personal macros + individual rounding
+\xintquadreg[coeffa=QUADRAa,coeffb=QUADRAb,coeffc=QUADRAc,round=4/3/2]{\LLX}{\LLY}%
+$a \approx \QUADRAa$ ; $b \approx \QUADRAb$ and $c \approx \QUADRAc$
+\end{tcblisting}
+
+\subsection{Cubic regression}%, hyperbolic and logarithmic regression}
+
+The equation for cubic is \fbox{$ax^3+bx^2+cx+d$}.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\xintcubreg[coeffa=...,coeffb=...,coeffc=...,coeffd=...,round=...]{xlist}{ylist}
+\end{tcblisting}
+
+By default, \MontreCode{coeffa=cubrega} ; \MontreCode{coeffb=cubregb} ; \MontreCode{coeffc=cubregc} and \MontreCode{coeffd=cubregd}.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\def\LLX{83,71,64,69,69,64,68,59,81,91,57,65,58,62}%
+\def\LLY{183,168,171,178,176,172,165,158,183,182,163,175,164,175}%
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+%individual roudings
+\xintcubreg[round=5/3/2/1]{\LLX}{\LLY}%
+$a \approx \cubrega$ ; $b \approx \cubregb$ ; $c \approx \cubregc$ and $d \approx \cubregd$
+\end{tcblisting}
+
+\subsection{Hyperbolic regression}
+
+The equation for hyperbolic is \fbox{$a+\displaystyle\frac{b}{x}$}.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\xinthypreg[coeffa=...,coeffb=...,round=...]{xlist}{ylist}
+\end{tcblisting}
+
+By default, \MontreCode{coeffa=hyprega} and \MontreCode{coeffb=hypregb}.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\def\LLX{83,71,64,69,69,64,68,59,81,91,57,65,58,62}%
+\def\LLY{183,168,171,178,176,172,165,158,183,182,163,175,164,175}%
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+%global roudings
+\xinthypreg[round=2]{\LLX}{\LLY}%
+$a \approx \hyprega$ and $b \approx \hypregb$
+\end{tcblisting}
+
+\subsection{Logarithmic regression}
+
+The equation for logarithmic is \fbox{$a+b\,\log(x)$}.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\xintlogreg[coeffa=...,coeffb=...,round=...]{xlist}{ylist}
+\end{tcblisting}
+
+By default, \MontreCode{coeffa=logrega} and \MontreCode{coeffb=logregb}.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\def\LLX{83,71,64,69,69,64,68,59,81,91,57,65,58,62}%
+\def\LLY{183,168,171,178,176,172,165,158,183,182,163,175,164,175}%
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+%individual roudings
+\xintlogreg[round=1/4]{\LLX}{\LLY}%
+$a \approx \logrega$ and $b \approx \logregb$
+\end{tcblisting}
+
+\subsection{Power regression}
+
+The equation for power is \fbox{$a \times x^{b}$}.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\xintpowreg[coeffa=...,coeffb=...,round=...]{xlist}{ylist}
+\end{tcblisting}
+
+By default, \MontreCode{coeffa=powrega} and \MontreCode{coeffb=powregb}.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\def\LLX{83,71,64,69,69,64,68,59,81,91,57,65,58,62}%
+\def\LLY{183,168,171,178,176,172,165,158,183,182,163,175,164,175}%
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+%default output
+\xintpowreg{\LLX}{\LLY}%
+$a \approx \powrega$ and $b \approx \powregb$
+\end{tcblisting}
+
+\subsection{Exponential regression}
+
+Available regressions are :
+
+\begin{itemize}
+	\item \fbox{$a \times b^{x}$} ;
+	\item \fbox{$e^{ax+b}$} ;
+	\item \fbox{$b\,e^{ax}$} ;
+	\item \fbox{$C+b\,e^{ax}$}.
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%a*b^x
+\xintexpabreg[coeffa=...,coeffb=...,round=...]{xlist}{ylist}
+\end{tcblisting}
+
+By default, \MontreCode{coeffa=expabrega} and \MontreCode{coeffb=expabregb}.
+
+\smallskip
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%e^(ax+b)
+\xintexpreg[coeffa=...,coeffb=...,round=...]{xlist}{ylist}
+\end{tcblisting}
+
+By default, \MontreCode{coeffa=exprega} and \MontreCode{coeffb=expregb}.
+
+\smallskip
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%b*e^(ax)
+\xintexpreg[Alt,coeffa=...,coeffb=...,round=...]{xlist}{ylist}
+\end{tcblisting}
+
+By default, \MontreCode{coeffa=exprega} and \MontreCode{coeffb=expregb}.
+
+\smallskip
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%C+b*e^(ax)
+\xintexpoffreg[offset=C,coeffa=...,coeffb=...,round=...]{xlist}{ylist}
+\end{tcblisting}
+
+By default, \MontreCode{coeffa=expregoffa} and \MontreCode{coeffb=expregoffb}.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\def\LLX{83,71,64,69,69,64,68,59,81,91,57,65,58,62}%
+\def\LLY{183,168,171,178,176,172,165,158,183,182,163,175,164,175}%
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+%a*b^x
+\xintexpabreg{\LLX}{\LLY}
+$a \approx \expabrega$ and $b \approx \expabregb$
+
+%e^(ax+b)
+\xintexpreg{\LLX}{\LLY}
+$a \approx \exprega$ and $b \approx \expregb$
+
+%b*e^(ax)
+\xintexpreg[Alt]{\LLX}{\LLY}
+$a \approx \exprega$ and $b \approx \expregb$
+
+%C+b*e^(ax)
+\xintexpoffreg[offset=50]{\LLX}{\LLY}
+$a \approx \expregoffa$ and $b \approx \expregoffb$
+\end{tcblisting}
+
+\pagebreak
+
+\section{Integration with other packages}
+
+\subsection{Number formatting}
+
+It is possible to format the results, according to locale rules, for example with \textsf{sinuitx}.
+
+\smallskip
+
+With \MontreCode{[locale=FR]} :
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+%a*b^x
+\xintexpabreg[round=1/3]{\LLX}{\LLY}%
+So we obtain $y \approx \num{\expabrega} \times e^{\num{\expabregb}\times x}$
+\end{tcblisting}
+
+\subsection{Plotting}
+
+It is also possible to integrate the package's commands into a plotting environment, such as \textsf{tikz} or \textsf{pgfplots}.
+
+\smallskip
+
+For example, with \textsf{tkz-grapheur} package :
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\def\LISTEXX{0,50,100,140}%
+\def\LISTEYY{275,290,315,350}%
+
+\begin{GraphiqueTikz}
+	[x=0.05cm,y=0.04cm,Xmin=0,Xmax=160,Xgrille=20,Xgrilles=10,
+	Origy=250,Ymin=250,Ymax=400,Ygrille=25,Ygrilles=5]
+	%window
+	\TracerAxesGrilles[Elargir=2.5mm,Police=\footnotesize]{auto}{auto}
+	%points
+	\TracerNuage[Style=o,CouleurNuage=red]{\LISTEXX}{\LISTEYY}
+	%regression expoffset C+b*epx(ax)
+	\xintexpoffreg[offset=250]{\LISTEXX}{\LISTEYY}
+	\DefinirCourbe[Nom=ajust,Couleur=blue,Trace]
+		<ajust>
+		{250+\expregoffb*exp(\expregoffa*x)}
+	%constructions
+	\PlacerImages[Couleurs=cyan/magenta,Traits]{ajust}{80}
+	\PlacerAntecedents[Style=x,Couleurs=blue/green!50!black,Traits]{ajust}{325}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\pagebreak
+
+\section{History}
+
+\begin{quote}
+\begin{verbatim}
+0.1.1: Bugfix
+0.1.0: Initial version
+\end{verbatim}
+\end{quote}
+
+\end{document}

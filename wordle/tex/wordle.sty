@@ -1,0 +1,298 @@
+% Author.........: C. Pierquet
+% licence........: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+% Inspiration....: https://tex.stackexchange.com/questions/659860/wordle-like-colored-letter-boxes-in-latex
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{wordle}[2023/09/03 v0.1.1 Wordle grid]
+% 0.1.1		Coorection d'un bug sur la version anglaise
+% 0.1.0		Version initiale + quelques modèles
+
+%------Packages utiles
+\RequirePackage{tikz}
+\RequirePackage{simplekv}
+\RequirePackage{xstring}
+
+%commandes utiles
+\usepackage{expl3}
+\ExplSyntaxOn
+
+%boite en [fr]
+\cs_new:Npn \l__sutom_boite_lettre:nn #1#2#3
+{
+	\ifboolKV[SUTOM]{Lettres}%
+	{%
+		\tikz \draw[rounded~corners=\fpeval{#3*\SutomUnit}cm,draw=\SutomBorder,line~width=\SutomWidth~mm,fill=#1] (0,0) rectangle++ (\SutomUnit,\SutomUnit) node[midway,font=\SutomFonte,text=\SutomFonteColor,scale=\SutomUnit] {#2} ;
+	}%
+	{%
+		\tikz \draw[rounded~corners=\fpeval{#3*\SutomUnit}cm,draw=\SutomBorder,line~width=\SutomWidth~mm,fill=#1] (0,0) rectangle++ (\SutomUnit,\SutomUnit) ;
+	}%
+}
+
+\cs_new:Npn \l__sutom_boite_lettre_rond:nn #1#2#3#4
+{
+	\IfStrEq{\SutomStyle}{rond}
+		{%
+			\tikz {\draw[rounded~corners=\fpeval{#4*\SutomUnit}cm,draw=\SutomBorder,line~width=\SutomWidth~mm,fill=#1] (0,0) rectangle++ (\SutomUnit,\SutomUnit) ;
+				\ifboolKV[SUTOM]{Lettres}%
+				{%
+					\draw[line~width=\SutomWidth~mm,draw=#2,fill=#2] ({0.5*\SutomUnit},{0.5*\SutomUnit}) circle[radius=\fpeval{0.5*\SutomUnit-0.1*\SutomWidth}] node[font=\SutomFonte,text=\SutomFonteColor,scale=\SutomUnit] {#3} ;
+				}%
+				{%
+					\draw[line~width=\SutomWidth~mm,draw=#2,fill=#2] ({0.5*\SutomUnit},{0.5*\SutomUnit}) circle[radius=\fpeval{0.5*\SutomUnit-0.1*\SutomWidth}];
+				}%
+			}%
+		}%
+		{%
+			\ifboolKV[SUTOM]{Lettres}%
+			{%
+				\tikz \draw[rounded~corners=\fpeval{#4*\SutomUnit}cm,line~width=0\SutomWidth~mm,draw=\SutomBorder,fill=#2] (0,0) rectangle++ (\SutomUnit,\SutomUnit) node[midway,font=\SutomFonte,text=\SutomFonteColor,scale=\SutomUnit] {#3} ;
+			}%
+			{%
+				\tikz \draw[rounded~corners=\fpeval{#4*\SutomUnit}cm,line~width=\SutomWidth~mm,draw=\SutomBorder,fill=#2] (0,0) rectangle++ (\SutomUnit,\SutomUnit) ;
+			}%
+		}%
+}
+
+%boite en [en]
+\cs_new:Npn \l__wordle_boite_lettre:nn #1#2#3
+{
+	\ifboolKV[WORDLE]{Letters}%
+	{%
+		\tikz \draw[rounded~corners=\fpeval{#3*\SutomUnit}cm,draw=\SutomBorder,line~width=\SutomWidth~mm,fill=#1] (0,0) rectangle++ (\SutomUnit,\SutomUnit) node[midway,font=\SutomFonte,text=\SutomFonteColor,scale=\SutomUnit] {#2} ;
+	}%
+	{%
+		\tikz \draw[rounded~corners=\fpeval{#3*\SutomUnit}cm,draw=\SutomBorder,line~width=\SutomWidth~mm,fill=#1] (0,0) rectangle++ (\SutomUnit,\SutomUnit) ;
+	}%
+}
+
+\cs_new:Npn \l__wordle_boite_lettre_rond:nn #1#2#3#4
+{
+	\IfStrEq{\SutomStyle}{default}
+		{%
+			\ifboolKV[WORDLE]{Letters}%
+			{%
+				\tikz \draw[rounded~corners=\fpeval{#4*\SutomUnit}cm,line~width=\SutomWidth~mm,draw=\SutomBorder,fill=#2] (0,0) rectangle++ (\SutomUnit,\SutomUnit) node[midway,font=\SutomFonte,text=\SutomFonteColor,scale=\SutomUnit] {#3} ;
+			}%
+			{%
+				\tikz \draw[rounded~corners=\fpeval{#4*\SutomUnit}cm,line~width=\SutomWidth~mm,draw=\SutomBorder,fill=#2] (0,0) rectangle++ (\SutomUnit,\SutomUnit) ;
+			}%
+		}%
+		{%
+			\tikz {\draw[rounded~corners=\fpeval{#4*\SutomUnit}cm,draw=\SutomBorder,line~width=\SutomWidth~mm,fill=#1] (0,0) rectangle++ (\SutomUnit,\SutomUnit) ;
+				\ifboolKV[WORDLE]{Letters}%
+				{%
+					\draw[line~width=\SutomWidth~mm,draw=#2,fill=#2] ({0.5*\SutomUnit},{0.5*\SutomUnit}) circle[radius=\fpeval{0.5*\SutomUnit-0.1*\SutomWidth}] node[font=\SutomFonte,text=\SutomFonteColor,scale=\SutomUnit] {#3} ;
+				}%
+				{%
+					\draw[line~width=\SutomWidth~mm,draw=#2,fill=#2] ({0.5*\SutomUnit},{0.5*\SutomUnit}) circle[radius=\fpeval{0.5*\SutomUnit-0.1*\SutomWidth}];
+				}%
+			}%
+		}%
+}
+
+\seq_new:N \l_wordle_seq   % the answer
+\prop_new:N \l_wordle_prop % count letters in wordle
+\seq_new:N \l_words_seq    % list of all words
+\prop_new:N \l_word_prop   % count letters in word
+\int_new:N \l_letter_int   % index of current letter in word
+
+% a conditional for nonnegative prop counter in \l_word_prop
+\prg_new_protected_conditional:Npnn \if_wordle_letter_nonnegative:n #1 {TF}
+{
+	\prop_if_in:NnTF \l_word_prop {#1}
+	{ % letter in in prop
+		\prop_get:NnN \l_word_prop {#1} \l_tmpa_tl
+		\int_compare:nNnTF {\l_tmpa_tl} < {0}
+		{\prg_return_false:} {\prg_return_true:}
+	}
+	{\prg_return_false:}
+}
+
+% a conditional for comparing letters
+\prg_new_protected_conditional:Npnn \if_wordle_letters_agree:n #1 {T, TF}
+{
+	\str_set:Nx \l_tmpa_str {\seq_item:Nn \l_wordle_seq {\l_letter_int}}
+	\str_if_eq:nVTF {#1} \l_tmpa_str {\prg_return_true:} {\prg_return_false:}
+}
+
+% add #3 to <prop=#1>.#2
+\cs_new_protected:Npn \wordle__add_to_prop_counter:Nnn #1#2#3
+{
+	\prop_put_if_new:Nnn #1 {#2} {0}
+	\prop_pop:NnN        #1 {#2} \l_tmp_a
+	\prop_put:Nnx        #1 {#2} {\int_eval:n {#3+\l_tmp_a}}
+}
+
+% make \l_wordle_prop<x> = #x's in wordle_seq
+\cs_new_protected:Npn \count_letters_in_wordle:n #1
+{
+	\wordle__add_to_prop_counter:Nnn \l_wordle_prop {#1} {1}%
+}
+
+% first run: subtract correct matches from letter counts
+\cs_new:Npn \count_letters_in_word:n #1
+{
+	\int_incr:N \l_letter_int
+	\if_wordle_letters_agree:nT {#1}
+	{ \wordle__add_to_prop_counter:Nnn \l_word_prop {#1} {-1} }%
+}
+
+%commande [fr]
+% on the second run we print a coloured wordle word
+\cs_new:Npn \write_letters_in_word:n #1
+{
+	\int_incr:N \l_letter_int
+	\if_wordle_letters_agree:nTF {#1}
+	{ \l__sutom_boite_lettre:nn {\SutomBienPlacee}{#1}{\SutomRounded} }
+	{
+		% subtract 1 from the prop counter
+		\wordle__add_to_prop_counter:Nnn \l_word_prop {#1} {-1}
+		% if the counter is non-negative this is a pseudo match
+		\if_wordle_letter_nonnegative:nTF {#1}
+		{ \l__sutom_boite_lettre_rond:nn {\SutomCoulFond}{\SutomCoulMalPlacee}{#1}{\SutomRounded} }
+		{ \l__sutom_boite_lettre:nn {\SutomCoulFond}{#1}{\SutomRounded} }
+	}%
+}
+
+%commande [en]
+% on the second run we print a coloured wordle word
+\cs_new:Npn \write_letters_in_wordle:n #1
+{
+	\int_incr:N \l_letter_int
+	\if_wordle_letters_agree:nTF {#1}
+	{ \l__wordle_boite_lettre:nn {\SutomBienPlacee}{#1}{\SutomRounded} }
+	{
+		% subtract 1 from the prop counter
+		\wordle__add_to_prop_counter:Nnn \l_word_prop {#1} {-1}
+		% if the counter is non-negative this is a pseudo match
+		\if_wordle_letter_nonnegative:nTF {#1}
+		{ \l__wordle_boite_lettre_rond:nn {\SutomCoulFond}{\SutomCoulMalPlacee}{#1}{\SutomRounded} }
+		{ \l__wordle_boite_lettre:nn {\SutomCoulFond}{#1}{\SutomRounded} }
+	}%
+}
+
+%clés [fr]
+\defKV[SUTOM]{%
+	Couleurs=\def\SutomCouleurs{#1},%
+	Arrondi=\def\SutomRounded{#1},%
+	Unite=\def\SutomUnit{#1},%
+	Police=\def\SutomFonte{#1},%
+	CouleurLettres=\def\SutomFonteColor{#1},%
+	Style=\def\SutomStyle{#1},%
+	Epaisseur=\def\SutomWidth{#1},%
+	CouleurBordure=\def\SutomBorder{#1}
+}
+
+\setKVdefault[SUTOM]{%
+	Couleurs={cyan!75!black,yellow,red},%
+	Arrondi=0.1,%
+	Unite=1,%
+	Police=\LARGE\bfseries\sffamily,%
+	CouleurLettres=white,%
+	Lettres=true,%
+	Style=rond,%
+	Epaisseur=0.25,%
+	CouleurBordure=white
+}
+
+%environnement [fr]
+\NewDocumentEnvironment{GrilleSutom}{ O{} m b }%
+{%
+	\restoreKV[SUTOM]%
+	\setKV[SUTOM]{#1}%
+	\StrBefore{\SutomCouleurs}{,}[\SutomCoulFond]%
+	\StrBetween[1,2]{\SutomCouleurs}{,}{,}[\SutomCoulMalPlacee]%
+	\StrBehind[2]{\SutomCouleurs}{,}[\SutomBienPlacee]%
+	\StrLen{#2}[\SutomNbLettres]%
+	\def\SutomLarg{\fpeval{1.01*\SutomUnit*\SutomNbLettres}}%
+	\begin{minipage}{\SutomLarg~cm}
+		\lineskip=0pt%
+		\parindent=0pt%
+		% split the answer into letters
+		\seq_set_split:Nnn \l_wordle_seq {} {#2}
+		% we need to count the number of times each letter appears in \l_wordle_seq
+		\prop_clear:N \l_wordle_prop
+		\tl_map_function:nN {#2} \count_letters_in_wordle:n
+		% split the solution into words
+		\regex_split:nnN {\s} {#3} \l_words_seq
+		% process the words
+		\seq_map_inline:Nn \l_words_seq
+		{
+			\int_zero:N \l_letter_int
+			\prop_set_eq:NN \l_word_prop \l_wordle_prop
+			\tl_map_function:nN {##1} \count_letters_in_word:n
+			\int_zero:N \l_letter_int
+			\tl_map_function:nN {##1} \write_letters_in_word:n
+			\par
+		}
+}%
+{%
+	\end{minipage}%
+}
+
+%clés [en]
+\definecolor{WordleBack}{HTML}{797D7F}
+\definecolor{WordleBad}{HTML}{CAB557}
+\definecolor{WordleGood}{HTML}{6AAB64}
+
+\defKV[WORDLE]{%
+	Colors=\def\SutomCouleurs{#1},%
+	Rounded=\def\SutomRounded{#1},%
+	Unit=\def\SutomUnit{#1},%
+	Fonte=\def\SutomFonte{#1},%
+	ColorLetters=\def\SutomFonteColor{#1},%
+	Style=\def\SutomStyle{#1},%
+	Thickness=\def\SutomWidth{#1},%
+	BorderColor=\def\SutomBorder{#1}
+}
+
+\setKVdefault[WORDLE]{%
+	Colors={WordleBack,WordleBad,WordleGood},%
+	Rounded=0.1,%
+	Unit=1,%
+	Fonte=\LARGE\bfseries\sffamily,%
+	CouleurLettres=white,%
+	Letters=true,%
+	Style=default,%
+	Thick=0.25,%
+	BorderColor=white
+}
+
+%environnement [en]
+\NewDocumentEnvironment{WordleGrid}{ O{} m b }
+{%
+	\restoreKV[WORDLE]%
+	\setKV[WORDLE]{#1}%
+	\StrBefore{\SutomCouleurs}{,}[\SutomCoulFond]%
+	\StrBetween[1,2]{\SutomCouleurs}{,}{,}[\SutomCoulMalPlacee]%
+	\StrBehind[2]{\SutomCouleurs}{,}[\SutomBienPlacee]%
+	\StrLen{#2}[\SutomNbLettres]%
+	\def\SutomLarg{\fpeval{1.01*\SutomUnit*\SutomNbLettres}}%
+	\begin{minipage}{\SutomLarg~cm}
+		\parindent=0pt
+		\lineskip=0pt
+		% split the answer into letters
+		\seq_set_split:Nnn \l_wordle_seq {} {#2}
+		% we need to count the number of times each letter appears in \l_wordle_seq
+		\prop_clear:N \l_wordle_prop
+		\tl_map_function:nN {#2} \count_letters_in_wordle:n
+		% split the solution into words
+		\regex_split:nnN {\s} {#3} \l_words_seq
+		% process the words
+		\seq_map_inline:Nn \l_words_seq
+		{
+			\int_zero:N \l_letter_int
+			\prop_set_eq:NN \l_word_prop \l_wordle_prop
+			\tl_map_function:nN {##1} \count_letters_in_word:n
+			\int_zero:N \l_letter_int
+			\tl_map_function:nN {##1} \write_letters_in_wordle:n
+			\par
+		}
+}%
+{%
+	\end{minipage}%
+}
+
+\ExplSyntaxOff
+
+\endinput

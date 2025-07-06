@@ -1,0 +1,251 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode}
+
+\documentclass[a4paper,english,11pt]{article}
+\usepackage[margin=1cm,includefoot]{geometry}
+\usepackage[english]{tkz-grapheur}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,minted}
+\usepackage{babel}
+
+\begin{document}
+
+\part*{Integrals examples}
+
+\section{Below cruve, by default}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+		[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\DrawAxisGrids[Behind,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefineCurve[Name=ch]<h>{0.25*(x+2)^2+1}
+	\DrawIntegral%
+		[Colors=blue/cyan,Style=fill]%
+		{h(x)} %formula
+		{-5.25}{1.5}
+	\DrawCurve[Color=red]{h(x)}
+	\DrawAxisGrids[Above,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphTikz}
+\end{tcblisting}
+
+\section{Behind interpolation curve}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+		[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\DrawAxisGrids[Grads=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefineLstInterpol{(-6,4)(-2,-2)(3,3.5)}[\interpoA]
+	\DefineInterpoCurve[Name=interpotest,Tension=1.05]{\interpoA}
+	\DrawIntegral%
+		[NameInterpo=interpotest,Colors=blue/cyan,Style=fill,Type=itp,Tension=1.05]%
+		{\interpoA} %pointsinterpo
+		{-5.25}{1.5}
+	\DrawInterpoCurve[Color=red,Tension=1.05]{\interpoA}
+	\DrawAxisGrids[Grid=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphTikz}
+\end{tcblisting}
+
+\section{Behind cubic spline}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+		[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\DrawAxisGrids[Grads=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefineLstSpline{-6/4/-2§-5/2/-2§-4/0/-2§-2/-2/0§1/2/2§3/3.5/0.5}[\lstsplineA]
+	\DefineSplineCurve[Name=splinetest]{\lstsplineA}<\SplineTeal>
+	\DrawIntegral%
+		[NameSpline=\SplineTeal,Type=spl,Colors=blue/purple,Style=hatch]%
+		{splinetest} %namesplinecurve
+		{-5}{2}
+	\DrawSplineCurve[Color=teal]{\lstsplineA}
+	\DrawAxisGrids[Grid=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphTikz}
+\end{tcblisting}
+
+\section{Between curves}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\DrawAxisGrids[Grads=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefineCurve[Name=ch]<h>{0.25*(x+2)^2-1}
+	\DefineCurve[Name=ck]<k>{-0.25*x+1}
+	\FindIntersections[Name=ITSC,Disp=false]{ch}{ck}
+	\DrawIntegral%
+		[Colors=olive/pink,Style=fill,Type=fct/fct,Bounds=node/abs]%
+		{h(x)}[k(x)] %formules
+		{(ITSC-1)}{1.5}
+	\DrawCurve[Color=red]{h(x)}
+	\DrawCurve[Color=blue]{k(x)}
+	\DrawAxisGrids[Grid=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphTikz}
+\end{tcblisting}
+
+\section{Between splines}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+		[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\DrawAxisGrids[Grads=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefineLstSpline{-6/4/-2§-5/2/-2§-4/0/-2§-2/-2/0§1/2/2§3/3.5/0.5}[\lstsplineA]
+	\DefineLstSpline{-6/-2/3§-2/4/0§3/-1/0}[\lstsplineB]
+	\DefineSplineCurve[Name=splinetestolive]{\lstsplineA}<\SplineOlive>
+	\DefineSplineCurve[Name=splinetestteal]{\lstsplineB}<\SplineTeal>
+	\FindIntersections[Name=ITT,Disp=false]{splinetestteal}{splinetestolive}
+	\DrawIntegral%
+		[NameSpline=\SplineTeal,NameSplineB=\SplineOlive,Type=spl/spl,Colors=blue/purple,Bounds=nodes]%
+		{splinetestolive} %Namecourbespline
+		[splinetestteal]  %Namecourbespline
+		{(ITT-1)}{(ITT-2)}
+	\DrawSplineCurve[Color=teal]{\lstsplineA}
+	\DrawSplineCurve[Color=olive]{\lstsplineB}
+	\DrawAxisGrids[Grid=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphTikz}
+\end{tcblisting}
+
+\section{Between interpolations}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\DrawAxisGrids[Grads=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefineLstInterpol{(-6,4)(-2,-2)(3,3.5)}[\interpoA]
+	\DefineInterpoCurve[Name=interpotest]{\interpoA}
+	\DefineLstInterpol{(-6,-2)(-1,4)(3,0)}[\interpoB]
+	\DefineInterpoCurve[Name=interpotesta]{\interpoB}
+	\DrawIntegral%
+	[NameInterpo=interpotesta,NameInterpoB=interpotest,Type=itp/itp,Colors=olive/pink]%
+		{\interpoB} %pointsinterpo
+		[\interpoA] %pointsinterpo
+		{-2}{1}
+	\DrawInterpoCurve[Color=red]{\interpoA}
+	\DrawInterpoCurve[Color=blue]{\interpoB}
+	\DrawAxisGrids[Grid=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphTikz}
+\end{tcblisting}
+
+\section{Betweend function and spline}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\DrawAxisGrids[Grads=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefineCurve[Name=ch]<h>{-0.25*(x+2)^2+3.5}
+	\DefineLstSpline{-6/4/-2§-5/2/-2§-4/0/-2§-2/-2/0§1/2/2§3/3.5/0.5}[\lstsplineA]
+	\DefineSplineCurve[Name=splineblue]{\lstsplineA}<\Splineblue>
+	\DrawIntegral%
+		[NameSplineB=\Splineblue,Type=fct/spl,Colors=olive/pink]%
+		{h(x)}       %formule
+		[splineblue] %Namecourbespline
+		{-3}{0}
+	\DrawCurve[Color=red]{h(x)}
+	\DrawSplineCurve[Color=blue]{\lstsplineA}
+	\DrawAxisGrids[Grid=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphTikz}
+\end{tcblisting}
+
+\section{Between spline and function}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\DrawAxisGrids[Grads=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefineCurve[Name=ch]<h>{0.25*(x+2)^2-2}
+	\DefineLstSpline{-6/4/2§-5/-2/-2§-4/0/2§-2/2/0§1/-2/-2§3/3.5/-0.5}[\lstsplineA]
+	\DefineSplineCurve[Name=splineblue]{\lstsplineA}<\Splineblue>
+	\DrawIntegral%
+		[NameSpline=\Splineblue,Type=spl/fct,Colors=olive/pink]%
+		{splineblue} %Namecourbespline
+		[h(x)]       %formule
+		{-3}{-1}
+	\DrawCurve[Color=red]{h(x)}
+	\DrawSplineCurve[Color=blue]{\lstsplineA}
+	\DrawAxisGrids[Grid=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphTikz}
+\end{tcblisting}
+
+\section{Between function and interpo}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\DrawAxisGrids[Grads=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefineCurve[Name=cm]<m>{-0.25*(x+2)^2+4}
+	\DefineLstInterpol{(-6,4)(-5,-2)(-2,1)(1,-2)(3,3)}[\interpoB]
+	\DefineInterpoCurve[Name=interpotestb]{\interpoB}
+	\DrawIntegral%
+	[NameInterpoB=interpotestb,Type=fct/itp,Colors=olive/pink]%
+		{m(x)}      %formule
+		[\interpoB] %pointsinterpo
+		{-4}{1}
+	\DrawCurve[Color=red]{m(x)}
+	\DrawInterpoCurve[Color=blue]{\interpoB}
+	\DrawAxisGrids[Grid=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphTikz}
+\end{tcblisting}
+
+\section{Between interpo and function}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\DrawAxisGrids[Grads=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefineCurve[Name=courbeQ]<q>{0.25*(x+2)^2-2.5}
+	\DefineLstInterpol{(-6,-2)(-5,4)(-2,-1)(1,2)(3,-2)}[\interpoA]
+	\DefineInterpoCurve[Name=interpotest]{\interpoA}
+	\FindIntersections[Name=FGH,Disp]{interpotest}{courbeQ}
+	\DrawIntegral%
+		[NameInterpo=interpotest,Type=itp/fct,Colors=olive/pink,Bounds=nodes]%
+		{\interpoA} %pointsinterpo
+		[q(x)]      %formule
+		{(FGH-1)}{(FGH-2)}
+	\DrawCurve[Color=red]{q(x)}
+	\DrawInterpoCurve[Color=blue]{\interpoA}
+	\DrawAxisGrids[Grid=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphTikz}
+\end{tcblisting}
+
+\section{Between spline and interpo}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\DrawAxisGrids[Grads=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefineLstSpline{-6/-2/2§-3/4/0§3/-2/0}[\lstsplineA]
+	\DefineSplineCurve[Name=splinered]{\lstsplineA}<\Splinered>
+	\DefineLstInterpol{(-6,4)(-5,-2)(-2,1)(1,-2)(3,3)}[\interpoB]
+	\DefineInterpoCurve[Name=interpotestb]{\interpoB}
+	\DrawIntegral%
+		[NameInterpoB=interpotestb,NameSpline=\Splinered,Type=spl/itp,Colors=olive/pink]%
+		{splinered} %Namecourbespline
+		[\interpoB] %pointsinterpo
+		{-4}{-2}
+	\DrawSplineCurve[Color=red]{\lstsplineA}
+	\DrawInterpoCurve[Color=blue]{\interpoB}
+	\DrawAxisGrids[Grid=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphTikz}
+\end{tcblisting}
+
+\section{Between interpo and spline}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphTikz}%
+	[x=0.8cm,y=1cm,Xmin=-7,Xmax=4,Ymin=-3,Ymax=5]
+	\DrawAxisGrids[Grads=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+	\DefineLstSpline{-6/4/-2§-3/-2.25/0§3/3/0}[\lstsplineB]
+	\DefineSplineCurve[Name=splineblue]{\lstsplineB}<\Splineblue>
+	\DefineLstInterpol{(-6,-2)(-5,4)(-2,-1)(1,2)(3,-2.5)}[\interpoA]
+	\DefineInterpoCurve[Name=interpotest]{\interpoA}
+	\FindIntersections[Name=UIO,Disp]{interpotest}{splineblue}
+	\DrawIntegral%
+		[NameInterpo=interpotest,NameSplineB=\Splineblue,Type=itp/spl,Colors=olive/pink,Bounds=nodes]%
+		{\interpoA}  %pointsinterpo
+		[splineblue] %Namecourbespline
+		{(UIO-1)}{(UIO-2)}
+	\DrawSplineCurve[Color=blue]{\lstsplineB}
+	\DrawInterpoCurve[Color=red]{\interpoA}
+	\DrawAxisGrids[Grid=false,Enlarge=2.5mm]{-7,-6,...,4}{-3,-2,...,5}
+\end{GraphTikz}
+\end{tcblisting}
+
+\end{document}
