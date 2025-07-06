@@ -1,0 +1,50 @@
+# My LaTeX Packages
+
+https://ctan.org/author/pierquet
+
+* calculatoritems
+* cascadiamono-otf
+* circularglyphs
+* coloredbelts
+* commalists-tools
+* couleurs-fr
+* CreationBoites
+* customenvs
+* euromoney
+* FenetreCas
+* highlightx
+* inlinegraphicx
+* ipsum
+* jetbrainsmono-otf
+* JeuxCartes
+* logoetalab
+* nodepthtext
+* OutilsGeomTikZ
+* PanneauxRoute
+* PapierGurvan
+* pictochrono
+* PixelArtTikz
+* postit
+* ProfLycee
+* ProfSio
+* pynotebook
+* quizztex
+* randintlist
+* ResolSysteme
+* Scrabble
+* sim-os-menus
+* SympyCalc
+* TangramTikZ
+* thematicpuzzle
+* tikz2d-fr
+* tikz3d-fr
+* tikz-decofonts
+* tikz-triminos
+* timeop
+* tkz-bernoulli
+* tkz-grapheur
+* TrivialPursuit
+* vectorlogos
+* wordle
+* WriteOnGrid
+* xint-regression
