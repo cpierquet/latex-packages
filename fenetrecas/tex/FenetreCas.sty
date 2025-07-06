@@ -1,0 +1,346 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c
+% or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{FenetreCas}[2023/11/05 0.1.4 Simuler une fenetre CAS type Geogebra ou Xcas]
+% 0.1.4	Passage \tikzstyle vers \tikzset
+% 0.1.3	Clé [PosRes] pour positionner la réponse (gauche/centre/droite) + Correction de bugs mineurs.
+% 0.1.2	Clés [Select] pour les numéros avec des ronds.
+% 0.1.1	Clés [FondCouleur] pour le fond des cases.
+% 0.1.0	Version initiale.
+
+%------Option(s)
+
+%------Packages utiles
+\RequirePackage{tikz}
+\RequirePackage{xstring}
+\RequirePackage{xintexpr}
+\RequirePackage{simplekv}
+\RequirePackage{settobox}
+%librairies tikz
+\usetikzlibrary{calc,positioning}
+
+%%------FENÊTRE CALCUL FORMEL GEOGEBRA
+%compteurs pour les n° de lignes
+\newcounter{geogebracfnum}
+
+%--création de l'environnement, en TikZ
+\newsavebox{\maboiteggbtitre}
+\newlength{\hauteurboiteggbtitre}
+
+%def des clés
+\defKV[paramfengeogebracf]{%
+	Largeur=\def\GEOCFlarg{#1},%
+	CouleurEntete=\def\GEOCFcoulentete{#1},%
+	LargeurNumero=\def\GEOCFlargnum{#1},%
+	CouleurNumero=\def\GEOCFcoulnum{#1},%
+	PoliceEntete=\def\GEOCFfontenete{#1},%
+	PoliceNumero=\def\GEOCFpolnum{#1},%
+	Titre=\def\GEOCFtitre{#1}
+}
+\setKVdefault[paramfengeogebracf]{%
+	Largeur=10,%
+	CouleurEntete=lightgray!25,%
+	LargeurNumero=1,%
+	CouleurNumero=cyan!5,%
+	PoliceEntete=\bfseries\large\sffamily,%
+	PoliceNumero=\large\sffamily,%
+	Titre={$\triangleright$ Calcul formel},%
+	Entete=true
+}
+
+\NewDocumentEnvironment{CalculFormelGeogebra}{ O{} D<>{} }
+{%
+	\useKVdefault[paramfengeogebracf]%
+	\setKV[paramfengeogebracf]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\setcounter{geogebracfnum}{0}%on repart avec le compteur à 0
+	\sbox{\maboiteggbtitre}{\GEOCFfontenete\GEOCFtitre}\settoboxtotalheight{\hauteurboiteggbtitre}{\maboiteggbtitre}
+	\begin{tikzpicture}[#2]
+		%ENTETE
+		\ifboolKV[paramfengeogebracf]{Entete}
+			{
+				\def\HCroix{\the\hauteurboiteggbtitre}%
+				\draw[semithick,fill=\GEOCFcoulentete] (0,0) rectangle (\GEOCFlarg,{2.25*\the\hauteurboiteggbtitre}) ;%
+				\draw (0,{2.25*0.5*\the\hauteurboiteggbtitre}) node[right=4pt,font=\GEOCFfontenete] {\GEOCFtitre} ;%
+				%crois fermeture
+				\coordinate (CROIXGEO) at ($({\GEOCFlarg},{2.25*0.5*\the\hauteurboiteggbtitre})+({-\the\hauteurboiteggbtitre},0)$) ;
+				\draw[semithick] ($(CROIXGEO)+({-0.35*\the\hauteurboiteggbtitre},{0.35*\the\hauteurboiteggbtitre})$)--++({0.7*\HCroix},{-0.7*\HCroix}) ;
+				\draw[semithick] ($(CROIXGEO)+({-0.35*\the\hauteurboiteggbtitre},{-0.35*\the\hauteurboiteggbtitre})$)--++({0.7*\HCroix},{0.7*\HCroix}) ;
+				\draw[semithick] ($(CROIXGEO)+({-0.5*\the\hauteurboiteggbtitre},{0.5*\the\hauteurboiteggbtitre})$)rectangle++({\HCroix},{-\HCroix}) ;
+			}
+			{}
+}%
+{%
+	\end{tikzpicture}%
+}
+
+%--création des lignes, une par une
+%commande externe pour les hauteurs
+\newsavebox{\maboiteggbcmd}
+\newsavebox{\maboiteggbres}
+\newlength{\hauteurboiteggbcmd}
+\newlength{\hauteurboiteggbres}
+\newlength{\offsetcfgeogebra}
+
+%def des clés
+\defKV[paramlgeogebra]{%
+	HauteurLigne=\def\GEOCFhauteur{#1},%
+	TailleCommande=\def\GEOCFtaillecmd{#1},%
+	TailleResultat=\def\GEOCFtailleres{#1},%
+	ElargirAuto=\def\GEOCFelargirauto{#1},%
+	MargeV=\def\GEOCFoffset{#1},%
+	MargeH=\def\GEOCFoffseth{#1},%
+	CouleurFond=\def\GEOCFcolfond{#1},%
+	CouleurSelect=\def\GEOCFcolselect{#1},%
+	PosRes=\def\GEOCFposrep{#1}
+}
+\setKVdefault[paramlgeogebra]{%
+	HauteurLigne=2,%
+	TailleCommande=\normalsize,%
+	TailleResultat=\large,%
+	ElargirAuto=1,%
+	HauteurAuto=true,%
+	MargeV=6pt,%
+	MargeH=0.2,%
+	Fond=false,%
+	CouleurFond=white,%
+	Select=true,%
+	CouleurSelect=white,%
+	PosRes=gauche
+}
+
+\NewDocumentCommand\LigneCalculsGeogebra{ O{} m m }{%
+	%clés
+	\useKVdefault[paramlgeogebra]%
+	\setKV[paramlgeogebra]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%récupération des tailles des lignes cmd et res poour ajustement
+	\setlength{\offsetcfgeogebra}{\GEOCFoffset}
+	\ifboolKV[paramlgeogebra]{HauteurAuto}
+		{%
+			\sbox{\maboiteggbcmd}{\pgfinterruptpicture \GEOCFtaillecmd#2\endpgfinterruptpicture}\settoboxtotalheight{\hauteurboiteggbcmd}{\maboiteggbcmd}
+			\sbox{\maboiteggbres}{\pgfinterruptpicture \GEOCFtailleres#3\endpgfinterruptpicture}\settoboxtotalheight{\hauteurboiteggbres}{\maboiteggbres}
+			\def\GEOCFhauteur{\GEOCFelargirauto*(\the\hauteurboiteggbcmd+\the\hauteurboiteggbres+4*\the\offsetcfgeogebra)}
+		}
+		{}
+	%compteur et raccourcis
+	\addtocounter{geogebracfnum}{1}%
+	\def\GGBL{\thegeogebracfnum}%
+	\def\GGBLA{\inteval{\GGBL-1}}%
+	%déclaration des nœuds (les "4" coins des blocs numéros)
+	\xintifboolexpr{\GGBL == 1}%si c'est la première ligne
+		{\coordinate (A0\GGBL) at (0,0);}
+		{\coordinate (A0\GGBL) at (A1\GGBLA) ;}
+	\coordinate (A1\GGBL) at ($(A0\GGBL) + (0,{-\GEOCFhauteur})$);
+	\coordinate (A2\GGBL) at ($(A0\GGBL) + ({\GEOCFlargnum},0)$);
+	\coordinate (A3\GGBL) at ($(A1\GGBL) + ({\GEOCFlargnum},0)$);
+	\coordinate (AH\GGBL) at ($(A0\GGBL) + ({0.5*\GEOCFlargnum},{-0.33*\GEOCFhauteur})$);
+	\coordinate (AM\GGBL) at ($(A0\GGBL) + ({0.5*\GEOCFlargnum},{-0.5*\GEOCFhauteur})$);
+	\coordinate (AB\GGBL) at ($(A0\GGBL) + ({0.5*\GEOCFlargnum},{-0.66*\GEOCFhauteur})$);
+	%les tracés
+	\ifboolKV[paramlgeogebra]{Select}%si on choisit les petits ronds par défaut ^^
+		{%
+			\draw[semithick,fill=\GEOCFcoulnum] (A0\GGBL) rectangle (A3\GGBL) ; %
+			\draw[semithick,draw=black,fill=\GEOCFcolselect] ($(AM\GGBL) + (0,-0.375)$) circle[radius=4pt] ;%
+			\draw[black] ($(AM\GGBL) + (0,0.375)$) node[font=\GEOCFpolnum] {\GGBL} ;%
+			
+		}%
+		{%
+			\draw[semithick,fill=\GEOCFcoulnum] (A0\GGBL) rectangle (A3\GGBL) node[midway,font=\GEOCFpolnum] {\GGBL} ;%
+		}%
+	\ifboolKV[paramlgeogebra]{Fond}
+		{\draw[semithick,fill=\GEOCFcolfond] (A2\GGBL) rectangle++({\GEOCFlarg-\GEOCFlargnum},{-\GEOCFhauteur}) ;}
+		{\draw[semithick] (A2\GGBL) rectangle++({\GEOCFlarg-\GEOCFlargnum},{-\GEOCFhauteur}) ;}
+	%les commande/résultat
+	\ifboolKV[paramlgeogebra]{HauteurAuto}
+		{%
+			%commande
+			\draw ($(A2\GGBL) + ({\GEOCFoffseth},{-\the\offsetcfgeogebra-0.5*\GEOCFelargirauto*\the\hauteurboiteggbcmd})$) node[font=\GEOCFtaillecmd,right] {#2} ;
+			%résultat
+			\IfStrEq{\GEOCFposrep}{gauche}
+				{%
+					\draw ($(A3\GGBL) + ({\GEOCFoffseth},{\the\offsetcfgeogebra+0.5*\GEOCFelargirauto*\the\hauteurboiteggbres})$) node[font=\GEOCFtailleres,right] {#3} ;
+				}{}%
+			\IfStrEq{\GEOCFposrep}{droite}
+				{%
+					\draw ($(A3\GGBL) + ({\GEOCFlarg-\GEOCFlargnum},0) + ({-\GEOCFoffseth},{\the\offsetcfgeogebra+0.5*\GEOCFelargirauto*\the\hauteurboiteggbres})$) node[font=\GEOCFtailleres,left] {#3} ;
+					%\draw ($(A3\GGBL) + ({\GEOCFlarg-\GEOCFlargnum},0) + ({-\GEOCFoffseth},{\the\offsetcfgeogebra+0.5*\GEOCFelargirauto*\the\hauteurboiteggbres})$) node[font=\GEOCFtailleres,left] {#3} ;
+				}{}%
+			\IfStrEq{\GEOCFposrep}{centre}
+				{%
+					\draw ($(A3\GGBL) + ({0.5*(\GEOCFlarg-\GEOCFlargnum)},{\the\offsetcfgeogebra+0.5*\GEOCFelargirauto*\the\hauteurboiteggbres})$) node[font=\GEOCFtailleres] {#3} ;
+				}{}%
+		}%
+		{%
+			%commande
+			\draw ($(A2\GGBL) + ({\GEOCFoffseth},{-0.25*\GEOCFhauteur})$) node[font=\GEOCFtaillecmd,right] {#2} ;
+			%résultat
+			\IfStrEq{\GEOCFposrep}{gauche}
+				{%
+					\draw ($(A2\GGBL) + ({\GEOCFoffseth},{-0.66*\GEOCFhauteur})$) node[font=\GEOCFtailleres,right] {#3} ;
+				}{}%
+			\IfStrEq{\GEOCFposrep}{droite}
+				{%
+					\draw ($(A2\GGBL) + ({\GEOCFlarg-\GEOCFlargnum},0) + ({-\GEOCFoffseth},{-0.66*\GEOCFhauteur})$) node[font=\GEOCFtailleres,left] {#3} ;
+				}{}%
+			\IfStrEq{\GEOCFposrep}{centre}
+				{%
+					\draw ($(A2\GGBL) + ({0.5*(\GEOCFlarg-\GEOCFlargnum)},0) + (0,{-0.66*\GEOCFhauteur})$) node[font=\GEOCFtailleres] {#3} ;
+				}%
+				{}%
+		}
+}
+
+%%------FENÊTRE CALCUL FORMEL XCAS
+\newcounter{xcascfnum}
+%def des clés
+\defKV[paramfenxcascf]{%
+	Largeur=\def\XCCFlarg{#1},%
+	EspaceLg=\def\XCCFesplg{#1},%
+	Couleur=\def\XCCFcouleur{#1},%
+	PoliceEntete=\def\XCCFfontenete{#1},%
+	TexteOptions=\def\XCCFtxtopts{#1}
+}
+\setKVdefault[paramfenxcascf]{%
+	Largeur=14,%
+	EspaceLg=2pt,%
+	Couleur=darkgray,%
+	Menu=true,%
+	Entete=true,%
+	NoirBlanc=false,%
+	PoliceEntete=\scriptsize,%
+	Sep=true,%
+	TexteOptions={Config : exact real RAD 12 xcas}
+}
+
+\NewDocumentEnvironment{CalculFormelXcas}{ O{} D<>{} }
+{%
+	\useKVdefault[paramfenxcascf]%
+	\setKV[paramfenxcascf]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\setcounter{xcascfnum}{0}%on repart avec le compteur à 0
+	%couleurs
+	\ifboolKV[paramfenxcascf]{NoirBlanc}%si NB=true
+		{
+			\def\CoulXCASPt{lightgray!20}\def\CoulXCASSave{lightgray!20}\def\CoulXCASMid{lightgray!20}\def\CoulXCASStop{black}
+		}
+		{
+			\def\CoulXCASPt{cyan!20}\def\CoulXCASSave{green!20}\def\CoulXCASMid{violet!20}\def\CoulXCASStop{red}
+		}
+	\begin{tikzpicture}[#2]
+		\tikzset{xcastitre/.style={font=\XCCFfontenete\ttfamily,inner sep=1pt,outer sep=0pt}}%
+		%\tikzstyle{xcastitre}=[font=\XCCFfontenete\ttfamily,inner sep=1pt,outer sep=0pt]
+		%LE BLOC "TITRE"
+		\ifboolKV[paramfenxcascf]{Entete}%si titre=true
+			{%
+				\node[semithick,draw=\XCCFcouleur,fill=\CoulXCASPt,above right,xcastitre] (PTIN) at ($(0,0)+(0,2pt)$) {\strut {\,?\,}} ;
+				\node[semithick,draw=\XCCFcouleur,fill=\CoulXCASSave,xcastitre,right=2pt] (SAUV) at (PTIN.east) {\strut \,Sauver\,} ;
+				\node[semithick,draw=\XCCFcouleur,fill=lightgray!20,xcastitre,above left] (CLOSE) at ($({\XCCFlarg},0)+(0,2pt)$) {\strut \,$\mathtt{\times}$\,} ;
+				\node[semithick,draw=\XCCFcouleur,fill=lightgray!20,xcastitre,left=6pt] (KBD) at (CLOSE.west) {\strut \:\:Kbd\:\:} ;
+				\node[semithick,draw=\XCCFcouleur,fill=lightgray!20,xcastitre,left=2pt] (STOP) at (KBD.west) {\strut \,\textcolor{\CoulXCASStop}{STOP}\,} ;
+				\draw[semithick,\XCCFcouleur,fill=\CoulXCASMid] ($(SAUV.north east)+({2pt},0)$) rectangle ($(STOP.south west)+({-2pt},0)$) node[midway,xcastitre,black] {\strut \XCCFtxtopts} ;
+			}
+			{}
+}%
+{%
+	\end{tikzpicture}%
+}
+
+\newsavebox{\maboitecmdxcas}
+\newsavebox{\maboiteresxcas}
+\newlength{\hauteurboitecmdxcas}
+\newlength{\hauteurboiteresxcas}
+\newlength{\offsetcfxcas}
+
+\defKV[paramlgxcas]{%
+	TailleCommande=\def\XCCFtaillecmd{#1},%
+	TailleResultat=\def\XCCFtailleres{#1},%
+	ElargirAuto=\def\XCCFelargirauto{#1},%
+	MargeV=\def\XCCFoffset{#1},%
+	MargeH=\def\XCCFoffseth{#1},%
+	CouleurCmd=\def\XCCFcoulcmd{#1},%
+	CouleurRes=\def\XCCFcoulres{#1},%
+	PosRes=\def\XCCFposres{#1},%
+	CouleurFond=\def\XCCFcolfond{#1}
+}
+
+\setKVdefault[paramlgxcas]{%
+	TailleCommande=\normalsize,%
+	TailleResultat=\large,%
+	ElargirAuto=1,%
+	MargeV=6pt,%
+	MargeH=0.15,%
+	CouleurCmd=red,%
+	CouleurRes=blue,%
+	PosRes=centre,%
+	Fond=false,%
+	CouleurFond=white
+}
+
+\NewDocumentCommand\LigneCalculsXcas{ O{} m m }{%
+	%clés
+	\useKVdefault[paramlgxcas]%
+	\setKV[paramlgxcas]{#1}% on paramètres les nouvelles clés et on les simplifie
+	%récupération des tailles des lignes cmd et res poour ajustement
+	\setlength{\offsetcfxcas}{\XCCFoffset}
+	\sbox{\maboitecmdxcas}{\pgfinterruptpicture \XCCFtaillecmd #2\endpgfinterruptpicture}\settoboxtotalheight{\hauteurboitecmdxcas}{\maboitecmdxcas}
+	\sbox{\maboiteresxcas}{\pgfinterruptpicture \XCCFtailleres #3\endpgfinterruptpicture}\settoboxtotalheight{\hauteurboiteresxcas}{\maboiteresxcas}
+	\def\XCCFhauteur{\XCCFelargirauto*(\the\hauteurboitecmdxcas+\the\hauteurboiteresxcas+4*\the\offsetcfxcas)}
+	%couleurs forcées
+	\ifboolKV[paramfenxcascf]{NoirBlanc}%si NB=true
+		{\def\XCCFcoulcmd{black}\def\XCCFcoulres{black}}{}
+	%compteur et raccourcis
+	\addtocounter{xcascfnum}{1}%
+	\def\XCL{\thexcascfnum}%
+	\def\XCLA{\inteval{\XCL-1}}%
+	%déclaration des nœuds (les "4" coins des blocs numéros)
+	\xintifboolexpr{\XCL == 1}%si c'est la première ligne
+		{\coordinate (A0\XCL) at (0,0);}
+		{\coordinate (A0\XCL) at ($(A1\XCLA)+(0,{-\XCCFesplg})$) ;}
+	\coordinate (A1\XCL) at ($(A0\XCL) + (0,{-\XCCFhauteur})$);
+	\coordinate (A2\XCL) at ($(A0\XCL) + ({\XCCFlarg},0)$);
+	\coordinate (A3\XCL) at ($(A1\XCL) + ({\XCCFlarg},0)$);
+	%les tracés
+	\ifboolKV[paramlgxcas]{Fond}%si on met une couleur de fond
+		{%
+			\IfSubStr{\XCCFcolfond}{/}%
+				{\StrCut{\XCCFcolfond}{/}{\XCCFcolfondC}{\XCCFcolfondR}}%
+				{\def\XCCFcolfondC{\XCCFcolfond}\def\XCCFcolfondR{\XCCFcolfond}}%
+			\draw[semithick,\XCCFcouleur,fill=\XCCFcolfondC] (A0\XCL) rectangle++ ($(0,{-2*\the\offsetcfxcas-\XCCFelargirauto*\the\hauteurboitecmdxcas})+({\XCCFlarg},0)$) ;%
+			\draw[semithick,\XCCFcouleur,fill=\XCCFcolfondR] ($(A0\XCL)+(0,{-2*\the\offsetcfxcas-\XCCFelargirauto*\the\hauteurboitecmdxcas})$) rectangle (A3\XCL) ;%
+		}
+		{\draw[semithick,\XCCFcouleur] (A0\XCL) rectangle (A3\XCL) ;}
+	%LA COMMANDE À GAUCHE
+	\draw ($(A0\XCL) + ({\XCCFoffseth},{-\the\offsetcfxcas-0.5*\XCCFelargirauto*\the\hauteurboitecmdxcas})$) node[\XCCFcoulcmd,font=\XCCFtaillecmd,right] {#2} ;
+	%LE RÉSULTAT
+	\IfStrEq{\XCCFposres}{centre}%si posrep=center
+		{%
+			\draw ($(A1\XCL) + ({0.5*\XCCFlarg},{\the\offsetcfxcas+0.5*\XCCFelargirauto*\the\hauteurboiteresxcas})$) node[\XCCFcoulres,font=\XCCFtailleres] {#3} ;
+		}{}
+	\IfStrEq{\XCCFposres}{gauche}%si posrep=left
+		{%
+			\draw ($(A1\XCL) + ({{\XCCFoffseth}},{\the\offsetcfxcas+0.5*\XCCFelargirauto*\the\hauteurboiteresxcas})$) node[\XCCFcoulres,font=\XCCFtailleres,right] {#3} ;
+		}{}
+	\IfStrEq{\XCCFposres}{droite}%si posrep=right
+		{%
+			\ifboolKV[paramfenxcascf]{Menu}%si menu=true
+				{%
+					\draw ($(A1\XCL) + ({\XCCFlarg-1},0) + ({-\XCCFoffseth},{\the\offsetcfxcas+0.5*\XCCFelargirauto*\the\hauteurboiteresxcas})$) node[\XCCFcoulres,font=\XCCFtailleres,left] {#3} ;
+				}%
+				{%
+					\draw ($(A1\XCL) + ({\XCCFlarg},0) + ({-\XCCFoffseth},{\the\offsetcfxcas+0.5*\XCCFelargirauto*\the\hauteurboiteresxcas})$) node[\XCCFcoulres,font=\XCCFtailleres,left] {#3} ;
+				}%
+		}{}
+	%LA LIGNE DE SÉPARATION
+	\ifboolKV[paramfenxcascf]{Sep}%si sep=true
+		{\draw[semithick,\XCCFcouleur] ($(A0\XCL)+(0,{-2*\the\offsetcfxcas-\XCCFelargirauto*\the\hauteurboitecmdxcas})$)--++({\XCCFlarg},0);}
+		{}
+	%LE BOUTON MENU
+	\ifboolKV[paramfenxcascf]{Menu}%si menu=true
+		{
+			\draw[semithick] (A3\XCL) node[draw=\XCCFcouleur,black,fill=lightgray!25,outer sep=0pt,inner sep=2pt,draw,above left,font=\tiny\sffamily\bfseries] {MENU} ;
+		}{}
+	%LE PETIT NUMÉRO
+	\draw[semithick] (A0\XCL) node[draw=\XCCFcouleur,fill=\CoulXCASMid,outer sep=0pt,inner sep=2pt,draw,below left,font=\footnotesize\sffamily] {\XCL} ;
+}
+
+\endinput

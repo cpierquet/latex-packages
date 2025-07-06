@@ -1,0 +1,4380 @@
+% Author..........: C. Pierquet
+% licence.........: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+% source pencil...: CC-BY-SA 4.0 https://tex.stackexchange.com/questions/504092/replicating-a-fancy-bordered-text-style-in-latex/504145#504145
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{customenvs}[2025/06/23 0.40c Custom classic environments]
+
+%====HISTORIQUE
+% v 0.40c	Widest string of list
+% v 0.40b	Bugfix + pictocalendar
+% v 0.40a	Bugfix + pictotraffic
+% v 0.3.8	Clé [Decoration=Perso/...] pour EnvtExo
+% v 0.3.7	Externalization of pictograms (included with package) + bugfix + storetolength
+% v 0.3.6	ArrowBullsEye with tikz
+% v 0.3.5	Correction de bugs avec fa6 notamment
+% v 0.3.4	Option for adjustbox + pictoskill + compatibity fa5/6
+% v 0.3.3	Write on image
+% v 0.3.2	Alt version of tkztribanner
+% v 0.3.1	CheckBox for MCQ + enhancements for bannerTri
+% v 0.3.0	Beamer compatibility (?)
+% v 0.2.8	Position absolue d'un objet dans une page
+% v 0.2.7	Mélange des réponses des QCMs
+% v 0.2.6	Roue des compétences / SkillsWheel / speedometer
+% v 0.2.5	Modification mineure des points dans l'environnement EnvtExo
+% v 0.2.4	Petite boîte marker
+% v 0.2.3	Panneau autoroutier + Panneau Soldes
+% v 0.2.2	Flèche évasée, en TikZ
+% v 0.2.1	Modification mineure de la gestion des étoiles tikz (baseline) + grille auto tikzpicture
+% v 0.2.0	Ajout d'étoiles pour les difficultés d'exercices (2 versions)
+% v 0.1.9	tkzBanner + tkzBannerTri + includegraphicsfill
+% v 0.1.8	Nutriscore
+% v 0.1.7	Style perso pour les vignettes
+% v 0.1.6	DisplaySkip patch + Patchs pas-tableur
+% v 0.1.5	Boxes for exam title + circled numbers + Vignettes + Small simple boxes creation
+% v 0.1.4	Commande (en/fr) pour du texte dans une boîte arrondie, de hauteur 'figée' + 'Chat' SMS
+% v 0.1.3	Environnement/Commande pour présentation d'un exercice
+% v 0.1.2	Crayon de compétences
+% v 0.1.1	Ajout de tableaux de compétences
+% v 0.1.0	Version initiale
+
+%====OPTIONS FR ET EN
+\newif\if@enum\@enumtrue%
+\DeclareOption{nonenum}{\@enumfalse}%
+\DeclareOption{noenum}{\@enumfalse}%
+\newif\if@beamer\@beamerfalse%
+\DeclareOption{beamer}{\@beamertrue\@enumfalse}%
+\newif\if@tblr\@tblrtrue%
+\DeclareOption{nontblr}{\@tblrfalse}%
+\DeclareOption{notblr}{\@tblrfalse}%
+\newif\if@multicol\@multicoltrue%
+\DeclareOption{nonmulticol}{\@multicolfalse}%
+\DeclareOption{nomulticol}{\@multicolfalse}%
+\newif\if@xcolor\@xcolortrue%
+\DeclareOption{nonxcolor}{\@xcolorfalse}%
+\DeclareOption{noxcolor}{\@xcolorfalse}%
+\newif\if@fafive \@fafivetrue
+\newif\if@fasix \@fasixfalse
+\newif\if@fafivesix \@fafivesixfalse
+\DeclareOption{nonfa}{\@fafivefalse\@fasixfalse\@fafivesixfalse}
+\DeclareOption{nofa}{\@fafivefalse\@fasixfalse\@fafivesixfalse}
+\DeclareOption{fa6}{\@fafivefalse\@fafivesixfalse\@fasixtrue}
+\DeclareOption{fa5fa6}{\@fafivefalse\@fasixfalse\@fafivesixtrue}
+\newif\if@adjustbox\@adjustboxtrue%
+\DeclareOption{nonadjustbox}{\@adjustboxfalse}%
+\DeclareOption{noadjustbox}{\@adjustboxfalse}%
+\newif\if@pastableur\@pastableurfalse%
+\DeclareOption{pastableur}{\@pastableurtrue}%
+\DeclareOption*{}
+\ProcessOptions\relax
+
+%====PACKAGES UTILES À CHARGER
+\RequirePackage{customenvs-tikzpictos}             %test
+\if@xcolor
+	\RequirePackage{xcolor}
+\fi
+\if@fafive
+	\RequirePackage{fontawesome5}
+	%aliases fa5/fa6
+	\def\faStarHalf{\faIcon{star-half-alt}}        %semble ko avec fa5alias (à surveiller)
+	\def\faThreeDotsV{\faEllipsisV}                %semble ok avec fa5alias
+	\def\faCPlus{\faPlusCircle}                    %semble ok avec fa5alias
+	\def\faCheckCircleReg{\faCheckCircle[regular]} %semble ok avec fa5alias
+	\def\faArrDownNb{\faSortNumericDown}           %semble ok avec fa5alias
+	\def\faProjDiag{\faProjectDiagram}             %semble ok avec fa5alias
+	\def\faFlipPhone{\faPhone*}                    %semble ko avec fa5alias (à surveiller)
+\fi
+\if@fasix
+	\RequirePackage{fontawesome6}
+	%aliases fa5/fa6
+	\def\faStarhalf{\faIcon{star-half-stroke}}
+	\def\faThreeDotsV{\faEllipsisVertical}
+	\def\faCPlus{\faCirclePlus}
+	\def\faCheckCircleReg{\faCircleCheck[regular]}
+	\def\faArrDownNb{\faIcon{arrow-down-1-9}}
+	\def\faProjDiag{\faDiagramProject}
+	\def\faFlipPhone{\faPhoneFlip}
+\fi
+\if@fafivesix
+	\RequirePackage[fa5alias]{fontawesome6}
+	%aliases fa5/fa6
+	\def\faStarhalf{\faIcon{star-half-stroke}}
+	\def\faThreeDotsV{\faEllipsisVertical}
+	\def\faCPlus{\faCirclePlus}
+	\def\faCheckCircleReg{\faCircleCheck[regular]}
+	\def\faArrDownNb{\faIcon{arrow-down-1-9}}
+	\def\faProjDiag{\faDiagramProject}
+	\def\faFlipPhone{\faPhoneFlip}
+\fi
+\if@enum
+	\RequirePackage{enumitem}
+\fi
+\if@tblr
+	\RequirePackage{tabularray}
+\fi
+\if@multicol
+	\RequirePackage{multicol}
+\fi
+\RequirePackage{xintexpr}
+\RequirePackage{randomlist}
+\RequirePackage{simplekv}
+\RequirePackage{xstring}
+\RequirePackage{listofitems}
+\RequirePackage{settobox}
+\if@adjustbox
+	\RequirePackage{adjustbox}
+\fi
+\RequirePackage{ifthen}
+\RequirePackage{calc}
+\RequirePackage{tikz}
+\usetikzlibrary{decorations.pathmorphing,positioning,shapes.misc,calc}
+\usetikzlibrary{babel}
+\RequirePackage{tcolorbox}
+\RequirePackage{varwidth}
+\tcbuselibrary{skins}
+
+%%----COMMANDES FR
+
+%====DECALER VERTICALEMENT, pas documenté pour le moment...
+\NewDocumentCommand\VCentrer{ O{-0.5} m }{%
+	{\raisebox{#1\depth}{#2\vphantom{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN0123456789}}}%
+}
+
+%====QCMs
+\NewList{TmpListeReponsesQCM}
+\def\ReponsesQCMbox{\raisebox{-0.2ex}{\faSquare[regular]}}
+
+\defKV[reponsesqcm]{%
+	NbCols=\def\RepQCMNbCol{#1},%
+	PoliceLabels=\def\RepQCMFonte{#1},%
+	EspacesCL=\def\RepQCMOffset{#1},%
+	Labels=\def\RepQCMTypeLabel{#1},%
+	EspaceLabels=\xdef\RepQCMSpace{#1},%
+	Largeur=\def\RepQCMLarg{#1}
+}
+
+\setKVdefault[reponsesqcm]{%
+	EspacesCL={6pt/2pt},%
+	NbCols=4,%
+	Filets=false,%
+	PoliceLabels={\bfseries},%
+	Labels={a.},%
+	EspaceLabels=\kern5pt,%
+	Swap=false,%
+	Largeur=0.99\linewidth,%
+	Melange=false
+}
+
+\NewDocumentCommand\QCMFormatteLabel{ m m }{%1=typelabel,%3=caractère
+	\IfSubStr{#1}{a}%
+		{%
+			{\RepQCMFonte\StrSubstitute{#1}{a}{#2}}%
+		}%
+		{}%
+	\IfSubStr{#1}{A}%
+		{%
+			{\RepQCMFonte\StrSubstitute{#1}{A}{#2}}%
+		}%
+		{}%
+	\IfSubStr{#1}{1}%
+		{%
+			{\RepQCMFonte\StrSubstitute{#1}{1}{#2}}%
+		}%
+		{}%
+}
+
+\NewDocumentCommand\ReponsesQCM{ O{} m D<>{} }{%1=nbcol,2=listeréponses
+	\restoreKV[reponsesqcm]%
+	\setKV[reponsesqcm]{#1}%
+	\IfSubStr{\RepQCMOffset}{/}%
+		{\StrCut{\RepQCMOffset}{/}{\RepQCMOffsetCol}{\RepQCMOffsetLgn}}%
+		{\def\RepQCMOffsetCol{\RepQCMOffset}\def\RepQCMOffsetLgn{\RepQCMOffset}}%
+	\setsepchar{§}%
+	\readlist*\QCMListereponses{#2}%
+	\def\QCMNbRep{\QCMListereponseslen}%
+	%les items créés
+	\IfStrEq{\RepQCMTypeLabel}{box}%
+		{%
+			\def\RepQCMLabelA{\ReponsesQCMbox\RepQCMSpace}%
+			\def\RepQCMLabelB{\ReponsesQCMbox\RepQCMSpace}%
+			\def\RepQCMLabelC{\ReponsesQCMbox\RepQCMSpace}%
+			\def\RepQCMLabelD{\ReponsesQCMbox\RepQCMSpace}%
+		}%
+		{%
+			\IfSubStr{\RepQCMTypeLabel}{a}%
+				{%
+					\xdef\RepQCMLabelA{\QCMFormatteLabel{\RepQCMTypeLabel}{a}\RepQCMSpace}%
+					\xdef\RepQCMLabelB{\QCMFormatteLabel{\RepQCMTypeLabel}{b}\RepQCMSpace}%
+					\xdef\RepQCMLabelC{\QCMFormatteLabel{\RepQCMTypeLabel}{c}\RepQCMSpace}%
+					\xdef\RepQCMLabelD{\QCMFormatteLabel{\RepQCMTypeLabel}{d}\RepQCMSpace}%
+				}{}%
+			\IfSubStr{\RepQCMTypeLabel}{A}%
+				{%
+					\xdef\RepQCMLabelA{\QCMFormatteLabel{\RepQCMTypeLabel}{A}\RepQCMSpace}%
+					\xdef\RepQCMLabelB{\QCMFormatteLabel{\RepQCMTypeLabel}{B}\RepQCMSpace}%
+					\xdef\RepQCMLabelC{\QCMFormatteLabel{\RepQCMTypeLabel}{C}\RepQCMSpace}%
+					\xdef\RepQCMLabelD{\QCMFormatteLabel{\RepQCMTypeLabel}{D}\RepQCMSpace}%
+				}{}%
+			\IfSubStr{\RepQCMTypeLabel}{1}%
+				{%
+					\xdef\RepQCMLabelA{\QCMFormatteLabel{\RepQCMTypeLabel}{1}\RepQCMSpace}%
+					\xdef\RepQCMLabelB{\QCMFormatteLabel{\RepQCMTypeLabel}{2}\RepQCMSpace}%
+					\xdef\RepQCMLabelC{\QCMFormatteLabel{\RepQCMTypeLabel}{3}\RepQCMSpace}%
+					\xdef\RepQCMLabelD{\QCMFormatteLabel{\RepQCMTypeLabel}{4}\RepQCMSpace}%
+				}{}%
+		}%
+	%en fonction du nb de colonnes et du shuffle
+	\ifboolKV[reponsesqcm]{Melange}%
+		{%
+			\ClearList{TmpListeReponsesQCM}%
+			\IfEq{\QCMNbRep}{2}%2réponses
+				{%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[1]}%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[2]}%
+					\ifboolKV[reponsesqcm]{Filets}%
+						{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,hlines,vlines,width=\RepQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+						{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,width=\RepQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+						\RepQCMLabelA\TmpListeReponsesQCM[0] & \RepQCMLabelB\TmpListeReponsesQCM[1] \\
+					\end{tblr}%
+				}%
+				{}%
+			\IfEq{\QCMNbRep}{3}%3réponses
+				{%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[1]}%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[2]}%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[3]}%
+					\ifboolKV[reponsesqcm]{Filets}%
+						{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,hlines,vlines,width=\RepQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
+						{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,width=\RepQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
+						\RepQCMLabelA\TmpListeReponsesQCM[0] & \RepQCMLabelB\TmpListeReponsesQCM[1] & \RepQCMLabelC\TmpListeReponsesQCM[2] \\
+					\end{tblr}%
+				}%
+				{}%
+			\IfEq{\QCMNbRep}{4}%4réponses
+				{%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[1]}%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[2]}%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[3]}%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[4]}%
+					\IfEq{\RepQCMNbCol}{4}%4colonnes
+						{%
+							\ifboolKV[reponsesqcm]{Filets}%
+								{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,hlines,vlines,width=\RepQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
+								{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,width=\RepQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
+								\RepQCMLabelA\TmpListeReponsesQCM[0] & \RepQCMLabelB\TmpListeReponsesQCM[1] & \RepQCMLabelC\TmpListeReponsesQCM[2] & \RepQCMLabelD\TmpListeReponsesQCM[3] \\
+							\end{tblr}%
+						}%
+						{%
+							\ifboolKV[reponsesqcm]{Filets}%
+								{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,hlines,vlines,width=\RepQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+								{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,width=\RepQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+								\RepQCMLabelA\TmpListeReponsesQCM[0] & \ifboolKV[reponsesqcm]{Swap}{\RepQCMLabelB\TmpListeReponsesQCM[1]}{\RepQCMLabelC\TmpListeReponsesQCM[1]} \\
+								\ifboolKV[reponsesqcm]{Swap}{\RepQCMLabelC\TmpListeReponsesQCM[2]}{\RepQCMLabelB\TmpListeReponsesQCM[2]} & \RepQCMLabelD\TmpListeReponsesQCM[3] \\
+							\end{tblr}%
+						}%
+				}%
+				{}%
+		}%
+		{%
+			\IfEq{\QCMNbRep}{2}%2réponses
+				{%
+					\ifboolKV[reponsesqcm]{Filets}%
+						{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,hlines,vlines,width=\RepQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+						{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,width=\RepQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+						\RepQCMLabelA\QCMListereponses[1] & \RepQCMLabelB\QCMListereponses[2] \\
+					\end{tblr}%
+				}%
+				{}%
+			\IfEq{\QCMNbRep}{3}%3réponses
+				{%
+					\ifboolKV[reponsesqcm]{Filets}%
+						{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,hlines,vlines,width=\RepQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
+						{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,width=\RepQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
+						\RepQCMLabelA\QCMListereponses[1] & \RepQCMLabelB\QCMListereponses[2] & \RepQCMLabelC\QCMListereponses[3] \\
+					\end{tblr}%
+				}%
+				{}%
+			\IfEq{\QCMNbRep}{4}%4réponses
+				{%
+					\IfEq{\RepQCMNbCol}{4}%4colonnes
+						{%
+							\ifboolKV[reponsesqcm]{Filets}%
+								{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,hlines,vlines,width=\RepQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
+								{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,width=\RepQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
+								\RepQCMLabelA\QCMListereponses[1] & \RepQCMLabelB\QCMListereponses[2] & \RepQCMLabelC\QCMListereponses[3] & \RepQCMLabelD\QCMListereponses[4] \\
+							\end{tblr}%
+						}%
+						{%
+							\ifboolKV[reponsesqcm]{Filets}%
+								{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,hlines,vlines,width=\RepQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+								{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,width=\RepQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+								\RepQCMLabelA\QCMListereponses[1] & \ifboolKV[reponsesqcm]{Swap}{\RepQCMLabelB\QCMListereponses[2]}{\RepQCMLabelC\QCMListereponses[3]} \\
+								\ifboolKV[reponsesqcm]{Swap}{\RepQCMLabelC\QCMListereponses[3]}{\RepQCMLabelB\QCMListereponses[2]} & \RepQCMLabelD\QCMListereponses[4] \\
+							\end{tblr}%
+						}%
+				}%
+				{}%
+		}%
+}
+
+%====CENTRAGE
+\newlength{\centeraltbef}%avant
+\newlength{\centeraltbeh}%après
+
+\defKV[myaltcenter]{Avant=\setlength{\centeraltbef}{#1},Apres=\setlength{\centeraltbeh}{#1}}
+\setKVdefault[myaltcenter]{Avant=0.33\baselineskip,Apres=0.33\baselineskip}
+
+\NewDocumentEnvironment{Centrage}{ O{} }%
+	{\restoreKV[myaltcenter]\setKV[myaltcenter]{#1}\par\kern\centeraltbef\centering}%
+	{\par\kern\centeraltbeh}
+
+%====MULTICOLS
+\NewDocumentCommand\CoeffEspaceMulticols{ O{1} }{%
+	\setlength{\multicolsep}{12pt plus 4pt minus 3pt}%
+	\IfStrEq{#1}{1.25}{\setlength{\multicolsep}{15pt plus 5pt minus 3.75pt}}{}% 125% of orig. values
+	\IfStrEq{#1}{0.75}{\setlength{\multicolsep}{9pt plus 3pt minus 2.25pt}}{}% 75% of orig. values
+	\IfStrEq{#1}{0.66}{\setlength{\multicolsep}{8pt plus 2.67pt minus 2pt}}{}% 66% of orig. values
+	\IfStrEq{#1}{0.50}{\setlength{\multicolsep}{6pt plus 2pt minus 1.5pt}}{}% 50% of orig. values
+	\IfStrEq{#1}{0.33}{\setlength{\multicolsep}{4pt plus 1.33pt minus 1pt}}{}% 33% of orig. values
+	\IfStrEq{#1}{0.25}{\setlength{\multicolsep}{3pt plus 1pt minus 0.75pt}}{}% 25% of orig. values
+	\IfStrEq{#1}{0}{\setlength{\multicolsep}{0pt}}{}% 0% of orig. values
+}
+
+\setKVdefault[multicolsperso]{%
+	Type=texte,%
+	CoeffEspVert=0.50,%
+	EpTrait=0pt
+}
+
+\NewDocumentEnvironment{MultiCols}{ O{} r() D<>{} d!! }%
+{%
+	\useKVdefault[multicolsperso]%
+	\setKV[multicolsperso]{#1}%
+	\CoeffEspaceMulticols[\useKV[multicolsperso]{CoeffEspVert}]%
+	\setlength{\columnseprule}{\useKV[multicolsperso]{EpTrait}}%
+	\begin{multicols}{#2}%
+	%enum beamer or not
+	\IfNoValueTF{#4}%
+		{%
+			\IfStrEq{\useKV[multicolsperso]{Type}}{enum}{\begin{enumerate}[#3]}{}%
+			\IfStrEq{\useKV[multicolsperso]{Type}}{item}{\begin{itemize}[#3]}{}%
+		}%
+		{%
+			\IfStrEq{\useKV[multicolsperso]{Type}}{enum}{\begin{enumerate}[#4][#3]}{}%
+			\IfStrEq{\useKV[multicolsperso]{Type}}{item}{\begin{itemize}[#4][#3]}{}%
+		}%
+	%==on teste si on a un argument optionnel pour beamer...
+}%
+{%
+	\IfStrEq{\useKV[multicolsperso]{Type}}{enum}{\end{enumerate}}{}%
+	\IfStrEq{\useKV[multicolsperso]{Type}}{item}{\end{itemize}}{}%
+	\end{multicols}%
+	\CoeffEspaceMulticols[1]%
+	\setlength{\columnseprule}{0pt}%
+}
+
+%====ITEMCHOICE
+\NewDocumentCommand\CreerListeItems{ m m m }{%1=liste,%2=macro,3=nomliste
+	\@ifIsList{#3}%
+		{La liste \texttt{#3} existe déjà, svp choisir un autre nom.}%
+		{\xdef#2{#1}\NewList{#3}}%
+}
+
+\defKV[itemchoisir]{%
+	Type=\def\ChoixTypeSerie{#1}
+}
+\setKVdefault[itemchoisir]{%
+	Alea=false,%
+	Type=enum
+}
+
+\NewDocumentCommand\ListeChoixItems{ O{} m m r() D<>{} d!! }{%1=options,2=série des items,3=nomsérie,4=liste choix,5=options enum,%6=beamer ?
+	%on teste si la liste considérée existe...
+	\@ifIsList{#3}%
+		{%
+			\restoreKV[itemchoisir]%
+			\setKV[itemchoisir]{#1}%
+			\ClearList{#3}%
+			%création de la liste
+			\ifboolKV[itemchoisir]{Alea}%
+				{%
+					\xintFor* ##1 in {\xintCSVtoList{#2}}\do{\InsertRandomItem{#3}{##1}}
+				}%
+				{%
+					\xintFor* ##1 in {\xintCSVtoList{#2}}\do{\InsertLastItem{#3}{##1}}
+				}%
+			%création de l'environnement
+			%==on teste si on a un argument optionnel pour beamer...
+			\IfNoValueTF{#6}%
+				{%
+					\IfStrEq{\ChoixTypeSerie}{enum}%
+						{\begin{enumerate}[#5]}{}%
+					\IfStrEq{\ChoixTypeSerie}{item}%
+						{\begin{itemize}[#5]}{}%
+					\IfSubStr{\ChoixTypeSerie}{MultiCols}%
+						{%
+							\StrBetween[1,2]{\ChoixTypeSerie}{/}{/}[\ChoixTypeMulticols]%
+							\StrBehind[2]{\ChoixTypeSerie}{/}[\NbMulticols]%
+							\begin{MultiCols}[Type=\ChoixTypeMulticols](\NbMulticols)<#5>%
+						}{}%
+				}%
+				{%
+					\IfStrEq{\ChoixTypeSerie}{enum}%
+						{\begin{enumerate}[#6][#5]}{}%
+					\IfStrEq{\ChoixTypeSerie}{item}%
+						{\begin{itemize}[#6][#5]}{}%
+					\IfSubStr{\ChoixTypeSerie}{MultiCols}%
+						{%
+							\StrBetween[1,2]{\ChoixTypeSerie}{/}{/}[\ChoixTypeMulticols]%
+							\StrBehind[2]{\ChoixTypeSerie}{/}[\NbMulticols]%
+							\begin{MultiCols}[Type=\ChoixTypeMulticols](\NbMulticols)<#5>!#6!%
+						}{}%
+				}%
+			%==multicols
+			%items choisis
+			\ifboolKV[itemchoisir]{Alea}%
+				{%
+					\xintFor* ##1 in {\xintSeq{0}{\xinteval{#4-1}}}\do{\GetItem{#3}{##1}{ItemChoisi}\item \ItemChoisi}
+				}%
+				{%
+					\xintFor* ##1 in {\xintCSVtoList{#4}}\do{\GetItem{#3}{\xinteval{##1-1}}{ItemChoisi}\item \ItemChoisi}
+				}
+			%fin de l'environnement
+			\IfStrEq{\ChoixTypeSerie}{enum}%
+				{\end{enumerate}}{}
+			\IfStrEq{\ChoixTypeSerie}{item}
+				{\end{itemize}}{}%
+			\IfSubStr{\ChoixTypeSerie}{MultiCols}%
+				{\end{MultiCols}}{}%
+		}%
+		{%
+			La liste \texttt{#3} n'existe pas, veuillez la créer avec la macro \texttt{\textbackslash CreerListeItems}.%
+		}%
+}
+
+%====TABLEAU DE COMPÉTENCES
+%patch fa vcenter
+\NewDocumentCommand{\vcenterfa}{ O{} m }{$\vcenter{\hbox{\faIcon[#1]{#2}}}$}
+
+%labelnote
+\def\LabelNoteComp{Note}
+%listeniveaux
+\def\LstDeuxNiv{NA § A}
+\def\LstTroisNiv{NA § ECA § A}
+\def\LstQuatreNiv{NA § PA § ECA § A}
+%noticeniveaux
+\def\NoticeDeuxNiv{Non acquis § Acquis}
+\def\NoticeTroisNiv{Non acquis § En cours d'acquis. § Acquis}
+\def\NoticeQuatreNiv{Non acquis § Part. acquis § En cours d'acquis. § Acquis}
+%nivparbatteries
+\def\DeuxNivBatterie{\vcenterfa[solid]{battery-quarter} § \vcenterfa[solid]{battery-full}}
+\def\TroisNivBatterie{\vcenterfa[solid]{battery-quarter} § \vcenterfa[solid]{battery-half} § \vcenterfa[solid]{battery-full}}
+\def\QuatreNivBatterie{\vcenterfa[solid]{battery-empty} § \vcenterfa[solid]{battery-quarter} § \vcenterfa[solid]{battery-half} § \vcenterfa[solid]{battery-full}}
+%nivparsmileys
+\if@fafive
+	\def\DeuxNivSmiley{\vcenterfa[regular]{angry} § \vcenterfa[regular]{smile}}
+	\def\TroisNivSmiley{\vcenterfa[regular]{angry} § \vcenterfa[regular]{frown} § \vcenterfa[regular]{smile}}
+	\def\QuatreNivSmiley{\vcenterfa[regular]{angry} § \vcenterfa[regular]{frown} § \vcenterfa[regular]{smile} § \vcenterfa[regular]{grin}}
+\fi
+\if@fasix
+	\def\DeuxNivSmiley{\vcenterfa[regular]{face-angry} § \vcenterfa[regular]{face-smile}}
+	\def\TroisNivSmiley{\vcenterfa[regular]{face-angry} § \vcenterfa[regular]{face-frown} § \vcenterfa[regular]{face-smile}}
+	\def\QuatreNivSmiley{\vcenterfa[regular]{face-angry} § \vcenterfa[regular]{face-frown} § \vcenterfa[regular]{face-smile} § \vcenterfa[regular]{face-grin}}
+\fi
+\if@fafivesix
+	\def\DeuxNivSmiley{\vcenterfa[regular]{face-angry} § \vcenterfa[regular]{face-smile}}
+	\def\TroisNivSmiley{\vcenterfa[regular]{face-angry} § \vcenterfa[regular]{face-frown} § \vcenterfa[regular]{face-smile}}
+	\def\QuatreNivSmiley{\vcenterfa[regular]{face-angry} § \vcenterfa[regular]{face-frown} § \vcenterfa[regular]{face-smile} § \vcenterfa[regular]{face-grin}}
+\fi
+
+% ========================tableau compétences
+\defKV[tblcomp]{%
+	Largeur=\def\COMPETlargeur{#1},%
+	LargeurNivs=\def\COMPETlargeurs{#1},%
+	Niveaux=\def\COMPETniveaux{#1},%
+	NoticeNiveaux=\def\COMPETnoticeniveaux{#1},%
+	Titre=\def\COMPETtitre{#1},%
+	PolTitre=\def\COMPETlegende{#1},%
+	PolComp=\def\COMPETcomp{#1},%
+	PolNotice=\def\COMPETnotice{#1},%
+	LigneSep=\def\COMPETsep{#1}
+}
+
+\setKVdefault[tblcomp]{%
+	Largeur=0.95\linewidth,%
+	LargeurNivs={0.75cm § 1.25cm},%niv + note
+	Niveaux={NA § ECA § A},%
+	NoticeNiveaux={Non acquis § En cours d'acquisition § Acquis},%
+	Titre=DS01,%
+	PolTitre=\small\sffamily\bfseries,%
+	PolNotice=\small\sffamily\bfseries,%
+	PolComp=\small\sffamily,%
+	LigneSep=2pt,%
+	CouleurNotice=black,%
+	CouleurNiveaux=black,%
+	CouleurFond=lightgray!25,%
+	Note=true,%
+	Notice=true
+}
+
+%pour créer le body du tableau (j'ai encore du mal avec ça...)
+\long\def\tblcompaddto#1#2{\expandafter\def\expandafter#1\expandafter{#1#2}}
+
+\NewDocumentCommand{\TableauCompetences}{ O{} m }{%1=options,2=liste compétences
+	\useKVdefault[tblcomp]%
+	\setKV[tblcomp]{#1}% on paramètres les nouvelles clés et on les simplifie
+	\setsepchar{§}%
+	\readlist*\ListeCompetences{#2}%
+	\readlist*\ListeNiveaux{\COMPETniveaux}%
+	\readlist*\ListeLargeurs{\COMPETlargeurs}%
+	\readlist*\ListeNoticeNiveaux{\COMPETnoticeniveaux}%
+	\def\CPtabledatacomp{}%
+	\xintifboolexpr{\ListeNiveauxlen == 2}%avec 3 niveaux de compétences
+		{%
+			\ifboolKV[tblcomp]{Note}%
+				{%
+					\tblcompaddto\CPtabledatacomp{\COMPETtitre & \ListeNiveaux[1] & \ListeNiveaux[2] & \LabelNoteComp \\}%
+					\xintFor* ##1 in {\xintSeq{1}{\ListeCompetenceslen}}\do{%
+						\tblcompaddto\CPtabledatacomp{\ListeCompetences[\the\numexpr\therownum-1\relax] & & & \\}%
+					}%
+					\ifboolKV[tblcomp]{Notice}%
+						{%
+							\tblcompaddto\CPtabledatacomp{{\ListeNiveaux[1]} : {\ListeNoticeNiveaux[1]} / {\ListeNiveaux[2]} : {\ListeNoticeNiveaux[2]} & & & \\}
+							%creation du tableau note+notice
+							\begin{tblr}[expand=\CPtabledatacomp]%
+								{%
+									width={\COMPETlargeur},%
+									hlines,vlines,colspec={X[l,b]*{2}{Q[c,b,\ListeLargeurs[1]]}Q[c,b,\ListeLargeurs[2]]},%
+									rowsep=\COMPETsep,%
+									row{1}={font=\COMPETlegende,fg=\useKV[tblcomp]{CouleurNiveaux},bg=\useKV[tblcomp]{CouleurFond}},%
+									row{2-Y}={font=\COMPETcomp},%
+									row{Z}={font=\COMPETnotice,fg=\useKV[tblcomp]{CouleurNotice}},%
+									cell{2}{Z}={r=\the\numexpr\ListeCompetenceslen+1\relax}{},%
+									cell{Z}{1}={c=3}{}
+								}%
+								\CPtabledatacomp
+							\end{tblr}%
+						}%
+						{%
+							%creation du tableau note-notice
+							\begin{tblr}[expand=\CPtabledatacomp]%
+								{%
+									width={\COMPETlargeur},%
+									hlines,vlines,colspec={X[l,b]*{2}{Q[c,b,\ListeLargeurs[1]]}Q[c,b,\ListeLargeurs[2]]},%
+									rowsep=\COMPETsep,%
+									row{1}={font=\COMPETlegende,fg=\useKV[tblcomp]{CouleurNiveaux},bg=\useKV[tblcomp]{CouleurFond}},%
+									row{2-Z}={font=\COMPETcomp},%
+									cell{2}{Z}={r=\the\numexpr\ListeCompetenceslen\relax}{}
+								}%
+								\CPtabledatacomp
+							\end{tblr}%
+						}%
+				}%
+				{%
+					\tblcompaddto\CPtabledatacomp{\COMPETtitre & \ListeNiveaux[1] & \ListeNiveaux[2] \\}%
+					\xintFor* ##1 in {\xintSeq{1}{\ListeCompetenceslen}}\do{%
+						\tblcompaddto\CPtabledatacomp{\ListeCompetences[\the\numexpr\therownum-1\relax] & & \\}%
+					}%
+					\ifboolKV[tblcomp]{Notice}%
+						{%
+							\tblcompaddto\CPtabledatacomp{{\ListeNiveaux[1]} : {\ListeNoticeNiveaux[1]} / {\ListeNiveaux[2]} : {\ListeNoticeNiveaux[2]} & & \\}
+							%creation du tableau -note+notice
+							\begin{tblr}[expand=\CPtabledatacomp]%
+								{%
+									width={\COMPETlargeur},%
+									hlines,vlines,colspec={X[l,b]*{2}{Q[c,b,\ListeLargeurs[1]]}},%
+									rowsep=\COMPETsep,%
+									row{1}={font=\COMPETlegende,fg=\useKV[tblcomp]{CouleurNiveaux},bg=\useKV[tblcomp]{CouleurFond}},%
+									row{2-Y}={font=\COMPETcomp},%
+									row{Z}={font=\COMPETnotice,fg=\useKV[tblcomp]{CouleurNotice}},%
+									cell{Z}{1}={c=3}{}
+								}%
+								\CPtabledatacomp
+							\end{tblr}%
+						}%
+						{%
+							%creation du tableau -note-notice
+							\begin{tblr}[expand=\CPtabledatacomp]%
+								{%
+									width={\COMPETlargeur},%
+									hlines,vlines,colspec={X[l,b]*{2}{Q[c,b,\ListeLargeurs[1]]}},%
+									rowsep=\COMPETsep,%
+									row{1}={font=\COMPETlegende,fg=\useKV[tblcomp]{CouleurNiveaux},bg=\useKV[tblcomp]{CouleurFond}},%
+									row{2-Z}={font=\COMPETcomp}
+								}%
+								\CPtabledatacomp
+							\end{tblr}%
+						}%
+				}%
+		}%
+		{}%
+	\xintifboolexpr{\ListeNiveauxlen == 3}%avec 3 niveaux de compétences
+		{%
+			\ifboolKV[tblcomp]{Note}%
+				{%
+					\tblcompaddto\CPtabledatacomp{\COMPETtitre & \ListeNiveaux[1] & \ListeNiveaux[2] & \ListeNiveaux[3] & \LabelNoteComp \\}%
+					\xintFor* ##1 in {\xintSeq{1}{\ListeCompetenceslen}}\do{%
+						\tblcompaddto\CPtabledatacomp{\ListeCompetences[\the\numexpr\therownum-1\relax] & & & & \\}%
+					}%
+					\ifboolKV[tblcomp]{Notice}%
+						{%
+							\tblcompaddto\CPtabledatacomp{{\ListeNiveaux[1]} : {\ListeNoticeNiveaux[1]} / {\ListeNiveaux[2]} : {\ListeNoticeNiveaux[2]} / {\ListeNiveaux[3]} : {\ListeNoticeNiveaux[3]} & & & & \\}
+							%creation du tableau note+notice
+							\begin{tblr}[expand=\CPtabledatacomp]%
+								{%
+									width={\COMPETlargeur},%
+									hlines,vlines,colspec={X[l,b]*{3}{Q[c,b,\ListeLargeurs[1]]}Q[c,b,\ListeLargeurs[2]]},%
+									rowsep=\COMPETsep,%
+									row{1}={font=\COMPETlegende,fg=\useKV[tblcomp]{CouleurNiveaux},bg=\useKV[tblcomp]{CouleurFond}},%
+									row{2-Y}={font=\COMPETcomp},%
+									row{Z}={font=\COMPETnotice,fg=\useKV[tblcomp]{CouleurNotice}},%
+									cell{2}{Z}={r=\the\numexpr\ListeCompetenceslen+1\relax}{},%
+									cell{Z}{1}={c=4}{}
+								}%
+								\CPtabledatacomp
+							\end{tblr}%
+						}%
+						{%
+							%creation du tableau note-notice
+							\begin{tblr}[expand=\CPtabledatacomp]%
+								{%
+									width={\COMPETlargeur},%
+									hlines,vlines,colspec={X[l,b]*{3}{Q[c,b,\ListeLargeurs[1]]}Q[c,b,\ListeLargeurs[2]]},%
+									rowsep=\COMPETsep,%
+									row{1}={font=\COMPETlegende,fg=\useKV[tblcomp]{CouleurNiveaux},bg=\useKV[tblcomp]{CouleurFond}},%
+									row{2-Z}={font=\COMPETcomp},%
+									cell{2}{Z}={r=\the\numexpr\ListeCompetenceslen\relax}{}
+								}%
+								\CPtabledatacomp
+							\end{tblr}%
+						}%
+				}%
+				{%
+					\tblcompaddto\CPtabledatacomp{\COMPETtitre & \ListeNiveaux[1] & \ListeNiveaux[2] & \ListeNiveaux[3] \\}%
+					\xintFor* ##1 in {\xintSeq{1}{\ListeCompetenceslen}}\do{%
+						\tblcompaddto\CPtabledatacomp{\ListeCompetences[\the\numexpr\therownum-1\relax] & & & \\}%
+					}%
+					\ifboolKV[tblcomp]{Notice}%
+						{%
+							\tblcompaddto\CPtabledatacomp{{\ListeNiveaux[1]} : {\ListeNoticeNiveaux[1]} / {\ListeNiveaux[2]} : {\ListeNoticeNiveaux[2]} / {\ListeNiveaux[3]} : {\ListeNoticeNiveaux[3]} & & & \\}
+							%creation du tableau -note+notice
+							\begin{tblr}[expand=\CPtabledatacomp]%
+								{%
+									width={\COMPETlargeur},%
+									hlines,vlines,colspec={X[l,b]*{3}{Q[c,b,\ListeLargeurs[1]]}},%
+									rowsep=\COMPETsep,%
+									row{1}={font=\COMPETlegende,fg=\useKV[tblcomp]{CouleurNiveaux},bg=\useKV[tblcomp]{CouleurFond}},%
+									row{2-Y}={font=\COMPETcomp},%
+									row{Z}={font=\COMPETnotice,fg=\useKV[tblcomp]{CouleurNotice}},%
+									cell{Z}{1}={c=4}{}
+								}%
+								\CPtabledatacomp
+							\end{tblr}%
+						}%
+						{%
+							%creation du tableau -note-notice
+							\begin{tblr}[expand=\CPtabledatacomp]%
+								{%
+									width={\COMPETlargeur},%
+									hlines,vlines,colspec={X[l,b]*{3}{Q[c,b,\ListeLargeurs[1]]}},%
+									rowsep=\COMPETsep,%
+									row{1}={font=\COMPETlegende,fg=\useKV[tblcomp]{CouleurNiveaux},bg=\useKV[tblcomp]{CouleurFond}},%
+									row{2-Z}={font=\COMPETcomp}
+								}%
+								\CPtabledatacomp
+							\end{tblr}%
+						}%
+				}%
+		}%
+		{}%
+	\xintifboolexpr{\ListeNiveauxlen == 4}%maintenant avec 4 niveaux de compétences
+		{%
+			\ifboolKV[tblcomp]{Note}%
+			{%
+				\tblcompaddto\CPtabledatacomp{\COMPETtitre & \ListeNiveaux[1] & \ListeNiveaux[2] & \ListeNiveaux[3] & \ListeNiveaux[4] & \LabelNoteComp \\}%
+				\xintFor* ##1 in {\xintSeq{1}{\ListeCompetenceslen}}\do{%
+					\tblcompaddto\CPtabledatacomp{\ListeCompetences[\the\numexpr\therownum-1\relax] & & & & & \\}%
+				}%
+				\ifboolKV[tblcomp]{Notice}%
+				{%
+					\tblcompaddto\CPtabledatacomp{{\ListeNiveaux[1]} : {\ListeNoticeNiveaux[1]} / {\ListeNiveaux[2]} : {\ListeNoticeNiveaux[2]} / {\ListeNiveaux[3]} : {\ListeNoticeNiveaux[3]} / {\ListeNiveaux[4]} : {\ListeNoticeNiveaux[4]} & & & & & \\}
+					%creation du tableau note+notice
+					\begin{tblr}[expand=\CPtabledatacomp]%
+						{%
+							width={\COMPETlargeur},%
+							hlines,vlines,colspec={X[l,b]*{4}{Q[c,b,\ListeLargeurs[1]]}Q[c,b,\ListeLargeurs[2]]},%
+							rowsep=\COMPETsep,%
+							row{1}={font=\COMPETlegende,fg=\useKV[tblcomp]{CouleurNiveaux},bg=\useKV[tblcomp]{CouleurFond}},%
+							row{2-Y}={font=\COMPETcomp},%
+							row{Z}={font=\COMPETnotice,fg=\useKV[tblcomp]{CouleurNotice}},%
+							cell{2}{Z}={r=\the\numexpr\ListeCompetenceslen+1\relax}{},%
+							cell{Z}{1}={c=5}{}
+						}%
+						\CPtabledatacomp
+					\end{tblr}%
+				}%
+				{%
+					%creation du tableau note-notice
+					\begin{tblr}[expand=\CPtabledatacomp]%
+						{%
+							width={\COMPETlargeur},%
+							hlines,vlines,colspec={X[l,b]*{4}{Q[c,b,\ListeLargeurs[1]]}Q[c,b,\ListeLargeurs[2]]},%
+							rowsep=\COMPETsep,%
+							row{1}={font=\COMPETlegende,fg=\useKV[tblcomp]{CouleurNiveaux},bg=\useKV[tblcomp]{CouleurFond}},%
+							row{2-Z}={font=\COMPETcomp},%
+							cell{2}{Z}={r=\the\numexpr\ListeCompetenceslen\relax}{}
+						}%
+						\CPtabledatacomp
+					\end{tblr}%
+				}%
+			}%
+			{%
+				\tblcompaddto\CPtabledatacomp{\COMPETtitre & \ListeNiveaux[1] & \ListeNiveaux[2] & \ListeNiveaux[3] & \ListeNiveaux[4] \\}%
+				\xintFor* ##1 in {\xintSeq{1}{\ListeCompetenceslen}}\do{%
+					\tblcompaddto\CPtabledatacomp{\ListeCompetences[\the\numexpr\therownum-1\relax] & & & & \\}%
+				}%
+				\ifboolKV[tblcomp]{Notice}%
+				{%
+					\tblcompaddto\CPtabledatacomp{{\ListeNiveaux[1]} : {\ListeNoticeNiveaux[1]} / {\ListeNiveaux[2]} : {\ListeNoticeNiveaux[2]} / {\ListeNiveaux[3]} : {\ListeNoticeNiveaux[3]} / {\ListeNiveaux[4]} : {\ListeNoticeNiveaux[4]} & & & & \\}
+					%creation du tableau -note+notice
+					\begin{tblr}[expand=\CPtabledatacomp]%
+						{%
+							width={\COMPETlargeur},%
+							hlines,vlines,colspec={X[l,b]*{4}{Q[c,b,\ListeLargeurs[1]]}},%
+							rowsep=\COMPETsep,%
+							row{1}={font=\COMPETlegende,fg=\useKV[tblcomp]{CouleurNiveaux},bg=\useKV[tblcomp]{CouleurFond}},%
+							row{2-Y}={font=\COMPETcomp},%
+							row{Z}={font=\COMPETnotice,fg=\useKV[tblcomp]{CouleurNotice}},%
+							cell{Z}{1}={c=5}{}
+						}%
+						\CPtabledatacomp
+					\end{tblr}%
+				}%
+				{%
+					%creation du tableau -note-notice
+					\begin{tblr}[expand=\CPtabledatacomp]%
+						{%
+							width={\COMPETlargeur},%
+							hlines,vlines,colspec={X[l,b]*{4}{Q[c,b,\ListeLargeurs[1]]}},%
+							rowsep=\COMPETsep,%
+							row{1}={font=\COMPETlegende,fg=\useKV[tblcomp]{CouleurNiveaux},bg=\useKV[tblcomp]{CouleurFond}},%
+							row{2-Z}={font=\COMPETcomp}
+						}%
+						\CPtabledatacomp
+					\end{tblr}%
+				}%
+			}%
+		}%
+		{}%
+}
+
+%====PENSKILLS
+\defKV[tachescrayon]{%
+	PoliceCateg=\def\pentaksfontcateg{#1},%
+	PoliceBloc=\def\pentaksfontblock{#1},%
+	Couleurs=\def\pentakscolors{#1},%
+	LargeurBloc=\def\pentakswidth{#1},%
+	Echelle=\def\pentakscale{#1}
+}
+\setKVdefault[tachescrayon]{%
+	PoliceCateg=\bfseries\sffamily,%
+	PoliceBloc=\small\ttfamily,%
+	Couleurs={yellow/black,orange/black,magenta/black,cyan/black,teal/black,brown/black},%
+	LargeurBloc=5cm,%
+	Echelle=1,%
+	NoirBlanc=false
+}
+
+\NewDocumentCommand\CrayonDeCompetences{ O{} D<>{} m }{%
+	\restoreKV[tachescrayon]%
+	\setKV[tachescrayon]{#1}%
+	%liste des couleurs, via listofitems
+	\setsepchar{,}%
+	\readlist*\lstColors{\pentakscolors}%
+	\begin{tikzpicture}%
+		[line width=0.25\pgflinewidth,scale=\pentakscale,transform shape,#2,pics/fancy box/.style={code={%
+			\path (0,0) coordinate (C0);
+			\foreach \Item/\Text [count=\Count starting from 0] in {#3}
+			{%
+				\ifboolKV[tachescrayon]{NoirBlanc}%
+					{%
+						\def\mybackcolor{gray}\def\myfontcolor{black}
+					}%
+					{%
+						\itemtomacro\lstColors[\the\numexpr\Count+1\relax]\mycolor
+						\IfSubStr{\mycolor}{/}%
+							{%
+								\StrCut{\mycolor}{/}{\mybackcolor}{\myfontcolor}%
+							}%
+							{%
+								\def\mybackcolor{\mycolor}\def\myfontcolor{black}%
+							}%
+					}%
+				\node[rounded rectangle,rounded rectangle left arc=none,draw=\mybackcolor,fill=\mybackcolor,anchor=north west,font=\pentaksfontcateg,text=\myfontcolor,outer sep=0pt,inner sep=0.75ex]  (RR\Count) at (C\Count) {\vphantom{pL}\Item};
+				\node[line width={\pentakscale*3\pgflinewidth},anchor=north west,below right={\pentakscale*1ex} of RR\Count.south west,draw,text width=\pentakswidth,font=\pentaksfontblock,inner sep=0.75ex] (T\Count) {\Text};
+				\coordinate[below left={\pentakscale*1ex} of T\Count.south west] (C\the\numexpr\Count+1\relax);
+				\filldraw[\mybackcolor] ([xshift=-1ex]C\Count) rectangle (C\the\numexpr\Count+1\relax);
+				\filldraw[\mybackcolor] ([xshift=-3ex]C\Count) rectangle ([xshift=-2ex]C\the\numexpr\Count+1\relax);
+				\filldraw[\mybackcolor!50!white] ([xshift=-2ex]C\Count) rectangle ([xshift=-1ex]C\the\numexpr\Count+1\relax);
+				\ifnum\Count=0
+					\shade[ball color=\mybackcolor!75] ([shift={(-3ex-\pentakscale*0.5\pgflinewidth,\pentakscale*0.5\pgflinewidth)}]C\Count) to[out=90,in=90]++(3ex+\pentakscale*\pgflinewidth,0) ;
+				\fi
+				\xdef\myCount{\Count}%last index
+				}
+			\ifboolKV[tachescrayon]{NoirBlanc}%
+				{%
+					\def\mylastbackcolor{gray}
+					\filldraw[lightgray!15] ([xshift=-3ex]C\the\numexpr\myCount+1\relax) --++ (0,-0.25ex) --++ (1.5ex,-4ex) coordinate[pos=0.8] (aux1) coordinate[pos=1] (aux2) -- ($(C\the\numexpr\myCount+1\relax)+(0,-0.25ex)$) coordinate[pos=0.2] (aux3) --++ (0,0.25ex) -- cycle ;
+				}%
+				{%
+					\itemtomacro\lstColors[\the\numexpr\myCount+1\relax]\mylastcolor
+					\IfSubStr{\mylastcolor}{/}%
+						{%
+							\StrBefore{\mylastcolor}{/}[\mylastbackcolor]%
+						}%
+						{%
+							\def\mylastbackcolor{\mylastcolor}%
+						}%
+					\filldraw[brown!10] ([xshift=-3ex]C\the\numexpr\myCount+1\relax) --++ (0,-0.25ex) --++ (1.5ex,-4ex) coordinate[pos=0.8] (aux1) coordinate[pos=1] (aux2) -- ($(C\the\numexpr\myCount+1\relax)+(0,-0.25ex)$) coordinate[pos=0.2] (aux3) --++ (0,0.25ex) -- cycle ;
+				}%
+			\filldraw[\mylastbackcolor] ([shift={(-3ex,3\pgflinewidth)}]C\the\numexpr\myCount+1\relax) to[out=-90,in=180]++ (0.5ex-0.5\pgflinewidth,-0.5ex) to[out=0,in=-90]++ (0.5ex-0.5\pgflinewidth,0.5ex) -- cycle ;
+			\filldraw[\mylastbackcolor] ([shift={(-1ex+\pgflinewidth,3\pgflinewidth)}]C\the\numexpr\myCount+1\relax) to[out=-90,in=180]++ (0.5ex-0.5\pgflinewidth,-0.5ex) to[out=0,in=-90]++ (0.5ex-0.5\pgflinewidth,0.5ex) -- cycle ;
+			\filldraw[\mylastbackcolor!50!white] ([shift={(-2ex,3\pgflinewidth)}]C\the\numexpr\myCount+1\relax) to[out=-90,in=180]++ (0.5ex,-0.5ex) to[out=0,in=-90]++ (0.5ex,0.5ex) -- cycle ;
+			\filldraw[line join=cap,gray,fill=gray] (aux1) -- (aux2) -- (aux3);
+		}}]
+		\pic{fancy box={#2}};
+	\end{tikzpicture}%
+}
+
+%====EXERCICE PERSO
+\newlength{\largstarsempty}
+\newlength{\largstarsmid}
+\newlength{\largstarfull}
+\newlength{\largmaxstars}
+
+%commande annexe tkzlevelstars [en] + [fr]
+\usetikzlibrary{shapes.geometric}
+
+\newlength{\tmphauteuretoiles}
+\newlength{\tmpprofondeuretoiles}
+\newlength{\tmpoffsetetoiles}\setlength{\tmpoffsetetoiles}{0.25pt}
+
+\defKV[levelstars]{%
+	colframe=\def\tkzLevelStarsColor{#1},
+	colback=\def\tkzLevelStarsColorBg{#1},
+	offset=\setlength{\tmpoffsetetoiles}{#1},
+	maxlevel=\def\tkzLevelStarsMaxLevel{#1}
+}
+
+\setKVdefault[levelstars]{%
+	colframe=black,
+	colback=gray,
+	offset={0.025em},
+	maxlevel=3,
+	valign=true
+}
+
+\NewDocumentCommand{\tkzLevelStars}{ O{} m }{%
+	%lectures des clés
+	\restoreKV[levelstars]%
+	\setKV[levelstars]{#1}%
+	%dimensions
+	\settototalheight{\tmphauteuretoiles}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+	\setlength{\tmphauteuretoiles}{0.95\tmphauteuretoiles}%
+	\ifboolKV[levelstars]{valign}%
+		{%
+			\settodepth{\tmpprofondeuretoiles}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+			\begin{tikzpicture}[baseline={-1.25\tmpprofondeuretoiles},fill=\tkzLevelStarsColorBg,draw=\tkzLevelStarsColor,rounded corners={0.05\tmphauteuretoiles},line width={0.04\tmphauteuretoiles}]
+		}%
+		{%
+			\begin{tikzpicture}[fill=\tkzLevelStarsColorBg,draw=\tkzLevelStarsColor,rounded corners={0.05\tmphauteuretoiles},line width={0.04\tmphauteuretoiles}]
+		}%
+		\foreach \X in {1,...,\tkzLevelStarsMaxLevel}{%
+			\xdef\tmpxfill{\xintfloateval{min(1,max(1+#2-\X,0))}}%
+			\path ({\X*(\tmphauteuretoiles+\tmpoffsetetoiles)},0) node[star,draw,star point height={0.25\tmphauteuretoiles},minimum size={\tmphauteuretoiles},inner sep=0pt,path picture={\fill (path picture bounding box.south west) rectangle  ([xshift=\tmpxfill*0.9515*\tmphauteuretoiles]path picture bounding box.north west);}]{};
+		}
+	\end{tikzpicture}%
+}
+
+\defKV[tkznivetoiles]{%
+	Couleur=\def\tkzLevelStarsColor{#1},
+	CouleurFond=\def\tkzLevelStarsColorBg{#1},
+	Offset=\setlength{\tmpoffsetetoiles}{#1},
+	NiveauMax=\def\tkzLevelStarsMaxLevel{#1}
+}
+
+\setKVdefault[tkznivetoiles]{%
+	Couleur=black,
+	CouleurFond=gray,
+	Offset={0.025em},
+	NiveauMax=3,
+	AlignV=true
+}
+
+\NewDocumentCommand{\tkzEtoiles}{ O{} m }{%
+	%lectures des clés
+	\restoreKV[tkznivetoiles]%
+	\setKV[tkznivetoiles]{#1}%
+	%dimensions
+	\settototalheight{\tmphauteuretoiles}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+	\setlength{\tmphauteuretoiles}{0.95\tmphauteuretoiles}%
+	\ifboolKV[tkznivetoiles]{AlignV}%
+		{%
+			\settodepth{\tmpprofondeuretoiles}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+			\begin{tikzpicture}[baseline={-1.25\tmpprofondeuretoiles},fill=\tkzLevelStarsColorBg,draw=\tkzLevelStarsColor,rounded corners={0.05\tmphauteuretoiles},line width={0.04\tmphauteuretoiles}]
+		}%
+		{%
+			\begin{tikzpicture}[fill=\tkzLevelStarsColorBg,draw=\tkzLevelStarsColor,rounded corners={0.05\tmphauteuretoiles},line width={0.04\tmphauteuretoiles}]
+		}%
+		\foreach \X in {1,...,\tkzLevelStarsMaxLevel}{%
+			\xdef\tmpxfill{\xintfloateval{min(1,max(1+#2-\X,0))}}%
+			\path ({\X*(\tmphauteuretoiles+\tmpoffsetetoiles)},0) node[star,draw,star point height={0.25\tmphauteuretoiles},minimum size={\tmphauteuretoiles},inner sep=0pt,path picture={\fill (path picture bounding box.south west) rectangle  ([xshift=\tmpxfill*0.9515*\tmphauteuretoiles]path picture bounding box.north west);}]{};
+		}
+	\end{tikzpicture}%
+}
+
+%commande annexe ;-)
+\NewDocumentCommand\NiveauDiffExos{ O{3} m }{%avec des demis ??
+	%les tailles de boîtes
+	\settowidth{\largstarsempty}{{\faStar[regular]}}%
+	\settowidth{\largstarsmid}{{\faStarHalf}}%
+	\settowidth{\largstarfull}{{\faStar}}%
+	\pgfmathsetlength{\largmaxstars}{max(\largstarsempty,\largstarsmid,\largstarfull)}%
+	%les calculs intermédiaires
+	\xintifboolexpr{#1 < 0}{\xdef\tmpstarsmax{3}}{\xdef\tmpstarsmax{#1}}%on met à 3 si pas valide
+	\xintifboolexpr{#2 >= 0 'and' #2 <= \tmpstarsmax 'and' isint(2*#2) == 1}{\xdef\tmpstars{#2}}{\xdef\tmpstars{0}}%on met à zéro si pas valide
+	%
+	\xintifboolexpr{isint(\tmpstars) == 1}%
+	{%
+		\xdef\tmpstarsexosfull{\tmpstars}%
+		\xdef\tmpstarsexosmid{0}%
+		\xdef\tmpstarsexosempty{\xinteval{\tmpstarsmax-\tmpstars}}%
+	}%
+	{%
+		\xdef\tmpstarsexosmid{1}%
+		\xdef\tmpstarsexosfull{\xinteval{(\tmpstars-0.5)}}%
+		\xdef\tmpstarsexosempty{\xinteval{\tmpstarsmax-1-\tmpstarsexosfull}}%
+	}%
+	%affichage des full
+	\xintifboolexpr{\tmpstarsexosfull > 0}{\xintFor* ##1 in {\xintSeq{1}{\tmpstarsexosfull}}\do{\makebox[\largmaxstars][c]{\faStar}}}{}%
+	%affichage des mid
+	\xintifboolexpr{\tmpstarsexosmid > 0}{\xintFor* ##1 in {\xintSeq{1}{\tmpstarsexosmid}}\do{\makebox[\largmaxstars][c]{\faStarHalf}}}{}%
+	%affichage des vides
+	\xintifboolexpr{\tmpstarsexosempty > 0}{\xintFor* ##1 in {\xintSeq{1}{\tmpstarsexosempty}}\do{\makebox[\largmaxstars][c]{\faStar[regular]}}}{}%
+}
+
+%commande annexe [en] ;-)
+\NewDocumentCommand\DiffLevelStars{ O{3} m }{%avec des demis ??
+	%les tailles de boîtes
+	\settowidth{\largstarsempty}{{\faStar[regular]}}%
+	\settowidth{\largstarsmid}{{\faStarHalf}}%
+	\settowidth{\largstarfull}{{\faStar}}%
+	\pgfmathsetlength{\largmaxstars}{max(\largstarsempty,\largstarsmid,\largstarfull)}%
+	%les calculs intermédiaires
+	\xintifboolexpr{#1 < 0}{\xdef\tmpstarsmax{3}}{\xdef\tmpstarsmax{#1}}%on met à 3 si pas valide
+	\xintifboolexpr{#2 >= 0 'and' #2 <= \tmpstarsmax 'and' isint(2*#2) == 1}{\xdef\tmpstars{#2}}{\xdef\tmpstars{0}}%on met à zéro si pas valide
+	%
+	\xintifboolexpr{isint(\tmpstars) == 1}%
+	{%
+		\xdef\tmpstarsexosfull{\tmpstars}%
+		\xdef\tmpstarsexosmid{0}%
+		\xdef\tmpstarsexosempty{\xinteval{\tmpstarsmax-\tmpstars}}%
+	}%
+	{%
+		\xdef\tmpstarsexosmid{1}%
+		\xdef\tmpstarsexosfull{\xinteval{(\tmpstars-0.5)}}%
+		\xdef\tmpstarsexosempty{\xinteval{\tmpstarsmax-1-\tmpstarsexosfull}}%
+	}%
+	%affichage des full
+	\xintifboolexpr{\tmpstarsexosfull > 0}{\xintFor* ##1 in {\xintSeq{1}{\tmpstarsexosfull}}\do{\makebox[\largmaxstars][c]{\faStar}}}{}%
+	%affichage des mid
+	\xintifboolexpr{\tmpstarsexosmid > 0}{\xintFor* ##1 in {\xintSeq{1}{\tmpstarsexosmid}}\do{\makebox[\largmaxstars][c]{\faStarHalf}}}{}%
+	%affichage des vides
+	\xintifboolexpr{\tmpstarsexosempty > 0}{\xintFor* ##1 in {\xintSeq{1}{\tmpstarsexosempty}}\do{\makebox[\largmaxstars][c]{\faStar[regular]}}}{}%
+}
+
+%code ppal
+\newcounter{numeroexo}
+\setcounter{numeroexo}{0}
+\newlength{\eptraitexo}
+\setlength{\eptraitexo}{1.1pt}
+\newlength{\eptraitexospace}
+\setlength{\eptraitexospace}{1.5\eptraitexo}
+\newlength{\tmp@image@hauteur@totale}
+\newlength{\tmp@image@profondeur}
+
+\colorlet{macouleurexo}{blue!50!black}
+\colorlet{macouleurexodeco}{blue!50!black}
+\colorlet{macouleurexodecofond}{blue!50!black}
+
+\newcommand\tmpstyleexo{\bfseries\LARGE\sffamily}%
+\newcommand\tmplabelexo{Exercice~}%
+
+\defKV[globalstyleexo]{%
+	Libelle=\renewcommand\tmplabelexo{#1},%
+	Couleur=\colorlet{macouleurexo}{#1},%
+	CouleurDeco=\colorlet{macouleurexodeco}{#1},%
+	CouleurFondDeco=\colorlet{macouleurexodecofond}{#1},%
+	Police=\renewcommand\tmpstyleexo{#1},%
+	EpTrait=\setlength{\eptraitexo}{#1},%
+	EchelleEtoiles=\def\tmpscalestarsexos{#1}
+}
+
+\setKVdefault[globalstyleexo]{%
+	Libelle={Exercice~},%
+	Couleur={blue!50!black},%
+	CouleurDeco={blue!50!black},%
+	CouleurFondDeco={macouleurexodeco!50},%
+	Police={\bfseries\LARGE\sffamily},%
+	EpTrait={1.1pt},%
+	EchelleEtoiles=0.85
+}
+
+\NewDocumentCommand\StyleEnvtExo{ O{} }{%
+	\restoreKV[globalstyleexo]%
+	\setKV[globalstyleexo]{#1}%
+}
+\NewDocumentCommand\StyleEnvtExoDefaut{ }{%
+	\restoreKV[globalstyleexo]%
+}
+
+\defKV[EnvtExercice]{%
+	Type=\def\EnvtExoType{#1},%
+	ComplementTitre=\def\EnvtExoCpltTitre{#1},%
+	CodeDebut=\def\EnvtExoCodeAvant{#1},%
+	EchelleImage=\def\EnvtExoScaleImg{#1},%
+	Decoration=\def\EnvtExoDeco{#1},%
+	Trait=\def\EnvtExoTrait{#1},%
+	Etoiles=\def\EnvtExoEtoiles{#1}
+}
+\setKVdefault[EnvtExercice]{
+	Type=Classique,%
+	ComplementTitre={},%
+	CodeDebut={},%
+	EchelleImage=1.15,%
+	Compteur=true,%
+	Decoration={},%
+	Trait=plein,%
+	Etoiles={}
+}
+
+\NewDocumentEnvironment{EnvtExo}{ !O{} }%
+{%
+	\useKVdefault[EnvtExercice]%
+	\setKV[EnvtExercice]{#1}%
+	\addtocounter{numeroexo}{1}%
+	\ifboolKV[EnvtExercice]{Compteur}{}{\addtocounter{numeroexo}{-1}}%
+	\def\hrulefill{\leavevmode\leaders\hrule height \eptraitexo\hfill\kern\z@}%épaisseur
+	\noindent\begingroup\color{macouleurexo}%
+	\IfStrEq{\EnvtExoType}{Classique}%OK exo°____vide
+		{%
+			%label avec numéro et complément
+			\tmpstyleexo\tmplabelexo\ifboolKV[EnvtExercice]{Compteur}{\thenumeroexo}{}\EnvtExoCpltTitre%
+			%étoiles eventuelles
+			\IfStrEq{\EnvtExoEtoiles}{}{}%
+				{%
+					\,(\IfSubStr{\EnvtExoEtoiles}{§}%
+						{%
+							\StrCut{\EnvtExoEtoiles}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
+						}%
+						{%
+							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoEtoiles}%
+						}%
+					)%
+				}%
+			%trait éventuel
+			\IfStrEqCase{\EnvtExoTrait}{%
+				{plein}{\,\hrulefill}%
+				{pointilles}{\,\dotfill}%
+				{dashilles}{\,\hdashrule{\fill}{\eptraitexo}{\eptraitexospace}}%
+				{non}{\hfill}%
+				{aucun}{~}%
+			}%
+			%décoration éventuelle
+			\IfSubStr{\EnvtExoDeco}{Icone}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
+					\,\textcolor{macouleurexodeco}{\scalebox{0.85}[0.85]{\EnvtExoIcon}}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Barres}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
+					\,%
+					\IfSubStr{\EnvtExoDeco}{*}%
+						{%
+							\IfStrEqCase{\EnvtExoIcon}{%
+								{V0}{\pictoskills[height=dauto,colors=skillgreen]{0}}%
+								{V1}{\pictoskills[height=dauto,colors=skillgreen]{1}}%
+								{V2}{\pictoskills[height=dauto,colors=skillgreen]{2}}%
+								{V3}{\pictoskills[height=dauto,colors=skillgreen]{3}}%
+								{O0}{\pictoskills[height=dauto,colors=skillorange]{0}}%
+								{O1}{\pictoskills[height=dauto,colors=skillorange]{1}}%
+								{O2}{\pictoskills[height=dauto,colors=skillorange]{2}}%
+								{O3}{\pictoskills[height=dauto,colors=skillorange]{3}}%
+								{R0}{\pictoskills[height=dauto,colors=skillred]{0}}%
+								{R1}{\pictoskills[height=dauto,colors=skillred]{1}}%
+								{R2}{\pictoskills[height=dauto,colors=skillred]{2}}%
+								{R3}{\pictoskills[height=dauto,colors=skillred]{3}}%
+							}%
+						}%
+						{%
+							\IfStrEqCase{\EnvtExoIcon}{%
+								{V0}{\pictoskills[height=auto,colors=skillgreen]{0}}%
+								{V1}{\pictoskills[height=auto,colors=skillgreen]{1}}%
+								{V2}{\pictoskills[height=auto,colors=skillgreen]{2}}%
+								{V3}{\pictoskills[height=auto,colors=skillgreen]{3}}%
+								{O0}{\pictoskills[height=auto,colors=skillorange]{0}}%
+								{O1}{\pictoskills[height=auto,colors=skillorange]{1}}%
+								{O2}{\pictoskills[height=auto,colors=skillorange]{2}}%
+								{O3}{\pictoskills[height=auto,colors=skillorange]{3}}%
+								{R0}{\pictoskills[height=auto,colors=skillred]{0}}%
+								{R1}{\pictoskills[height=auto,colors=skillred]{1}}%
+								{R2}{\pictoskills[height=auto,colors=skillred]{2}}%
+								{R3}{\pictoskills[height=auto,colors=skillred]{3}}%
+							}%
+						}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Ceinture}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoCouleur]%
+					\,\CeintureCouleur{\EnvtExoCouleur}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Cible}%
+				{%
+					\IfSubStr{\EnvtExoDeco}{*}%
+						{%
+							\,\tkzBullsEyeArrow[colors]%
+						}%
+						{%
+							\,\tkzBullsEyeArrow%
+						}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Chrono}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoChrono]%
+					\,\pictochrono[ColTime=macouleurexodeco!50]{\EnvtExoChrono}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Perso}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPerso]%
+					\,\EnvtExoPerso%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Points}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPts]%
+					\xintifboolexpr{ \EnvtExoPts <= 1 }{\def\pts{point}}{\def\pts{points}}%
+					\,\textcolor{macouleurexodeco}{(\StrSubstitute{\EnvtExoPts}{.}{{{,}}}\ \pts)}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Image}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoImg]%
+					\settototalheight{\tmp@image@hauteur@totale}{\hbox{\tmpstyleexo qB}}%
+					\,$\vcenter{\hbox{\includegraphics[height=\EnvtExoScaleImg\tmp@image@hauteur@totale]{\EnvtExoImg}}}$%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Speedo}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoLevel]%
+					\StrCut{\EnvtExoLevel}{§}{\EnvtExoLevelSk}{\EnvtExoLevelTo}%
+					\,\MiniCompteurNiveaux[Couleurs=macouleurexodeco,Marqueur=\EnvtExoLevelSk]{\EnvtExoLevelTo}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{faEtoiles}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
+					\IfSubStr{\EnvtExoStars}{§}%
+						{%
+							\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+							\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos[\EnvtExoStarTot]{\EnvtExoStarNb}}}%
+						}%
+						{%
+							\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos{\EnvtExoStars}}}%
+						}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{tkzEtoiles}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
+					\IfSubStr{\EnvtExoStars}{§}%
+						{%
+							\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
+						}%
+						{%
+							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoStars}%
+						}%
+				}{}%
+		}{}%
+	\IfSubStr{\EnvtExoType}{Perso}%OK perso____déco
+		{%
+			\StrBehind{\EnvtExoType}{/}[\EnvtExoLabel]%
+			%label avec numéro et complément
+			\tmpstyleexo\EnvtExoLabel\ifboolKV[EnvtExercice]{Compteur}{\thenumeroexo}{}\EnvtExoCpltTitre%
+			%étoiles eventuelles
+			\IfStrEq{\EnvtExoEtoiles}{}{}%
+				{%
+					\,(\IfSubStr{\EnvtExoEtoiles}{§}%
+						{%
+							\StrCut{\EnvtExoEtoiles}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
+						}%
+						{%
+							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoEtoiles}%
+						}%
+					)%
+				}%
+			%trait éventuel
+			\IfStrEqCase{\EnvtExoTrait}{%
+				{plein}{\,\hrulefill}%
+				{pointilles}{\,\dotfill}%
+				{dashilles}{\,\hdashrule{\fill}{\eptraitexo}{\eptraitexospace}}%
+				{non}{\hfill}%
+			}%
+			%décoration éventuelle
+			\IfSubStr{\EnvtExoDeco}{Icone}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
+					\,\textcolor{macouleurexodeco}{\scalebox{0.85}[0.85]{\EnvtExoIcon}}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Barres}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
+					\,%
+					\IfSubStr{\EnvtExoDeco}{*}%
+						{%
+							\IfStrEqCase{\EnvtExoIcon}{%
+								{V0}{\pictoskills[height=dauto,colors=skillgreen]{0}}%
+								{V1}{\pictoskills[height=dauto,colors=skillgreen]{1}}%
+								{V2}{\pictoskills[height=dauto,colors=skillgreen]{2}}%
+								{V3}{\pictoskills[height=dauto,colors=skillgreen]{3}}%
+								{O0}{\pictoskills[height=dauto,colors=skillorange]{0}}%
+								{O1}{\pictoskills[height=dauto,colors=skillorange]{1}}%
+								{O2}{\pictoskills[height=dauto,colors=skillorange]{2}}%
+								{O3}{\pictoskills[height=dauto,colors=skillorange]{3}}%
+								{R0}{\pictoskills[height=dauto,colors=skillred]{0}}%
+								{R1}{\pictoskills[height=dauto,colors=skillred]{1}}%
+								{R2}{\pictoskills[height=dauto,colors=skillred]{2}}%
+								{R3}{\pictoskills[height=dauto,colors=skillred]{3}}%
+							}%
+						}%
+						{%
+							\IfStrEqCase{\EnvtExoIcon}{%
+								{V0}{\pictoskills[height=auto,colors=skillgreen]{0}}%
+								{V1}{\pictoskills[height=auto,colors=skillgreen]{1}}%
+								{V2}{\pictoskills[height=auto,colors=skillgreen]{2}}%
+								{V3}{\pictoskills[height=auto,colors=skillgreen]{3}}%
+								{O0}{\pictoskills[height=auto,colors=skillorange]{0}}%
+								{O1}{\pictoskills[height=auto,colors=skillorange]{1}}%
+								{O2}{\pictoskills[height=auto,colors=skillorange]{2}}%
+								{O3}{\pictoskills[height=auto,colors=skillorange]{3}}%
+								{R0}{\pictoskills[height=auto,colors=skillred]{0}}%
+								{R1}{\pictoskills[height=auto,colors=skillred]{1}}%
+								{R2}{\pictoskills[height=auto,colors=skillred]{2}}%
+								{R3}{\pictoskills[height=auto,colors=skillred]{3}}%
+							}%
+						}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Ceinture}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoCouleur]%
+					\,\CeintureCouleur{\EnvtExoCouleur}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Cible}%
+				{%
+					\IfSubStr{\EnvtExoDeco}{*}%
+						{%
+							\,\tkzBullsEyeArrow[colors]%
+						}%
+						{%
+							\,\tkzBullsEyeArrow%
+						}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Chrono}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoChrono]%
+					\,\pictochrono[ColTime=macouleurexodeco!50]{\EnvtExoChrono}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Perso}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPerso]%
+					\,\EnvtExoPerso%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Points}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPts]%
+					\xintifboolexpr{ \EnvtExoPts <= 1 }{\def\pts{point}}{\def\pts{points}}%
+					\,\textcolor{macouleurexodeco}{(\StrSubstitute{\EnvtExoPts}{.}{{{,}}}\ \pts)}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Image}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoImg]%
+					\settototalheight{\tmp@image@hauteur@totale}{\hbox{\tmpstyleexo qB}}%
+					\,$\vcenter{\hbox{\includegraphics[height=\EnvtExoScaleImg\tmp@image@hauteur@totale]{\EnvtExoImg}}}$%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{faEtoiles}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
+					\IfSuStr{\EnvtExoStars}{§}%
+						{%
+							\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+							\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos[\EnvtExoStarTot]{\EnvtExoStarNb}}}%
+						}%
+						{%
+							\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos{\EnvtExoStars}}}%
+						}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{tkzEtoiles}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
+					\IfSubStr{\EnvtExoStars}{§}%
+						{%
+							\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
+						}%
+						{%
+							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoStars}%
+						}%
+				}{}%
+		}{}%
+	\endgroup%
+	\def\hrulefill{\leavevmode\leaders\hrule height 0.4pt\hfill\kern\z@}%
+	\par%
+	\EnvtExoCodeAvant%
+}%
+{}%
+
+\NewDocumentCommand\TitreExo{ !O{} }{%
+	\useKVdefault[EnvtExercice]%
+	\setKV[EnvtExercice]{#1}%
+	\addtocounter{numeroexo}{1}%
+	\ifboolKV[EnvtExercice]{Compteur}{}{\addtocounter{numeroexo}{-1}}%
+	\def\hrulefill{\leavevmode\leaders\hrule height \eptraitexo\hfill\kern\z@}%épaisseur
+	\noindent\begingroup\color{macouleurexo}%
+	\IfStrEq{\EnvtExoType}{Classique}%OK exo°____vide
+		{%
+			%label avec numéro et complément
+			\tmpstyleexo\tmplabelexo\ifboolKV[EnvtExercice]{Compteur}{\thenumeroexo}{}\EnvtExoCpltTitre%
+			%étoiles eventuelles
+			\IfStrEq{\EnvtExoEtoiles}{}{}%
+				{%
+					\,(\IfSubStr{\EnvtExoEtoiles}{§}%
+						{%
+							\StrCut{\EnvtExoEtoiles}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
+						}%
+						{%
+							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoEtoiles}%
+						}%
+					)%
+				}%
+			%trait éventuel
+			\IfStrEqCase{\EnvtExoTrait}{%
+				{plein}{\,\hrulefill}%
+				{pointilles}{\,\dotfill}%
+				{dashilles}{\,\hdashrule{\fill}{\eptraitexo}{\eptraitexospace}}%
+				{non}{\hfill}%
+			}%
+			%décoration éventuelle
+			\IfSubStr{\EnvtExoDeco}{Icone}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
+					\,\scalebox{0.85}[0.85]{\EnvtExoIcon}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Barres}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
+					\,%
+					\IfSubStr{\EnvtExoDeco}{*}%
+						{%
+							\IfStrEqCase{\EnvtExoIcon}{%
+								{V0}{\pictoskills[height=dauto,colors=skillgreen]{0}}%
+								{V1}{\pictoskills[height=dauto,colors=skillgreen]{1}}%
+								{V2}{\pictoskills[height=dauto,colors=skillgreen]{2}}%
+								{V3}{\pictoskills[height=dauto,colors=skillgreen]{3}}%
+								{O0}{\pictoskills[height=dauto,colors=skillorange]{0}}%
+								{O1}{\pictoskills[height=dauto,colors=skillorange]{1}}%
+								{O2}{\pictoskills[height=dauto,colors=skillorange]{2}}%
+								{O3}{\pictoskills[height=dauto,colors=skillorange]{3}}%
+								{R0}{\pictoskills[height=dauto,colors=skillred]{0}}%
+								{R1}{\pictoskills[height=dauto,colors=skillred]{1}}%
+								{R2}{\pictoskills[height=dauto,colors=skillred]{2}}%
+								{R3}{\pictoskills[height=dauto,colors=skillred]{3}}%
+							}%
+						}%
+						{%
+							\IfStrEqCase{\EnvtExoIcon}{%
+								{V0}{\pictoskills[height=auto,colors=skillgreen]{0}}%
+								{V1}{\pictoskills[height=auto,colors=skillgreen]{1}}%
+								{V2}{\pictoskills[height=auto,colors=skillgreen]{2}}%
+								{V3}{\pictoskills[height=auto,colors=skillgreen]{3}}%
+								{O0}{\pictoskills[height=auto,colors=skillorange]{0}}%
+								{O1}{\pictoskills[height=auto,colors=skillorange]{1}}%
+								{O2}{\pictoskills[height=auto,colors=skillorange]{2}}%
+								{O3}{\pictoskills[height=auto,colors=skillorange]{3}}%
+								{R0}{\pictoskills[height=auto,colors=skillred]{0}}%
+								{R1}{\pictoskills[height=auto,colors=skillred]{1}}%
+								{R2}{\pictoskills[height=auto,colors=skillred]{2}}%
+								{R3}{\pictoskills[height=auto,colors=skillred]{3}}%
+							}%
+						}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Ceinture}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoCouleur]%
+					\,\CeintureCouleur{\EnvtExoCouleur}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Cible}%
+				{%
+					\IfSubStr{\EnvtExoDeco}{*}%
+						{%
+							\,\tkzBullsEyeArrow[colors]%
+						}%
+						{%
+							\,\tkzBullsEyeArrow%
+						}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Chrono}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoChrono]%
+					\,\pictochrono[ColTime=macouleurexo!50]{\EnvtExoChrono}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Perso}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPerso]%
+					\,\EnvtExoPerso%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Points}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPts]%
+					\xintifboolexpr{ \EnvtExoPts <= 1 }{\def\pts{point}}{\def\pts{points}}%
+					\,\textcolor{macouleurexodeco}{(\StrSubstitute{\EnvtExoPts}{.}{{{,}}}\ \pts)}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Image}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoImg]%
+					\settototalheight{\tmp@image@hauteur@totale}{\hbox{\tmpstyleexo qB}}%
+					\,$\vcenter{\hbox{\includegraphics[height=\EnvtExoScaleImg\tmp@image@hauteur@totale]{\EnvtExoImg}}}$%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{faEtoiles}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
+					\IfSuStr{\EnvtExoStars}{§}%
+						{%
+							\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+							\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos[\EnvtExoStarTot]{\EnvtExoStarNb}}}%
+						}%
+						{%
+							\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos{\EnvtExoStars}}}%
+						}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{tkzEtoiles}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
+					\IfSubStr{\EnvtExoStars}{§}%
+						{%
+							\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
+						}%
+						{%
+							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoStars}%
+						}%
+				}{}%
+		}{}%
+	\IfSubStr{\EnvtExoType}{Perso}%OK perso____déco
+		{%
+			\StrBehind{\EnvtExoType}{/}[\EnvtExoLabel]%
+			%label avec numéro et complément
+			\tmpstyleexo\EnvtExoLabel\ifboolKV[EnvtExercice]{Compteur}{\thenumeroexo}{}\EnvtExoCpltTitre%
+			%étoiles eventuelles
+			\IfStrEq{\EnvtExoEtoiles}{}{}%
+				{%
+					\,(\IfSubStr{\EnvtExoEtoiles}{§}%
+						{%
+							\StrCut{\EnvtExoEtoiles}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
+						}%
+						{%
+							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoEtoiles}%
+						}%
+					)%
+				}%
+			%trait éventuel
+			\IfStrEqCase{\EnvtExoTrait}{%
+				{plein}{\,\hrulefill}%
+				{pointilles}{\,\dotfill}%
+				{dashilles}{\,\hdashrule{\fill}{\eptraitexo}{\eptraitexospace}}%
+				{non}{\hfill}%
+			}%
+			%décoration éventuelle
+			\IfSubStr{\EnvtExoDeco}{Icone}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
+					\,\scalebox{0.85}[0.85]{\EnvtExoIcon}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Barres}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
+					\,%
+					\IfSubStr{\EnvtExoDeco}{*}%
+						{%
+							\IfStrEqCase{\EnvtExoIcon}{%
+								{V0}{\pictoskill[height=dauto,col=skillgreen]{0}}%
+								{V1}{\pictoskill[height=dauto,col=skillgreen]{1}}%
+								{V2}{\pictoskill[height=dauto,col=skillgreen]{2}}%
+								{V3}{\pictoskill[height=dauto,col=skillgreen]{3}}%
+								{O0}{\pictoskill[height=dauto,col=skillorange]{0}}%
+								{O1}{\pictoskill[height=dauto,col=skillorange]{1}}%
+								{O2}{\pictoskill[height=dauto,col=skillorange]{2}}%
+								{O3}{\pictoskill[height=dauto,col=skillorange]{3}}%
+								{R0}{\pictoskill[height=dauto,col=skillred]{0}}%
+								{R1}{\pictoskill[height=dauto,col=skillred]{1}}%
+								{R2}{\pictoskill[height=dauto,col=skillred]{2}}%
+								{R3}{\pictoskill[height=dauto,col=skillred]{3}}%
+							}%
+						}%
+						{%
+							\IfStrEqCase{\EnvtExoIcon}{%
+								{V0}{\pictoskill[height=auto,col=skillgreen]{0}}%
+								{V1}{\pictoskill[height=auto,col=skillgreen]{1}}%
+								{V2}{\pictoskill[height=auto,col=skillgreen]{2}}%
+								{V3}{\pictoskill[height=auto,col=skillgreen]{3}}%
+								{O0}{\pictoskill[height=auto,col=skillorange]{0}}%
+								{O1}{\pictoskill[height=auto,col=skillorange]{1}}%
+								{O2}{\pictoskill[height=auto,col=skillorange]{2}}%
+								{O3}{\pictoskill[height=auto,col=skillorange]{3}}%
+								{R0}{\pictoskill[height=auto,col=skillred]{0}}%
+								{R1}{\pictoskill[height=auto,col=skillred]{1}}%
+								{R2}{\pictoskill[height=auto,col=skillred]{2}}%
+								{R3}{\pictoskill[height=auto,col=skillred]{3}}%
+							}%
+						}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Ceinture}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoCouleur]%
+					\,\CeintureCouleur{\EnvtExoCouleur}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Cible}%
+				{%
+					\,\tkzBullsEyeArrow{}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Chrono}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoChrono]%
+					\,\pictochrono[ColTime=macouleurexo!50]{\EnvtExoChrono}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Points}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPts]%
+					\xintifboolexpr{ \EnvtExoPts <= 1 }{\def\pts{point}}{\def\pts{points}}%
+					\,\textcolor{macouleurexodeco}{(\StrSubstitute{\EnvtExoPts}{.}{{{,}}}\ \pts)}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{Image}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoImg]%
+					\settototalheight{\tmp@image@hauteur@totale}{\hbox{\tmpstyleexo qB}}%
+					\,$\vcenter{\hbox{\includegraphics[height=\EnvtExoScaleImg\tmp@image@hauteur@totale]{\EnvtExoImg}}}$%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{faEtoiles}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
+					\IfSuStr{\EnvtExoStars}{§}%
+						{%
+							\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+							\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos[\EnvtExoStarTot]{\EnvtExoStarNb}}}%
+						}%
+						{%
+							\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos{\EnvtExoStars}}}%
+						}%
+				}{}%
+			\IfSubStr{\EnvtExoDeco}{tkzEtoiles}%
+				{%
+					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
+					\IfSubStr{\EnvtExoStars}{§}%
+						{%
+							\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
+						}%
+						{%
+							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoStars}%
+						}%
+				}{}%
+		}{}%
+	\endgroup%
+	\def\hrulefill{\leavevmode\leaders\hrule height 0.4pt\hfill\kern\z@}%
+	\par%
+	\EnvtExoCodeAvant%
+}
+
+%====BOITE ARRONDIE
+\newlength{\tmpheightbox}
+\defKV[BoiteArrondie]{EspH=\def\RoundedBoxDelta{#1},Style=\def\RoundedBoxStyle{#1}}
+\setKVdefault[BoiteArrondie]{%
+	Fond=red,%
+	Texte=white,%
+	EspH=0.125em,%
+	Style=rect
+}
+\NewDocumentCommand\BoiteArrondie{ O{} m O{char} }{%
+	\restoreKV[BoiteArrondie]%
+	\setKV[BoiteArrondie]{#1}%
+	\settototalheight{\tmpheightbox}{\hbox{(EazertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN)#2}}%hauteur globale
+	\IfStrEqCase{\RoundedBoxStyle}{%
+		{rect}{\tikz[remember picture,baseline=(#3.base)]{\node[minimum height=\tmpheightbox,shape=rectangle,rounded corners=0.25em,fill={\useKV[BoiteArrondie]{Fond}},inner sep=0.75pt,outer sep=0pt,text={\useKV[BoiteArrondie]{Texte}}] (#3) {\vphantom{(qE)}\kern\RoundedBoxDelta#2\kern\RoundedBoxDelta};}}%
+		{cercle}{\tikz[remember picture,baseline=(#3.base)]{\node[shape=circle,minimum height=\tmpheightbox,fill={\useKV[BoiteArrondie]{Fond}},inner sep=0.75pt,outer sep=0pt,text={\useKV[BoiteArrondie]{Texte}}] (#3) {\vphantom{(qE)}#2};}}%
+	}\relax
+}
+
+%%====Chat SMS
+
+%===Données utiles
+\newlength{\WidthofSMS}
+\newlength{\HeightofSMS}
+\newlength{\OffsetofSMS}
+\newlength{\WidthofSMSavatar}
+\newlength{\MarginofSMSavatar}
+\colorlet{smscolp}{teal!75!cyan!75!white}
+\colorlet{smscoltitle}{white}
+
+%===Styles [FR/EN]
+\tcbset{SMSglobal/.style={
+	enhanced,arc=0pt,outer arc=0pt,colback=\ProjectSmsColback,toptitle=0.3cm,bottomtitle=0.3cm,title={\null},
+	overlay={
+		%la barre de titre
+		\node[anchor=east,smscoltitle,font=\large] at ([xshift=-1mm]title.east) {\faVideo~~\faFlipPhone~~\faThreeDotsV};
+		\node[draw=none,anchor=west,inner sep=1pt,text=smscoltitle,font=\large] at ([xshift=1mm]title.west) (picture) {\ProjectSmsAvat};
+		\node[draw=none,anchor=west,text=smscoltitle,font=\large,text depth=0pt,inner sep=1pt] at (picture.east) {\sffamily\bfseries\vphantom{pB}\NameofSMS} ;
+		%le bas
+		\draw[line width=0.85pt,darkgray] ([yshift=1cm]frame.south west) -- ([yshift=1cm]frame.south east);
+		\node[draw=smscolp!75!black,top color=lightgray!40,bottom color=lightgray!40,middle color=white,line width=1pt,rounded corners=2pt,text width={{\WidthofSMS-2.5cm}},minimum height=0.75cm,font=\large\ProjectSmsFonte,text=darkgray,inner xsep=6pt] at ([shift={(0,0.5cm)}]frame.south) {\textcolor{gray}{\rule[-0.1cm]{1pt}{0.5cm}}\,\ProjectSmsWrite};
+		\node[draw=none,font=\LARGE,text=darkgray!50,anchor=east,align=center] at ([shift={(-1mm,0.5cm)}]frame.south east) (send) {\faPaperPlane};
+		\node[draw=none,font=\LARGE,text=darkgray!50,anchor=west,align=center] at ([shift={(1mm,0.5cm)}]frame.south west) (add) {\faPlusCircle};
+		},
+	boxrule=0.85pt,colframe=darkgray,
+	title style={top color=smscolp!90!black,bottom color=smscolp!90!black,middle color=smscolp!75},
+	bottom=1.15cm,top=0mm,left=1mm,right=1mm
+	}
+}
+
+%===Keys [FR]
+\defKV[ProjetSMS]{%
+	Hauteur=\def\ProjectSmsHeight{#1},%
+	Largeur=\setlength{\WidthofSMS}{#1},%
+	Marge=\setlength{\OffsetofSMS}{#1},%
+	Couleur=\colorlet{smscolp}{#1},%
+	CouleurFond=\def\ProjectSmsColback{#1},%
+	CouleurR=\def\ProjectSmsColIn{#1},%
+	CouleurE=\def\ProjectSmsColOut{#1},%
+	CouleurTitre=\colorlet{smscoltitle}{#1},%
+	PoliceTxt=\def\ProjectSmsFonte{#1},%
+	Avatar=\def\ProjectSmsAvatar{#1},%
+	TxtEcrire=\def\ProjectSmsWrite{#1}
+}
+\setKVdefault[ProjetSMS]{%
+	Hauteur=auto,%
+	Largeur=7cm,%
+	Marge=1.5cm,%
+	CouleurFond={lightgray!5},%
+	CouleurR=lime!25,%
+	CouleurE=teal!25,%
+	TxtEcrire={Écrire\ldots},%
+	PoliceTxt=\normalfont,%
+	Avatar=\faAddressCard,%
+	AffAvatar=false,%
+	NoirBlanc=false
+}
+
+%===Envt [FR]
+\NewDocumentEnvironment{EnvSMS}{ O{} m }
+{
+	\restoreKV[ProjetSMS]%
+	\setKV[ProjetSMS]{#1}%
+	\def\NameofSMS{#2}%
+		\IfSubStr{\ProjectSmsAvatar}{Image}%
+		{%
+			\StrBehind{\ProjectSmsAvatar}{/}[\tmpimgavatar]%
+			\def\ProjectSmsAvat{\includegraphics[height=0.5cm]{\tmpimgavatar}}%
+			\ifboolKV[ProjetSMS]{AffAvatar}%
+				{%
+					\setlength{\WidthofSMSavatar}{\widthof{\includegraphics[height=0.5\baselineskip]{\tmpimgavatar}}}%
+					\setlength{\MarginofSMSavatar}{\WidthofSMSavatar+2pt}%
+				}%
+				{%
+					\setlength{\MarginofSMSavatar}{0pt}%
+				}%
+		}%
+		{%
+			\def\ProjectSmsAvat{\ProjectSmsAvatar}%
+			\ifboolKV[ProjetSMS]{AffAvatar}%
+				{%
+					\setlength{\WidthofSMSavatar}{\widthof{\tiny\ProjectSmsAvatar}}%
+					\setlength{\MarginofSMSavatar}{\WidthofSMSavatar+2pt}%
+				}%
+				{%
+					\setlength{\MarginofSMSavatar}{0pt}%
+				}%
+		}%
+	\IfStrEq{\ProjectSmsHeight}{auto}%
+		{%
+			\tcbset{SMSsize/.style={width=\WidthofSMS}}%
+		}%
+		{%
+			\setlength{\HeightofSMS}{\ProjectSmsHeight}%
+			\tcbset{SMSsize/.style={width=\WidthofSMS,height=\HeightofSMS,valign=bottom}}%
+		}%
+	\ifboolKV[ProjetSMS]{NoirBlanc}%
+		{%
+			\colorlet{smscolp}{lightgray!25}%
+			\def\ProjectSmsColback{lightgray!5}%
+			\def\ProjectSmsColIn{lightgray!10}%
+			\def\ProjectSmsColOut{lightgray!10}%
+			\colorlet{smscoltitle}{gray}%
+		}%
+		{}%
+	\tcolorbox[SMSsize,SMSglobal]%
+}
+{
+	\endtcolorbox%
+}
+
+%===Macros [FR]
+\NewDocumentCommand\SMSrec{ s m m }{%
+	\ifboolKV[ProjetSMS]{AffAvatar}%
+		{%
+			\IfSubStr{\ProjectSmsAvatar}{Image}%
+				{%
+					\tcbset{SMSAffLogo/.style={left skip=\MarginofSMSavatar,overlay={\node[anchor=north east] at ([yshift={1mm+1pt}]interior.north west) {\includegraphics[height=0.5\baselineskip]{\tmpimgavatar}};}}}%
+				}%
+				{%
+					\tcbset{SMSAffLogo/.style={left skip=\MarginofSMSavatar,overlay={\node[anchor=north east,font=\tiny,text=gray] at ([yshift={1mm+1pt}]interior.north west) {\ProjectSmsAvatar};}}}%
+				}%
+		}%
+		{%
+			\tcbset{SMSAffLogo/.style={}}%
+		}%
+	\tcbox[enhanced,interior code={},before skip=0.5mm,after skip=0.5mm,halign=left,left=1.5mm,right=1.5mm,
+	frame code={
+		\filldraw[\ProjectSmsColIn,draw=black,rounded corners=4pt]
+		(frame.south east) rectangle (frame.north west) ;
+	},
+	width={\WidthofSMS-\OffsetofSMS},top=1mm,bottom=1mm,
+	capture=minipage,fontupper=\small\ProjectSmsFonte,
+	attach boxed title to top left,
+	coltitle=black,fonttitle=\scriptsize\sffamily,
+	boxed title style={size=fbox,bottom=0pt,boxsep=2pt,frame empty,interior empty},
+	title={\@ifpackageloaded{babel}{\NoAutoSpacing#2}{#2}\IfBooleanTF{#1}{$\cdot$\scalebox{0.6}[0.6]{\faCheckCircleReg\!\faCheckCircleReg}~}{}},left=1mm,right=1mm,boxsep=0mm,SMSAffLogo]{#3}%
+}
+\NewDocumentCommand\SMSenv{ s m m }{%
+	\tcbox[enhanced,interior code={},before skip=0.5mm,after skip=0.5mm,halign=left,left=1.5mm,right=1.5mm,
+	frame code={
+		\filldraw[\ProjectSmsColOut,draw=black,rounded corners=4pt]
+		(frame.south east) rectangle (frame.north west) ;
+	},
+	width={\WidthofSMS-\OffsetofSMS},top=1mm,bottom=1mm,flush right,
+	capture=minipage,fontupper=\small\ProjectSmsFonte,
+	attach boxed title to top right,
+	coltitle=black,fonttitle=\scriptsize\sffamily,
+	boxed title style={size=fbox,bottom=0pt,boxsep=2pt,frame empty,interior empty},
+	title={\@ifpackageloaded{babel}{\NoAutoSpacing#2}{#2}\IfBooleanTF{#1}{}{$\cdot$\scalebox{0.6}[0.6]{\faCheckCircleReg\!\faCheckCircleReg}~}},left=1mm,right=1mm,boxsep=0mm]{#3}%
+}
+
+%====Nutriscore
+\definecolor{couleurNS1}{RGB}{45,126,67}
+\definecolor{couleurNS2}{RGB}{151,186,56}
+\definecolor{couleurNS3}{RGB}{240,202,13}
+\definecolor{couleurNS4}{RGB}{213,123,26}
+\definecolor{couleurNS5}{RGB}{197,52,25}
+\tikzset{noeudNS/.style={pos=0.5,xscale=\echellexNS*\hauteurNS,yscale=\echelleyNS*\hauteurNS}}
+
+\defKV[NUTRISCORE]{%
+	Hauteur=\pgfmathsetmacro{\hauteurNS}{#1},%
+	Ratio=\pgfmathsetmacro{\ratiolargeurbandeNS}{#1},%
+	Symboles=\def\lettresNS{#1},%
+	Legende=\def\legendeNS{#1},%
+	Police=\def\fonteNS{#1},%
+	Couleurs=\def\couleursNS{#1},%
+	EchelleSymboles=\def\echellesymbNS{#1},%
+	CouleurFond=\def\coulbgNS{#1}
+}
+\setKVdefault[NUTRISCORE]{%
+	Hauteur=1,%
+	Ratio={0.6},%
+	Symboles={A,B,C,D,E},%
+	Legende={score},%
+	Police=\sffamily\bfseries,%
+	AffLegende=true,%
+	Couleurs={couleurNS1,couleurNS2,couleurNS3,couleurNS4,couleurNS5},%
+	EchelleSymboles={1.25,1.65},%
+	CouleurFond=white
+}
+
+\NewDocumentCommand\BandeauScore{ O{} D<>{} m }{%
+	\restoreKV[NUTRISCORE]%
+	\setKV[NUTRISCORE]{#1}%
+	\IfEq{#3}{}%
+		{%
+			\xdef\numcasNS{0}%
+		}%
+		{%
+			\xdef\numcasNS{#3}%
+		}%
+	\setsepchar{,}%
+	\readlist\letterListNS{\lettresNS}%
+	\xdef\nbcasesNS{\letterListNSlen}%
+	\readlist\colorListNS{\couleursNS}%
+	\xdef\nbcouleursNS{\colorListNSlen}%
+	\pgfmathsetmacro{\largeurcaseNS}{\hauteurNS*\ratiolargeurbandeNS}%
+	\pgfmathsetmacro{\largeurbandeNS}{\largeurcaseNS*\nbcasesNS}%
+	\pgfmathsetmacro{\margeNS}{0.225*\largeurcaseNS/2.4}%
+	\IfSubStr{\echellesymbNS}{,}%
+		{%
+			\StrCut{\echellesymbNS}{,}{\echellexNS}{\echelleyNS}%
+		}%
+		{%
+			\xdef\echellexNS{\echellesymbNS}\xdef\echelleyNS{\echellesymbNS}%
+		}%
+	\begin{tikzpicture}[font=\fonteNS,#2]
+		%---test
+		\filldraw[white,rounded corners=\fpeval{5*\largeurcaseNS*\ratiolargeurbandeNS}mm,line width=\fpeval{1.5*\largeurcaseNS*\ratiolargeurbandeNS}mm,opacity=0] ({-\margeNS},{-\margeNS}) rectangle++ (\nbcasesNS*\largeurcaseNS+2*\margeNS,\hauteurNS+2*\margeNS) ;
+		%---testfin
+		\begin{scope}
+			\clip[rounded corners=\fpeval{5*\largeurcaseNS*\ratiolargeurbandeNS}mm] (0,0) rectangle (\largeurbandeNS,\hauteurNS);
+			\foreach \tmpiii in {1,...,\letterListNSlen}{%
+				\ifnum\tmpiii=\numcasNS
+				\else
+					\ifnum\tmpiii>\nbcouleursNS
+						\fill[draw=none,lightgray] ({(\tmpiii-1)*\largeurcaseNS},0) rectangle ++(\largeurcaseNS,\hauteurNS) node[noeudNS,white,opacity=0.66]{\letterListNS[\tmpiii]};
+					\else
+						\fill[draw=none,{\colorListNS[\tmpiii]}] ({(\tmpiii-1)*\largeurcaseNS},0) rectangle ++(\largeurcaseNS,\hauteurNS) node[noeudNS,white,opacity=0.66]{\letterListNS[\tmpiii]};
+					\fi
+				\fi
+			}%
+		\end{scope}
+		\xintifboolexpr{\numcasNS >=1 'and' \numcasNS <= \nbcasesNS }%
+			{%
+				\begin{scope}
+					%\clip (-\margeNS,-\margeNS) rectangle++ (\largeurbandeNS+2*\margeNS,\hauteurNS+2*\margeNS);
+					\draw[draw=\coulbgNS,rounded corners=\fpeval{7.25*\largeurcaseNS*\ratiolargeurbandeNS}mm,line width=\fpeval{1.5*\largeurcaseNS*\ratiolargeurbandeNS}mm,fill={\colorListNS[#3]}] ({(\numcasNS-1)*\largeurcaseNS-\margeNS},{-\margeNS}) rectangle++ (\largeurcaseNS+2*\margeNS,\hauteurNS+2*\margeNS) node[noeudNS,white]{\letterListNS[\numcasNS]};
+				\end{scope}
+			}%
+			{%
+			}%
+		%légende
+		\ifboolKV[NUTRISCORE]{AffLegende}%
+			{%
+				\node[above right=1pt,gray,scale=\fpeval{0.5*\hauteurNS},inner sep=1pt] at ({0.125*\margeNS},1.02*\hauteurNS) {\vphantom{QÉ}\MakeUppercase{\legendeNS}};
+			}{}%
+	\end{tikzpicture}%
+}
+
+%%----COMMANDES EN
+
+%====QCMs
+\def\MCQanswersbox{\raisebox{-0.2ex}{\faSquare[regular]}}
+
+\defKV[answersmcq]{%
+	NumCols=\def\RepQCMNbCol{#1},%
+	FontLabels=\def\RepQCMFonte{#1},%
+	SpaceCR=\def\RepQCMOffset{#1},%
+	Labels=\def\RepQCMTypeLabel{#1},%
+	SpaceLabels=\xdef\RepQCMSpace{#1},%
+	Width=\def\RepQCMLarg{#1}
+}
+
+\setKVdefault[answersmcq]{%
+	SpaceCR={6pt/2pt},%
+	NumCols=4,%
+	Lines=false,%
+	FontLabels={\bfseries},%
+	Labels={a.},%
+	SpaceLabels=\kern5pt,%
+	Swap=false,%
+	Width=0.99\linewidth,%
+	Shuffle=false
+}
+
+\NewDocumentCommand\MCQFormatLabel{ m m }{%1=typelabel,%3=caractère
+	\IfSubStr{#1}{a}%
+		{%
+			{\RepQCMFonte\StrSubstitute{#1}{a}{#2}}%
+		}%
+		{}%
+	\IfSubStr{#1}{A}%
+		{%
+			{\RepQCMFonte\StrSubstitute{#1}{A}{#2}}%
+		}%
+		{}%
+	\IfSubStr{#1}{1}%
+		{%
+			{\RepQCMFonte\StrSubstitute{#1}{1}{#2}}%
+		}%
+		{}%
+}
+
+\NewDocumentCommand\AnswersMCQ{ O{} m D<>{} }{%1=nbcol,2=listeréponses
+	\restoreKV[answersmcq]%
+	\setKV[answersmcq]{#1}%
+	\IfSubStr{\RepQCMOffset}{/}%
+		{\StrCut{\RepQCMOffset}{/}{\RepQCMOffsetCol}{\RepQCMOffsetLgn}}%
+		{\def\RepQCMOffsetCol{\RepQCMOffset}\def\RepQCMOffsetLgn{\RepQCMOffset}}%
+	\setsepchar{§}%
+	\readlist*\QCMListereponses{#2}%
+	\def\QCMNbRep{\QCMListereponseslen}%
+	%les items créés
+	\IfStrEq{\RepQCMTypeLabel}{box}%
+		{%
+			\def\RepQCMLabelA{\ReponsesQCMbox\RepQCMSpace}%
+			\def\RepQCMLabelB{\ReponsesQCMbox\RepQCMSpace}%
+			\def\RepQCMLabelC{\ReponsesQCMbox\RepQCMSpace}%
+			\def\RepQCMLabelD{\ReponsesQCMbox\RepQCMSpace}%
+		}%
+		{%
+			\IfSubStr{\RepQCMTypeLabel}{a}%
+				{%
+					\xdef\RepQCMLabelA{\QCMFormatteLabel{\RepQCMTypeLabel}{a}\RepQCMSpace}%
+					\xdef\RepQCMLabelB{\QCMFormatteLabel{\RepQCMTypeLabel}{b}\RepQCMSpace}%
+					\xdef\RepQCMLabelC{\QCMFormatteLabel{\RepQCMTypeLabel}{c}\RepQCMSpace}%
+					\xdef\RepQCMLabelD{\QCMFormatteLabel{\RepQCMTypeLabel}{d}\RepQCMSpace}%
+				}{}%
+			\IfSubStr{\RepQCMTypeLabel}{A}%
+				{%
+					\xdef\RepQCMLabelA{\QCMFormatteLabel{\RepQCMTypeLabel}{A}\RepQCMSpace}%
+					\xdef\RepQCMLabelB{\QCMFormatteLabel{\RepQCMTypeLabel}{B}\RepQCMSpace}%
+					\xdef\RepQCMLabelC{\QCMFormatteLabel{\RepQCMTypeLabel}{C}\RepQCMSpace}%
+					\xdef\RepQCMLabelD{\QCMFormatteLabel{\RepQCMTypeLabel}{D}\RepQCMSpace}%
+				}{}%
+			\IfSubStr{\RepQCMTypeLabel}{1}%
+				{%
+					\xdef\RepQCMLabelA{\QCMFormatteLabel{\RepQCMTypeLabel}{1}\RepQCMSpace}%
+					\xdef\RepQCMLabelB{\QCMFormatteLabel{\RepQCMTypeLabel}{2}\RepQCMSpace}%
+					\xdef\RepQCMLabelC{\QCMFormatteLabel{\RepQCMTypeLabel}{3}\RepQCMSpace}%
+					\xdef\RepQCMLabelD{\QCMFormatteLabel{\RepQCMTypeLabel}{4}\RepQCMSpace}%
+				}{}%
+		}%
+	%en fonction du nb de colonnes
+	\ifboolKV[answersmcq]{Shuffle}%
+		{%
+			\ClearList{TmpListeReponsesQCM}%
+			\IfEq{\QCMNbRep}{2}%2réponses
+				{%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[1]}%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[2]}%
+					\ifboolKV[answersmcq]{Lines}%
+						{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,hlines,vlines,width=\RepQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+						{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,width=\RepQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+						\RepQCMLabelA\TmpListeReponsesQCM[0] & \RepQCMLabelB\TmpListeReponsesQCM[1] \\
+					\end{tblr}%
+				}%
+				{}%
+			\IfEq{\QCMNbRep}{3}%3réponses
+				{%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[1]}%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[2]}%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[3]}%
+					\ifboolKV[answersmcq]{Lines}%
+						{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,hlines,vlines,width=\RepQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
+						{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,width=\RepQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
+						\RepQCMLabelA\TmpListeReponsesQCM[0] & \RepQCMLabelB\TmpListeReponsesQCM[1] & \RepQCMLabelC\TmpListeReponsesQCM[2] \\
+					\end{tblr}%
+				}%
+				{}%
+			\IfEq{\QCMNbRep}{4}%4réponses
+				{%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[1]}%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[2]}%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[3]}%
+					\InsertRandomItem{TmpListeReponsesQCM}{\QCMListereponses[4]}%
+					\IfEq{\RepQCMNbCol}{4}%4colonnes
+						{%
+							\ifboolKV[answersmcq]{Lines}%
+								{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,hlines,vlines,width=\RepQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
+								{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,width=\RepQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
+								\RepQCMLabelA\TmpListeReponsesQCM[0] & \RepQCMLabelB\TmpListeReponsesQCM[1] & \RepQCMLabelC\TmpListeReponsesQCM[2] & \RepQCMLabelD\TmpListeReponsesQCM[3] \\
+							\end{tblr}%
+						}%
+						{%
+							\ifboolKV[answersmcq]{Lines}%
+								{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,hlines,vlines,width=\RepQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+								{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,width=\RepQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+								\RepQCMLabelA\TmpListeReponsesQCM[0] & \ifboolKV[answersmcq]{Swap}{\RepQCMLabelB\TmpListeReponsesQCM[1]}{\RepQCMLabelC\TmpListeReponsesQCM[1]} \\
+								\ifboolKV[answersmcq]{Swap}{\RepQCMLabelC\TmpListeReponsesQCM[2]}{\RepQCMLabelB\TmpListeReponsesQCM[2]} & \RepQCMLabelD\TmpListeReponsesQCM[3] \\
+							\end{tblr}%
+						}%
+				}%
+				{}%
+		}%
+		{%
+			\IfEq{\QCMNbRep}{2}%2réponses
+				{%
+					\ifboolKV[answersmcq]{Lines}%
+						{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,hlines,vlines,width=\RepQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+						{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,width=\RepQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+						\RepQCMLabelA\QCMListereponses[1] & \RepQCMLabelB\QCMListereponses[2] \\
+					\end{tblr}%
+				}%
+				{}%
+			\IfEq{\QCMNbRep}{3}%3réponses
+				{%
+					\ifboolKV[answersmcq]{Lines}%
+						{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,hlines,vlines,width=\RepQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
+						{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,width=\RepQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
+						\RepQCMLabelA\QCMListereponses[1] & \RepQCMLabelB\QCMListereponses[2] & \RepQCMLabelC\QCMListereponses[3] \\
+					\end{tblr}%
+				}%
+				{}%
+			\IfEq{\QCMNbRep}{4}%4réponses
+				{%
+					\IfEq{\RepQCMNbCol}{4}%4colonnes
+						{%
+							\ifboolKV[answersmcq]{Lines}%
+								{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,hlines,vlines,width=\RepQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
+								{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,width=\RepQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
+								\RepQCMLabelA\QCMListereponses[1] & \RepQCMLabelB\QCMListereponses[2] & \RepQCMLabelC\QCMListereponses[3] & \RepQCMLabelD\QCMListereponses[4] \\
+							\end{tblr}%
+						}%
+						{%
+							\ifboolKV[answersmcq]{Lines}%
+								{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,hlines,vlines,width=\RepQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+								{\begin{tblr}{rowsep=\RepQCMOffsetLgn,colsep=\RepQCMOffsetCol,width=\RepQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+								\RepQCMLabelA\QCMListereponses[1] & \ifboolKV[answersmcq]{Swap}{\RepQCMLabelB\QCMListereponses[2]}{\RepQCMLabelC\QCMListereponses[3]} \\
+								\ifboolKV[answersmcq]{Swap}{\RepQCMLabelC\QCMListereponses[3]}{\RepQCMLabelB\QCMListereponses[2]} & \RepQCMLabelD\QCMListereponses[4] \\
+							\end{tblr}%
+						}%
+				}%
+				{}%
+		}%
+}
+
+%====ITEMCHOICE
+\NewDocumentCommand\CreateItemsList{ m m m }{%1=liste,%2=macro,3=nomliste
+	\@ifIsList{#3}%
+		{The list \texttt{#3} already exists, pick an other name.}%
+		{\xdef#2{#1}\NewList{#3}}%
+}
+
+\defKV[itemchoice]{%
+	Type=\def\ChoixTypeSerie{#1}
+}
+\setKVdefault[itemchoice]{%
+	Random=false,%
+	Type=enum
+}
+
+\NewDocumentCommand\ListItemsChoice{ O{} m m r() D<>{} d!! }{%1=options,2=série des items,3=nomsérie,4=liste choix,5=options enum,%6=options beamer ?
+	%on teste si la liste considérée existe...
+	\@ifIsList{#3}%
+		{%
+			\restoreKV[itemchoice]%
+			\setKV[itemchoice]{#1}%
+			\ClearList{#3}%
+			%création de la liste
+			\ifboolKV[itemchoice]{Random}%
+				{%
+					\xintFor* ##1 in {\xintCSVtoList{#2}}\do{\InsertRandomItem{#3}{##1}}
+				}%
+				{%
+					\xintFor* ##1 in {\xintCSVtoList{#2}}\do{\InsertLastItem{#3}{##1}}
+				}%
+			%création de l'environnement
+			\IfNoValueTF{#6}%
+				{%
+					\IfStrEq{\ChoixTypeSerie}{enum}%
+						{\begin{enumerate}[#5]}{}%
+					\IfStrEq{\ChoixTypeSerie}{item}%
+						{\begin{itemize}[#5]}{}%
+				}%
+				{%
+					\IfStrEq{\ChoixTypeSerie}{enum}%
+						{\begin{enumerate}[#6][#5]}{}%
+					\IfStrEq{\ChoixTypeSerie}{item}%
+						{\begin{itemize}[#6][#5]}{}%
+				}%
+			%==multicols
+			\IfSubStr{\ChoixTypeSerie}{MultiCols}%
+				{%
+					\StrBetween[1,2]{\ChoixTypeSerie}{/}{/}[\ChoixTypeMulticols]%
+					\StrBehind[2]{\ChoixTypeSerie}{/}[\NbMulticols]%
+					\begin{MultiCols}[Type=\ChoixTypeMulticols](\NbMulticols)<#5>%
+				}{}%
+			%items choisis
+			\ifboolKV[itemchoice]{Random}%
+				{%
+					\xintFor* ##1 in {\xintSeq{0}{\xinteval{#4-1}}}\do{\GetItem{#3}{##1}{ItemChoisi}\item \ItemChoisi}
+				}%
+				{%
+					\xintFor* ##1 in {\xintCSVtoList{#4}}\do{\GetItem{#3}{\xinteval{##1-1}}{ItemChoisi}\item \ItemChoisi}
+				}
+			%fin de l'environnement
+			\IfStrEq{\ChoixTypeSerie}{enum}%
+				{\end{enumerate}}{}
+			\IfStrEq{\ChoixTypeSerie}{item}
+				{\end{itemize}}{}%
+			\IfSubStr{\ChoixTypeSerie}{MultiCols}%
+				{\end{MultiCols}}{}%
+		}%
+		{%
+			The list \texttt{#3} doesn't exist, please use \texttt{\textbackslash CreerListeItems} to create it.%
+		}%
+}
+
+%====PENSKILLS
+\defKV[pentasks]{%
+	FontCateg=\def\pentaksfontcateg{#1},%
+	FontBlock=\def\pentaksfontblock{#1},%
+	Colors=\def\pentakscolors{#1},%
+	BlockWidth=\def\pentakswidth{#1},
+	Scale=\def\pentakscale{#1}
+}
+\setKVdefault[pentasks]{%
+	FontCateg=\bfseries\sffamily,%
+	FontBlock=\small\ttfamily,%
+	Colors={yellow/black,orange/black,magenta/black,cyan/black,teal/black,brown/black},%
+	BlockWidth=5cm,%
+	Scale=1,%
+	BlackWhite=false
+}
+
+\NewDocumentCommand\PencilSkills{ O{} D<>{} m }{%
+	\restoreKV[pentasks]%
+	\setKV[pentasks]{#1}%
+	%\edef\lstColors{\pentakscolors}%
+	\setsepchar{,}%
+	\readlist*\lstColors{\pentakscolors}%
+	\begin{tikzpicture}%
+		[line width=0.25\pgflinewidth,scale=\pentakscale,transform shape,#2,pics/fancy box/.style={code={%
+			\path (0,0) coordinate (C0);
+			\foreach \Item/\Text [count=\Count starting from 0] in {#3}
+			{%
+				\ifboolKV[pentasks]{BlackWhite}%
+					{%
+						\def\mybackcolor{gray}\def\myfontcolor{black}
+					}%
+					{%
+						\itemtomacro\lstColors[\the\numexpr\Count+1\relax]\mycolor
+						\IfSubStr{\mycolor}{/}%
+							{%
+								\StrCut{\mycolor}{/}{\mybackcolor}{\myfontcolor}%
+							}%
+							{%
+								\def\mybackcolor{\mycolor}\def\myfontcolor{\mycolor}%
+							}%
+					}%
+				\node[rounded rectangle,rounded rectangle left arc=none,draw=\mybackcolor,fill=\mybackcolor,anchor=north west,font=\pentaksfontcateg,text=\myfontcolor,outer sep=0pt,inner sep=0.75ex]  (RR\Count) at (C\Count) {\vphantom{pL}\Item};
+				\node[line width={\pentakscale*3\pgflinewidth},anchor=north west,below right={\pentakscale*1ex} of RR\Count.south west,draw,text width=\pentakswidth,font=\pentaksfontblock,inner sep=0.75ex] (T\Count) {\Text};
+				\coordinate[below left={\pentakscale*1ex} of T\Count.south west] (C\the\numexpr\Count+1\relax);
+				\filldraw[\mybackcolor] ([xshift=-1ex]C\Count) rectangle (C\the\numexpr\Count+1\relax);
+				\filldraw[\mybackcolor] ([xshift=-3ex]C\Count) rectangle ([xshift=-2ex]C\the\numexpr\Count+1\relax);
+				\filldraw[\mybackcolor!50!white] ([xshift=-2ex]C\Count) rectangle ([xshift=-1ex]C\the\numexpr\Count+1\relax);
+				\ifnum\Count=0
+					\shade[ball color=\mybackcolor!75] ([shift={(-3ex-\pentakscale*0.5\pgflinewidth,\pentakscale*0.5\pgflinewidth)}]C\Count) to[out=90,in=90]++(3ex+\pentakscale*\pgflinewidth,0) ;
+%					(C\Count);
+				\fi
+				\xdef\myCount{\Count}%last index
+				}
+			\ifboolKV[pentasks]{BlackWhite}%
+				{%
+					\def\mylastbackcolor{gray}
+					\filldraw[lightgray!15] ([xshift=-3ex]C\the\numexpr\myCount+1\relax) --++ (0,-0.25ex) --++ (1.5ex,-4ex) coordinate[pos=0.8] (aux1) coordinate[pos=1] (aux2) -- ($(C\the\numexpr\myCount+1\relax)+(0,-0.25ex)$) coordinate[pos=0.2] (aux3) --++ (0,0.25ex) -- cycle ;
+				}%
+				{%
+					\itemtomacro\lstColors[\the\numexpr\myCount+1\relax]\mylastcolor
+					\IfSubStr{\mylastcolor}{/}%
+						{%
+							\StrBefore{\mylastcolor}{/}[\mylastbackcolor]%
+						}%
+						{%
+							\def\mylastbackcolor{\mylastcolor}%
+						}%
+					\filldraw[brown!10] ([xshift=-3ex]C\the\numexpr\myCount+1\relax) --++ (0,-0.25ex) --++ (1.5ex,-4ex) coordinate[pos=0.8] (aux1) coordinate[pos=1] (aux2) -- ($(C\the\numexpr\myCount+1\relax)+(0,-0.25ex)$) coordinate[pos=0.2] (aux3) --++ (0,0.25ex) -- cycle ;
+				}%
+			\filldraw[\mylastbackcolor] ([shift={(-3ex,3\pgflinewidth)}]C\the\numexpr\myCount+1\relax) to[out=-90,in=180]++ (0.5ex-0.5\pgflinewidth,-0.5ex) to[out=0,in=-90]++ (0.5ex-0.5\pgflinewidth,0.5ex) -- cycle ;
+			\filldraw[\mylastbackcolor] ([shift={(-1ex+\pgflinewidth,3\pgflinewidth)}]C\the\numexpr\myCount+1\relax) to[out=-90,in=180]++ (0.5ex-0.5\pgflinewidth,-0.5ex) to[out=0,in=-90]++ (0.5ex-0.5\pgflinewidth,0.5ex) -- cycle ;
+			\filldraw[\mylastbackcolor!50!white] ([shift={(-2ex,3\pgflinewidth)}]C\the\numexpr\myCount+1\relax) to[out=-90,in=180]++ (0.5ex,-0.5ex) to[out=0,in=-90]++ (0.5ex,0.5ex) -- cycle ;
+			\filldraw[line join=cap,gray,fill=gray] (aux1) -- (aux2) -- (aux3);
+		}}]
+		\pic{fancy box={#2}};
+	\end{tikzpicture}%
+}
+
+%====Chat SMS
+%===Keys [EN]
+\defKV[ProjectSMS]{%
+	height=\def\ProjectSmsHeight{#1},%
+	width=\setlength{\WidthofSMS}{#1},%
+	margin=\setlength{\OffsetofSMS}{#1},%
+	color=\colorlet{smscolp}{#1},%
+	colback=\def\ProjectSmsColback{#1},%
+	colorin=\def\ProjectSmsColIn{#1},%
+	colorout=\def\ProjectSmsColOut{#1},%
+	coltitle=\colorlet{smscoltitle}{#1},%
+	fonttxt=\def\ProjectSmsFonte{#1},%
+	avatar=\def\ProjectSmsAvatar{#1},%
+	writetxt=\def\ProjectSmsWrite{#1}
+}
+\setKVdefault[ProjectSMS]{%
+	height=auto,%
+	width=7cm,%
+	margin=1.5cm,%
+	colback=lightgray!5,%
+	colorin=lime!25,%
+	colorout=teal!25,%
+	writetxt={Write\ldots},%
+	fonttxt=\normalfont,%
+	avatar=\faAddressCard,%
+	dispavatar=false,%
+	blackwhite=false
+}
+
+%===Envt [EN]
+\NewDocumentEnvironment{ChatSMS}{ O{} m }
+{
+	\restoreKV[ProjectSMS]%
+	\setKV[ProjectSMS]{#1}%
+	\def\NameofSMS{#2}%
+	\IfSubStr{\ProjectSmsAvatar}{img}%
+		{%
+			\StrBehind{\ProjectSmsAvatar}{/}[\tmpimgavatar]%
+			\def\ProjectSmsAvat{\includegraphics[height=0.5cm]{\tmpimgavatar}}%
+			\ifboolKV[ProjectSMS]{dispavatar}%
+				{%
+					\setlength{\WidthofSMSavatar}{\widthof{\includegraphics[height=0.5\baselineskip]{\tmpimgavatar}}}%
+					\setlength{\MarginofSMSavatar}{\WidthofSMSavatar+2pt}%
+				}%
+				{%
+					\setlength{\MarginofSMSavatar}{0pt}%
+				}%
+		}%
+		{%
+			\def\ProjectSmsAvat{\ProjectSmsAvatar}%
+			\ifboolKV[ProjectSMS]{dispavatar}%
+				{%
+					\setlength{\WidthofSMSavatar}{\widthof{\tiny\ProjectSmsAvatar}}%
+					\setlength{\MarginofSMSavatar}{\WidthofSMSavatar+2pt}%
+				}%
+				{%
+					\setlength{\MarginofSMSavatar}{0pt}%
+				}%
+		}%
+	\IfStrEq{\ProjectSmsHeight}{auto}%
+		{%
+			\tcbset{SMSsize/.style={width=\WidthofSMS}}%
+		}%
+		{%
+			\setlength{\HeightofSMS}{\ProjectSmsHeight}%
+			\tcbset{SMSsize/.style={width=\WidthofSMS,height=\HeightofSMS,valign=bottom}}%
+		}%
+	\ifboolKV[ProjectSMS]{blackwhite}%
+		{%
+			\colorlet{smscolp}{lightgray!25}%
+			\def\ProjectSmsColback{lightgray!5}%
+			\def\ProjectSmsColIn{lightgray!10}%
+			\def\ProjectSmsColOut{lightgray!10}%
+			\colorlet{smscoltitle}{gray}%
+		}%
+		{}%
+	\tcolorbox[SMSsize,SMSglobal]%
+}
+{
+	\endtcolorbox%
+}
+
+%===Macros [EN]
+\NewDocumentCommand\InSMS{ s m m }{%
+	\ifboolKV[ProjectSMS]{dispavatar}%
+		{%
+			\IfSubStr{\ProjectSmsAvatar}{img}%
+				{%
+					\tcbset{SMSAffLogo/.style={left skip=\MarginofSMSavatar,overlay={\node[anchor=north east] at ([yshift={1mm+1pt}]interior.north west) {\includegraphics[height=0.5\baselineskip]{\tmpimgavatar}};}}}%
+				}%
+				{%
+					\tcbset{SMSAffLogo/.style={left skip=\MarginofSMSavatar,overlay={\node[anchor=north east,font=\tiny,text=gray] at ([yshift={1mm+1pt}]interior.north west) {\ProjectSmsAvatar};}}}%
+				}%
+		}%
+		{%
+			\tcbset{SMSAffLogo/.style={}}%
+		}%
+	\tcbox[enhanced,interior code={},before skip=0.5mm,after skip=0.5mm,halign=left,left=1.5mm,right=1.5mm,
+	frame code={
+		\filldraw[\ProjectSmsColIn,draw=black,rounded corners=4pt]
+		(frame.south east) rectangle (frame.north west) ;
+	},
+	width={\WidthofSMS-\OffsetofSMS},top=1mm,bottom=1mm,
+	capture=minipage,fontupper=\small\ProjectSmsFonte,
+	attach boxed title to top left,
+	coltitle=black,fonttitle=\scriptsize\sffamily,
+	boxed title style={size=fbox,bottom=0pt,boxsep=2pt,frame empty,interior empty},
+	title={#2\IfBooleanTF{#1}{$\cdot$\scalebox{0.6}[0.6]{\faCheckCircleReg\!\faCheckCircleReg}~}{}},left=1mm,right=1mm,boxsep=0mm,SMSAffLogo]{#3}%
+}
+\NewDocumentCommand\OutSMS{ s m m }{%
+	\tcbox[enhanced,interior code={},before skip=0.5mm,after skip=0.5mm,halign=left,left=1.5mm,right=1.5mm,
+	frame code={
+		\filldraw[\ProjectSmsColOut,draw=black,rounded corners=4pt]
+		(frame.south east) rectangle (frame.north west) ;
+	},
+	width={\WidthofSMS-\OffsetofSMS},top=1mm,bottom=1mm,flush right,
+	capture=minipage,fontupper=\small\ProjectSmsFonte,
+	attach boxed title to top right,
+	coltitle=black,fonttitle=\scriptsize\sffamily,
+	boxed title style={size=fbox,bottom=0pt,boxsep=2pt,frame empty,interior empty},
+	title={#2\IfBooleanTF{#1}{}{$\cdot$\scalebox{0.6}[0.6]{\faCheckCircleReg\!\faCheckCircleReg}~}},left=1mm,right=1mm,boxsep=0mm]{#3}%
+}
+
+%====SMALL BOXES CREATION
+\tikzset{simpleboxrulearrow/.style={line width=0.8pt,|->,>=latex}}
+
+\NewTColorBox{BoiteSimple}{ O{blue} D<>{} m }{
+	enhanced,nobeforeafter,blanker,size=small,bottom=1mm,before=\par\noindent,%top=0mm,left=1mm,right=1mm,
+	title={#3},fonttitle=\sffamily\bfseries\color{#1},lefttitle=1em,
+	finish={\draw[#1,simpleboxrulearrow] ([xshift=1em]title.west) --++ (-1em,0) |- (frame.south east) -- ($(frame.south east)!0.5!(frame.north east)$) ;},%
+	#2
+}
+
+\NewDocumentCommand\GenereBoiteSimple{ O{blue} m }{%
+	%1 = couleur
+	%2 = nom
+	\NewTColorBox{#2}{ O{} m }{
+		enhanced,nobeforeafter,blanker,size=small,bottom=1mm,before=\par\noindent,%top=0mm,left=1mm,right=1mm,
+		title={##2},fonttitle=\sffamily\bfseries\color{#1},lefttitle=1em,
+		finish={\draw[#1,simpleboxrulearrow] ([xshift=1em]title.west) --++ (-1em,0) |- (frame.south east) -- ($(frame.south east)!0.5!(frame.north east)$) ;},%
+		##1
+	}
+}
+
+%====CIRCLEDNUMBERSSIMPLE
+\defKV[CircledBoxNumber]{bg=\def\tmpbordernbcircbox{#1}}
+\setKVdefault[CircledBoxNumber]{bg={},txt=black,bthick=0.5pt,bcol=black,raise=true}
+
+\newlength{\tmpheightnbcircbox}
+\newlength{\tmpdepthnbcircbox}
+\NewDocumentCommand\CircledNumber{ O{} m O{circnb} }{%
+	\restoreKV[CircledBoxNumber]%
+	\setKV[CircledBoxNumber]{#1}%
+	\settototalheight{\tmpheightnbcircbox}{(1234567890)}%hauteur globale
+	\settodepth{\tmpdepthnbcircbox}{(1234567890)}%
+	\ifboolKV[CircledBoxNumber]{raise}%
+		{%
+			\IfEq{\tmpbordernbcircbox}{}%
+				{%
+					{\tikz[baseline={([yshift=\tmpdepthnbcircbox]current bounding box.south)}]\node[outer sep=0pt,inner sep=0.5pt,minimum height={\tmpheightnbcircbox-\useKV[CircledBoxNumber]{bthick}},draw,{\useKV[CircledBoxNumber]{bcol}},line width={\useKV[CircledBoxNumber]{bthick}},circle,text={\useKV[CircledBoxNumber]{txt}}] (#3) {\ifnum#2<10 #2\else\scalebox{0.5}[1]{#2}\fi} ;}%
+				}%
+				{%
+					{\tikz[baseline={([yshift=\tmpdepthnbcircbox]current bounding box.south)}]\node[outer sep=0pt,inner sep=0.5pt,minimum height={\tmpheightnbcircbox-\useKV[CircledBoxNumber]{bthick}},draw,{\useKV[CircledBoxNumber]{bcol}},line width={\useKV[CircledBoxNumber]{bthick}},circle,fill={\useKV[CircledBoxNumber]{bg}},text={\useKV[CircledBoxNumber]{txt}}] (#3) {\ifnum#2<10 #2\else\scalebox{0.5}[1]{#2}\fi} ;}%
+				}%
+		}%
+		{%
+			\IfEq{\tmpbordernbcircbox}{}%
+				{%
+					{\tikz[baseline=(#3.base)] \node[outer sep=0pt,inner sep=0.5pt,minimum height={\tmpheightnbcircbox-\useKV[CircledBoxNumber]{bthick}},draw,{\useKV[CircledBoxNumber]{bcol}},line width={\useKV[CircledBoxNumber]{bthick}},circle,text={\useKV[CircledBoxNumber]{txt}}] (#3) {\ifnum#2<10 #2\else\scalebox{0.5}[1]{#2}\fi} ;}%
+				}%
+				{%
+					{\tikz[baseline=(#3.base)] \node[outer sep=0pt,inner sep=0.5pt,minimum height={\tmpheightnbcircbox-\useKV[CircledBoxNumber]{bthick}},draw,{\useKV[CircledBoxNumber]{bcol}},line width={\useKV[CircledBoxNumber]{bthick}},circle,fill={\useKV[CircledBoxNumber]{bg}},text={\useKV[CircledBoxNumber]{txt}}] (#3) {\ifnum#2<10 #2\else\scalebox{0.5}[1]{#2}\fi} ;}%
+				}%
+		}%
+}
+
+%====EXAM BOX TITLE(s)
+\NewDocumentCommand\LetPhantomBox{}{%
+	\vphantom{(ÉAZERTYUIOPQSDFGHJKLMWXCVBN,éàço)}%
+}
+
+\tcbset{StyleTitreSujet/.style={%
+	enhanced,size=small,
+	colback=white!5,boxrule=1.25pt,
+	attach boxed title to top left={xshift=0.5cm,yshift=1mm-\tcboxedtitleheight},
+	varwidth boxed title*=-3cm,
+	boxed title style={frame code={
+			\path[fill=tcbcolframe!50!black]
+			([yshift=-1mm,xshift=-1mm]frame.north west)
+			arc[start angle=0,end angle=180,radius=1mm]
+			([yshift=-1mm,xshift=1mm]frame.north east)
+			arc[start angle=180,end angle=0,radius=1mm];
+			\path[fill=tcbcolframe] ([xshift=-2mm]frame.north west) -- ([xshift=2mm]frame.north east) [rounded corners=1mm]-- ([xshift=1mm,yshift=-1mm]frame.north east) -- (frame.south east) -- (frame.south west) -- ([xshift=-1mm,yshift=-1mm]frame.north west) [sharp corners]-- cycle;
+		},interior engine=empty,size=fbox,
+	},
+	fonttitle=\bfseries\sffamily,
+	fontupper=\huge\bfseries\sffamily,
+	}
+}
+
+\defKV[tcbtitresujet]{%
+	AlignH=\def\tcbtitresujethalign{#1}
+}
+
+\setKVdefault[tcbtitresujet]{%
+	Couleur=black,
+	AlignH=center
+}
+
+\NewDocumentEnvironment{TitreSujet}{ O{} D<>{} m }%
+{%
+	\restoreKV[tcbtitresujet]%
+	\setKV[tcbtitresujet]{#1}%
+	\IfStrEqCase{\tcbtitresujethalign}{%
+		{right}{\tcbset{StyleTitreSujetAlign/.style={halign=flush right}}}%
+		{left}{\tcbset{StyleTitreSujetAlign/.style={halign=flush left}}}%
+	}[\tcbset{StyleTitreSujetAlign/.style={halign=flush center}}]%
+	\tcolorbox[colupper={\useKV[tcbtitresujet]{Couleur}},colframe={\useKV[tcbtitresujet]{Couleur}},StyleTitreSujet,StyleTitreSujetAlign,title={\vphantom{QJ}#3},before upper=\LetPhantomBox,after upper=\LetPhantomBox,#2]%
+}%
+{%
+	\endtcolorbox%
+}
+
+\tcbset{StyleTitreSujetSousEpreuve/.style={%
+		center,after skip=1pt,size=small,boxsep=3pt,boxrule=1pt,colback=white,left=2pt,right=2pt,%
+		sharp corners,rounded corners=downhill,arc=8pt,
+		fontupper={\sffamily\bfseries\large}
+	}
+}
+
+\NewDocumentCommand\SousTitreSujetEpreuve{ O{black} m }{%
+	\tcbset{StyleTitreSujetSousEpreuveCouleur/.style={colframe=#1,colupper=#1}}
+	\IfStrEqCase{#2}{%
+		{U21}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\:\:,after upper=\:\:\faProjDiag]{Épreuve E2 - Mathématiques pour l'Informatique}}%
+		{U2}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\:\:,after upper=\:\:\faProjDiag]{Épreuve E2 - Mathématiques pour l'Informatique}}%
+		{U2CG}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\:\:,after upper=\:\:\faProjDiag]{Épreuve E2 - Mathématiques appliquées}}%
+		{U3}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\:\:,after upper=\:\:\faProjDiag]{Épreuve E3 - Mathématiques pour l'Informatique}}%
+		{UF2}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faDice\:\:,after upper=\:\:\faChartLine]{Épreuve EF2 - Mathématiques Approfondies}}%
+		{U41OL}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faDice\:\:,after upper=\:\:\faBezierCurve]{Épreuve U41 - Mathématiques}}}%
+		[{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur]{#2}}]%
+}
+
+\NewDocumentCommand\SujetTitreExo{ O{black} m }{%
+	\tcolorbox[enhanced,width=\linewidth,size=small,colback=white,colframe=#1,boxrule=0.75pt,fontupper=\color{#1}\Large\sffamily\bfseries,sharp corners,rounded corners=south,arc=4pt,before upper=\LetPhantomBox]
+	#2
+	\endtcolorbox%
+}
+
+%====vignettes
+\NewDocumentCommand\LetPhantomVignette{}{%
+	\vphantom{(AZERTYUIOPQSDFGHJKLMWXCVBN,éàço)}%
+}
+
+\tcbset{cevignettes/.style={%
+		nobeforeafter,box align=base,boxsep=0pt,enhanced,sharp corners=all,rounded corners=southeast,arc=2pt,boxrule=0.65pt,left=1.75pt,right=1.25pt,top=1.25pt,bottom=0.5pt,colback=white,before upper=\LetPhantomVignette
+	}
+}
+
+\tcbset{cevignettepy/.style={%
+		cevignettes,left=6.25pt,coltitle=tcbcolframe,
+		underlay={\begin{tcbclipinterior}\fill[fill=tcbcolframe!33]($(interior.south west)$) rectangle node[rotate=90,font=\tiny\sffamily,tcbcolframe!75!black]{\scalebox{0.55}[0.75]{\textbf{PY}}} ($(interior.north west)+(5pt,0pt)$);\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{cevignettealgo/.style={%
+		cevignettes,left=6.25pt,coltitle=tcbcolframe,
+		underlay={\begin{tcbclipinterior}\fill[fill=tcbcolframe!33]($(interior.south west)$) rectangle node[rotate=90,font=\tiny\sffamily,tcbcolframe!75!black]{\scalebox{0.55}[0.75]{\textbf{ALGO}}} ($(interior.north west)+(5pt,0pt)$);\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{cevignettetableur/.style={%
+		cevignettes,left=6.25pt,coltitle=tcbcolframe,
+		underlay={\begin{tcbclipinterior}\fill[fill=tcbcolframe!33]($(interior.south west)$) rectangle node[rotate=90,font=\tiny\sffamily,tcbcolframe!75!black]{\scalebox{0.5}[0.75]{\textbf{EXCEL}}} ($(interior.north west)+(5pt,0pt)$);\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{cevignetteMPM/.style={%
+		cevignettes,left=6.25pt,coltitle=white,
+		underlay={\begin{tcbclipinterior}\fill[fill=tcbcolframe!33]($(interior.south west)$) rectangle node[rotate=90,font=\tiny\sffamily,tcbcolframe!75!black]{\scalebox{0.55}[0.75]{\textbf{MPM}}} ($(interior.north west)+(5pt,0pt)$);\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{cevignettegraph/.style={%
+		cevignettes,left=6.25pt,coltitle=white,
+		underlay={\begin{tcbclipinterior}\fill[fill=tcbcolframe!33]($(interior.south west)$) rectangle node[rotate=90,font=\tiny\sffamily,tcbcolframe!75!black]{\scalebox{0.55}[0.75]{\textbf{GRPH}}} ($(interior.north west)+(5pt,0pt)$);\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{cevignetteshell/.style={%
+		cevignettes,left=6.25pt,coltitle=white,
+		underlay={\begin{tcbclipinterior}\fill[fill=tcbcolframe!33]($(interior.south west)$) rectangle node[rotate=90,font=\tiny\sffamily,tcbcolframe!75!black] {\scalebox{0.5}[0.75]{\textbf{SHELL}}} ($(interior.north west)+(5pt,0pt)$);\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{cevignettelatex/.style={%
+		cevignettes,left=6.25pt,coltitle=white,
+		underlay={\begin{tcbclipinterior}\fill[fill=tcbcolframe!33]($(interior.south west)$) rectangle node[rotate=90,font=\tiny\sffamily,tcbcolframe!75!black]{\scalebox{0.55}[0.75]{\textbf{\LaTeX}}} ($(interior.north west)+(5pt,0pt)$);\end{tcbclipinterior}}
+	}
+}
+
+\tcbset{cevignettexcas/.style={%
+		cevignettes,left=6.25pt,coltitle=white,colback=white,%
+		underlay={\begin{tcbclipinterior}\fill[fill=tcbcolframe!33]($(interior.south west)$) rectangle node[rotate=90,font=\tiny\sffamily,tcbcolframe!75!black]{\scalebox{0.55}[0.75]{\textbf{XCAS}}} ($(interior.north west)+(5pt,0pt)$);\end{tcbclipinterior}}
+	}
+}
+
+\defKV[cevignette]{Type=\def\cevignettetype{#1},Couleur=\def\cevignettecolor{#1},Police=\def\cevignettefont{#1},Echelle=\def\cevignettescaleperso{#1}}
+\setKVdefault[cevignette]{Type={},Couleur={darkgray},Police=\footnotesize,Echelle=0.55}
+
+\NewDocumentCommand\AffVignette{ s O{} m }{%
+	\restoreKV[cevignette]%
+	\setKV[cevignette]{#2}%
+	\IfStrEqCase{\cevignettetype}{%
+		{}{\tcbox[colframe=\cevignettecolor,fontupper={\cevignettefont},cevignettes]{\IfBooleanTF{#1}{\NoAutoSpacing}{}#3}}%
+		{algo}{\tcbox[colframe=\cevignettecolor,fontupper={\cevignettefont\ttfamily},cevignettealgo]{\IfBooleanTF{#1}{\NoAutoSpacing}{}#3}}%
+		{py}{\tcbox[colframe=\cevignettecolor,fontupper={\cevignettefont\ttfamily},cevignettepy]{\IfBooleanTF{#1}{\NoAutoSpacing}{}#3}}%
+		{pypit}{\tcbox[colframe=\cevignettecolor,fontupper={\cevignettefont\ttfamily},cevignettepy]{\piton{#3}}}%
+		{pyl}{\tcbox[colframe=\cevignettecolor,fontupper={\cevignettefont\ttfamily},cevignettepy]{\piton{\py{#3}}}}%
+		{mpm}{\tcbox[colframe=\cevignettecolor,fontupper={\cevignettefont},cevignetteMPM]{\IfBooleanTF{#1}{\NoAutoSpacing}{}#3}}%
+		{grph}{\tcbox[colframe=\cevignettecolor,fontupper={\cevignettefont},cevignettegraph]{\IfBooleanTF{#1}{\NoAutoSpacing}{}#3}}%
+		{xcas}{\tcbox[colframe=\cevignettecolor,fontupper={\cevignettefont},cevignettexcas]{\IfBooleanTF{#1}{\NoAutoSpacing}{}#3}}%
+		{shell}{\tcbox[colframe=\cevignettecolor,fontupper={\cevignettefont\ttfamily},cevignetteshell]{\IfBooleanTF{#1}{\NoAutoSpacing}{}#3}}%
+		{tex}{\tcbox[colframe=\cevignettecolor,fontupper={\cevignettefont\ttfamily},cevignettelatex]{\IfBooleanTF{#1}{\NoAutoSpacing}{}#3}}%
+		{sheet}{\tcbox[colframe=\cevignettecolor,fontupper={\cevignettefont},cevignettetableur]{\IfBooleanTF{#1}{\NoAutoSpacing}{}#3}}%
+	}%
+	\IfSubStr{\cevignettetype}{perso}%
+		{%
+			\StrBehind{\cevignettetype}{/}[\cevignettelabelperso]%
+			\tcbox[colframe=\cevignettecolor,fontupper={\cevignettefont},cevignettes,left=6pt,coltitle=white,colback=white,underlay={\begin{tcbclipinterior}\fill[fill=tcbcolframe!33]($(interior.south west)$) rectangle node[rotate=90,font=\tiny\sffamily,tcbcolframe!75!black]{\scalebox{\cevignettescaleperso}[0.75]{\textbf{\cevignettelabelperso}}} ($(interior.north west)+(5pt,0pt)$);\end{tcbclipinterior}}]{\IfBooleanTF{#1}{\NoAutoSpacing}{}#3}%
+		}%
+		{}%
+	\relax%
+}
+
+%====DisplaySkip [en]
+\defKV[DisplaySkip]{%
+	aboveds=\def\ceabovedisplayskip{#1},%
+	abovedsshort=\def\ceabovedisplayskipshort{#1},%
+	belowdds=\def\cebelowdisplayskip{#1},%
+	belowdsshort=\def\cebelowdisplayskipshort{#1},%
+	global=\def\globaldisplayskip{#1}
+}
+
+\setKVdefault[DisplaySkip]{%
+	aboveds={12pt plus 3pt minus 9pt},%
+	abovedsshort={0pt plus 3pt},%
+	belowdds={12pt plus 3pt minus 9pt},%
+	belowdsshort={7pt plus 3pt minus 4pt},%
+	global={},%
+	shrink=false
+}
+\NewDocumentCommand\ChangeSpacingDisplaySkip{ O{} }{%
+	\restoreKV[DisplaySkip]%
+	\setKV[DisplaySkip]{#1}%
+	\ifboolKV[DisplaySkip]{shrink}%
+		{%
+			\AtBeginDocument{%
+				\abovedisplayskip=0.33\baselineskip
+				\abovedisplayshortskip=0.33\baselineskip
+				\belowdisplayskip=0.33\baselineskip
+				\belowdisplayshortskip=0.33\baselineskip
+			}
+		}%
+		{%
+			\IfStrEq{\globaldisplayskip}{}%
+				{%
+					\AtBeginDocument{%
+						\abovedisplayskip=\ceabovedisplayskip
+						\abovedisplayshortskip=\ceabovedisplayskipshort
+						\belowdisplayskip=\cebelowdisplayskip
+						\belowdisplayshortskip=\cebelowdisplayskipshort
+					}
+				}%
+				{%
+					\AtBeginDocument{%
+						\abovedisplayskip=\globaldisplayskip
+						\abovedisplayshortskip=\globaldisplayskip
+						\belowdisplayskip=\globaldisplayskip
+						\belowdisplayshortskip=\globaldisplayskip
+					}
+				}%
+		}%
+}
+
+%====DisplaySkip [fr]
+\defKV[DisplaySkipFr]{%
+	Avant=\def\ceabovedisplayskip{#1},%
+	AvantS=\def\ceabovedisplayskipshort{#1},%
+	Apres=\def\cebelowdisplayskip{#1},%
+	ApresS=\def\cebelowdisplayskipshort{#1},%
+	Global=\def\globaldisplayskip{#1}
+}
+
+\setKVdefault[DisplaySkipFr]{%
+	Avant={12pt plus 3pt minus 9pt},%
+	AvantS={0pt plus 3pt},%
+	Apres={12pt plus 3pt minus 9pt},%
+	ApresS={7pt plus 3pt minus 4pt},%
+	Global={},%
+	Dense=false
+}
+\NewDocumentCommand\ChangerDisplaySkip{ O{} }{%
+	\restoreKV[DisplaySkipFr]%
+	\setKV[DisplaySkipFr]{#1}%
+	\ifboolKV[DisplaySkipFr]{Dense}%
+		{%
+			\AtBeginDocument{%
+				\abovedisplayskip=0.33\baselineskip
+				\abovedisplayshortskip=0.33\baselineskip
+				\belowdisplayskip=0.33\baselineskip
+				\belowdisplayshortskip=0.33\baselineskip
+			}
+		}%
+		{%
+			\IfStrEq{\globaldisplayskip}{}%
+				{%
+					\AtBeginDocument{%
+						\abovedisplayskip=\ceabovedisplayskip
+						\abovedisplayshortskip=\ceabovedisplayskipshort
+						\belowdisplayskip=\cebelowdisplayskip
+						\belowdisplayshortskip=\cebelowdisplayskipshort
+					}
+				}%
+				{%
+					\AtBeginDocument{%
+						\abovedisplayskip=\globaldisplayskip
+						\abovedisplayshortskip=\globaldisplayskip
+						\belowdisplayskip=\globaldisplayskip
+						\belowdisplayshortskip=\globaldisplayskip
+					}
+				}%
+		}%
+}
+
+%====Patchs pas-tableur
+\if@pastableur
+
+\RequirePackage{pas-tableur}
+
+\renewcommand{\pastableur@grid}[4] % #1 : width, #2 : name, #3 : numline, #4 : coord.
+{%
+	\node[celempty,below,minimum height=\line@height,minimum width=#1] (cell#2-#3) at (#4) {};%
+	\draw[graySepCell] ($(cell#2-#3.south west)+(0.2pt,0)$) -- (cell#2-#3.south east) -- ($(cell#2-#3.north east)+(0,-0.2pt)$);%
+}
+
+\renewcommand{\pastab@draw@cell}[5]
+% #1 : \first@width, #2 : \first@name, #3 : 0=colonne1 / 1=autres colonnes / 
+% 2 = ligne 1, #4 : coord., #5 : contenu
+{%
+	\ifnum#3=0%
+		\tikzstyle{cellstyle} = [celhead,minimum width={#1},minimum height=\line@height]%
+		\def\pastableur@coord{(0,0)}%
+	\else%
+		\ifnum#3=1%
+			\tikzstyle{cellstyle} = [celhead,right,minimum width={#1},minimum height=\line@height]%
+		\else
+			\ifnum#3=2%
+				\tikzstyle{cellstyle} = [below left,celhead,minimum width={#1},minimum height=\line@height]
+			\else%
+				\tikzstyle{cellstryle} = [below,celhead,minimum width={#1},minimum height=\line@height]
+			\fi%
+		\fi%
+		\def\pastableur@coord{(#4)}%
+	\fi%
+	\node[cellstyle] (#2) at \pastableur@coord {\helvbx#5};%
+	\fill[grayBottomCell] (#2.south west) rectangle (#2.north east) ;%
+	\fill[grayTopCell] (#2.north west) rectangle ($0.5*(#2.south east)+0.5*(#2.north east)$) ;%
+	\node[minimum width={#1},minimum height=\line@height,cellstyle] at \pastableur@coord {\helvbx#5};%
+}
+
+\NewDocumentCommand\celcouleur{ O{graySepCell!50} m }{%OK
+	\draw[draw=none,fill=#1] ($(cell#2.south west)+(0.2pt,0.2pt)$) rectangle ($(cell#2.north east) + (-0.2pt,-0.2pt)$) ;%
+}
+
+\defKV[celparam]{align=\def\pastableurfusalign{#1},width=\def\pastableurfuswidth{#1}}
+\setKVdefault[celparam]{align=left,width={\col@width}}
+
+\NewDocumentCommand\celfusion{ O{} m m m }{%OK
+	\restoreKV[celparam]%
+	\setKV[celparam]{#1}%
+	\IfStrEq{#4}{}%
+		{%
+			\draw[draw=none,fill=white] ($(cell#2.south west)+(0.2pt,0.2pt)$) rectangle ($(cell#3.north east) + (-0.2pt,-0.2pt)$);
+		}%
+		{%
+			\draw[draw=none,fill=white] ($(cell#2.south west)+(0.2pt,0.2pt)$) rectangle ($(cell#3.north east) + (-0.2pt,-0.2pt)$) node[midway,text width=\dimexpr\pastableurfuswidth-4pt,align=\pastableurfusalign] {#4};
+		}%
+}
+
+\NewDocumentCommand\celnumbreak{ m m m }{%
+	\def\numpointilles{#1}
+	\xdef\numavant{\inteval{\numpointilles-1}}%
+	\def\numdebut{#2}\def\numfin{#3}
+	\foreach \num@line [remember=\num@line as \lastnum (initially \numavant)] in {\numpointilles}
+		{%
+			\pastab@draw@cell{\numline@width}{numline\num@line}{3}{numline\lastnum.south east}{\dots}%
+		}%
+	\foreach \num@line [remember=\num@line as \lastnum (initially \numpointilles)] in {\numdebut,\numfin}
+		{%
+			\pastab@draw@cell{\numline@width}{numline\num@line}{3}{numline\lastnum.south east}{\num@line}%
+		}%
+}
+
+\NewDocumentCommand\lignetxt{ s O{} m D<>{1} m }{%3=num ligne,%5=liste
+	\IfBooleanTF{#1}%
+		{
+			\foreach \x [count=\i] in {#5}
+			{%
+				\xdef\j{\inteval{\i+(#4-1)}}%
+				\StrChar{ABCDEFGHIJKLMNOPQRSTUVWXYZ}{\j}[\iltr]%
+				\IfEq{\x}{}{}{\celtxt*[#2]{\iltr}{#3}{\x}}%
+			}%
+		}%
+		{%
+			\foreach \x [count=\i] in {#5}
+			{%
+				\xdef\j{\inteval{\i+(#4-1)}}%
+				\StrChar{ABCDEFGHIJKLMNOPQRSTUVWXYZ}{\j}[\iltr]%
+				\IfEq{\x}{}{}{\celtxt[#2]{\iltr}{#3}{\x}}%
+			}%
+		}%
+}
+
+\NewDocumentCommand\colonnetxt{ s O{} m D<>{1} m }{%3=lettre colonne,%5=liste
+	\IfBooleanTF{#1}%
+		{%
+			\foreach \x [count=\i] in {#5}
+			{%
+				\xdef\j{\inteval{\i+(#4-1)}}
+				\IfStrEq{\x}{}{}{\celtxt*[#2]{#3}{\j}{\x}}%
+			}%
+		}%
+		{%
+			\foreach \x [count=\i] in {#5}
+			{%
+				\xdef\j{\inteval{\i+(#4-1)}}
+				\IfStrEq{\x}{}{}{\celtxt[#2]{#3}{\j}{\x}}%
+			}%
+		}%
+}
+
+\fi
+
+%====BannerScore
+\definecolor{colorNS1}{RGB}{45,126,67}
+\definecolor{colorNS2}{RGB}{151,186,56}
+\definecolor{colorNS3}{RGB}{240,202,13}
+\definecolor{colorNS4}{RGB}{213,123,26}
+\definecolor{colorNS5}{RGB}{197,52,25}
+\tikzset{nodeNS/.style={pos=0.5,xscale=\echellexNS*\hauteurNS,yscale=\echelleyNS*\hauteurNS}}
+
+\defKV[NUTRISCOREEN]{%
+	Height=\pgfmathsetmacro{\hauteurNS}{#1},%
+	Ratio=\pgfmathsetmacro{\ratiolargeurbandeNS}{#1},%
+	Symbols=\def\lettresNS{#1},%
+	Legend=\def\legendeNS{#1},%
+	Font=\def\fonteNS{#1},%
+	Colors=\def\couleursNS{#1},%
+	ScaleSymbols=\def\echellesymbNS{#1},%
+	Colbg=\def\coulbgNS{#1}
+}
+\setKVdefault[NUTRISCOREEN]{%
+	Height=1,%
+	Ratio={0.6},%
+	Symbols={A,B,C,D,E},%
+	Legend={score},%
+	Font=\sffamily\bfseries,%
+	ShowLegend=true,%
+	Colors={colorNS1,colorNS2,colorNS3,colorNS4,colorNS5},%
+	ScaleSymbols={1.25,1.65},%
+	Colbg=white
+}
+
+\NewDocumentCommand\ScoreBanner{ O{} D<>{} m }{%
+	\restoreKV[NUTRISCOREEN]%
+	\setKV[NUTRISCOREEN]{#1}%
+	\IfEq{#3}{}%
+		{%
+			\xdef\numcasNS{0}%
+		}%
+		{%
+			\xdef\numcasNS{#3}%
+		}%
+	\setsepchar{,}%
+	\readlist\letterListNS{\lettresNS}%
+	\xdef\nbcasesNS{\letterListNSlen}%
+	\readlist\colorListNS{\couleursNS}%
+	\xdef\nbcouleursNS{\colorListNSlen}%
+	\pgfmathsetmacro{\largeurcaseNS}{\hauteurNS*\ratiolargeurbandeNS}%
+	\pgfmathsetmacro{\largeurbandeNS}{\largeurcaseNS*\nbcasesNS}%
+	\pgfmathsetmacro{\margeNS}{0.225*\largeurcaseNS/2.4}%
+	\IfSubStr{\echellesymbNS}{,}%
+		{%
+			\StrCut{\echellesymbNS}{,}{\echellexNS}{\echelleyNS}%
+		}%
+		{%
+			\xdef\echellexNS{\echellesymbNS}\xdef\echelleyNS{\echellesymbNS}%
+		}%
+	\begin{tikzpicture}[font=\fonteNS,#2]
+		%---test
+		\filldraw[white,rounded corners=\fpeval{5*\largeurcaseNS*\ratiolargeurbandeNS}mm,line width=\fpeval{1.5*\largeurcaseNS*\ratiolargeurbandeNS}mm,opacity=0] ({-\margeNS},{-\margeNS}) rectangle++ (\nbcasesNS*\largeurcaseNS+2*\margeNS,\hauteurNS+2*\margeNS) ;
+		%---testfin
+		\begin{scope}
+			\clip[rounded corners=\fpeval{5*\largeurcaseNS*\ratiolargeurbandeNS}mm] (0,0) rectangle (\largeurbandeNS,\hauteurNS);
+			\foreach \iii in {1,...,\letterListNSlen}{%
+				\ifnum\iii=\numcasNS
+				\else
+					\ifnum\iii>\nbcouleursNS
+						\fill[draw=none,lightgray] ({(\iii-1)*\largeurcaseNS},0) rectangle ++(\largeurcaseNS,\hauteurNS) node[noeudNS,white,opacity=0.66]{\letterListNS[\iii]};
+					\else
+						\fill[draw=none,{\colorListNS[\iii]}] ({(\iii-1)*\largeurcaseNS},0) rectangle ++(\largeurcaseNS,\hauteurNS) node[noeudNS,white,opacity=0.66]{\letterListNS[\iii]};
+					\fi
+				\fi
+			}%
+		\end{scope}
+		\xintifboolexpr{\numcasNS >=1 'and' \numcasNS <= \nbcasesNS }%
+			{%
+				\begin{scope}
+					%\clip (-\margeNS,-\margeNS) rectangle++ (\largeurbandeNS+2*\margeNS,\hauteurNS+2*\margeNS);
+					\draw[draw=\coulbgNS,rounded corners=\fpeval{7.25*\largeurcaseNS*\ratiolargeurbandeNS}mm,line width=\fpeval{1.5*\largeurcaseNS*\ratiolargeurbandeNS}mm,fill={\colorListNS[#3]}] ({(\numcasNS-1)*\largeurcaseNS-\margeNS},{-\margeNS}) rectangle++ (\largeurcaseNS+2*\margeNS,\hauteurNS+2*\margeNS) node[noeudNS,white]{\letterListNS[#3]};
+				\end{scope}
+			}%
+			{}%
+		%légende
+		\ifboolKV[NUTRISCOREEN]{ShowLegend}%
+			{%
+				\node[above right=1pt,gray,scale=\fpeval{0.5*\hauteurNS},inner sep=1pt] at ({0.125*\margeNS},1.02*\hauteurNS) {\MakeUppercase{\legendeNS}};
+			}{}%
+	\end{tikzpicture}%
+}
+
+%====vincludegraphics [fr]
+\newlength{\tmp@includegraphics@vfill@offset}
+
+\defKV[vfillincludegphcs]{vOffset=\setlength\tmp@includegraphics@vfill@offset{#1},vCentrer=\def\tmpincludegpvcenter{#1}}
+\setKVdefault[vfillincludegphcs]{vRemplir=false,vOffset=0pt,vCentrer=n}
+
+\NewDocumentCommand\InsererImage{ D<>{} O{} m }{%
+	\restoreKV[vfillincludegphcs]%
+	\setKV[vfillincludegphcs]{#1}%
+	\ifboolKV[vfillincludegphcs]{vRemplir}%
+		{%
+			\IfStrEqCase{\tmpincludegpvcenter}{%
+				{m}{\vfill\includegraphics[height=\dimexpr\pagegoal-\pagetotal-\tmp@includegraphics@vfill@offset\relax,#2]{#3}\vfill}%
+				{h}{\includegraphics[height=\dimexpr\pagegoal-\pagetotal-\tmp@includegraphics@vfill@offset\relax,#2]{#3}\vfill}%
+				{b}{\vfill\includegraphics[height=\dimexpr\pagegoal-\pagetotal-\tmp@includegraphics@vfill@offset\relax,#2]{#3}}%
+				{n}{\includegraphics[height=\dimexpr\pagegoal-\pagetotal-\tmp@includegraphics@vfill@offset\relax,#2]{#3}}%
+			}[{\includegraphics[height=\dimexpr\pagegoal-\pagetotal-\tmp@includegraphics@vfill@offset\relax,#2]{#3}}]%
+		}%
+		{%
+			\includegraphics[#2]{#3}%
+		}%
+}
+
+%===tkzBanner mixte
+\defKV[tkzBannerKeys]{%
+	maincolor=\def\tkzBannermaincol{#1}
+}
+
+\setKVdefault[tkzBannerKeys]{%
+	height=2.1cm,%
+	width=\linewidth,%
+	collight=teal!25,%
+	colmedium=teal!75,%
+	coldark=teal,%
+	coltxt=white,%
+	fonttxt=\sffamily\bfseries,%
+	swap=false,%
+	maincolor={},%
+	num=true
+}
+
+\NewDocumentCommand\tkzBanner{ O{} m m }{%
+	\noindent%
+	\restoreKV[tkzBannerKeys]%
+	\setKV[tkzBannerKeys]{#1}%
+	\pgfmathsetmacro{\tkzBannerscale}{\useKV[tkzBannerKeys]{width}/\linewidth}%
+	\begin{tikzpicture}
+		\IfEq{\tkzBannermaincol}{}%
+			{%
+				\tikzset{tkzbannerdark/.style={\useKV[tkzBannerKeys]{coldark}}}
+				\tikzset{tkzbannermedium/.style={\useKV[tkzBannerKeys]{colmedium}}}
+				\tikzset{tkzbannerlight/.style={\useKV[tkzBannerKeys]{collight}}}
+			}%
+			{%
+				\tikzset{tkzbannerdark/.style={\tkzBannermaincol}}
+				\tikzset{tkzbannermedium/.style={\tkzBannermaincol!75}}
+				\tikzset{tkzbannerlight/.style={\tkzBannermaincol!25}}
+			}%
+		%coordinates
+		\coordinate (tkzBanner-NW) at (0,{\useKV[tkzBannerKeys]{height}}) ;
+		\coordinate (tkzBanner-SW) at (0,0) ;
+		\coordinate (tkzBanner-NE) at ({\useKV[tkzBannerKeys]{width}},{\useKV[tkzBannerKeys]{height}}) ;
+		\coordinate (tkzBanner-SE) at ({\useKV[tkzBannerKeys]{width}},0) ;%
+		%swap or note
+		\ifboolKV[tkzBannerKeys]{swap}%
+			{%
+				\coordinate (tkzBanner-A) at ($(tkzBanner-SE)!0.57!(tkzBanner-SW)$) ;
+				\coordinate (tkzBanner-B) at ($(tkzBanner-NE)!0.91!(tkzBanner-NW)$) ;
+				\coordinate (tkzBanner-C) at ($(tkzBanner-NE)!0.92!(tkzBanner-NW)$) ;
+				\coordinate (tkzBanner-D) at ($(tkzBanner-SE)!0.63!(tkzBanner-SW)$) ;
+			}%
+			{%
+				\coordinate (tkzBanner-A) at ($(tkzBanner-SW)!0.57!(tkzBanner-SE)$) ;
+				\coordinate (tkzBanner-B) at ($(tkzBanner-NW)!0.91!(tkzBanner-NE)$) ;
+				\coordinate (tkzBanner-C) at ($(tkzBanner-NW)!0.92!(tkzBanner-NE)$) ;
+				\coordinate (tkzBanner-D) at ($(tkzBanner-SW)!0.63!(tkzBanner-SE)$) ;
+			}%
+		%drawing
+		\fill[tkzbannerdark] (0,0) rectangle ({\useKV[tkzBannerKeys]{width}},{\useKV[tkzBannerKeys]{height}});
+		\ifboolKV[tkzBannerKeys]{swap}%
+			{%
+				\fill[tkzbannerlight] (tkzBanner-A) to[bend left=8] (tkzBanner-B) -- (tkzBanner-C) to[bend right=7] (tkzBanner-D) -- cycle ;
+				\fill[tkzbannermedium] (tkzBanner-C) to[bend right=7] (tkzBanner-D) -- (tkzBanner-SW) |- cycle ;
+			}%
+			{%
+				\fill[tkzbannerlight] (tkzBanner-A) to[bend right=8] (tkzBanner-B) -- (tkzBanner-C) to[bend left=7] (tkzBanner-D) -- cycle ;
+				\fill[tkzbannermedium] (tkzBanner-C) to[bend left=7] (tkzBanner-D) -- (tkzBanner-SE) |- cycle ;
+			}%
+		%nodes
+		\ifboolKV[tkzBannerKeys]{swap}%
+			{%
+				\node[inner sep=2pt,text={\useKV[tkzBannerKeys]{coltxt}},below left,font={\useKV[tkzBannerKeys]{fonttxt}},scale={2*\tkzBannerscale}] at (tkzBanner-NE) {\vphantom{qÉ}#2};
+				\ifboolKV[tkzBannerKeys]{num}%
+					{%
+						\node[inner sep=2pt,text={\useKV[tkzBannerKeys]{coltxt}},above right,font={\useKV[tkzBannerKeys]{fonttxt}},scale={1.25*\tkzBannerscale}] at (tkzBanner-SW) {\vphantom{qÉ}#3};
+					}%
+					{}%
+			}%
+			{%
+				\ifboolKV[tkzBannerKeys]{num}%
+					{%
+						\node[inner sep=2pt,text={\useKV[tkzBannerKeys]{coltxt}},above left,font={\useKV[tkzBannerKeys]{fonttxt}},scale={1.25*\tkzBannerscale}] at (tkzBanner-SE) {\vphantom{qÉ}#3};
+					}%
+					{}%
+				\node[inner sep=2pt,text={\useKV[tkzBannerKeys]{coltxt}},below right,font={\useKV[tkzBannerKeys]{fonttxt}},scale={2*\tkzBannerscale}] at (tkzBanner-NW) {\vphantom{qÉ}#2};
+			}%
+	\end{tikzpicture}%
+}
+
+%====titre stylisé [fr], à voir avec part ??
+\newlength{\tmp@tkzbanner@autowidthtype}
+\setlength\tmp@tkzbanner@autowidthtype{2.5em}
+\newlength{\tmp@tkzbanner@autowidthnum}
+\setlength\tmp@tkzbanner@autowidthnum{2em}
+\newlength{\tmp@tkzbanner@marginoffsetbanner}
+\setlength\tmp@tkzbanner@marginoffsetbanner{2pt}
+\newlength{\tmp@tkzbanner@autowidth}
+\setlength\tmp@tkzbanner@autowidth{2.5em}
+
+\defKV[tkzBannerpartKeys]{%
+	maincolor=\def\tkzBannermaintricol{#1},%
+	logo=\def\tkzBannermaintrilogo{#1},%
+	type=\def\tkzBannermaintritype{#1},%
+	blockwidth=\def\tkzBannermaintriblockwidth{#1},%
+	customtype=\def\tkzBannermaintritypelibre{#1},%
+	fonttxt=\def\tkzBannermainfonttype{#1},%
+	posnum=\def\tkzBannermainposnum{#1}
+}
+
+\setKVdefault[tkzBannerpartKeys]{%
+	height=2.5em,%
+	width={\linewidth-0.5pt},%
+	blockwidth=2.75em,%
+	collight=darkgray!25,%
+	colmedium=darkgray!50,%
+	coldark=darkgray,%
+	coltxt=white,%
+	fonttxt=\sffamily\bfseries,%
+	swap=false,%
+	maincolor={},%
+	logo={},%
+	type={},%
+	num=true,
+	dispblock=true,%
+	customtype={},%
+	custommulti=false,%
+	posnum=0.425
+}
+
+\NewDocumentCommand\tkzBannerTri{ O{} m m }{%
+	%#1 := clés
+	%#2 := numéro
+	%#3 := titre
+	\noindent%
+	\restoreKV[tkzBannerpartKeys]%
+	\setKV[tkzBannerpartKeys]{#1}%
+	\pgfmathsetmacro{\tkzBannertriscale}{0.75*(\useKV[tkzBannerpartKeys]{height})/1.25cm}%
+	\pgfmathsetmacro{\scaletypedoctribanner}{1.05*0.75*(\useKV[tkzBannerpartKeys]{height})/1.25cm}%
+	\pgfmathsetmacro{\scaletypedoctribannernum}{2.5*0.75*(\useKV[tkzBannerpartKeys]{height})/1.25cm}%
+	\pgfmathsetmacro{\tkzBannertriangle}{0.10*(\useKV[tkzBannerpartKeys]{height})/(\useKV[tkzBannerpartKeys]{width})}%
+	\IfEq{\tkzBannermaintriblockwidth}{auto}%
+		{%
+			\settowidth{\tmp@tkzbanner@autowidthtype}{\scalebox{\scaletypedoctribanner}[\scaletypedoctribanner]{\tkzBannermainfonttype\vphantom{qÉ}\tkzBannermaintritype}}%
+			\addtolength{\tmp@tkzbanner@autowidthtype}{4pt}%
+			\settowidth{\tmp@tkzbanner@autowidthnum}{\scalebox{\scaletypedoctribannernum}[\scaletypedoctribannernum]{\tkzBannermainfonttype\vphantom{qÉ}00}}%
+			\addtolength{\tmp@tkzbanner@autowidthnum}{4pt}%
+			\pgfmathsetlength{\tmp@tkzbanner@autowidth}{max(\tmp@tkzbanner@autowidthtype,\tmp@tkzbanner@autowidthnum)}%
+		}%
+		{%
+			\setlength\tmp@tkzbanner@autowidth{\tkzBannermaintriblockwidth}%
+		}%
+	\begin{tikzpicture}
+		\IfEq{\tkzBannermaintricol}{}%
+			{%
+				\tikzset{tkzbannertridark/.style={\useKV[tkzBannerpartKeys]{coldark}}}
+				\tikzset{tkzbannertrimedium/.style={\useKV[tkzBannerpartKeys]{colmedium}}}
+				\tikzset{tkzbannertrilight/.style={\useKV[tkzBannerpartKeys]{collight}}}
+			}%
+			{%
+				\tikzset{tkzbannertridark/.style={\tkzBannermaintricol}}
+				\tikzset{tkzbannertrimedium/.style={\tkzBannermaintricol!50}}
+				\tikzset{tkzbannertrilight/.style={\tkzBannermaintricol!25}}
+			}%
+		%coordinates
+		\coordinate (tkzBannerTri-NW) at (0,{\useKV[tkzBannerpartKeys]{height}}) ;
+		\coordinate (tkzBannerTri-SW) at (0,0) ;
+		\coordinate (tkzBannerTri-NE) at ({\useKV[tkzBannerpartKeys]{width}},{\useKV[tkzBannerpartKeys]{height}}) ;
+		\coordinate (tkzBannerTri-SE) at ({\useKV[tkzBannerpartKeys]{width}},0) ;%
+		\coordinate (tkzBannerTri-SWd) at ($(tkzBannerTri-SW)!0.05!(tkzBannerTri-NW)$) ;%
+		\coordinate (tkzBannerTri-SEd) at ($(tkzBannerTri-SE)!0.15!(tkzBannerTri-NE)$) ;%
+		%drawing & shadow
+		\fill[lightgray!75] ([yshift=-1pt]tkzBannerTri-SWd) -- ([yshift=-1pt]tkzBannerTri-SEd) -- (tkzBannerTri-NE) -| cycle ;
+		\ifboolKV[tkzBannerpartKeys]{swap}%
+			{%
+				\fill[white] (tkzBannerTri-SWd) -- (tkzBannerTri-SEd) -- (tkzBannerTri-NE) -| cycle ;
+				\draw[line width=1pt,tkzbannertridark] ([shift={(0.5pt,-0.5pt)}]tkzBannerTri-NW) -| ([shift={(-0.5pt,0)}]tkzBannerTri-SEd) -- (tkzBannerTri-SWd) ;
+			}%
+			{%
+				\fill[tkzbannertrimedium] (tkzBannerTri-SWd) -- (tkzBannerTri-SEd) -- (tkzBannerTri-NE) -| cycle ;
+			}%
+		\ifboolKV[tkzBannerpartKeys]{dispblock}%
+			{%
+				\begin{scope}
+					\clip ($(tkzBannerTri-SW)!0.0375!(tkzBannerTri-NW)$) -- ($(tkzBannerTri-SE)!0.1375!(tkzBannerTri-NE)$) -- (tkzBannerTri-NE) -| cycle ;
+					%light
+					\fill[tkzbannertrilight] (tkzBannerTri-NW) --++ ({\tmp@tkzbanner@autowidth+2*\tmp@tkzbanner@marginoffsetbanner},0) -- ({\tmp@tkzbanner@autowidth+2*\tmp@tkzbanner@marginoffsetbanner+1em},{0.5*(\useKV[tkzBannerpartKeys]{height})}) -- ({\tmp@tkzbanner@autowidth+2*\tmp@tkzbanner@marginoffsetbanner},0) -- (tkzBannerTri-SW) -- cycle ;
+				\end{scope}
+				\begin{scope}
+					\clip ($(tkzBannerTri-SW)!0.025!(tkzBannerTri-NW)$) -- ($(tkzBannerTri-SE)!0.125!(tkzBannerTri-NE)$) -- (tkzBannerTri-NE) -| cycle ;
+					%medium
+					\fill[tkzbannertrimedium] (tkzBannerTri-NW) --++ ({\tmp@tkzbanner@autowidth+\tmp@tkzbanner@marginoffsetbanner},0) -- ({\tmp@tkzbanner@autowidth+\tmp@tkzbanner@marginoffsetbanner+1em},{0.5*(\useKV[tkzBannerpartKeys]{height})}) -- ({\tmp@tkzbanner@autowidth+\tmp@tkzbanner@marginoffsetbanner},0) -- (tkzBannerTri-SW) -- cycle ;
+				\end{scope}
+				\begin{scope}
+					\clip ($(tkzBannerTri-SW)!0.0125!(tkzBannerTri-NW)$) -- ($(tkzBannerTri-SE)!0.1125!(tkzBannerTri-NE)$) -- (tkzBannerTri-NE) -| cycle ;
+					%dark
+					\fill[tkzbannertridark] (tkzBannerTri-NW) --++ ({\tmp@tkzbanner@autowidth},0) -- ({\tmp@tkzbanner@autowidth+1em},{0.5*(\useKV[tkzBannerpartKeys]{height})}) -- ({\tmp@tkzbanner@autowidth},0) -- (tkzBannerTri-SW) -- cycle ;
+					\IfEq{\tkzBannermaintritypelibre}{}%
+						{%
+							\ifboolKV[tkzBannerpartKeys]{num}%
+								{%
+									\IfEq{\tkzBannermaintritype}{}%
+										{%
+											\node[inner sep=2pt,text={\useKV[tkzBannerpartKeys]{coltxt}},font={\useKV[tkzBannerpartKeys]{fonttxt}},scale={2.5*\tkzBannertriscale},rotate={atan(\tkzBannertriangle)}] at ({0.5*\tmp@tkzbanner@autowidth},{0.5*(\useKV[tkzBannerpartKeys]{height})}) {\vphantom{qÉ}#2};
+										}%
+										{%
+											\node[inner sep=2pt,below=1pt,text={\useKV[tkzBannerpartKeys]{coltxt}},font={\useKV[tkzBannerpartKeys]{fonttxt}},scale={1.05*\tkzBannertriscale},rotate={atan(\tkzBannertriangle)}] at ({0.5*\tmp@tkzbanner@autowidth},{\useKV[tkzBannerpartKeys]{height}}) {\vphantom{qÉ}\tkzBannermaintritype};
+											\node[inner sep=2pt,text={\useKV[tkzBannerpartKeys]{coltxt}},font={\useKV[tkzBannerpartKeys]{fonttxt}},scale={2.5*\tkzBannertriscale},rotate={atan(\tkzBannertriangle)}] at ({0.5*\tmp@tkzbanner@autowidth},{\tkzBannermainposnum*(\useKV[tkzBannerpartKeys]{height})}) {\vphantom{qÉ}#2};
+										}%
+								}%
+								{}%
+						}%
+						{%
+							\ifboolKV[tkzBannerpartKeys]{custommulti}%
+								{%
+									\node[inner sep=2pt,text={\useKV[tkzBannerpartKeys]{coltxt}},font={\useKV[tkzBannerpartKeys]{fonttxt}},scale={1.75*\tkzBannertriscale},rotate={atan(\tkzBannertriangle)},text width=\tmp@tkzbanner@autowidth,align=center] at ({0.5*\tmp@tkzbanner@autowidth},{0.5*(\useKV[tkzBannerpartKeys]{height})}) {\tkzBannermaintritypelibre};
+								}%
+								{%
+									\node[inner sep=2pt,text={\useKV[tkzBannerpartKeys]{coltxt}},font={\useKV[tkzBannerpartKeys]{fonttxt}},scale={2.5*\tkzBannertriscale},rotate={atan(\tkzBannertriangle)}] at ({0.5*\tmp@tkzbanner@autowidth},{0.5*(\useKV[tkzBannerpartKeys]{height})}) {\vphantom{qÉ}\tkzBannermaintritypelibre};
+								}%
+						}%
+				\end{scope}
+			}%
+			{}%
+		%nodes
+		\begin{scope}
+			\clip (tkzBannerTri-SWd) -- (tkzBannerTri-SEd) -- (tkzBannerTri-NE) -| cycle ;
+			\ifboolKV[tkzBannerpartKeys]{swap}%
+				{%
+					\node[inner sep=2pt,right,text=\tkzBannermaintricol,font={\useKV[tkzBannerpartKeys]{fonttxt}},scale={2.75*\tkzBannertriscale},rotate={atan(\tkzBannertriangle)}] at ({\tmp@tkzbanner@autowidth+2*\tmp@tkzbanner@marginoffsetbanner+1.25em},{0.5*(\useKV[tkzBannerpartKeys]{height})}) {\vphantom{qÉ}#3};
+					%logo
+					\IfEq{\tkzBannermaintrilogo}{}%
+						{}%
+						{%
+							\node[inner sep=2pt,left,text=\tkzBannermaintricol,font={\useKV[tkzBannerpartKeys]{fonttxt}},scale={2.5*\tkzBannertriscale},rotate={atan(\tkzBannertriangle)}] at ({\useKV[tkzBannerpartKeys]{width}},{0.55*(\useKV[tkzBannerpartKeys]{height})}) {\vphantom{qÉ}\tkzBannermaintrilogo};
+						}%
+				}%
+				{%
+					\node[inner sep=2pt,right,text={\useKV[tkzBannerpartKeys]{coltxt}},font={\useKV[tkzBannerpartKeys]{fonttxt}},scale={2.75*\tkzBannertriscale},rotate={atan(\tkzBannertriangle)}] at ({\tmp@tkzbanner@autowidth+2*\tmp@tkzbanner@marginoffsetbanner+1.25em},{0.5*(\useKV[tkzBannerpartKeys]{height})}) {\vphantom{qÉ}#3};
+					%logo
+					\IfEq{\tkzBannermaintrilogo}{}%
+						{}%
+						{%
+							\node[inner sep=2pt,left,text={\useKV[tkzBannerpartKeys]{coltxt}},font={\useKV[tkzBannerpartKeys]{fonttxt}},scale={2.5*\tkzBannertriscale},rotate={atan(\tkzBannertriangle)}] at ({\useKV[tkzBannerpartKeys]{width}},{0.55*(\useKV[tkzBannerpartKeys]{height})}) {\vphantom{qÉ}\tkzBannermaintrilogo};
+						}%
+				}%
+			\end{scope}
+	\end{tikzpicture}%
+}
+
+%====grille automatique tikz ?
+\NewDocumentCommand\tkzGrilleAuto{ s O{thin,lightgray} m }{%
+	\IfBooleanT{#1}{\filldraw (0,0) circle[radius=2pt] ;}
+	\StrCut{#3}{§}{\tkzautogridx}{\tkzautogridy}%
+	\draw[xstep=\tkzautogridx,ystep=\tkzautogridy,#2] (current bounding box.south west) grid (current bounding box.north east) ;
+}
+\NewDocumentCommand\tkzAutoGrid{ s O{thin,lightgray} m }{%
+	\IfBooleanT{#1}{\filldraw (0,0) circle[radius=2pt] ;}
+	\StrCut{#3}{§}{\tkzautogridx}{\tkzautogridy}%
+	\draw[xstep=\tkzautogridx,ystep=\tkzautogridy,#2] (current bounding box.south west) grid (current bounding box.north east) ;
+}
+
+\tikzset{grilleauto/.store in=\tkzautogrid,grilleauto/.default={},grilleauto={}}
+\tikzset{autogrid/.store in=\tkzautogrid,autogrid/.default={},autogrid={}}
+
+\NewDocumentCommand\tkzAutoGridActivate{ s }{%
+	\@ifundefined{tkzautogrid}%
+		{}%
+		{%
+			\tikzset{every picture/.style={%
+					execute at end picture={%
+						\IfEq{\tkzautogrid}{}{}{\IfBooleanTF{#1}{\tkzGrilleAuto*{\tkzautogrid}}{\tkzGrilleAuto{\tkzautogrid}}}%
+					},
+				},
+			}%
+		}%
+}
+
+\NewDocumentCommand\tkzAutoGridLocal{ s }{%
+	\@ifundefined{tkzautogrid}%
+		{}%
+		{%
+			\tikzset{execute at end picture={%
+				\IfEq{\tkzautogrid}{}{}{\IfBooleanTF{#1}{\tkzGrilleAuto*{\tkzautogrid}}{\tkzGrilleAuto{\tkzautogrid}}}%
+				},
+			},
+		}%
+}
+
+%====FLÈCHE ÉVASÉE [FR]
+\usetikzlibrary{arrows,arrows.meta}
+
+\defKV[FlecheEvasee]{%
+	Couleur=\def\FlecheEvaseeCouleur{#1},%
+	TailleFleche=\def\FlecheEvaseeFleche{#1},%
+	Direction=\def\FlecheEvaseeDirectionAngle{#1},%
+	Coeff=\def\FlecheEvaseeCoeff{#1},%
+	TypeFleche=\def\FlecheEvaseeType{#1},%
+	Epaisseur=\def\FlecheEvaseeEpaisseur{#1},%
+	LineCap=\def\FlecheEvaseeLineCap{#1}
+}
+\setKVdefault[FlecheEvasee]{%
+	Couleur=black,%
+	TailleFleche=auto,%
+	Direction={},%
+	Coeff=4,%
+	TypeFleche=Latex,%
+	Deplacement=false,%
+	Epaisseur=0.5mm,%
+	LineCap=butt
+}
+
+\NewDocumentCommand\tkzFlecheEvasee{ O{} m m }{%1=options,2=début,3=fin
+	\restoreKV[FlecheEvasee]%
+	\setKV[FlecheEvasee]{#1}%
+	\begin{scope}[line width=0.05mm]
+		\IfStrEq{\FlecheEvaseeFleche}{auto}%
+			{%
+				\xdef\FlecheEvaseeH{2*\FlecheEvaseeCoeff*\FlecheEvaseeEpaisseur}%
+				\xdef\FlecheEvaseeW{2.1*\FlecheEvaseeCoeff*\FlecheEvaseeEpaisseur}%
+			}%
+			{%
+				\StrCut{\FlecheEvaseeFleche}{/}{\FlecheEvaseeH}{\FlecheEvaseeW}%
+			}%
+		\IfEq{\FlecheEvaseeDirectionAngle}{}%
+			{%
+				\xdef\FlecheEvaseeDirection{}\xdef\FlecheEvaseeAngle{0}%
+			}%
+			{%
+				\StrCut{\FlecheEvaseeDirectionAngle}{/}{\FlecheEvaseeDirection}{\FlecheEvaseeAngle}%
+			}%
+		%coordonnées
+		\coordinate (TMPDEPART) at (#2) ;
+		\ifboolKV[FlecheEvasee]{Deplacement}%
+			{%
+				\coordinate (TMPARRIVEE) at ($(TMPDEPART)+(#3)$) ;
+			}%
+			{%
+				\coordinate (TMPARRIVEE) at (#3) ;
+			}
+		\pgfmathanglebetweenpoints{\pgfpointanchor{TMPDEPART}{center}}{\pgfpointanchor{TMPARRIVEE}{center}}%
+		\edef\tmpangle{\pgfmathresult}%
+		%nœuds
+		\IfEq{\FlecheEvaseeDirection}{right}%
+			{%
+				\coordinate (TMPDG) at ([shift={({90+\tmpangle-\FlecheEvaseeAngle}:{0.5*\FlecheEvaseeEpaisseur})}]TMPDEPART) ;
+				\coordinate (TMPDD) at ([shift={({-90+\tmpangle-\FlecheEvaseeAngle}:{0.5*\FlecheEvaseeEpaisseur})}]TMPDEPART) ;
+				\coordinate (TMPF) at ($(TMPARRIVEE)+({\FlecheEvaseeAngle+\tmpangle+180}:\FlecheEvaseeH)$) ;
+				\coordinate (TMPFG) at ($(TMPARRIVEE)+({\FlecheEvaseeAngle+\tmpangle+180}:\FlecheEvaseeH)+({\FlecheEvaseeAngle+\tmpangle-90}:{0.5*\FlecheEvaseeCoeff*\FlecheEvaseeEpaisseur})$) ;
+				\coordinate (TMPFD) at ($(TMPARRIVEE)+({\FlecheEvaseeAngle+\tmpangle+180}:\FlecheEvaseeH)+({\FlecheEvaseeAngle+\tmpangle+90}:{0.5*\FlecheEvaseeCoeff*\FlecheEvaseeEpaisseur})$) ;
+				\IfStrEq{\FlecheEvaseeType}{Stealth}%
+					{%
+						\draw[\FlecheEvaseeCouleur,->,-{\FlecheEvaseeType[length={1.5*\FlecheEvaseeH},width={1.1*\FlecheEvaseeW}]}] (TMPF)--(TMPARRIVEE) ;
+					}%
+					{%
+						\draw[\FlecheEvaseeCouleur,->,-{\FlecheEvaseeType[length=\FlecheEvaseeH,width=\FlecheEvaseeW]}] (TMPF)--(TMPARRIVEE) ;
+					}%
+				\filldraw[line cap=\FlecheEvaseeLineCap,\FlecheEvaseeCouleur] (TMPDD) to[bend right=\FlecheEvaseeAngle] (TMPFG) -- (TMPFD) to[bend left=\FlecheEvaseeAngle] (TMPDG) --cycle ;
+			}%
+			{}%
+		\IfEq{\FlecheEvaseeDirection}{left}%
+			{%
+				\coordinate (TMPDG) at ([shift={({90+\tmpangle+\FlecheEvaseeAngle}:{0.5*\FlecheEvaseeEpaisseur})}]TMPDEPART) ;
+				\coordinate (TMPDD) at ([shift={({-90+\tmpangle+\FlecheEvaseeAngle}:{0.5*\FlecheEvaseeEpaisseur})}]TMPDEPART) ;
+				\coordinate (TMPF) at ($(TMPARRIVEE)+({180+\tmpangle-\FlecheEvaseeAngle}:\FlecheEvaseeH)$) ;
+				\coordinate (TMPFG) at ($(TMPARRIVEE)+({180+\tmpangle-\FlecheEvaseeAngle}:\FlecheEvaseeH)+({180+\tmpangle-\FlecheEvaseeAngle+90}:{0.5*\FlecheEvaseeCoeff*\FlecheEvaseeEpaisseur})$) ;
+				\coordinate (TMPFD) at ($(TMPARRIVEE)+({180+\tmpangle-\FlecheEvaseeAngle}:\FlecheEvaseeH)+({180+\tmpangle-\FlecheEvaseeAngle-90}:{0.5*\FlecheEvaseeCoeff*\FlecheEvaseeEpaisseur})$) ;
+				\IfStrEq{\FlecheEvaseeType}{Stealth}%
+					{%
+						\draw[\FlecheEvaseeCouleur,->,-{\FlecheEvaseeType[length={1.5*\FlecheEvaseeH},width={1.1*\FlecheEvaseeW}]}] (TMPF)--(TMPARRIVEE) ;
+					}%
+					{%
+						\draw[\FlecheEvaseeCouleur,->,-{\FlecheEvaseeType[length=\FlecheEvaseeH,width=\FlecheEvaseeW]}] (TMPF)--(TMPARRIVEE) ;
+					}%
+				\filldraw[line cap=\FlecheEvaseeLineCap,\FlecheEvaseeCouleur] (TMPDD) to[bend left=\FlecheEvaseeAngle] (TMPFG) -- (TMPFD) to[bend right=\FlecheEvaseeAngle] (TMPDG) --cycle ;
+			}%
+			{}%
+		\IfEq{\FlecheEvaseeDirection}{}%
+			{%
+				\coordinate (TMPF) at ($(TMPARRIVEE)+({180+\tmpangle-\FlecheEvaseeAngle}:\FlecheEvaseeH)$) ;
+				\coordinate (TMPDG) at ([shift={({90+\tmpangle-\FlecheEvaseeAngle}:{0.5*\FlecheEvaseeEpaisseur})}]TMPDEPART) ;
+				\coordinate (TMPFG) at ($(TMPARRIVEE)+({180+\tmpangle-\FlecheEvaseeAngle}:\FlecheEvaseeH)+({-90+\tmpangle-\FlecheEvaseeAngle}:{-0.5*\FlecheEvaseeCoeff*\FlecheEvaseeEpaisseur})$) ;
+				\coordinate (TMPFD) at ($(TMPARRIVEE)+({180+\tmpangle-\FlecheEvaseeAngle}:\FlecheEvaseeH)+({-90+\tmpangle-\FlecheEvaseeAngle}:{0.5*\FlecheEvaseeCoeff*\FlecheEvaseeEpaisseur})$) ;
+				\coordinate (TMPDD) at ([shift={({-90+\tmpangle-\FlecheEvaseeAngle}:{0.5*\FlecheEvaseeEpaisseur})}]TMPDEPART) ;
+				\IfStrEq{\FlecheEvaseeType}{Stealth}%
+					{%
+						\draw[\FlecheEvaseeCouleur,->,-{\FlecheEvaseeType[length={1.5*\FlecheEvaseeH},width={1.1*\FlecheEvaseeW}]}] (TMPF)--(TMPARRIVEE) ;
+					}%
+					{%
+						\draw[\FlecheEvaseeCouleur,->,-{\FlecheEvaseeType[length=\FlecheEvaseeH,width=\FlecheEvaseeW]}] (TMPF)--(TMPARRIVEE) ;
+					}%
+				\filldraw[line cap=\FlecheEvaseeLineCap,\FlecheEvaseeCouleur] (TMPDG) to (TMPFG) -- (TMPFD) to (TMPDD) --cycle ;
+			}%
+			{}%
+	\end{scope}
+}
+
+%====FLÈCHE ÉVASÉE [EN]
+\defKV[flaredarrow]{%
+	color=\def\FlecheEvaseeCouleur{#1},%
+	arrowsize=\def\FlecheEvaseeFleche{#1},%
+	bend=\def\FlecheEvaseeDirectionAngle{#1},%
+	factor=\def\FlecheEvaseeCoeff{#1},%
+	arrowstyle=\def\FlecheEvaseeType{#1},%
+	thickness=\def\FlecheEvaseeEpaisseur{#1},%
+	linecap=\def\FlecheEvaseeLineCap{#1}
+}
+\setKVdefault[flaredarrow]{%
+	color=black,%
+	arrowsize=auto,%
+	bend={},%
+	factor=4,%
+	arrowstyle=Latex,%
+	move=false,%
+	thickness=0.5mm,%
+	linecap=butt
+}
+
+\NewDocumentCommand\tkzFlaredArrow{ O{} m m }{%1=options,2=début,3=fin
+	\restoreKV[flaredarrow]%
+	\setKV[flaredarrow]{#1}%
+	\begin{scope}[line width=0.05mm]
+		\IfStrEq{\FlecheEvaseeFleche}{auto}%
+			{%
+				\xdef\FlecheEvaseeH{2*\FlecheEvaseeCoeff*\FlecheEvaseeEpaisseur}%
+				\xdef\FlecheEvaseeW{2.1*\FlecheEvaseeCoeff*\FlecheEvaseeEpaisseur}%
+			}%
+			{%
+				\StrCut{\FlecheEvaseeFleche}{/}{\FlecheEvaseeH}{\FlecheEvaseeW}%
+			}%
+		\IfEq{\FlecheEvaseeDirectionAngle}{}%
+			{%
+				\xdef\FlecheEvaseeDirection{}\xdef\FlecheEvaseeAngle{0}%
+			}%
+			{%
+				\StrCut{\FlecheEvaseeDirectionAngle}{/}{\FlecheEvaseeDirection}{\FlecheEvaseeAngle}%
+			}%
+		%coordonnées
+		\coordinate (TMPDEPART) at (#2) ;
+		\ifboolKV[flaredarrow]{move}%
+			{%
+				\coordinate (TMPARRIVEE) at ($(TMPDEPART)+(#3)$) ;
+			}%
+			{%
+				\coordinate (TMPARRIVEE) at (#3) ;
+			}
+		\pgfmathanglebetweenpoints{\pgfpointanchor{TMPDEPART}{center}}{\pgfpointanchor{TMPARRIVEE}{center}}%
+		\edef\tmpangle{\pgfmathresult}%
+		%nœuds
+		\IfEq{\FlecheEvaseeDirection}{right}%
+			{%
+				\coordinate (TMPDG) at ([shift={({90+\tmpangle-\FlecheEvaseeAngle}:{0.5*\FlecheEvaseeEpaisseur})}]TMPDEPART) ;
+				\coordinate (TMPDD) at ([shift={({-90+\tmpangle-\FlecheEvaseeAngle}:{0.5*\FlecheEvaseeEpaisseur})}]TMPDEPART) ;
+				\coordinate (TMPF) at ($(TMPARRIVEE)+({\FlecheEvaseeAngle+\tmpangle+180}:\FlecheEvaseeH)$) ;
+				\coordinate (TMPFG) at ($(TMPARRIVEE)+({\FlecheEvaseeAngle+\tmpangle+180}:\FlecheEvaseeH)+({\FlecheEvaseeAngle+\tmpangle-90}:{0.5*\FlecheEvaseeCoeff*\FlecheEvaseeEpaisseur})$) ;
+				\coordinate (TMPFD) at ($(TMPARRIVEE)+({\FlecheEvaseeAngle+\tmpangle+180}:\FlecheEvaseeH)+({\FlecheEvaseeAngle+\tmpangle+90}:{0.5*\FlecheEvaseeCoeff*\FlecheEvaseeEpaisseur})$) ;
+				\IfStrEq{\FlecheEvaseeType}{Stealth}%
+					{%
+						\draw[\FlecheEvaseeCouleur,->,-{\FlecheEvaseeType[length={1.5*\FlecheEvaseeH},width={1.1*\FlecheEvaseeW}]}] (TMPF)--(TMPARRIVEE) ;
+					}%
+					{%
+						\draw[\FlecheEvaseeCouleur,->,-{\FlecheEvaseeType[length=\FlecheEvaseeH,width=\FlecheEvaseeW]}] (TMPF)--(TMPARRIVEE) ;
+					}%
+				\filldraw[line cap=\FlecheEvaseeLineCap,\FlecheEvaseeCouleur] (TMPDD) to[bend right=\FlecheEvaseeAngle] (TMPFG) -- (TMPFD) to[bend left=\FlecheEvaseeAngle] (TMPDG) --cycle ;
+			}%
+			{}%
+		\IfEq{\FlecheEvaseeDirection}{left}%
+			{%
+				\coordinate (TMPDG) at ([shift={({90+\tmpangle+\FlecheEvaseeAngle}:{0.5*\FlecheEvaseeEpaisseur})}]TMPDEPART) ;
+				\coordinate (TMPDD) at ([shift={({-90+\tmpangle+\FlecheEvaseeAngle}:{0.5*\FlecheEvaseeEpaisseur})}]TMPDEPART) ;
+				\coordinate (TMPF) at ($(TMPARRIVEE)+({180+\tmpangle-\FlecheEvaseeAngle}:\FlecheEvaseeH)$) ;
+				\coordinate (TMPFG) at ($(TMPARRIVEE)+({180+\tmpangle-\FlecheEvaseeAngle}:\FlecheEvaseeH)+({180+\tmpangle-\FlecheEvaseeAngle+90}:{0.5*\FlecheEvaseeCoeff*\FlecheEvaseeEpaisseur})$) ;
+				\coordinate (TMPFD) at ($(TMPARRIVEE)+({180+\tmpangle-\FlecheEvaseeAngle}:\FlecheEvaseeH)+({180+\tmpangle-\FlecheEvaseeAngle-90}:{0.5*\FlecheEvaseeCoeff*\FlecheEvaseeEpaisseur})$) ;
+				\IfStrEq{\FlecheEvaseeType}{Stealth}%
+					{%
+						\draw[\FlecheEvaseeCouleur,->,-{\FlecheEvaseeType[length={1.5*\FlecheEvaseeH},width={1.1*\FlecheEvaseeW}]}] (TMPF)--(TMPARRIVEE) ;
+					}%
+					{%
+						\draw[\FlecheEvaseeCouleur,->,-{\FlecheEvaseeType[length=\FlecheEvaseeH,width=\FlecheEvaseeW]}] (TMPF)--(TMPARRIVEE) ;
+					}%
+				\filldraw[line cap=\FlecheEvaseeLineCap,\FlecheEvaseeCouleur] (TMPDD) to[bend left=\FlecheEvaseeAngle] (TMPFG) -- (TMPFD) to[bend right=\FlecheEvaseeAngle] (TMPDG) --cycle ;
+			}%
+			{}%
+		\IfEq{\FlecheEvaseeDirection}{}%
+			{%
+				\coordinate (TMPF) at ($(TMPARRIVEE)+({180+\tmpangle-\FlecheEvaseeAngle}:\FlecheEvaseeH)$) ;
+				\coordinate (TMPDG) at ([shift={({90+\tmpangle-\FlecheEvaseeAngle}:{0.5*\FlecheEvaseeEpaisseur})}]TMPDEPART) ;
+				\coordinate (TMPFG) at ($(TMPARRIVEE)+({180+\tmpangle-\FlecheEvaseeAngle}:\FlecheEvaseeH)+({-90+\tmpangle-\FlecheEvaseeAngle}:{-0.5*\FlecheEvaseeCoeff*\FlecheEvaseeEpaisseur})$) ;
+				\coordinate (TMPFD) at ($(TMPARRIVEE)+({180+\tmpangle-\FlecheEvaseeAngle}:\FlecheEvaseeH)+({-90+\tmpangle-\FlecheEvaseeAngle}:{0.5*\FlecheEvaseeCoeff*\FlecheEvaseeEpaisseur})$) ;
+				\coordinate (TMPDD) at ([shift={({-90+\tmpangle-\FlecheEvaseeAngle}:{0.5*\FlecheEvaseeEpaisseur})}]TMPDEPART) ;
+				\IfStrEq{\FlecheEvaseeType}{Stealth}%
+					{%
+						\draw[\FlecheEvaseeCouleur,->,-{\FlecheEvaseeType[length={1.5*\FlecheEvaseeH},width={1.1*\FlecheEvaseeW}]}] (TMPF)--(TMPARRIVEE) ;
+					}%
+					{%
+						\draw[\FlecheEvaseeCouleur,->,-{\FlecheEvaseeType[length=\FlecheEvaseeH,width=\FlecheEvaseeW]}] (TMPF)--(TMPARRIVEE) ;
+					}%
+				\filldraw[line cap=\FlecheEvaseeLineCap,\FlecheEvaseeCouleur] (TMPDG) to (TMPFG) -- (TMPFD) to (TMPDD) --cycle ;
+			}%
+			{}%
+	\end{scope}
+}
+
+%====PANO AUTOROUTE
+\newlength{\PanoTorouteStretch}
+\newlength{\PanoTorouteOffsetArrow}
+
+\defKV[PanoAutoroute]{%
+	Fleches=\def\PanoTorouteArrow{#1},%
+	CouleurFond=\def\PanoTorouteCoul{#1},%
+	CouleurTitre=\def\PanoTorouteCoulTitre{#1},%
+	Police=\def\PanoTorouteFonte{#1},%
+	PoliceCartouche=\def\PanoTorouteFonteTitre{#1},%
+	TypeFleche=\def\PanoTorouteStyleArrow{#1},%
+	EspacementV=\setlength{\PanoTorouteStretch}{#1},%
+	OffsetFleches=\setlength{\PanoTorouteOffsetArrow}{#1}
+}
+
+\setKVdefault[PanoAutoroute]{%
+	Fleches=0,%
+	CouleurFond=blue,%
+	CouleurTitre=red,%
+	Largeur=10cm,%
+	Police=\LARGE\bfseries\sffamily,%
+	PoliceCartouche=\Large\bfseries\sffamily,%
+	TypeFleche={\scalebox{1.33}[1.25]{\faArrowDown}},%
+	EspacementV={2.5mm},%
+	OffsetFleches={5mm},%
+	Dernier=true
+}
+
+\NewDocumentEnvironment{PanneauAutoroute}{ O{} D<>{} m }%
+{%
+	\restoreKV[PanoAutoroute]%
+	\setKV[PanoAutoroute]{#1}
+	\IfEq{#3}{}%
+		{%
+			\tcolorbox[enhanced,width={\useKV[PanoAutoroute]{Largeur}},fontupper=\PanoTorouteFonte,colback=\PanoTorouteCoul,colframe=\PanoTorouteCoul!5!white,coltext=white,sharp corners,boxsep=1mm,left=1mm,right=1mm,top=1mm,bottom=1mm,#2]
+		}%
+		{%
+			\tcolorbox[enhanced,width={\useKV[PanoAutoroute]{Largeur}},fontupper=\PanoTorouteFonte,colback=\PanoTorouteCoul,colframe=\PanoTorouteCoul!5!white,coltext=white,sharp corners,boxsep=1mm,left=1mm,right=1mm,top=1mm,bottom=1mm,attach boxed title to top center,fonttitle=\PanoTorouteFonteTitre,coltitle=white,boxed title style={colback=\PanoTorouteCoulTitre,size=small,sharp corners,left=0mm,right=0mm,colframe=\PanoTorouteCoulTitre!5!white},title={#3},#2]
+		}%
+	\baselineskip=-1000pt\lineskip=\PanoTorouteStretch\lineskiplimit=\maxdimen%
+}%
+{%
+	\ifnum\PanoTorouteArrow>0
+		
+		\medskip
+		\hspace*{\PanoTorouteOffsetArrow}\foreach \i in {1,...,\PanoTorouteArrow}{\hfill\PanoTorouteStyleArrow}\hfill\hspace*{\PanoTorouteOffsetArrow}
+	\fi%
+	\endtcolorbox%
+	%
+	\ifboolKV[PanoAutoroute]{Dernier}{}{\vspace*{\dimexpr-\baselineskip-0.5mm\relax}}%
+}
+
+\NewDocumentCommand\VilleDist{ s m m }{%
+	\IfBooleanTF{#1}%
+		{%
+			#2\hfill~#3
+		}%
+		{%
+			#2\hfill~#3\\
+		}%
+}
+
+%====PANOSOLDES
+\newlength{\tmphautbannsold}
+\newlength{\tmphautbannsoldextra}
+\newlength{\tmplargbannsold}
+\newlength{\tmplargasold}
+\newlength{\tmplargbsold}
+\newlength{\tmplargtotsold}
+\newlength{\tmpoffsetbannsold}
+\newlength{\tmphautlignesol}
+\newlength{\tmphautsoles}
+
+\def\labelancienprix{Ancien Prix~:~}
+\def\labelnouveauprix{Nouveau Prix~:~}
+\def\labelreduction{SOLDES~:~}
+
+\defKV[PanoSoldes]{%
+	Couleur=\def\panosoldescolor{#1},%
+	Largeur=\def\panosoldeswidth{#1},%
+	PoliceEntete=\def\panosoldesfonthaut{#1},%
+	PolicePrix=\def\panosoldesfontprix{#1},%
+	PoliceReduc=\def\panosoldesfontreduc{#1},%
+	OffsetReduc=\setlength{\tmpoffsetbannsold}{#1},%
+	Titre=\def\panosoldestitre{#1},%
+	AgrandirReduc=\setlength{\tmphautbannsoldextra}{#1}
+}
+
+\setKVdefault[PanoSoldes]{%
+	Couleur=gray,
+	Largeur=auto,
+	PoliceEntete=\large\bfseries,%
+	PolicePrix=\footnotesize,%
+	PoliceReduc=\large\bfseries,%
+	Titre=GRANDE DÉMARQUE,%
+	OffsetReduc=1.25cm,%
+	AgrandirReduc=0mm
+}
+
+\NewDocumentCommand\AfficheSoldes{ O{} m m m }{%
+	\restoreKV[PanoSoldes]%
+	\setKV[PanoSoldes]{#1}%
+	%calcul de la largeur
+	\IfEq{\panosoldeswidth}{auto}%
+		{%
+			\settowidth{\tmplargbannsold}{{\panosoldesfontreduc\labelreduction-999X}}%largeur avec un peu de marge dûe à la rotation
+			\settowidth{\tmplargasold}{{\panosoldesfontprix\labelancienprix99999X}}%largeur avec un peu de marge dûe au prix "élastique"
+			\settowidth{\tmplargbsold}{{\panosoldesfontprix\labelnouveauprix99999X}}%largeur avec un peu de marge dûe au prix "élastique"
+			\pgfmathsetlength{\tmplargtotsold}{max(\tmplargbannsold,\tmplargasold,\tmplargbsold)+1mm}%on rajoute encore un peu de marge pour être sûr
+		}%
+		{%
+			\setlength{\tmplargtotsold}{\panosoldeswidth}%
+		}%
+	%calcul de la hauteur
+	\settototalheight{\tmphautlignesol}{\panosoldesfontprix\labelancienprix\labelnouveauprix0,123456789X}%
+	\settototalheight{\tmphautbannsold}{\panosoldesfontreduc\labelreduction-0,123456789X}%
+	\addtolength{\tmphautbannsold}{6mm+\tmphautbannsoldextra}%
+	\setlength{\tmphautsoles}{2\tmphautlignesol}%
+	\addtolength{\tmphautsoles}{\tmpoffsetbannsold+2mm}%
+	\addtolength{\tmphautsoles}{\tmphautbannsold}%
+	%boîte
+	\tcolorbox[%
+		enhanced,nobeforeafter,width=\tmplargtotsold,text height=\tmphautsoles,boxrule=0.5mm,boxsep=0.5mm,title={\panosoldestitre},halign title=flush center,colframe=\panosoldescolor,colback=white,top=1.25mm,bottom=1.25mm,left=1.25mm,right=1.25mm,fonttitle=\panosoldesfonthaut,%
+		overlay={%
+			\begin{tcbclipframe}
+				\draw ([shift={(1.25mm,-2mm)}]interior.north west) node[anchor=north west,font=\panosoldesfontprix,inner sep=0pt] {Ancien prix : {#2}} ;
+				\draw ([shift={(-1.25mm,2.5mm)}]interior.south east) node[anchor=south east,left,font=\panosoldesfontprix,inner sep=0pt] {Nouveau prix : {#3}} ;
+				%bannière (cf Séb Lozano)
+				\fill[line cap=rect,\panosoldescolor] ([shift={(0,2.5mm+\tmphautlignesol)}]interior.south west)--([shift={(0,2.5mm+\tmphautlignesol+\tmpoffsetbannsold)}]interior.south east)--++(0,\tmphautbannsold)--([shift={(0,2.5mm+\tmphautlignesol+\tmphautbannsold)}]interior.south west) ;
+				%petit filet
+				\draw[white,semithick] ([shift={(0,2.5mm+\tmphautlignesol+1pt)}]interior.south west)--([shift={(0,2.5mm+\tmphautlignesol+\tmpoffsetbannsold+1pt)}]interior.south east)--++(0,\tmphautbannsold-2pt)--([shift={(0,2.5mm+\tmphautlignesol+\tmphautbannsold-1pt)}]interior.south west)--cycle ;
+				%label
+				\draw[draw=none] ([shift={(0,2.5mm+\tmphautlignesol+0.5\tmphautbannsold)}]interior.south west) -- ([shift={(0,2.5mm+\tmphautlignesol+\tmpoffsetbannsold+0.5\tmphautbannsold)}]interior.south east) node[midway,sloped,font=\panosoldesfontreduc,text=white] {SOLDES : {#4}} ;
+			\end{tcbclipframe}%
+			}%
+		]%
+	\endtcolorbox%
+}
+
+%====tcbmarker
+\defKV[tcbmarker]{%
+	Couleur=\def\tcbmarkercolor{#1},%
+	color=\def\tcbmarkercolor{#1},%
+	Police=\def\tcbmarkerfonte{#1},%
+	font=\def\tcbmarkerfonte{#1},%
+	Largeur=\def\tcbmarkerlarg{#1},%
+	width=\def\tcbmarkerlarg{#1}
+}
+\setKVdefault[tcbmarker]{%
+	Couleur=yellow,%
+	color=yellow,%
+	Police=\small\sffamily,%
+	font=\small\sffamily,%
+	Largeur=auto,%
+	width=auto
+}
+
+\NewDocumentCommand\tbcmarker{ O{} D<>{} m }{%
+	\restoreKV[tcbmarker]%
+	\setKV[tcbmarker]{#1}%
+	\IfEq{\tcbmarkerlarg}{auto}%
+		{%
+			\tcbset{tcbmarkerbase/.style={enhanced,box align=base}}
+		}%
+		{%
+			\tcbset{tcbmarkerbase/.style={enhanced,capture=minipage,width=\tcbmarkerlarg}}
+		}%
+	\tcbox[tcbmarkerbase,nobeforeafter,fontupper=\tcbmarkerfonte,%
+	boxrule=0.5pt,boxsep=0.5mm,left=2mm,right=5mm,top=0pt,bottom=0pt,colback=\tcbmarkercolor!15,colframe=\tcbmarkercolor!20!black,sharp corners,rounded corners=southeast,arc is angular,arc=3mm,%
+	underlay={\path[line width=0.5pt,fill=tcbcolback!80!black] ([yshift=3mm]interior.south east)--++(-0.4,-0.1)--++(0.1,-0.2);\path[line width=0.5pt,draw=tcbcolframe,shorten <=-0.05mm,shorten >=-0.05mm] ([yshift=3mm]interior.south east)--++(-0.4,-0.1)--++(0.1,-0.2);},drop fuzzy shadow,#2,before upper={\vphantom{(qÉ)}},#2]{#3}%
+}
+
+%====SkillsWheel [en & fr]
+\usetikzlibrary{bbox}
+\newlength{\skilwheelradius}
+\setlength\skilwheelradius{4cm}
+
+\defKV[skillswheel]{%
+	Rayon=\setlength\skilwheelradius{#1},%
+	Radius=\setlength\skilwheelradius{#1},%
+	Police=\def\skilwheelfonte{#1},%
+	Font=\def\skilwheelfonte{#1},%
+	ListeNiveaux=\def\skilwheelskills{#1},%
+	SkillsList=\def\skilwheelskills{#1},%
+	Marqueur=\def\skilwheelmark{#1},%
+	Mark=\def\skilwheelmark{#1}
+}
+\setKVdefault[skillswheel]{%
+	Rayon=3cm,Radius=3cm,
+	Police=\bfseries\sffamily,Font=\bfseries\sffamily,%
+	ListeNiveaux={},SkillsList={},%
+	Marqueur={},Mark={}
+}
+
+\NewDocumentCommand\RoueNiveaux{ O{} D<>{} m }{%
+	%1 := clés
+	%2 := liste couleurs
+	%3 := choix marqueur
+	\restoreKV[skillswheel]%
+	\setKV[skillswheel]{#1}%
+	\IfSubStr{#3}{,}%
+		{%
+			\setsepchar{,}%
+			\readlist*\skilswheelcolors{#3}%
+		}%
+		{%
+			\xdef\skilswheelcolorslen{#3}%
+		}%
+	\IfEq{\skilwheelmark}{}%
+		{}%
+		{%
+			\xintifboolexpr{\skilwheelmark >= 0 'and' \skilwheelmark <= \skilswheelcolorslen}%
+				{%
+					\xdef\skilswheelposcurs{\xintfloateval{180-180*(\skilwheelmark)/\skilswheelcolorslen}}%
+				}%
+				{%
+					\xdef\skilswheelposcurs{\xintfloateval{0.5*\skilswheelcolorslen}}%
+				}%
+		}%
+	\IfEq{\skilwheelskills}{}{}{\readlist*\skilswheellstskills{\skilwheelskills}}%
+	\begin{tikzpicture}[transform shape,#2]
+		\foreach \i in {1,...,\skilswheelcolorslen}{%
+			\IfSubStr{#3}{,}%
+				{%
+					\draw[line join=mitter,line cap=rect,line width=\fpeval{0.015\skilwheelradius},fill={\skilswheelcolors[\i]}] ({180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) -- ({180-180*(\i-1)/\skilswheelcolorslen}:\skilwheelradius) arc({180-180*(\i-1)/\skilswheelcolorslen}:{180-180*(\i)/\skilswheelcolorslen}:\skilwheelradius) -- ({180-180*(\i)/\skilswheelcolorslen}:{0.075\skilwheelradius}) arc({180-180*(\i)/\skilswheelcolorslen}:{180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) ;
+				}%
+				{%
+					\draw[line join=mitter,line cap=rect,line width=\fpeval{0.015\skilwheelradius}] ({180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) -- ({180-180*(\i-1)/\skilswheelcolorslen}:\skilwheelradius) arc({180-180*(\i-1)/\skilswheelcolorslen}:{180-180*(\i)/\skilswheelcolorslen}:\skilwheelradius) -- ({180-180*(\i)/\skilswheelcolorslen}:{0.075\skilwheelradius}) arc({180-180*(\i)/\skilswheelcolorslen}:{180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) ;
+				}%
+			%label
+			\IfEq{\skilwheelskills}{}%
+				{}%
+				{%
+					\xintifboolexpr{ 180*(\i-1)/\skilswheelcolorslen <= 90}%
+						{%
+							\draw[draw=none] ({180-180*(\i-1)/\skilswheelcolorslen}:\skilwheelradius) -- ({180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) node[inner sep=1.5pt,sloped,pos=0.033,above right,font=\skilwheelfonte] {\vphantom{()}\skilswheellstskills[\i]} ;
+						}%
+						{%
+							\draw[draw=none] ({180-180*(\i)/\skilswheelcolorslen}:\skilwheelradius) -- ({180-180*(\i)/\skilswheelcolorslen}:{0.075\skilwheelradius}) node[inner sep=1.5pt,sloped,pos=0.033,above left,font=\skilwheelfonte] {\vphantom{()}\skilswheellstskills[\i]} ;
+						}%
+				}%
+		}%
+		\IfEq{\skilwheelmark}{}%
+			{}%
+			{%
+				\node[rotate={90+\skilswheelposcurs},regular polygon,regular polygon sides=3,fill=black,inner sep=0pt,minimum size={0.125*\skilwheelradius},outer sep=0pt] at (\skilswheelposcurs:{1.0125\skilwheelradius}) {} ;
+			}%
+	\end{tikzpicture}%
+}
+
+\NewDocumentCommand\WheelOfSkills{ O{} D<>{} m }{%
+	%1 := clés
+	%2 := liste couleurs
+	%3 := choix marqueur
+	\restoreKV[skillswheel]%
+	\setKV[skillswheel]{#1}%
+	\IfSubStr{#3}{,}%
+		{%
+			\setsepchar{,}%
+			\readlist*\skilswheelcolors{#3}%
+		}%
+		{%
+			\xdef\skilswheelcolorslen{#3}%
+		}%
+	\IfEq{\skilwheelmark}{}%
+		{}%
+		{%
+			\xintifboolexpr{\skilwheelmark >= 0 'and' \skilwheelmark <= \skilswheelcolorslen}%
+				{%
+					\xdef\skilswheelposcurs{\xintfloateval{180-180*(\skilwheelmark)/\skilswheelcolorslen}}%
+				}%
+				{%
+					\xdef\skilswheelposcurs{\xintfloateval{0.5*\skilswheelcolorslen}}%
+				}%
+		}%
+	\IfEq{\skilwheelskills}{}{}{\readlist*\skilswheellstskills{\skilwheelskills}}%
+	\begin{tikzpicture}[transform shape,#2]
+		\foreach \i in {1,...,\skilswheelcolorslen}{%
+			\IfSubStr{#3}{,}%
+				{%
+					\draw[line join=mitter,line cap=rect,line width=\fpeval{0.015\skilwheelradius},fill={\skilswheelcolors[\i]}] ({180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) -- ({180-180*(\i-1)/\skilswheelcolorslen}:\skilwheelradius) arc({180-180*(\i-1)/\skilswheelcolorslen}:{180-180*(\i)/\skilswheelcolorslen}:\skilwheelradius) -- ({180-180*(\i)/\skilswheelcolorslen}:{0.075\skilwheelradius}) arc({180-180*(\i)/\skilswheelcolorslen}:{180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) ;
+				}%
+				{%
+					\draw[line join=mitter,line cap=rect,line width=\fpeval{0.015\skilwheelradius}] ({180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) -- ({180-180*(\i-1)/\skilswheelcolorslen}:\skilwheelradius) arc({180-180*(\i-1)/\skilswheelcolorslen}:{180-180*(\i)/\skilswheelcolorslen}:\skilwheelradius) -- ({180-180*(\i)/\skilswheelcolorslen}:{0.075\skilwheelradius}) arc({180-180*(\i)/\skilswheelcolorslen}:{180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) ;
+				}%
+			%label
+			\IfEq{\skilwheelskills}{}%
+				{}%
+				{%
+					\xintifboolexpr{ 180*(\i-1)/\skilswheelcolorslen <= 90}%
+						{%
+							\draw[draw=none] ({180-180*(\i-1)/\skilswheelcolorslen}:\skilwheelradius) -- ({180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) node[inner sep=1.5pt,sloped,pos=0.033,above right,font=\skilwheelfonte] {\vphantom{()}\skilswheellstskills[\i]} ;
+						}%
+						{%
+							\draw[draw=none] ({180-180*(\i)/\skilswheelcolorslen}:\skilwheelradius) -- ({180-180*(\i)/\skilswheelcolorslen}:{0.075\skilwheelradius}) node[inner sep=1.5pt,sloped,pos=0.033,above left,font=\skilwheelfonte] {\vphantom{()}\skilswheellstskills[\i]} ;
+						}%
+				}%
+		}%
+		\IfEq{\skilwheelmark}{}%
+			{}%
+			{%
+				\node[rotate={90+\skilswheelposcurs},regular polygon,regular polygon sides=3,fill=black,inner sep=0pt,minimum size={0.125*\skilwheelradius},outer sep=0pt] at (\skilswheelposcurs:{1.0125\skilwheelradius}) {} ;
+			}%
+	\end{tikzpicture}%
+}
+
+\defKV[skillswheellevel]{%
+	Pos=\def\skilswheelposlab{#1},%
+	Echelle=\def\skilswheelscalelab{#1},%
+	Scale=\def\skilswheelscalelab{#1},%
+}
+\setKVdefault[skillswheellevel]{%
+	Pos=0.80,%
+	Echelle=2,Scale=2
+}
+
+\NewDocumentCommand\PlacerIconeNiveau{ O{} m m }{%
+	\restoreKV[skillswheellevel]%
+	\setKV[skillswheellevel]{#1}%
+	\node[rotate={90-(180*(#2-0.5)/\skilswheelcolorslen)},inner sep=0pt,outer sep=0pt,scale=\skilswheelscalelab] at ({180-180*(#2-0.5)/\skilswheelcolorslen}:{\skilswheelposlab\skilwheelradius}) {#3} ;
+}
+
+\NewDocumentCommand\PutIconSkill{ O{} m m }{%
+	\restoreKV[skillswheellevel]%
+	\setKV[skillswheellevel]{#1}%
+	\node[rotate={90-(180*(#2-0.5)/\skilswheelcolorslen)},inner sep=0pt,outer sep=0pt,scale=\skilswheelscalelab] at ({180-180*(#2-0.5)/\skilswheelcolorslen}:{\skilswheelposlab\skilwheelradius}) {#3} ;
+}
+
+\NewDocumentCommand\PlacerIconesNiveaux{ O{} m }{%
+	\restoreKV[skillswheellevel]%
+	\setKV[skillswheellevel]{#1}%
+	\setsepchar{,}%
+	\readlist*\skllsticon{#2}%
+	\foreach \i in {1,...,\skllsticonlen}{%
+		\node[rotate={90-(180*(\i-0.5)/\skilswheelcolorslen)},inner sep=0pt,outer sep=0pt,scale=\skilswheelscalelab] at ({180-180*(\i-0.5)/\skilswheelcolorslen}:{\skilswheelposlab\skilwheelradius}) {\skllsticon[\i]} ;
+	}
+}
+
+\NewDocumentCommand\PutIconsSkills{ O{} m }{%
+	\restoreKV[skillswheellevel]%
+	\setKV[skillswheellevel]{#1}%
+	\setsepchar{,}%
+	\readlist*\skllsticon{#2}%
+	\foreach \i in {1,...,\skllsticonlen}{%
+		\node[rotate={90-(180*(\i-0.5)/\skilswheelcolorslen)},inner sep=0pt,outer sep=0pt,scale=\skilswheelscalelab] at ({180-180*(\i-0.5)/\skilswheelcolorslen}:{\skilswheelposlab\skilwheelradius}) {\skllsticon[\i]} ;
+	}
+}
+
+\NewDocumentEnvironment{EnvRoueNiveaux}{ O{} D<>{} m }%
+{%
+	%1 := clés
+	%2 := liste couleurs
+	%3 := choix marqueur
+	\restoreKV[skillswheel]%
+	\setKV[skillswheel]{#1}%
+	%\IfEq{#3}{}{\xdef\skilwheelmark{-1}}{\xdef\skilwheelmark{#3}}%
+	\IfSubStr{#3}{,}%
+	{%
+		\setsepchar{,}%
+		\readlist*\skilswheelcolors{#3}%
+	}%
+	{%
+		\xdef\skilswheelcolorslen{#3}%
+	}%
+	\IfEq{\skilwheelmark}{}%
+	{}%
+	{%
+		\xintifboolexpr{\skilwheelmark >= 0 'and' \skilwheelmark <= \skilswheelcolorslen}%
+		{%
+			\xdef\skilswheelposcurs{\xintfloateval{180-180*(\skilwheelmark)/\skilswheelcolorslen}}%
+		}%
+		{%
+			\xdef\skilswheelposcurs{\xintfloateval{0.5*\skilswheelcolorslen}}%
+		}%
+	}%
+	\IfEq{\skilwheelskills}{}{}{\readlist*\skilswheellstskills{\skilwheelskills}}%
+	\begin{tikzpicture}[transform shape,#2]
+		\foreach \i in {1,...,\skilswheelcolorslen}{%
+			\IfSubStr{#3}{,}%
+			{%
+				\draw[line join=mitter,line cap=rect,line width=\fpeval{0.015\skilwheelradius},fill={\skilswheelcolors[\i]}] ({180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) -- ({180-180*(\i-1)/\skilswheelcolorslen}:\skilwheelradius) arc({180-180*(\i-1)/\skilswheelcolorslen}:{180-180*(\i)/\skilswheelcolorslen}:\skilwheelradius) -- ({180-180*(\i)/\skilswheelcolorslen}:{0.075\skilwheelradius}) arc({180-180*(\i)/\skilswheelcolorslen}:{180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) ;
+			}%
+			{%
+				\draw[line join=mitter,line cap=rect,line width=\fpeval{0.015\skilwheelradius}] ({180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) -- ({180-180*(\i-1)/\skilswheelcolorslen}:\skilwheelradius) arc({180-180*(\i-1)/\skilswheelcolorslen}:{180-180*(\i)/\skilswheelcolorslen}:\skilwheelradius) -- ({180-180*(\i)/\skilswheelcolorslen}:{0.075\skilwheelradius}) arc({180-180*(\i)/\skilswheelcolorslen}:{180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) ;
+			}%
+			%label
+			\IfEq{\skilwheelskills}{}%
+			{}%
+			{%
+				\xintifboolexpr{ 180*(\i-1)/\skilswheelcolorslen <= 90}%
+				{%
+					\draw[draw=none] ({180-180*(\i-1)/\skilswheelcolorslen}:\skilwheelradius) -- ({180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) node[inner sep=1.5pt,sloped,pos=0.033,above right,font=\skilwheelfonte] {\vphantom{()}\skilswheellstskills[\i]} ;
+				}%
+				{%
+					\draw[draw=none] ({180-180*(\i)/\skilswheelcolorslen}:\skilwheelradius) -- ({180-180*(\i)/\skilswheelcolorslen}:{0.075\skilwheelradius}) node[inner sep=1.5pt,sloped,pos=0.033,above left,font=\skilwheelfonte] {\vphantom{()}\skilswheellstskills[\i]} ;
+				}%
+			}%
+		}%
+		\IfEq{\skilwheelmark}{}%
+		{}%
+		{%
+			\node[rotate={90+\skilswheelposcurs},regular polygon,regular polygon sides=3,fill=black,inner sep=0pt,minimum size={0.125*\skilwheelradius},outer sep=0pt] at (\skilswheelposcurs:{1.0125\skilwheelradius}) {} ;
+		}%
+}%
+{%
+	\end{tikzpicture}%
+}
+
+\NewDocumentEnvironment{SkillsWheel}{ O{} D<>{} m }%
+{%
+	%1 := clés
+	%2 := liste couleurs
+	%3 := choix marqueur
+	\restoreKV[skillswheel]%
+	\setKV[skillswheel]{#1}%
+	%\IfEq{#3}{}{\xdef\skilwheelmark{-1}}{\xdef\skilwheelmark{#3}}%
+	\IfSubStr{#3}{,}%
+	{%
+		\setsepchar{,}%
+		\readlist*\skilswheelcolors{#3}%
+	}%
+	{%
+		\xdef\skilswheelcolorslen{#3}%
+	}%
+	\IfEq{\skilwheelmark}{}%
+	{}%
+	{%
+		\xintifboolexpr{\skilwheelmark >= 0 'and' \skilwheelmark <= \skilswheelcolorslen}%
+		{%
+			\xdef\skilswheelposcurs{\xintfloateval{180-180*(\skilwheelmark)/\skilswheelcolorslen}}%
+		}%
+		{%
+			\xdef\skilswheelposcurs{\xintfloateval{0.5*\skilswheelcolorslen}}%
+		}%
+	}%
+	\IfEq{\skilwheelskills}{}{}{\readlist*\skilswheellstskills{\skilwheelskills}}%
+	\begin{tikzpicture}[transform shape,#2]
+		\foreach \i in {1,...,\skilswheelcolorslen}{%
+			\IfSubStr{#3}{,}%
+			{%
+				\draw[line join=mitter,line cap=rect,line width=\fpeval{0.015\skilwheelradius},fill={\skilswheelcolors[\i]}] ({180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) -- ({180-180*(\i-1)/\skilswheelcolorslen}:\skilwheelradius) arc({180-180*(\i-1)/\skilswheelcolorslen}:{180-180*(\i)/\skilswheelcolorslen}:\skilwheelradius) -- ({180-180*(\i)/\skilswheelcolorslen}:{0.075\skilwheelradius}) arc({180-180*(\i)/\skilswheelcolorslen}:{180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) ;
+			}%
+			{%
+				\draw[line join=mitter,line cap=rect,line width=\fpeval{0.015\skilwheelradius}] ({180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) -- ({180-180*(\i-1)/\skilswheelcolorslen}:\skilwheelradius) arc({180-180*(\i-1)/\skilswheelcolorslen}:{180-180*(\i)/\skilswheelcolorslen}:\skilwheelradius) -- ({180-180*(\i)/\skilswheelcolorslen}:{0.075\skilwheelradius}) arc({180-180*(\i)/\skilswheelcolorslen}:{180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) ;
+			}%
+			%label
+			\IfEq{\skilwheelskills}{}%
+			{}%
+			{%
+				\xintifboolexpr{ 180*(\i-1)/\skilswheelcolorslen <= 90}%
+				{%
+					\draw[draw=none] ({180-180*(\i-1)/\skilswheelcolorslen}:\skilwheelradius) -- ({180-180*(\i-1)/\skilswheelcolorslen}:{0.075\skilwheelradius}) node[inner sep=1.5pt,sloped,pos=0.033,above right,font=\skilwheelfonte] {\vphantom{()}\skilswheellstskills[\i]} ;
+				}%
+				{%
+					\draw[draw=none] ({180-180*(\i)/\skilswheelcolorslen}:\skilwheelradius) -- ({180-180*(\i)/\skilswheelcolorslen}:{0.075\skilwheelradius}) node[inner sep=1.5pt,sloped,pos=0.033,above left,font=\skilwheelfonte] {\vphantom{()}\skilswheellstskills[\i]} ;
+				}%
+			}%
+		}%
+		\IfEq{\skilwheelmark}{}%
+		{}%
+		{%
+			\node[rotate={90+\skilswheelposcurs},regular polygon,regular polygon sides=3,fill=black,inner sep=0pt,minimum size={0.125*\skilwheelradius},outer sep=0pt] at (\skilswheelposcurs:{1.0125\skilwheelradius}) {} ;
+		}%
+}%
+{%
+	\end{tikzpicture}%
+}
+
+\newlength{\tmphauteurgradniv}
+\newlength{\tmphauteurspeedom}
+
+\defKV[miniskillswheel]{%
+	Couleurs=\def\miniskillswheelcol{#1},%
+	Colors=\def\miniskillswheelcol{#1},%
+	Marqueur=\def\miniskillswheelmark{#1},%
+	Mark=\def\miniskillswheelmark{#1},%
+	Taille=\setlength{\tmphauteurspeedom}{#1},%
+	Size=\setlength{\tmphauteurspeedom}{#1}
+}
+\setKVdefault[miniskillswheel]{%
+	Couleurs=black,%
+	Colors=black,
+	Marqueur={},%
+	Mark={},
+	Taille=4cm,%
+	Size=4cm
+}
+
+\NewDocumentCommand\MiniCompteurNiveaux{ O{} D<>{} m }{%
+	\restoreKV[miniskillswheel]%
+	\setKV[miniskillswheel]{#1}%
+	\settototalheight{\tmphauteurgradniv}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+	\setlength{\tmphauteurgradniv}{0.90\tmphauteurgradniv}%.
+	\IfEq{\miniskillswheelmark}{}%
+		{}%
+		{%
+			\xintifboolexpr{\miniskillswheelmark >= 0 'and' \miniskillswheelmark <= #3}%
+				{%
+					\xdef\miniskilswheelposcurs{\xintfloateval{180-180*(\miniskillswheelmark)/(#3)}}%
+				}%
+				{%
+					\xdef\miniskilswheelposcurs{\xintfloateval{0.5*(#3)}}%
+				}%
+		}%
+	\IfSubStr{\miniskillswheelcol}{/}%
+		{%
+			\StrCut{\miniskillswheelcol}{/}{\miniskillswheelcolp}{\miniskillswheelcols}%
+		}%
+		{%
+			\xdef\miniskillswheelcolp{\miniskillswheelcol}\xdef\miniskillswheelcols{\miniskillswheelcol}%
+		}%
+	\begin{tikzpicture}[bezier bounding box,baseline={-0.075\tmphauteurgradniv},line width={0.075\tmphauteurgradniv},#2,transform shape]
+		\draw[\miniskillswheelcolp] (-15:{0.7588\tmphauteurgradniv}) arc(-15:195:{0.7588\tmphauteurgradniv}) --cycle ;
+		\foreach \i in {0,...,#3}{%
+			\draw[\miniskillswheelcolp,line cap=round] ({180-180*(\i)/#3}:{0.55\tmphauteurgradniv})--({180-180*(\i)/#3}:{0.65\tmphauteurgradniv}) ;
+		}
+		\IfEq{\miniskillswheelmark}{}%
+			{}%
+			{%
+				\draw[\miniskillswheelcols] (0,0) circle[radius=0.1\tmphauteurgradniv] ;
+				\draw[\miniskillswheelcols,line cap=round] ({\miniskilswheelposcurs}:{0.1\tmphauteurgradniv}) -- ({\miniskilswheelposcurs}:{0.6125\tmphauteurgradniv}) ;
+			}%
+	\end{tikzpicture}%
+}
+
+\NewDocumentCommand\miniskillwheel{ O{} D<>{} m }{%
+	\restoreKV[miniskillswheel]%
+	\setKV[miniskillswheel]{#1}%
+	\settototalheight{\tmphauteurgradniv}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+	\setlength{\tmphauteurgradniv}{0.90\tmphauteurgradniv}%.
+	\IfEq{\miniskillswheelmark}{}%
+		{}%
+		{%
+			\xintifboolexpr{\miniskillswheelmark >= 0 'and' \miniskillswheelmark <= #3}%
+				{%
+					\xdef\miniskilswheelposcurs{\xintfloateval{180-180*(\miniskillswheelmark)/(#3)}}%
+				}%
+				{%
+					\xdef\miniskilswheelposcurs{\xintfloateval{0.5*(#3)}}%
+				}%
+		}%
+	\IfSubStr{\miniskillswheelcol}{/}%
+		{%
+			\StrCut{\miniskillswheelcol}{/}{\miniskillswheelcolp}{\miniskillswheelcols}%
+		}%
+		{%
+			\xdef\miniskillswheelcolp{\miniskillswheelcol}\xdef\miniskillswheelcols{\miniskillswheelcol}%
+		}%
+	\begin{tikzpicture}[bezier bounding box,baseline={-0.075\tmphauteurgradniv},line width={0.075\tmphauteurgradniv},#2,transform shape]
+		\draw[\miniskillswheelcolp] (-15:{0.7588\tmphauteurgradniv}) arc(-15:195:{0.7588\tmphauteurgradniv}) --cycle ;
+		\foreach \i in {0,...,#3}{%
+			\draw[\miniskillswheelcolp,line cap=round] ({180-180*(\i)/#3}:{0.55\tmphauteurgradniv})--({180-180*(\i)/#3}:{0.65\tmphauteurgradniv}) ;
+		}
+		\IfEq{\miniskillswheelmark}{}%
+			{}%
+			{%
+				\draw[\miniskillswheelcols] (0,0) circle[radius=0.1\tmphauteurgradniv] ;
+				\draw[\miniskillswheelcols,line cap=round] ({\miniskilswheelposcurs}:{0.1\tmphauteurgradniv}) -- ({\miniskilswheelposcurs}:{0.6125\tmphauteurgradniv}) ;
+			}%
+	\end{tikzpicture}%
+}
+
+\NewDocumentCommand\tkzspeedometer{ O{} D<>{} m }{%
+	\restoreKV[miniskillswheel]%
+	\setKV[miniskillswheel]{#1}%
+	\setlength{\tmphauteurgradniv}{0.9\tmphauteurspeedom}%
+	\IfEq{\miniskillswheelmark}{}%
+		{}%
+		{%
+			\xintifboolexpr{\miniskillswheelmark >= 0 'and' \miniskillswheelmark <= #3}%
+				{%
+					\xdef\miniskilswheelposcurs{\xintfloateval{180-180*(\miniskillswheelmark)/(#3)}}%
+				}%
+				{%
+					\xdef\miniskilswheelposcurs{\xintfloateval{0.5*(#3)}}%
+				}%
+		}%
+	\IfSubStr{\miniskillswheelcol}{/}%
+		{%
+			\StrCut{\miniskillswheelcol}{/}{\miniskillswheelcolp}{\miniskillswheelcols}%
+		}%
+		{%
+			\xdef\miniskillswheelcolp{\miniskillswheelcol}\xdef\miniskillswheelcols{\miniskillswheelcol}%
+		}%
+	\begin{tikzpicture}[bezier bounding box,line width={0.075\tmphauteurgradniv},#2,transform shape]%
+		\draw[\miniskillswheelcolp] (-15:{0.7588\tmphauteurgradniv}) arc(-15:195:{0.7588\tmphauteurgradniv}) --cycle ;
+		\foreach \i in {0,...,#3}{%
+			\draw[\miniskillswheelcolp,line cap=round] ({180-180*(\i)/#3}:{0.55\tmphauteurgradniv})--({180-180*(\i)/#3}:{0.65\tmphauteurgradniv}) ;
+		}%
+		\IfEq{\miniskillswheelmark}{}%
+			{}%
+			{%
+				\draw[\miniskillswheelcols] (0,0) circle[radius=0.1\tmphauteurgradniv] ;%
+				\draw[\miniskillswheelcols,line cap=round] ({\miniskilswheelposcurs}:{0.1\tmphauteurgradniv}) -- ({\miniskilswheelposcurs}:{0.6125\tmphauteurgradniv}) ;%
+			}%
+	\end{tikzpicture}%
+}
+
+%====POSITION ABSOLUE DANS LA PAGE
+\defKV[absposobject]{scale=\def\absposobject@scale{#1},anchor=\def\absposobject@anchor{#1}}
+\setKVdefault[absposobject]{scale={},anchor={north west}}
+\NewDocumentCommand\absposobject{ O{} m m m }{%
+	\restoreKV[absposobject]%
+	\setKV[absposobject]{#1}%
+	\IfStrEq{\absposobject@scale}{}%
+		{%
+			\begin{tikzpicture}[remember picture,overlay] \node[inner sep=0pt,outer sep=0pt] at ($([xshift=#2,yshift=#3]current page.\absposobject@anchor)$) {#4}; \end{tikzpicture}%
+		}%
+		{%
+			\begin{tikzpicture}[remember picture,overlay] \node[inner sep=0pt,outer sep=0pt,scale=\absposobject@scale] at ($([xshift=#2,yshift=#3]current page.\absposobject@anchor)$) {#4}; \end{tikzpicture}%
+		}%
+}
+
+\defKV[absposobjet]{Echelle=\def\absposobject@scale{#1},Ancre=\def\absposobject@anchor{#1}}
+\setKVdefault[absposobjet]{Echelle={},Ancre={north west}}
+\NewDocumentCommand\objetposabs{ O{} m m m }{%
+	\restoreKV[absposobjet]%
+	\setKV[absposobjet]{#1}%
+	\IfStrEq{\absposobject@scale}{}%
+		{%
+			\begin{tikzpicture}[remember picture,overlay] \node[inner sep=0pt,outer sep=0pt] at ($([xshift=#2,yshift=#3]current page.\absposobject@anchor)$) {#4}; \end{tikzpicture}%
+		}%
+		{%
+			\begin{tikzpicture}[remember picture,overlay] \node[inner sep=0pt,outer sep=0pt,scale=\absposobject@scale] at ($([xshift=#2,yshift=#3]current page.\absposobject@anchor)$) {#4}; \end{tikzpicture}%
+		}%
+}
+
+%====TITLE v2 (with better texts)
+\newsavebox\tmpmybox
+\newlength\tmpmywidthbox
+\newlength\tmpmytotheightbox
+\newlength\tmpfixedwidth
+
+\NewDocumentCommand\resizeiflarger{ s m m m }{%
+	%#2 = content
+	%#3 = fixed height
+	%#4	= var width
+	\setlength\tmpfixedwidth{#4}%
+	\IfBooleanTF{#1}%
+		{%
+			\savebox{\tmpmybox}{\resizebox*{!}{#3}{#2}}%
+			\settowidth{\tmpmywidthbox}{\usebox{\tmpmybox}}%on stocke la largeur
+			\ifthenelse{\tmpmywidthbox < \tmpfixedwidth}%
+				{%
+					\usebox{\tmpmybox}%
+				}%
+				{%
+					\resizebox*{\tmpfixedwidth}{#3}{#2}%
+				}%
+		}%
+		{%
+			\savebox{\tmpmybox}{\resizebox{!}{#3}{#2}}%
+			\settowidth{\tmpmywidthbox}{\usebox{\tmpmybox}}%on stocke la largeur
+			\ifthenelse{\tmpmywidthbox < \tmpfixedwidth}%
+				{%
+					\usebox{\tmpmybox}%
+				}%
+				{%
+					\resizebox{\tmpfixedwidth}{#3}{#2}%
+				}%
+		}%
+}
+
+\newlength\tmp@tkzbanneralt@height
+\newlength{\tmp@tkzbanneralt@autowidthtype}
+\setlength\tmp@tkzbanneralt@autowidthtype{2.5em}
+\newlength{\tmp@tkzbanneralt@autowidthnum}
+\setlength\tmp@tkzbanneralt@autowidthnum{2em}
+\newlength{\tmp@tkzbanneralt@marginoffsetbanner}
+\setlength\tmp@tkzbanneralt@marginoffsetbanner{2pt}
+\newlength{\tmp@tkzbanneralt@autowidth}
+\newlength\tmp@tkzbanneralt@txtheight
+\newlength\tmp@tkzbanneralt@txtmarginhblock
+\newlength\tmp@tkzbanneralt@txtheightsmall
+\newlength\tmp@tkzbanneralt@txtheightbig
+\newlength\tmp@tkzbanneralt@titlewidth
+
+\def\tmp@tkzbanneralt@scalemain{0.75}
+\def\tmp@tkzbanneralt@scalesmall{0.25}
+\def\tmp@tkzbanneralt@scalesnum{0.5}
+%\xdef\tmp@tkzbanneralt@offsetmargin{\fpeval{(1-\tmp@tkzbanneralt@scalesmall-\tmp@tkzbanneralt@scalesnum)/3}}
+
+\defKV[tkzBannerpartAltKeys]{%
+	height=\setlength\tmp@tkzbanneralt@height{#1},%
+	maincolor=\def\tkzBannermaintricol{#1},%
+	logo=\def\tkzBannermaintrilogo{#1},%
+	type=\def\tkzBannermaintritype{#1},%
+	blockwidth=\setlength\tmp@tkzbanneralt@autowidth{#1},%
+	customtype=\def\tkzBannermaintritypelibre{#1},%
+	fonttxt=\def\tkzBannermainfonttype{#1}
+}
+
+\setKVdefault[tkzBannerpartAltKeys]{%
+	height=1cm,%
+	width={\linewidth-0.5pt},%
+	blockwidth=1cm,%
+	collight=darkgray!25,%
+	colmedium=darkgray!50,%
+	coldark=darkgray,%
+	coltxt=white,%
+	fonttxt=\sffamily\bfseries,%
+	swap=false,%
+	maincolor={},%
+	logo={},%
+	type={},%
+	num=true,
+	customtype={},%
+	custommulti=false
+}
+
+\NewDocumentCommand\tkzBannerTriAlt{ O{} m m }{%
+	%#1 := clés
+	%#2 := numéro
+	%#3 := titre
+	\noindent%
+	\restoreKV[tkzBannerpartAltKeys]%
+	\setKV[tkzBannerpartAltKeys]{#1}%
+	%on commence par faire les calculs d'échelle des labels
+	\setlength\tmp@tkzbanneralt@txtheight{\tmp@tkzbanneralt@scalemain\tmp@tkzbanneralt@height}%
+	\setlength\tmp@tkzbanneralt@txtheightsmall{\tmp@tkzbanneralt@scalesmall\tmp@tkzbanneralt@height}%
+	\setlength\tmp@tkzbanneralt@txtheightbig{\tmp@tkzbanneralt@scalesnum\tmp@tkzbanneralt@height}%
+	\xdef\tmp@tkzbanneralt@offsetmargin{\fpeval{(1-\tmp@tkzbanneralt@scalesmall-\tmp@tkzbanneralt@scalesnum)/3}}%
+	\setlength\tmp@tkzbanneralt@txtmarginhblock{\tmp@tkzbanneralt@offsetmargin\tmp@tkzbanneralt@height}%
+	\pgfmathsetmacro{\tkzBannertriangle}{0.10*(\useKV[tkzBannerpartKeys]{height})/(\useKV[tkzBannerpartKeys]{width})}%
+	\IfEq{\tkzBannermaintrilogo}{}%OK
+		{%
+			\setlength\tmp@tkzbanneralt@titlewidth{\linewidth-\tmp@tkzbanneralt@autowidth-2\tmp@tkzbanneralt@marginoffsetbanner-3.5mm}%
+		}%
+		{%
+			\setlength\tmp@tkzbanneralt@titlewidth{\linewidth-\tmp@tkzbanneralt@autowidth-2\tmp@tkzbanneralt@marginoffsetbanner-3.5mm-\tmp@tkzbanneralt@height}%
+		}%
+	%l'environnement tikzpicture
+	\begin{tikzpicture}
+		\IfEq{\tkzBannermaintricol}{}%
+			{%
+				\tikzset{tkzbannertridark/.style={\useKV[tkzBannerpartAltKeys]{coldark}}}
+				\tikzset{tkzbannertrimedium/.style={\useKV[tkzBannerpartAltKeys]{colmedium}}}
+				\tikzset{tkzbannertrilight/.style={\useKV[tkzBannerpartAltKeys]{collight}}}
+			}%
+			{%
+				\tikzset{tkzbannertridark/.style={\tkzBannermaintricol}}
+				\tikzset{tkzbannertrimedium/.style={\tkzBannermaintricol!50}}
+				\tikzset{tkzbannertrilight/.style={\tkzBannermaintricol!25}}
+			}%
+		%coordinates
+		\coordinate (tkzBannerTri-NW) at (0,{\useKV[tkzBannerpartAltKeys]{height}}) ;
+		\coordinate (tkzBannerTri-SW) at (0,0) ;
+		\coordinate (tkzBannerTri-NE) at ({\useKV[tkzBannerpartAltKeys]{width}},{\useKV[tkzBannerpartAltKeys]{height}}) ;
+		\coordinate (tkzBannerTri-SE) at ({\useKV[tkzBannerpartAltKeys]{width}},0) ;%
+		\coordinate (tkzBannerTri-SWd) at ($(tkzBannerTri-SW)!0.05!(tkzBannerTri-NW)$) ;%
+		\coordinate (tkzBannerTri-SEd) at ($(tkzBannerTri-SE)!0.15!(tkzBannerTri-NE)$) ;%
+		%drawing & shadow
+		\fill[lightgray!75] ([yshift=-1pt]tkzBannerTri-SWd) -- ([yshift=-1pt]tkzBannerTri-SEd) -- (tkzBannerTri-NE) -| cycle ;
+		\ifboolKV[tkzBannerpartAltKeys]{swap}%
+			{%
+				\fill[white] (tkzBannerTri-SWd) -- (tkzBannerTri-SEd) -- (tkzBannerTri-NE) -| cycle ;
+				\draw[line width=1pt,tkzbannertridark] ([shift={(0.5pt,-0.5pt)}]tkzBannerTri-NW) -| ([shift={(-0.5pt,0)}]tkzBannerTri-SEd) -- (tkzBannerTri-SWd) ;
+			}%
+			{%
+				\fill[tkzbannertrimedium] (tkzBannerTri-SWd) -- (tkzBannerTri-SEd) -- (tkzBannerTri-NE) -| cycle ;
+			}%
+		\begin{scope}
+			\clip ($(tkzBannerTri-SW)!0.0375!(tkzBannerTri-NW)$) -- ($(tkzBannerTri-SE)!0.1375!(tkzBannerTri-NE)$) -- (tkzBannerTri-NE) -| cycle ;
+			%light
+			\fill[tkzbannertrilight] (tkzBannerTri-NW) --++ ({\tmp@tkzbanneralt@autowidth+2*\tmp@tkzbanneralt@marginoffsetbanner},0) -- ({\tmp@tkzbanneralt@autowidth+2*\tmp@tkzbanneralt@marginoffsetbanner+3.5mm},{0.5*(\useKV[tkzBannerpartAltKeys]{height})}) -- ({\tmp@tkzbanneralt@autowidth+2*\tmp@tkzbanneralt@marginoffsetbanner},0) -- (tkzBannerTri-SW) -- cycle ;
+		\end{scope}
+		\begin{scope}
+			\clip ($(tkzBannerTri-SW)!0.025!(tkzBannerTri-NW)$) -- ($(tkzBannerTri-SE)!0.125!(tkzBannerTri-NE)$) -- (tkzBannerTri-NE) -| cycle ;
+			%medium
+			\fill[tkzbannertrimedium] (tkzBannerTri-NW) --++ ({\tmp@tkzbanneralt@autowidth+\tmp@tkzbanneralt@marginoffsetbanner},0) -- ({\tmp@tkzbanneralt@autowidth+\tmp@tkzbanneralt@marginoffsetbanner+3.5mm},{0.5*(\useKV[tkzBannerpartAltKeys]{height})}) -- ({\tmp@tkzbanneralt@autowidth+\tmp@tkzbanneralt@marginoffsetbanner},0) -- (tkzBannerTri-SW) -- cycle ;
+		\end{scope}
+		\begin{scope}
+			\clip ($(tkzBannerTri-SW)!0.0125!(tkzBannerTri-NW)$) -- ($(tkzBannerTri-SE)!0.1125!(tkzBannerTri-NE)$) -- (tkzBannerTri-NE) -| cycle ;
+			%dark
+			\fill[tkzbannertridark] (tkzBannerTri-NW) --++ ({\tmp@tkzbanneralt@autowidth},0) -- ({\tmp@tkzbanneralt@autowidth+3.5mm},{0.5*(\useKV[tkzBannerpartAltKeys]{height})}) -- ({\tmp@tkzbanneralt@autowidth},0) -- (tkzBannerTri-SW) -- cycle ;
+		\end{scope}
+		%le label du titre (OK)
+		\begin{scope}
+			\clip (tkzBannerTri-SWd) -- (tkzBannerTri-SEd) -- (tkzBannerTri-NE) -| cycle ;
+			\ifboolKV[tkzBannerpartAltKeys]{swap}%
+				{%
+					\node[inner sep=1.25pt,right,text=\tkzBannermaintricol,font={\useKV[tkzBannerpartAltKeys]{fonttxt}},rotate={atan(\tkzBannertriangle)}] at ({\tmp@tkzbanneralt@autowidth+2*\tmp@tkzbanneralt@marginoffsetbanner+4mm},{0.52*(\useKV[tkzBannerpartAltKeys]{height})}) {\resizeiflarger*{\tkzBannermainfonttype\vphantom{qÉ}#3}{\tmp@tkzbanneralt@txtheight}{\tmp@tkzbanneralt@titlewidth}};%
+					%{\resizebox*{!}{\tmp@tkzbanneralt@txtheight}{\vphantom{qÉ}#3}};
+					%logo
+					\IfEq{\tkzBannermaintrilogo}{}%OK
+						{}%
+						{%
+							\node[inner sep=1.25pt,left=2pt,text=\tkzBannermaintricol,font={\useKV[tkzBannerpartAltKeys]{fonttxt}},rotate={atan(\tkzBannertriangle)}] at ({\useKV[tkzBannerpartAltKeys]{width}},{0.55*(\useKV[tkzBannerpartAltKeys]{height})}) {\resizebox*{!}{0.9\tmp@tkzbanneralt@txtheight}{\vphantom{qÉ}\tkzBannermaintrilogo}};
+						}%
+				}%
+				{%
+					\node[inner sep=1.25pt,right,text={\useKV[tkzBannerpartAltKeys]{coltxt}},font={\useKV[tkzBannerpartAltKeys]{fonttxt}},rotate={atan(\tkzBannertriangle)}] at ({\tmp@tkzbanneralt@autowidth+2*\tmp@tkzbanneralt@marginoffsetbanner+4mm},{0.52*(\useKV[tkzBannerpartAltKeys]{height})}) {\resizeiflarger*{\tkzBannermainfonttype\vphantom{qÉ}#3}{\tmp@tkzbanneralt@txtheight}{\tmp@tkzbanneralt@titlewidth}};%
+					%{\resizebox*{!}{\tmp@tkzbanneralt@txtheight}{\vphantom{qÉ}#3}};
+					%logo
+					\IfEq{\tkzBannermaintrilogo}{}%OK
+						{}%
+						{%
+							\node[inner sep=1.25pt,left=2pt,text={\useKV[tkzBannerpartAltKeys]{coltxt}},font={\useKV[tkzBannerpartAltKeys]{fonttxt}},rotate={atan(\tkzBannertriangle)}] at ({\useKV[tkzBannerpartAltKeys]{width}},{0.55*(\useKV[tkzBannerpartAltKeys]{height})}) {\resizebox*{!}{0.9\tmp@tkzbanneralt@txtheight}{\vphantom{qÉ}\tkzBannermaintrilogo}};
+						}%
+				}%
+		\end{scope}
+		%les labels gauches, en test
+		\begin{scope}
+			\clip ($(tkzBannerTri-SW)!0.0125!(tkzBannerTri-NW)$) -- ($(tkzBannerTri-SE)!0.1125!(tkzBannerTri-NE)$) -- (tkzBannerTri-NE) -| cycle ;
+			\IfEq{\tkzBannermaintritypelibre}{}%
+				{%
+					\ifboolKV[tkzBannerpartAltKeys]{num}%
+						{%
+							\IfEq{\tkzBannermaintritype}{}%
+							{%
+								%Numéro tout seul (OK)
+								\node[inner sep=0pt,text={\useKV[tkzBannerpartAltKeys]{coltxt}},font={\useKV[tkzBannerpartAltKeys]{fonttxt}},rotate={atan(\tkzBannertriangle)}] at ({0.55*\tmp@tkzbanneralt@autowidth},{0.5*(\useKV[tkzBannerpartAltKeys]{height})}) {\resizeiflarger{\tkzBannermainfonttype #2}{\tmp@tkzbanneralt@txtheightbig}{0.925\tmp@tkzbanneralt@autowidth}};% {\resizebox*{0.9\tmp@tkzbanneralt@autowidth}{!}{#2}};
+							}%
+							{%
+								%Label OK & Numéro OK
+								\node[text depth=0pt,inner sep=0pt,below=1.25\tmp@tkzbanneralt@txtmarginhblock,text={\useKV[tkzBannerpartAltKeys]{coltxt}},font={\useKV[tkzBannerpartAltKeys]{fonttxt}},rotate={atan(\tkzBannertriangle)}] at ({0.5*\tmp@tkzbanneralt@autowidth},{\useKV[tkzBannerpartAltKeys]{height}}) {\resizeiflarger*{\vphantom{qB}\tkzBannermaintritype}{\tmp@tkzbanneralt@txtheightsmall}{0.925\tmp@tkzbanneralt@autowidth}} ;%{\resizebox*{!}{\tmp@tkzbanneralt@txtheightsmall}{\vphantom{qB}\tkzBannermaintritype}};
+								\node[inner sep=0pt,above=0.95\tmp@tkzbanneralt@txtmarginhblock,text={\useKV[tkzBannerpartAltKeys]{coltxt}},font={\useKV[tkzBannerpartAltKeys]{fonttxt}},rotate={atan(\tkzBannertriangle)}] at ({0.5*\tmp@tkzbanneralt@autowidth},0) {\resizeiflarger*{\vphantom{qB}#2}{\tmp@tkzbanneralt@txtheightbig}{0.925\tmp@tkzbanneralt@autowidth}} ;% {\resizebox*{!}{\tmp@tkzbanneralt@txtheightbig}{\vphantom{qB}#2}};
+							}%
+						}%
+						{}%
+				}%
+				{%
+					\ifboolKV[tkzBannerpartAltKeys]{custommulti}%
+						{%
+							%2 Lignes (OK)
+							\StrCut{\tkzBannermaintritypelibre}{+}{\tkzBannermaintritypelibreA}{\tkzBannermaintritypelibreB}%
+							\node[inner sep=1.25pt,above,text={\useKV[tkzBannerpartAltKeys]{coltxt}},font={\useKV[tkzBannerpartAltKeys]{fonttxt}},rotate={atan(\tkzBannertriangle)},text width=0.925\tmp@tkzbanneralt@autowidth,align=center] at ({0.525*\tmp@tkzbanneralt@autowidth},{0.5*(\useKV[tkzBannerpartAltKeys]{height})}) {\resizeiflarger{\vphantom{qB}\tkzBannermaintritypelibreA}{\tmp@tkzbanneralt@txtheightsmall}{0.925\tmp@tkzbanneralt@autowidth}};
+							\node[inner sep=1.25pt,below,text={\useKV[tkzBannerpartAltKeys]{coltxt}},font={\useKV[tkzBannerpartAltKeys]{fonttxt}},rotate={atan(\tkzBannertriangle)},text width=0.925\tmp@tkzbanneralt@autowidth,align=center] at ({0.525*\tmp@tkzbanneralt@autowidth},{0.5*(\useKV[tkzBannerpartAltKeys]{height})}) {\resizeiflarger{\vphantom{qB}\tkzBannermaintritypelibreB}{\tmp@tkzbanneralt@txtheightsmall}{0.925\tmp@tkzbanneralt@autowidth}};
+						}%
+						{%
+							%une ligne (OK)
+							\node[inner sep=1.25pt,text={\useKV[tkzBannerpartAltKeys]{coltxt}},font={\useKV[tkzBannerpartAltKeys]{fonttxt}},rotate={atan(\tkzBannertriangle)}] at ({0.525*\tmp@tkzbanneralt@autowidth},{0.5*(\useKV[tkzBannerpartAltKeys]{height})}) {\resizeiflarger{\vphantom{qB}\tkzBannermaintritypelibre}{\tmp@tkzbanneralt@txtheightsmall}{0.925\tmp@tkzbanneralt@autowidth}};
+						}%
+				}%
+		\end{scope}
+	\end{tikzpicture}%
+}
+
+%====Write on images
+\newcommand\cecalcwidthnodetikz[2]{%
+	\pgfpointdiff{\pgfpointanchor{#1}{east}}{\pgfpointanchor{#1}{west}}%
+	\pgf@xa=\pgf@x
+	\pgf@ya=\pgf@y
+	% to convert from pt to cm   
+	\pgfmathparse{veclen(\pgf@xa,\pgf@ya)/28.45274}%
+	\global\let#2\pgfmathresult%
+}
+\newcommand\cecalcheightnodetikz[2]{%
+	\pgfpointdiff{\pgfpointanchor{#1}{south}}{\pgfpointanchor{#1}{north}}%
+	\pgf@xa=\pgf@x
+	\pgf@ya=\pgf@y
+	% to convert from pt to cm   
+	\pgfmathparse{veclen(\pgf@xa,\pgf@ya)/28.45274}%
+	\global\let#2\pgfmathresult%
+}
+
+\defKV[writeonimg]{%
+	Noeud=\def\writeonimgnode{#1},%
+	node=\def\enwriteonimgnode{#1},%
+	Grille=\def\writeonimggrid{#1},%
+	grid=\def\enwriteonimggrid{#1},%
+	SousGrille=\def\writeonimgsubgrid{#1},%
+	subgrid=\def\enwriteonimgsubgrid{#1},%
+	CouleurGrille=\def\writeonimggridcolor{#1},%
+	gridcolor=\def\enwriteonimggridcolor{#1}
+}
+\setKVdefault[writeonimg]{%
+	Clip=true,clip=true,%
+	Noeud=MonImage,node=MyImg,%
+	Grille={},grid={},%
+	SousGrille=4,subgrid=4,%
+	CouleurGrille=teal,gridcolor=teal
+}
+
+\NewDocumentEnvironment{AnnoterImage}{ O{} O{} D<>{} m }%
+{%
+	\restoreKV[writeonimg]%
+	\setKV[writeonimg]{#1}%
+	\IfFileExists{#4}%
+		{%
+			\begin{tikzpicture}[transform shape,#3]
+				\node[shape=rectangle,inner sep=0pt,anchor=south west](\writeonimgnode){\includegraphics[#2]{#4}};
+				\useasboundingbox (\writeonimgnode.south west) rectangle (\writeonimgnode.north east) ;
+				\cecalcwidthnodetikz{\writeonimgnode}{\mytmpwidth}
+				\cecalcheightnodetikz{\writeonimgnode}{\mytmpheight}%
+				\IfStrEq{\writeonimggrid}{}%
+					{}%
+					{%
+						\draw[{\writeonimggridcolor},very thin,xstep=\fpeval{1/(\writeonimgsubgrid)*\writeonimggrid}cm,ystep=\fpeval{1/(\writeonimgsubgrid)*\writeonimggrid}cm,opacity=0.75] (\writeonimgnode.south west) grid (\writeonimgnode.north east) ;
+						\draw[{\writeonimggridcolor},thick,xstep=\writeonimggrid cm,ystep=\writeonimggrid cm,opacity=0.75] (\writeonimgnode.south west) grid (\writeonimgnode.north east) ;
+						\foreach \x in {0,\writeonimggrid,...,\mytmpwidth}{%
+							\draw (\x,0) node[draw,fill=white,inner sep=0.5pt,font=\tiny,rotate=90,anchor=west] {\x} ;
+							\draw (\x,\mytmpheight) node[draw,fill=white,inner sep=0.5pt,font=\tiny,rotate=90,anchor=east] {\x} ;
+						}
+						\foreach \y in {0,\writeonimggrid,...,\mytmpheight}{%
+							\draw (0,\y) node[draw,fill=white,inner sep=0.5pt,font=\tiny,right] {\y} ;
+							\draw (\mytmpwidth,\y) node[draw,fill=white,inner sep=0.5pt,font=\tiny,left] {\y} ;
+						}
+					}%
+				\ifboolKV[writeonimg]{Clip}%
+					{%
+						\clip (\writeonimgnode.south west) rectangle (\writeonimgnode.north east) ;
+					}%
+					{}%
+		}%
+		{%
+			{\setlength\fboxsep{1pt}\fbox{\tiny\ttfamily XXX}}%
+		}%
+}%
+{%
+	\IfFileExists{#4}%
+		{%
+			\end{tikzpicture}%
+		}%
+		{}%
+}%
+
+\NewDocumentCommand\PlacerTxtSurImg{ s O{} m m }{%
+	\IfBooleanTF{#1}%
+		{%
+			\StrCut{#3}{,}{\writeonimgxpercent}{\writeonimgypercent}%
+			\draw ({\writeonimgxpercent*\mytmpwidth},{\writeonimgypercent*\mytmpheight}) node[#2] {#4} ;
+		}%
+		{%
+			\draw (#3) node[#2] {#4} ;
+		}%
+}
+
+\NewDocumentEnvironment{imgannotate}{ O{} O{} D<>{} m }%
+{%
+	\restoreKV[writeonimg]%
+	\setKV[writeonimg]{#1}%
+	\IfFileExists{#4}%
+		{%
+			\begin{tikzpicture}[transform shape,#3]
+				\node[shape=rectangle,inner sep=0pt,anchor=south west](\enwriteonimgnode){\includegraphics[#2]{#4}};
+				\useasboundingbox (\enwriteonimgnode.south west) rectangle (\enwriteonimgnode.north east) ;
+				\cecalcwidthnodetikz{\enwriteonimgnode}{\mytmpwidth}
+				\cecalcheightnodetikz{\enwriteonimgnode}{\mytmpheight}%
+				\IfStrEq{\enwriteonimggrid}{}%
+					{}%
+					{%
+						\draw[{\enwriteonimggridcolor},very thin,xstep=\fpeval{1/(\enwriteonimgsubgrid)*\enwriteonimggrid}cm,ystep=\fpeval{1/(\enwriteonimgsubgrid)*\enwriteonimggrid}cm,opacity=0.75] (\enwriteonimgnode.south west) grid (\enwriteonimgnode.north east) ;
+						\draw[{\enwriteonimggridcolor},thick,xstep=\enwriteonimggrid cm,ystep=\enwriteonimggrid cm,opacity=0.75] (\enwriteonimgnode.south west) grid (\enwriteonimgnode.north east) ;
+						\foreach \x in {0,\enwriteonimggrid,...,\mytmpwidth}{%
+							\draw (\x,0) node[draw,fill=white,inner sep=0.5pt,font=\tiny,rotate=90,anchor=west] {\x} ;
+							\draw (\x,\mytmpheight) node[draw,fill=white,inner sep=0.5pt,font=\tiny,rotate=90,anchor=east] {\x} ;
+						}
+						\foreach \y in {0,\enwriteonimggrid,...,\mytmpheight}{%
+							\draw (0,\y) node[draw,fill=white,inner sep=0.5pt,font=\tiny,right] {\y} ;
+							\draw (\mytmpwidth,\y) node[draw,fill=white,inner sep=0.5pt,font=\tiny,left] {\y} ;
+						}
+					}%
+				\ifboolKV[writeonimg]{clip}%
+					{%
+						\clip (\enwriteonimgnode.south west) rectangle (\enwriteonimgnode.north east) ;
+					}%
+					{}%
+		}%
+		{%
+			{\setlength\fboxsep{1pt}\fbox{\tiny\ttfamily XXX}}%
+		}%
+}%
+{%
+	\IfFileExists{#4}%
+		{%
+			\end{tikzpicture}%
+		}%
+		{}%
+}%
+
+\NewDocumentCommand\puttxtonimg{ s O{} m m }{%
+	\IfBooleanTF{#1}%
+		{%
+			\StrCut{#3}{,}{\writeonimgxpercent}{\writeonimgypercent}%
+			\draw ({\writeonimgxpercent*\mytmpwidth},{\writeonimgypercent*\mytmpheight}) node[#2] {#4} ;
+		}%
+		{%
+			\draw (#3) node[#2] {#4} ;
+		}%
+}
+
+%====store to length
+\NewDocumentCommand\storewidthtolength{omm}{%
+	\ifdeflength{#3}{\settowidth#3{\hbox{#2}}}{\newlength{#3}\settowidth#3{\hbox{#2}}}%
+	\IfNoValueF{#1}{\addtolength#3{#1}}%
+}
+
+\NewDocumentCommand\storeheighttolength{omm}{%
+	\ifdeflength{#3}{\settoheight#3{\hbox{#2}}}{\newlength{#3}\settoheight#3{\hbox{#2}}}%
+	\IfNoValueF{#1}{\addtolength#3{#1}}%
+}
+
+\NewDocumentCommand\storetotalheighttolength{omm}{%
+	\ifdeflength{#3}{\settototalheight#3{\hbox{#2}}}{\newlength{#3}\settototalheight#3{\hbox{#2}}}%
+	\IfNoValueF{#1}{\addtolength#3{#1}}%
+}
+
+\NewDocumentCommand\storedepthtolength{omm}{%
+	\ifdeflength{#3}{\settodepth#3{\hbox{#2}}}{\newlength{#3}\settodepth#3{\hbox{#2}}}%
+	\IfNoValueF{#1}{\addtolength#3{#1}}%
+}
+
+%====halign several numbers properly ?
+\newlength\tmpwideststring
+\newlength\tmpwideststringelt
+
+\NewDocumentCommand\getwideststring{ O{\tmpwideststring} m }{%
+	\setlength\tmpwideststring{0pt}%
+	\xintFor* ##1 in {\xintCSVtoList{#2}}\do{%
+		\settowidth{\tmpwideststringelt}{\hbox{##1}}%
+		\pgfmathsetlength{\global#1}{max(#1,\tmpwideststringelt)}%
+	}%
+}
+
+\NewDocumentCommand\halignnb{ O{0,1,2,3,4,5,6,7,8,9} D<>{c} m }{%
+	%#1 = ref strings
+	%#2 = string
+	\getwideststring{#1}%
+	\makebox[\tmpwideststring][#2]{#3}%
+}
+
+\NewDocumentCommand\halignmakebox{ O{c} m m }{%
+	%#1 = align makebox
+	%#2 = string
+	%#3 = ref strings
+	\getwideststring{#3}%
+	\makebox[\tmpwideststring][#1]{#2}%
+}
+
+\endinput

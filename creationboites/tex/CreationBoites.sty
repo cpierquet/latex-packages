@@ -1,0 +1,193 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{CreationBoites}[2025/07/01 0.1.4 Macros pour creer des boites tcbox simples, avec personnalisation(s)]
+
+%====HISTORIQUE
+% v 0.1.4	Ajout d'une option 'style peros rajouté' à la macro principale
+% v 0.1.3	Amélioration du code pour twemoji
+% v 0.1.2	Option pour compatibilité avec fontawesome5/6
+% v 0.1.1	Correction d'un bug avec [breakable] pour autoriser la coupure des boîtes + Clé pour décaler le logo CoinBasDroit + Décoration Icone
+% v 0.1.0	Version initiale
+
+%====OPTION
+\newif\if@breakable \@breakablefalse
+\DeclareOption{breakable}{\@breakabletrue}
+\newif\if@twemojis \@twemojistrue
+\newif\if@fafive \@fafivetrue
+\newif\if@fasix \@fasixfalse
+\newif\if@fafivesix \@fafivesixfalse
+\DeclareOption{nontwemojis}{\@twemojisfalse}
+\DeclareOption{nonfa}{\@fafivefalse\@fasixfalse\@fafivesixfalse}
+\DeclareOption{fa6}{\@fafivefalse\@fafivesixfalse\@fasixtrue}
+\DeclareOption{fa5fa6}{\@fafivefalse\@fasixfalse\@fafivesixtrue}
+\DeclareOption*{}%si option inconnue ;-)
+\ProcessOptions\relax
+
+%====BASE
+\RequirePackage{tcolorbox}
+\tcbuselibrary{fitting,skins}
+\usetikzlibrary{calc}
+\if@fafive
+	\RequirePackage{fontawesome5}
+\fi
+\if@fasix
+	\RequirePackage{fontawesome6}
+\fi
+\if@fafivesix
+	\RequirePackage[fa5alias]{fontawesome6}
+\fi
+\if@twemojis
+	\RequirePackage{twemojis}
+\fi
+\RequirePackage{simplekv}
+\RequirePackage{xstring}
+
+%====MACRO TESTEMPTY expl3
+\ExplSyntaxOn
+\DeclareExpandableDocumentCommand\CreaBoitesIfNoValueOrEmptyTF{mmm}{\IfNoValueTF{#1}{#2}{\tl_if_empty:nTF {#1} {#2} {#3}}}
+\ExplSyntaxOff
+
+%====CRÉATION DES COMPTEURS ET DES PARAMÈTRES DE BASE
+\NewDocumentCommand\CreerCompteur{ m }{%
+	\newcounter{#1}%création
+	\setcounter{#1}{0}%initialisation
+}
+\newcommand\policetitreboite{\bfseries\sffamily}
+\newcommand\policesoustitreboite{\small\bfseries\sffamily}
+\newcommand\couleursoustitreboite{red}
+\newcommand\tailleiconeboite{\small}
+\newcommand\margeboite{4mm}
+\newcommand\eptraitboite{1.25pt}
+\newcommand\margeinttitreboite{3pt}
+
+%====STYLE GÉNÉRAL DES TCBOX
+\if@breakable
+	\tcbuselibrary{breakable}
+	\tcbset{baseboite/.style={
+		enhanced,sharp corners=uphill,boxrule=\eptraitboite,%
+		breakable,%
+		before skip=0.5em,after skip=0.5em,%
+		colback=white,top=4mm,left={\margeboite-\margeinttitreboite-\eptraitboite},right={\margeboite-\margeinttitreboite-\eptraitboite}
+		}%
+	}
+\else
+	\tcbset{baseboite/.style={
+		enhanced,sharp corners=uphill,boxrule=\eptraitboite,%
+		before skip=0.5em,after skip=0.5em,%
+		colback=white,top=4mm,left={\margeboite-\margeinttitreboite-\eptraitboite},right={\margeboite-\margeinttitreboite-\eptraitboite}
+		}%
+	}
+\fi
+
+%====MACROS TITRE/SOUS-TITRE/LOGO
+
+\NewDocumentCommand\TitreBoite{ m m m m }{%
+	%1=couleur
+	%2=icone
+	%3=noms
+	%4=compteur
+	\node[inner sep=\margeinttitreboite,rounded corners=3pt,draw=#1,line width=\eptraitboite,rectangle,fill=#1!5!white,anchor=west,xshift=\margeboite,text=black,font=\policetitreboite] at (frame.north west) {\,\CreaBoitesIfNoValueOrEmptyTF{#2}{}{{\tailleiconeboite#2}~}\vphantom{Ppé}\ifboolKV[Boites]{Pluriel}{\StrBehind{#3}{/}}{\StrBefore{#3}{/}}\IfStrEq{\BoxModifLabel}{}{}{\BoxModifLabel}\ifboolKV[Boites]{Compteur}{~#4}{}\IfStrEq{\BoxCpltTitle}{}{}{\BoxCpltTitle}\,} ;
+}
+
+\NewDocumentCommand\SousTitreBoite{ }{%
+	\node[fill=white,anchor=east,xshift=-\margeboite,text=\couleursoustitreboite!75!black,font=\policesoustitreboite] at (frame.north east) {\vphantom{Ppé}\BoxSubTitle} ;
+}
+\NewDocumentCommand\LogoCoinDroit{ }{%OK
+	\begin{tcbclipinterior}\node[opacity=\BoxOpaciteLogo,rotate=-\BoxRotationLogo] at ($(interior.south east)+(\BoxOffsetLogo)$){\includegraphics[height=\BoxHauteurLogo]{\BoxLogo}};\end{tcbclipinterior}%
+}
+\NewDocumentCommand\EmojiCoinDroit{ }{%OK
+	\begin{tcbclipinterior}\node[opacity=\BoxOpaciteLogo,rotate=-\BoxRotationLogo] at ($(interior.south east)+(\BoxOffsetLogo)$){\twemoji[height=\BoxHauteurLogo]{\BoxLogoEmoji}};\end{tcbclipinterior}%
+}
+\NewDocumentCommand\IconeCoinDroit{ }{%Ok
+	\begin{tcbclipinterior}\node[opacity=\BoxOpaciteIcone,rotate=-\BoxRotationIcone,scale=\BoxEchelleIcone] at ($(interior.south east)+(\BoxOffsetLogo)$){\BoxIcone};\end{tcbclipinterior}%
+}
+
+%====MACRO POUR QQUES PARAMÈTRES BASIQUES
+\defKV[ParamBoites]{%
+	PoliceTitre=\renewcommand\policetitreboite{#1},%
+	PoliceSousTitre=\renewcommand\policesoustitreboite{#1},%
+	Marge=\renewcommand\margeboite{#1},%
+	TailleIcone=\renewcommand\tailleiconeboite{#1},%
+	CouleurSousTitre=\renewcommand\couleursoustitreboite{#1},%
+	EpaisseurBordure=\renewcommand\eptraitboite{#1},%
+	MargeTitre=\renewcommand\margeinttitreboite{#1}
+}
+\setKVdefault[ParamBoites]{%
+	PoliceTitre=\bfseries\sffamily,%
+	PoliceSousTitre=\small\bfseries\sffamily,%
+	Marge=4mm,%
+	TailleIcone=\small,%
+	CouleurSousTitre=red,%
+	EpaisseurBordure=1.25pt,%
+	MargeTitre=3pt
+}
+\NewDocumentCommand\ParamBoites{ O{} }{%
+	\useKVdefault[ParamBoites]%
+	\setKV[ParamBoites]{#1}%
+}
+
+%====MACRO PRINCIPALE
+\defKV[Boites]{%
+	ComplementTitre=\def\BoxCpltTitle{#1},%
+	SousTitre=\def\BoxSubTitle{#1},%
+	Logo=\def\BoxLogo{#1},%
+	Emoji=\def\BoxLogoEmoji{#1},%
+	ModifLabel=\def\BoxModifLabel{#1},%
+	HauteurLogo=\def\BoxHauteurLogo{#1},%
+	RotationLogo=\def\BoxRotationLogo{#1},%
+	OpaciteLogo=\def\BoxOpaciteLogo{#1},%
+	OffsetDeco=\def\BoxOffsetLogo{#1},%
+	Icone=\def\BoxIcone{#1},%
+	EchelleIcone=\def\BoxEchelleIcone{#1},%
+	RotationIcone=\def\BoxRotationIcone{#1},%
+	OpaciteIcone=\def\BoxOpaciteIcone{#1}
+}
+\setKVdefault[Boites]{%
+	Pluriel=false,%
+	ComplementTitre={},%
+	SousTitre={},
+	Compteur=true,%
+	Logo={},%
+	Emoji={},%
+	ModifLabel={},%
+	HauteurLogo=24pt,%
+	RotationLogo=45,%
+	OpaciteLogo=0.33,%
+	OffsetDeco={-10pt,10pt},%
+	Icone={},%
+	EchelleIcone=1,%
+	RotationIcone=30,%
+	OpaciteIcone=0.5
+}
+
+\NewDocumentCommand\CreationBoite{ O{black} m m m m !O{} }{%
+	%1 = couleur
+	%2 = nom
+	%2 = compteur
+	%4 = icone
+	%5 = label singulier/pluriel
+	%6 = options persos tcbox
+	\CreerCompteur{#3}%
+	\NewDocumentEnvironment{#2}{ O{} D<>{} }%
+		%1 = clés
+		%2 = options spécifiques tcbox
+		{%
+			\useKVdefault[Boites]%
+			\setKV[Boites]{##1}%
+			\ifboolKV[Boites]{Compteur}{\stepcounter{#3}}{}%on augmente le compteur si demandé
+			\tcbset{reset}%je pense que c'est mieux
+			\tcolorbox[baseboite,colframe=#1,##2,overlay={%
+				\IfStrEq{\BoxLogo}{}{}{\LogoCoinDroit}%logo 
+				\IfStrEq{\BoxIcone}{}{}{\IconeCoinDroit}%icone
+				\IfStrEq{\BoxLogoEmoji}{}{}{\EmojiCoinDroit}%emoji
+				\tikzset{overlay=false}%
+				\TitreBoite{#1}{#4}{#5}{\arabic{#3}}%titre
+				\IfStrEq{\BoxSubTitle}{}{}{\SousTitreBoite}%soustitre
+			},#6]%
+		}%
+	{\endtcolorbox}%
+}
+
+\endinput

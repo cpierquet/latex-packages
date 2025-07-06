@@ -1,0 +1,649 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: lualatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: lualatex: {shell: no, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[french,11pt,a4paper]{article}
+%\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
+%\usepackage{amssymb}
+\usepackage{fontspec}
+\setmonofont[Scale=MatchLowercase]{Inconsolatazi4}
+\usepackage{CreationBoites}
+\usepackage{enumitem}
+\usepackage{soul}
+\usepackage{codehigh}
+\usepackage{multicol}
+\usepackage{tabularray}
+\usepackage{lipsum}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+%\rhead{\sffamily\small\affloetalab[Legende]}
+\lfoot{\sffamily\small [CreationBoites]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=1.5cm]{geometry}
+\setlength{\parindent}{0pt}
+
+\def\TPversion{0.1.4}
+\def\TPdate{1\up*{er} juillet 2025}
+\sethlcolor{lightgray!25}
+\NewDocumentCommand\MontreCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+
+\CreationBoite[blue]{BoiteDeDemo}{CompteurBoiteDemo}{\faIcons}{Boîte Démo/Boîtes Démos}
+\CreationBoite[red]{BoiteDanger}{CompteurBoiteDanger}{\twemoji{warning}}{Danger/Dangers}[colback=red!10]
+
+\usepackage{babel}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{CreationBoites}}\\
+				\\
+				{\LARGE Création \textit{semi-}automatique de boîtes \textit{tcbox}} \\
+				\\
+				{\LARGE avec quelques éléments de personnalisation.} \\
+				\\
+				{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{tabular}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
+\end{tabular}
+\end{center}
+
+\hrule
+
+\vfill
+
+\begin{tcolorbox}[colframe=lightgray,colback=white]
+\begin{BoiteDeDemo}
+	\lipsum[1][1]
+\end{BoiteDeDemo}
+
+\begin{BoiteDeDemo}[Compteur=false]
+	\lipsum[1][1]
+\end{BoiteDeDemo}
+
+\begin{BoiteDeDemo}[Pluriel]
+	\lipsum[1][1]
+\end{BoiteDeDemo}
+
+\begin{BoiteDeDemo}[SousTitre={Un petit sous-titre}]
+	\lipsum[1][1]
+\end{BoiteDeDemo}
+
+\begin{BoiteDeDemo}[ComplementTitre={ - Un complément de titre}]%noter l'espace ;-)
+	\lipsum[1][1]
+\end{BoiteDeDemo}
+
+\begin{BoiteDeDemo}[ModifLabel={ super important}]%noter l'espace ;-)
+	\lipsum[1][1]
+\end{BoiteDeDemo}
+
+\begin{BoiteDeDemo}[Logo={example-image}]
+	\lipsum[1][1]
+\end{BoiteDeDemo}
+
+\begin{BoiteDeDemo}[Icone={\faLightbulb}]
+	\lipsum[1][1]
+\end{BoiteDeDemo}
+
+\begin{BoiteDanger}[Compteur=false,Emoji=snake]
+	\lipsum[1][1]
+\end{BoiteDanger}
+\end{tcolorbox}
+
+\vfill~
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+\hrule
+
+\vspace*{5mm}
+
+\section{Le package CreationBoites}
+
+\subsection{Idées}
+
+L'idée est de proposer un moyen de \textit{générer} des boîtes simples, créées grâce à \MontreCode{tcolorbox}, de manière \textit{semi}-automatisée.
+
+\smallskip
+
+Chaque boîte sera définie -- avec un style global -- via :
+
+\begin{itemize}
+	\item un \textbf{nom} (pour l'environnement) ;
+	\item un nom de \textbf{compteur} pour la numéroter ;
+	\item une \textbf{couleur} (optionnelle et noire par défaut) ;
+	\item une \textbf{icône} ou un \textbf{logo} ou un \textbf{emoji} ;
+	\item un \textbf{label} (singulier ou pluriel).
+\end{itemize}
+
+\medskip
+
+Il ne faut pas voir ce package comme un outil avancé de création, \MontreCode{tcolorbox} étant déjà suffisamment complet pour que l'utilisateur puisse faire tout ce dont il a envie, mais comme un \textit{assistant simple} pour créer des boîtes pour des supports de cours par exemple !
+
+\subsection{Chargement}
+
+Le package se charge dans le préambule, via \MontreCode{\textbackslash usepackage\{CreationBoites\}}.
+
+Les seuls packages chargés sont :
+
+\begin{itemize}
+	\item \MontreCode{tcolorbox} (avec les libraires \MontreCode{fitting,skins}) ;
+	\item \MontreCode{fontawesome}, \MontreCode{simplekv}, \MontreCode{twemojis} et \MontreCode{xstring} ;
+	\item la librairie \MontreCode{breakable} avec l'option \MontreCode{[breakable]} de chargement du package.
+\end{itemize}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\usepackage{CreationBoites}                    %version classique, avec fa5, par défaut
+\usepackage[fa6]{CreationBoites}               %version  avec fa6
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\usepackage[breakable]{CreationBoites}         %version avec breakable
+\end{codehigh}
+
+\pagebreak
+
+\subsection{Utilisation basique}
+
+Le package propose deux macros principales :
+
+\begin{itemize}
+	\item \MontreCode{\textbackslash CreationBoite} pour créer les différentes boîtes/environnements ;
+	\item \MontreCode{\textbackslash ParamBoites} pour une modification \textit{globale} de certains paramètres des boîtes (polices et marges).
+\end{itemize}
+
+\medskip
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\CreationBoite[Couleur]{Nom}{Compteur}{Icône}{Libéllés}[options tcbox]
+\ParamBoites[Clés]
+\end{codehigh}
+
+\medskip
+
+Ainsi, les exemples de boîtes données sur la page de garde ont été créées grâce à :
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\CreationBoite%
+    [blue]                         %Couleur de base
+    {BoiteDeDemo}                  %Nom de l'environnement
+    {CompteurBoiteDemo}            %Compteur
+    {\faIcons}                     %Icône
+    {Boîte Démo/Boîtes Démos}      %Libélés (sing/plur)
+
+\CreationBoite%
+    [red]                          %Couleur de base
+    {BoiteDanger}                  %Nom de l'environnement
+    {CompteurBoiteDanger}          %Compteur
+    {\twemoji{warning}}            %Emoji
+    {Danger/Dangers}               %Libélés (sing/plur)
+    [colback=red!10]               %options tcbox spécifiques pour la boîte Danger
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\setcounter{CompteurBoiteDemo}{0}
+\setcounter{CompteurBoiteDanger}{0}
+\begin{BoiteDeDemo}
+    \lipsum[1][1]
+\end{BoiteDeDemo}
+
+\begin{BoiteDanger}
+    \lipsum[2][1]
+\end{BoiteDanger}
+\end{demohigh}
+
+Dans ce cas la boîte est créée grâce à la syntaxe suivante :
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{NomEnv}[Clés]<Options tcbox>
+...
+\end{NomEnv}
+\end{codehigh}
+
+\pagebreak
+
+\section{Utilisation basique}
+
+\subsection{Style global de la boîte}
+
+Le style global des boîtes est défini par :
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\tcbset{baseboite/.style={
+    enhanced,sharp corners=uphill,boxrule=\eptraitboite,%
+    before skip=0.5em,after skip=0.5em,%
+    colback=white,top=4mm,%
+    left={\margeboite-\margeinttitreboite-\eptraitboite},%
+    right={\margeboite-\margeinttitreboite-\eptraitboite}
+}%
+}
+\end{codehigh}
+
+À noter que le \MontreCode{\textbackslash margeboite-\textbackslash margeinttitreboite-\textbackslash eptraitboite} vient :
+
+\begin{itemize}
+	\item des \MontreCode{\textbackslash margeinttitreboite} du paramètre \MontreCode{inner sep} du nœud Ti\textit{k}Z ;
+	\item des \MontreCode{\textbackslash eptraitboite} du paramètre \MontreCode{boxrule} de la boîte \textit{titre}.
+\end{itemize}
+
+\subsection{Paramétrage simple de la boîte}
+
+Il est possible de rajouter ou modifier quelques éléments de chaque boîte (les clés suivantes sont cumulables) :
+
+\begin{itemize}
+	\item un \textsf{sous-titre} (couleur \textsf{rouge foncé}) peut être ajouté (en haut à droite de la boîte), via la clé \MontreCode{[SousTitre=...]} ;
+	\item le label peut être modifié :
+	\begin{itemize}
+		\item le compteur peut être désactivé, grâce à la clé \MontreCode{[Compteur=false]} ;
+		\item la clé \MontreCode{[Pluriel]} force le pluriel du label ;
+		\item un complément peut être rajouté entre le label et le compteur grâce à la clé \MontreCode{[ModifLabel=...]} ;
+		\item un complément peut être rajouté après le compteur grâce à la clé \MontreCode{[ComplementTitre=...]} ;
+	\end{itemize}
+	\item une petite image (type \textit{filigrane}) peut être rajoutée (de hauteur 24pt et pivotée de 45° dans le sens horaire par défaut), dans le coin \textit{bas-droite} de la boîte :
+	\begin{itemize}
+		\item en spécifiant l'image grâce à la clé \MontreCode{[Logo=...]} ;
+		\item en spécifiant hauteur/rotation/opacité grâce aux clés \MontreCode{[HauteurLogo=...]} , \MontreCode{[RotationLogo=...]} et \MontreCode{[OpaciteLogo=...]} ;
+	\end{itemize}
+	\item un petit emoji (type \textit{filigrane}) peut être rajoutée (de hauteur 24pt et pivotée de 45° dans le sens horaire par défaut), dans le coin \textit{bas-droite} de la boîte :
+	\begin{itemize}
+		\item en spécifiant l'emoji grâce à la clé \MontreCode{[Emoji=...]} ;
+		\item en spécifiant hauteur/rotation/opacité grâce aux clés \MontreCode{[HauteurLogo=...]} , \MontreCode{[RotationLogo=...]} et \MontreCode{[OpaciteLogo=...]} ;
+	\end{itemize}
+	\item une petit logo (type \textsf{fontawesome5}) peut être rajoutée (d'échelle 1 et pivotée de 30° dans le sens horaire par défaut), dans le coin \textit{bas-droite} de la boîte :
+	\begin{itemize}
+		\item en spécifiant l'image grâce à la clé \MontreCode{[Icone=...]} ;
+		\item en spécifiant échelle/rotation/opacité grâce aux clés \MontreCode{[EchelleIcone=...]} , \MontreCode{[RotationIcone=...]} et \MontreCode{[OpaciteIcone=...]}.
+	\end{itemize}
+\end{itemize}
+
+Dans le cas de l'utilisation de \MontreCode{[Logo=...]}/\MontreCode{[Icone=...]}/\MontreCode{[Emoji=...]}, il est également possible de spécifier la position relative par rapport au coin inférieur droit, via la clé \MontreCode{[OffsetDeco=\{xoffset,yoffset\}]} (valant \MontreCode{\{-10pt,10pt\}} par défaut).
+
+\medskip
+
+Des options spécifiques \MontreCode{tcolorbox} peuvent être passées en option à l'environnement, elles sont à mettre entre \MontreCode{<...>} avant le corps de l'environnement.
+
+\pagebreak
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\setcounter{CompteurBoiteDemo}{0}
+\begin{BoiteDeDemo}[Compteur=false]
+\lipsum[1][1-2]
+\end{BoiteDeDemo}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{BoiteDeDemo}[Pluriel]<width=0.5\linewidth>
+\lipsum[1][1-2]
+\end{BoiteDeDemo}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{BoiteDeDemo}[SousTitre={Un petit sous-titre}]
+\lipsum[1][1-2]
+\end{BoiteDeDemo}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{BoiteDeDemo}[ComplementTitre={ - Un complément de titre}]%noter l'espace ;-)
+\lipsum[1][1-2]
+\end{BoiteDeDemo}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{BoiteDeDemo}[ModifLabel={ super important}]%noter l'espace ;-)
+\lipsum[1][1-2]
+\end{BoiteDeDemo}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{BoiteDeDemo}[Logo={example-image}]
+\lipsum[1][3-4]
+\end{BoiteDeDemo}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{BoiteDeDemo}[Logo={example-image},HauteurLogo=5mm,RotationLogo=10]
+\lipsum[1][3-4]
+\end{BoiteDeDemo}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{BoiteDeDemo}[Icone={\faYoutube},EchelleIcone=1.25,RotationIcone=15]
+	\lipsum[1][3-4]
+\end{BoiteDeDemo}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{BoiteDeDemo}[Emoji={snake},RotationIcone=15]
+	\lipsum[1][3-4]
+\end{BoiteDeDemo}
+\end{demohigh}
+
+Et en \textit{cumulant} des clés de personnalisation on peut obtenir :
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{BoiteDeDemo}[%
+    ModifLabel={s super importants},ComplementTitre={ (vraiment super importants)},%
+    SousTitre={- Source -},Compteur=false,Logo={example-image-a},%
+    HauteurLogo=1cm,RotationLogo=15,OpaciteLogo=1
+    ]
+\lipsum[2][1-4]
+\end{BoiteDeDemo}
+\end{demohigh}
+
+\pagebreak
+
+\subsection{Personnalisation \textit{intermédiaire}}
+
+Il est possible de paramétrer \textit{facilement} certaines options, via la commande \MontreCode{\textbackslash ParamBoites[...]} :
+
+\begin{itemize}
+	\item la police du label grâce à la clé \MontreCode{[PoliceTitre=...]} (\verb*|\bfseries\sffamily| par défaut) ;
+	\item la police du sous-titre grâce à la clé \MontreCode{[PoliceSousTitre=...]} (\verb*|\small\bfseries\sffamily| par défaut) ;
+	\item la couleur de base du sous-titre grâce à la clé \MontreCode{[CouleurSousTitre=...]} (\verb*|red| par défaut) ;
+	\item les marges gauche et droite grâce à la clé \MontreCode{[Marge=...]} (\verb*|4mm| par défaut) ;
+	\item l'épaisseur des bordures grâce à la clé \MontreCode{[EpaisseurBordure=...]} (\verb*|1.25pt| par défaut) ;
+	\item la marge spécifique pour la boîte \textit{titre} grâce à clé \MontreCode{[MargeTitre=...]} (\verb*|3pt| par défaut).
+\end{itemize}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\ParamBoites[%
+    Marge=2cm,MargeTitre=2mm,%
+    PoliceTitre=\large\bfseries\ttfamily,%
+    PoliceSousTitre=\scriptsize\bfseries\sffamily,%
+    CouleurSousTitre=orange]
+\end{codehigh}
+
+\ParamBoites[Marge=2cm,MargeTitre=2mm,PoliceTitre=\large\bfseries\ttfamily,PoliceSousTitre=\scriptsize\bfseries\sffamily,CouleurSousTitre=orange]
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{BoiteDeDemo}[SousTitre={- Un petit sous-titre -}]
+\lipsum[1][1-2]
+\end{BoiteDeDemo}
+\end{demohigh}
+
+On peut revenir aux paramètres par défaut grâce à la commande \MontreCode{\textbackslash ParamBoites} (sans argument).
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\ParamBoites
+\begin{BoiteDeDemo}[SousTitre={- Un petit sous-titre -}]
+\lipsum[1][1-2]
+\end{BoiteDeDemo}
+\end{demohigh}
+
+\pagebreak
+
+\section{Utilisation avancée}
+
+\subsection{Styles spécifiques}
+
+Il est possible quand même de modifier \textit{en profondeur} les boîtes créées, en redéfinissant les commandes suivantes via \verb*|\RenewDocumentCommand| :
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\NewDocumentCommand\TitreBoite{ m m m m }{%
+    %1=couleur
+    %2=icone
+    %3=nom
+    %4=compteur
+    % \BoxModifLabel = texte entre label et compteur
+    % \BoxCpltTitle = Texte après le compteur
+    \node[inner sep=\margeinttitreboite,rounded corners=3pt,draw=#1,line width=\eptraitboite,%
+      rectangle,fill=#1!5!white,anchor=west,xshift=\margeboite,text=black,%
+      font=\policetitreboite]%
+      at (frame.north west)
+      {%
+      \,\CreaBoitesIfNoValueOrEmptyTF{#2}{}{{\tailleiconeboite#2}~}\vphantom{Ppé}%
+      \ifboolKV[Boites]{Pluriel}{\StrBehind{#3}{/}}{\StrBefore{#3}{/}}%
+      \IfStrEq{\BoxModifLabel}{}{}{\BoxModifLabel}\ifboolKV[Boites]{Compteur}{~#4}{}%
+      \IfStrEq{\BoxCpltTitle}{}{}{\BoxCpltTitle}\,%
+      } ;
+}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\NewDocumentCommand\SousTitreBoite{ }{%\BoxSubTitle = Sous-titre
+    \node[fill=white,anchor=east,xshift=-\margeboite,text=red!75!black,%
+    font=\policesoustitreboite] at (frame.north east) %
+    {\vphantom{Ppé}\BoxSubTitle} ;
+}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\NewDocumentCommand\LogoCoinDroit{ }{%
+    \begin{tcbclipinterior}
+        \node[opacity=\BoxOpaciteLogo,rotate=-\BoxRotationLogo]%
+        at ($(interior.south east)+(\BoxOffsetLogo)$) %
+        {\includegraphics[height=\BoxHauteurLogo]{\BoxLogo}};%
+    \end{tcbclipinterior}%
+}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\NewDocumentCommand\IconeCoinDroit{ }{%
+    \begin{tcbclipinterior}
+        \node[opacity=\BoxOpaciteIcone,rotate=-\BoxRotationIcone,scale=\BoxEchelleIcone]%
+        at ($(interior.south east)+(\BoxOffsetLogo)$){\BoxIcone};
+    \end{tcbclipinterior}%
+}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\NewDocumentCommand\EmojiCoinDroit{ }{%
+    \begin{tcbclipinterior}
+        \node[opacity=\BoxOpaciteIcone,rotate=-\BoxRotationIcone]%
+        at ($(interior.south east)+(\BoxOffsetLogo)$){\twemoji[height=\BoxHauteurLogo]{\BoxLogoEmoji}};
+    \end{tcbclipinterior}%
+}
+\end{codehigh}
+
+\pagebreak
+
+\subsection{Exemple de personnalisations avancées}
+
+Par exemple, on peut modifier globalement le comportement de la boîte :
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\tcbset{baseboite/.style={
+    enhanced,boxrule=0.75pt,%
+    center,width=0.75\linewidth,%
+    before skip=1em,after skip=1em,%
+    colback=white,top=4mm,left=1mm,right=1mm
+    }%
+}
+\RenewDocumentCommand\TitreBoite{ m m m m }{%
+    \node[inner sep=2pt,draw=#1,line width=0.75pt,rounded corners,%
+    rectangle,fill=white,anchor=center,xshift=-1cm,text=black,%
+    font=\policetitreboite]%
+    at (frame.north)
+    {%
+    ~#2 #3\ifboolKV[Boites]{Compteur}{~#4}{}\IfStrEq{\BoxCpltTitle}{}{}{\BoxCpltTitle}~
+    } ;
+}
+\RenewDocumentCommand\SousTitreBoite{ }{%
+    \node[fill=white,anchor=center,%
+    font=\policesoustitreboite] at (frame.south) {\vphantom{pP}\BoxSubTitle} ;
+}
+\ParamBoites[PoliceTitre=\bfseries,PoliceSousTitre=\small\sffamily]
+\CreationBoite{BoxDef}{CompteurDefi}{\faAddressBook}{Définition}
+\CreationBoite[lime]{BoxProp}{CompteurProp}{\faAmbulance}{Propriété}[colback=lime!25]
+\end{codehigh}
+
+\tcbset{baseboite/.style={
+enhanced,boxrule=0.75pt,%
+center,width=0.75\linewidth,%
+before skip=1em,after skip=1em,%
+colback=white,top=4mm,left=1mm,right=1mm
+}%
+}
+
+\RenewDocumentCommand\TitreBoite{ m m m m }{%
+\node[inner sep=2pt,draw=#1,line width=0.75pt,rounded corners,%
+rectangle,fill=white,anchor=center,text=black,%
+font=\policetitreboite]%
+at (frame.north)
+{%
+~#2 #3\ifboolKV[Boites]{Compteur}{~#4}{}\IfStrEq{\BoxCpltTitle}{}{}{\BoxCpltTitle}~
+} ;
+}
+
+\RenewDocumentCommand\SousTitreBoite{ }{%
+\node[fill=white,anchor=center,%
+font=\policesoustitreboite] at (frame.south) %
+{\vphantom{pP}\BoxSubTitle} ;
+}
+
+\ParamBoites[PoliceTitre=\bfseries,PoliceSousTitre=\small\sffamily]
+
+\CreationBoite{BoxDef}{CompteurDefi}{\faAddressBook}{Définition}
+\CreationBoite[lime]{BoxProp}{CompteurProp}{\faAmbulance}{Propriété}[colback=lime!25]
+
+\begin{demohigh}
+On va montrer en situation :
+
+\begin{BoxDef}[ComplementTitre={ (importante)},SousTitre={- Fin -}]
+\lipsum[1][1-2]
+\end{BoxDef}
+
+\begin{BoxProp}[ComplementTitre={ (très importante)},Compteur=false]
+\lipsum[1][3-4]
+\end{BoxProp}
+
+Voili voilà !
+\end{demohigh}
+
+\pagebreak
+
+\subsection{Galerie pour des boîtes à destination de cours}
+
+Pour les exemples suivants, les paramètres et styles ont été remis par défaut.
+
+Toute couleur (\MontreCode{xcolor} n'est pas chargé avec des options spécifiques) peut être utilisée pour créer une boîte.
+
+\tcbset{baseboite/.style={
+	enhanced,sharp corners=uphill,boxrule=1.25pt,%
+	before skip=0.5em,after skip=0.5em,%
+	colback=white,top=4mm,left={\margeboite-4.25pt},right={\margeboite-4.25pt}
+}%
+}
+
+\RenewDocumentCommand\TitreBoite{ m m m m }{%
+	%1=couleur
+	%2=icone
+	%3=nom
+	%4=compteur
+	% \BoxModifLabel = texte entre label et compteur
+	% \BoxCpltTitle = Texte après le compteur
+	\node[inner sep=3pt,rounded corners=3pt,draw=#1,line width=1.25pt,%
+	rectangle,fill=#1!5!white,anchor=west,xshift=\margeboite,text=black,%
+	font=\policetitreboite]%
+	at (frame.north west)
+	{%
+		\,\CreaBoitesIfNoValueOrEmptyTF{#2}{}{{\small#2}~}\vphantom{Ppé}%
+		\ifboolKV[Boites]{Pluriel}{\StrBehind{#3}{/}}{\StrBefore{#3}{/}}%
+		\IfStrEq{\BoxModifLabel}{}{}{\BoxModifLabel}\ifboolKV[Boites]{Compteur}{~#4}{}%
+		\IfStrEq{\BoxCpltTitle}{}{}{\BoxCpltTitle}\,%
+	} ;
+}
+
+\RenewDocumentCommand\SousTitreBoite{ }{%\BoxSubTitle = Sous-titre
+	\node[fill=white,anchor=east,xshift=-\margeboite,text=red!75!black,%
+	font=\policesoustitreboite] at (frame.north east) %
+	{\vphantom{Ppé}\BoxSubTitle} ;
+}
+
+\RenewDocumentCommand\LogoCoinDroit{ }{%
+	\begin{tcbclipinterior}%
+		\node[opacity=\BoxOpaciteLogo,rotate=-\BoxRotationLogo]%
+		at ($(interior.south east)+(-10pt,10pt)$) %
+		{\includegraphics[height=\BoxHauteurLogo]{\BoxLogo}};%
+	\end{tcbclipinterior}%
+}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\ParamBoites %on remet à 0 les paramètres
+\CreationBoite[teal]{EnvDefi}{CptDefi}{\faIcon[regular]{comment-dots}}{Définition/Définitions}
+\CreationBoite[yellow]{EnvHumour}{CptHumour}{\faIcon[regular]{laugh-wink}}{Humour/Humours}
+\CreationBoite[violet]{EnvProp}{CptProp}{\faCog}{Propriété/Propriétés}
+\CreationBoite[red]{EnvThm}{CptThm}{\faBullhorn}{Théorème/Théorèmes}[colback=red!10]
+\CreationBoite[blue]{EnvRmq}{CptRmq}{\faHandPointRight[regular]}{Remarque/Remarques}
+
+\begin{EnvDefi}
+\lipsum[1][3-4]
+\end{EnvDefi}
+
+\begin{EnvHumour}
+\lipsum[2][3-4]
+\end{EnvHumour}
+
+\begin{EnvProp}
+\lipsum[2][3-4]
+\end{EnvProp}
+
+\begin{EnvThm}
+\lipsum[2][3-4]
+\end{EnvThm}
+
+\begin{EnvRmq}[Pluriel,Logo={example-image-1x1},SousTitre={ - Fondamentales -}]
+\lipsum[3][1-7]
+\end{EnvRmq}
+\end{demohigh}
+
+\pagebreak
+
+\section{Historique}
+
+\verb|v0.1.4|~:~~~~Possibilité de rajouter des options \textsf{tcbox} lors de la création des boîtes
+
+\verb|v0.1.3|~:~~~~Compatibilité avec \texttt{twemojis}
+
+\verb|v0.1.2|~:~~~~Pré-compatibilité avec \texttt{fontawesome6}
+
+\verb|v0.1.1|~:~~~~Correction d'un bug avec \texttt{[breakable]} + Clés pour des \texttt{[Icone]}
+
+\verb|v0.1.0|~:~~~~Version initiale
+
+\vspace*{15mm}
+
+\pagebreak
+
+\end{document}

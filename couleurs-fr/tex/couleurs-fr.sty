@@ -1,0 +1,1585 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{couleurs-fr}[2025/07/02 0.1.3 Version fr de couleurs svgnames/dvipsnames de xcolor, ainsi que des schemes xkcd/flexoki]
+
+%====HISTORIQUE
+% v 0.1.3	Ajout des flexoki (https://stephango.com/flexoki)
+% v 0.1.2	Ajout des couleurs xkcd,préfixées par x (https://xkcd.com/color/rgb.txt) + option pour préfixer les couleurs génériques
+% v 0.1.1	Ajout de couleurs venant de wikipedia (https://fr.wikipedia.org/wiki/Liste_de_noms_de_couleur)
+% v 0.1.0	Version initiale
+
+%====BASE
+\RequirePackage{xcolor}
+
+%====PREFIXE
+\newif\if@tmpprefixe \@tmpprefixefalse
+\DeclareOption{Prefixe}{\@tmpprefixetrue}%
+\DeclareOption*{}
+\ProcessOptions\relax
+
+%====SVGNAMES
+\if@tmpprefixe
+	\definecolorset{rgb}{g}{}{%
+	AmandeBlanche,1,.92,.804;%
+	AmandineFonce,.72,.525,.044;%
+	AmandineClair,.933,.867,.51;%
+	AmandinePale,.932,.91,.668;%
+	Amandine,.855,.648,.125;%
+	Argent,.752,.752,.752;%
+	Azur,.94,1,1;%
+	BeigeFonce,1,.855,.725;%
+	Beige,.96,.96,.864;%
+	Bisque,1,.894,.77;%
+	BlancAntique,.98,.92,.844;%
+	BlancFantome,.972,.972,1;%
+	BlancFloral,1,.98,.94;%
+	BlancNajavo,1,.87,.68;%
+	Blanc,1,1,1;%
+	BleuAcierClair,.69,.77,.87;%
+	BleuAcier,.275,.51,.705;%
+	BleuAlice,.94,.972,1;%
+	BleuArdoiseFonce,.284,.24,.545;%
+	BleuArdoiseInter,.484,.408,.932;%
+	BleuArdoiseClair,.518,.44,1;%
+	BleuArdoise,.415,.352,.804;%
+	BleuCadet,.372,.62,.628;%
+	BleuCielIntense,0,.75,1;%
+	BleuCielClair,.53,.808,.98;%
+	BleuCiel,.53,.808,.92;%
+	BleuDodger,.116,.565,1;%
+	BleuFonce,0,0,.545;%
+	BleuInter,0,0,.804;%
+	BleuClair,.68,.848,.9;%
+	BleuMarineInter,.4,.804,.668;%
+	BleuNavy,0,0,.5;%
+	BleuNuit,.098,.098,.44;%
+	BleuPoudre,.69,.88,.9;%
+	BleuRoyal,.255,.41,.884;%
+	BleuViolet,.54,.17,.888;%
+	Bleuet,.392,.585,.93;%
+	Bleu,0,0,1;%
+	Ble,.96,.87,.7;%
+	Bois,.87,.72,.53;%
+	Brique,.698,.132,.132;%
+	Bronze,.824,.705,.55;%
+	BrunIntense,.545,.27,.075;%
+	BrunClair,1,.92,.804;%
+	Brun,.648,.165,.165;%
+	Caramel,.824,.41,.116;%
+	Chardon,.848,.75,.848;%
+	Chartreuse,.498,1,0;%
+	CitronVertFonce,.196,.804,.196;%
+	CitronVert,0,1,0;%
+	Coquillage,1,.96,.932;%
+	CorailClair,.94,.5,.5;%
+	Corail,1,.498,.312;%
+	Cramoisi,.864,.08,.235;%
+	CremeMenthe,.96,1,.98;%
+	CyanFonce,0,.545,.545;%
+	CyanClair,.88,1,1;%
+	Cyan,0,1,1;%
+	EauMarine,.498,1,.83;%
+	Eau,0,1,1;%
+	Fumee,.96,.96,.96;%
+	Fuschia,1,0,1;%
+	GrisArdoiseFonce,.185,.31,.31;%
+	GrisArdoiseClair,.468,.532,.6;%
+	GrisArdoise,.44,.5,.565;%
+	GrisAttenue,.41,.41,.41;%
+	GrisEtain,.864,.864,.864;%
+	GrisFonce,.664,.664,.664;%
+	GrisClair,.828,.828,.828;%
+	Gris,.5,.5,.5;%
+	Indigo,.294,0,.51;%
+	Ivoire,1,1,.94;%
+	JauneAmandineClair,.98,.98,.824;%
+	JauneClair,1,.98,.804;%
+	JauneVert,.68,1,.185;%
+	Jaune,1,1,0;%
+	KakiFonce,.74,.716,.42;%
+	Kaki,.94,.9,.55;%
+	LavandeClair,1,.94,.96;%
+	Lavande,.9,.9,.98;%
+	Lin,.98,.94,.9;%
+	MagentaFonce,.545,0,.545;%
+	Magenta,1,0,1;%
+	Mais,1,.972,.864;%
+	MarronRosy,.736,.56,.56;%
+	MarronSandy,.956,.644,.376;%
+	Marron,.5,0,0;%
+	Miellat,.94,1,.94;%
+	Mocassin,1,.894,.71;%
+	Neige,1,.98,.98;%
+	Noir,0,0,0;%
+	Olivatre,.42,.556,.136;%
+	OrangeFonce,1,.55,0;%
+	Orange,1,.648,0;%
+	OrchideeFonce,.6,.196,.8;%
+	OrchideeInter,.73,.332,.828;%
+	Orchidee,.855,.44,.84;%
+	Or,1,.844,0;%
+	Papaye,1,.936,.835;%
+	Perou,.804,.52,.248;%
+	Prune,.868,.628,.868;%
+	RoseFonce,1,.41,.705;%
+	RoseIntense,1,.08,.576;%
+	RoseClair,1,.712,.756;%
+	RoseMisty,1,.894,.884;%
+	Rose,1,.752,.796;%
+	RougeFonce,.545,0,0;%
+	RougeIndien,.804,.36,.36;%
+	RougeOrange,1,.27,0;%
+	RougeVioletInter,.78,.084,.52;%
+	RougeVioletPale,.86,.44,.576;%
+	RougeViolet,.816,.125,.565;%
+	Rouge,1,0,0;%
+	Sarcelle,0,.5,.5;%
+	SaumonFonce,.912,.59,.48;%
+	SaumonClair,1,.628,.48;%
+	Saumon,.98,.5,.448;%
+	Sienne,.628,.32,.176;%
+	Tomate,1,.39,.28;%
+	TurquoiseFonce,0,.808,.82;%
+	TurquoiseInter,.284,.82,.8;%
+	TurquoisePale,.688,.932,.932;%
+	Turquoise,.25,.88,.815;%
+	VertFonce,0,.392,0;%
+	VertForet,.132,.545,.132;%
+	VertJaune,.604,.804,.196;%
+	VertClair,.565,.932,.565;%
+	VertMerFonce,.56,.736,.56;%
+	VertMerInter,.235,.7,.444;%
+	VertMerClair,.125,.698,.668;%
+	VertMer,.18,.545,.34;%
+	VertOliveFonce,.332,.42,.185;%
+	VertPale,.596,.985,.596;%
+	VertPelouse,.488,.99,0;%
+	VertPrintanierInter,0,.98,.604;%
+	VertPrintanier,0,1,.498;%
+	Vert,0,.5,0;%
+	VieilleDentelle,.992,.96,.9;%
+	VioletFonce,.58,0,.828;%
+	VioletInter,.576,.44,.86;%
+	Violet,.5,0,.5;%
+	Violette,.932,.51,.932
+	}
+\else
+	\definecolorset{rgb}{}{}{%
+	AmandeBlanche,1,.92,.804;%
+	AmandineFonce,.72,.525,.044;%
+	AmandineClair,.933,.867,.51;%
+	AmandinePale,.932,.91,.668;%
+	Amandine,.855,.648,.125;%
+	Argent,.752,.752,.752;%
+	Azur,.94,1,1;%
+	BeigeFonce,1,.855,.725;%
+	Beige,.96,.96,.864;%
+	Bisque,1,.894,.77;%
+	BlancAntique,.98,.92,.844;%
+	BlancFantome,.972,.972,1;%
+	BlancFloral,1,.98,.94;%
+	BlancNajavo,1,.87,.68;%
+	Blanc,1,1,1;%
+	BleuAcierClair,.69,.77,.87;%
+	BleuAcier,.275,.51,.705;%
+	BleuAlice,.94,.972,1;%
+	BleuArdoiseFonce,.284,.24,.545;%
+	BleuArdoiseInter,.484,.408,.932;%
+	BleuArdoiseClair,.518,.44,1;%
+	BleuArdoise,.415,.352,.804;%
+	BleuCadet,.372,.62,.628;%
+	BleuCielIntense,0,.75,1;%
+	BleuCielClair,.53,.808,.98;%
+	BleuCiel,.53,.808,.92;%
+	BleuDodger,.116,.565,1;%
+	BleuFonce,0,0,.545;%
+	BleuInter,0,0,.804;%
+	BleuClair,.68,.848,.9;%
+	BleuMarineInter,.4,.804,.668;%
+	BleuNavy,0,0,.5;%
+	BleuNuit,.098,.098,.44;%
+	BleuPoudre,.69,.88,.9;%
+	BleuRoyal,.255,.41,.884;%
+	BleuViolet,.54,.17,.888;%
+	Bleuet,.392,.585,.93;%
+	Bleu,0,0,1;%
+	Ble,.96,.87,.7;%
+	Bois,.87,.72,.53;%
+	Brique,.698,.132,.132;%
+	Bronze,.824,.705,.55;%
+	BrunIntense,.545,.27,.075;%
+	BrunClair,1,.92,.804;%
+	Brun,.648,.165,.165;%
+	Caramel,.824,.41,.116;%
+	Chardon,.848,.75,.848;%
+	Chartreuse,.498,1,0;%
+	CitronVertFonce,.196,.804,.196;%
+	CitronVert,0,1,0;%
+	Coquillage,1,.96,.932;%
+	CorailClair,.94,.5,.5;%
+	Corail,1,.498,.312;%
+	Cramoisi,.864,.08,.235;%
+	CremeMenthe,.96,1,.98;%
+	CyanFonce,0,.545,.545;%
+	CyanClair,.88,1,1;%
+	Cyan,0,1,1;%
+	EauMarine,.498,1,.83;%
+	Eau,0,1,1;%
+	Fumee,.96,.96,.96;%
+	Fuschia,1,0,1;%
+	GrisArdoiseFonce,.185,.31,.31;%
+	GrisArdoiseClair,.468,.532,.6;%
+	GrisArdoise,.44,.5,.565;%
+	GrisAttenue,.41,.41,.41;%
+	GrisEtain,.864,.864,.864;%
+	GrisFonce,.664,.664,.664;%
+	GrisClair,.828,.828,.828;%
+	Gris,.5,.5,.5;%
+	Indigo,.294,0,.51;%
+	Ivoire,1,1,.94;%
+	JauneAmandineClair,.98,.98,.824;%
+	JauneClair,1,.98,.804;%
+	JauneVert,.68,1,.185;%
+	Jaune,1,1,0;%
+	KakiFonce,.74,.716,.42;%
+	Kaki,.94,.9,.55;%
+	LavandeClair,1,.94,.96;%
+	Lavande,.9,.9,.98;%
+	Lin,.98,.94,.9;%
+	MagentaFonce,.545,0,.545;%
+	Magenta,1,0,1;%
+	Mais,1,.972,.864;%
+	MarronRosy,.736,.56,.56;%
+	MarronSandy,.956,.644,.376;%
+	Marron,.5,0,0;%
+	Miellat,.94,1,.94;%
+	Mocassin,1,.894,.71;%
+	Neige,1,.98,.98;%
+	Noir,0,0,0;%
+	Olivatre,.42,.556,.136;%
+	OrangeFonce,1,.55,0;%
+	Orange,1,.648,0;%
+	OrchideeFonce,.6,.196,.8;%
+	OrchideeInter,.73,.332,.828;%
+	Orchidee,.855,.44,.84;%
+	Or,1,.844,0;%
+	Papaye,1,.936,.835;%
+	Perou,.804,.52,.248;%
+	Prune,.868,.628,.868;%
+	RoseFonce,1,.41,.705;%
+	RoseIntense,1,.08,.576;%
+	RoseClair,1,.712,.756;%
+	RoseMisty,1,.894,.884;%
+	Rose,1,.752,.796;%
+	RougeFonce,.545,0,0;%
+	RougeIndien,.804,.36,.36;%
+	RougeOrange,1,.27,0;%
+	RougeVioletInter,.78,.084,.52;%
+	RougeVioletPale,.86,.44,.576;%
+	RougeViolet,.816,.125,.565;%
+	Rouge,1,0,0;%
+	Sarcelle,0,.5,.5;%
+	SaumonFonce,.912,.59,.48;%
+	SaumonClair,1,.628,.48;%
+	Saumon,.98,.5,.448;%
+	Sienne,.628,.32,.176;%
+	Tomate,1,.39,.28;%
+	TurquoiseFonce,0,.808,.82;%
+	TurquoiseInter,.284,.82,.8;%
+	TurquoisePale,.688,.932,.932;%
+	Turquoise,.25,.88,.815;%
+	VertFonce,0,.392,0;%
+	VertForet,.132,.545,.132;%
+	VertJaune,.604,.804,.196;%
+	VertClair,.565,.932,.565;%
+	VertMerFonce,.56,.736,.56;%
+	VertMerInter,.235,.7,.444;%
+	VertMerClair,.125,.698,.668;%
+	VertMer,.18,.545,.34;%
+	VertOliveFonce,.332,.42,.185;%
+	VertPale,.596,.985,.596;%
+	VertPelouse,.488,.99,0;%
+	VertPrintanierInter,0,.98,.604;%
+	VertPrintanier,0,1,.498;%
+	Vert,0,.5,0;%
+	VieilleDentelle,.992,.96,.9;%
+	VioletFonce,.58,0,.828;%
+	VioletInter,.576,.44,.86;%
+	Violet,.5,0,.5;%
+	Violette,.932,.51,.932
+}
+\fi
+
+%====DVIPSNAMES
+\if@tmpprefixe
+	\definecolorset{HTML}{g}{}{%
+	BleuCeruleen,00A3E3;%
+	BleuProcess,00B0EF;%
+	BrunJaune,973F05;%
+	Melon,F79E7C;%
+	Mure,A93B94;%
+	OrangeRoughy,C04F16;%
+	Peche,F79559;%
+	Pissenlit,FDBB43;%
+	Rhodamine,EE549F;%
+	RoseCarmin,F181B2;%
+	RougeBrique,B6301C;%
+	RougeRubis,ED027D;%
+	VertBleu,00B3b8;%
+	VertJungle,00A99A;%
+	VertPin,008A73;%
+	VioletBleu,483A94;%
+	VioletRouge,9F236C;%
+	VioletRoyal,623E99
+	}
+\else
+	\definecolorset{HTML}{}{}{%
+	BleuCeruleen,00A3E3;%
+	BleuProcess,00B0EF;%
+	BrunJaune,973F05;%
+	Melon,F79E7C;%
+	Mure,A93B94;%
+	OrangeRoughy,C04F16;%
+	Peche,F79559;%
+	Pissenlit,FDBB43;%
+	Rhodamine,EE549F;%
+	RoseCarmin,F181B2;%
+	RougeBrique,B6301C;%
+	RougeRubis,ED027D;%
+	VertBleu,00B3b8;%
+	VertJungle,00A99A;%
+	VertPin,008A73;%
+	VioletBleu,483A94;%
+	VioletRouge,9F236C;%
+	VioletRoyal,623E99
+	}
+\fi
+
+%====WIKIPEDIA
+\if@tmpprefixe
+	\definecolorset{HTML}{g}{}{%
+	Abricot,E67E30;%
+	Acajou,88421D;%
+	AigueMarine,79F8F8;%
+	Amande,82C46C;%
+	Amarante,91283B;%
+	Ambre,F0C300;%
+	Amethyste,884DA7;%
+	Anthracite,303030;%
+	Aubergine,370028;%
+	Aurore,FFCB60;%
+	Avocat,568203;%
+	Basane,8B6C42;%
+	Beurre,F0E36B;%
+	Bistre,856D4D;%
+	Bis,766F64;%
+	Bitume,4E3D28;%
+	BlancCasse,FEFEE2;%
+	BlancLunaire,F4FEFE;%
+	BleuBleuet,5472AE;%
+	BleuCanard,048B9A;%
+	BleuCeleste,357AB7;%
+	BleuCharrette,8EA2C6;%
+	BleuCobalt,22427C;%
+	BleuElectrique,2C75FF;%
+	BleuGivre,80D0D0;%
+	BleuMarine,03224C;%
+	BleuOutremer,004787;%
+	BleuPaon,067790;%
+	BleuPersan,4E63CE;%
+	BleuPetrole,1D4851;%
+	BleuPrusse,24445C;%
+	BleuRoi,318CE7;%
+	BleuSaphir,0131B4;%
+	BleuTurquin,425B8A;%
+	BoutonOr,FCDC12;%
+	BrouNoix,3F2204;%
+	CacaOie,CDCD0D;%
+	Cacao,614B3A;%
+	Cachou,2F1B0C;%
+	Cafe,462E01;%
+	Cannelle,7E5835;%
+	Capucine,FF5E4D;%
+	Carmin,960018;%
+	Carotte,F4661B;%
+	Chamois,D0C07A;%
+	Chaudron,85530F;%
+	Chocolat,5A3A22;%
+	Cinabre,DB1702;%
+	Citrouille,DF6D14;%
+	Coquelicot,C60800;%
+	CoquilleOeuf,FDE9E0;%
+	CouleursMars,EED153;%
+	CuisseNymphe,FEE7F0;%
+	Cuivre,B36700;%
+	Ecarlate,ED0000;%
+	Ecru,FEFEE0;%
+	Emeraude,00815F;%
+	Fauve,AD4F09;%
+	Flave,E6E697;%
+	Fraise,BF3030;%
+	Framboise,C72C48;%
+	Garance,EE1010;%
+	Glauque,649B88;%
+	Glycine,C9A0DC;%
+	Grege,BBAE98;%
+	Grenadine,E9383F;%
+	Grenat,6E0B14;%
+	GrisAcier,AFAFAF;%
+	GrisFer,7F7F7F;%
+	GrisPayne,677179;%
+	GrisPerle,CECECE;%
+	GrisSouris,9E9E9E;%
+	Groseille,CF0A1D;%
+	Gueules,E21313;%
+	Heliotrope,DF73FF;%
+	Incarnat,FF6F7D;%
+	IndigoFonce,2E006C;%
+	Isabelle,FEA777;%
+	JauneCanari,E7F00D;%
+	JauneCitron,F7FF3C;%
+	JauneCobalt,FDEE00;%
+	JauneImperial,FFE436;%
+	JauneMimosa,FEF86C;%
+	JauneNaples,FFF0BC;%
+	LapisLazuli,26619C;%
+	Lavalliere,8F5922;%
+	LieVin,AC1E44;%
+	Lilas,B666D2;%
+	Malachite,1FA055;%
+	Mandarine,FEA347;%
+	Mastic,B3B191;%
+	Mauve,D473D4;%
+	Menthe,16B84E;%
+	Moutarde,C7CF00;%
+	Nacarat,FC5D5D;%
+	Nankin,F7E269;%
+	Noisette,955628;%
+	OcreRouge,DD985C;%
+	Ocre,DFAF2C;%
+	Olive,708D23;%
+	OrangeBrule,CC5500;%
+	Orpiment,FCD21C;%
+	Outremer,26619C;%
+	OxydeFer,F7230C;%
+	Paille,FEE347;%
+	Parme,CFA0E9;%
+	PelureOignon,D58490;%
+	Pervenche,CCCCFF;%
+	Pistache,BEF574;%
+	PoilChameau,B67823;%
+	Pourpre,9E0E40;%
+	Prasin,4CA66B;%
+	Puce,4E1609;%
+	RoseMountbatten,997A8D;%
+	RougeAndrinople,A91101;%
+	RougeCardinal,B82010;%
+	RougeCerise,BB0B0B;%
+	RougeFalun,801818;%
+	RougeFeu,FF4901;%
+	RougeSang,850606;%
+	RougeTomate,DE2916;%
+	Rouille,985717;%
+	Rubis,E0115F;%
+	Sable,E0CDA9;%
+	Safre,0131B4;%
+	SangBoeuf,730800;%
+	Sanguine,850606;%
+	Sepia,AE8964;%
+	Sinople,149414;%
+	Smalt,003399;%
+	Soufre,FFFF6B;%
+	Tabac,9F551E;%
+	Taupe,463F32;%
+	TerreOmbre,926D27;%
+	Tomette,AE4A34;%
+	Topaze,FAEA73;%
+	Tourterelle,BBACAC;%
+	Vanille,E1CE9A;%
+	Vermeil,FF0921;%
+	Vermillon,DB1702;%
+	VertBouteille,096A09;%
+	VertCeladon,83A697;%
+	VertCitron,9EFD38;%
+	VertDeGris,95A595;%
+	VertEau,B0F2B6;%
+	VertEpinard,175732;%
+	VertHooker,1B4F08;%
+	VertImperial,00561B;%
+	VertLichen,85C17E;%
+	VertOxydeChrome,18391E;%
+	VertPerroquet,3AF24B;%
+	VertPoireau,4CA66B;%
+	VertPomme,34C924;%
+	VertPrairie,57D53B;%
+	VertPrintemps,00FF7F;%
+	VertSapin,095228;%
+	VertSauge,689D71;%
+	VertTilleul,A5D152;%
+	VertVeronèse,5A6521;%
+	VertVessie,22780F;%
+	VioletEveque,723E64;%
+	Viride,40826D;%
+	Zinzolin,6C0277
+	}
+\else
+	\definecolorset{HTML}{}{}{%
+	Abricot,E67E30;%
+	Acajou,88421D;%
+	AigueMarine,79F8F8;%
+	Amande,82C46C;%
+	Amarante,91283B;%
+	Ambre,F0C300;%
+	Amethyste,884DA7;%
+	Anthracite,303030;%
+	Aubergine,370028;%
+	Aurore,FFCB60;%
+	Avocat,568203;%
+	Basane,8B6C42;%
+	Beurre,F0E36B;%
+	Bistre,856D4D;%
+	Bis,766F64;%
+	Bitume,4E3D28;%
+	BlancCasse,FEFEE2;%
+	BlancLunaire,F4FEFE;%
+	BleuBleuet,5472AE;%
+	BleuCanard,048B9A;%
+	BleuCeleste,357AB7;%
+	BleuCharrette,8EA2C6;%
+	BleuCobalt,22427C;%
+	BleuElectrique,2C75FF;%
+	BleuGivre,80D0D0;%
+	BleuMarine,03224C;%
+	BleuOutremer,004787;%
+	BleuPaon,067790;%
+	BleuPersan,4E63CE;%
+	BleuPetrole,1D4851;%
+	BleuPrusse,24445C;%
+	BleuRoi,318CE7;%
+	BleuSaphir,0131B4;%
+	BleuTurquin,425B8A;%
+	BoutonOr,FCDC12;%
+	BrouNoix,3F2204;%
+	CacaOie,CDCD0D;%
+	Cacao,614B3A;%
+	Cachou,2F1B0C;%
+	Cafe,462E01;%
+	Cannelle,7E5835;%
+	Capucine,FF5E4D;%
+	Carmin,960018;%
+	Carotte,F4661B;%
+	Chamois,D0C07A;%
+	Chaudron,85530F;%
+	Chocolat,5A3A22;%
+	Cinabre,DB1702;%
+	Citrouille,DF6D14;%
+	Coquelicot,C60800;%
+	CoquilleOeuf,FDE9E0;%
+	CouleursMars,EED153;%
+	CuisseNymphe,FEE7F0;%
+	Cuivre,B36700;%
+	Ecarlate,ED0000;%
+	Ecru,FEFEE0;%
+	Emeraude,00815F;%
+	Fauve,AD4F09;%
+	Flave,E6E697;%
+	Fraise,BF3030;%
+	Framboise,C72C48;%
+	Garance,EE1010;%
+	Glauque,649B88;%
+	Glycine,C9A0DC;%
+	Grege,BBAE98;%
+	Grenadine,E9383F;%
+	Grenat,6E0B14;%
+	GrisAcier,AFAFAF;%
+	GrisFer,7F7F7F;%
+	GrisPayne,677179;%
+	GrisPerle,CECECE;%
+	GrisSouris,9E9E9E;%
+	Groseille,CF0A1D;%
+	Gueules,E21313;%
+	Heliotrope,DF73FF;%
+	Incarnat,FF6F7D;%
+	IndigoFonce,2E006C;%
+	Isabelle,FEA777;%
+	JauneCanari,E7F00D;%
+	JauneCitron,F7FF3C;%
+	JauneCobalt,FDEE00;%
+	JauneImperial,FFE436;%
+	JauneMimosa,FEF86C;%
+	JauneNaples,FFF0BC;%
+	LapisLazuli,26619C;%
+	Lavalliere,8F5922;%
+	LieVin,AC1E44;%
+	Lilas,B666D2;%
+	Malachite,1FA055;%
+	Mandarine,FEA347;%
+	Mastic,B3B191;%
+	Mauve,D473D4;%
+	Menthe,16B84E;%
+	Moutarde,C7CF00;%
+	Nacarat,FC5D5D;%
+	Nankin,F7E269;%
+	Noisette,955628;%
+	OcreRouge,DD985C;%
+	Ocre,DFAF2C;%
+	Olive,708D23;%
+	OrangeBrule,CC5500;%
+	Orpiment,FCD21C;%
+	Outremer,26619C;%
+	OxydeFer,F7230C;%
+	Paille,FEE347;%
+	Parme,CFA0E9;%
+	PelureOignon,D58490;%
+	Pervenche,CCCCFF;%
+	Pistache,BEF574;%
+	PoilChameau,B67823;%
+	Pourpre,9E0E40;%
+	Prasin,4CA66B;%
+	Puce,4E1609;%
+	RoseMountbatten,997A8D;%
+	RougeAndrinople,A91101;%
+	RougeCardinal,B82010;%
+	RougeCerise,BB0B0B;%
+	RougeFalun,801818;%
+	RougeFeu,FF4901;%
+	RougeSang,850606;%
+	RougeTomate,DE2916;%
+	Rouille,985717;%
+	Rubis,E0115F;%
+	Sable,E0CDA9;%
+	Safre,0131B4;%
+	SangBoeuf,730800;%
+	Sanguine,850606;%
+	Sepia,AE8964;%
+	Sinople,149414;%
+	Smalt,003399;%
+	Soufre,FFFF6B;%
+	Tabac,9F551E;%
+	Taupe,463F32;%
+	TerreOmbre,926D27;%
+	Tomette,AE4A34;%
+	Topaze,FAEA73;%
+	Tourterelle,BBACAC;%
+	Vanille,E1CE9A;%
+	Vermeil,FF0921;%
+	Vermillon,DB1702;%
+	VertBouteille,096A09;%
+	VertCeladon,83A697;%
+	VertCitron,9EFD38;%
+	VertDeGris,95A595;%
+	VertEau,B0F2B6;%
+	VertEpinard,175732;%
+	VertHooker,1B4F08;%
+	VertImperial,00561B;%
+	VertLichen,85C17E;%
+	VertOxydeChrome,18391E;%
+	VertPerroquet,3AF24B;%
+	VertPoireau,4CA66B;%
+	VertPomme,34C924;%
+	VertPrairie,57D53B;%
+	VertPrintemps,00FF7F;%
+	VertSapin,095228;%
+	VertSauge,689D71;%
+	VertTilleul,A5D152;%
+	VertVeronèse,5A6521;%
+	VertVessie,22780F;%
+	VioletEveque,723E64;%
+	Viride,40826D;%
+	Zinzolin,6C0277
+	}
+\fi
+
+%====XKCD-fr
+\definecolorset{HTML}{x}{}{%
+    Abricot,FFB16D;%
+    Acajou,4A0100;%
+    Acier,738595;%
+    Adobe,BD6C48;%
+    AigueMarine,04D8B2;%
+    Algue,54AC68;%
+    Ambre,FEB308;%
+    Amethyste,9B5FC0;%
+    Ardoise,516572;%
+    Argent,C5C9C7;%
+    Argile,B66A50;%
+    Asperge,77AB56;%
+    Aubergine,380835;%
+    AubergineLeger,894585;%
+    Auburn,9A3001;%
+    Avocat,90B134;%
+    Azur,069AF3;%
+    Baie,990F4B;%
+    Banane,FFFF7E;%
+    Barney,AC1DB8;%
+    Beige,D1B26F;%
+    BeigeClair,FBEEAC;%
+    BeigeFonce,AC9362;%
+    BeigeJaunatre,FCFC81;%
+    BeigeJaune,FFE36E;%
+    BeigeKaki,E6F2A2;%
+    BeigeRose,D99B82;%
+    BeigeVerdatre,C9D179;%
+    Beurre,FFFF81;%
+    Bile,B5C306;%
+    Blanc,FFFFFF;%
+    BlancCasse,FFFFE4;%
+    Ble,FBDD7E;%
+    Bleu,0343DF;%
+    BleuAcier,5A7D9A;%
+    BleuAgreable,107AB0;%
+    BleuArdoise,5B7C99;%
+    BleuArdoiseFonce,214761;%
+    BleuAttenue,3B719F;%
+    BleuBebe,A2CFFE;%
+    BleuBleu,2242C7;%
+    BleuBleuClair,CAFFFB;%
+    BleuCadet,4E7496;%
+    BleuCanardFonce,014D4E;%
+    BleuCaroline,8AB8FE;%
+    BleuCeruleen,056EEE;%
+    BleuChaud,4B57DB;%
+    BleuCiel,75BBFD;%
+    BleuCielCanard,C3FBF4;%
+    BleuCielClair,C6FCFF;%
+    BleuCielClairVif,3D7AFD;%
+    BleuCielFonce,448EE4;%
+    BleuCielPale,BDF6FE;%
+    BleuCielProfond,0D75F8;%
+    BleuCielRobinson,6DEDFD;%
+    BleuCielVif,02CCFE;%
+    BleuClair,247AFD;%
+    BleuClairVif,26F7FD;%
+    BleuCobalt,030AA7;%
+    BleuCool,4984B8;%
+    BleuCoquilleOeuf,C4FFF7;%
+    BleuCrepuscule,0A437A;%
+    BleuDefraichi,3F829D;%
+    BleuDenim,3B5B92;%
+    BleuDodger,3E82FC;%
+    BleuDoux,6488EA;%
+    BleuDusky,475F94;%
+    BleuEau,02D8E9;%
+    BleuElectrique,0652FF;%
+    BleuEteint,5684AE;%
+    BleuFane,5A86AD;%
+    BleuFonce,00035B;%
+    BleuFrance,436BAD;%
+    BleuGris,647D8E;%
+    BleuGrisatre,5E819D;%
+    BleuIndigo,3A18B1;%
+    BleuLaid,31668A;%
+    BleuLavande,8B88F8;%
+    BleuMarine,001146;%
+    BleuMarineFonce,00022E;%
+    BleuMer,047495;%
+    BleuMerProfonde,015482;%
+    BleuMetallique,4F738E;%
+    BleuMousseMer,78D1B6;%
+    BleuMoyen,276AB3;%
+    BleuNavyClair,155084;%
+    BleuNeon,04D9FF;%
+    BleuNuageux,ACC2D9;%
+    BleuNuit,020035;%
+    BleuOcean,03719C;%
+    BleuOrageux,507B9C;%
+    BleuOutremer,1805DB;%
+    BleuPale,D0FEFE;%
+    BleuPaon,016795;%
+    BleuPastel,A2BFFE;%
+    BleuPervenche,8F8CE7;%
+    BleuPoudre,B1D1FC;%
+    BleuPourpre,5F34E7;%
+    BleuPrimaire,0804F9;%
+    BleuPrusse,004577;%
+    BleuPuissant,0C06F7;%
+    BleuPur,0203E2;%
+    BleuRiche,021BF9;%
+    BleuRoyal,0504AA;%
+    BleuRoyalClair,3A2EFE;%
+    BleuRoyalFonce,02066F;%
+    BleuSarcelle,01889F;%
+    BleuTeinte,00555A;%
+    BleuTeintePourpre,5539CC;%
+    BleuTiffany,7BF2DA;%
+    BleuToucheViolet,533CC6;%
+    BleuTresClair,D5FFFF;%
+    BleuTresFonce,000133;%
+    BleuTresPale,D6FFFE;%
+    BleuTurquoise,06B1C4;%
+    BleuVert,017A79;%
+    BleuVertClair,56FCA2;%
+    BleuVertetre,0B8B87;%
+    BleuVif,0165FC;%
+    BleuViolet,510AC9;%
+    BleuVrai,010FCC;%
+    BleuVraimentClair,D4FFFF;%
+    BleuWindows,3778BF;%
+    Bleuet,5170D7;%
+    Bordeaux,680018;%
+    Bordeaux,7B002C;%
+    Boue,735C12;%
+    Bourgogne,610023;%
+    BourgogneClair,A8415B;%
+    Brique,A03623;%
+    Bronze,A87900;%
+    BrunChocolat,411900;%
+    BrunClair,AD8150;%
+    BrunDore,B27A01;%
+    BrunFonce,341C02;%
+    BrunJaunatre,AE8B0C;%
+    BrunJaune,B79400;%
+    BrunOrange,BE6400;%
+    BrunPale,B1916E;%
+    BrunPourpre,673A3F;%
+    BrunRougeatre,7F2B0A;%
+    BrunSable,CBA560;%
+    BrunTerne,876E4B;%
+    BrunVerdatre,696112;%
+    Brunatre,9C6D57;%
+    Caca,8F7303;%
+    CacaBebe,937C00;%
+    Cacao,875F42;%
+    Cafe,A6814C;%
+    Camouflage,7F8F4E;%
+    Canneberge,9E003A;%
+    Cannelle,AC4F06;%
+    Caramel,AF6F09;%
+    CaramelBeurre,FDB147;%
+    Carmin,9D0216;%
+    Celadon,BEFDB7;%
+    Celeri,C1FD95;%
+    Cerise,CF0234;%
+    Ceruleen,0485D1;%
+    Chameau,C69F59;%
+    Champignon,BA9E88;%
+    Charbon,343837;%
+    Chartreuse,C1F80A;%
+    Chataigne,742802;%
+    Chocolat,3D1C02;%
+    ChocolatLait,7F4E1E;%
+    Ciel,82CAFC;%
+    Ciment,A5A391;%
+    Citron,FDFF52;%
+    CitronElectrique,A8FF04;%
+    CitronVert,AAFF32;%
+    CitronVert,AEFF6E;%
+    CitronVertClair,65FE08;%
+    CitronVertFonce,7EBD01;%
+    CitronVertPale,BEFD73;%
+    CitronVertVif,87FD05;%
+    Cobalt,1E488F;%
+    CoquilleOeuf,FFFCC4;%
+    Corail,FC5A50;%
+    CorailFonce,CF524E;%
+    Courge,F2AB15;%
+    Cramoisi,8C000F;%
+    Creme,FEF69E;%
+    CremeAnglaise,FFFD78;%
+    CremeFonce,FFF39A;%
+    Crepuscule,4E518B;%
+    Cuir,AC7434;%
+    Cuivre,B66325;%
+    Cyan,00FFFF;%
+    CyanClair,ACFFFC;%
+    CyanFonce,0A888A;%
+    CyanPale,B7FFFA;%
+    CyanVert,2AFEB7;%
+    CyanVif,41FDFE;%
+    Denim,3B638C;%
+    Desert,CCAD60;%
+    Diarrhee,9F8303;%
+    Dore,F5BF03;%
+    EauClair,8CFFDB;%
+    EauFonce,05696B;%
+    EauPale,B8FFEB;%
+    EauProfond,08787F;%
+    EauVif,0BF9EA;%
+    Ecarlate,BE0119;%
+    Ecchymose,7E4071;%
+    Ecru,FEFFCA;%
+    Emeraude,01A049;%
+    Epicea,0A5F38;%
+    Fade,AFA88B;%
+    Faon,CFAF7B;%
+    Feuille,71AA34;%
+    Fonce,1B2431;%
+    Foret,0B5509;%
+    Fougere,63A950;%
+    Fraise,FB2943;%
+    Framboise,B00149;%
+    Fuchsia,ED0DD9;%
+    FuchsiaFoncé,9D0759;%
+    Glace,D6FFFA;%
+    Glaviot,9BB53C;%
+    Glycine,A87DC2;%
+    Gres,C9AE74;%
+    Gris,929591;%
+    GrisAcier,6F828A;%
+    GrisArdoise,59656D;%
+    GrisArme,536267;%
+    GrisBleu,607C8E;%
+    GrisBleuClair,9DBCD4;%
+    GrisBleuFonce,1F3B4D;%
+    GrisBleuatre,89A0B0;%
+    GrisBrun,8D8468;%
+    GrisCharbon,3C4142;%
+    GrisChaud,978A84;%
+    GrisClair,D8DCD6;%
+    GrisCuirasse,6B7C85;%
+    GrisFonce,363737;%
+    GrisFrais,95A3A6;%
+    GrisMoyen,7D7F7C;%
+    GrisPale,FDFDFE;%
+    GrisRosatre,C88D94;%
+    GrisRose,C3909B;%
+    GrisRougeatre,997570;%
+    GrisTaupe,B9A281;%
+    GrisTeinteBleu,748B97;%
+    GrisTeinteMarronn,86775F;%
+    GrisVert,77926F;%
+    GrisViolace,947E94;%
+    GrisViolet,7A687F;%
+    Grisatre,A8A495;%
+    Heliotrope,D94FF5;%
+    Herbe,5CAC2D;%
+    Indigo,380282;%
+    IndigoClair,6D5ACF;%
+    IndigoFonce,1F0954;%
+    Iris,6258C4;%
+    Ivoire,FFFFCB;%
+    Jade,1FA774;%
+    Jaunatre,FAEE66;%
+    Jaune,FFFF14;%
+    JauneAttenue,EEDC5B;%
+    JauneBanane,FAFE4B;%
+    JauneBeurre,FFFD74;%
+    JauneBoueux,BFAC05;%
+    JauneBrule,D5AB09;%
+    JauneBrun,B29705;%
+    JauneCanari,FDFF63;%
+    JauneCitron,FDFF38;%
+    JauneCitronVert,D0FE1D;%
+    JauneClair,FFFE7A;%
+    JauneDore,FEC615;%
+    JauneEnsoleille,FFF917;%
+    JauneFane,FEFF7F;%
+    JauneFonce,D5B60A;%
+    JauneLaid,D0C101;%
+    JauneMaladif,D0E429;%
+    JauneMoutarde,D2BD0A;%
+    JauneNeon,CFFF04;%
+    JauneOlive,C2B709;%
+    JauneOr,F9BC08;%
+    JaunePale,FFFF84;%
+    JaunePastel,FFFE71;%
+    JaunePele,F1F33F;%
+    JaunePisse,DDD618;%
+    JauneSable,FCE166;%
+    JauneSale,CDC50A;%
+    JauneSoleil,FFDF22;%
+    JauneTeinteOrange,FDB915;%
+    JauneTournesol,FFDA03;%
+    JauneVerdatre,CDFD02;%
+    JauneVert,C6F808;%
+    JauneVif,FFFD01;%
+    JauneVomi,C2BE0E;%
+    JoncOr,FAC205;%
+    Kaki,AAA662;%
+    KakiFonce,9B8F55;%
+    Kiwi,9CEF43;%
+    Lavande,A484AC;%
+    LavandeClair,DFC5FE;%
+    LavandeClairVif,C760FF;%
+    LavandeFonce,856798;%
+    LavandeLeger,EFC0FE;%
+    LavandePale,EECFFE;%
+    LavandrePoudre,AC86A8;%
+    Lichen,8FB67B;%
+    Lilas,C48EFD;%
+    LilasClair,EDC8FF;%
+    LilasFonce,9C6DA5;%
+    LilasPale,E4CBFF;%
+    LilasProfond,966EBD;%
+    LilasVif,C95EFB;%
+    MacaroniFromage,EFB435;%
+    Magenta,C20078;%
+    MagentaClair,FA5FF7;%
+    MagentaFonce,960056;%
+    MagentaPale,D767AD;%
+    MagentaProfond,A0025C;%
+    MagentaVif,FF08E8;%
+    Mais,F4D054;%
+    Mandarine,FF9408;%
+    Mangue,FFA62B;%
+    Manille,FFFA86;%
+    Marecage,698339;%
+    Marine,042E60;%
+    Marron,650021;%
+    MarronArgile,B2713D;%
+    MarronBoue,60460F;%
+    MarronBoueux,886806;%
+    MarronBronze,AB7E4C;%
+    MarronCaca,7A5901;%
+    MarronCacaBebe,AB9004;%
+    MarronChaud,964E02;%
+    MarronFonce,3C0008;%
+    MarronGrisatre,7A6A4F;%
+    MarronJaunatre,9B7A01;%
+    MarronLaid,7D7103;%
+    MarronMoutarde,AC7E04;%
+    MarronMoyen,7F5112;%
+    MarronOlive,645403;%
+    MarronPourpre,6B4247;%
+    MarronProfond,410200;%
+    MarronRosatre,B17261;%
+    MarronRouge,A24857;%
+    MarronRougeatre,6E1005;%
+    MarronRouille,8B3103;%
+    MarronSable,C4A661;%
+    MarronTeinteOrange,B16002;%
+    MarronTerre,836539;%
+    MarronTresClair,D3B683;%
+    MarronTresFonce,1D0200;%
+    MarronVert,544E03;%
+    Mastic,BEAE8A;%
+    Mauve,AE7181;%
+    MauveClair,C292A1;%
+    MauvePale,FED0FC;%
+    Melon,FF7855;%
+    Menthe,9FFEB0;%
+    MentheFonce,48C072;%
+    MentheVerveine,1EF876;%
+    Mer,3C9992;%
+    Merlot,730039;%
+    Minuit,03012D;%
+    Moka,9D7651;%
+    Morve,ACBB0D;%
+    Mousse,769958;%
+    MousseMer,80F9AD;%
+    MousseMerLegere,A0FEBF;%
+    Moutarde,CEB301;%
+    MoutardeClair,F7D560;%
+    MoutardeFonce,A88905;%
+    Mure,920A4E;%
+    Myrtille,464196;%
+    Noir,000000;%
+    Noisette,8E7618;%
+    Ocean,017B92;%
+    Ocre,BF9005;%
+    OcreJaune,CB9D06;%
+    Oeillet,FD798F;%
+    Olive,6E750E;%
+    OliveBourbe,6F7632;%
+    OliveClair,ACBF69;%
+    OliveFonce,373E02;%
+    OlivePale,B9CC81;%
+    OliveVif,9CBB04;%
+    OmbreBrulee,A0450E;%
+    Or,DBB40C;%
+    OrClair,FDDC5C;%
+    OrFonce,B59410;%
+    OrPale,FDDE6C;%
+    Orange,F97306;%
+    OrangeAttenue,D8863B;%
+    OrangeBrique,C14A09;%
+    OrangeBrule,C04E01;%
+    OrangeBrunatre,CA6B02;%
+    OrangeCitrouille,E17701;%
+    OrangeClair,FDAA48;%
+    OrangeDecolore,F0944D;%
+    OrangeFonce,C65102;%
+    OrangeJaunatre,FCB001;%
+    OrangeJaune,FFAD01;%
+    OrangePale,FF964F;%
+    OrangePoussiere,F0833A;%
+    OrangeRosatre,FF724C;%
+    OrangeRouge,FD3C06;%
+    OrangeRougeatre,F8481C;%
+    OrangeRouille,C45508;%
+    OrangeSale,C87606;%
+    OrangeSanguine,FE4B03;%
+    OrangeVif,FF5B00;%
+    Orchidee,C875C4;%
+    Outremer,2000B1;%
+    Paille,FCF679;%
+    Pale,FFF9D0;%
+    Pamplemousse,FD5956;%
+    Parchemin,FEFCAF;%
+    Pasteque,FD4659;%
+    Peche,FFB07C;%
+    PecheClair,FFD8B1;%
+    PecheFonce,DE7E5D;%
+    PechePele,FFE5AD;%
+    PervencheClair,C1C6FC;%
+    PervencheFonce,665FD1;%
+    Petrole,005F6A;%
+    Pierre,ADA587;%
+    Pin,2B5D34;%
+    Pissenlit,FEDF08;%
+    Pistache,C0FA8B;%
+    Poire,CBF85F;%
+    Pois,A4BF20;%
+    Pomme,6ECB3C;%
+    PommeVerte,5EDC1F;%
+    Pourpre,7E1E9C;%
+    PourpreAttenue,84597E;%
+    PourpreBarney,A00498;%
+    PourpreBleu,5729CE;%
+    PourpreBleuatre,6241C7;%
+    PourpreDoux,A66FB5;%
+    PourpreElectrique,AA23FF;%
+    PourpreEteint,805B87;%
+    PourpreFane,825F87;%
+    PourpreFonce,35063E;%
+    PourpreGris,826D8C;%
+    PourpreGrisatre,887191;%
+    PourpreMinuit,280137;%
+    PourpreMoyen,9E43A2;%
+    PourpreNeon,BC13FE;%
+    PourprePastel,CAA0FF;%
+    PourprePrune,4E0550;%
+    PourpreRaisin,5D1451;%
+    PourpreRiche,720058;%
+    PourpreRosatre,C94CBE;%
+    PourpreRose,C83CB9;%
+    PourpreRouge,820747;%
+    PourpreRougeatre,910951;%
+    PourpreSale,734A65;%
+    PourpreSombre,895B7B;%
+    PourpreTeinteBleu,703BE7;%
+    PourpreTeinteMarron,76424E;%
+    PourpreTresClair,F6CEFC;%
+    PourpreTresSombre,2A0134;%
+    PourpreVif,9900FA;%
+    Poussiere,B2996E;%
+    PresqueNoir,070D0D;%
+    Prune,580F41;%
+    PruneClair,9D5783;%
+    PruneFonce,3F012C;%
+    Puce,A57E52;%
+    Raisin,6C3461;%
+    Rosatre,FC86AA;%
+    Rose,CF6275;%
+    RoseAncien,C77986;%
+    RoseAncienne,C87F89;%
+    RoseAttenue,D1768F;%
+    RoseBarbie,FE46A5;%
+    RoseBebe,FFB7CE;%
+    RoseBlush,FE828C;%
+    RoseBonbon,FF63E9;%
+    RoseCarnation,FF7FA7;%
+    RoseChaud,FB5581;%
+    RoseChaudFonce,D90166;%
+    RoseChewingGum,FE83CC;%
+    RoseChoquant,FE02A2;%
+    RoseClair,FFC5CB;%
+    RoseCochon,E78EA5;%
+    RoseCorail,FF6163;%
+    RoseDoux,FDB0C0;%
+    RoseElectrique,FF0490;%
+    RoseFane,C0737A;%
+    RoseFane,D58A94;%
+    RoseFonce,B5485D;%
+    RoseLaid,CD7584;%
+    RoseLavande,DD85D7;%
+    RoseMoyen,F36196;%
+    RoseNeon,FE019A;%
+    RoseOrange,FF6F52;%
+    RosePale,F29E8E;%
+    RosePastel,FFBACD;%
+    RosePeche,FF9A8A;%
+    RosePoudre,FFB2D0;%
+    RoseRose,F6688E;%
+    RoseRouge,FA2A55;%
+    RoseRougeatre,FE2C54;%
+    RoseSalissant,CA7B80;%
+    RoseSaumon,F7879A;%
+    RoseSoutenu,FF0789;%
+    RoseTeinteMarron,C27E79;%
+    RoseTeintePourpre,F075E6;%
+    RoseTresClair,FFF4F2;%
+    RoseVif,FE01B1;%
+    RoseViolatre,CE5DAE;%
+    RoseViolet,D725DE;%
+    Roseatre,D46A7E;%
+    Rouge,E50000;%
+    RougeAttenue,BB3F3F;%
+    RougeBrique,8F1402;%
+    RougeBrule,9F2305;%
+    RougeCamionPompier,FE0002;%
+    RougeCerise,F7022A;%
+    RougeClair,FE2F4A;%
+    RougeFonce,9A0200;%
+    RougeIndien,850E04;%
+    RougeLevres,D5174E;%
+    RougeNeon,FF073A;%
+    RougePale,D9544D;%
+    RougePastel,DB5856;%
+    RougePoussiere,B9484E;%
+    RougeRosatre,FC2647;%
+    RougeRose,BE013C;%
+    RougeRougeLevres,C0022F;%
+    RougeRouille,AA2704;%
+    RougeSang,980002;%
+    RougeTeinteMarron,922B05;%
+    RougeTeinteOrange,F43605;%
+    RougeTeintePourpre,B0054B;%
+    RougeTomate,EC2D01;%
+    RougeVif,FF000D;%
+    RougeVin,7B0323;%
+    RougeViolet,A50055;%
+    Rougeatre,C44240;%
+    RougeatreBrun,9E3623;%
+    RougeatreRose,F10C45;%
+    Rouille,A83C09;%
+    Roux,A13905;%
+    Royal,0C1793;%
+    Rubis,CA0147;%
+    Sable,E2CA76;%
+    SableFonce,A88F59;%
+    SableVert,BCCB7A;%
+    Safran,FEB209;%
+    Sang,770001;%
+    SangSeche,4B0101;%
+    Saphir,2138AB;%
+    Sarcelle,029386;%
+    SarcelleClair,7BFDC7;%
+    SarcelleFonce,017371;%
+    SarcelleGrisatre,5E9B8A;%
+    SarcellePale,82CBB2;%
+    SarcellePoudre,4C9085;%
+    SarcelleTerne,5F9E8F;%
+    SarcelleVerte,32BF84;%
+    Sauge,87AE73;%
+    SaugeClair,BCECAC;%
+    SaugeFoncee,598556;%
+    Saumon,FF796C;%
+    SaumonClair,FEA993;%
+    SaumonFonce,C85A53;%
+    SaumonPale,FFB19A;%
+    Sepia,985E2B;%
+    Sienne,A9561E;%
+    Souci,FCC006;%
+    SoupePois,929901;%
+    TaupeFonce,7F684E;%
+    TeinteBleu,2976BB;%
+    TeinteOrange,FC824A;%
+    TeintePourpre,98568D;%
+    Terne,828344;%
+    Terre,8A6E45;%
+    TerreBrulee,B04E0F;%
+    TerreCuite,C9643B;%
+    TerreOmbre,B26400;%
+    TerreSienneBrulee,B75203;%
+    TerreSienneBrute,A75E09;%
+    TerreSienneNaturelle,9A6200;%
+    The,65AB7C;%
+    TheVert,BDF8A3;%
+    Tomate,EF4026;%
+    Topaze,13BBAF;%
+    Toupet,C7AC7D;%
+    Tournesol,FFC512;%
+    Trefle,01B44C;%
+    Turquoise,06C2AC;%
+    TurquoiseClair,7EF4CC;%
+    TurquoiseClairVif,0FFEF9;%
+    TurquoiseFonce,045C5A;%
+    TurquoisePale,A5FBD5;%
+    TurquoiseProfond,017374;%
+    TurquoiseVerdatre,00FBB0;%
+    Velours,750851;%
+    Vermillon,F4320C;%
+    Vert,15B01A;%
+    VertAcide,8FFE09;%
+    VertAlgue,21C36F;%
+    VertAlgue,35AD6B;%
+    VertAqua,12E193;%
+    VertArbre,2A7E19;%
+    VertArdoise,658D6D;%
+    VertArmee,4B5D16;%
+    VertAssezClair,61E160;%
+    VertAttenue,5FA052;%
+    VertAvocat,87A922;%
+    VertBebe,8CFF9E;%
+    VertBizarre,3AE57F;%
+    VertBleu,137E6D;%
+    VertBleuClair,7EFBB3;%
+    VertBleuFonce,005249;%
+    VertBleuatre,2BB179;%
+    VertBleuatreClair,76FDA8;%
+    VertBleute,0CDC73;%
+    VertBoue,606602;%
+    VertBouteille,044A05;%
+    VertBrunatre,6A6E09;%
+    VertCaca,6F7C00;%
+    VertCacaBebe,889717;%
+    VertCamouflage,4B6113;%
+    VertChasseur,0B4008;%
+    VertCitron,89FE05;%
+    VertCitronPale,B1FF65;%
+    VertClair,76FF7B;%
+    VertClairClair,C8FFB0;%
+    VertClairPale,B1FC99;%
+    VertCool,33B864;%
+    VertCourse,014600;%
+    VertCourseBritannique,05480D;%
+    VertCrotteNez,96B403;%
+    VertDecolore,6BA353;%
+    VertDegoutant,8FAE22;%
+    VertDegoutant,A0BF16;%
+    VertDelave,BCF5A6;%
+    VertDesagreable,70B23F;%
+    VertDouxCouleur,6FC276;%
+    VertElectrique,21FC0D;%
+    VertEmeraude,028F1E;%
+    VertEnnuyeux,63B365;%
+    VertEternel,05472A;%
+    VertFane,7BB274;%
+    VertFeuille,5CA904;%
+    VertFeuillu,51B73B;%
+    VertFluo,08FF08;%
+    VertFluorescent,0AFF02;%
+    VertFonce,02590F;%
+    VertForet,048243;%
+    VertForetClair,4F9153;%
+    VertForetFonce,002D04;%
+    VertFougere,548D44;%
+    VertFrais,69D84F;%
+    VertGrenouille,58BC08;%
+    VertGris,789B73;%
+    VertGrisatre,719F91;%
+    VertGrisatreClair,B7E1A1;%
+    VertHerbe,3F9B0B;%
+    VertHerbeClair,9AF764;%
+    VertHerbeFonce,388004;%
+    VertHiver,20F986;%
+    VertHopital,9BE5AA;%
+    VertIrlandais,019529;%
+    VertJade,2BAF6A;%
+    VertJaunatre,40A368;%
+    VertJaunatre,B0DD16;%
+    VertJaune,B5CE08;%
+    VertJauneClair,CCFD7F;%
+    VertJauneFonce,728F02;%
+    VertJauneVif,9DFF00;%
+    VertJauneatreClair,C2FF89;%
+    VertKaki,728639;%
+    VertKelley,009337;%
+    VertKelly,02AB2E;%
+    VertKermit,5CB200;%
+    VertKiwi,8EE53F;%
+    VertLaid,7A9703;%
+    VertLimacon,99CC04;%
+    VertLumineux,2DFE54;%
+    VertMalade,9DB92C;%
+    VertMaladif,94B21C;%
+    VertMarais,748500;%
+    VertMarinLumineux,05FFA6;%
+    VertMarine,35530A;%
+    VertMarron,6F6C0A;%
+    VertMastic,A9BE70;%
+    VertMenthe,0BF77D;%
+    VertMentheClair,A6FBB2;%
+    VertMentheFonce,20C073;%
+    VertMer,53FCA1;%
+    VertMerFonce,11875D;%
+    VertMilitaire,667C3E;%
+    VertMousse,658B38;%
+    VertMousseLeger,A6C875;%
+    VertMousseMer,7AF9AB;%
+    VertMousseMerLeger,A7FFB5;%
+    VertMoussu,638B27;%
+    VertMoutarde,A8B504;%
+    VertMoyen,39AD48;%
+    VertNeon,0CFF0C;%
+    VertNeonClair,4EFD54;%
+    VertOcean,3D9973;%
+    VertOlive,677A04;%
+    VertOliveClair,A4BE5C;%
+    VertOliveFonce,3C4D03;%
+    VertOlivePale,B1D27B;%
+    VertPale,C7FDB5;%
+    VertPaques,8CFD7E;%
+    VertPastel,B0FF9D;%
+    VertPastelClair,B2FBA5;%
+    VertPastelFonce,56AE57;%
+    VertPelouse,4DA409;%
+    VertPin,0A481E;%
+    VertPlusClair,75FD63;%
+    VertPois,8EAB12;%
+    VertPoisLeger,C4FE82;%
+    VertPoison,40FD14;%
+    VertPomme,76CD26;%
+    VertPoussiere,76A973;%
+    VertPrintemps,A9F971;%
+    VertRadioactif,2CFA1F;%
+    VertSalissant,667E2C;%
+    VertSapin,5C8B15;%
+    VertSarcelle,0CB577;%
+    VertSauge,88B378;%
+    VertSoupePois,94A617;%
+    VertSurligneur,1BFC06;%
+    VertTeinteBleu,10A674;%
+    VertTerne,749551;%
+    VertTortue,75B84F;%
+    VertToxique,61DE2A;%
+    VertTrefle,02C14D;%
+    VertTresClair,D1FFBD;%
+    VertTresFonce,062E03;%
+    VertTrouble,6C7A0E;%
+    VertTurquoise,04F489;%
+    VertUni,699D4C;%
+    VertVeritable,089404;%
+    VertVif,01F9C6;%
+    VertVifClair,53FE5C;%
+    VertVomi,89A203;%
+    VertVomiBebe,B6C406;%
+    Vin,80013F;%
+    VinRouge,8C0034;%
+    Violet,8756E4;%
+    VioletBebe,CA9BF7;%
+    VioletChaud,952E8F;%
+    VioletClair,A552E6;%
+    VioletFonce,34013F;%
+    VioletMochard,A442A0;%
+    VioletPale,B790D4;%
+    VioletPaques,C071FE;%
+    VioletPlusClair,A55AF4;%
+    VioletProfond,490648;%
+    VioletRoyal,4B006E;%
+    VioletVif,AD0AFD;%
+    Violetatre,94568C;%
+    Viridien,1E9167;%
+    Vomi,A2A415}
+
+%====flexoki-fr
+\definecolor{fBase-50}{HTML}{F2F0E5}
+\definecolor{fBase-100}{HTML}{E6E4D9}
+\definecolor{fBase-150}{HTML}{DAD8CE}
+\definecolor{fBase-200}{HTML}{CECDC3}
+\definecolor{fBase-300}{HTML}{B7B5AC}
+\definecolor{fBase-400}{HTML}{9F9D96}
+\definecolor{fBase-500}{HTML}{878580}
+\definecolor{fBase-600}{HTML}{6F6E69}
+\definecolor{fBase-700}{HTML}{575653}
+\definecolor{fBase-800}{HTML}{403E3C}
+\definecolor{fBase-850}{HTML}{343331}
+\definecolor{fBase-900}{HTML}{282726}
+\definecolor{fBase-950}{HTML}{1C1B1A}
+
+\definecolor{fRouge-50}{RGB}{255,225,213}
+\definecolor{fRouge-100}{RGB}{255,202,187}
+\definecolor{fRouge-150}{RGB}{253,178,162}
+\definecolor{fRouge-200}{RGB}{248,154,138}
+\definecolor{fRouge-300}{RGB}{232,112,95}
+\definecolor{fRouge-400}{RGB}{209,77,65}
+\definecolor{fRouge-500}{RGB}{192,62,53}
+\definecolor{fRouge-600}{RGB}{175,48,41}
+\definecolor{fRouge-700}{RGB}{148,40,34}
+\definecolor{fRouge-800}{RGB}{108,32,28}
+\definecolor{fRouge-850}{RGB}{85,27,24}
+\definecolor{fRouge-900}{RGB}{62,23,21}
+\definecolor{fRouge-950}{RGB}{38,19,18}
+
+\definecolor{fOrange-50}{RGB}{255,231,206}
+\definecolor{fOrange-100}{RGB}{254,211,175}
+\definecolor{fOrange-150}{RGB}{252,193,146}
+\definecolor{fOrange-200}{RGB}{249,174,119}
+\definecolor{fOrange-300}{RGB}{236,139,73}
+\definecolor{fOrange-400}{RGB}{218,112,44}
+\definecolor{fOrange-500}{RGB}{203,97,32}
+\definecolor{fOrange-600}{RGB}{188,82,21}
+\definecolor{fOrange-700}{RGB}{157,67,16}
+\definecolor{fOrange-800}{RGB}{113,50,13}
+\definecolor{fOrange-850}{RGB}{89,41,13}
+\definecolor{fOrange-900}{RGB}{64,32,13}
+\definecolor{fOrange-950}{RGB}{39,24,14}
+
+\definecolor{fJaune-50}{RGB}{250,238,198}
+\definecolor{fJaune-100}{RGB}{246,226,160}
+\definecolor{fJaune-150}{RGB}{241,214,126}
+\definecolor{fJaune-200}{RGB}{236,203,96}
+\definecolor{fJaune-300}{RGB}{223,180,49}
+\definecolor{fJaune-400}{RGB}{208,162,21}
+\definecolor{fJaune-500}{RGB}{190,146,7}
+\definecolor{fJaune-600}{RGB}{173,131,1}
+\definecolor{fJaune-700}{RGB}{142,107,1}
+\definecolor{fJaune-800}{RGB}{102,77,1}
+\definecolor{fJaune-850}{RGB}{80,61,2}
+\definecolor{fJaune-900}{RGB}{58,45,4}
+\definecolor{fJaune-950}{RGB}{36,30,8}
+
+\definecolor{fVert-50}{RGB}{237,238,207}
+\definecolor{fVert-100}{RGB}{221,226,178}
+\definecolor{fVert-150}{RGB}{205,213,151}
+\definecolor{fVert-200}{RGB}{190,201,126}
+\definecolor{fVert-300}{RGB}{160,175,84}
+\definecolor{fVert-400}{RGB}{135,154,57}
+\definecolor{fVert-500}{RGB}{118,141,33}
+\definecolor{fVert-600}{RGB}{102,128,11}
+\definecolor{fVert-700}{RGB}{83,105,7}
+\definecolor{fVert-800}{RGB}{61,76,7}
+\definecolor{fVert-850}{RGB}{49,61,7}
+\definecolor{fVert-900}{RGB}{37,45,9}
+\definecolor{fVert-950}{RGB}{26,30,12}
+
+\definecolor{fCyan-50}{RGB}{221,241,228}
+\definecolor{fCyan-100}{RGB}{191,232,217}
+\definecolor{fCyan-150}{RGB}{162,222,206}
+\definecolor{fCyan-200}{RGB}{135,211,195}
+\definecolor{fCyan-300}{RGB}{90,189,172}
+\definecolor{fCyan-400}{RGB}{58,169,159}
+\definecolor{fCyan-500}{RGB}{47,150,141}
+\definecolor{fCyan-600}{RGB}{36,131,123}
+\definecolor{fCyan-700}{RGB}{28,108,102}
+\definecolor{fCyan-800}{RGB}{22,79,74}
+\definecolor{fCyan-850}{RGB}{20,63,60}
+\definecolor{fCyan-900}{RGB}{18,47,44}
+\definecolor{fCyan-950}{RGB}{16,31,29}
+
+\definecolor{fBleu-50}{RGB}{225,236,235}
+\definecolor{fBleu-100}{RGB}{198,221,232}
+\definecolor{fBleu-150}{RGB}{171,207,226}
+\definecolor{fBleu-200}{RGB}{146,191,219}
+\definecolor{fBleu-300}{RGB}{102,160,200}
+\definecolor{fBleu-400}{RGB}{67,133,190}
+\definecolor{fBleu-500}{RGB}{49,113,178}
+\definecolor{fBleu-600}{RGB}{32,94,166}
+\definecolor{fBleu-700}{RGB}{26,79,140}
+\definecolor{fBleu-800}{RGB}{22,59,102}
+\definecolor{fBleu-850}{RGB}{19,48,81}
+\definecolor{fBleu-900}{RGB}{18,37,59}
+\definecolor{fBleu-950}{RGB}{16,26,36}
+
+\definecolor{fViolet-50}{RGB}{240,234,236}
+\definecolor{fViolet-100}{RGB}{226,217,233}
+\definecolor{fViolet-150}{RGB}{211,202,230}
+\definecolor{fViolet-200}{RGB}{196,185,224}
+\definecolor{fViolet-300}{RGB}{166,153,208}
+\definecolor{fViolet-400}{RGB}{139,126,200}
+\definecolor{fViolet-500}{RGB}{115,94,181}
+\definecolor{fViolet-600}{RGB}{94,64,157}
+\definecolor{fViolet-700}{RGB}{79,54,133}
+\definecolor{fViolet-800}{RGB}{60,42,98}
+\definecolor{fViolet-850}{RGB}{49,35,78}
+\definecolor{fViolet-900}{RGB}{38,28,57}
+\definecolor{fViolet-950}{RGB}{26,22,35}
+
+\definecolor{fMagenta-50}{RGB}{254,228,229}
+\definecolor{fMagenta-100}{RGB}{252,207,218}
+\definecolor{fMagenta-150}{RGB}{249,185,207}
+\definecolor{fMagenta-200}{RGB}{244,164,194}
+\definecolor{fMagenta-300}{RGB}{228,125,168}
+\definecolor{fMagenta-400}{RGB}{206,93,151}
+\definecolor{fMagenta-500}{RGB}{183,69,131}
+\definecolor{fMagenta-600}{RGB}{160,47,111}
+\definecolor{fMagenta-700}{RGB}{135,40,94}
+\definecolor{fMagenta-800}{RGB}{100,31,70}
+\definecolor{fMagenta-850}{RGB}{79,27,57}
+\definecolor{fMagenta-900}{RGB}{57,23,43}
+\definecolor{fMagenta-950}{RGB}{36,19,29}
+
+\endinput

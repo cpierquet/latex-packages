@@ -1,0 +1,549 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c
+% or later, see http://www.latex-project.org/lppl.txt
+% pdf from domain public svg (user frankes in openclipart), see https://openclipart.org/artist/frankes
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{euromoney}[2024/09/07 0.1.1 Insert Euro coins and banknotes]
+
+%------History
+% 0.1.1	New filenames, according to TL rules
+% 0.1.0	Initial version
+
+%------Packages
+\RequirePackage{xstring}
+\RequirePackage{simplekv}
+\RequirePackage{graphicx}
+\RequirePackage{tikz}
+\usetikzlibrary{calc}
+\RequirePackage{listofitems}
+
+%------Lengths
+\newlength{\tmphautmonnaies}
+\setlength{\tmphautmonnaies}{1em}
+\newlength{\tmpoffsethmonnaies}
+\setlength{\tmpoffsethmonnaies}{0pt}
+\newlength{\tmpoffsetvmonnaies}
+\setlength{\tmpoffsetvmonnaies}{5mm}
+
+%------Keys [fr]
+\defKV[Monnaies]{%
+	HauteurRef=\setlength{\tmphautmonnaies}{#1},%
+	Style=\def\piecebilletstyle{#1},%
+	DecalH=\setlength{\tmpoffsethmonnaies}{#1},%
+	DecalV=\setlength{\tmpoffsetvmonnaies}{#1},%
+	Empilage=\def\piecebilletempilage{#1},%
+	Angle=\def\piecebilletrotation{#1}
+}
+
+\setKVdefault[Monnaies]{%
+	HauteurRef=2cm,%
+	Style=simple,%
+	HauteurAuto=false,%
+	DecalH=0pt,%
+	DecalV=5mm,%
+	Empilage=H,%
+	Angle=10
+}
+
+%------Keys [en]
+\defKV[Moneys]{%
+	RefHeight=\setlength{\tmphautmonnaies}{#1},%
+	Style=\def\piecebilletstyle{#1},%
+	OffsetH=\setlength{\tmpoffsethmonnaies}{#1},%
+	OffsetV=\setlength{\tmpoffsetvmonnaies}{#1},%
+	Stack=\def\piecebilletempilage{#1},%
+	Angle=\def\piecebilletrotation{#1}
+}
+
+\setKVdefault[Moneys]{%
+	RefHeight=2cm,%
+	Style=simple,%
+	AutoHeight=false,%
+	OffsetH=0pt,%
+	OffsetV=5mm,%
+	Stack=H,%
+	Angle=10
+}
+
+%-----Macros billet(s) [fr]
+\NewDocumentCommand\BilletEuro{ D<>{} O{} m }{%
+	\restoreKV[Monnaies]%
+	\setKV[Monnaies]{#1}%
+	\IfStrEqCase{\piecebilletstyle}{%
+		{simple}{\def\monnaiessuffixe{simple}}%
+		{full}{\def\monnaiessuffixe{}}%
+		{nb}{\def\monnaiessuffixe{simplebw}}%
+	}%
+	\includegraphics[#2]{euromoney-#3euro\monnaiessuffixe}%
+}
+
+\NewDocumentCommand\BilletsEuro{ O{} m }{%
+	\restoreKV[Monnaies]%
+	\setKV[Monnaies]{#1}%
+	\IfStrEqCase{\piecebilletstyle}{%
+		{simple}{\def\monnaiessuffixe{simple}}%
+		{full}{\def\monnaiessuffixe{}}%
+		{nb}{\def\monnaiessuffixe{simplebw}}%
+	}%
+	%affichage
+	\IfStrEq{\piecebilletempilage}{H}%empilage vertical
+		{%
+			\setsepchar{+}%
+			\readlist*\listetmppieces{#2}%
+			\xdef\nbempilagespieces{\listetmppieceslen}%
+			\ifdim\tmpoffsethmonnaies=0pt\relax%
+				\foreach \i in {1,...,\listetmppieceslen}{%
+					%on découpe l'empilage
+					\itemtomacro\listetmppieces[\i]{\tmpempilpieces}%
+					\IfSubStr{\tmpempilpieces}{*}%
+						{%
+							\StrCut{\tmpempilpieces}{*}{\tmpnbpieces}{\tmptypepieces}%
+						}%
+						{%
+							\xdef\tmpnbpieces{1}%
+							\xdef\tmptypepieces{\tmpempilpieces}%
+						}%
+					\IfStrEqCase{\tmptypepieces}{%
+						{500}{\def\monnaiessomme{500euro}}%
+						{200}{\def\monnaiessomme{200euro}}%
+						{100}{\def\monnaiessomme{100euro}}%
+						{50}{\def\monnaiessomme{50euro}}%
+						{20}{\def\monnaiessomme{20euro}}%
+						{10}{\def\monnaiessomme{10euro}}%
+						{5}{\def\monnaiessomme{5euro}}%
+					}%
+					\ifboolKV[Monnaies]{HauteurAuto}%
+						{%
+							\IfStrEqCase{\tmptypepieces}{%
+								{500}{\def\monnaiesechellerelative{1}}%
+								{200}{\def\monnaiesechellerelative{1}}%
+								{100}{\def\monnaiesechellerelative{1}}%
+								{50}{\def\monnaiesechellerelative{0.9390}}%
+								{20}{\def\monnaiesechellerelative{0.8780}}%
+								{10}{\def\monnaiesechellerelative{0.8171}}%
+								{5}{\def\monnaiesechellerelative{0.7561}}%
+							}%
+						}%
+						{%
+							\def\monnaiesechellerelative{1}%
+						}%
+					\begin{tikzpicture}
+						\foreach \i in {1,...,\tmpnbpieces}{%
+							\draw (0,{(\i-1)*\tmpoffsetvmonnaies}) node[anchor=south west,inner sep=0pt] {\includegraphics[height=\dimexpr\monnaiesechellerelative\tmphautmonnaies\relax]{euromoney-\monnaiessomme\monnaiessuffixe}} ;%
+						}%
+					\end{tikzpicture}%
+				}%
+			\else%
+				\begin{tikzpicture}
+					\foreach \i in {1,...,\listetmppieceslen}{%
+					%on découpe l'empilage
+					\itemtomacro\listetmppieces[\i]{\tmpempilpieces}%
+					\IfSubStr{\tmpempilpieces}{*}%
+						{%
+							\StrCut{\tmpempilpieces}{*}{\tmpnbpieces}{\tmptypepieces}%
+						}%
+						{%
+							\xdef\tmpnbpieces{1}\xdef\tmptypepieces{\tmpempilpieces}%
+						}%
+					\IfStrEqCase{\tmptypepieces}{%
+						{500}{\def\monnaiessomme{500euro}}%
+						{200}{\def\monnaiessomme{200euro}}%
+						{100}{\def\monnaiessomme{100euro}}%
+						{50}{\def\monnaiessomme{50euro}}%
+						{20}{\def\monnaiessomme{20euro}}%
+						{10}{\def\monnaiessomme{10euro}}%
+						{5}{\def\monnaiessomme{5euro}}%
+					}%
+					\ifboolKV[Monnaies]{HauteurAuto}%
+						{%
+							\IfStrEqCase{\tmptypepieces}{%
+								{500}{\def\monnaiesechellerelative{1}}%
+								{200}{\def\monnaiesechellerelative{1}}%
+								{100}{\def\monnaiesechellerelative{1}}%
+								{50}{\def\monnaiesechellerelative{0.9390}}%
+								{20}{\def\monnaiesechellerelative{0.8780}}%
+								{10}{\def\monnaiesechellerelative{0.8171}}%
+								{5}{\def\monnaiesechellerelative{0.7561}}%
+							}%
+						}%
+						{%
+							\def\monnaiesechellerelative{1}%
+						}%
+					\foreach \ii in {1,...,\tmpnbpieces}{%
+						\draw ({(\i-1)*\tmpoffsethmonnaies},{(\ii-1)*\tmpoffsetvmonnaies}) node[anchor=south west,inner sep=0pt] {\includegraphics[height=\dimexpr\monnaiesechellerelative\tmphautmonnaies\relax]{euromoney-\monnaiessomme\monnaiessuffixe}} ;%
+						}%
+					}%
+				\end{tikzpicture}%
+			\fi%
+		}%
+		{}%
+	\IfStrEq{\piecebilletempilage}{eventail}%empilage eventail
+		{%
+			\setsepchar{+}%
+			\readlist*\listbilletseventail{#2}%
+			\xdef\nbeventailbillets{\listbilletseventaillen}%
+			\begin{tikzpicture}
+				\foreach \i in {1,...,\nbeventailbillets}{%
+					\itemtomacro\listbilletseventail[\i]{\tmpempilpieces}%
+					\IfStrEqCase{\tmpempilpieces}{%
+						{500}{\def\monnaiesechellerelative{1}}%
+						{200}{\def\monnaiesechellerelative{1}}%
+						{100}{\def\monnaiesechellerelative{1}}%
+						{50}{\def\monnaiesechellerelative{0.9390}}%
+						{20}{\def\monnaiesechellerelative{0.8780}}%
+						{10}{\def\monnaiesechellerelative{0.8171}}%
+						{5}{\def\monnaiesechellerelative{0.7561}}%
+					}%
+					\IfStrEqCase{\tmpempilpieces}{%
+						{500}{\def\monnaiessomme{500euro}}%
+						{200}{\def\monnaiessomme{200euro}}%
+						{100}{\def\monnaiessomme{100euro}}%
+						{50}{\def\monnaiessomme{50euro}}%
+						{20}{\def\monnaiessomme{20euro}}%
+						{10}{\def\monnaiessomme{10euro}}%
+						{5}{\def\monnaiessomme{5euro}}%
+					}%
+					\ifboolKV[Monnaies]{HauteurAuto}%
+						{%
+							\IfStrEqCase{\tmpempilpieces}{%
+								{500}{\def\monnaiesechellerelative{1}}%
+								{200}{\def\monnaiesechellerelative{1}}%
+								{100}{\def\monnaiesechellerelative{1}}%
+								{50}{\def\monnaiesechellerelative{0.9390}}%
+								{20}{\def\monnaiesechellerelative{0.8780}}%
+								{10}{\def\monnaiesechellerelative{0.8171}}%
+								{5}{\def\monnaiesechellerelative{0.7561}}%
+							}%
+						}%
+						{%
+							\def\monnaiesechellerelative{1}%
+						}%
+					\draw ({-\i*\tmpoffsethmonnaies},{-\i*\tmpoffsetvmonnaies}) node[above right=0pt,inner sep=0pt,outer sep=0pt,rotate={\fpeval{90-0.5*\piecebilletrotation*\nbeventailbillets+(\i-1)*\piecebilletrotation}}] {\includegraphics[height=\dimexpr\monnaiesechellerelative\tmphautmonnaies\relax]{euromoney-\monnaiessomme\monnaiessuffixe}} ;%
+				}%
+			\end{tikzpicture}%
+		}%
+		{}%
+}
+
+%-----Macros billet(s) [en]
+\NewDocumentCommand\EuroBanknote{ D<>{} O{} m }{%
+	\restoreKV[Moneys]%
+	\setKV[Moneys]{#1}%
+	\IfStrEqCase{\piecebilletstyle}{%
+		{simple}{\def\monnaiessuffixe{simple}}%
+		{full}{\def\monnaiessuffixe{}}%
+		{bw}{\def\monnaiessuffixe{simplebw}}%
+	}%
+	\includegraphics[#2]{#3euro\monnaiessuffixe}%
+}
+
+\NewDocumentCommand\EuroBanknotes{ O{} m }{%
+	\restoreKV[Moneys]%
+	\setKV[Moneys]{#1}%
+	\IfStrEqCase{\piecebilletstyle}{%
+		{simple}{\def\monnaiessuffixe{simple}}%
+		{full}{\def\monnaiessuffixe{}}%
+		{bw}{\def\monnaiessuffixe{simplebw}}%
+	}%
+	%affichage
+	\IfStrEq{\piecebilletempilage}{H}%empilage vertical
+		{%
+			\setsepchar{+}%
+			\readlist*\listetmppieces{#2}%
+			\xdef\nbempilagespieces{\listetmppieceslen}%
+			\ifdim\tmpoffsethmonnaies=0pt\relax%
+				\foreach \i in {1,...,\listetmppieceslen}{%
+					%on découpe l'empilage
+					\itemtomacro\listetmppieces[\i]{\tmpempilpieces}%
+					\IfSubStr{\tmpempilpieces}{*}%
+						{%
+							\StrCut{\tmpempilpieces}{*}{\tmpnbpieces}{\tmptypepieces}%
+						}%
+						{%
+							\xdef\tmpnbpieces{1}%
+							\xdef\tmptypepieces{\tmpempilpieces}%
+						}%
+					\IfStrEqCase{\tmptypepieces}{%
+						{500}{\def\monnaiessomme{500euro}}%
+						{200}{\def\monnaiessomme{200euro}}%
+						{100}{\def\monnaiessomme{100euro}}%
+						{50}{\def\monnaiessomme{50euro}}%
+						{20}{\def\monnaiessomme{20euro}}%
+						{10}{\def\monnaiessomme{10euro}}%
+						{5}{\def\monnaiessomme{5euro}}%
+					}%
+					\ifboolKV[Moneys]{AutoHeight}%
+						{%
+							\IfStrEqCase{\tmptypepieces}{%
+								{500}{\def\monnaiesechellerelative{1}}%
+								{200}{\def\monnaiesechellerelative{1}}%
+								{100}{\def\monnaiesechellerelative{1}}%
+								{50}{\def\monnaiesechellerelative{0.9390}}%
+								{20}{\def\monnaiesechellerelative{0.8780}}%
+								{10}{\def\monnaiesechellerelative{0.8171}}%
+								{5}{\def\monnaiesechellerelative{0.7561}}%
+							}%
+						}%
+						{%
+							\def\monnaiesechellerelative{1}%
+						}%
+					\begin{tikzpicture}
+						\foreach \i in {1,...,\tmpnbpieces}{%
+							\draw (0,{(\i-1)*\tmpoffsetvmonnaies}) node[anchor=south west,inner sep=0pt] {\includegraphics[height=\dimexpr\monnaiesechellerelative\tmphautmonnaies\relax]{euromoney-\monnaiessomme\monnaiessuffixe}} ;%
+						}%
+					\end{tikzpicture}%
+				}%
+			\else%
+				\begin{tikzpicture}
+					\foreach \i in {1,...,\listetmppieceslen}{%
+					%on découpe l'empilage
+					\itemtomacro\listetmppieces[\i]{\tmpempilpieces}%
+					\IfSubStr{\tmpempilpieces}{*}%
+						{%
+							\StrCut{\tmpempilpieces}{*}{\tmpnbpieces}{\tmptypepieces}%
+						}%
+						{%
+							\xdef\tmpnbpieces{1}\xdef\tmptypepieces{\tmpempilpieces}%
+						}%
+					\IfStrEqCase{\tmptypepieces}{%
+						{500}{\def\monnaiessomme{500euro}}%
+						{200}{\def\monnaiessomme{200euro}}%
+						{100}{\def\monnaiessomme{100euro}}%
+						{50}{\def\monnaiessomme{50euro}}%
+						{20}{\def\monnaiessomme{20euro}}%
+						{10}{\def\monnaiessomme{10euro}}%
+						{5}{\def\monnaiessomme{5euro}}%
+					}%
+					\ifboolKV[Moneys]{AutoHeight}%
+						{%
+							\IfStrEqCase{\tmptypepieces}{%
+								{500}{\def\monnaiesechellerelative{1}}%
+								{200}{\def\monnaiesechellerelative{1}}%
+								{100}{\def\monnaiesechellerelative{1}}%
+								{50}{\def\monnaiesechellerelative{0.9390}}%
+								{20}{\def\monnaiesechellerelative{0.8780}}%
+								{10}{\def\monnaiesechellerelative{0.8171}}%
+								{5}{\def\monnaiesechellerelative{0.7561}}%
+							}%
+						}%
+						{%
+							\def\monnaiesechellerelative{1}%
+						}%
+					\foreach \ii in {1,...,\tmpnbpieces}{%
+						\draw ({(\i-1)*\tmpoffsethmonnaies},{(\ii-1)*\tmpoffsetvmonnaies}) node[anchor=south west,inner sep=0pt] {\includegraphics[height=\dimexpr\monnaiesechellerelative\tmphautmonnaies\relax]{euromoney-\monnaiessomme\monnaiessuffixe}} ;%
+						}%
+					}%
+				\end{tikzpicture}%
+			\fi%
+		}%
+		{}%
+	\IfStrEq{\piecebilletempilage}{fan}%empilage eventail
+		{%
+			\setsepchar{+}%
+			\readlist*\listbilletseventail{#2}%
+			\xdef\nbeventailbillets{\listbilletseventaillen}%
+			\begin{tikzpicture}
+				\foreach \i in {1,...,\nbeventailbillets}{%
+					\itemtomacro\listbilletseventail[\i]{\tmpempilpieces}%
+					\IfStrEqCase{\tmpempilpieces}{%
+						{500}{\def\monnaiesechellerelative{1}}%
+						{200}{\def\monnaiesechellerelative{1}}%
+						{100}{\def\monnaiesechellerelative{1}}%
+						{50}{\def\monnaiesechellerelative{0.9390}}%
+						{20}{\def\monnaiesechellerelative{0.8780}}%
+						{10}{\def\monnaiesechellerelative{0.8171}}%
+						{5}{\def\monnaiesechellerelative{0.7561}}%
+					}%
+					\IfStrEqCase{\tmpempilpieces}{%
+						{500}{\def\monnaiessomme{500euro}}%
+						{200}{\def\monnaiessomme{200euro}}%
+						{100}{\def\monnaiessomme{100euro}}%
+						{50}{\def\monnaiessomme{50euro}}%
+						{20}{\def\monnaiessomme{20euro}}%
+						{10}{\def\monnaiessomme{10euro}}%
+						{5}{\def\monnaiessomme{5euro}}%
+					}%
+					\ifboolKV[Moneys]{AutoHeight}%
+						{%
+							\IfStrEqCase{\tmpempilpieces}{%
+								{500}{\def\monnaiesechellerelative{1}}%
+								{200}{\def\monnaiesechellerelative{1}}%
+								{100}{\def\monnaiesechellerelative{1}}%
+								{50}{\def\monnaiesechellerelative{0.9390}}%
+								{20}{\def\monnaiesechellerelative{0.8780}}%
+								{10}{\def\monnaiesechellerelative{0.8171}}%
+								{5}{\def\monnaiesechellerelative{0.7561}}%
+							}%
+						}%
+						{%
+							\def\monnaiesechellerelative{1}%
+						}%
+					\draw ({-\i*\tmpoffsethmonnaies},{-\i*\tmpoffsetvmonnaies}) node[above right=0pt,inner sep=0pt,outer sep=0pt,rotate={\fpeval{90-0.5*\piecebilletrotation*\nbeventailbillets+(\i-1)*\piecebilletrotation}}] {\includegraphics[height=\dimexpr\monnaiesechellerelative\tmphautmonnaies\relax]{euromoney-\monnaiessomme\monnaiessuffixe}} ;%
+				}%
+			\end{tikzpicture}%
+		}%
+		{}%
+}
+
+%-----Macro pièces [fr]
+\NewDocumentCommand\PiecesEuro{ O{} m }{%
+	\restoreKV[Monnaies]%
+	\setKV[Monnaies]{#1}%
+	\IfStrEqCase{\piecebilletstyle}{%
+		{simple}{\def\monnaiessuffixe{simple}}%
+		{full}{\def\monnaiessuffixe{}}%
+		{nb}{\def\monnaiessuffixe{simplebw}}%
+	}%
+	%boucle
+	\setsepchar{+}%
+	\readlist*\listetmppieces{#2}%
+	\xdef\nbempilagespieces{\listetmppieceslen}%
+	\foreach \i in {1,...,\listetmppieceslen}{%
+		%on découpe l'empilage
+		\itemtomacro\listetmppieces[\i]{\tmpempilpieces}%
+		\IfSubStr{\tmpempilpieces}{*}%
+			{%
+				\StrCut{\tmpempilpieces}{*}{\tmpnbpieces}{\tmptypepieces}%
+			}%
+			{%
+				\xdef\tmptypepieces{\tmpempilpieces}%
+			}%
+		\IfStrEqCase{\tmptypepieces}{%
+			{2}{\def\monnaiessomme{2euro}}%
+			{1}{\def\monnaiessomme{1euro}}%
+			{0.5}{\def\monnaiessomme{50cent}}%
+			{0.2}{\def\monnaiessomme{20cent}}%
+			{0.1}{\def\monnaiessomme{10cent}}%
+			{0.05}{\def\monnaiessomme{5cent}}%
+			{0.02}{\def\monnaiessomme{2cent}}%
+			{0.01}{\def\monnaiessomme{1cent}}%
+		}%
+		\ifboolKV[Monnaies]{HauteurAuto}%
+			{%
+				\IfStrEqCase{\tmptypepieces}{%
+					{2}{\def\monnaiesechellerelative{1}}%
+					{1}{\def\monnaiesechellerelative{0.9029}}%
+					{0.5}{\def\monnaiesechellerelative{0.9417}}%
+					{0.2}{\def\monnaiesechellerelative{0.8641}}%
+					{0.1}{\def\monnaiesechellerelative{0.7670}}%
+					{0.05}{\def\monnaiesechellerelative{0.8252}}%
+					{0.02}{\def\monnaiesechellerelative{0.7282}}%
+					{0.01}{\def\monnaiesechellerelative{0.6311}}%
+				}%
+			}%
+			{%
+				\def\monnaiesechellerelative{1}%
+			}%
+		%affichage
+		\IfStrEq{\piecebilletempilage}{H}%
+			{%
+				\IfSubStr{\tmpempilpieces}{*}%
+					{%
+						\includegraphics[height=\dimexpr\monnaiesechellerelative\tmphautmonnaies\relax]{euromoney-\monnaiessomme\monnaiessuffixe}%
+						\ifnum\tmpnbpieces=1\else%
+							\foreach \i in {1,...,\inteval{\tmpnbpieces-1}}{%
+								\ifdim\tmpoffsethmonnaies>0pt\relax\hspace*{\dimexpr\tmpoffsethmonnaies-\monnaiesechellerelative\tmphautmonnaies\relax}\fi%
+								\includegraphics[height=\dimexpr\monnaiesechellerelative\tmphautmonnaies\relax]{euromoney-\monnaiessomme\monnaiessuffixe}%
+							}%
+						\fi%
+					}%
+					{%
+						\includegraphics[height=\dimexpr\monnaiesechellerelative\tmphautmonnaies\relax]{euromoney-\monnaiessomme\monnaiessuffixe}%
+					}%
+					\ifnum\i<\listetmppieceslen%
+						\ifdim\tmpoffsethmonnaies>0pt\relax\hspace*{\dimexpr\tmpoffsethmonnaies-\monnaiesechellerelative\tmphautmonnaies\relax}%
+						\fi%
+					\fi%
+			}%
+			{%
+				\begin{tikzpicture}
+					\foreach \i in {1,...,\tmpnbpieces}{%
+						\draw (0,{(\i-1)*\tmpoffsetvmonnaies}) node[inner sep=0pt] {\includegraphics[height=\dimexpr\monnaiesechellerelative\tmphautmonnaies\relax]{euromoney-\monnaiessomme\monnaiessuffixe}} ;%
+					}%
+				\end{tikzpicture}%
+			}%
+	}%
+}
+
+%-----Macro pièces [en]
+\NewDocumentCommand\EuroCoins{ O{} m }{%
+	\restoreKV[Moneys]%
+	\setKV[Moneys]{#1}%
+	\IfStrEqCase{\piecebilletstyle}{%
+		{simple}{\def\monnaiessuffixe{simple}}%
+		{full}{\def\monnaiessuffixe{}}%
+		{bw}{\def\monnaiessuffixe{simplebw}}%
+	}%
+	%boucle
+	\setsepchar{+}%
+	\readlist*\listetmppieces{#2}%
+	\xdef\nbempilagespieces{\listetmppieceslen}%
+	\foreach \i in {1,...,\listetmppieceslen}{%
+		%on découpe l'empilage
+		\itemtomacro\listetmppieces[\i]{\tmpempilpieces}%
+		\IfSubStr{\tmpempilpieces}{*}%
+			{%
+				\StrCut{\tmpempilpieces}{*}{\tmpnbpieces}{\tmptypepieces}%
+			}%
+			{%
+				\xdef\tmptypepieces{\tmpempilpieces}%
+			}%
+		\IfStrEqCase{\tmptypepieces}{%
+			{2}{\def\monnaiessomme{2euro}}%
+			{1}{\def\monnaiessomme{1euro}}%
+			{0.5}{\def\monnaiessomme{50cent}}%
+			{0.2}{\def\monnaiessomme{20cent}}%
+			{0.1}{\def\monnaiessomme{10cent}}%
+			{0.05}{\def\monnaiessomme{5cent}}%
+			{0.02}{\def\monnaiessomme{2cent}}%
+			{0.01}{\def\monnaiessomme{1cent}}%
+		}%
+		\ifboolKV[Moneys]{AutoHeight}%
+			{%
+				\IfStrEqCase{\tmptypepieces}{%
+					{2}{\def\monnaiesechellerelative{1}}%
+					{1}{\def\monnaiesechellerelative{0.9029}}%
+					{0.5}{\def\monnaiesechellerelative{0.9417}}%
+					{0.2}{\def\monnaiesechellerelative{0.8641}}%
+					{0.1}{\def\monnaiesechellerelative{0.7670}}%
+					{0.05}{\def\monnaiesechellerelative{0.8252}}%
+					{0.02}{\def\monnaiesechellerelative{0.7282}}%
+					{0.01}{\def\monnaiesechellerelative{0.6311}}%
+				}%
+			}%
+			{%
+				\def\monnaiesechellerelative{1}%
+			}%
+		%affichage
+		\IfStrEq{\piecebilletempilage}{H}%
+			{%
+				\IfSubStr{\tmpempilpieces}{*}%
+					{%
+						\includegraphics[height=\dimexpr\monnaiesechellerelative\tmphautmonnaies\relax]{euromoney-\monnaiessomme\monnaiessuffixe}%
+						\ifnum\tmpnbpieces=1\else%
+							\foreach \i in {1,...,\inteval{\tmpnbpieces-1}}{%
+								\ifdim\tmpoffsethmonnaies>0pt\relax\hspace*{\dimexpr\tmpoffsethmonnaies-\monnaiesechellerelative\tmphautmonnaies\relax}\fi%
+								\includegraphics[height=\dimexpr\monnaiesechellerelative\tmphautmonnaies\relax]{euromoney-\monnaiessomme\monnaiessuffixe}%
+							}%
+						\fi%
+					}%
+					{%
+						\includegraphics[height=\dimexpr\monnaiesechellerelative\tmphautmonnaies\relax]{euromoney-\monnaiessomme\monnaiessuffixe}%
+					}%
+					\ifnum\i<\listetmppieceslen%
+						\ifdim\tmpoffsethmonnaies>0pt\relax\hspace*{\dimexpr\tmpoffsethmonnaies-\monnaiesechellerelative\tmphautmonnaies\relax}%
+						\fi%
+					\fi%
+			}%
+			{%
+				\begin{tikzpicture}
+					\foreach \i in {1,...,\tmpnbpieces}{%
+						\draw (0,{(\i-1)*\tmpoffsetvmonnaies}) node[inner sep=0pt] {\includegraphics[height=\dimexpr\monnaiesechellerelative\tmphautmonnaies\relax]{euromoney-\monnaiessomme\monnaiessuffixe}} ;%
+					}%
+				\end{tikzpicture}%
+			}%
+	}%
+}
+
+\endinput

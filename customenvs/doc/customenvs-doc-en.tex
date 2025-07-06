@@ -1,0 +1,1100 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: lualatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: lualatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[english,11pt,a4paper]{article}
+%\usepackage[utf8x]{inputenc}
+%\usepackage[T1]{fontenc}
+%\usepackage{DejaVuSerif}
+%\usepackage[scale=1.1]{inconsolata}
+\usepackage{customenvs}
+\usepackage{xspace}
+\usepackage{tabularx}
+\usepackage{soul}
+\usepackage{codehigh}
+%\usepackage{fontawesome5}
+\usepackage{lipsum}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [customenvs]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=1.5cm]{geometry}
+\setlength{\parindent}{0pt}
+
+\def\TPversion{0.40c}
+\def\TPdate{23/06/2025}
+\usepackage{tcolorbox}
+\sethlcolor{lightgray!25}
+\NewDocumentCommand\MontreCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+\usepackage[auto]{contour}
+
+\usepackage{babel}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.75\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\renewcommand\arraystretch{1.25}
+			\begin{tabular}{c}
+				{\Huge \texttt{customenvs [en]}}\\
+				\\
+				{\Large Some custom environments,} \\
+				{\Large or small patches.} \\
+			\end{tabular}
+			\renewcommand\arraystretch{1}
+			
+			\medskip
+			
+			{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\vspace*{1mm}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
+\end{tabular}
+\end{center}
+
+\vspace*{5mm}
+
+%\hrule
+%
+%\vspace*{2mm}
+%
+%{\centering Le nom du package vient de \textsf{ENVironnemenTS ALTernatifs}, avec le suffixe \textsf{FRançais}.\par}
+%
+%\vspace*{2mm}
+%
+%\hrule
+%
+%\vspace*{1cm}
+
+\hrule
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+\hrule
+
+\vfill
+
+\section{History}
+
+\verb|v0.40b|~:~~~PictoCalendar (\textsf{customenvs-tikzpictos} \texttt{v0.1.2}) + enhancements
+
+\verb|v0.40a|~:~~~PictoTraffic (\textsf{customenvs-tikzpictos} \texttt{v0.1.1}) + enhancements
+
+\verb|v0.3.7|~:~~~Auxiliary package \textsf{customenvs-tikzpictos} for pictograms
+
+\verb|v0.3.6|~:~~~Picto \textit{bullseye+arrow}
+
+\verb|v0.3.5|~:~~~Bugfix + pre-compatibility with \textsf{fa5/fa6}
+
+\verb|v0.3.4|~:~~~Pictoskill
+
+\verb|v0.3.3|~:~~~Annotate image
+
+\verb|v0.3.2|~:~~~Alt version of title banner
+
+\verb|v0.3.1|~:~~~Box for MCQ
+
+\verb|v0.3.0|~:~~~Bugfix with \textsf{beamer}
+
+\verb|v0.2.7|~:~~~Key for mixing answers in MCQ
+
+\verb|v0.2.6|~:~~~Whell of skills, speedometer
+
+\verb|v0.2.5|~:~~~Bugfix with exercices (\textsf{[fr]} macro)
+
+\verb|v0.2.4|~:~~~Small box \textit{marker}
+
+\verb|v0.2.3|~:~~~Highway signs + sold banners (see \textsf{[fr]} doc)
+
+\verb|v0.2.2|~:~~~Flared arrow, with \TikZ
+
+\verb|v0.2.1|~:~~~Enhancements for \textit{stars skills} + AutoGrid for \TikZ\ (see \textsf{[fr]} doc)
+
+\verb|v0.2.0|~:~~~Skills with stars (\textsf{fontawesome5} or \TikZ)
+
+\verb|v0.1.9|~:~~~Title banner
+
+\verb|v0.1.8|~:~~~Score banner
+
+\verb|v0.1.7|~:~~~Small patch for \textsf{Vignette} macro (see \texttt{[fr]} documentation)
+
+\verb|v0.1.6|~:~~~Small patchs for \textsf{displayskip} + \textsf{pas-tableur} (see \texttt{[fr]} documentation)
+
+\verb|v0.1.5|~:~~~New macros for boxes with \textsf{tcolorbox} (see \texttt{[fr]} documentation)
+
+\verb|v0.1.4|~:~~~Create a SMS conversation
+
+\verb|v0.1.3|~:~~~Environment for exercise(s) (in french doc)
+
+\verb|v0.1.2|~:~~~Pencil of skills
+
+\verb|v0.1.1|~:~~~Skills table (only french for the moment...)
+
+\verb|v0.1.0|~:~~~Initial version
+
+\vspace*{5mm}
+
+\pagebreak
+
+\section{The package customenvs}
+
+\subsection{Idea}
+
+The idea is to propose some classics environments with customizations (some are, for the moment, only in french) :
+
+\begin{itemize}
+	\item write in \textit{multicols}, with spacings enhancements ;
+	\item present answers for a \textit{MCQ} ;
+	\item create a list with \textit{choosen items} (randomly or by numbers) ;
+	\item present a skill table.
+\end{itemize}
+
+\smallskip
+
+The globa idea is ti propose \textit{user-friendly} environments, with explicit customizations, without using verbose syntax ; but there's other solutions, using for example \MontreCode{\textbackslash vspace} ou \MontreCode{\textbackslash  setlength} or \MontreCode{spacingtricks} package.
+
+\subsection{Loading}
+
+The package loads within the preamble with \MontreCode{\textbackslash usepackage\{customenvs\}}.
+
+Loaded packages are 
+
+\begin{itemize}
+	\item \MontreCode{xstring}, \MontreCode{simplekv}, \MontreCode{listofitems}, \MontreCode{randomlist} and \MontreCode{xintexpr} ;
+	\item \MontreCode{enumitem} ;
+	\item \MontreCode{multicol} ;
+	\item \MontreCode{tabularray} ;
+	\item \MontreCode{fontawesome} ;
+\end{itemize}
+
+Due to limitations, \MontreCode{enumitem}/\MontreCode{multicol}/\MontreCode{tabularray}\MontreCode{fontawesome5/6} can be \textit{un}loaded by \MontreCode{customenvs} (user must load them manually) via options :
+
+\begin{itemize}
+	\item \MontreCode{$\mathtt{\langle}$beamer$\mathtt{\rangle}$} for using with \textsf{beamer} ;
+	\item \MontreCode{$\mathtt{\langle}$noenum$\mathtt{\rangle}$} ;
+	\item \MontreCode{$\mathtt{\langle}$nomulticol$\mathtt{\rangle}$} ;
+	\item \MontreCode{$\mathtt{\langle}$notblr$\mathtt{\rangle}$} ;
+	\item \MontreCode{$\mathtt{\langle}$nofa$\mathtt{\rangle}$}.
+\end{itemize}
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%with all packages
+\usepackage{customenvs}
+
+%with option to no load some packages
+\usepackage[option(s)]{customenvs}
+\end{codehigh}
+
+\pagebreak
+
+\subsection{Subpackage customenvs-tikzpictos (v0.1.2)}
+
+The package \MontreCode{customenvs-tikzpictos}, loaded within \MontreCode{customenvs} (but can be loaded independently), proposes small pictograms.
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%\usepackage{customenvs-tikzpictos} %only if for standalone
+
+\tkzpicto%
+    [keys]
+    <tikz options>
+    {type=params}
+
+%type= wifi/network/stars/speedo/bullseye/skills/pill/calendar
+%params= nb/nblevels (except bullseye) or day/month (calendar)
+%key height= len / auto (without depth) / dauto (with depth)
+\end{codehigh}
+
+\hfill\begin{tblr}{hlines,vlines,cells={font=\sffamily\Large}}
+	Wifi & \pictowifi[colors=purple/yellow]{0}|\pictowifi[colors=purple/yellow]{1}|\pictowifi[colors=purple/yellow]{2}|\pictowifi[colors=purple/yellow]{3}|\pictowifi[colors=purple/yellow]{4}\\
+	Wifi (bars) & \pictowifi[colors=purple/yellow,style=bar]{0}|\pictowifi[colors=purple/yellow,style=bar]{1}|\pictowifi[colors=purple/yellow,style=bar]{2}|\pictowifi[colors=purple/yellow,style=bar]{3}|\pictowifi[colors=purple/yellow,style=bar]{4}\\
+	Network & \pictonetwork[colors=teal/orange]{0}|\pictonetwork[colors=teal/orange]{1}|\pictonetwork[colors=teal/orange]{2}|\pictonetwork[colors=teal/orange]{3}|\pictonetwork[colors=teal/orange]{4}\\
+	Stars & \pictostars[colors=brown/cyan]{0}|\pictostars[colors=brown/cyan]{0.5}|\pictostars[colors=brown/cyan]{3}\\
+	Speedometer & \pictospeedometer[colors=violet/olive]{}|\pictospeedometer[colors=violet/olive]{0}|\pictospeedometer[colors=violet/olive]{0.5}|\pictospeedometer[colors=violet/olive]{5.5}|\pictospeedometer[colors=violet/olive]{6} \\
+	BullsEye & \pictobullseye[colors]|\pictobullseye[colors]<rotate=90>|\pictobullseye[colors]<rotate=180>|\pictobullseye[colors]<rotate=-90>\\
+	Battery & \pictobattery[barcolor=auto]{}|\pictobattery[barcolor=auto]{1}|\pictobattery[barcolor=auto]{2}|\pictobattery[barcolor=auto]{3}\\
+	Battery (flip) & \pictobattery[flip,barcolor=auto]{}|\pictobattery[flip,barcolor=auto]{1}|\pictobattery[flip,barcolor=auto]{2}|\pictobattery[flip,barcolor=auto]{3}\\
+	Skills & \pictoskills[colors={red}]{}|\pictoskills[colors={red}]{1}|\pictoskills[colors={red}]{2}|\pictoskills[colors={red}]{3}\\
+	Pill & \pictopill[colors=blue/red]{}|\pictopill[colors=blue/red]{1}|\pictopill[colors=blue/red]{3}\\
+	TrafficLight & \pictotraffic{}|\pictotraffic{1}|\pictotraffic{2}|\pictotraffic{3}|\pictotraffic{123}|\pictotraffic{13}\\
+	MiniCalendar & \pictocalendar{15/aug.}|\pictocalendar[color=red]{30/dec.}|\pictocalendar[color=blue]{14/feb.}\\
+\end{tblr}\hfill\null
+
+\newpage
+
+\section{Answers for a MCQ}
+
+\subsection{Idea}
+
+The idea is to propose an environment to present answers for a MQC with \MontreCode{tabularray} (and not \MontreCode{multicols}).
+
+\smallskip
+
+It's possible to use 2, 3 or 4 answers (and with 4 answers it's possible to use 2 columns.)
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\AnswersMCQ[options]{list of answers}<tblr options>
+\end{codehigh}
+
+The avalailable \MontreCode{options} are :
+
+\begin{itemize}
+	\item \MontreCode{Width} : \MontreCode{0.99\textbackslash linewidth} by default ;
+	\item \MontreCode{Lines}  : \MontreCode{false} by default ;
+	\item \MontreCode{SpaceCR} for Columns/Rows spacing, within \MontreCode{col/row} or \MontreCode{global} : \MontreCode{6pt/2pt} by default ;
+	\item \MontreCode{NumCols}, 2 or 4 : \MontreCode{4} by default ;
+	\item \MontreCode{Labels} for the labels : \MontreCode{a.} by default ;
+	\begin{itemize}
+		\item with \MontreCode{box} to use a \textit{Box} ;
+		\item with \MontreCode{a} to \textit{enumerate} \MontreCode{a b c d} ;
+		\item with \MontreCode{A} to \textit{enumerate} \MontreCode{A B C D} ;
+		\item with \MontreCode{1} to \textit{enumerate} \MontreCode{1 2 3 4} ;
+	\end{itemize}
+	\item \MontreCode{FontLabels} : \MontreCode{\textbackslash bfseries} by default ;
+	\item \MontreCode{SpaceLabels} : \MontreCode{\textbackslash kern5pt} by default ;
+	\item \MontreCode{Shuffle}, for mixing answers : \MontreCode{false} by default ;
+	\item \MontreCode{Swap}, for ACBD instead of ABCD : \MontreCode{false} by default.
+\end{itemize}
+
+The list of answers must be given within \MontreCode{answA § answB § ...}.
+
+Specific options for \MontreCode{tblr} are given between last optionnal argument, between \MontreCode{<...>}.
+
+\subsection{Examples}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%default output
+\AnswersMCQ{Answer A § Answer B § Answer C § Answer D}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\AnswersMCQ[Lines]{Answer A § Answer B § Answer C § Answer D}
+
+\AnswersMCQ[Lines,Shuffle]{Answer A1 § Answer B1 § Answer C1 § Answer D1}
+
+\AnswersMCQ[Lines,Shuffle]{Answer A2 § Answer B2 § Answer C2 § Answer D2}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\AnswersMCQ[Lines,Labels=(1.),SpaceLabels={~~~}]{Answer A § Answer B § Answer C}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\AnswersMCQ[Labels={A.},FontLabels={\color{red}\bfseries}]%
+    {Answer A § Answer B § Answer C § Answer D}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\AnswersMCQ[Labels={1.},FontLabels={\color{red}\bfseries}]%
+    {Answer A § Answer B § Answer C § Answer D}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\AnswersMCQ[NumCols=2,Labels={A.},FontLabels={\color{red}\bfseries}]%
+    {Answer A § Answer B § Answer C § Answer D}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\AnswersMCQ[NumCols=2,Swap,Labels={A.},FontLabels={\color{red}\bfseries}]%
+    {Answer A § Answer B § Answer C § Answer D}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\AnswersMCQ[Lines,NumCols=2,SpaceCR=6pt/10pt,Labels=box]%
+    {Answer A § Answer B § Answer C § Answer D}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+% checkedbox is \def\MCQanswersbox{\raisebox{-0.2ex}{\faSquare[regular]}}
+\AnswersMCQ[Width=10cm,NumCols=2,Lines]%
+    {$\displaystyle\frac1x$ § $1+\displaystyle\frac1x$ § $-2x^2+5$ § $-\infty$}
+    <rows={1.5cm}>
+\end{demohigh}
+
+\pagebreak
+
+\section{List with picked elements (random or not)}
+
+\subsection{Global use}
+
+The idea is to :
+
+\begin{itemize}
+	\item create a list of items, the base for choices ;
+	\item print the list with picked items.
+\end{itemize}
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\CreateItemsList{list}{macro}{listname}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\ListItemsChoice[keys]{macro}{listname}(numbers)<enumitem options>!beamer options!
+\end{codehigh}
+
+The available \MontreCode{keys} are :
+
+\begin{itemize}
+	\item \MontreCode{Type} : \MontreCode{enum} or \MontreCode{item} ;
+	\item \MontreCode{Random}  : \MontreCode{false} by default.
+\end{itemize}
+
+The second argument, mandatory and between \MontreCode{\{...\}} is the macro for the list.
+
+The third argument, mandatory and between \MontreCode{\{...\}} is the name of the list.
+
+The fourth argument, mandatory and between \MontreCode{(...)} give :
+
+\begin{itemize}
+	\item the number of random items to display, with \MontreCode{Random=true} ;
+	\item the numbers of picked itemps, within \MontreCode{num1,num2,...}.
+\end{itemize}
+
+The next argument, optional and between \MontreCode{<...>} gives specific options to \MontreCode{enumitem} environment.
+
+The last argument, between \MontreCode{!..!} gives specific options to \MontreCode{enumitem} environment with \MontreCode{beamer}.
+
+\medskip
+
+Controls are done :
+
+\begin{itemize}
+	\item to verify that the list doesn't exist (for the creation) ;
+	\item to verify that that the list still exist (for the display).
+\end{itemize}
+
+\subsection{Examples}
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%creation of list ListItems, with macro \mylistofitems
+\CreateItemsList%
+    {Answer A,Answer B,Answer C,Answer D,Answer E,Answer F,Answer G,Answer H}%
+    {\mylistofitems}{ListItems}
+\end{codehigh}
+
+\CreateItemsList%
+{Answer A,Answer B,Answer C,Answer D,Answer E,Answer F,Answer G,Answer H}%
+{\mylistofitems}{ListItems}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%items random
+\ListItemsChoice[Random]{\mylistofitems}{ListItems}(5)
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%items picked 
+\ListItemsChoice{\mylistofitems}{ListItems}(1,4,3,8,2)
+\end{demohigh}
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%creation of list ListItemsB, with macro \mylistofitemsb
+\CreateItemsList%
+    {{$\int_0^1 x^2 dx$},{$\int_0^1 x^3 dx$},{$\int_0^1 x^4 dx$},...}%
+    {\mylistofitemsb}{ListItemsB}
+\end{codehigh}
+
+\CreateItemsList%
+{{$\int_0^1 x^2 dx$},{$\int_0^1 x^3 dx$},{$\int_0^1 x^4 dx$},{$\int_0^1 x^5 dx$},{$\int_0^1 x^6 dx$},{$\int_0^1 x^7 dx$},{$\int_0^1 x^8 dx$}}%
+{\mylistofitemsb}{ListItemsB}
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%items picked 
+\ListItemsChoice[Type=item]{\mylistofitemsb}{ListItemsB}(7,2,1,5,3)<label=$--$>
+\end{codehigh}
+
+\ListItemsChoice[Type=item]{\mylistofitemsb}{ListItemsB}(7,2,1,5,3)<label=$--$>
+
+\pagebreak
+
+\section{Pencil of skills}
+
+\subsection{Global use}
+
+The idea is to :
+
+\begin{itemize}
+	\item present of list of categories and skills ;
+	\item presented like a pencil.
+\end{itemize}
+
+The code (within CC-BY-SA 4.0 license) is adapted from :
+
+\hfill{\footnotesize \url{https://tex.stackexchange.com/questions/504092/replicating-a-fancy-bordered-text-style-in-latex/504145#504145}}\hfill~
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\PencilSkills[keys]<tikz options>{listofskills}
+\end{codehigh}
+
+The style is globally fixed, but there's some customization available.
+
+\subsection{The macro}
+
+Available \MontreCode{keys} are :
+
+\begin{itemize}
+	\item \MontreCode{FontCateg} : font for the categories ;
+	\item \MontreCode{FontBlock} : font for the skills ;
+	\item \MontreCode{Colors} : list of category's colors
+	
+	\MontreCode{BgCateg1/FgCateg1,BgCateg1/FgCateg1,...}
+	
+	(if \MontreCode{FgCateg1} est missing, \MontreCode{black} is used)
+	\item \MontreCode{BlockWidth} : width of skill's block ;
+	\item \MontreCode{Scale} : global scale
+	\item \MontreCode{BlackWhite} : boolean for B\&W.
+\end{itemize}
+
+The second argument, optional and between \MontreCode{<...>} gives specific options to \MontreCode{enumitem} environment.
+
+\smallskip
+
+The last argument, mandatory and between \MontreCode{(...)} give the list of categories/skills, within
+
+\MontreCode{Categ1/ListSkills1,Categ2/ListSkills2,...}.
+
+\subsection{Examples}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%default output
+\PencilSkills{Search/Skill 1\\ Skill 2,Model/{Skill 1\\ Skill 2}}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\PencilSkills[Scale=0.75]%
+    {Search/Skill 1\\Skill 2,Model/{Skill 1\\Skill 2},%
+    Represent/{Skill 1\\Skill 2},Calculate/{Skill 1\\Skill 2},%
+    Reason/{Skill 1\\Skill 2},Communicate/{Skill 1\\Skill 2}}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\PencilSkills[Scale=0.75,BlockWidth=3cm]<rotate=90>{
+    Search/Skill 1\\Skill 2,Model/{Skill 1\\Skill 2}}
+\hspace{1cm}
+\PencilSkills[Scale=0.75,BlockWidth=3cm]<rotate=-90>{
+    Search/Skill 1\\Skill 2,Model/{Skill 1\\Skill 2}}
+\hspace{1cm}
+\PencilSkills[Scale=0.75,BlockWidth=3cm,BlackWhite]<rotate=45>{
+    Search/Skill 1\\Skill 2,Model/{Skill 1\\Skill 2}}
+\end{demohigh}
+
+\pagebreak
+
+\section{Score banner}
+
+\subsection{Global use}
+
+The idea is to insert a score banner, with customization.
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+ScoreBanner[keys]{number}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%default output
+\ScoreBanner{}
+\end{demohigh}
+
+\subsection{The macro}
+
+Available \MontreCode{keys} are :
+
+\begin{itemize}
+	\item \MontreCode{Height} : height of the banner (without the legend) ; \MontreCode{1} by default
+	\item \MontreCode{Ratio} : ratio of boxes ; \MontreCode{0.6} by default
+	\item \MontreCode{Symbols} : labels ; \MontreCode{A,B,C,D,E} by default
+	\item \MontreCode{Legend} : legend (uppercase) ; \MontreCode{score} by default ;
+	\item \MontreCode{Font} : global font ; \MontreCode{\textbackslash bfseries\textbackslash sffamily} by default
+	\item \MontreCode{ShowLegend} : boolean for the legend ;  \MontreCode{false} by default ;
+	\item \MontreCode{Colors} : colors for boxes ;
+	
+	\hfill\MontreCode{colorNS1,colorNS2,colorNS3,colorNS4,colorNS5} by default ;
+	\item \MontreCode{ScaleSymbols} : scale H/V of labels ;  \MontreCode{1.25,1.65} by default ;
+	\item \MontreCode{Colbg} : background color for select box  ;  \MontreCode{white} by default.
+\end{itemize}
+
+\smallskip
+
+If the list of colors doesn't fill all the boxes, \MontreCode{lightgray} color is used.
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\ScoreBanner[Legend=Geometry,Height=2]{4}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25,style/demo=yellow!25]
+%bg of lower part is yellow!25
+\def\lstcouleurs{colorNS1,colorNS2,colorNS3,colorNS4,colorNS5,purple}
+\ScoreBanner%
+  [ScaleSymbols={1.33,2},Height=3.25,ShowLegend=false,Ratio=0.75,
+  Symbols={1,2,3,4,5,6},Colors=\lstcouleurs,
+  Colbg=yellow!25]{1}
+\end{demohigh}
+
+\pagebreak
+
+\section{SMS conversation}
+
+\subsection{Global use}
+
+The idea is to present a conversation of SMS.
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\begin{ChatSMS}[keys]{name}
+  \InSMS(*){time}{msg}
+  \OutSMS*(*){time}{msg}
+\end{ChatSMS}
+\end{codehigh}
+
+The style is globally fixed, but there's some customization available.
+
+\subsection{The environment}
+
+Available \MontreCode{keys} are :
+
+\begin{itemize}
+	\item \MontreCode{height} : height of the window (auto or specific) ; \MontreCode{auto} by default
+	\item \MontreCode{width} : width of the window ; \MontreCode{7cm} by default
+	\item \MontreCode{margin} : margin (L or R) for the bubble \MontreCode{1.5cm} by default
+	\item \MontreCode{color} : \textit{main} color (banner) ; \MontreCode{teal!75!cyan!75!white} by default ;
+	\item \MontreCode{colback} : color for background ; \MontreCode{lightgray!5} by default
+	\item \MontreCode{colorin} : color for incoming SMS ; \MontreCode{lime!25} by default
+	\item \MontreCode{colorout} : color for outcoming SMS ; \MontreCode{teal!25} by default
+	\item \MontreCode{writetxt} : text of sending zone ; \MontreCode{Write} by default
+	\item \MontreCode{fonttxt} : bubble's font ; \MontreCode{\textbackslash normalfont} by default
+	\item \MontreCode{avatar} : avatar of contact ; \MontreCode{\textbackslash faAddressCard} by default
+	\item \MontreCode{dispavatar} : boolean for displaying avatar near the bubbles ; \MontreCode{false} by default
+	\item \MontreCode{blackwhite} : boolean pour black\&white. \MontreCode{false} by default
+\end{itemize}
+
+The argument, mandatory and between \MontreCode{(...)} give the name of the contact.
+
+\subsection{Macros for the bubbles}
+
+Regarding the bubble creation commands, \MontreCode{\textbackslash InSMS} and \MontreCode{\textbackslash OutSMS}:
+
+\begin{itemize}
+	\item the \textit{starred} version does not display the \textit{checkmarks} of \textit{good reception};
+	\item the first mandatory argument is the time to display ;
+	\item the second mandatory argument is the message to display (including multi-lines).
+\end{itemize}
+
+\subsection{Examples}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%with a personal image
+\begin{ChatSMS}%
+  [width=6cm,fonttxt=\sffamily,height=10cm,avatar=img/android,dispavatar]{CP}
+  \InSMS{19:23}{Hi !}
+  \OutSMS{19:23}{Hi !\\ How are you ?}
+  \InSMS{19:25}{Just a problem with a math question\ldots}
+  \OutSMS{19:26}{Wanna help ??}
+  \InSMS{19:28}{Yes, I need to compute $\mathsf{\int_{0}^{1} x^2e^{-x}\,dx}$\ldots}
+  \OutSMS*{19:30}{Take care !!}
+\end{ChatSMS}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\begin{ChatSMS}%
+  [width=8cm,fonttxt=\sffamily,avatar=\faCanadianMapleLeaf,blackwhite]{CP}
+  \InSMS{19:23}{Hi !}
+  \OutSMS{19:23}{Hi !\\ How are you ?}
+  \InSMS{19:25}{Just a problem with a math question\ldots}
+  \OutSMS{19:26}{Wanna help ??}
+  \InSMS{19:28}{Yes, I need to compute $\mathsf{\int_{0}^{1} x^2e^{-x}\,dx}$\ldots}
+  \OutSMS*{19:30}{Take care !!}
+\end{ChatSMS}
+\end{demohigh}
+
+\pagebreak
+
+\section{Title banner}
+
+\subsection{Global usage}
+
+The idea is to propose a banner, made with \TikZ, to present for example a title.
+
+The global style is fixed, but few customization are possible.
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\tkzBannerTri[keys]{number}{title}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\tkzBannerTri{01}{Title of document}
+\end{demohigh}
+
+Available \MontreCode{keys} are :
+
+\begin{itemize}
+	\item \MontreCode{height} (\MontreCode{2.5em} by default)
+	\item \MontreCode{width} (\MontreCode{\textbackslash linewidth} by default)
+	\item \MontreCode{blockwidth} (\MontreCode{2.75em} by default, but can be set to \MontreCode{auto})
+	\item \MontreCode{coltxt} (\MontreCode{white} by default)
+	\item \MontreCode{fonttxt}
+	\item \MontreCode{swap} (\MontreCode{false} by default, for an other style )
+	\item \MontreCode{maincolor} (\MontreCode{darkgray} by default)
+	\item \MontreCode{collight} (\MontreCode{darkgray!25} by default)
+	\item \MontreCode{colmedium} (\MontreCode{darkgray!50} by default)
+	\item \MontreCode{coldark} (\MontreCode{darkgray} by default)
+	\item \MontreCode{logo}
+	\item \MontreCode{type}
+	\item \MontreCode{dispblock} (\MontreCode{true} by default)
+	\item \MontreCode{num} (\MontreCode{true}  by default)
+	\item \MontreCode{customtype}
+	\item \MontreCode{custommulti} (\MontreCode{false} by default)
+\end{itemize}
+
+\subsection{Examples}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\tkzBannerTri
+  [maincolor=red,type=EXERCISES,blockwidth=auto,logo=\faAddressBook]
+  {7}{My doc}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\tkzBannerTri
+  [maincolor=red,type=EXERCISES,blockwidth=5em,logo=\faAddressBook]
+  {7}{My doc}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\tkzBannerTri
+  [maincolor=red,type=EXERCISES,blockwidth=auto,logo=\faAddressBook,swap]
+  {07}{My doc}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\tkzBannerTri
+  [dispblock=false,maincolor=teal,logo=\faSchool]
+  {}{My doc}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\tkzBannerTri
+  [maincolor=olive,customtype=TP,blockwidth=4em,logo=\faAddressBook,height=4em]
+  {7}{My doc}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\tkzBannerTriAlt
+  [maincolor=violet,type=UE3.1,blockwidth=1.25cm,logo=\faGraduationCap,height=1.25cm]
+  {TP}{My doc}
+\end{demohigh}
+
+\pagebreak
+
+\section{Various commands}
+
+\subsection{Difficulty levels with stars (fontawesome5)}
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\DiffLevelStars[max level (3)]{level}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\DiffLevelStars{0}\par
+\DiffLevelStars{2.5}\par
+\textcolor{teal}{\LARGE\DiffLevelStars[5]{4}}\par
+\DiffLevelStars[5]{1.5}\par
+\end{demohigh}
+
+\subsection{Difficulty levels with stars (tikz)}
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\tkzLevelStars[colframe=...,colback=...,offset=...,maxlevel=...,valign=...]{level}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\tkzLevelStars{2.5}\par
+{\LARGE We ty inline \tkzLevelStars{2.25} with score 2.25}\par
+{\LARGE We ty inline \tkzLevelStars[valign=false]{1.75} with score 1.75}\par
+\tkzLevelStars[colframe=red,colback=yellow,maxlevel=5]{3}
+\end{demohigh}
+
+\subsection{Flared arrow}
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\tkzFlaredArrow[%
+  color=...,           %color of arrow
+  arrowsize=...,       %size (auto or H/W )
+  bend=...,            %empty for straigth or left/... or right/...
+  thickness=...,       %size for the beginning
+  factor=...,          %factor for calculing size for ending
+  arrowstyle=...,      %style (arrows.meta)
+  move=...             %boolean for moving instead coordinates
+  ]%
+  {begin}{end or move}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%arrow 0.5mm -> 1.25mm
+\begin{tikzpicture}
+\tkzFlaredArrow%
+  [thickness=0.5mm,factor=2.5,bend=left/30,color=red,arrowstyle=Triangle]%
+  {0,0}{5,1.5}
+\end{tikzpicture}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\begin{tikzpicture}
+  \draw[thin,lightgray] (-3,-1) grid (5,5) ;
+  \coordinate (A) at (0,0) ; \coordinate (B) at (4,1) ;
+  \coordinate (C) at (1,1) ; \coordinate (D) at (5,4) ;
+  \coordinate (E) at (0,1) ; \coordinate (F) at (0,5) ;
+  \coordinate (G) at (-2,0) ;
+  \tkzFlaredArrow[color=green,arrowstyle=Triangle]{A}{B}
+  \tkzFlaredArrow[color=blue,bend=right/10]{D}{C}
+  \tkzFlaredArrow%
+    [color=red,bend=left/45,arrowstyle=Stealth,thickness=0.1mm,factor=10]%
+    {-2,1}{0,4}
+  \tkzFlaredArrow%
+    [color=red,bend=right/45,thickness=0.1mm,factor=10,arrowstyle=Stealth]%
+    {-2,1}{0,4}
+  \tkzFlaredArrow[color=teal,move,bend=left/10]{-3,-1}{5,1}
+  \end{tikzpicture}
+\end{demohigh}
+
+\subsection{Small markerbox}
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\tbcmarker[color=...,width=...,font=...]{text}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\tbcmarker{my text}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\tbcmarker[color=olive,font=\normalfont\normalsize]{my text}
+\end{demohigh}
+
+%\subsection{Letters wirh pixelart style (experimental)}
+%
+%\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%%one letter only
+%\PixlLetter%
+%    [height=...,thick=...,color=...,gridcolor=...,
+%    offseth=...,offsetv=...,gridafter=...,nospaceafter=...]
+%    <tikzpicture options>
+%    {letter}
+%
+%%several words
+%\PixlLetters%
+%    [height=...,thick=...,color=...,gridcolor=...,
+%    offseth=...,offsetv=...,gridafter=...,nospaceafter=...]
+%    {letters}
+%\end{codehigh}
+%
+%\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%\PixlLetter{M}\PixlLetter{o}\PixlLetter{n}\PixlLetter{k}\PixlLetter{e}\PixlLetter{y}
+%\end{codehigh}
+%
+%\PixlLetter{M}\PixlLetter{o}\PixlLetter{n}\PixlLetter{k}\PixlLetter{e}\PixlLetter{y}
+%
+%\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%\PixlLetters[height=2cm,color=red,gridafter,offsetv=1]{(Monkey)}
+%\end{codehigh}
+%
+%\PixlLetters[height=2cm,color=red,gridafter,offsetv=1]{(Monkey)}
+%
+%\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%\PixlLetters[color=blue]{Monkeys roxxxx !?}
+%\end{codehigh}
+%
+%\PixlLetters[color=blue]{Monkeys roxxxx !?}
+%
+%\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%\PixlLetters[color=red]{1+1=2}
+%\end{codehigh}
+%
+%\PixlLetters[color=red]{1+1=2}
+
+%\subsection{Wheel of skills / speedometer}
+%
+%\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%\WheelOfSkills[%
+%    Radius=...,      %radius of wheel
+%    Mark=...,        %absolute position of optional marker
+%    Font=...,        %font of optional labels
+%    SkillsList=...,  %list of optional skill labels
+%    ]%
+%    {number of skills or list of colors}
+%\end{codehigh}
+%
+%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%\WheelOfSkills[%
+%    Radius=3cm,%
+%    Mark=5.85,%
+%    Font=\scriptsize\bfseries\ttfamily,%
+%    SkillsList={Niv.1,Niv.2,Niv.3,Niv.4,Niv.5,Niv.6,Niv.7,Niv.8,Niv.9,Niv.10}]%
+%    {10}%
+%\end{demohigh}
+%
+%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%\WheelOfSkills[%
+%    Mark=1.5,%
+%    Font=\scriptsize\bfseries\sffamily,%
+%    SkillsList={LOW-MODERATE,NORMAL,HIGH,VERY HIGH,SEVERE,EXTREME,CATASTROPHIC}
+%    ]%
+%    {yellow!50,orange!50,red!50,blue!50,teal!50,purple!50,violet!50}%
+%\end{demohigh}
+%
+%\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%\begin{SkillsWheel}[%
+%    Radius=...,      %radius of wheel
+%    Mark=...,        %absolute position of optional marker
+%    Font=...,        %font of optional labels
+%    SkillsList=...,  %list of optional skill labels
+%    ]{number of skills or list of colors}
+%    \PutIconsSkills[Pos=...,Scale=...]{list of icons}
+%\end{SkillsWheel}
+%\end{codehigh}
+%
+%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%\begin{SkillsWheel}[Radius=5cm,Mark=5.85]%
+%        {yellow!50,orange!50,red!50,blue!50,teal!50,purple!50,violet!50}
+%    \PutIconsSkills[Echelle=3]%
+%    {\faPython,\faAdjust,\faAngellist,\faAmbulance,\faAdjust,\faBabyCarriage,\faBlender}
+%\end{SkillsWheel}
+%\end{demohigh}
+%
+%\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%%inline version, with automatic dimensions
+%\miniskillwheel[Colors=...,Mark=...]{nb of levels}
+%
+%%normal version
+%\tkzspeedometer[Size=...,Mark=...,Colors=...]{nb levels}
+%\end{codehigh}
+%
+%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%%inline version, with automatic dimensions
+%\scalebox{2.25}[2.25]{\sffamily Small inline \textit{skillwheel}
+%\miniskillwheel[Colors=red/blue,Mark=4.33]{7} for testing.}
+%
+%%normal version
+%\tkzspeedometer[Size=5cm,Mark=2.25,Colors=teal/magenta]{6}
+%\end{demohigh}
+
+\subsection{Annotate an image}
+
+The idea is to provide a way of annotating an image, using an environment and a command which are linked to \TikZ.
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\begin{imgannotate}[keys][includegraphics options]{imagefile with extension}
+  \puttxtonimg[tikz node options]{coordinates}{txt}
+  \puttxtonimg*[tikz node options]{coordinates within percentage}{txt}
+\end{imgannotate}
+%====keys
+%clip=...     : boolean for clipping img
+%node=...     : node name for reusing (remember picture)
+%grid=...     : optionnal value for showing helping grid
+%subgrid=...  : integer value for subgrid
+%gridcolor=...: grid color
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%\usepackage[auto,outline]{contour}
+\begin{imgannotate}[grid=1][height=4cm]{example-image.png}
+  \puttxtonimg[scale=5,rotate=30]
+    {1,1}{\contourlength{0.05em}\color{white}\contour{black}{$\pi$}}
+  \puttxtonimg*[scale=1.5,rotate=-15]
+    {0.66,0.75}{\contourlength{0.025em}\color{violet}\contour{yellow}{Pythagore}}
+\end{imgannotate}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\begin{imgannotate}[node=IMGTEST][height=5cm]<rotate=10>{example-image-golden.pdf}
+  %tikz usual commands
+  \draw (IMGTEST.center) node[above=5mm,font=\Huge\ttfamily\bfseries,text=blue] {TEST1} ;
+  \draw (IMGTEST.north west) node[draw,thick,red,inner sep=0.5mm,below right=2.5mm,font=\LARGE\sffamily\bfseries,text=red] {TEST2} ;
+\end{imgannotate}
+\end{demohigh}
+
+\subsection{Lengths}
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\getwideststring[\macro]{elt1,elt2,...eltn}
+
+\halignmakebox[align option]{elt}{list of elements}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%widest string (\tmpwideststring by default)
+\getwideststring{Exercise 1,Evaluation 2,Test n°3}\the\tmpwideststring
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%without
+\sffamily\Large
+Exercise 1 (10 points)\\
+Evaluation 2 (8 points) \\
+Test n°3 (4 points)
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%with
+\sffamily\Large
+\halignmakebox[l]{Exercise 1}{Exercise 1,Evaluation 2,Test n°3} 
+(\halignmakebox[r]{10}{10,8,4} points)
+
+\halignmakebox[l]{Evaluation 2}{Exercise 1,Evaluation 2,Test n°3} 
+(\halignmakebox[r]{8}{10,8,4} points)
+
+\halignmakebox[l]{Test n°3}{Exercise 1,Evaluation 2,Test n°3} 
+(\halignmakebox[r]{4}{10,8,4} points)
+\end{demohigh}
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%width
+\storewidthtolength[delta]{box}{\macro}
+%height
+\storeheighttolength[delta]{box}{\macro}
+%totalheight
+\storetotalheighttolength[delta]{box}{\macro}
+%depth
+\storedepthtolength[delta]{box}{\macro}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\def\tmpbox{\large $1+\frac{1}{x}$}
+%
+\storewidthtolength{\tmpbox}{\mytmpboxwidth}\the\mytmpboxwidth
+
+\storewidthtolength[10pt]{\tmpbox}{\mytmpboxwidthdelta}\the\mytmpboxwidthdelta
+
+\storeheighttolength{\tmpbox}{\mytmpboxheight}\the\mytmpboxheight
+
+\storetotalheighttolength{\tmpbox}{\mytmpboxtotheight}\the\mytmpboxtotheight
+
+\storedepthtolength{\tmpbox}{\mytmpboxdepth}\the\mytmpboxdepth
+\end{demohigh}
+
+\begin{center}
+\def\tmpbox{\large $1+\frac{1}{x}$}%
+\storewidthtolength{\tmpbox}{\mytmpboxwidth}%
+\storeheighttolength{\tmpbox}{\mytmpboxheight}%
+\storetotalheighttolength{\tmpbox}{\mytmpboxtotheight}%
+\storedepthtolength{\tmpbox}{\mytmpboxdepth}%
+\begin{tikzpicture}[scale=5,transform shape]
+	\node[draw=lightgray,inner sep=0pt,text=black] (BOX) {\large $1+\frac{1}{x}$} ;
+	\begin{scope}
+		\clip (BOX) ;
+		\draw[lightgray] ([yshift=\mytmpboxdepth]BOX.south west) --++ ({\mytmpboxwidth+2\pgflinewidth},0) ;
+	\end{scope}
+	\draw[lightgray] ([yshift=\mytmpboxdepth]BOX.south west) --++ ({\mytmpboxwidth},0) ;
+	\draw[<->,>=latex] ([yshift=-2pt]BOX.south west) --++ ({\mytmpboxwidth},0) node[midway,below,scale=0.2] {\the\mytmpboxwidth} ;
+	\draw[<->,>=latex] ([xshift=-2pt]BOX.south west) --++ (0,\mytmpboxdepth) node[midway,left,scale=0.2] {\the\mytmpboxdepth} ;
+	\draw[<->,>=latex] ([xshift=-2pt]BOX.north west) --++ (0,-\mytmpboxheight) node[midway,left,scale=0.2] {\the\mytmpboxheight} ;
+	\draw[<->,>=latex] ([xshift=2pt]BOX.south east) --++ (0,\mytmpboxtotheight) node[midway,right,scale=0.2] {\the\mytmpboxtotheight} ;
+\end{tikzpicture}
+\end{center}
+
+
+%\subsection{Pictoskill}
+%
+%\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%\pictoskills[%
+%  colors=...,      %main color
+%  height=...,      %height (unit) or auto or dauto (with depth)
+%  hoffset=...,     %horizontal sep for bars
+%  opacity=...,     %opacty of light parts
+%  ]%
+%  {nb}
+%\end{codehigh}
+%
+%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%%with fixed height
+%\pictoskills[height=1cm]{1}
+%\end{demohigh}
+%
+%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%%with fixed height and color
+%\pictoskills[colors=teal,height=2em]{2}
+%\end{demohigh}
+%
+%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%%automatic height, without depth
+%\begin{LARGE}
+%Inline, without depth, we get \pictoskills[colors=skillorange,height=auto]{2}
+%and \pictoskills[colors=skillred,hoffset=0.1]{1}
+%\end{LARGE}
+%\end{demohigh}
+%
+%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%%automatic height, with depth
+%\begin{Huge}
+%\sffamily
+%Inline, with depth, we get \pictoskills[colors=skillorange]{2}
+%and \pictoskills[colors=skillred,hoffset=0.025]{1}
+%\end{Huge}
+%\end{demohigh}
+%
+%\subsection{PictoBullsEye}
+%
+%\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%\pictobullseye[%
+%  maincolor=...,       %main color
+%  height=...,          %height (unit) or auto (with depth, or not with *)
+%  colors=...,          %boolean for coloring areas
+%  listcolors=...,      %list of three colors for aeras
+%  ]%
+%  <tikz options>
+%\end{codehigh}
+%
+%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%%with fixed height
+%{\tikz\draw (0,0) grid (1,2);}%
+%\pictobullseye[height=2cm,maincolor=red]%
+%\pictobullseye[height=1cm,maincolor=blue]<rotate=90>%
+%\pictobullseye[height=0.75cm,maincolor=gray]<rotate=-90>%
+%{\tikz\draw (0,0) grid (1,2);}
+%\end{demohigh}
+%
+%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%%inline with and without depth, based on (q)H characters of current font
+%A try q\pictobullseye\pictobullseye[height=auto,maincolor=red]H inline.
+%\end{demohigh}
+%
+%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+%\scalebox{4}[4]{%
+%Inline tests\,\pictobullseye[height=auto,colors,listcolors={green!50,orange!50,red!50}]\,%
+%and\,\pictobullseye[colors,listcolors={red!50,yellow!50,teal!50}]<rotate=90>!%
+%}
+%\end{demohigh}
+
+\end{document}

@@ -1,0 +1,1162 @@
+% Author..........: C. Pierquet
+% licence.........: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{customenvs-tikzpictos}[2025/06/23 0.1.3 Small pictograms, made with tikz]
+
+%====HISTORY
+% v 0.1.3	Clippy
+% v 0.1.2	Mini-calendar
+% v 0.1.1	PictoTraffic
+% v 0.1.0	Initial version subpackage of customenvs
+
+%====PACKAGES
+\RequirePackage{xintexpr}
+\RequirePackage{simplekv}
+\RequirePackage{xstring}
+\RequirePackage{listofitems}
+\RequirePackage{ifthen}
+\RequirePackage{calc}
+\RequirePackage{tikz}
+\usetikzlibrary{shapes.geometric,bbox}
+
+%====pictostars
+\newlength{\pictotmphauteuretoiles}
+\newlength{\pictotmpprofondeuretoiles}
+\newlength{\pictotmpoffsetetoiles}
+\setlength{\pictotmpoffsetetoiles}{0.25pt}
+
+\defKV[pictostars]{%
+	colors=\def\tkzLevelStarsColors{#1},%
+	offset=\setlength{\pictotmpoffsetetoiles}{#1},%
+	height=\def\pictotmpheightetetoiles{#1}
+}
+
+\setKVdefault[pictostars]{%
+	colors={black/lightgray},%
+	offset={0.01em},%
+	height=dauto
+}
+
+\NewDocumentCommand{\pictostars}{O{}D<>{}m}{%(OK) modif avec hauteur
+	%#1=clés
+	%#2=options tikz
+	%#3=données nb/nblev
+	\restoreKV[pictostars]%
+	\setKV[pictostars]{#1}%
+	%lecture des données
+	\IfSubStr{#3}{/}%
+		{%
+			\StrCut{#3}{/}{\pictotmpnbetoiles}{\tkzLevelStarsMaxLevel}%param complet
+		}%
+		{%
+			\IfStrEq{#3}{}%
+				{\def\pictotmpnbetoiles{0}\def\tkzLevelStarsMaxLevel{3}}%si vide 0/3
+				{\def\pictotmpnbetoiles{#3}\def\tkzLevelStarsMaxLevel{3}}%sinon #3/3
+		}%
+	%couleurs
+	\IfSubStr{\tkzLevelStarsColors}{/}%
+		{%
+			\StrCut{\tkzLevelStarsColors}{/}{\tkzLevelStarsColor}{\tkzLevelStarsColorBg}%
+		}%
+		{%
+			\def\tkzLevelStarsColor{\tkzLevelStarsColors}\def\tkzLevelStarsColorBg{\tkzLevelStarsColors}%
+		}%
+	%lengths
+	\IfSubStr{\pictotmpheightetetoiles}{auto}%
+		{%
+			\IfStrEq{\pictotmpheightetetoiles}{auto}%
+				{%
+					\settototalheight{\pictotmphauteuretoiles}{\hbox{HLM}}%
+					\setlength{\pictotmphauteuretoiles}{0.975\pictotmphauteuretoiles}%
+					%classic tikzpicture
+					\begin{tikzpicture}[bezier bounding box,fill=\tkzLevelStarsColorBg,draw=\tkzLevelStarsColor,rounded corners={0.05\pictotmphauteuretoiles},line width={0.05\pictotmphauteuretoiles},#2]
+				}{}%
+			\IfStrEq{\pictotmpheightetetoiles}{dauto}%
+				{%
+					\settototalheight{\pictotmphauteuretoiles}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+					\setlength{\pictotmphauteuretoiles}{0.975\pictotmphauteuretoiles}%
+					\settodepth{\pictotmpprofondeuretoiles}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+					%raised tikzpicture
+					\begin{tikzpicture}[bezier bounding box,baseline={-\pictotmpprofondeuretoiles},fill=\tkzLevelStarsColorBg,draw=\tkzLevelStarsColor,rounded corners={0.05\pictotmphauteuretoiles},line width={0.05\pictotmphauteuretoiles},#2]
+				}{}%
+		}%
+		{%
+			\setlength\pictotmphauteuretoiles{\pictotmpheightetetoiles}%
+			%classic tikzpicture
+			\begin{tikzpicture}[bezier bounding box,fill=\tkzLevelStarsColorBg,draw=\tkzLevelStarsColor,rounded corners={0.05\pictotmphauteuretoiles},line width={0.05\pictotmphauteuretoiles},#2]
+		}%
+		\foreach \X in {1,...,\tkzLevelStarsMaxLevel}{%
+			\xdef\tmpxfill{\xintfloateval{min(1,max(1+(\pictotmpnbetoiles)-\X,0))}}%
+			\path ({\X*(\pictotmphauteuretoiles+\pictotmpoffsetetoiles)},0) node[star,draw,star point height={0.25\pictotmphauteuretoiles},minimum size={\pictotmphauteuretoiles},inner sep=0pt,path picture={\fill (path picture bounding box.south west) rectangle  ([xshift=\tmpxfill*0.9515*\pictotmphauteuretoiles]path picture bounding box.north west);}]{};
+		}
+	\end{tikzpicture}%
+}
+
+%====PICTO SPEEDO
+\newlength{\pictotmphauteurgradniv}
+
+\defKV[pictoskillswheel]{%
+	colors=\def\miniskillswheelcol{#1},%
+	height=\def\miniskillswheelheight{#1}
+}
+\setKVdefault[pictoskillswheel]{%
+	colors=black,%
+	height=dauto
+}
+
+\NewDocumentCommand\pictospeedometer{O{}D<>{}m}{%(OK) à voir avec hauteur auto...
+	%#1 = clés
+	%#2 = options tikz
+	%#2 = données nb/nblev
+	\restoreKV[pictoskillswheel]%
+	\setKV[pictoskillswheel]{#1}%
+	%height
+	\IfSubStr{\miniskillswheelheight}{auto}%
+		{%
+			\IfStrEq{\miniskillswheelheight}{auto}%
+				{%
+					\settototalheight{\pictotmphauteurgradniv}{\hbox{AZERTYUIOPHL}}%
+					\setlength{\pictotmphauteurgradniv}{0.95\pictotmphauteurgradniv}%
+				}{}%
+			\IfStrEq{\miniskillswheelheight}{dauto}%
+				{%
+					\settototalheight{\pictotmphauteurgradniv}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+					\setlength{\pictotmphauteurgradniv}{0.95\pictotmphauteurgradniv}%
+				}{}%
+		}%
+		{%
+			\setlength\pictotmphauteurgradniv{\miniskillswheelheight}%
+		}%
+	%data
+	\IfStrEq{#3}{}%lecture des données
+		{\def\miniskillswheelmark{}\def\pictospeednb{6}}%
+		{%
+			\IfSubStr{#3}{/}%
+				{\StrCut{#3}{/}{\miniskillswheelmark}{\pictospeednb}}%
+				{\def\miniskillswheelmark{#3}\def\pictospeednb{6}}%
+		}%
+	\IfEq{\miniskillswheelmark}{}%
+		{}%
+		{%
+			\xintifboolexpr{\miniskillswheelmark >= 0 'and' \miniskillswheelmark <= \pictospeednb}%
+				{%
+					\xdef\miniskilswheelposcurs{\xintfloateval{180-180*(\miniskillswheelmark)/(\pictospeednb)}}%
+				}%
+				{%
+					\xdef\miniskilswheelposcurs{\xintfloateval{0.5*(\pictospeednb)}}%
+				}%
+		}%
+	\IfSubStr{\miniskillswheelcol}{/}%
+		{%
+			\StrCut{\miniskillswheelcol}{/}{\miniskillswheelcolp}{\miniskillswheelcols}%
+		}%
+		{%
+			\xdef\miniskillswheelcolp{\miniskillswheelcol}\xdef\miniskillswheelcols{\miniskillswheelcol}%
+		}%
+	\IfSubStr{\miniskillswheelheight}{auto}%
+		{%
+			\IfStrEq{\miniskillswheelheight}{auto}%
+				{%
+					%classic tikzpicture
+					\begin{tikzpicture}[bezier bounding box,line width={0.066\pictotmphauteurgradniv},#2,transform shape]
+				}{}%
+			\IfStrEq{\miniskillswheelheight}{dauto}%
+				{%
+					%raised tikzpicture
+					\begin{tikzpicture}[bezier bounding box,baseline={-0.01\pictotmphauteurgradniv},line width={0.066\pictotmphauteurgradniv},#2,transform shape]
+				}{}%
+		}%
+		{%
+			%classic tikzpicture
+			\begin{tikzpicture}[bezier bounding box,line width={0.066\pictotmphauteurgradniv},#2,transform shape]
+		}%
+		\draw[\miniskillswheelcolp] (-15:{0.7588\pictotmphauteurgradniv}) arc(-15:195:{0.7588\pictotmphauteurgradniv}) --cycle ;
+		\foreach \i in {0,...,\pictospeednb}{%
+			\draw[\miniskillswheelcolp,line cap=round] ({180-180*(\i)/\pictospeednb}:{0.55\pictotmphauteurgradniv})--({180-180*(\i)/\pictospeednb}:{0.65\pictotmphauteurgradniv}) ;
+		}
+		\IfEq{\miniskillswheelmark}{}%
+			{}%
+			{%
+				\draw[\miniskillswheelcols] (0,0) circle[radius=0.1\pictotmphauteurgradniv] ;
+				\draw[\miniskillswheelcols,line cap=round] ({\miniskilswheelposcurs}:{0.1\pictotmphauteurgradniv}) -- ({\miniskilswheelposcurs}:{0.6125\pictotmphauteurgradniv}) ;
+			}%
+	\end{tikzpicture}%
+}
+
+%====PICTO BULLSEYE
+\defKV[tkzArrowBullsEye]{%
+	height=\def\heightarrowbullseye{#1},%
+	maincolor=\def\colorarrowbullseye{#1},%
+	listcolors=\def\colorslistarrowbullseye{#1}
+}
+\setKVdefault[tkzArrowBullsEye]{%
+	height=dauto,%
+	maincolor={},%
+	color=false,%
+	colors=false,%
+	listcolors={yellow,red,blue!50!cyan}
+}
+
+\newcommand\inttkzArrowBullsEye{
+	\draw (54:2.25) arc (54:396:2.25) (0,0) circle[radius=0.6] (0,0) circle[radius=1.36] ;
+	\draw[line cap=round,line join=round] (0,0)--(45:1.7) -- (55:2.5) -- (52:3.5) -- (45:3.1) -- (38:3.5) -- (35:2.5) -- (45:1.7) -- cycle;
+}
+
+\newcommand\intcolortkzArrowBullsEye{
+	\filldraw[black,fill=\colbullseyeC] (0,0) circle[radius=2.25] ;%
+	\filldraw[black,fill=\colbullseyeB] (0,0) circle[radius=1.36] ;
+	\filldraw[black,fill=\colbullseyeA] (0,0) circle[radius=0.6] ;
+	\draw[black,fill=white,line cap=round,line join=round] (0,0)--(45:1.7) -- (55:2.5) -- (52:3.5) -- (45:3.1) -- (38:3.5) -- (35:2.5) -- (45:1.7) -- cycle;
+}
+
+\def\calcheightofchars{H}
+\def\calctotheightofchars{qH}
+\def\calcdepthofchars{qH}
+
+\newlength\totheightarrowbullseye
+\newlength\depthbullseye
+
+\NewDocumentCommand\pictobullseye{O{}D<>{}}{%(OK)
+	%#1 = keys
+	%#2 = tikz options
+	\restoreKV[tkzArrowBullsEye]%
+	\setKV[tkzArrowBullsEye]{#1}%
+	\ifboolKV[tkzArrowBullsEye]{colors}%
+		{\setKV[tkzArrowBullsEye]{color=true}}%
+		{}%
+	\ifboolKV[tkzArrowBullsEye]{color}%
+		{%
+			\setsepchar{,}\readlist\lstcolorslistarrowbullseye{\colorslistarrowbullseye}%
+			\itemtomacro\lstcolorslistarrowbullseye[1]\colbullseyeA%
+			\itemtomacro\lstcolorslistarrowbullseye[2]\colbullseyeB%
+			\itemtomacro\lstcolorslistarrowbullseye[3]\colbullseyeC%
+		}%
+		{}%
+	%scale
+	\IfSubStr{\heightarrowbullseye}{auto}%
+		{%
+			\IfStrEq{\heightarrowbullseye}{dauto}%
+				{%dauto with depth
+					\settototalheight\totheightarrowbullseye{\hbox{\calctotheightofchars}}%
+					\settodepth\depthbullseye{\hbox{\calcdepthofchars}}%
+				}%
+				{%auto without depth
+					\settototalheight\totheightarrowbullseye{\hbox{\calcheightofchars}}%
+				}%
+		}%
+		{%
+			\setlength\totheightarrowbullseye{\heightarrowbullseye}%
+		}%
+	%scale + style
+	\pgfmathsetmacro{\tikzarrowbullseyescale}{\totheightarrowbullseye/53mm}%
+	\tikzset{tkzarrowbullseye/.style={scale=\tikzarrowbullseyescale,line width=\fpeval{2.75*\tikzarrowbullseyescale}mm,bezier bounding box}}%
+	%arrow
+	\IfSubStr{\heightarrowbullseye}{auto}%
+		{%
+			\IfStrEq{\heightarrowbullseye}{dauto}%
+				{%raised tikzpicture
+					\raisebox{-\depthbullseye}{%
+						\begin{tikzpicture}[\colorarrowbullseye,tkzarrowbullseye,#2]
+							\ifboolKV[tkzArrowBullsEye]{color}{\intcolortkzArrowBullsEye}{\inttkzArrowBullsEye}
+						\end{tikzpicture}%
+					}%
+				}%
+				{%classic tikzpicture
+					\begin{tikzpicture}[\colorarrowbullseye,tkzarrowbullseye,#2]
+						\ifboolKV[tkzArrowBullsEye]{color}{\intcolortkzArrowBullsEye}{\inttkzArrowBullsEye}
+					\end{tikzpicture}%
+				}%
+		}%
+		{%
+			%classic tikzpicture
+			\begin{tikzpicture}[\colorarrowbullseye,tkzarrowbullseye,#2]
+				\ifboolKV[tkzArrowBullsEye]{color}{\intcolortkzArrowBullsEye}{\inttkzArrowBullsEye}
+			\end{tikzpicture}%
+		}%
+}
+%alias
+\NewCommandCopy\tkzBullsEyeArrow\pictobullseye
+
+%====PICTO BATTERY
+\newlength\unittkzbattery
+\newlength\tmpheightofcharstkzbattery
+\newlength\tmpdepthofcharstkzbattery
+\newlength\tmpraisevofkzbattery
+
+\NewDocumentCommand\inttkzbattery{O{}O{}m}{%
+	%#1=maincolor
+	%#2=fillcolor
+	%#3=level
+	\xdef\heightbatterylevel{\fpeval{(0.9)/(\pictobatterynblevels)-\pictobatterystretch}}%
+	\xdef\offsetbatterylevel{\fpeval{(1-(\pictobatterynblevels)*(\heightbatterylevel))/(\pictobatterynblevels+1)}}%
+	\draw[#1,line width=0.125\unittkzbattery,rounded corners=0.033\unittkzbattery,postaction={fill=white}] (-0.33,0) rectangle++ (0.66,1) ;
+	\fill[#1,line width=0.05\unittkzbattery,rounded corners=0.01\unittkzbattery] ([yshift=0.0625\unittkzbattery]-0.15,1) rectangle++ (0.3,0.1) ;
+	\ifnum#3=0\relax%
+	\else%
+		\foreach \i in {1,...,#3}{%
+			\xintifboolexpr{#3 >= \i}%
+				{%
+					\fill[#2,line width=0.125\unittkzbattery,rounded corners=0.033\unittkzbattery] ({-0.33+\offsetbatterylevel},{(\i-1)*\heightbatterylevel+(\i)*\offsetbatterylevel}) rectangle++ ({0.66-2*\offsetbatterylevel},{\heightbatterylevel}) ;
+				}{}%
+		}%
+	\fi%
+}
+
+\defKV[pictobattery]{%
+	maincolor=\def\pictobatterycolor{#1},%
+	barcolor=\def\pictobatteryfillcolor{#1},%
+	height=\def\pictobatteryheight{#1},%
+	scale=\def\pictobatteryscale{#1},%
+	innermargin=\def\pictobatterystretch{#1}
+}
+\setKVdefault[pictobattery]{%
+	maincolor={},%
+	barcolor=lightgray,%
+	height=dauto,%
+	flip=false,%
+	scale=1,%
+	innermargin=0.03,%
+	shaded=false
+}
+
+\NewDocumentCommand\pictobattery{O{}D<>{}m}{%(OK)
+	%#1=clés
+	%#2=options tikz
+	%#3=données nb/niv
+	\restoreKV[pictobattery]%
+	\setKV[pictobattery]{#1}%
+	\IfStrEq{#3}{}{\xdef\tmpargggg{0}}{\xdef\tmpargggg{#3}}%
+	\IfSubStr{\tmpargggg}{/}%
+		{%
+			\StrCut{\tmpargggg}{/}{\tmpbattlevel}{\pictobatterynblevels}%
+		}%
+		{%
+			\xdef\tmpbattlevel{\tmpargggg}%
+			\xdef\pictobatterynblevels{3}%
+		}%
+	\IfStrEqCase{\pictobatteryheight}{%
+		{dauto}{\settototalheight\tmpheightofcharstkzbattery{qH}\settodepth\tmpdepthofcharstkzbattery{qH}}%
+		{auto}{\settototalheight\tmpheightofcharstkzbattery{H}\settodepth\tmpdepthofcharstkzbattery{H}}%
+	}[%
+		\setlength\tmpheightofcharstkzbattery{\pictobatteryheight}%
+	]%
+	\ifboolKV[pictobattery]{shaded}%
+		{%
+			\xdef\levelshededbattery{\fpeval{(\tmpbattlevel)/(\pictobatterynblevels)*100}}%
+			\xdef\pictobatteryfillcolor{\pictobatteryfillcolor!\levelshededbattery}%
+		}%
+		{%
+			\IfStrEq{\pictobatteryfillcolor}{auto}%
+				{%
+					\IfStrEq{\pictobatterynblevels}{2}%
+						{%
+							\xintifboolexpr{\tmpbattlevel == 0}{\xdef\pictobatteryfillcolor{}}{}%
+							\xintifboolexpr{\tmpbattlevel == 1}{\xdef\pictobatteryfillcolor{orange}}{}%
+							\xintifboolexpr{\tmpbattlevel == 2}{\xdef\pictobatteryfillcolor{green!75!black}}{}%
+						}{}%
+					\IfStrEq{\pictobatterynblevels}{3}%
+						{%
+							\xintifboolexpr{\tmpbattlevel == 0}{\xdef\pictobatteryfillcolor{}}{}%
+							\xintifboolexpr{\tmpbattlevel == 1}{\xdef\pictobatteryfillcolor{red}}{}%
+							\xintifboolexpr{\tmpbattlevel == 2}{\xdef\pictobatteryfillcolor{orange}}{}%
+							\xintifboolexpr{\tmpbattlevel == 3}{\xdef\pictobatteryfillcolor{green!75!black}}{}%
+						}{}%
+					\IfStrEq{\pictobatterynblevels}{4}%
+						{%
+							\xintifboolexpr{\tmpbattlevel == 0}{\xdef\pictobatteryfillcolor{}}{}%
+							\xintifboolexpr{\tmpbattlevel == 1}{\xdef\pictobatteryfillcolor{red}}{}%
+							\xintifboolexpr{\tmpbattlevel == 2}{\xdef\pictobatteryfillcolor{orange}}{}%
+							\xintifboolexpr{\tmpbattlevel == 3}{\xdef\pictobatteryfillcolor{yellow}}{}%
+							\xintifboolexpr{\tmpbattlevel == 4}{\xdef\pictobatteryfillcolor{green!75!black}}{}%
+						}{}%
+					\IfStrEq{\pictobatterynblevels}{5}%
+						{%
+							\xintifboolexpr{\tmpbattlevel == 0}{\xdef\pictobatteryfillcolor{}}{}%
+							\xintifboolexpr{\tmpbattlevel == 1}{\xdef\pictobatteryfillcolor{red}}{}%
+							\xintifboolexpr{\tmpbattlevel == 2}{\xdef\pictobatteryfillcolor{orange}}{}%
+							\xintifboolexpr{\tmpbattlevel == 3}{\xdef\pictobatteryfillcolor{yellow}}{}%
+							\xintifboolexpr{\tmpbattlevel == 4}{\xdef\pictobatteryfillcolor{lime}}{}%
+							\xintifboolexpr{\tmpbattlevel == 5}{\xdef\pictobatteryfillcolor{green!75!black}}{}%
+						}{}%
+					\IfStrEq{\pictobatterynblevels}{6}%
+						{%
+							\xintifboolexpr{\tmpbattlevel == 0}{\xdef\pictobatteryfillcolor{}}{}%
+							\xintifboolexpr{\tmpbattlevel == 1}{\xdef\pictobatteryfillcolor{red}}{}%
+							\xintifboolexpr{\tmpbattlevel == 2}{\xdef\pictobatteryfillcolor{orange}}{}%
+							\xintifboolexpr{\tmpbattlevel == 3}{\xdef\pictobatteryfillcolor{yellow}}{}%
+							\xintifboolexpr{\tmpbattlevel == 4}{\xdef\pictobatteryfillcolor{lime}}{}%
+							\xintifboolexpr{\tmpbattlevel == 5}{\xdef\pictobatteryfillcolor{lime!50!green}}{}%
+							\xintifboolexpr{\tmpbattlevel == 6}{\xdef\pictobatteryfillcolor{green!75!black}}{}%
+						}{}%
+					\IfStrEq{\pictobatterynblevels}{7}%
+						{%
+							\xintifboolexpr{\tmpbattlevel == 0}{\xdef\pictobatteryfillcolor{}}{}%
+							\xintifboolexpr{\tmpbattlevel == 1}{\xdef\pictobatteryfillcolor{red}}{}%
+							\xintifboolexpr{\tmpbattlevel == 2}{\xdef\pictobatteryfillcolor{red!50!orange}}{}%
+							\xintifboolexpr{\tmpbattlevel == 3}{\xdef\pictobatteryfillcolor{orange}}{}%
+							\xintifboolexpr{\tmpbattlevel == 4}{\xdef\pictobatteryfillcolor{yellow}}{}%
+							\xintifboolexpr{\tmpbattlevel == 5}{\xdef\pictobatteryfillcolor{lime}}{}%
+							\xintifboolexpr{\tmpbattlevel == 6}{\xdef\pictobatteryfillcolor{lime!50!green}}{}%
+							\xintifboolexpr{\tmpbattlevel == 7}{\xdef\pictobatteryfillcolor{green!75!black}}{}%
+						}{}%
+					\IfStrEq{\pictobatterynblevels}{8}%
+						{%
+							\xintifboolexpr{\tmpbattlevel == 0}{\xdef\pictobatteryfillcolor{}}{}%
+							\xintifboolexpr{\tmpbattlevel == 1}{\xdef\pictobatteryfillcolor{red}}{}%
+							\xintifboolexpr{\tmpbattlevel == 2}{\xdef\pictobatteryfillcolor{red!50!orange}}{}%
+							\xintifboolexpr{\tmpbattlevel == 3}{\xdef\pictobatteryfillcolor{orange}}{}%
+							\xintifboolexpr{\tmpbattlevel == 4}{\xdef\pictobatteryfillcolor{orange!50!yellow}}{}%
+							\xintifboolexpr{\tmpbattlevel == 5}{\xdef\pictobatteryfillcolor{yellow}}{}%
+							\xintifboolexpr{\tmpbattlevel == 6}{\xdef\pictobatteryfillcolor{lime}}{}%
+							\xintifboolexpr{\tmpbattlevel == 7}{\xdef\pictobatteryfillcolor{lime!50!green}}{}%
+							\xintifboolexpr{\tmpbattlevel == 8}{\xdef\pictobatteryfillcolor{green!75!black}}{}%
+						}{}%
+					\IfStrEq{\pictobatterynblevels}{9}%
+						{%
+							\xintifboolexpr{\tmpbattlevel == 0}{\xdef\pictobatteryfillcolor{}}{}%
+							\xintifboolexpr{\tmpbattlevel == 1}{\xdef\pictobatteryfillcolor{red}}{}%
+							\xintifboolexpr{\tmpbattlevel == 2}{\xdef\pictobatteryfillcolor{red!50!orange}}{}%
+							\xintifboolexpr{\tmpbattlevel == 3}{\xdef\pictobatteryfillcolor{orange}}{}%
+							\xintifboolexpr{\tmpbattlevel == 4}{\xdef\pictobatteryfillcolor{orange!50!yellow}}{}%
+							\xintifboolexpr{\tmpbattlevel == 5}{\xdef\pictobatteryfillcolor{yellow}}{}%
+							\xintifboolexpr{\tmpbattlevel == 6}{\xdef\pictobatteryfillcolor{yellow!50!lime}}{}%
+							\xintifboolexpr{\tmpbattlevel == 7}{\xdef\pictobatteryfillcolor{lime}}{}%
+							\xintifboolexpr{\tmpbattlevel == 8}{\xdef\pictobatteryfillcolor{lime!50!green}}{}%
+							\xintifboolexpr{\tmpbattlevel == 9}{\xdef\pictobatteryfillcolor{green!75!black}}{}%
+						}{}%
+					\IfStrEq{\pictobatterynblevels}{10}%
+						{%
+							\xintifboolexpr{\tmpbattlevel == 0}{\xdef\pictobatteryfillcolor{}}{}%
+							\xintifboolexpr{\tmpbattlevel == 1}{\xdef\pictobatteryfillcolor{red}}{}%
+							\xintifboolexpr{\tmpbattlevel == 2}{\xdef\pictobatteryfillcolor{red!50!orange}}{}%
+							\xintifboolexpr{\tmpbattlevel == 3}{\xdef\pictobatteryfillcolor{orange}}{}%
+							\xintifboolexpr{\tmpbattlevel == 4}{\xdef\pictobatteryfillcolor{orange!50!yellow}}{}%
+							\xintifboolexpr{\tmpbattlevel == 5}{\xdef\pictobatteryfillcolor{yellow}}{}%
+							\xintifboolexpr{\tmpbattlevel == 6}{\xdef\pictobatteryfillcolor{yellow!50!lime}}{}%
+							\xintifboolexpr{\tmpbattlevel == 7}{\xdef\pictobatteryfillcolor{lime}}{}%
+							\xintifboolexpr{\tmpbattlevel == 8}{\xdef\pictobatteryfillcolor{lime!50!green}}{}%
+							\xintifboolexpr{\tmpbattlevel == 9}{\xdef\pictobatteryfillcolor{green!85!black}}{}%
+							\xintifboolexpr{\tmpbattlevel == 10}{\xdef\pictobatteryfillcolor{green!50!black}}{}%
+						}{}%
+				}%
+		{}%
+		}%
+	\ifboolKV[pictobattery]{flip}%
+		{%1,2738
+			\xdef\tmpscaaaale{\fpeval{1.2738*\pictobatteryscale}}%
+			\setlength\unittkzbattery{\tmpscaaaale\tmpheightofcharstkzbattery}%
+			\IfStrEq{\pictobatteryheight}{dauto}%
+				{%raided tikzpicture
+					\xdef\tmpoffffset{\fpeval{(1-\pictobatteryscale)/2}}%
+					\setlength\tmpraisevofkzbattery{\dimexpr\tmpoffffset\tmpheightofcharstkzbattery-\tmpdepthofcharstkzbattery\relax}%
+					\raisebox{\tmpraisevofkzbattery}{%
+						\begin{tikzpicture}[x=\unittkzbattery,y=\unittkzbattery,rotate=-90,#2]\inttkzbattery[\pictobatterycolor][\pictobatteryfillcolor]{\tmpbattlevel}\end{tikzpicture}%
+					}%
+				}%
+				{%classic tikzpicture
+					\begin{tikzpicture}[x=\unittkzbattery,y=\unittkzbattery,rotate=-90,#2]\inttkzbattery[\pictobatterycolor][\pictobatteryfillcolor]{\tmpbattlevel}\end{tikzpicture}%
+				}%
+		}%
+		{%0.8163
+			\xdef\tmpscaaaale{\fpeval{0.8163*\pictobatteryscale}}%
+			\setlength\unittkzbattery{\tmpscaaaale\tmpheightofcharstkzbattery}%
+			\IfStrEq{\pictobatteryheight}{dauto}%
+				{%raided tikzpicture
+					\xdef\tmpoffffset{\fpeval{(1-\pictobatteryscale)/2}}%
+					\setlength\tmpraisevofkzbattery{\dimexpr\tmpoffffset\tmpheightofcharstkzbattery-\tmpdepthofcharstkzbattery\relax}%
+					\raisebox{\tmpraisevofkzbattery}{%
+						\begin{tikzpicture}[x=\unittkzbattery,y=\unittkzbattery,#2]\inttkzbattery[\pictobatterycolor][\pictobatteryfillcolor]{\tmpbattlevel}\end{tikzpicture}%
+					}%
+				}%
+				{%classic tikzpicture
+					\begin{tikzpicture}[x=\unittkzbattery,y=\unittkzbattery,#2]\inttkzbattery[\pictobatterycolor][\pictobatteryfillcolor]{\tmpbattlevel}\end{tikzpicture}%
+				}%
+		}%
+}
+
+%====pictowifi/network
+\newlength\pictowifitotheight
+\newlength\pictowifidepth
+
+\defKV[pictowifi]{%
+	height=\def\pictowifiheight{#1},%
+	colors=\def\pictowificolors{#1},%
+	style=\def\pictowifistyle{#1}
+}
+\setKVdefault[pictowifi]{%
+	height=dauto,%
+	colors={black/lightgray},%
+	style=full
+}
+
+\NewDocumentCommand\intpictonetwork{}{%
+	%\begin{tikzpicture}[x=\pictowifitotheight,y=\pictowifitotheight,line join=round,line cap=round,rounded corners=0.05\pictowifitotheight]
+		\xintifboolexpr{ \tmpwifilevel == 0 }%
+			{%
+				\foreach \i in {1,...,\tmpwifinblevel}{%
+					\xdef\j{\fpeval{(\i-1)*0.225}}%
+					\fill[\pictowificolorbg] ({\j\pictowifitotheight},0) rectangle++ ({0.2\pictowifitotheight},{\i/\tmpwifinblevel}) ;
+				}%
+			}{}%
+		\xintifboolexpr{ \tmpwifilevel == \tmpwifinblevel }%
+			{%
+				\foreach \i in {1,...,\tmpwifinblevel}{%
+					\xdef\j{\fpeval{(\i-1)*0.225}}%
+					\fill[\pictowificolorframe] ({\j\pictowifitotheight},0) rectangle++ ({0.2\pictowifitotheight},{\i/\tmpwifinblevel}) ;
+				}%
+			}{}%
+		\xintifboolexpr{\tmpwifilevel >= 1 'and' \tmpwifilevel < \tmpwifinblevel}%
+			{%
+				\foreach \i in {1,...,\tmpwifilevel}{%
+					\xdef\j{\fpeval{(\i-1)*0.225}}%
+					\fill[\pictowificolorframe] ({\j\pictowifitotheight},0) rectangle++ ({0.2\pictowifitotheight},{\i/\tmpwifinblevel}) ;
+				}%
+				\foreach \i in {\inteval{\tmpwifilevel+1},...,\tmpwifinblevel}{%
+					\xdef\j{\fpeval{(\i-1)*0.225}}%
+					\fill[\pictowificolorbg] ({\j\pictowifitotheight},0) rectangle++ ({0.2\pictowifitotheight},{\i/\tmpwifinblevel}) ;
+				}%
+			}{}%
+	%\end{tikzpicture}%
+}
+
+\NewDocumentCommand\intpictowififull{}{%
+	\fill[\pictowificolorbg] (0,0)--(45:{\tmpwifilevel/\tmpwifinblevel}) arc(45:135:{\tmpwifilevel/\tmpwifinblevel})--cycle ;
+	\draw[\pictowificolorframe] (0,0)--(45:1) arc(45:135:1)--cycle ;
+}
+
+\NewDocumentCommand\intpictowifibar{}{%
+		%rien
+		\xintifboolexpr{ \tmpwifilevel == 0 }%
+			{%
+				\filldraw[\pictowificolorbg] (0,0)--(45:{1/\tmpwifinblevel}) arc(45:135:{1/\tmpwifinblevel})--cycle ;
+				\foreach \i in {2,...,\tmpwifinblevel}{%
+					\draw[\pictowificolorbg] (45:{\i/\tmpwifinblevel}) arc(45:135:{\i/\tmpwifinblevel}) ;
+				}%
+			}%
+			{}%
+		%seulement la première
+		\xintifboolexpr{ \tmpwifilevel == 1 }%
+			{%
+				\filldraw[\pictowificolorframe] (0,0)--(45:{1/\tmpwifinblevel}) arc(45:135:{1/\tmpwifinblevel})--cycle ;
+				\foreach \i in {2,...,\tmpwifinblevel}{%
+					\draw[\pictowificolorbg] (45:{\i/\tmpwifinblevel}) arc(45:135:{\i/\tmpwifinblevel}) ;
+				}%
+			}%
+			{}%
+		%toutes les barres
+		\xintifboolexpr{\tmpwifilevel == \tmpwifinblevel}%
+			{%
+				\filldraw[\pictowificolorframe] (0,0)--(45:{1/\tmpwifinblevel}) arc(45:135:{1/\tmpwifinblevel})--cycle ;
+				\foreach \i in {2,...,\tmpwifilevel}{%
+					\draw[\pictowificolorframe] (45:{\i/\tmpwifinblevel}) arc(45:135:{\i/\tmpwifinblevel}) ;
+				}%
+			}%
+			{}%
+		%les autres cas
+		\xintifboolexpr{\tmpwifilevel > 1 'and' \tmpwifilevel < \tmpwifinblevel}%
+			{%
+				\filldraw[\pictowificolorframe] (0,0)--(45:{1/\tmpwifinblevel}) arc(45:135:{1/\tmpwifinblevel})--cycle ;
+				\foreach \i in {2,...,\tmpwifilevel}{%
+					\draw[\pictowificolorframe] (45:{\i/\tmpwifinblevel}) arc(45:135:{\i/\tmpwifinblevel}) ;
+				}%
+				\foreach \i in {\inteval{\tmpwifilevel+1},...,\tmpwifinblevel}{%
+					\draw[\pictowificolorbg] (45:{\i/\tmpwifinblevel}) arc(45:135:{\i/\tmpwifinblevel}) ;
+				}%
+			}%
+			{}%
+}
+
+\NewDocumentCommand\pictowifi{O{}D<>{}m}{%(OK)
+	%#1=clés
+	%#2=options tikz
+	%#3=données nb/niv
+	\restoreKV[pictowifi]%
+	\setKV[pictowifi]{#1}%
+	\StrCut{\pictowificolors}{/}{\pictowificolorframe}{\pictowificolorbg}%
+	\IfSubStr{#3}{/}%
+		{%
+			\StrCut{#3}{/}{\tmpwifilevel}{\tmpwifinblevel}%
+		}%
+		{%
+			\IfStrEq{#3}{}%
+				{%
+					\def\tmpwifilevel{0}\def\tmpwifinblevel{4}%
+				}%
+				{%
+					\def\tmpwifilevel{#3}\def\tmpwifinblevel{4}%
+				}%
+		}%
+	\IfSubStr{\pictowifiheight}{auto}%
+		{%
+			\IfStrEq{\pictowifiheight}{dauto}%
+				{%
+					\settototalheight\pictowifitotheight{\hbox{qH}}%
+					\setlength\pictowifitotheight{0.95\pictowifitotheight}%
+					\settodepth\pictowifidepth{\hbox{qH}}%
+				}{}%
+			\IfStrEq{\pictowifiheight}{auto}%
+				{%
+					\settototalheight\pictowifitotheight{\hbox{H}}%
+					\setlength\pictowifitotheight{0.95\pictowifitotheight}%
+					\settodepth\pictowifidepth{\hbox{H}}%
+				}{}%
+		}%
+		{%
+			\setlength\pictowifitotheight{\pictowifiheight}%
+		}%
+	\IfStrEq{\pictowifiheight}{dauto}%
+		{%
+			%raised tikzpicture
+			\raisebox{-\pictowifidepth}{%
+				\begin{tikzpicture}[x=\pictowifitotheight,y=\pictowifitotheight,line width=0.05\pictowifitotheight,line join=round,line cap=round,#2]
+					\IfStrEq{\pictowifistyle}{full}{\intpictowififull}{}%
+					\IfStrEq{\pictowifistyle}{bar}{\intpictowifibar}{}%
+				\end{tikzpicture}%
+			}%
+		}%
+		{%
+			%classic tikzpicture
+			\begin{tikzpicture}[x=\pictowifitotheight,y=\pictowifitotheight,line width=0.05\pictowifitotheight,line join=round,line cap=round,#2]
+				\IfStrEq{\pictowifistyle}{full}{\intpictowififull}{}%
+				\IfStrEq{\pictowifistyle}{bar}{\intpictowifibar}{}%
+			\end{tikzpicture}%
+		}%
+}
+
+\NewDocumentCommand\pictonetwork{O{}D<>{}m}{%(OK)
+	%#1=clés
+	%#2=options tikz
+	%#3=données nb/niv
+	\restoreKV[pictowifi]%
+	\setKV[pictowifi]{#1}%
+	\StrCut{\pictowificolors}{/}{\pictowificolorframe}{\pictowificolorbg}%
+	\IfSubStr{#3}{/}%
+		{%
+			\StrCut{#3}{/}{\tmpwifilevel}{\tmpwifinblevel}%
+		}%
+		{%
+			\IfStrEq{#3}{}%
+				{%
+					\def\tmpwifilevel{0}\def\tmpwifinblevel{4}%
+				}%
+				{%
+					\def\tmpwifilevel{#3}\def\tmpwifinblevel{4}%
+				}%
+		}%
+	\IfSubStr{\pictowifiheight}{auto}%
+		{%
+			\IfStrEq{\pictowifiheight}{dauto}%
+				{%
+					\settototalheight\pictowifitotheight{\hbox{qH}}%
+					\settodepth\pictowifidepth{\hbox{qH}}%
+				}{}%
+			\IfStrEq{\pictowifiheight}{auto}%
+				{%
+					\settototalheight\pictowifitotheight{\hbox{H}}%
+					\settodepth\pictowifidepth{\hbox{H}}%
+				}{}%
+		}%
+		{%
+			\setlength\pictowifitotheight{\pictowifiheight}%
+		}%
+	\IfStrEq{\pictowifiheight}{dauto}%
+		{%
+			%raised tikzpicture
+			\raisebox{-\pictowifidepth}{%
+				\begin{tikzpicture}[x=\pictowifitotheight,y=\pictowifitotheight,line join=round,line cap=round,rounded corners=0.05\pictowifitotheight,#2]
+					\intpictonetwork%
+				\end{tikzpicture}%
+			}%
+		}%
+		{%
+			%classic tikzpicture
+			\begin{tikzpicture}[x=\pictowifitotheight,y=\pictowifitotheight,line join=round,line cap=round,rounded corners=0.05\pictowifitotheight,#2]
+				\intpictonetwork%
+			\end{tikzpicture}%
+		}%
+}
+
+%====PICTO SKILLS
+\def\samplecapletters{AZERTYUIOSDFHKLMWXCVBN}
+\def\sampledptletters{qypqg}
+
+\definecolor{skillgreen}{RGB}{118, 201, 39}
+\definecolor{skillorange}{RGB}{255, 153, 0}
+\definecolor{skillred}{RGB}{255, 0, 0}
+
+\newlength{\pictoskillheight}
+\newlength{\pictoskilldepth}
+
+\defKV[pictoskill]{%
+	colors=\def\pictoskillcol{#1},%
+	height=\def\pictoskillh{#1},%
+	hoffset=\def\pictoskilloffset{#1},%
+	voffset=\def\pictoskillvoffset{#1},%
+	opacity=\def\pictoskillopacity{#1}
+}
+\setKVdefault[pictoskill]{%
+	colors=gray/lightgray,%
+	height=dauto,%
+	hoffset=0.175,%
+	voffset=0.6,%
+	opacity=0.5
+}
+
+\NewDocumentCommand\pictoskills{O{}D<>{}m}{%(OK)
+	\restoreKV[pictoskill]%
+	\setKV[pictoskill]{#1}%
+	%levels + opacity
+	\IfStrEq{#3}{}%lecture des données
+		{\def\pictoskilllevel{1}\def\pictoskilllevelmax{3}}%
+		{%
+			\IfSubStr{#3}{/}%
+				{\StrCut{#3}{/}{\pictoskilllevel}{\pictoskilllevelmax}}%
+				{\def\pictoskilllevel{#3}\def\pictoskilllevelmax{3}}%
+		}%
+	\xdef\pictoskillopacity{\xintfloateval{100*\pictoskillopacity}}%
+	\IfSubStr{\pictoskillcol}{/}%
+		{%
+			\StrCut{\pictoskillcol}{/}{\pictoskillcolA}{\pictoskillcolB}%
+		}%
+		{%
+			\def\pictoskillcolB{\pictoskillcol!\pictoskillopacity!white}\def\pictoskillcolA{\pictoskillcol}%
+		}%
+	%height
+	\IfStrEqCase{\pictoskillh}{%
+		{auto}%
+		{%
+			\settototalheight{\pictoskillheight}{\hbox{\samplecapletters}}%
+			\settodepth{\pictoskilldepth}{\hbox{\samplecapletters}}%
+			%classic tikzpicture
+			\begin{tikzpicture}[x=1.125\pictoskillheight,y=0.975\pictoskillheight,#2]
+		}%
+		{dauto}%
+		{%
+			\settototalheight{\pictoskillheight}{\hbox{\sampledptletters\samplecapletters}}%
+			\settodepth{\pictoskilldepth}{\hbox{\sampledptletters}}%
+			%raised tikzpicture
+			\begin{tikzpicture}[x=1.125\pictoskillheight,y=0.975\pictoskillheight,baseline=0.975\pictoskilldepth,#2]
+		}%
+		}[%
+			\setlength\pictoskillheight{\pictoskillh}%
+			\setlength\pictoskilldepth{0pt}%
+			%classic tikzpicture
+			\begin{tikzpicture}[x=1.125\pictoskillheight,y=0.975\pictoskillheight,#2]
+		]%
+	%===test offset
+	\xdef\pictoskilllarg{\fpeval{(1-\pictoskilloffset)/\pictoskilllevelmax}}%
+	\xdef\pictoskilloffsetindiv{\fpeval{(\pictoskilloffset)/(\pictoskilllevelmax+1)}}%
+	%===fintest offset
+	\clip (0,0)--++(0,\pictoskillvoffset)--(1,1)--(1,0)--cycle;
+	\foreach \i in {1,...,\pictoskilllevelmax}{%
+		\xintifboolexpr{\i <= \pictoskilllevel}%
+			{%
+				\fill[\pictoskillcolA] ({(\i*\pictoskilloffsetindiv+(\i-1)*\pictoskilllarg},0) rectangle++ ({\pictoskilllarg},1) ;
+			}%
+			{%
+				\fill[\pictoskillcolB] ({(\i*\pictoskilloffsetindiv+(\i-1)*\pictoskilllarg},0) rectangle++ ({\pictoskilllarg},1) ;
+			}%
+	}%
+	\end{tikzpicture}%
+}
+
+%aliases
+\NewCommandCopy\pictoskill\pictoskills
+\NewDocumentCommand\pictoskillsgreen{ O{} }{\pictoskills[#1,colors=skillgreen]{1}}
+\NewDocumentCommand\pictoskillsorange{ O{} }{\pictoskills[#1,colors=skillorange]{2}}
+\NewDocumentCommand\pictoskillsred{ O{} }{\pictoskills[#1,colors=skillred]{3}}
+
+%====PICTO PILL
+\newlength\pictopillheight
+\newlength\pictopilldepth
+
+\defKV[pictopill]{%
+	colors=\def\pictopillcolors{#1},%
+	offset=\def\pictopilloffset{#1},%
+	height=\def\pictopilltypeheight{#1},%
+	scale=\def\pictopillscale{#1}
+}
+
+\setKVdefault[pictopill]{%
+	colors={black/lightgray},%
+	offset=0.1,%
+	height=dauto,%
+	scale=0.9
+}
+
+\NewDocumentCommand\pictopillint{}{%
+	%left part
+	\xintifboolexpr{\pictotmpnbpills >= 1}%
+		{%
+			\draw[\pictopillcolorframe,fill=\pictopillcolorbg] (-\pictopilloffset\pictopillheight,0.4625\pictopillheight) --++ (-0.6\pictopillheight,0) to[out=180,in=90]++ (-0.4625\pictopillheight,-0.4625\pictopillheight)  to[out=-90,in=180]++ (0.4625\pictopillheight,-0.4625\pictopillheight) --++ (0.6\pictopillheight,0) -- cycle;
+		}%
+		{%
+			\draw[\pictopillcolorframe] (-\pictopilloffset\pictopillheight,0.4625\pictopillheight) --++ (-0.6\pictopillheight,0) to[out=180,in=90]++ (-0.4625\pictopillheight,-0.4625\pictopillheight)  to[out=-90,in=180]++ (0.4625\pictopillheight,-0.4625\pictopillheight) --++ (0.6\pictopillheight,0) -- cycle;
+		}%
+	%middle(s) part
+	\foreach \i in {2,...,\inteval{\pictotmpnbtotpills-1}}{%
+		\xdef\j{\inteval{\i-2}}%
+		\xdef\k{\fpeval{(\i-1)*\pictopilloffset}}%
+		\xintifboolexpr{\pictotmpnbpills >= \i}%
+			{%
+				\draw[\pictopillcolorframe,fill=\pictopillcolorbg] ({\j\pictopillheight+\k\pictopillheight},-0.4625\pictopillheight) rectangle++ (0.925\pictopillheight,0.925\pictopillheight) ;
+			}%
+			{%
+				\draw[\pictopillcolorframe] ({\j\pictopillheight+\k\pictopillheight},-0.4625\pictopillheight) rectangle++ (0.925\pictopillheight,0.925\pictopillheight) ;
+			}%
+	}%
+	%right part
+	\xdef\tmpargAAA{\inteval{\pictotmpnbtotpills-2}}%
+	\xdef\tmpargBBB{\fpeval{(\pictotmpnbtotpills-1)*\pictopilloffset}}%
+	\xintifboolexpr{\pictotmpnbpills == \pictotmpnbtotpills}%
+		{%
+			\draw[\pictopillcolorframe,fill=\pictopillcolorbg] ({\tmpargAAA\pictopillheight+\tmpargBBB\pictopillheight},0.4625\pictopillheight) --++ (0.6\pictopillheight,0) to[out=0,in=90]++ (0.4625\pictopillheight,-0.4625\pictopillheight) to[out=-90,in=0]++ (-0.4625\pictopillheight,-0.4625\pictopillheight) --++ (-0.6\pictopillheight,0) -- cycle;
+		}%
+		{%
+			\draw[\pictopillcolorframe] ({\tmpargAAA\pictopillheight+\tmpargBBB\pictopillheight},0.4625\pictopillheight) --++ (0.6\pictopillheight,0) to[out=0,in=90]++ (0.4625\pictopillheight,-0.4625\pictopillheight) to[out=-90,in=0]++ (-0.4625\pictopillheight,-0.4625\pictopillheight) --++ (-0.6\pictopillheight,0) -- cycle;
+		}%
+}
+
+\NewDocumentCommand{\pictopill}{O{}D<>{}m}{%(OK) modif avec hauteur
+	%#1=clés
+	%#2=options tikz
+	%#3=données nb/nblev
+	\restoreKV[pictopill]%
+	\setKV[pictopill]{#1}%
+	%lecture des données
+	\IfSubStr{#3}{/}%
+		{%
+			\StrCut{#3}{/}{\pictotmpnbpills}{\pictotmpnbtotpills}%param complet
+		}%
+		{%
+			\IfStrEq{#3}{}%
+			{\def\pictotmpnbpills{0}\def\pictotmpnbtotpills{3}}%si vide 0/3
+			{\def\pictotmpnbpills{#3}\def\pictotmpnbtotpills{3}}%sinon #3/3
+		}%
+	%couleurs
+	\IfSubStr{\pictopillcolors}{/}%
+		{%
+			\StrCut{\pictopillcolors}{/}{\pictopillcolorframe}{\pictopillcolorbg}%
+		}%
+		{%
+			\def\pictopillcolorframe{\pictopillcolors}\def\pictopillcolorbg{\pictopillcolors}%
+		}%
+	%lengths
+	\IfSubStr{\pictopilltypeheight}{auto}%
+		{%
+			\IfStrEq{\pictopilltypeheight}{auto}%
+				{%
+					\settototalheight{\pictopillheight}{\hbox{HLM}}%
+				}{}%
+			\IfStrEq{\pictopilltypeheight}{dauto}%
+				{%
+					\settototalheight{\pictopillheight}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+					\settodepth{\pictopilldepth}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+				}{}%
+		}%
+		{%
+			\setlength\pictopillheight{\pictopilltypeheight}%
+		}%
+	\IfStrEq{\pictopilltypeheight}{dauto}%
+		{%
+			\begin{tikzpicture}[scale=\pictopillscale,line width=\fpeval{0.075*\pictopillscale}\pictopillheight,baseline=-1.25\pictopilldepth,#2]
+				\pictopillint
+			\end{tikzpicture}%
+		}%
+		{%
+			\begin{tikzpicture}[scale=\pictopillscale,line width=\fpeval{0.075*\pictopillscale}\pictopillheight,#2]
+				\pictopillint
+			\end{tikzpicture}%
+		}%
+}
+
+%====TRAFFICLIGHT
+\newlength\pictotrafficheight
+\newlength\pictotrafficdepth
+
+\defKV[pictotraffic]{%
+	maincolor=\def\pictotrafficcolor{#1},%
+	listcolors=\def\pictotrafficcolors{#1},%
+	height=\def\pictotraffictypeheight{#1},%
+	scale=\def\pictotrafficscale{#1}
+}
+
+\setKVdefault[pictotraffic]{%
+	maincolor={black},%
+	listcolors={red,yellow!75!orange,green!50!black},%
+	height=dauto,%
+	scale=1,%
+	borders=false
+}
+%rayon = 0.76/6 = 0,125
+
+\NewDocumentCommand\pictopictotrafficint{}{%
+	\def\offsethtrafficpicto{3.5}%
+	\xdef\pictotrafficradius{\fpeval{(1-0.15)/6-0.015}}%
+	\xdef\pictotrafficoffset{\fpeval{(0.15)/3}}%
+	%bg
+	\fill[\pictotrafficcolor] ({-\pictotrafficradius\pictotrafficheight-\fpeval{1.5*\pictotrafficoffset}\pictotrafficheight},0) rectangle ({\pictotrafficradius\pictotrafficheight+\fpeval{1.5*\pictotrafficoffset}\pictotrafficheight},{\pictotrafficheight}) ;
+	%rounded
+	\fill[\pictotrafficcolor,line join=round] ({-\pictotrafficradius\pictotrafficheight-\fpeval{\offsethtrafficpicto*\pictotrafficoffset}\pictotrafficheight},{\pictotrafficheight-\pictotrafficoffset\pictotrafficheight}) -- ({\pictotrafficradius\pictotrafficheight+\fpeval{\offsethtrafficpicto*\pictotrafficoffset}\pictotrafficheight},{\pictotrafficheight-\pictotrafficoffset\pictotrafficheight}) -- (0,{\pictotrafficheight-\pictotrafficoffset\pictotrafficheight-\fpeval{2*\pictotrafficradius}\pictotrafficheight}) -- cycle ;
+	\fill[\pictotrafficcolor,line join=round] ({-\pictotrafficradius\pictotrafficheight-\fpeval{\offsethtrafficpicto*\pictotrafficoffset}\pictotrafficheight},{0.5\pictotrafficheight+\pictotrafficradius\pictotrafficheight}) -- ({\pictotrafficradius\pictotrafficheight+\fpeval{\offsethtrafficpicto*\pictotrafficoffset}\pictotrafficheight},{0.5\pictotrafficheight+\pictotrafficradius\pictotrafficheight}) -- (0,{0.5\pictotrafficheight-\pictotrafficradius\pictotrafficheight}) -- cycle ;
+	\fill[\pictotrafficcolor,line join=round] ({-\pictotrafficradius\pictotrafficheight-\fpeval{\offsethtrafficpicto*\pictotrafficoffset}\pictotrafficheight},{\pictotrafficoffset\pictotrafficheight+\fpeval{2*\pictotrafficradius}\pictotrafficheight}) -- ({\pictotrafficradius\pictotrafficheight+\fpeval{\offsethtrafficpicto*\pictotrafficoffset}\pictotrafficheight},{\pictotrafficoffset\pictotrafficheight+\fpeval{2*\pictotrafficradius}\pictotrafficheight}) -- (0,{\pictotrafficoffset\pictotrafficheight}) -- cycle ;
+	%colors basis
+	\ifboolKV[pictotraffic]{borders}%
+		{%
+			\draw[white,fill=\pictotrafficcolor!50!white] (0,{\pictotrafficoffset\pictotrafficheight+\pictotrafficradius\pictotrafficheight}) circle[radius={\pictotrafficradius\pictotrafficheight}] ;
+			\draw[white,fill=\pictotrafficcolor!50!white] (0,{0.5\pictotrafficheight}) circle[radius={\pictotrafficradius\pictotrafficheight}] ;
+			\draw[white,fill=\pictotrafficcolor!50!white] (0,{\pictotrafficheight-\pictotrafficoffset\pictotrafficheight-\pictotrafficradius\pictotrafficheight}) circle[radius={\pictotrafficradius\pictotrafficheight}] ;
+			%red
+			\IfSubStr{\pictotrafficlevel}{1}%
+				{%
+					\draw[white,fill={\lstcolorslisttraffic[1]}] (0,{\pictotrafficheight-\pictotrafficoffset\pictotrafficheight-\pictotrafficradius\pictotrafficheight}) circle[radius={\pictotrafficradius\pictotrafficheight}] ;
+				}{}%
+			%orange
+			\IfSubStr{\pictotrafficlevel}{2}%
+				{%
+					\draw[white,{fill=\lstcolorslisttraffic[2]}] (0,{0.5\pictotrafficheight}) circle[radius={\pictotrafficradius\pictotrafficheight}] ;
+				}{}%
+			%green
+			\IfSubStr{\pictotrafficlevel}{3}%
+				{%
+					\draw[white,fill={\lstcolorslisttraffic[3]}] (0,{\pictotrafficoffset\pictotrafficheight+\pictotrafficradius\pictotrafficheight}) circle[radius={\pictotrafficradius\pictotrafficheight}] ;
+				}{}%
+		}%
+		{%
+			\filldraw[\pictotrafficcolor!50!white] (0,{\pictotrafficoffset\pictotrafficheight+\pictotrafficradius\pictotrafficheight}) circle[radius={\pictotrafficradius\pictotrafficheight}] ;
+			\filldraw[\pictotrafficcolor!50!white] (0,{0.5\pictotrafficheight}) circle[radius={\pictotrafficradius\pictotrafficheight}] ;
+			\filldraw[\pictotrafficcolor!50!white] (0,{\pictotrafficheight-\pictotrafficoffset\pictotrafficheight-\pictotrafficradius\pictotrafficheight}) circle[radius={\pictotrafficradius\pictotrafficheight}] ;
+			%red
+			\IfSubStr{\pictotrafficlevel}{1}%
+				{%
+					\filldraw[{\lstcolorslisttraffic[1]}] (0,{\pictotrafficheight-\pictotrafficoffset\pictotrafficheight-\pictotrafficradius\pictotrafficheight}) circle[radius={\pictotrafficradius\pictotrafficheight}] ;
+				}{}%
+			%orange
+			\IfSubStr{\pictotrafficlevel}{2}%
+				{%
+					\filldraw[{\lstcolorslisttraffic[2]}] (0,{0.5\pictotrafficheight}) circle[radius={\pictotrafficradius\pictotrafficheight}] ;
+				}{}%
+			%green
+			\IfSubStr{\pictotrafficlevel}{3}%
+				{%
+					\filldraw[{\lstcolorslisttraffic[3]}] (0,{\pictotrafficoffset\pictotrafficheight+\pictotrafficradius\pictotrafficheight}) circle[radius={\pictotrafficradius\pictotrafficheight}] ;
+				}{}%
+		}%
+}
+
+\NewDocumentCommand{\pictotraffic}{O{}D<>{}m}{%(OK) modif avec hauteur
+	%#1=clés
+	%#2=options tikz
+	%#3=données level (0/1/2/3)
+	\restoreKV[pictotraffic]%
+	\setKV[pictotraffic]{#1}%
+	%lecture des données
+	\def\pictotrafficlevel{#3}%
+	%colors
+	\setsepchar{,}%
+	\readlist\lstcolorslisttraffic{\pictotrafficcolors}%
+	%lengths
+	\IfSubStr{\pictotraffictypeheight}{auto}%
+		{%
+			\IfStrEq{\pictotraffictypeheight}{auto}%
+				{%
+					\settototalheight{\pictotrafficheight}{\hbox{H}}%
+				}{}%
+			\IfStrEq{\pictotraffictypeheight}{dauto}%
+				{%
+					\settototalheight{\pictotrafficheight}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+					\settodepth{\pictotrafficdepth}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+				}{}%
+		}%
+		{%
+			\setlength\pictotrafficheight{\pictotraffictypeheight}%
+		}%
+	\IfStrEq{\pictotraffictypeheight}{dauto}%
+		{%
+			\begin{tikzpicture}[scale=\pictotrafficscale,line width=\fpeval{0.015*\pictotrafficscale}\pictotrafficheight,rounded corners=\fpeval{0.05*\pictotrafficscale}\pictotrafficheight,baseline={\pictotrafficdepth-\fpeval{(1-\pictotrafficscale)/2}\pictotrafficheight},transform shape,#2] %OK
+				\pictopictotrafficint
+			\end{tikzpicture}%
+		}%
+		{%
+			\begin{tikzpicture}[scale=\pictotrafficscale,line width=\fpeval{0.015*\pictotrafficscale}\pictotrafficheight,rounded corners=\fpeval{0.05*\pictotrafficscale}\pictotrafficheight,transform shape,#2]
+				\pictopictotrafficint
+			\end{tikzpicture}%
+		}%
+}
+
+%====MINICALENDAR
+\newlength\tmptotalheightcurrenttext
+\newlength\tmpdepthcurrenttext
+
+\defKV[minictikzcalendar]{%
+	color=\def\minictikzcalendarcol{#1},%
+	height=\def\minictikzcalendarheight{#1},%
+	monthcolor=\def\minictikzcalendarcolmois{#1},%
+	daycolor=\def\minictikzcalendarcoljour{#1}
+}
+\setKVdefault[minictikzcalendar]{%
+	color=black,%
+	height=dauto,%
+	monthcolor=white,%
+	daycolor=black
+}
+
+\tikzset{minicalmonth/.style={font=\sffamily\bfseries,\minictikzcalendarcolmois}}
+\tikzset{minicalday/.style={font=\sffamily\bfseries,\minictikzcalendarcoljour}}
+
+\NewDocumentCommand\pictocalendar{O{}D<>{}m}{%
+	\restoreKV[minictikzcalendar]%
+	\setKV[minictikzcalendar]{#1}%
+	\StrCut{#3}{/}{\minictikzcalendarday}{\minictikzcalendarmonth}%
+	\IfStrEqCase{\minictikzcalendarheight}{%
+		{auto}%
+		{%
+			\settototalheight\tmptotalheightcurrenttext{\hbox{M}}%
+			\tikzset{minicaldepth/.style={x=0.975\tmptotalheightcurrenttext,y=0.975\tmptotalheightcurrenttext}}%
+		}%
+		{dauto}%
+		{%
+			\settototalheight\tmptotalheightcurrenttext{\hbox{qM}}%
+			\settodepth\tmpdepthcurrenttext{\hbox{qM}}%
+			\tikzset{minicaldepth/.style={x=0.925\tmptotalheightcurrenttext,y=0.925\tmptotalheightcurrenttext,baseline=0.8125\tmpdepthcurrenttext}}%
+		}%
+	}[%
+		\setlength\tmptotalheightcurrenttext{\minictikzcalendarheight}%
+		\tikzset{minicaldepth/.style={x=\tmptotalheightcurrenttext,y=\tmptotalheightcurrenttext}}%
+	]%
+	\begin{tikzpicture}[line width=0.0375\tmptotalheightcurrenttext,minicaldepth,#2]
+		\draw[\minictikzcalendarcol] (0,0) {[rounded corners=0.075\tmptotalheightcurrenttext] --++(0,1)--++(1,0)}--++(0,-1)--cycle ;
+		\filldraw[\minictikzcalendarcol] (0,0.7) {[rounded corners=0.075\tmptotalheightcurrenttext] --(0,1)--++(1,0)}--(1,0.7)--cycle ;
+		\clip (0,0) {[rounded corners=0.075\tmptotalheightcurrenttext] --++(0,1)--++(1,0)}--++(0,-1)--cycle ;
+		\draw (0.5,0.85) node[inner sep=0pt,minicalmonth] {\resizebox{!}{0.175\tmptotalheightcurrenttext}{\vphantom{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}\minictikzcalendarmonth}} ;
+		\draw[black] (0.5,0.35) node[inner sep=0pt,minicalday] {\resizebox{!}{0.425\tmptotalheightcurrenttext}{\vphantom{0123456789}\minictikzcalendarday}} ;
+	\end{tikzpicture}%
+}
+
+%====CLIPPY
+\defKV[tkzclippy]{%
+	height=\def\tkzclippyunit{#1},%
+	color=\def\tkzclippycolor{#1},%
+	eyecolor=\def\tkzclippyeyecolor{#1},%
+	style=\def\tkzclippyeyestyle{#1},%
+	rotate=\def\tkzclippyerotate{#1},%
+	ratio=\def\tkzclippyeratio{#1}
+}
+\setKVdefault[tkzclippy]{%
+	height=dauto,
+	color=black,%
+	eyecolor=black,%
+	style=normal,%
+	rotate=0,%
+	ratio=0.225
+}
+
+\newlength\clippyunit
+\newlength\clippydepthunit
+\tikzset{tkzclippyborder/.style={\tkzclippycolor,line width=0.025\clippyunit,line cap=round}}
+\tikzset{tkzclippyborderbrow/.style={\tkzclippycolor,line width=0.025\clippyunit,line cap=round}}
+\tikzset{tkzclippyeyeborder/.style={\tkzclippycolor,line width=0.015\clippyunit,fill=white}}
+\tikzset{tkzclippyeyeinner/.style={line width=0.0125\clippyunit,\tkzclippyeyecolor}}
+
+\newcommand\intclippybody{%
+	\draw[tkzclippyborder] (0,0.6)--(0,0.2)--({\tkzclippyeratio},0.2)--(\tkzclippyeratio,1)--(-0.0375,1)--++(0,-1)--++({\tkzclippyeratio+0.075},0)--++(0,0.4)--++(65:0.1) ;
+}
+\newcommand\intclippyeyes{%
+	\draw[tkzclippyeyeborder] (-0.0375,0.75) circle[radius=0.075] ;
+	\draw[tkzclippyeyeborder] ({\tkzclippyeratio},0.75) circle[radius=0.075] ;
+	\filldraw[tkzclippyeyeinner] (-0.0375,0.75) circle[radius=0.0325] ;
+	\filldraw[tkzclippyeyeinner] ({\tkzclippyeratio},0.75) circle[radius=0.0325] ;
+}
+\newcommand\intclippyeyebrow[6]{%
+	%#1=lR / %#2=lL / %#3=rR / %#4=lL / %#5=bendl / %#6=bendr
+	\draw[tkzclippyborderbrow] (0.035,#1) to[#5] (-0.09,#2) ;
+	\draw[tkzclippyborderbrow] ({\tkzclippyeratio-0.0725},#3) to[#6] ({\tkzclippyeratio+0.0525},#4) ;
+}
+
+\NewDocumentCommand\pictoclippy{ O{} D<>{} }{%
+	\restoreKV[tkzclippy]%
+	\setKV[tkzclippy]{#1}%
+	\IfSubStr{\tkzclippyunit}{auto}%
+		{%
+			\IfStrEq{\tkzclippyunit}{auto}%
+				{%
+					\settototalheight\clippyunit{\hbox{B}}%
+					\setlength\clippydepthunit{-0.015\clippyunit}%
+				}%
+				{%
+					\settototalheight\clippyunit{\hbox{qB}}%
+					\settodepth\clippydepthunit{\hbox{qB}}%
+				}%
+		}%
+		{%
+			\setlength\clippyunit{\tkzclippyunit}%
+			\setlength\clippydepthunit{0pt}%
+		}%
+	\begin{tikzpicture}[x=\clippyunit,y=\clippyunit,scale=0.9756,rounded corners=0.0875\clippyunit,baseline=0.95\clippydepthunit,rotate=\tkzclippyerotate,#2,inner sep=0pt]
+		\intclippybody
+		\intclippyeyes
+		\IfStrEqCase{\tkzclippyeyestyle}{%
+			{normal}{\intclippyeyebrow{0.875}{0.875}{0.875}{0.875}{}{}}%
+			{angry}{\intclippyeyebrow{0.85}{0.875}{0.85}{0.875}{}{}}%
+			{happy}{\intclippyeyebrow{0.875}{0.85}{0.875}{0.85}{}{}}%
+			{anghappy}{\intclippyeyebrow{0.85}{0.875}{0.875}{0.85}{}{}}%
+			{happangry}{\intclippyeyebrow{0.875}{0.85}{0.85}{0.875}{}{}}%
+			{surprised}{\intclippyeyebrow{0.875}{0.875}{0.875}{0.875}{bend right=45}{bend left=45}}%
+			{confused}{\intclippyeyebrow{0.875}{0.875}{0.875}{0.875}{bend right=45}{bend right=22.5}}%
+		}%
+	\end{tikzpicture}%
+}
+
+%====GENERIC MACRO ?
+\NewDocumentCommand\tkzpicto{O{}D<>{}m}{%
+	\IfSubStr{#3}{wifi}{%
+		\StrBehind{#3}{=}[\tmpargggggwifi]%
+		\pictowifi[#1]<#2>{\tmpargggggwifi}%
+	}{}%
+	\IfSubStr{#3}{network}{%
+		\StrBehind{#3}{=}[\tmpargggggnetwork]%
+		\pictonetwork[#1]<#2>{\tmpargggggnetwork}%
+	}{}%
+	\IfSubStr{#3}{stars}{%
+		\StrBehind{#3}{=}[\tmpargggggstars]%
+		\pictostars[#1]<#2>{\tmpargggggstars}%
+	}{}%
+	\IfSubStr{#3}{speedo}{%
+		\StrBehind{#3}{=}[\tmpargggggspeedo]%
+		\pictospeedometer[#1]<#2>{\tmpargggggspeedo}%
+	}{}%
+	\IfStrEq{#3}{bullseye}{{\pictobullseye[#1]<#2>}}{}%
+	\IfSubStr{#3}{battery}{%
+		\StrBehind{#3}{=}[\tmpargggggbattery]%
+		\pictobattery[#1]<#2>{\tmpargggggbattery}%
+	}{}%
+	\IfSubStr{#3}{skills}{%
+		\StrBehind{#3}{=}[\tmpargggggskills]%
+		\pictoskills[#1]<#2>{\tmpargggggskills}%
+	}{}%
+	\IfSubStr{#3}{pill}{%
+		\StrBehind{#3}{=}[\tmpargggggpill]%
+		\pictopill[#1]<#2>{\tmpargggggpill}%
+	}{}%
+	\IfSubStr{#3}{traffic}{%
+		\IfSubStr{#3}{=}%
+			{%
+				\StrBehind{#3}{=}[\tmpargggggtraffic]%
+				\pictotraffic[#1]<#2>{\tmpargggggtraffic}%
+			}%
+			{%
+				\pictotraffic[#1]<#2>{}%
+			}%
+	}{}%
+	\IfSubStr{#3}{calendar}{%
+		\StrBehind{#3}{=}[\tmpargggggcal]%
+		\pictocalendar[#1]<#2>{\tmpargggggcal}%
+	}{}%
+	\IfSubStr{#3}{clippy}{%
+		\StrBehind{#3}{=}[\tmpargggggclippy]%
+		\pictoclippy[#1,style=\tmpargggggclippy]<#2>%
+	}{}%
+}
+
+\endinput

@@ -1,0 +1,448 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[french,11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{DejaVuSerif}
+\usepackage[scale=1.125]{inconsolata}
+\usepackage{amssymb}
+\usepackage[Prefixe]{couleurs-fr}
+\usepackage{tikz}
+\usepackage{soul}
+\usepackage{codehigh}
+\usepackage{multicol}
+\usepackage{fontawesome5}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [couleurs-fr]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=1.5cm]{geometry}
+\setlength{\parindent}{0pt}
+
+\def\TPversion{0.1.3}
+\def\TPdate{02 juillet 2025}
+\definecolor{GrisClair}{rgb}{.828,.828,.828}
+\definecolor{BleuAlice}{rgb}{.94,.972,1}
+\def\HtRet{0.45}\def\LgRect{1.5}
+\usepackage{tcolorbox}
+
+\NewDocumentCommand\MontreCouleur{ O{black} m m m }{%
+	\begin{tikzpicture}
+		\draw[thick,draw=black,fill=g#2] (0,0) rectangle++ (\LgRect,\HtRet) ;
+		\draw ({\LgRect+0.025},{0.5*\HtRet}) node[right,font=\ttfamily,text=#1] {\vphantom{pf}g#2} ;
+	\end{tikzpicture}%
+	\par
+}
+
+\NewDocumentCommand\MontreCouleurXKCD{ O{black} m m }{%
+	\begin{tikzpicture}
+		\draw[thick,draw=black,fill=x#2] (0,0) rectangle++ (\LgRect,\HtRet) ;
+		\draw ({\LgRect+0.025},{0.5*\HtRet}) node[right,font=\ttfamily,text=#1] {\vphantom{pf}x#2} ;
+	\end{tikzpicture}%
+	\par
+}
+
+\sethlcolor{GrisClair!25}
+\NewDocumentCommand\MontreCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+
+\usepackage{babel}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.75\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{couleurs-fr}}\\
+				\\
+				{\LARGE Des couleurs de \texttt{xcolor},} \\
+				{\LARGE en version francisées,} \\
+				{\LARGE avec préfixe}
+			\end{tabular}
+			
+			\medskip
+			
+			{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\vspace*{1mm}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://github.com/cpierquet/couleurs-fr}}
+\end{tabular}
+\end{center}
+
+\hrule
+
+\vspace*{5mm}
+
+\begin{codehigh}[language=latex/latex3,style/main=BleuAlice,style/code=BleuAlice]
+%chargement avec prefixe
+\documentclass{article}
+...
+\usepackage[Prefixe]{couleurs-fr}
+%les couleurs de base seront sous la forme <gNom>
+...
+\end{codehigh}
+
+\section{Couleurs génériques}
+
+Dans ce cas, les noms des couleurs (génériques) sont préfixées par \MontreCode{g} car le package est chargé avec l'option \MontreCode{[Prefixe]}.
+
+\begin{multicols}{3}
+	\MontreCouleur{Abricot}{HTML}{E67E30}
+	\MontreCouleur{Acajou}{HTML}{88421D}
+	\MontreCouleur{AigueMarine}{HTML}{79F8F8}
+	\MontreCouleur{AmandeBlanche}{rgb}{1,.92,.804}
+	\MontreCouleur{Amande}{HTML}{82C46C}
+	\MontreCouleur{AmandineFonce}{rgb}{.72,.525,.044}
+	\MontreCouleur{AmandineClair}{rgb}{.933,.867,.51}
+	\MontreCouleur{AmandinePale}{rgb}{.932,.91,.668}
+	\MontreCouleur{Amandine}{rgb}{.855,.648,.125}
+	\MontreCouleur{Amarante}{HTML}{91283B}
+	\MontreCouleur{Ambre}{HTML}{F0C300}
+	\MontreCouleur{Amethyste}{HTML}{884DA7}
+	\MontreCouleur{Anthracite}{HTML}{303030}
+	\MontreCouleur{Argent}{rgb}{.752,.752,.752}
+	\MontreCouleur{Aubergine}{HTML}{370028}
+	\MontreCouleur{Aurore}{HTML}{FFCB60}
+	\MontreCouleur{Avocat}{HTML}{568203}
+	\MontreCouleur{Azur}{rgb}{.94,1,1}
+	\MontreCouleur{Basane}{HTML}{8B6C42}
+	\MontreCouleur{BeigeFonce}{rgb}{1,.855,.725}
+	\MontreCouleur{Beige}{rgb}{.96,.96,.864}
+	\MontreCouleur{Beurre}{HTML}{F0E36B}
+	\MontreCouleur{Bisque}{rgb}{1,.894,.77}
+	\MontreCouleur{Bistre}{HTML}{856D4D}
+	\MontreCouleur{Bis}{HTML}{766F64}
+	\MontreCouleur{Bitume}{HTML}{4E3D28}
+	\MontreCouleur{BlancAntique}{rgb}{.98,.92,.844}
+	\MontreCouleur{BlancCasse}{HTML}{FEFEE2}
+	\MontreCouleur{BlancFantome}{rgb}{.972,.972,1}
+	\MontreCouleur{BlancFloral}{rgb}{1,.98,.94}
+	\MontreCouleur{BlancLunaire}{HTML}{F4FEFE}
+	\MontreCouleur{BlancNajavo}{rgb}{1,.87,.68}
+	\MontreCouleur{Blanc}{rgb}{1,1,1}
+	\MontreCouleur{BleuAcierClair}{rgb}{.69,.77,.87}
+	\MontreCouleur{BleuAcier}{rgb}{.275,.51,.705}
+	\MontreCouleur{BleuAlice}{rgb}{.94,.972,1}
+	\MontreCouleur{BleuArdoiseFonce}{rgb}{.284,.24,.545}
+	\MontreCouleur{BleuArdoiseInter}{rgb}{.484,.408,.932}
+	\MontreCouleur{BleuArdoiseClair}{rgb}{.518,.44,1}
+	\MontreCouleur{BleuArdoise}{rgb}{.415,.352,.804}
+	\MontreCouleur{BleuBleuet}{HTML}{5472AE}
+	\MontreCouleur{BleuCadet}{rgb}{.372,.62,.628}
+	\MontreCouleur{BleuCanard}{HTML}{048B9A}
+	\MontreCouleur{BleuCeleste}{HTML}{357AB7}
+	\MontreCouleur{BleuCeruleen}{HTML}{00A3E3}
+	\MontreCouleur{BleuCharrette}{HTML}{8EA2C6}
+	\MontreCouleur{BleuCielIntense}{rgb}{0,.75,1}
+	\MontreCouleur{BleuCielClair}{rgb}{.53,.808,.98}
+	\MontreCouleur{BleuCiel}{rgb}{.53,.808,.92}
+	\MontreCouleur{BleuCobalt}{HTML}{22427C}
+	\MontreCouleur{BleuDodger}{rgb}{.116,.565,1}
+	\MontreCouleur{BleuElectrique}{HTML}{2C75FF}
+	\MontreCouleur{BleuFonce}{rgb}{0,0,.545}
+	\MontreCouleur{BleuGivre}{HTML}{80D0D0}
+	\MontreCouleur{BleuInter}{rgb}{0,0,.804}
+	\MontreCouleur{BleuClair}{rgb}{.68,.848,.9}
+	\MontreCouleur{BleuMarineInter}{rgb}{.4,.804,.668}
+	\MontreCouleur{BleuMarine}{HTML}{03224C}
+	\MontreCouleur{BleuNavy}{rgb}{0,0,.5}
+	\MontreCouleur{BleuNuit}{rgb}{.098,.098,.44}
+	\MontreCouleur{BleuOutremer}{HTML}{004787}
+	\MontreCouleur{BleuPaon}{HTML}{067790}
+	\MontreCouleur{BleuPersan}{HTML}{4E63CE}
+	\MontreCouleur{BleuPetrole}{HTML}{1D4851}
+	\MontreCouleur{BleuPoudre}{rgb}{.69,.88,.9}
+	\MontreCouleur{BleuProcess}{HTML}{00B0EF}
+	\MontreCouleur{BleuPrusse}{HTML}{24445C}
+	\MontreCouleur{BleuRoi}{HTML}{318CE7}
+	\MontreCouleur{BleuRoyal}{rgb}{.255,.41,.884}
+	\MontreCouleur{BleuSaphir}{HTML}{0131B4}
+	\MontreCouleur{BleuTurquin}{HTML}{425B8A}
+	\MontreCouleur{BleuViolet}{rgb}{.54,.17,.888}
+	\MontreCouleur{Bleuet}{rgb}{.392,.585,.93}
+	\MontreCouleur{Bleu}{rgb}{0,0,1}
+	\MontreCouleur{Ble}{rgb}{.96,.87,.7}
+	\MontreCouleur{Bois}{rgb}{.87,.72,.53}
+	\MontreCouleur{BoutonOr}{HTML}{FCDC12}
+	\MontreCouleur{Brique}{rgb}{.698,.132,.132}
+	\MontreCouleur{Bronze}{rgb}{.824,.705,.55}
+	\MontreCouleur{BrouNoix}{HTML}{3F2204}
+	\MontreCouleur{BrunIntense}{rgb}{.545,.27,.075}
+	\MontreCouleur{BrunJaune}{HTML}{973F05}
+	\MontreCouleur{BrunClair}{rgb}{1,.92,.804}
+	\MontreCouleur{Brun}{rgb}{.648,.165,.165}
+	\MontreCouleur{CacaOie}{HTML}{CDCD0D}
+	\MontreCouleur{Cacao}{HTML}{614B3A}
+	\MontreCouleur{Cachou}{HTML}{2F1B0C}
+	\MontreCouleur{Cafe}{HTML}{462E01}
+	\MontreCouleur{Cannelle}{HTML}{7E5835}
+	\MontreCouleur{Capucine}{HTML}{FF5E4D}
+	\MontreCouleur{Caramel}{rgb}{.824,.41,.116}
+	\MontreCouleur{Carmin}{HTML}{960018}
+	\MontreCouleur{Carotte}{HTML}{F4661B}
+	\MontreCouleur{Chamois}{HTML}{D0C07A}
+	\MontreCouleur{Chardon}{rgb}{.848,.75,.848}
+	\MontreCouleur{Chartreuse}{rgb}{.498,1,0}
+	\MontreCouleur{Chaudron}{HTML}{85530F}
+	\MontreCouleur{Chocolat}{HTML}{5A3A22}
+	\MontreCouleur{Cinabre}{HTML}{DB1702}
+	\MontreCouleur{CitronVertFonce}{rgb}{.196,.804,.196}
+	\MontreCouleur{CitronVert}{rgb}{0,1,0}
+	\MontreCouleur{Citrouille}{HTML}{DF6D14}
+	\MontreCouleur{Coquelicot}{HTML}{C60800}
+	\MontreCouleur{Coquillage}{rgb}{1,.96,.932}
+	\MontreCouleur{CoquilleOeuf}{HTML}{FDE9E0}
+	\MontreCouleur{CorailClair}{rgb}{.94,.5,.5}
+	\MontreCouleur{Corail}{rgb}{1,.498,.312}
+	\MontreCouleur{CouleursMars}{HTML}{EED153}
+	\MontreCouleur{Cramoisi}{rgb}{.864,.08,.235}
+	\MontreCouleur{CremeMenthe}{rgb}{.96,1,.98}
+	\MontreCouleur{CuisseNymphe}{HTML}{FEE7F0}
+	\MontreCouleur{Cuivre}{HTML}{B36700}
+	\MontreCouleur{CyanFonce}{rgb}{0,.545,.545}
+	\MontreCouleur{CyanClair}{rgb}{.88,1,1}
+	\MontreCouleur{Cyan}{rgb}{0,1,1}
+	\MontreCouleur{EauMarine}{rgb}{.498,1,.83}
+	\MontreCouleur{Eau}{rgb}{0,1,1}
+	\MontreCouleur{Ecarlate}{HTML}{ED0000}
+	\MontreCouleur{Ecru}{HTML}{FEFEE0}
+	\MontreCouleur{Emeraude}{HTML}{00815F}
+	\MontreCouleur{Fauve}{HTML}{AD4F09}
+	\MontreCouleur{Flave}{HTML}{E6E697}
+	\MontreCouleur{Fraise}{HTML}{BF3030}
+	\MontreCouleur{Framboise}{HTML}{C72C48}
+	\MontreCouleur{Fumee}{rgb}{.96,.96,.96}
+	\MontreCouleur{Fuschia}{rgb}{1,0,1}
+	\MontreCouleur{Garance}{HTML}{EE1010}
+	\MontreCouleur{Glauque}{HTML}{649B88}
+	\MontreCouleur{Glycine}{HTML}{C9A0DC}
+	\MontreCouleur{Grege}{HTML}{BBAE98}
+	\MontreCouleur{Grenadine}{HTML}{E9383F}
+	\MontreCouleur{Grenat}{HTML}{6E0B14}
+	\MontreCouleur{GrisAcier}{HTML}{AFAFAF}
+	\MontreCouleur{GrisArdoiseFonce}{rgb}{.185,.31,.31}
+	\MontreCouleur{GrisArdoiseClair}{rgb}{.468,.532,.6}
+	\MontreCouleur{GrisArdoise}{rgb}{.44,.5,.565}
+	\MontreCouleur{GrisAttenue}{rgb}{.41,.41,.41}
+	\MontreCouleur{GrisEtain}{rgb}{.864,.864,.864}
+	\MontreCouleur{GrisFer}{HTML}{7F7F7F}
+	\MontreCouleur{GrisFonce}{rgb}{.664,.664,.664}
+	\MontreCouleur{GrisClair}{rgb}{.828,.828,.828}
+	\MontreCouleur{GrisPayne}{HTML}{677179}
+	\MontreCouleur{GrisPerle}{HTML}{CECECE}
+	\MontreCouleur{GrisSouris}{HTML}{9E9E9E}
+	\MontreCouleur{Gris}{rgb}{.5,.5,.5}
+	\MontreCouleur{Groseille}{HTML}{CF0A1D}
+	\MontreCouleur{Gueules}{HTML}{E21313}
+	\MontreCouleur{Heliotrope}{HTML}{DF73FF}
+	\MontreCouleur{Incarnat}{HTML}{FF6F7D}
+	\MontreCouleur{IndigoFonce}{HTML}{2E006C}
+	\MontreCouleur{Indigo}{rgb}{.294,0,.51}
+	\MontreCouleur{Isabelle}{HTML}{FEA777}
+	\MontreCouleur{Ivoire}{rgb}{1,1,.94}
+	\MontreCouleur{JauneAmandineClair}{rgb}{.98,.98,.824}
+	\MontreCouleur{JauneCanari}{HTML}{E7F00D}
+	\MontreCouleur{JauneCitron}{HTML}{F7FF3C}
+	\MontreCouleur{JauneCobalt}{HTML}{FDEE00}
+	\MontreCouleur{JauneImperial}{HTML}{FFE436}
+	\MontreCouleur{JauneClair}{rgb}{1,.98,.804}
+	\MontreCouleur{JauneMimosa}{HTML}{FEF86C}
+	\MontreCouleur{JauneNaples}{HTML}{FFF0BC}
+	\MontreCouleur{JauneVert}{rgb}{.68,1,.185}
+	\MontreCouleur{Jaune}{rgb}{1,1,0}
+	\MontreCouleur{KakiFonce}{rgb}{.74,.716,.42}
+	\MontreCouleur{Kaki}{rgb}{.94,.9,.55}
+	\MontreCouleur{LapisLazuli}{HTML}{26619C}
+	\MontreCouleur{Lavalliere}{HTML}{8F5922}
+	\MontreCouleur{LavandeClair}{rgb}{1,.94,.96}
+	\MontreCouleur{Lavande}{rgb}{.9,.9,.98}
+	\MontreCouleur{LieVin}{HTML}{AC1E44}
+	\MontreCouleur{Lilas}{HTML}{B666D2}
+	\MontreCouleur{Lin}{rgb}{.98,.94,.9}
+	\MontreCouleur{MagentaFonce}{rgb}{.545,0,.545}
+	\MontreCouleur{Magenta}{rgb}{1,0,1}
+	\MontreCouleur{Mais}{rgb}{1,.972,.864}
+	\MontreCouleur{Malachite}{HTML}{1FA055}
+	\MontreCouleur{Mandarine}{HTML}{FEA347}
+	\MontreCouleur{MarronRosy}{rgb}{.736,.56,.56}
+	\MontreCouleur{MarronSandy}{rgb}{.956,.644,.376}
+	\MontreCouleur{Marron}{rgb}{.5,0,0}
+	\MontreCouleur{Mastic}{HTML}{B3B191}
+	\MontreCouleur{Mauve}{HTML}{D473D4}
+	\MontreCouleur{Melon}{HTML}{F79E7C}
+	\MontreCouleur{Menthe}{HTML}{16B84E}
+	\MontreCouleur{Miellat}{rgb}{.94,1,.94}
+	\MontreCouleur{Mocassin}{rgb}{1,.894,.71}
+	\MontreCouleur{Moutarde}{HTML}{C7CF00}
+	\MontreCouleur{Mure}{HTML}{A93B94}
+	\MontreCouleur{Nacarat}{HTML}{FC5D5D}
+	\MontreCouleur{Nankin}{HTML}{F7E269}
+	\MontreCouleur{Neige}{rgb}{1,.98,.98}
+	\MontreCouleur{Noir}{rgb}{0,0,0}
+	\MontreCouleur{Noisette}{HTML}{955628}
+	\MontreCouleur{OcreRouge}{HTML}{DD985C}
+	\MontreCouleur{Ocre}{HTML}{DFAF2C}
+	\MontreCouleur{Olivatre}{rgb}{.42,.556,.136}
+	\MontreCouleur{Olive}{rgb}{.5,.5,0}
+	\MontreCouleur{OrangeBrule}{HTML}{CC5500}
+	\MontreCouleur{OrangeFonce}{rgb}{1,.55,0}
+	\MontreCouleur{OrangeRoughy}{HTML}{C04F16}
+	\MontreCouleur{Orange}{rgb}{1,.648,0}
+	\MontreCouleur{OrchideeFonce}{rgb}{.6,.196,.8}
+	\MontreCouleur{OrchideeInter}{rgb}{.73,.332,.828}
+	\MontreCouleur{Orchidee}{rgb}{.855,.44,.84}
+	\MontreCouleur{Orpiment}{HTML}{FCD21C}
+	\MontreCouleur{Or}{rgb}{1,.844,0}
+	\MontreCouleur{Outremer}{HTML}{26619C}
+	\MontreCouleur{OxydeFer}{HTML}{F7230C}
+	\MontreCouleur{Paille}{HTML}{FEE347}
+	\MontreCouleur{Papaye}{rgb}{1,.936,.835}
+	\MontreCouleur{Parme}{HTML}{CFA0E9}
+	\MontreCouleur{Peche}{HTML}{F79559}
+	\MontreCouleur{PelureOignon}{HTML}{D58490}
+	\MontreCouleur{Perou}{rgb}{.804,.52,.248}
+	\MontreCouleur{Pervenche}{HTML}{CCCCFF}
+	\MontreCouleur{Pissenlit}{HTML}{FDBB43}
+	\MontreCouleur{Pistache}{HTML}{BEF574}
+	\MontreCouleur{PoilChameau}{HTML}{B67823}
+	\MontreCouleur{Pourpre}{HTML}{9E0E40}
+	\MontreCouleur{Prasin}{HTML}{4CA66B}
+	\MontreCouleur{Prune}{rgb}{.868,.628,.868}
+	\MontreCouleur{Puce}{HTML}{4E1609}
+	\MontreCouleur{Rhodamine}{HTML}{EE549F}
+	\MontreCouleur{RoseCarmin}{HTML}{F181B2}
+	\MontreCouleur{RoseFonce}{rgb}{1,.41,.705}
+	\MontreCouleur{RoseIntense}{rgb}{1,.08,.576}
+	\MontreCouleur{RoseClair}{rgb}{1,.712,.756}
+	\MontreCouleur{RoseMisty}{rgb}{1,.894,.884}
+	\MontreCouleur{RoseMountbatten}{HTML}{997A8D}
+	\MontreCouleur{Rose}{rgb}{1,.752,.796}
+	\MontreCouleur{RougeAndrinople}{HTML}{A91101}
+	\MontreCouleur{RougeBrique}{HTML}{B6301C}
+	\MontreCouleur{RougeCardinal}{HTML}{B82010}
+	\MontreCouleur{RougeCerise}{HTML}{BB0B0B}
+	\MontreCouleur{RougeFalun}{HTML}{801818}
+	\MontreCouleur{RougeFeu}{HTML}{FF4901}
+	\MontreCouleur{RougeFonce}{rgb}{.545,0,0}
+	\MontreCouleur{RougeIndien}{rgb}{.804,.36,.36}
+	\MontreCouleur{RougeOrange}{rgb}{1,.27,0}
+	\MontreCouleur{RougeRubis}{HTML}{ED027D}
+	\MontreCouleur{RougeSang}{HTML}{850606}
+	\MontreCouleur{RougeTomate}{HTML}{DE2916}
+	\MontreCouleur{RougeVioletInter}{rgb}{.78,.084,.52}
+	\MontreCouleur{RougeVioletPale}{rgb}{.86,.44,.576}
+	\MontreCouleur{RougeViolet}{rgb}{.816,.125,.565}
+	\MontreCouleur{Rouge}{rgb}{1,0,0}
+	\MontreCouleur{Rouille}{HTML}{985717}
+	\MontreCouleur{Rubis}{HTML}{E0115F}
+	\MontreCouleur{Sable}{HTML}{E0CDA9}
+	\MontreCouleur{Safre}{HTML}{0131B4}
+	\MontreCouleur{SangBoeuf}{HTML}{730800}
+	\MontreCouleur{Sanguine}{HTML}{850606}
+	\MontreCouleur{Sarcelle}{rgb}{0,.5,.5}
+	\MontreCouleur{SaumonFonce}{rgb}{.912,.59,.48}
+	\MontreCouleur{SaumonClair}{rgb}{1,.628,.48}
+	\MontreCouleur{Saumon}{rgb}{.98,.5,.448}
+	\MontreCouleur{Sepia}{HTML}{AE8964}
+	\MontreCouleur{Sienne}{rgb}{.628,.32,.176}
+	\MontreCouleur{Sinople}{HTML}{149414}
+	\MontreCouleur{Smalt}{HTML}{003399}
+	\MontreCouleur{Soufre}{HTML}{FFFF6B}
+	\MontreCouleur{Tabac}{HTML}{9F551E}
+	\MontreCouleur{Taupe}{HTML}{463F32}
+	\MontreCouleur{TerreOmbre}{HTML}{926D27}
+	\MontreCouleur{Tomate}{rgb}{1,.39,.28}
+	\MontreCouleur{Tomette}{HTML}{AE4A34}
+	\MontreCouleur{Topaze}{HTML}{FAEA73}
+	\MontreCouleur{Tourterelle}{HTML}{BBACAC}
+	\MontreCouleur{TurquoiseFonce}{rgb}{0,.808,.82}
+	\MontreCouleur{TurquoiseInter}{rgb}{.284,.82,.8}
+	\MontreCouleur{TurquoisePale}{rgb}{.688,.932,.932}
+	\MontreCouleur{Turquoise}{rgb}{.25,.88,.815}
+	\MontreCouleur{Vanille}{HTML}{E1CE9A}
+	\MontreCouleur{Vermeil}{HTML}{FF0921}
+	\MontreCouleur{Vermillon}{HTML}{DB1702}
+	\MontreCouleur{VertBleu}{HTML}{00B3b8}
+	\MontreCouleur{VertBouteille}{HTML}{096A09}
+	\MontreCouleur{VertCeladon}{HTML}{83A697}
+	\MontreCouleur{VertCitron}{HTML}{9EFD38}
+	\MontreCouleur{VertDeGris}{HTML}{95A595}
+	\MontreCouleur{VertEau}{HTML}{B0F2B6}
+	\MontreCouleur{VertEpinard}{HTML}{175732}
+	\MontreCouleur{VertFonce}{rgb}{0,.392,0}
+	\MontreCouleur{VertForet}{rgb}{.132,.545,.132}
+	\MontreCouleur{VertHooker}{HTML}{1B4F08}
+	\MontreCouleur{VertImperial}{HTML}{00561B}
+	\MontreCouleur{VertJaune}{rgb}{.604,.804,.196}
+	\MontreCouleur{VertJungle}{HTML}{00A99A}
+	\MontreCouleur{VertClair}{rgb}{.565,.932,.565}
+	\MontreCouleur{VertLichen}{HTML}{85C17E}
+	\MontreCouleur{VertMerFonce}{rgb}{.56,.736,.56}
+	\MontreCouleur{VertMerInter}{rgb}{.235,.7,.444}
+	\MontreCouleur{VertMerClair}{rgb}{.125,.698,.668}
+	\MontreCouleur{VertMer}{rgb}{.18,.545,.34}
+	\MontreCouleur{VertOliveFonce}{rgb}{.332,.42,.185}
+	\MontreCouleur{VertOxydeChrome}{HTML}{18391E}
+	\MontreCouleur{VertPale}{rgb}{.596,.985,.596}
+	\MontreCouleur{VertPelouse}{rgb}{.488,.99,0}
+	\MontreCouleur{VertPerroquet}{HTML}{3AF24B}
+	\MontreCouleur{VertPin}{HTML}{008A73}
+	\MontreCouleur{VertPoireau}{HTML}{4CA66B}
+	\MontreCouleur{VertPomme}{HTML}{34C924}
+	\MontreCouleur{VertPrairie}{HTML}{57D53B}
+	\MontreCouleur{VertPrintanierInter}{rgb}{0,.98,.604}
+	\MontreCouleur{VertPrintanier}{rgb}{0,1,.498}
+	\MontreCouleur{VertPrintemps}{HTML}{00FF7F}
+	\MontreCouleur{VertSapin}{HTML}{095228}
+	\MontreCouleur{VertSauge}{HTML}{689D71}
+	\MontreCouleur{VertTilleul}{HTML}{A5D152}
+	\MontreCouleur{VertVeronèse}{HTML}{5A6521}
+	\MontreCouleur{VertVessie}{HTML}{22780F}
+	\MontreCouleur{Vert}{rgb}{0,.5,0}
+	\MontreCouleur{VieilleDentelle}{rgb}{.992,.96,.9}
+	\MontreCouleur{VioletBleu}{HTML}{483A94}
+	\MontreCouleur{VioletEveque}{HTML}{723E64}
+	\MontreCouleur{VioletFonce}{rgb}{.58,0,.828}
+	\MontreCouleur{VioletInter}{rgb}{.576,.44,.86}
+	\MontreCouleur{VioletRouge}{HTML}{9F236C}
+	\MontreCouleur{VioletRoyal}{HTML}{623E99}
+	\MontreCouleur{Violette}{rgb}{.932,.51,.932}
+	\MontreCouleur{Violet}{rgb}{.5,0,.5}
+	\MontreCouleur{Viride}{HTML}{40826D}
+	\MontreCouleur{Zinzolin}{HTML}{6C0277}
+\end{multicols}
+
+
+
+\end{document}

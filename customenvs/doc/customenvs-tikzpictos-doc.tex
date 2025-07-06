@@ -1,0 +1,465 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[english,11pt,a4paper]{article}
+\usepackage{bera}
+\usepackage{inconsolata}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[scale=0.875]{cabin}
+\usepackage{customenvs-tikzpictos}
+\usepackage{soul}
+\usepackage{tabularray}
+\usepackage{lipsum}
+\usepackage{codehigh}
+\usepackage{fontawesome5}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+%\rhead{\sffamily\small\affloetalab[Legende]}
+\lfoot{\sffamily\small [tikz-pictos]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\usepackage{xspace}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+
+\def\TPversion{0.1.3}
+\def\TPdate{23/06/2025}
+\usepackage{tcolorbox}
+
+\sethlcolor{lightgray!25}
+\NewDocumentCommand\MontreCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+
+\usepackage{babel}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{customenvs-tikzpictos}} \\
+				\\
+				{\LARGE (part of \texttt{customenvs})}\\
+				\\
+				{\LARGE Small pictograms, with Ti\textit{k}Z,} \\
+				\\
+				{\LARGE for manual or inline insertion.} \\
+				\\
+				{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{tabular}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
+\end{tabular}
+\end{center}
+
+\vspace*{1.25cm}
+
+\hrule
+
+\medskip
+
+\hfill\MontreCode{customenvs-tikzpictos} is included with \MontreCode{customenvs}, but can be loaded independently !\hfill\null
+
+\medskip
+
+\hrule
+
+\vfill
+
+\hfill\begin{tblr}{hlines,vlines,cells={font=\sffamily\Huge}}
+	Wifi & \pictowifi[colors=purple/yellow]{0}|\pictowifi[colors=purple/yellow]{1}|\pictowifi[colors=purple/yellow]{2}|\pictowifi[colors=purple/yellow]{3}|\pictowifi[colors=purple/yellow]{4}\\
+	Wifi (bars) & \pictowifi[colors=purple/yellow,style=bar]{0}|\pictowifi[colors=purple/yellow,style=bar]{1}|\pictowifi[colors=purple/yellow,style=bar]{2}|\pictowifi[colors=purple/yellow,style=bar]{3}|\pictowifi[colors=purple/yellow,style=bar]{4}\\
+	Network & \pictonetwork[colors=teal/orange]{0}|\pictonetwork[colors=teal/orange]{1}|\pictonetwork[colors=teal/orange]{2}|\pictonetwork[colors=teal/orange]{3}|\pictonetwork[colors=teal/orange]{4}\\
+	Stars & \pictostars[colors=brown/cyan]{0}|\pictostars[colors=brown/cyan]{0.5}|\pictostars[colors=brown/cyan]{3}\\
+	Speedometer & \pictospeedometer[colors=violet/olive]{}|\pictospeedometer[colors=violet/olive]{0}|\pictospeedometer[colors=violet/olive]{0.5}|\pictospeedometer[colors=violet/olive]{5.5}|\pictospeedometer[colors=violet/olive]{6} \\
+	BullsEye & \pictobullseye[colors]|\pictobullseye[colors]<rotate=90>|\pictobullseye[colors]<rotate=180>|\pictobullseye[colors]<rotate=-90>\\
+	Battery & \pictobattery[barcolor=auto]{}|\pictobattery[barcolor=auto]{1}|\pictobattery[barcolor=auto]{2}|\pictobattery[barcolor=auto]{3}\\
+	Battery (flip) & \pictobattery[flip,barcolor=auto]{}|\pictobattery[flip,barcolor=auto]{1}|\pictobattery[flip,barcolor=auto]{2}|\pictobattery[flip,barcolor=auto]{3}\\
+	Skills & \pictoskills[colors={red}]{}|\pictoskills[colors={red}]{1}|\pictoskills[colors={red}]{2}|\pictoskills[colors={red}]{3}\\
+	Pill & \pictopill[colors=blue/red]{}|\pictopill[colors=blue/red]{1}|\pictopill[colors=blue/red]{3}\\
+	TrafficLight & \pictotraffic{}|\pictotraffic{1}|\pictotraffic{2}|\pictotraffic{3}|\pictotraffic{123}|\pictotraffic{13}\\
+	MiniCalendar & \pictocalendar{15/aug.}|\pictocalendar[color=red]{30/dec.}|\pictocalendar[color=blue]{14/feb.}\\
+	Clippy & \pictoclippy|\pictoclippy[style=angry]|\pictoclippy[style=happangry]|\pictoclippy[style=confused]\\
+\end{tblr}\hfill\null
+
+\vfill~
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+\hrule
+
+\vspace*{5mm}
+
+\section{The package tikz-pictos}
+
+\subsection{Ideas}
+
+The idea is to display some pictograms like. Each pictogram can be inserted inline with automatic height (with or without depth), or with a manual height.
+
+\subsection{Loading}
+
+The package loads within the preamble, with \MontreCode{\textbackslash usepackage\{customenvs-tikzpictos\}}.
+
+If \MontreCode{customenvs} is loaded, it load itself \MontreCode{customenvs-tikzpictos}
+
+The only loaded packages are \MontreCode{simplekv}, \MontreCode{calc}, \MontreCode{simplekv}, \MontreCode{listofitems}, \MontreCode{xstring}, \MontreCode{xintexpr} and \MontreCode{tikz} (with \MontreCode{shapes.geometric / bbox} libraries).
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\usepackage{customenvs-tikzpictos}
+\end{codehigh}
+
+\subsection{Gallery}
+
+\begin{tblr}{hlines,vlines,cells={font=\sffamily\Huge}}
+	Wifi & q\pictowifi{0}|\pictowifi{1}|\pictowifi{2}|\pictowifi{3}|\pictowifi{4}H\\
+	Wifi (bars) & q\pictowifi[style=bar]{0}|\pictowifi[style=bar]{1}|\pictowifi[style=bar]{2}|\pictowifi[style=bar]{3}|\pictowifi[style=bar]{4}H\\
+	Network & q\pictonetwork{0}|\pictonetwork{1}|\pictonetwork{2}|\pictonetwork{3}|\pictonetwork{4}H\\
+	Stars & q\pictostars{0}|\pictostars{0.5}|\pictostars{3}H\\
+	Speedometer & q\pictospeedometer{}|\pictospeedometer{0}|\pictospeedometer{0.5}|\pictospeedometer{5.5}|\pictospeedometer{6}H  \\
+	BullsEye & q\pictobullseye[]|\pictobullseye[]<rotate=90>|\pictobullseye[]<rotate=180>|\pictobullseye[]<rotate=-90>H\\
+	Battery & q\pictobattery{}|\pictobattery{1}|\pictobattery{2}|\pictobattery{3}H\\
+	Battery (flip) & q\pictobattery[flip]{}|\pictobattery[flip]{1}|\pictobattery[flip]{2}|\pictobattery[flip]{3}H\\
+	Skills & q\pictoskills{}|\pictoskills{1}|\pictoskills{2}|\pictoskills{3}H\\
+	Pill & q\pictopill{}|\pictopill{1}|\pictopill{3}H\\
+	TrafficLight & q\pictotraffic{1}|\pictotraffic{2}|\pictotraffic{3}\pictotraffic{123}H\\
+	MiniCalendar & q\pictocalendar{15/aug.}|\pictocalendar{30/dec.}|\pictocalendar{14/feb.}H\\
+	Clippy & \pictoclippy|\pictoclippy[style=angry]|\pictoclippy[style=happangry]|\pictoclippy[style=confused]\\
+\end{tblr}
+
+\medskip
+
+\begin{tblr}{hlines,vlines,cells={font=\sffamily\Huge}}
+	Wifi & q\pictowifi[colors=purple/yellow]{0}|\pictowifi[colors=purple/yellow]{1}|\pictowifi[colors=purple/yellow]{2}|\pictowifi[colors=purple/yellow]{3}|\pictowifi[colors=purple/yellow]{4}H\\
+	Wifi (bars) & q\pictowifi[colors=purple/yellow,style=bar]{0}|\pictowifi[colors=purple/yellow,style=bar]{1}|\pictowifi[colors=purple/yellow,style=bar]{2}|\pictowifi[colors=purple/yellow,style=bar]{3}|\pictowifi[colors=purple/yellow,style=bar]{4}H\\
+	Network & q\pictonetwork[colors=teal/orange]{0}|\pictonetwork[colors=teal/orange]{1}|\pictonetwork[colors=teal/orange]{2}|\pictonetwork[colors=teal/orange]{3}|\pictonetwork[colors=teal/orange]{4}H\\
+	Stars & q\pictostars[colors=brown/cyan]{0}|\pictostars[colors=brown/cyan]{0.5}|\pictostars[colors=brown/cyan]{3}H\\
+	Speedometer & q\pictospeedometer[colors=violet/olive]{}|\pictospeedometer[colors=violet/olive]{0}|\pictospeedometer[colors=violet/olive]{0.5}|\pictospeedometer[colors=violet/olive]{5.5}|\pictospeedometer[colors=violet/olive]{6}H \\
+	BullsEye & q\pictobullseye[colors]|\pictobullseye[colors]<rotate=90>|\pictobullseye[colors]<rotate=180>|\pictobullseye[colors]<rotate=-90>H\\
+	Battery & q\pictobattery[barcolor=auto]{}|\pictobattery[barcolor=auto]{1}|\pictobattery[barcolor=auto]{2}|\pictobattery[barcolor=auto]{3}H\\
+	Battery (flip) & q\pictobattery[flip,barcolor=auto]{}|\pictobattery[flip,barcolor=auto]{1}|\pictobattery[flip,barcolor=auto]{2}|\pictobattery[flip,barcolor=auto]{3}H\\
+	Skills & q\pictoskills[colors={red}]{}|\pictoskills[colors={red}]{1}|\pictoskills[colors={red}]{2}|\pictoskills[colors={red}]{3}H\\
+	Pill & q\pictopill[colors=blue/red]{}|\pictopill[colors=blue/red]{1}|\pictopill[colors=blue/red]{3}H\\
+	TrafficLight & q\pictotraffic[borders,listcolors={blue,lime,purple}]{1}|\pictotraffic[borders,listcolors={blue,lime,purple}]{2}|\pictotraffic[borders,listcolors={blue,lime,purple}]{3}\pictotraffic[borders,listcolors={blue,lime,purple}]{123}H\\
+	MiniCalendar & q\pictocalendar[col=teal]{15/aug.}|\pictocalendar[col=teal,monthcol=darkgray,daycolor=darkgray]{30/dec.}|\pictocalendar[col=yellow,monthcol=black,daycolor=purple]{01/jan.}H\\
+	Clippy & \pictoclippy|\pictoclippy[color=blue,eyecolor=red,style=angry,rotate=10]|\pictoclippy[color=orange,eyecolor=purple,style=happangry]|\pictoclippy[ratio=0.275,style=confused]\\
+\end{tblr}
+
+\medskip
+
+\begin{tblr}{hlines,vlines,cells={font=\sffamily\Huge}}
+	Wifi & a\pictowifi[height=auto]{0}|\pictowifi[height=auto]{1}|\pictowifi[height=auto]{2}|\pictowifi[height=auto]{3}|\pictowifi[height=auto]{4}H\\
+	Wifi (bars) & a\pictowifi[style=bar,height=auto]{0}|\pictowifi[style=bar,height=auto]{1}|\pictowifi[style=bar,height=auto]{2}|\pictowifi[style=bar,height=auto]{3}|\pictowifi[style=bar,height=auto]{4}H\\
+	Network & a\pictonetwork[height=auto]{0}|\pictonetwork[height=auto]{1}|\pictonetwork[height=auto]{2}|\pictonetwork[height=auto]{3}|\pictonetwork[height=auto]{4}H\\
+	Stars & a\pictostars[height=auto]{0}|\pictostars[height=auto]{0.5}|\pictostars[height=auto]{3}H\\
+	Speedometer & a\pictospeedometer[height=auto]{}|\pictospeedometer[height=auto]{0}|\pictospeedometer[height=auto]{0.5}|\pictospeedometer[height=auto]{5.5}|\pictospeedometer[height=auto]{6}H  \\
+	BullsEye & a\pictobullseye[height=auto]|\pictobullseye[height=auto]<rotate=90>|\pictobullseye[height=auto]<rotate=180>|\pictobullseye[height=auto]<rotate=-90>H\\
+	Battery & a\pictobattery[height=auto]{}|\pictobattery[height=auto]{1}|\pictobattery[height=auto]{2}|\pictobattery[height=auto]{3}H\\
+	Battery (flip) & a\pictobattery[height=auto,flip]{}|\pictobattery[height=auto,flip]{1}|\pictobattery[height=auto,flip]{2}|\pictobattery[height=auto,flip]{3}H\\
+	Skills & a\pictoskills[height=auto]{}|\pictoskills[height=auto]{1}|\pictoskills[height=auto]{2}|\pictoskills[height=auto]{3}H\\
+	Pill & a\pictopill[height=auto]{}|\pictopill[height=auto]{1}|\pictopill[height=auto]{3}H\\
+	TrafficLight & a\pictotraffic[height=auto]{1}|\pictotraffic[height=auto]{2}|\pictotraffic[height=auto]{3}\pictotraffic[height=auto]{123}H\\
+	MiniCalendar & q\pictocalendar[height=auto]{15/aug.}|\pictocalendar[height=auto]{30/dec.}|\pictocalendar[height=auto]{14/feb.}H\\
+	Clippy &\pictoclippy[height=auto]|\pictoclippy[height=auto,style=angry]|\pictoclippy[height=auto,style=happangry]|\pictoclippy[height=auto,style=confused]\\
+\end{tblr}
+
+\medskip
+
+\begin{tblr}{hlines,vlines,cells={font=\sffamily\Huge}}
+	Wifi & a\pictowifi[colors=purple/yellow,height=auto]{0}|\pictowifi[colors=purple/yellow,height=auto]{1}|\pictowifi[colors=purple/yellow,height=auto]{2}|\pictowifi[colors=purple/yellow,height=auto]{3}|\pictowifi[colors=purple/yellow,height=auto]{4}H\\
+	Wifi (bars) & a\pictowifi[colors=purple/yellow,style=bar,height=auto]{0}|\pictowifi[colors=purple/yellow,style=bar,height=auto]{1}|\pictowifi[colors=purple/yellow,style=bar,height=auto]{2}|\pictowifi[colors=purple/yellow,style=bar,height=auto]{3}|\pictowifi[colors=purple/yellow,style=bar,height=auto]{4}H\\
+	Network & a\pictonetwork[colors=teal/orange,height=auto]{0}|\pictonetwork[colors=teal/orange,height=auto]{1}|\pictonetwork[colors=teal/orange,height=auto]{2}|\pictonetwork[colors=teal/orange,height=auto]{3}|\pictonetwork[colors=teal/orange,height=auto]{4}H\\
+	Stars & a\pictostars[colors=brown/cyan,height=auto]{0}|\pictostars[colors=brown/cyan,height=auto]{0.5}|\pictostars[colors=brown/cyan,height=auto]{3}H\\
+	Speedometer & a\pictospeedometer[colors=violet/olive,height=auto]{}|\pictospeedometer[colors=violet/olive,height=auto]{0}|\pictospeedometer[colors=violet/olive,height=auto]{0.5}|\pictospeedometer[colors=violet/olive,height=auto]{5.5}|\pictospeedometer[colors=violet/olive,height=auto]{6}H \\
+	BullsEye & a\pictobullseye[colors,height=auto]|\pictobullseye[colors,height=auto]<rotate=90>|\pictobullseye[colors,height=auto]<rotate=180>|\pictobullseye[colors,height=auto]<rotate=-90>H\\
+	Battery & a\pictobattery[barcolor=auto,height=auto]{}|\pictobattery[barcolor=auto,height=auto]{1}|\pictobattery[barcolor=auto,height=auto]{2}|\pictobattery[barcolor=auto,height=auto]{3}H\\
+	Battery (flip) & a\pictobattery[barcolor=auto,height=auto,flip]{}|\pictobattery[barcolor=auto,height=auto,flip]{1}|\pictobattery[barcolor=auto,height=auto,flip]{2}|\pictobattery[barcolor=auto,height=auto,flip]{3}H\\
+	Skills & a\pictoskills[colors={red},height=auto]{}|\pictoskills[colors={red},height=auto]{1}|\pictoskills[colors={red},height=auto]{2}|\pictoskills[colors={red},height=auto]{3}H\\
+	Pill & a\pictopill[colors=blue/red,height=auto]{}|\pictopill[colors=blue/red,height=auto]{1}|\pictopill[colors=blue/red,height=auto]{3}H\\
+	TrafficLight & q\pictotraffic[height=auto,listcolors={blue,lime,purple}]{1}|\pictotraffic[height=auto,listcolors={blue,lime,purple}]{2}|\pictotraffic[height=auto,listcolors={blue,lime,purple}]{3}\pictotraffic[height=auto,listcolors={blue,lime,purple}]{123}H\\
+	MiniCalendar & q\pictocalendar[col=teal,height=auto]{15/aug.}|\pictocalendar[col=teal,monthcol=darkgray,daycolor=darkgray,height=auto]{30/dec.}|\pictocalendar[col=yellow,monthcol=black,daycolor=purple,height=auto]{29/april}H\\
+	Clippy &\pictoclippy[height=auto]|\pictoclippy[height=auto,color=blue,eyecolor=red,style=angry,rotate=10]|\pictoclippy[height=auto,color=orange,eyecolor=purple,style=happangry]|\pictoclippy[height=auto,ratio=0.275,style=confused]\\
+\end{tblr}
+
+\medskip
+
+\section{Macros}
+
+\subsection{Global usage}
+
+\begin{codehigh}[language=latex/latex2]
+\tkzpicto%
+  [keys]
+  <tikz options>
+  {type=params}
+\end{codehigh}
+
+\subsection{Wifi}
+
+\begin{codehigh}[language=latex/latex2]
+\tkzpicto%
+  [style=...,height=...,colors=...]
+  <tikz options>
+  {wifi=level/nblevels}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2]
+\Huge
+\tkzpicto{wifi}                                              %default (full)
+\tkzpicto[style=bar]{wifi}                                   %default (bar)
+\tkzpicto{wifi=1}                                            %with 4 levels
+\tkzpicto{wifi=5/7}                                          %custom (full)
+\tkzpicto[style=bar]{wifi=5/9}                               %custom (bar)
+\tkzpicto[colors=violet/lime]{wifi=5/7}                      %colored custom
+\end{demohigh}
+
+\subsection{Network}
+
+\begin{codehigh}[language=latex/latex2]
+\tkzpicto%
+  [height=...,colors=...]
+  <tikz options>
+  {network=level/nblevels}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2]
+\Huge
+\tkzpicto{network}                                          %default
+\tkzpicto{network=1}                                        %with 4 levels
+\tkzpicto{network=5/7}                                      %full custom
+\tkzpicto[colors=orange/brown!50]{network=5/7}              %colored custom
+\end{demohigh}
+
+\subsection{Stars}
+
+\begin{codehigh}[language=latex/latex2]
+\tkzpicto%
+  [height=...,colors=...,offset=...]
+  <tikz options>
+  {stars=level/nblevels}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2]
+\Huge
+\tkzpicto{stars}                                            %default
+\tkzpicto{stars=1}                                          %with 4 levels
+\tkzpicto{stars=1.25/4}                                     %full custom
+\tkzpicto[colors=teal/magenta]{stars=5/7}                   %colored custom
+\end{demohigh}
+
+\subsection{SpeedoMeter}
+
+\begin{codehigh}[language=latex/latex2]
+\tkzpicto%
+  [colors=...]
+  <tikz options>
+  {speedo=level/nblevels}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2]
+\Huge
+\tkzpicto{speedo}                                           %default
+\tkzpicto{speedo=4}                                         %with 4 levels
+\tkzpicto{speedo=1.25/4}                                    %full custom
+\tkzpicto[colors=purple/olive]{speedo=5/7}                  %colored custom
+\end{demohigh}
+
+\subsection{Bullseye}
+
+\begin{codehigh}[language=latex/latex2]
+\tkzpicto%
+  [height=...,maincolor=...,color=TF,listcolors=...]
+  <tikz options>
+  {bullseye}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2]
+\Huge
+\tkzpicto{bullseye}                                         %default
+\tkzpicto<rotate=-90>{bullseye}                             %default (rotate)
+\tkzpicto[listcolors={teal,orange,lime},color]{bullseye}    %with 4 levels
+\end{demohigh}
+
+\subsection{Battery}
+
+\begin{codehigh}[language=latex/latex2]
+\tkzpicto%
+  [height=...,maincolor=...,barcolor=...,flip=TF,scale=...,shaded=TF]
+  <tikz options>
+  {battery=nb/nblevels}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2]
+\Huge
+\tkzpicto{battery}                                          %default
+\tkzpicto[flip]{battery}                                    %default (flip)
+\tkzpicto{battery=1}                                        %custom
+\tkzpicto[flip,scale=0.55]{battery=1}                       %custom flip scaled
+\tkzpicto[barcolor=auto]{battery=3/9}                       %autocolor
+\tkzpicto[maincolor=gray,barcolor=olive]{battery=7/8}       %custom color
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\xintFor* #1 in {\xintSeq{0}{5}}\do{\pictobattery[height=2cm,barcolor=auto]{#1/5}}
+\end{demohigh}
+
+\subsection{Skills}
+
+\begin{codehigh}[language=latex/latex2]
+\tkzpicto%
+  [height=...,colors=...,hoffset=...,voffset=...]
+  <tikz options>
+  {skills=nb/nblevels}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2]
+\Huge
+\tkzpicto{skills}                                           %default
+\tkzpicto{skills=2}                                         %custom
+\tkzpicto[voffset=0.4]{skills=1/4}                          %custom
+\tkzpicto[colors=blue/red]{skills=5/6}                      %custom color
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\Huge
+\pictoskillsgreen                                           %alias for green (1/3)
+\pictoskillsorange                                          %alias for orange (2/3)
+\pictoskillsred                                             %alias for red (3/3)
+\end{demohigh}
+
+\subsection{Pill}
+
+\begin{codehigh}[language=latex/latex2]
+\tkzpicto%
+  [height=...,colors=...,offset=]
+  <tikz options>
+  {pill=nb/nblevels}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2]
+\Huge
+\tkzpicto{pill}                                            %default
+\tkzpicto{pill=2}                                          %custom
+\tkzpicto[offset=0.2]{pill=3/4}                            %custom
+\tkzpicto[colors=teal/orange]{pill=5/6}                    %custom color
+\end{demohigh}
+
+\subsection{TrafficLight}
+
+\begin{codehigh}[language=latex/latex2]
+\tkzpicto%
+  [height=...,maincolor=...,listcolors=...,borders=TF]
+  <tikz options>
+  {traffic=levels}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2]
+\Huge
+\tkzpicto{traffic}                                         %default
+\tkzpicto[borders]{traffic=2}                              %custom
+\tkzpicto[maincolor=gray]{traffic=123}                     %custom
+\tkzpicto[listcolors={teal,orange,green}]{traffic=123}     %custom color
+\end{demohigh}
+
+\subsection{MiniCalendar}
+
+\begin{codehigh}[language=latex/latex2]
+\tkzpicto%
+  [height=...,color=...,daycolor=...,monthcolor=...]
+  <tikz options>
+  {calendar=day/month}
+
+%styles tikz for month/day
+\tikzset{minicalmonth/.style={font=\sffamily\bfseries,\minictikzcalendarcolmois}}
+\tikzset{minicalday/.style={font=\sffamily\bfseries,\minictikzcalendarcoljour}}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2]
+\Huge
+\tkzpicto{calendar=13/march}                               %default
+\tkzpicto[color=olive]{calendar=13/march}                  %custom color
+\tkzpicto[color=red,daycolor=red]{calendar=25/dec.}        %custom colors
+\end{demohigh}
+
+\subsection{Clippy}
+
+\begin{codehigh}[language=latex/latex2]
+\tkzclippy%
+  [height=...,color=...,eyecolor=...,ratio=...,rotate=...]
+  <tikz options>
+  {clippy=style}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2]
+%styles
+\Huge
+\pictoclippy%
+\pictoclippy[style=angry]%
+\pictoclippy[style=happy]%
+\pictoclippy[style=anghappy]%
+\pictoclippy[style=happangry]%
+\pictoclippy[style=surprised]%
+\pictoclippy[style=confused]%
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+%gallery
+\pictoclippy%
+  [height=3cm,style=confused,color=darkgray,eyecolor=blue]%
+\pictoclippy%
+  [height=3cm,style=happangry,color=violet,rotate=15,eyecolor=blue]%
+\pictoclippy%
+  [height=3cm,style=confused,color=brown,rotate=15,eyecolor=yellow,ratio=0.2]%
+\pictoclippy%
+  [height=3cm,style=confused,color=brown,rotate=15,eyecolor=yellow,ratio=0.5]%
+\end{demohigh}
+
+\pagebreak
+
+\section{History}
+
+\verb|v0.1.3|~:~~~~Clippy
+
+\verb|v0.1.2|~:~~~~Mini calendar
+
+\verb|v0.1.1|~:~~~~Traffic Light
+
+\verb|v0.1.0|~:~~~~Initial version
+
+\end{document}
