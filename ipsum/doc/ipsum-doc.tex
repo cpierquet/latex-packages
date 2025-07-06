@@ -1,0 +1,269 @@
+% !TeX TXS-program:compile = txs:///pdflatex
+
+\documentclass[11pt,a4paper]{ltxdoc}
+\usepackage{ipsum}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{fontawesome5}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+%\rhead{\sffamily\small\affloetalab[Legende]}
+\lfoot{\sffamily\small [ipsum]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+\def\TPversion{0.1.2}
+\def\TPdate{15/11/2023}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,hooks}
+\usepackage{soul}
+\sethlcolor{lightgray!25}
+\NewDocumentCommand\MontreCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+\NewDocumentCommand\GenSample{ O{#2} m }{%
+	%\hfill\textbf{\textsf{LANG=#1}}\par\smallskip
+	\hrule\par\smallskip
+	\ipsum<Type=sent,Lang=#2>\par\smallskip
+	\hrule\par\smallskip
+	\ipsum<Type=sent,Lang=#2>[5-6]\par\smallskip
+	\hrule\par\smallskip
+	\ipsum<Lang=#2>[2]\par\smallskip
+	\hrule\par\smallskip
+	\ipsum<Lang=#2>[1-3]\par\smallskip
+	\hrule\par\smallskip
+	\ipsum<Lang=#2>[6-7]\par\smallskip
+	\hrule\par\smallskip
+	\ipsum<Type=enum,Lang=#2>[2-4]\par\smallskip
+	\hrule\par\smallskip
+	\ipsum<Type=item,Lang=#2>[8-9]\par\smallskip
+	\hrule\par\smallskip
+}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{ipsum}}\\
+				\\
+				{\LARGE Creating "Dummy Text"} \\
+				{\LARGE with multilingual support.} \\
+				\\
+				{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{tabular}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://github.com/cpierquet/ipsum}} \\
+	\\
+	\texttt{Thanks to \url{https://ipsum.one/} for the paragraphs, with free license !}
+\end{tabular}
+\end{center}
+
+\hrule
+
+\vfill
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\ipsum<Lang=EN>[6]
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\ipsum<Lang=LAT>[4]
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\ipsum<Lang=FR>[2]
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\ipsum<Type=enum,Lang=NL>[6-9]
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\ipsum<Type=item,Lang=ES>[1-3]
+\end{tcolorbox}
+
+\vfill~
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+\hrule
+
+\vspace*{5mm}
+
+\section{Introduction}
+
+\subsection{Description}
+
+With this package you can create dummy text, in several languages.
+
+Use \cmd{\ipsum} to get some paragraphs/sentences/lists, with optional languages and optional numbers.
+
+Details can be found at \url{https://ipsum.one/}.
+
+\subsection{Loading}
+
+To load the package, simply use :
+
+\begin{quote}
+\begin{verbatim}
+\usepackage{ipsum}
+\end{verbatim}
+\end{quote}
+
+\vfill
+
+\subsection{History}
+
+\begin{quote}
+\begin{verbatim}
+0.1.2 : Fix typo in doc
+0.1.0 : Initial version
+\end{verbatim}
+\end{quote}
+
+\pagebreak
+
+\section{The macros}
+
+\subsection{General usage}
+
+In order to print one or several paragraphs/sentences/lists, the command is :
+
+\begin{quote}
+\begin{verbatim}
+\ipsum<Lang=...,Type=...>[range]
+\end{verbatim}
+\end{quote}
+
+Available \textsf{Lang} are :
+
+\begin{multicols}{4}
+	\begin{itemize}
+		\item \texttt{LAT} : Latin (def.)
+		\item \texttt{EN~} : English
+		\item \texttt{FR~} : French
+		\item \texttt{DE~} : German
+		\item \texttt{ES~} : Spanish
+		\item \texttt{PT~} : Portuguese
+		\item \texttt{IT~} : Italian
+		\item \texttt{NL~} : Dutch
+	\end{itemize}
+\end{multicols}
+
+Available \textsf{Type} are :
+
+\begin{multicols}{2}
+	\begin{itemize}
+		\item \texttt{par~} : paragraphs (def.)
+		\item \texttt{sent} : sentences
+		\item \texttt{enum} : enumerated list
+		\item \texttt{item} : itemized list
+	\end{itemize}
+\end{multicols}
+
+The \textsf{range} can be given (by default it's \texttt{1}) :
+
+\begin{itemize}
+	\item by one number, between \texttt{1} and \texttt{7} ;
+	\item by two numbers, \texttt{a-b} (with $\mathtt{1 \leq a < b \leq 7}$ for paragraphs, and $\mathtt{1 \leq a < b \leq 9}$ for others).
+\end{itemize}
+
+\subsection{Samples}
+
+Each language is illustrated with :
+
+\begin{quote}
+\begin{verbatim}
+\ipsum<Type=sent,Lang=...>        %the first sentence
+\ipsum<Type=sent,Lang=...>[5-6]   %the 5/6th sentences
+\ipsum<Lang=...>[2]               %the second paragraph
+\ipsum<Lang=...>[1-3]             %the first three
+\ipsum<Lang=...>[6-7]             %the last two
+\ipsum<Type=enum,Lang=...>[2-4]   %enumlist with 2/3/4th sentences
+\ipsum<Type=item,Lang=...>[8-9]   %itemist with last two sentences
+\end{verbatim}
+\end{quote}
+
+\pagebreak
+
+\subsubsection{Lang = Default}
+
+\GenSample[Default]{LAT}
+
+\pagebreak
+
+\subsubsection{Lang = EN}
+
+\GenSample{EN}
+
+\pagebreak
+
+\subsubsection{Lang = FR}
+
+\GenSample{FR}
+
+\pagebreak
+
+\subsubsection{Lang = DE}
+
+\GenSample{DE}
+
+\pagebreak
+
+\subsubsection{Lang = ES}
+
+\GenSample{ES}
+
+\pagebreak
+
+\subsubsection{Lang = PT}
+
+\GenSample{PT}
+
+\pagebreak
+
+\subsubsection{Lang = IT}
+
+\GenSample{IT}
+
+\pagebreak
+
+\subsubsection{Lang = NL}
+
+\GenSample{NL}
+
+\end{document}

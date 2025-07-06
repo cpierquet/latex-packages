@@ -1,0 +1,48 @@
+% Author        : C. Pierquet
+% licence       : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{inlinegraphicx}[2024/11/06 0.1.0 Insert inline graphicx]
+
+%====HISTORY
+% v 0.1.0	Initial version
+
+%====BASE
+\RequirePackage{graphicx}
+\RequirePackage{calc}
+\RequirePackage{simplekv}
+
+%====DIMENSIONS
+\newlength{\totheightinlinegraphicx}
+\newlength{\depthinlinegraphicx}
+\newlength{\inlinedepthgraphicsscale}
+
+%====KEYS
+\defKV[inlinegraphics]{scale=\def\inlinegraphicsscale{#1},strut=\def\inlinegraphicstrut{#1}}
+\setKVdefault[inlinegraphics]{scale=1,strut={qH}}
+
+%====MACRO
+\NewDocumentCommand\inlinegraphics{ s O{} m }{%
+	%1 = no depth/raisebox
+	%2 = keys (scale + strut)
+	%3 = file
+	\restoreKV[inlinegraphics]%
+	\setKV[inlinegraphics]{#2}%
+	\IfBooleanTF{#1}%
+		{%
+			\settoheight{\totheightinlinegraphicx}{\hbox{\inlinegraphicstrut}}%
+			\includegraphics[height=\inlinegraphicsscale\totheightinlinegraphicx]{#3}%
+		}%
+		{%
+			\settototalheight{\totheightinlinegraphicx}{\hbox{\inlinegraphicstrut}}%
+			\settodepth{\depthinlinegraphicx}{\hbox{\inlinegraphicstrut}}%
+			\xdef\inlinegraphicsinvscale{\fpeval{0.5*(1-\inlinegraphicsscale)}}%
+			\setlength{\inlinedepthgraphicsscale}%
+				{\dimexpr\depthinlinegraphicx-\inlinegraphicsinvscale\totheightinlinegraphicx\relax}%
+			\raisebox{-\inlinedepthgraphicsscale}{%
+				\includegraphics[height=\inlinegraphicsscale\totheightinlinegraphicx]{#3}%
+			}%
+		}%
+}
+
+\endinput

@@ -1,0 +1,8 @@
+\defaultfontfeatures[jetbrainscode]
+   {Extension=.otf,
+    UprightFont=JetBrainsMono-Regular,
+    ItalicFont=JetBrainsMono-Italic,
+    BoldFont=JetBrainsMono-Bold,
+    BoldItalicFont=JetBrainsMono-BoldItalic,
+    Contextuals=Alternate
+}

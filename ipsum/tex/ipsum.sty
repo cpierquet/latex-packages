@@ -1,0 +1,743 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+% Source     : https://ipsum.one/
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ipsum}[2023/11/15 0.1.2 Multilanguage simply dummy texts]
+
+%====HISTORIQUE
+% v 0.1.2	Fix typo in doc
+% v 0.1.1	Fix typo in doc
+% v 0.1.0	Initial version
+
+%====PACKAGES
+\RequirePackage{xstring}
+\RequirePackage{xintexpr}
+\RequirePackage{simplekv}
+
+%====KEYS
+\defKV[ipsumdummy]{%
+	Lang=\def\ipsumlg{#1},%
+	Type=\def\ipsumtype{#1}
+}
+\setKVdefault[ipsumdummy]{%
+	Lang=LAT,%
+	Type=par
+}
+
+%====PARAGRAPHS
+%==[LAT]
+\xdef\ipsum@par@LAT@A{%
+Nam quis enim. Quisque ornare dui a tortor. Fusce consequat lacus pellentesque metus. Duis euismod. Duis non quam. Maecenas vitae dolor in ipsum auctor vehicula. Vivamus nec nibh eget wisi varius pulvinar. Cras a lacus. Etiam et massa. Donec in nisl sit amet dui imperdiet vestibulum. Duis porttitor nibh id eros.\par
+}
+\xdef\ipsum@par@LAT@B{%
+Fusce adipiscing justo nec ante. Nullam in enim. Pellentesque felis orci, sagittis ac, malesuada et, facilisis in, ligula. Nunc non magna sit amet mi aliquam dictum. In mi. Curabitur sollicitudin justo sed quam. Aenean imperdiet. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae Donec lacinia nonummy lectus. Proin vel urna. Fusce sit amet orci ac magna iaculis pharetra. Duis sagittis massa in tellus. Aenean vel velit vel felis consectetuer pharetra.\par
+}
+\xdef\ipsum@par@LAT@C{%
+Morbi malesuada hendrerit dui. Nunc mauris leo, dapibus sit amet, vestibulum et, commodo id, est. Pellentesque purus. Pellentesque tristique, nunc ac pulvinar adipiscing, justo eros consequat lectus, sit amet posuere lectus neque vel augue. Cras consectetuer libero ac eros. Ut eget massa. Fusce sit amet enim eleifend sem dictum auctor. In eget risus luctus wisi convallis pulvinar. Vivamus sapien risus, tempor in, viverra in, aliquet pellentesque, eros. Aliquam euismod libero a sem.\par
+}
+\xdef\ipsum@par@LAT@D{%
+Fusce mollis dui eu leo. Sed sapien augue, porta at, posuere ut, ultrices molestie, est. Vivamus quis pede nec erat placerat tincidunt. Aenean odio dui, facilisis non, vehicula et, bibendum a, libero. Etiam leo turpis, venenatis eleifend, nonummy sit amet, aliquam non, mi. Maecenas eget mi. Sed nec diam. Integer orci tellus, pellentesque nec, bibendum quis, sodales ut, nibh. Duis laoreet aliquet orci. Curabitur sit amet sem sit amet nibh fermentum faucibus. Donec adipiscing, ipsum id fringilla convallis, elit massa cursus augue, at lobortis massa augue nec ligula. Proin ac lacus.\par
+}
+\xdef\ipsum@par@LAT@E{%
+Donec vel augue. Morbi a turpis sed libero consequat porta. Quisque lacinia consequat odio. Sed vehicula sollicitudin purus. Vestibulum eget est. In hac habitasse platea dictumst. Sed blandit, tortor a auctor imperdiet, wisi nibh ornare leo, ac dictum nibh enim eu orci. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aliquam tincidunt ullamcorper justo. Etiam accumsan lacus nec ante. Ut dictum luctus mauris. Ut metus. Maecenas gravida. Proin iaculis. Integer convallis, justo iaculis ullamcorper sollicitudin, lectus neque tincidunt mi, at condimentum sem quam vel diam. Aenean sit amet purus.\par
+}
+\xdef\ipsum@par@LAT@F{%
+Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae Aliquam interdum porttitor tortor. Donec ultricies justo eget sapien. Proin ac est. Aliquam erat volutpat. In tempus scelerisque ligula. Morbi scelerisque urna. Duis ac nisl. Donec sed leo. Fusce posuere orci mollis nunc. Sed arcu enim, pharetra nec, aliquam eu, consectetuer sit amet, eros. Sed id enim. Etiam mattis est at elit. Pellentesque est risus, pellentesque nec, dignissim vitae, egestas vitae, sapien. Maecenas et eros non libero iaculis facilisis. Mauris porttitor tempor justo. Sed sollicitudin neque nec libero.\par
+}
+\xdef\ipsum@par@LAT@G{%
+Morbi tincidunt posuere arcu. Cras venenatis est vitae dolor. Vivamus scelerisque semper mi. Donec ipsum arcu, consequat scelerisque, viverra id, dictum at, metus. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut pede sem, tempus ut, porttitor bibendum, molestie eu, elit. Suspendisse potenti. Sed id lectus sit amet purus faucibus vehicula. Praesent sed sem non dui pharetra interdum. Nam viverra ultrices magna.\par
+}
+%==[FR]
+\xdef\ipsum@par@FR@A{%
+Sans qu’elle daignât le dire à personne, un accès de fièvre d’un de ses fils la mettait presque dans le même état que si l’enfant eût été mort. Un éclat de rire grossier, un haussement d’épaules, accompagné de quelque maxime triviale sur la folie des femmes, avaient constamment accueilli les confidences de ce genre de chagrins, que le besoin d’épanchement l’avait portée à faire à son mari, dans les premières années de leur mariage. Ces sortes de plaisanteries, quand surtout elles portaient sur les maladies de ses enfants, retournaient le poignard dans le cœur de Mme de Rênal. Voilà ce qu’elle trouva au lieu des flatteries empressées et mielleuses du couvent jésuitique où elle avait passé sa jeunesse. Son éducation fut faite par la douleur. Trop fière pour parler de ce genre de chagrins, même à son amie Mme Derville, elle se figura que tous les hommes étaient comme son mari, M. Valenod et le sous-préfet Charcot de Maugiron. La grossièreté, et la plus brutale insensibilité à tout ce qui n’était pas intérêt d’argent, de préséance ou de croix ; la haine aveugle pour tout raisonnement qui les contrariait, lui parurent des choses naturelles à ce sexe, comme porter des bottes et un chapeau de feutre.\par
+}
+\xdef\ipsum@par@FR@B{%
+On rit beaucoup, on admira ; tel est l’esprit à l’usage de Verrières. Julien était déjà debout, tout le monde se leva malgré le décorum ; tel est l’empire du génie. Mme Valenod le retint encore un quart d’heure ; il fallait bien qu’il entendît les enfants réciter leur catéchisme ; ils firent les plus drôles de confusions, dont lui seul s’aperçut. Il n’eut garde de les relever. Quelle ignorance des premiers principes de la religion! pensait-il. Il saluait enfin et croyait pouvoir s’échapper ; mais il fallut essuyer une fable de La Fontaine.\par
+}
+\xdef\ipsum@par@FR@C{%
+Mais la demoiselle du comptoir avait remarqué la charmante figure de ce jeune bourgeois de campagne, qui, arrêté à trois pas du poêle, et son petit paquet sous le bras, considérait le buste du roi, en beau plâtre blanc. Cette demoiselle, grande Franc-Comtoise, fort bien faite, et mise comme il le faut pour faire valoir un café, avait déjà dit deux fois, d’une petite voix qui cherchait à n’être entendue que de Julien : Monsieur! Monsieur! Julien rencontra de grands yeux bleus fort tendres, et vit que c’était à lui qu’on parlait.\par
+}
+\xdef\ipsum@par@FR@D{%
+Il est vrai que cet arrangement a été critiqué par les bonnes têtes de l’endroit. Une fois, c’était un jour de dimanche, il y a quatre ans de cela, M. de Rênal, revenant de l’église en costume de maire, vit de loin le vieux Sorel, entouré de ses trois fils, sourire en le regardant. Ce sourire a porté un jour fatal dans l’âme de M. le maire, il pense depuis lors qu’il eût pu obtenir l’échange à meilleur marché.\par
+}
+\xdef\ipsum@par@FR@E{%
+Il vit de loin la croix de fer doré sur la porte ; il approcha lentement ; ses jambes semblaient se dérober sous lui. Voilà donc cet enfer sur la terre, dont je ne pourrai sortir! Enfin il se décida à sonner. Le bruit de la cloche retentit comme dans un lieu solitaire. Au bout de dix minutes, un homme pâle, vêtu de noir, vint lui ouvrir. Julien le regarda et aussitôt baissa les yeux. Ce portier avait une physionomie singulière. La pupille saillante et verte de ses yeux s’arrondissait comme celle d’un chat ; les contours immobiles de ses paupières annonçaient l’impossibilité de toute sympathie ; ses lèvres minces se développaient en demi-cercle sur des dents qui avançaient. Cependant cette physionomie ne montrait pas le crime, mais plutôt cette insensibilité parfaite qui inspire bien plus de terreur à la jeunesse. Le seul sentiment que le regard rapide de Julien put deviner sur cette longue figure dévote fut un mépris profond pour tout ce dont on voudrait lui parler, et qui ne serait pas l’intérêt du ciel.\par
+}
+\xdef\ipsum@par@FR@F{%
+Ma femme a réellement beaucoup de tête ! se disait, le lendemain à six heures du matin, le maire de Verrières, en descendant à la scie du père Sorel. Quoi que je lui aie dit, pour conserver la supériorité qui m’appartient, je n’avais pas songé que si je ne prends pas ce petit abbé Sorel, qui, dit-on, sait le latin comme un ange, le directeur du dépôt, cette âme sans repos, pourrait bien avoir la même idée que moi et me l’enlever. Avec quel ton de suffisance il parlerait du précepteur de ses enfants !... Ce précepteur, une fois à moi, portera-t-il la soutane ?\par
+}
+\xdef\ipsum@par@FR@G{%
+M. de Rênal était absorbé dans ce doute, lorsqu’il vit de loin un paysan, homme de près de six pieds, qui, dès le petit jour, semblait fort occupé à mesurer des pièces de bois déposées le long du Doubs, sur le chemin de halage. Le paysan n’eut pas l’air fort satisfait de voir approcher M. le maire ; car ces pièces de bois obstruaient le chemin, et étaient déposées là en contravention.\par
+}
+%==[EN]
+\xdef\ipsum@par@EN@A{%
+On Wednesday night the weather was very bad, my balance was strangely variable, and I was obliged to lean with my knees and elbows against the sideboard, to prevent myself from falling. Portmanteaus and bags came in and out of my cabin; an unusual hubbub reigned in the adjoining saloon, in which two or three hundred packages were making expeditions from one end to the other, knocking the tables and chairs with loud crashes; doors slammed, the boards creaked, the partitions made that groaning noise peculiar to pine wood; bottles and glasses jingled together in their racks, and a cataract of plates and dishes rolled about on the pantry floors.\par
+}
+\xdef\ipsum@par@EN@B{%
+I said that the length of the 'Great Eastern' exceeded two hectometres. For the benefit of those partial to comparisons, I will add that it is a third longer than the 'Pont des Arts;' in reality this steam-ship measures 673 feet at the load water-line, between the perpendiculars; the upper deck is 680 feet from stem to stern; that is to say, its length is double that of the largest transatlantic steamers; its width amidships is about 71 feet, and behind the paddles about 107 feet.\par
+}
+\xdef\ipsum@par@EN@C{%
+After having left the Doctor, I spent the rest of the day with Fabian; we had gone to the stern, which Pitferge called 'walking in the country.' There alone, and leaning over the taffrail, we surveyed the great expanse of water, while around us rose the briny vapours distilled from the spray; small rainbows, formed by the refraction of the sun's rays, spanned the foaming waves. Below us, at a distance of forty feet, the screw was beating the water with a tremendous force, making its copper gleam in the midst of what appeared to be a vast conglomeration of liquefied emeralds, the fleecy track extending as far as the eye could reach, mingled in a milky path the foam from the screw, and the paddle engines, whilst the white and black fringed plumage of the sea-gulls flying above, cast rapid shadows over the sea.\par
+}
+\xdef\ipsum@par@EN@D{%
+The church was the great saloon, formed by the upper-deck at the stern, the exterior of which, from its width and regularity of structure, reminded one very much of the hotel of the Ministère des Finances, in the Rue de Rivoli. I entered. Numbers of the faithful were already in their places.\par
+}
+\xdef\ipsum@par@EN@E{%
+The church was the great saloon, formed by the upper-deck at the stern, the exterior of which, from its width and regularity of structure, reminded one very much of the hotel of the Ministère des Finances, in the Rue de Rivoli. I entered. Numbers of the faithful were already in their places.\par
+}
+\xdef\ipsum@par@EN@F{%
+Everything was finished by evening; not a trace of mud was visible on the well-swept boulevards, for an army of sweepers had been at work. There was a full cargo; provisions, goods, and coal filled the stewards' room, the store, and the coal houses. However, the steamer had not yet sunk to the load water-line, and did not draw the necessary thirty-three feet. It was an inconvenient position for the wheels, for the paddles not being sufficiently immersed, caused a great diminution in the speed.\par
+}
+\xdef\ipsum@par@EN@G{%
+Thus the reason for rearranging the ship to this purpose, and the consequent necessity of filling up the tanks and replacing the boilers, of enlarging the saloons in which so many people were to live during the voyage, and of building extra dining saloons, finally the arrangement of a thousand berths in the sides of the gigantic hull.\par
+}
+%==[DE]
+\xdef\ipsum@par@DE@A{%
+Ingenieur Und Dr.Krokowskis Lächeln zog sich gleichsam zurück, bü te an Kraft und Herzlichkeit für den Augenblick etwas ein. Das ist wacker.Und Sie werden hier also keinerlei ärztliche Behandlung in Anspruch nehmen, weder in körperlicher noch in psychischer Hinsicht Nein, ich danke tausendmal sagte Hans Castorp und wäre fast einen Schritt zurückgewichen.\par
+}
+\xdef\ipsum@par@DE@B{%
+Das mit der Seelenzergliederung war zu stark, das hätte nicht kommen dürfen.Au erdem bin ich doch auch wohl ein bi chen abgespannt von der Reise.Leidest du auch so an kalten Fü en Gleichzeitig hat man dann so ein hei es Gesicht, das ist unangenehm.\par
+}
+\xdef\ipsum@par@DE@C{%
+Raum, der sich drehend und fliehend zwischen ihn und seine Pflanzstätte wälzt, bewährt Kräfte, die man gewöhnlich der Zeit vorbehalten glaubt von Stunde zu Stunde stellt er innere Veränderungen her, die den von ihr bewirkten sehr ähnlich sind, aber sie in gewisser Weise übertreffen.\par
+}
+\xdef\ipsum@par@DE@D{%
+August, August sagte Hans Castorp. Aber mich friert Mich friert abscheulich, nämlich am Körper, denn im Gesicht bin ich auffallend echauffiert, da, fühle doch mal, wie ich brenne Diese Zumutung, man solle sein Gesicht befühlen, pa te ganz und gar nicht zu Hans Castorps Natur und berührte ihn selber peinlich.\par
+}
+\xdef\ipsum@par@DE@E{%
+Gleich wann Na, in drei Wochen. Ach so, du fährst wohl schon wieder nach Hause in deinen Gedanken, antwortete Joachim. Nun, warte nur, du kommst ja eben erst an.Drei Wochen sind freilich fast nichts für uns hier oben, aber für dich, der du zu Besuch hier bist und überhaupt nur drei Wochen bleiben sollst, für dich ist es doch eine Menge Zeit.\par
+}
+\xdef\ipsum@par@DE@F{%
+Leichen Ach so Na, höre mal rief Hans Castorp.Und plötzlich geriet er ins Lachen, in ein heftiges, unbezwingliches Lachen, das seine Brust erschütterte und sein vom kühlen Wind etwas steifes Gesicht zu einer leise schmerzenden Grimasse verzog.\par
+}
+\xdef\ipsum@par@DE@G{%
+Gletscher und Firnen und die gewaltigen Bergesriesen Diese Dinger sind doch nicht sehr hoch, wie mir scheint. Doch, sie sind hoch, antwortete Joachim. Du siehst die Baumgrenze fast überall, sie markiert sich ja auffallend scharf, die Fichten hören auf, und damit hört alles auf, aus ist es, Felsen, wie du bemerkst.\par
+}
+%==[IT]
+\xdef\ipsum@par@IT@A{%
+Quinci non passa mai anima buona e però, se Caron di te si lagna, ben puoi sapere omai che l suo dir suona.Finito questo, la buia campagna tremò sì forte, che de lo spavento la mente di sudore ancor mi bagna.La terra lagrimosa diede vento, che balenò una luce vermiglia la qual mi vinse ciascun sentimento e caddi come l uom cui sonno piglia.\par
+}
+\xdef\ipsum@par@IT@B{%
+Così discesi del cerchio primaio giù nel secondo, che men loco cinghia e tanto più dolor, che punge a guaio.Stavvi Minòs orribilmente, e ringhia essamina le colpe ne l intrata giudica e manda secondo ch avvinghia.Dico che quando l anima mal nata li vien dinanzi, tutta si confessa e quel conoscitor de le peccata vede qual loco d inferno è da essa cignesi con la coda tante volte quantunque gradi vuol che giù sia messa.\par
+}
+\xdef\ipsum@par@IT@C{%
+Quando vidi costui nel gran diserto, Miserere di me, gridai a lui, qual che tu sii, od ombra od omo certo.Rispuosemi Non omo, omo già fui, e li parenti miei furon lombardi, mantoani per patrïa ambedui.Nacqui sub Iulio, ancor che fosse tardi, e vissi a Roma sotto l buono Augusto nel tempo de li dèi falsi e bugiardi.\par
+}
+\xdef\ipsum@par@IT@D{%
+Quinci fuor quete le lanose gote al nocchier de la livida palude, che ntorno a li occhi avea di fiamme rote.Ma quell anime, ch eran lasse e nude, cangiar colore e dibattero i denti, ratto che nteser le parole crude.Bestemmiavano Dio e lor parenti, l umana spezie e l loco e l tempo e l seme di lor semenza e di lor nascimenti.\par
+}
+\xdef\ipsum@par@IT@E{%
+Quali fioretti dal notturno gelo chinati e chiusi, poi che l sol li mbianca, si drizzan tutti aperti in loro stelo, tal mi fec io di mia virtude stanca, e tanto buono ardire al cor mi corse, ch i cominciai come persona franca Oh pietosa colei che mi soccorse e te cortese ch ubidisti tosto a le vere parole che ti porse Tu m hai con disiderio il cor disposto sì al venir con le parole tue, ch i son tornato nel primo proposto.\par
+}
+\xdef\ipsum@par@IT@F{%
+Questi parea che contra me venisse con la test alta e con rabbiosa fame, sì che parea che l aere ne tremesse.Ed una lupa, che di tutte brame sembiava carca ne la sua magrezza, e molte genti fé già viver grame, questa mi porse tanto di gravezza con la paura ch uscia di sua vista, ch io perdei la speranza de l altezza.\par
+}
+\xdef\ipsum@par@IT@G{%
+Gintesi ch a così fatto tormento enno dannati i peccator carnali, che la ragion sommettono al talento.E come li stornei ne portan l ali nel freddo tempo, a schiera larga e piena, così quel fiato li spiriti mali di qua, di là, di giù, di sù li mena nulla speranza li conforta mai, non che di posa, ma di minor pena.\par
+}
+%==[SP]
+\xdef\ipsum@par@ES@A{%
+Vicente López, hemos contemplado con satisfacción en la sala de sus ilustres descendientes, fue preciso que todo Madrid se transformase que la desamortización edificara una ciudad nueva sobre los escombros de los conventos que el Marqués de Pontejos adecentase este lugarón que las reformas arancelarias del 49 y del 68, pusieran patas arriba todo el comercio madrileño que el grande ingenio de Salamanca idease los primeros ferrocarriles que Madrid se colocase, por arte del vapor, a cuarenta horas de París, y por fin, que hubiera muchas guerras y revoluciones y grandes trastornos en la riqueza individual.\par
+}
+\xdef\ipsum@par@ES@B{%
+D.Baldomero no lo decía así pero sus vagas ideas sobre el asunto se condensaban en una expresión de moda y muy socorrida el mundo marcha.Felizmente para Juanito, estaba allí su madre, en quien se equilibraban maravillosamente el corazón y la inteligencia.\par
+}
+\xdef\ipsum@par@ES@C{%
+Envolverse en él es como vestirse con un cuadro.La industria moderna no inventará nada que iguale a la ingenua poesía del mantón, salpicado de flores, flexible, pegadizo y mate, con aquel fleco que tiene algo de los enredos del sueño y aquella brillantez de color que iluminaba las muchedumbres en los tiempos en que su uso era general.\par
+}
+\xdef\ipsum@par@ES@D{%
+Juanito Santa Cruz y Miquis llevaron un día una sartén no sé si a la clase de Novar o a la de Uribe, que explicaba Metafísica y frieron un par de huevos.Otras muchas tonterías de este jaez cuenta Villalonga, las cuales no copio por no alargar este relato.\par
+}
+\xdef\ipsum@par@ES@E{%
+Porque Madrid no tenía de metrópoli más que el nombre y la vanidad ridícula.Era un payo con casaca de gentil-hombre y la camisa desgarrada y sucia.Por fin el paleto se disponía a ser señor de verdad.Isabel Cordero, que se anticipaba a su época, presintió la traída de aguas del Lozoya, en aquellos veranos ardorosos en que el Ayuntamiento refrescaba y alimentaba las fuentes del Berro y de la Teja con cubas de agua sacada de los pozos en aquellos tiempos en que los portales eran sentinas y en que los vecinos iban de un cuarto a otro con el pucherito en la mano, pidiendo por favor un poco de agua para afeitarse.\par
+}
+\xdef\ipsum@par@ES@F{%
+Dígase lo que se quiera, hija, aquella educación no era buena.Hoy no se puede criar a los hijos de esa manera.Yo qué quieres que te diga, creo que en lo esencial Juanito no ha de faltarnos.Es de casta honrada, tiene la formalidad en la masa de la sangre.\par
+}
+\xdef\ipsum@par@ES@G{%
+Pedro Mata opinaba del propio modo, aplicando a la sociedad y a la política el sistema de la medicina expectante.La naturaleza se cura sola no hay más que dejarla. Las fuerzas reparatrices lo hacen todo, ayudadas del aire.El hombre se educa sólo en virtud de las suscepciones constantes que determina en su espíritu la conciencia, ayudada del ambiente social.\par
+}
+%==[PT]
+\xdef\ipsum@par@PT@A{%
+Não resuscito Morto tenho eu vivido a vida toda.Trazeis-me rosas d onde as heis trazido, Boa velhinha e minha boa amiga Rosas no inverno permitti que o diga, Sois feiticeira d onde as heis colhido Na primavera de meus annos, ólho, Mas vejo abrolhos e não vejo flôres E vós colhêl-as, como as eu não colho.\par
+}
+\xdef\ipsum@par@PT@B{%
+Então, se por encanto Fallando em ti, mas só, Todo banhado em pranto Me visses, tinhas dó.Tinhas.A piedade É filha da mulher, Que sempre quiz metade D uma afflicção qualquer.Havias ao teu rosto De me apertar a mim, D encher, fartar de gosto, Todo este abysmo sim.\par
+}
+\xdef\ipsum@par@PT@C{%
+Abraços, abraços Que mal nos farão Se Deus me deu braços, Foi essa a razão.Um dia que o alto Me vinha abraçar, Fiquei-lhe d um salto Suspensa no ar.Amores, amores.Deixál-os dizer Se Deus me deu flôres, Foi para as colher.Eu tenho um moreno, Tenho um de outra côr, Tenho um mais pequeno, Tenho outro maior.\par
+}
+\xdef\ipsum@par@PT@D{%
+Astros fio-me em vós, e Deus permitta Que os infelizes sempre em vós se fiem.Intima voz do fundo, bem do fundo D alma me diz e as lagrimas me saltam Vês os milhões de soes que o espaço esmaltam Pisa a terra a teus pés, inda ha mais mundo.Ha depois d esta vida inda outra vida.\par
+}
+\xdef\ipsum@par@PT@E{%
+Bemdito seja Deus Além n aquelle serro Parece que raspou Com uma pá de ferro A terra que encontrou.Nem um só pé de trigo És lá capaz de vêr.Já eu disse commigo Como póde isto ser As arvores arranca O vento muito bem Serve-lhe de alavanca A rama que ellas tem.\par
+}
+\xdef\ipsum@par@PT@F{%
+Foi um diluvio d agua E o furacão, que fez, Emilia até dá mágoa Tantos estragos vês Esta infeliz víuva, Foi-lhe o telhado ao ar Depois, já nem da chuva Tinha onde se abrigar.De mais a mais sósinha, Sem ter nenhum dos seus Aqui ao pé ceguinha.\par
+}
+\xdef\ipsum@par@PT@G{%
+Não cabe Em nossa pobre lingua O que a alma sente, á mingua De voz, que só Deus sabe.Um dia, não sei que eu tinha...Uma tristeza tamanha E lembra-me ir á montanha, Que temos aqui vizinha, Onde em tempo me entretinha Horas e horas sósinha Quando ainda se não estranha Que n uma teia de aranha Se prenda uma innocentinha, Ou atraz d uma avesinha Se cance a vêr se a apanha.\par
+}
+%==[NL]
+\xdef\ipsum@par@NL@A{%
+Leidschen makker bij mij gelogeerd, met wien ik te Zomerzorg eten zou, om vervolgens over Velzerend naar Velzen te wandelen, waar wij den nacht zouden doorbrengen om s morgens naar de Breezaap te gaan en aldaar wat te botaniseeren, waarvan wij beide groote liefhebbers zijn.
+}
+\xdef\ipsum@par@NL@B{%
+Rampen, die benauwen, kwellen en schokken, en die niet zelden een grooten en hevigen invloed hebben op de vorming van het karakter.De eerste en grootste hebben wij al gehad.Het is, met verlof van Pestalozzi en Prinsen, de school.Dat is een kanker een dagelijks weerkeerend verdriet.
+}
+\xdef\ipsum@par@NL@C{%
+Welnu, er zijn er meer dan men denkt.Het grootworden, hoe schoon en voortreffelijk een uitvinding ook, is de oorzaak veler smarten.Want vooreerst, men steekt lange bloote armen uit de mouwen, groote en den kous uit de broek.Daarbij schaamt men zich dan gewoonlijk dat men nog rijglaarsjes of schoenen met gespen draagt, omdat er altijd eenige voorlijke knapen zijn, die al halve-laarzen hebben, en vroegtijdige juffertjes, die zich op schoenen met lange linten verheffen.
+}
+\xdef\ipsum@par@NL@D{%
+Hebje nog altijd dat strooien soortje zei hij, de punt van degene, die hij genomen had, met het ongeloovigste gezicht van de wereld afbijtende, en toen zijn vroeger onderwerp weer opnemende, daar hij nog niet genoeg van had Jongens, ik vind dat het zoo mal staat als iemand niet rooken kan.
+}
+\xdef\ipsum@par@NL@E{%
+Spreek mij niet van groote-menschen-jammeren Zij halen niet bij deze. Geen koopman die op springen staat ziet met meer angst den dag tegemoet waarop hij zal worden omvergegooid, 11 dan een blijde jongen of vroolijk meisje den dag, waarop men scheiden zal van den dubbelen tand Wij zijn aan de physieke rampen.
+}
+\xdef\ipsum@par@NL@F{%
+Meergemelde natuuronderzoeker heeft even de Dreef verlaten, om in de verrukking van deze vreemdelingen te deelen, maar gaat nu door een allerliefst laantje, waarin de ochtendzon allergeestigst door t hoog geboomte speelt, op de logementen af.
+}
+\xdef\ipsum@par@NL@G{%
+Malle dingen Anders een goed fatsoen.Ik hou niet van die ronde boorden. Boerhave en de nederige inwoner van het malle, kleine stadje waren er mooi mee hij verbeeldde t niet gezien te hebben. Kanje nog al niet rooken, Hildebrand Ik vloog naar den portecigares en bood hem dien aan.
+}
+
+%====SENTENCES
+%==[LAT]
+\xdef\ipsum@sentence@LAT@A{quam sollicitudin a hendrerit eget pretium ut}
+\xdef\ipsum@sentence@LAT@B{orci aliquam erat elit pharetra nec aliquet}
+\xdef\ipsum@sentence@LAT@C{porta sapien curabitur sit amet libero eget}
+\xdef\ipsum@sentence@LAT@D{auctor at ultrices eu sagittis ut purus}
+\xdef\ipsum@sentence@LAT@E{erat volutpat curabitur ullamcorper est in mauris}
+\xdef\ipsum@sentence@LAT@F{arcu turpis ac sem aliquam aliquet dapibus}
+\xdef\ipsum@sentence@LAT@G{neque ac ipsum nunc fermentum massa at}
+\xdef\ipsum@sentence@LAT@H{sed massa nunc euismod mauris luctus adipiscing}
+\xdef\ipsum@sentence@LAT@I{nulla velit vel lectus cras dapibus mauris}
+%==[FR]
+\xdef\ipsum@sentence@FR@A{Sa réponse fut parfaite, et surtout longue comme un mandement ; elle laissait}
+\xdef\ipsum@sentence@FR@B{Elle est pourtant bien jolie, cette main ! quel charme ! quelle noblesse}
+\xdef\ipsum@sentence@FR@C{Bientôt, il ne fut plus question dans Verrières que de voir qui l’emporterait}
+\xdef\ipsum@sentence@FR@D{Le soleil est fort chaud dans ces montagnes ; lorsqu’il brille d’aplomb}
+\xdef\ipsum@sentence@FR@E{Esclaves du temps de la domination espagnole, ils conservent encore ce}
+\xdef\ipsum@sentence@FR@F{Tout occupés à suivre exactement la marque noire tracée sur la pièce}
+\xdef\ipsum@sentence@FR@G{Le lendemain, dès cinq heures, avant que Mme de Rênal fût visible}
+\xdef\ipsum@sentence@FR@H{Des flots de fumée de tabac, s’élançant de la bouche de tous}
+\xdef\ipsum@sentence@FR@I{Mme de Rênal, se promenant avec M Valenod et le sous-préfet}
+%==[EN]
+\xdef\ipsum@sentence@EN@A{I saw also piles of Bibles, which were to be distributed in the church}
+\xdef\ipsum@sentence@EN@B{I saw an object moving for several moments at the bows, but it turned out}
+\xdef\ipsum@sentence@EN@C{I returned by the boulevards on the starboard side, avoiding contact with}
+\xdef\ipsum@sentence@EN@D{Everything was finished by evening; not a trace of mud was visible on the}
+\xdef\ipsum@sentence@EN@E{A black mire that British mud which is so rarely absent from the pavement}
+\xdef\ipsum@sentence@EN@F{What were we against the husband, the master? Nothing}
+\xdef\ipsum@sentence@EN@G{I, following the general example, staked my dollar, and fate allotted me}
+\xdef\ipsum@sentence@EN@H{Numerous vessels, brigs and schooners, were awaiting the tide; steamers}
+\xdef\ipsum@sentence@EN@I{Beside the Great Eastern, these three-mast ships looked like barges; their}
+%==[DE]
+\xdef\ipsum@sentence@DE@A{ersten Stockwerk blieb Hans Castorp plötzlich stehen festgebannt}
+\xdef\ipsum@sentence@DE@B{erdem sei sie kDEschsüchtig wie übrigens die meisten}
+\xdef\ipsum@sentence@DE@C{siehst die Baumgrenze fast überall sie markiert sich ja auffallend}
+\xdef\ipsum@sentence@DE@D{Verlobter war bei ihr englischer Marineoffizier aber er benahm}
+\xdef\ipsum@sentence@DE@E{Joachim hatte das Deckenlicht eingeschaltet und in seiner zitternden}
+\xdef\ipsum@sentence@DE@F{Schwebend zwischen ihnen und dem Unbekannten fragte}
+\xdef\ipsum@sentence@DE@G{hielt an einer kleinen Station es war Davos Dorf wie Hans Castorp}
+\xdef\ipsum@sentence@DE@H{ungefähr fünfunddrei ig Jahre alt breitschultrig fett bedeutend}
+\xdef\ipsum@sentence@DE@I{spielt oder um jedes Präsens geflissentlich zu vermeiden}
+%==[ES]
+\xdef\ipsum@sentence@ES@A{Juanito Santa Cruz y Miquis llevaron un día una sartén}
+\xdef\ipsum@sentence@ES@B{sublime es el más discreto y las bocas más elocuentes aquellas}
+\xdef\ipsum@sentence@ES@C{innovador fue Senquá del cual puede decirse que representaba}
+\xdef\ipsum@sentence@ES@D{Fedro y Cicerón no se hubieran incomodado si estuvieran oyendo}
+\xdef\ipsum@sentence@ES@E{verle uníase el temor de que le sorbieran aquellos gabachos}
+\xdef\ipsum@sentence@ES@F{compensar las pérdidas de la quemazón urgía plantear}
+\xdef\ipsum@sentence@ES@G{Eulalia Muñoz era muy vanidosa y decía que no había}
+\xdef\ipsum@sentence@ES@H{auxiliar eficacísimo de Casarredonda en sus valiosas contratas}
+\xdef\ipsum@sentence@ES@I{Baldomero no lo decía así pero sus vagas ideas sobre el asunto}
+%==[IT]
+\xdef\ipsum@sentence@IT@A{quando tu sarai nel dolce mondo priegoti ch a la mente altrui}
+\xdef\ipsum@sentence@IT@B{Così andammo infino a la lumera parlando cose che l tacere}
+\xdef\ipsum@sentence@IT@C{Semiramìs di cui si legge che succedette a Nino e fu sua sposa}
+\xdef\ipsum@sentence@IT@D{Allor fu la paura un poco queta che nel lago del cor m era durata}
+\xdef\ipsum@sentence@IT@E{vizio di lussuria fu sì rotta che libito fé licito in sua legge}
+\xdef\ipsum@sentence@IT@F{altra è colei che s ancise amorosa e ruppe fede al cener}
+\xdef\ipsum@sentence@IT@G{Disse Beatrice loda di Dio vera ché non soccorri}
+\xdef\ipsum@sentence@IT@H{conoscer la prima radice del nostro amor tu hai cotanto affetto}
+\xdef\ipsum@sentence@IT@I{Tutti lo miran tutti onor li fanno quivi vid ïo Socrate e PITone}
+%==[PT]
+\xdef\ipsum@sentence@PT@A{espaço immenso Se amada estrella olhar piedoso envia}
+\xdef\ipsum@sentence@PT@B{Dorme dorme Vergontea de marfim Mas dize o espelho a imagem}
+\xdef\ipsum@sentence@PT@C{Está a porta aberta E vejo alumiada A parte descoberta}
+\xdef\ipsum@sentence@PT@D{ainda o pranto corria E o cabello me batia No rosto que me doía}
+\xdef\ipsum@sentence@PT@E{quando abraço e beijo O travesseiro e assim Acórdo}
+\xdef\ipsum@sentence@PT@F{Girar talvez Em quanto a minha sombra meus amores}
+\xdef\ipsum@sentence@PT@G{tempo simplesmente A flôr que vai nascendo e mais valia Seres}
+\xdef\ipsum@sentence@PT@H{olhos só elles valem Duas estrellas bem vês Pois vozes}
+\xdef\ipsum@sentence@PT@I{Enfeitiçaes que a formosura crêde Não vem da face avelludada}
+%==[NL]
+\xdef\ipsum@sentence@NL@A{Hertebaan vertoonen zich hier en daar een paar jonge dames}
+\xdef\ipsum@sentence@NL@B{zijner majesteit onmiddellijke 15 tegenwoordigheid}
+\xdef\ipsum@sentence@NL@C{morgen tweemaal op t bord zijt geschreven eens omdat}
+\xdef\ipsum@sentence@NL@D{grooten schreeuw gaaft gij uwe vreugde over het laatste artikel}
+\xdef\ipsum@sentence@NL@E{halsboord had 23 het door de warmte het was zeer warm weder}
+\xdef\ipsum@sentence@NL@F{konden hoe zouden zij zich op den grappenmaker wreken}
+\xdef\ipsum@sentence@NL@G{gewoonlijk hoogrood als hij binnen moet komen om aan oom en tante}
+\xdef\ipsum@sentence@NL@H{species rangschikt en men tevens achtslaat op de vreemde vogelen}
+\xdef\ipsum@sentence@NL@I{Waagdet gij nog eens een oude anecdote die u veel genoegen verschaft}
+
+%====COMMANDS
+\NewDocumentCommand\ipsum{ D<>{} O{1} }{%
+	\useKVdefault[ipsumdummy]%
+	\setKV[ipsumdummy]{#1}%
+	%RANGE
+	\IfSubStr{#2}{-}%
+		{%
+			\StrCut{#2}{-}{\ipsumrangegeb}{\ipsumrangeend}%
+			\xintifboolexpr{\ipsumrangegeb < 1}{\xdef\ipsumrangegeb{1}}{}%
+			\IfEq{\ipsumtype}{par}%
+				{%
+					\xintifboolexpr{\ipsumrangeend > 7}{\xdef\ipsumrangeend{7}}{}%
+				}{}%
+			\IfEq{\ipsumtype}{sent}%
+				{%
+					\xintifboolexpr{\ipsumrangeend > 9}{\xdef\ipsumrangeend{9}}{}%
+				}{}%
+			\IfEq{\ipsumtype}{enum}%
+				{%
+					\xintifboolexpr{\ipsumrangeend > 9}{\xdef\ipsumrangeend{9}}{}%
+				}{}%
+			\IfEq{\ipsumtype}{item}%
+				{%
+					\xintifboolexpr{\ipsumrangeend > 9}{\xdef\ipsumrangeend{9}}{}%
+				}{}%
+			\xdef\ipsumrange{}%
+			\xintFor* ##1 in {\xintSeq{\ipsumrangegeb}{\ipsumrangeend}}\do{\xdef\ipsumrange{\ipsumrange##1}}%
+		}%
+		{%
+			\xintifboolexpr{#2 < 1 'or' #2 > 8}{\xdef\ipsumrange{1}}{\xdef\ipsumrange{#2}}%
+		}%
+	%TYPE PAR
+	\IfEq{\ipsumtype}{par}%
+		{%
+			\IfEq{\ipsumlg}{FR}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\ipsum@par@FR@A}{}%
+					\IfSubStr{\ipsumrange}{2}{\ipsum@par@FR@B}{}%
+					\IfSubStr{\ipsumrange}{3}{\ipsum@par@FR@C}{}%
+					\IfSubStr{\ipsumrange}{4}{\ipsum@par@FR@D}{}%
+					\IfSubStr{\ipsumrange}{5}{\ipsum@par@FR@E}{}%
+					\IfSubStr{\ipsumrange}{6}{\ipsum@par@FR@F}{}%
+					\IfSubStr{\ipsumrange}{7}{\ipsum@par@FR@G}{}%
+				}%
+				{}%
+			\IfEq{\ipsumlg}{EN}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\ipsum@par@EN@A}{}%
+					\IfSubStr{\ipsumrange}{2}{\ipsum@par@EN@B}{}%
+					\IfSubStr{\ipsumrange}{3}{\ipsum@par@EN@C}{}%
+					\IfSubStr{\ipsumrange}{4}{\ipsum@par@EN@D}{}%
+					\IfSubStr{\ipsumrange}{5}{\ipsum@par@EN@E}{}%
+					\IfSubStr{\ipsumrange}{6}{\ipsum@par@EN@F}{}%
+					\IfSubStr{\ipsumrange}{7}{\ipsum@par@EN@G}{}%
+				}%
+				{}%
+			\IfEq{\ipsumlg}{DE}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\ipsum@par@DE@A}{}%
+					\IfSubStr{\ipsumrange}{2}{\ipsum@par@DE@B}{}%
+					\IfSubStr{\ipsumrange}{3}{\ipsum@par@DE@C}{}%
+					\IfSubStr{\ipsumrange}{4}{\ipsum@par@DE@D}{}%
+					\IfSubStr{\ipsumrange}{5}{\ipsum@par@DE@E}{}%
+					\IfSubStr{\ipsumrange}{6}{\ipsum@par@DE@F}{}%
+					\IfSubStr{\ipsumrange}{7}{\ipsum@par@DE@G}{}%
+				}%
+				{}%
+			\IfEq{\ipsumlg}{IT}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\ipsum@par@IT@A}{}%
+					\IfSubStr{\ipsumrange}{2}{\ipsum@par@IT@B}{}%
+					\IfSubStr{\ipsumrange}{3}{\ipsum@par@IT@C}{}%
+					\IfSubStr{\ipsumrange}{4}{\ipsum@par@IT@D}{}%
+					\IfSubStr{\ipsumrange}{5}{\ipsum@par@IT@E}{}%
+					\IfSubStr{\ipsumrange}{6}{\ipsum@par@IT@F}{}%
+					\IfSubStr{\ipsumrange}{7}{\ipsum@par@IT@G}{}%
+				}%
+				{}%
+			\IfEq{\ipsumlg}{LAT}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\ipsum@par@LAT@A}{}%
+					\IfSubStr{\ipsumrange}{2}{\ipsum@par@LAT@B}{}%
+					\IfSubStr{\ipsumrange}{3}{\ipsum@par@LAT@C}{}%
+					\IfSubStr{\ipsumrange}{4}{\ipsum@par@LAT@D}{}%
+					\IfSubStr{\ipsumrange}{5}{\ipsum@par@LAT@E}{}%
+					\IfSubStr{\ipsumrange}{6}{\ipsum@par@LAT@F}{}%
+					\IfSubStr{\ipsumrange}{7}{\ipsum@par@LAT@G}{}%
+				}%
+				{}%
+			\IfEq{\ipsumlg}{ES}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\ipsum@par@ES@A}{}%
+					\IfSubStr{\ipsumrange}{2}{\ipsum@par@ES@B}{}%
+					\IfSubStr{\ipsumrange}{3}{\ipsum@par@ES@C}{}%
+					\IfSubStr{\ipsumrange}{4}{\ipsum@par@ES@D}{}%
+					\IfSubStr{\ipsumrange}{5}{\ipsum@par@ES@E}{}%
+					\IfSubStr{\ipsumrange}{6}{\ipsum@par@ES@F}{}%
+					\IfSubStr{\ipsumrange}{7}{\ipsum@par@ES@G}{}%
+				}%
+				{}%
+			\IfEq{\ipsumlg}{PT}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\ipsum@par@PT@A}{}%
+					\IfSubStr{\ipsumrange}{2}{\ipsum@par@PT@B}{}%
+					\IfSubStr{\ipsumrange}{3}{\ipsum@par@PT@C}{}%
+					\IfSubStr{\ipsumrange}{4}{\ipsum@par@PT@D}{}%
+					\IfSubStr{\ipsumrange}{5}{\ipsum@par@PT@E}{}%
+					\IfSubStr{\ipsumrange}{6}{\ipsum@par@PT@F}{}%
+					\IfSubStr{\ipsumrange}{7}{\ipsum@par@PT@G}{}%
+				}%
+				{}%
+			\IfEq{\ipsumlg}{NL}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\ipsum@par@NL@A}{}%
+					\IfSubStr{\ipsumrange}{2}{\ipsum@par@NL@B}{}%
+					\IfSubStr{\ipsumrange}{3}{\ipsum@par@NL@C}{}%
+					\IfSubStr{\ipsumrange}{4}{\ipsum@par@NL@D}{}%
+					\IfSubStr{\ipsumrange}{5}{\ipsum@par@NL@E}{}%
+					\IfSubStr{\ipsumrange}{6}{\ipsum@par@NL@F}{}%
+					\IfSubStr{\ipsumrange}{7}{\ipsum@par@NL@G}{}%
+				}%
+				{}%
+		}%
+		{}
+	%TYPE PAR
+	\IfEq{\ipsumtype}{sent}%
+		{%
+			\IfEq{\ipsumlg}{FR}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\ipsum@sentence@FR@A}{}\par%
+					\IfSubStr{\ipsumrange}{2}{\ipsum@sentence@FR@B}{}\par%
+					\IfSubStr{\ipsumrange}{3}{\ipsum@sentence@FR@C}{}\par%
+					\IfSubStr{\ipsumrange}{4}{\ipsum@sentence@FR@D}{}\par%
+					\IfSubStr{\ipsumrange}{5}{\ipsum@sentence@FR@E}{}\par%
+					\IfSubStr{\ipsumrange}{6}{\ipsum@sentence@FR@F}{}\par%
+					\IfSubStr{\ipsumrange}{7}{\ipsum@sentence@FR@G}{}\par%
+					\IfSubStr{\ipsumrange}{8}{\ipsum@sentence@FR@H}{}\par%
+					\IfSubStr{\ipsumrange}{9}{\ipsum@sentence@FR@I}{}\par%
+				}%
+				{}%
+			\IfEq{\ipsumlg}{EN}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\ipsum@sentence@EN@A}{}\par%
+					\IfSubStr{\ipsumrange}{2}{\ipsum@sentence@EN@B}{}\par%
+					\IfSubStr{\ipsumrange}{3}{\ipsum@sentence@EN@C}{}\par%
+					\IfSubStr{\ipsumrange}{4}{\ipsum@sentence@EN@D}{}\par%
+					\IfSubStr{\ipsumrange}{5}{\ipsum@sentence@EN@E}{}\par%
+					\IfSubStr{\ipsumrange}{6}{\ipsum@sentence@EN@F}{}\par%
+					\IfSubStr{\ipsumrange}{7}{\ipsum@sentence@EN@G}{}\par%
+					\IfSubStr{\ipsumrange}{8}{\ipsum@sentence@EN@H}{}\par%
+					\IfSubStr{\ipsumrange}{9}{\ipsum@sentence@EN@I}{}\par%
+				}%
+				{}%
+			\IfEq{\ipsumlg}{DE}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\ipsum@sentence@DE@A}{}\par%
+					\IfSubStr{\ipsumrange}{2}{\ipsum@sentence@DE@B}{}\par%
+					\IfSubStr{\ipsumrange}{3}{\ipsum@sentence@DE@C}{}\par%
+					\IfSubStr{\ipsumrange}{4}{\ipsum@sentence@DE@D}{}\par%
+					\IfSubStr{\ipsumrange}{5}{\ipsum@sentence@DE@E}{}\par%
+					\IfSubStr{\ipsumrange}{6}{\ipsum@sentence@DE@F}{}\par%
+					\IfSubStr{\ipsumrange}{7}{\ipsum@sentence@DE@G}{}\par%
+					\IfSubStr{\ipsumrange}{8}{\ipsum@sentence@DE@H}{}\par%
+					\IfSubStr{\ipsumrange}{9}{\ipsum@sentence@DE@I}{}\par%
+				}%
+				{}%
+			\IfEq{\ipsumlg}{IT}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\ipsum@sentence@IT@A}{}\par%
+					\IfSubStr{\ipsumrange}{2}{\ipsum@sentence@IT@B}{}\par%
+					\IfSubStr{\ipsumrange}{3}{\ipsum@sentence@IT@C}{}\par%
+					\IfSubStr{\ipsumrange}{4}{\ipsum@sentence@IT@D}{}\par%
+					\IfSubStr{\ipsumrange}{5}{\ipsum@sentence@IT@E}{}\par%
+					\IfSubStr{\ipsumrange}{6}{\ipsum@sentence@IT@F}{}\par%
+					\IfSubStr{\ipsumrange}{7}{\ipsum@sentence@IT@G}{}\par%
+					\IfSubStr{\ipsumrange}{8}{\ipsum@sentence@IT@H}{}\par%
+					\IfSubStr{\ipsumrange}{9}{\ipsum@sentence@IT@I}{}\par%
+				}%
+				{}%
+			\IfEq{\ipsumlg}{LAT}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\ipsum@sentence@LAT@A}{}\par%
+					\IfSubStr{\ipsumrange}{2}{\ipsum@sentence@LAT@B}{}\par%
+					\IfSubStr{\ipsumrange}{3}{\ipsum@sentence@LAT@C}{}\par%
+					\IfSubStr{\ipsumrange}{4}{\ipsum@sentence@LAT@D}{}\par%
+					\IfSubStr{\ipsumrange}{5}{\ipsum@sentence@LAT@E}{}\par%
+					\IfSubStr{\ipsumrange}{6}{\ipsum@sentence@LAT@F}{}\par%
+					\IfSubStr{\ipsumrange}{7}{\ipsum@sentence@LAT@G}{}\par%
+					\IfSubStr{\ipsumrange}{8}{\ipsum@sentence@LAT@H}{}\par%
+					\IfSubStr{\ipsumrange}{9}{\ipsum@sentence@LAT@I}{}\par%
+				}%
+				{}%
+			\IfEq{\ipsumlg}{ES}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\ipsum@sentence@ES@A}{}\par%
+					\IfSubStr{\ipsumrange}{2}{\ipsum@sentence@ES@B}{}\par%
+					\IfSubStr{\ipsumrange}{3}{\ipsum@sentence@ES@C}{}\par%
+					\IfSubStr{\ipsumrange}{4}{\ipsum@sentence@ES@D}{}\par%
+					\IfSubStr{\ipsumrange}{5}{\ipsum@sentence@ES@E}{}\par%
+					\IfSubStr{\ipsumrange}{6}{\ipsum@sentence@ES@F}{}\par%
+					\IfSubStr{\ipsumrange}{7}{\ipsum@sentence@ES@G}{}\par%
+					\IfSubStr{\ipsumrange}{8}{\ipsum@sentence@ES@H}{}\par%
+					\IfSubStr{\ipsumrange}{9}{\ipsum@sentence@ES@I}{}\par%
+				}%
+				{}%
+			\IfEq{\ipsumlg}{PT}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\ipsum@sentence@PT@A}{}\par%
+					\IfSubStr{\ipsumrange}{2}{\ipsum@sentence@PT@B}{}\par%
+					\IfSubStr{\ipsumrange}{3}{\ipsum@sentence@PT@C}{}\par%
+					\IfSubStr{\ipsumrange}{4}{\ipsum@sentence@PT@D}{}\par%
+					\IfSubStr{\ipsumrange}{5}{\ipsum@sentence@PT@E}{}\par%
+					\IfSubStr{\ipsumrange}{6}{\ipsum@sentence@PT@F}{}\par%
+					\IfSubStr{\ipsumrange}{7}{\ipsum@sentence@PT@G}{}\par%
+					\IfSubStr{\ipsumrange}{8}{\ipsum@sentence@PT@H}{}\par%
+					\IfSubStr{\ipsumrange}{9}{\ipsum@sentence@PT@I}{}\par%
+				}%
+				{}%
+			\IfEq{\ipsumlg}{NL}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\ipsum@sentence@NL@A}{}\par%
+					\IfSubStr{\ipsumrange}{2}{\ipsum@sentence@NL@B}{}\par%
+					\IfSubStr{\ipsumrange}{3}{\ipsum@sentence@NL@C}{}\par%
+					\IfSubStr{\ipsumrange}{4}{\ipsum@sentence@NL@D}{}\par%
+					\IfSubStr{\ipsumrange}{5}{\ipsum@sentence@NL@E}{}\par%
+					\IfSubStr{\ipsumrange}{6}{\ipsum@sentence@NL@F}{}\par%
+					\IfSubStr{\ipsumrange}{7}{\ipsum@sentence@NL@G}{}\par%
+					\IfSubStr{\ipsumrange}{8}{\ipsum@sentence@NL@H}{}\par%
+					\IfSubStr{\ipsumrange}{9}{\ipsum@sentence@NL@I}{}\par%
+				}%
+				{}%
+		}%
+		{}%
+	\IfEq{\ipsumtype}{enum}%
+		{%
+			\begin{enumerate}
+			\IfEq{\ipsumlg}{FR}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\item \ipsum@sentence@FR@A}{}
+					\IfSubStr{\ipsumrange}{2}{\item \ipsum@sentence@FR@B}{}
+					\IfSubStr{\ipsumrange}{3}{\item \ipsum@sentence@FR@C}{}
+					\IfSubStr{\ipsumrange}{4}{\item \ipsum@sentence@FR@D}{}
+					\IfSubStr{\ipsumrange}{5}{\item \ipsum@sentence@FR@E}{}
+					\IfSubStr{\ipsumrange}{6}{\item \ipsum@sentence@FR@F}{}
+					\IfSubStr{\ipsumrange}{7}{\item \ipsum@sentence@FR@G}{}
+					\IfSubStr{\ipsumrange}{8}{\item \ipsum@sentence@FR@H}{}
+					\IfSubStr{\ipsumrange}{9}{\item \ipsum@sentence@FR@I}{}
+				}%
+				{}%
+			\IfEq{\ipsumlg}{EN}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\item \ipsum@sentence@EN@A}{}
+					\IfSubStr{\ipsumrange}{2}{\item \ipsum@sentence@EN@B}{}
+					\IfSubStr{\ipsumrange}{3}{\item \ipsum@sentence@EN@C}{}
+					\IfSubStr{\ipsumrange}{4}{\item \ipsum@sentence@EN@D}{}
+					\IfSubStr{\ipsumrange}{5}{\item \ipsum@sentence@EN@E}{}
+					\IfSubStr{\ipsumrange}{6}{\item \ipsum@sentence@EN@F}{}
+					\IfSubStr{\ipsumrange}{7}{\item \ipsum@sentence@EN@G}{}
+					\IfSubStr{\ipsumrange}{8}{\item \ipsum@sentence@EN@H}{}
+					\IfSubStr{\ipsumrange}{9}{\item \ipsum@sentence@EN@I}{}
+				}%
+				{}%
+			\IfEq{\ipsumlg}{DE}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\item \ipsum@sentence@DE@A}{}
+					\IfSubStr{\ipsumrange}{2}{\item \ipsum@sentence@DE@B}{}
+					\IfSubStr{\ipsumrange}{3}{\item \ipsum@sentence@DE@C}{}
+					\IfSubStr{\ipsumrange}{4}{\item \ipsum@sentence@DE@D}{}
+					\IfSubStr{\ipsumrange}{5}{\item \ipsum@sentence@DE@E}{}
+					\IfSubStr{\ipsumrange}{6}{\item \ipsum@sentence@DE@F}{}
+					\IfSubStr{\ipsumrange}{7}{\item \ipsum@sentence@DE@G}{}
+					\IfSubStr{\ipsumrange}{8}{\item \ipsum@sentence@DE@H}{}
+					\IfSubStr{\ipsumrange}{9}{\item \ipsum@sentence@DE@I}{}
+				}%
+				{}%
+			\IfEq{\ipsumlg}{IT}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\item \ipsum@sentence@IT@A}{}
+					\IfSubStr{\ipsumrange}{2}{\item \ipsum@sentence@IT@B}{}
+					\IfSubStr{\ipsumrange}{3}{\item \ipsum@sentence@IT@C}{}
+					\IfSubStr{\ipsumrange}{4}{\item \ipsum@sentence@IT@D}{}
+					\IfSubStr{\ipsumrange}{5}{\item \ipsum@sentence@IT@E}{}
+					\IfSubStr{\ipsumrange}{6}{\item \ipsum@sentence@IT@F}{}
+					\IfSubStr{\ipsumrange}{7}{\item \ipsum@sentence@IT@G}{}
+					\IfSubStr{\ipsumrange}{8}{\item \ipsum@sentence@IT@H}{}
+					\IfSubStr{\ipsumrange}{9}{\item \ipsum@sentence@IT@I}{}
+				}%
+				{}%
+			\IfEq{\ipsumlg}{LAT}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\item \ipsum@sentence@LAT@A}{}
+					\IfSubStr{\ipsumrange}{2}{\item \ipsum@sentence@LAT@B}{}
+					\IfSubStr{\ipsumrange}{3}{\item \ipsum@sentence@LAT@C}{}
+					\IfSubStr{\ipsumrange}{4}{\item \ipsum@sentence@LAT@D}{}
+					\IfSubStr{\ipsumrange}{5}{\item \ipsum@sentence@LAT@E}{}
+					\IfSubStr{\ipsumrange}{6}{\item \ipsum@sentence@LAT@F}{}
+					\IfSubStr{\ipsumrange}{7}{\item \ipsum@sentence@LAT@G}{}
+					\IfSubStr{\ipsumrange}{8}{\item \ipsum@sentence@LAT@H}{}
+					\IfSubStr{\ipsumrange}{9}{\item \ipsum@sentence@LAT@I}{}
+				}%
+				{}%
+			\IfEq{\ipsumlg}{ES}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\item \ipsum@sentence@ES@A}{}
+					\IfSubStr{\ipsumrange}{2}{\item \ipsum@sentence@ES@B}{}
+					\IfSubStr{\ipsumrange}{3}{\item \ipsum@sentence@ES@C}{}
+					\IfSubStr{\ipsumrange}{4}{\item \ipsum@sentence@ES@D}{}
+					\IfSubStr{\ipsumrange}{5}{\item \ipsum@sentence@ES@E}{}
+					\IfSubStr{\ipsumrange}{6}{\item \ipsum@sentence@ES@F}{}
+					\IfSubStr{\ipsumrange}{7}{\item \ipsum@sentence@ES@G}{}
+					\IfSubStr{\ipsumrange}{8}{\item \ipsum@sentence@ES@H}{}
+					\IfSubStr{\ipsumrange}{9}{\item \ipsum@sentence@ES@I}{}
+				}%
+				{}%
+			\IfEq{\ipsumlg}{PT}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\item \ipsum@sentence@PT@A}{}
+					\IfSubStr{\ipsumrange}{2}{\item \ipsum@sentence@PT@B}{}
+					\IfSubStr{\ipsumrange}{3}{\item \ipsum@sentence@PT@C}{}
+					\IfSubStr{\ipsumrange}{4}{\item \ipsum@sentence@PT@D}{}
+					\IfSubStr{\ipsumrange}{5}{\item \ipsum@sentence@PT@E}{}
+					\IfSubStr{\ipsumrange}{6}{\item \ipsum@sentence@PT@F}{}
+					\IfSubStr{\ipsumrange}{7}{\item \ipsum@sentence@PT@G}{}
+					\IfSubStr{\ipsumrange}{8}{\item \ipsum@sentence@PT@H}{}
+					\IfSubStr{\ipsumrange}{9}{\item \ipsum@sentence@PT@I}{}
+				}%
+				{}%
+			\IfEq{\ipsumlg}{NL}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\item \ipsum@sentence@NL@A}{}
+					\IfSubStr{\ipsumrange}{2}{\item \ipsum@sentence@NL@B}{}
+					\IfSubStr{\ipsumrange}{3}{\item \ipsum@sentence@NL@C}{}
+					\IfSubStr{\ipsumrange}{4}{\item \ipsum@sentence@NL@D}{}
+					\IfSubStr{\ipsumrange}{5}{\item \ipsum@sentence@NL@E}{}
+					\IfSubStr{\ipsumrange}{6}{\item \ipsum@sentence@NL@F}{}
+					\IfSubStr{\ipsumrange}{7}{\item \ipsum@sentence@NL@G}{}
+					\IfSubStr{\ipsumrange}{8}{\item \ipsum@sentence@NL@H}{}
+					\IfSubStr{\ipsumrange}{9}{\item \ipsum@sentence@NL@I}{}
+				}%
+				{}%
+			\end{enumerate}
+		}%
+		{}%
+	\IfEq{\ipsumtype}{item}%
+		{%
+			\begin{itemize}
+			\IfEq{\ipsumlg}{FR}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\item \ipsum@sentence@FR@A}{}
+					\IfSubStr{\ipsumrange}{2}{\item \ipsum@sentence@FR@B}{}
+					\IfSubStr{\ipsumrange}{3}{\item \ipsum@sentence@FR@C}{}
+					\IfSubStr{\ipsumrange}{4}{\item \ipsum@sentence@FR@D}{}
+					\IfSubStr{\ipsumrange}{5}{\item \ipsum@sentence@FR@E}{}
+					\IfSubStr{\ipsumrange}{6}{\item \ipsum@sentence@FR@F}{}
+					\IfSubStr{\ipsumrange}{7}{\item \ipsum@sentence@FR@G}{}
+					\IfSubStr{\ipsumrange}{8}{\item \ipsum@sentence@FR@H}{}
+					\IfSubStr{\ipsumrange}{9}{\item \ipsum@sentence@FR@I}{}
+				}%
+				{}%
+			\IfEq{\ipsumlg}{EN}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\item \ipsum@sentence@EN@A}{}
+					\IfSubStr{\ipsumrange}{2}{\item \ipsum@sentence@EN@B}{}
+					\IfSubStr{\ipsumrange}{3}{\item \ipsum@sentence@EN@C}{}
+					\IfSubStr{\ipsumrange}{4}{\item \ipsum@sentence@EN@D}{}
+					\IfSubStr{\ipsumrange}{5}{\item \ipsum@sentence@EN@E}{}
+					\IfSubStr{\ipsumrange}{6}{\item \ipsum@sentence@EN@F}{}
+					\IfSubStr{\ipsumrange}{7}{\item \ipsum@sentence@EN@G}{}
+					\IfSubStr{\ipsumrange}{8}{\item \ipsum@sentence@EN@H}{}
+					\IfSubStr{\ipsumrange}{9}{\item \ipsum@sentence@EN@I}{}
+				}%
+				{}%
+			\IfEq{\ipsumlg}{DE}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\item \ipsum@sentence@DE@A}{}
+					\IfSubStr{\ipsumrange}{2}{\item \ipsum@sentence@DE@B}{}
+					\IfSubStr{\ipsumrange}{3}{\item \ipsum@sentence@DE@C}{}
+					\IfSubStr{\ipsumrange}{4}{\item \ipsum@sentence@DE@D}{}
+					\IfSubStr{\ipsumrange}{5}{\item \ipsum@sentence@DE@E}{}
+					\IfSubStr{\ipsumrange}{6}{\item \ipsum@sentence@DE@F}{}
+					\IfSubStr{\ipsumrange}{7}{\item \ipsum@sentence@DE@G}{}
+					\IfSubStr{\ipsumrange}{8}{\item \ipsum@sentence@DE@H}{}
+					\IfSubStr{\ipsumrange}{9}{\item \ipsum@sentence@DE@I}{}
+				}%
+				{}%
+			\IfEq{\ipsumlg}{IT}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\item \ipsum@sentence@IT@A}{}
+					\IfSubStr{\ipsumrange}{2}{\item \ipsum@sentence@IT@B}{}
+					\IfSubStr{\ipsumrange}{3}{\item \ipsum@sentence@IT@C}{}
+					\IfSubStr{\ipsumrange}{4}{\item \ipsum@sentence@IT@D}{}
+					\IfSubStr{\ipsumrange}{5}{\item \ipsum@sentence@IT@E}{}
+					\IfSubStr{\ipsumrange}{6}{\item \ipsum@sentence@IT@F}{}
+					\IfSubStr{\ipsumrange}{7}{\item \ipsum@sentence@IT@G}{}
+					\IfSubStr{\ipsumrange}{8}{\item \ipsum@sentence@IT@H}{}
+					\IfSubStr{\ipsumrange}{9}{\item \ipsum@sentence@IT@I}{}
+				}%
+				{}%
+			\IfEq{\ipsumlg}{LAT}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\item \ipsum@sentence@LAT@A}{}
+					\IfSubStr{\ipsumrange}{2}{\item \ipsum@sentence@LAT@B}{}
+					\IfSubStr{\ipsumrange}{3}{\item \ipsum@sentence@LAT@C}{}
+					\IfSubStr{\ipsumrange}{4}{\item \ipsum@sentence@LAT@D}{}
+					\IfSubStr{\ipsumrange}{5}{\item \ipsum@sentence@LAT@E}{}
+					\IfSubStr{\ipsumrange}{6}{\item \ipsum@sentence@LAT@F}{}
+					\IfSubStr{\ipsumrange}{7}{\item \ipsum@sentence@LAT@G}{}
+					\IfSubStr{\ipsumrange}{8}{\item \ipsum@sentence@LAT@H}{}
+					\IfSubStr{\ipsumrange}{9}{\item \ipsum@sentence@LAT@I}{}
+				}%
+				{}%
+			\IfEq{\ipsumlg}{ES}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\item \ipsum@sentence@ES@A}{}
+					\IfSubStr{\ipsumrange}{2}{\item \ipsum@sentence@ES@B}{}
+					\IfSubStr{\ipsumrange}{3}{\item \ipsum@sentence@ES@C}{}
+					\IfSubStr{\ipsumrange}{4}{\item \ipsum@sentence@ES@D}{}
+					\IfSubStr{\ipsumrange}{5}{\item \ipsum@sentence@ES@E}{}
+					\IfSubStr{\ipsumrange}{6}{\item \ipsum@sentence@ES@F}{}
+					\IfSubStr{\ipsumrange}{7}{\item \ipsum@sentence@ES@G}{}
+					\IfSubStr{\ipsumrange}{8}{\item \ipsum@sentence@ES@H}{}
+					\IfSubStr{\ipsumrange}{9}{\item \ipsum@sentence@ES@I}{}
+				}%
+				{}%
+			\IfEq{\ipsumlg}{PT}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\item \ipsum@sentence@PT@A}{}
+					\IfSubStr{\ipsumrange}{2}{\item \ipsum@sentence@PT@B}{}
+					\IfSubStr{\ipsumrange}{3}{\item \ipsum@sentence@PT@C}{}
+					\IfSubStr{\ipsumrange}{4}{\item \ipsum@sentence@PT@D}{}
+					\IfSubStr{\ipsumrange}{5}{\item \ipsum@sentence@PT@E}{}
+					\IfSubStr{\ipsumrange}{6}{\item \ipsum@sentence@PT@F}{}
+					\IfSubStr{\ipsumrange}{7}{\item \ipsum@sentence@PT@G}{}
+					\IfSubStr{\ipsumrange}{8}{\item \ipsum@sentence@PT@H}{}
+					\IfSubStr{\ipsumrange}{9}{\item \ipsum@sentence@PT@I}{}
+				}%
+				{}%
+			\IfEq{\ipsumlg}{NL}%
+				{%
+					\IfSubStr{\ipsumrange}{1}{\item \ipsum@sentence@NL@A}{}
+					\IfSubStr{\ipsumrange}{2}{\item \ipsum@sentence@NL@B}{}
+					\IfSubStr{\ipsumrange}{3}{\item \ipsum@sentence@NL@C}{}
+					\IfSubStr{\ipsumrange}{4}{\item \ipsum@sentence@NL@D}{}
+					\IfSubStr{\ipsumrange}{5}{\item \ipsum@sentence@NL@E}{}
+					\IfSubStr{\ipsumrange}{6}{\item \ipsum@sentence@NL@F}{}
+					\IfSubStr{\ipsumrange}{7}{\item \ipsum@sentence@NL@G}{}
+					\IfSubStr{\ipsumrange}{8}{\item \ipsum@sentence@NL@H}{}
+					\IfSubStr{\ipsumrange}{9}{\item \ipsum@sentence@NL@I}{}
+				}%
+				{}%
+			\end{itemize}
+		}%
+		{}%
+}
+
+\endinput

@@ -1,0 +1,33 @@
+% jetbrainsmono-otf.sty
+% C. Pierquet 2025
+% JetBrains Mono typeface is available under the SIL Open Font License 1.1 license
+%
+% This file is distributed under the terms of the LaTeX Project Public
+% License from CTAN archives in directory  macros/latex/base/lppl.txt.
+% Either version 1.3 or, at your option, any later version.
+
+\ProvidesPackage{jetbrainsmono-otf}[2025/01/10 v0.1 Supports JetBrainsMono fonts for lualatex and xelatex.] 
+
+\RequirePackage{xkeyval}
+
+\newcommand*{\JetBrainsMono@scale}{MatchLowercase}
+\DeclareOptionX{scale}{\renewcommand*{\JetBrainsMono@scale}{#1}}
+\ProcessOptionsX\relax
+
+\RequirePackage{fontspec}
+\defaultfontfeatures{
+  HyphenChar=None,
+  Scale     =\JetBrainsMono@scale}
+\newfontfamily\jetbrainsmono{jetbrainsmono}
+\newfontfamily\jetbrainsmonoextralight{jetbrainsmono-extralight}
+\newfontfamily\jetbrainsmonolight{jetbrainsmono-light}
+\newfontfamily\jetbrainsmonomedium{jetbrainsmono-medium}
+\newfontfamily\jetbrainsmonothin{jetbrainsmono-thin}
+\newfontfamily\jetbrainscode{jetbrainscode}
+\newfontfamily\jetbrainscodeextralight{jetbrainscode-extralight}
+\newfontfamily\jetbrainscodelight{jetbrainscode-light}
+\newfontfamily\jetbrainscodemedium{jetbrainscode-medium}
+\newfontfamily\jetbrainscodethin{jetbrainscode-thin}
+\defaultfontfeatures{}
+
+\endinput

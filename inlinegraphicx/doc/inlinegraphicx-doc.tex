@@ -1,0 +1,267 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+
+\documentclass[11pt,a4paper]{ltxdoc}
+\usepackage{bera}
+\usepackage{inconsolata}
+\usepackage[T1]{fontenc}
+\usepackage[scale=0.875]{cabin}
+\usepackage{inlinegraphicx}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{tabularray}
+\usepackage{fontawesome5}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [inlinegraphicx]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\let\TikZ\tikzlogo
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+\def\TPversion{0.1.0}
+\def\TPdate{06/11/2024}
+\usepackage{tcolorbox}
+\usepackage{pgffor}
+\tcbuselibrary{breakable,skins,hooks,listingsutf8}
+%\usepackage{soul}
+%\sethlcolor{lightgray!25}
+
+\lstset{
+	language=[LaTeX]TeX,%
+	basicstyle=\ttfamily,%
+	keywordstyle={\color{blue}},%
+	classoffset=0,%
+	keywords={},%
+	alsoletter={-},%
+	keywordstyle={\color{blue}},%
+	classoffset=1,%
+	alsoletter={-},%
+	morekeywords={inlinegraphicx,calc,simplekv,graphicx},%
+	keywordstyle={\color{violet}},%
+	classoffset=2,%
+	alsoletter={-},%
+	morekeywords={\inlinegraphics,\includegraphics},%
+	keywordstyle={\color{green!50!black}},%
+	classoffset=3,%
+	morekeywords={scale,strut},%
+	keywordstyle={\color{orange!75!black}}
+}
+
+\newtcblisting{DemoCode}[1]{%
+	enhanced,width=\linewidth,%
+	bicolor,size=title,%
+	colback=cyan!10!white,%
+	colbacklower=cyan!5!white,%
+	colframe=cyan!75!black,%
+	listing options={%
+		breaklines=true,%
+		breakatwhitespace=true,%
+		style=tcblatex,basicstyle=\small\ttfamily,%
+		tabsize=4,%
+		commentstyle={\itshape\color{gray}},
+		keywordstyle={\color{blue}},%
+		classoffset=0,%
+		keywords={\usepackage,\includegraphics,xstring,listofitems,tikz,calc,simplekv,graphicx,\readlist,\showitems,\xintFor,\xintSeq,\draw,\node},%
+		alsoletter={-},%
+		keywordstyle={\color{blue}},%
+		classoffset=1,%
+		alsoletter={-},%
+		morekeywords={euromoney},%
+		keywordstyle={\color{violet}},%
+		classoffset=2,%
+		alsoletter={-},%
+		morekeywords={\inlinegraphics,\includegraphics},%
+		keywordstyle={\color{green!50!black}},%
+		classoffset=3,%
+		morekeywords={scale,strut},%
+		keywordstyle={\color{orange!75!black}}
+	},%
+	#1
+}
+
+\newtcbinputlisting\DemoCodeFile[1]{%
+	enhanced,width=\linewidth,%
+	bicolor,size=title,%
+	colback=lightgray!10!white,%
+	colbacklower=lightgray!5!white,%
+	colframe=lightgray!75!black,%
+	listing options={%
+		breaklines=true,%
+		breakatwhitespace=true,%
+		style=tcblatex,
+		basicstyle=\scriptsize\ttfamily,%
+		tabsize=4,%
+		commentstyle={\itshape\color{gray}},%
+		%lastline=148
+	},%
+	breakable,
+	listing only,%
+	listing file={#1}
+}
+
+\NewDocumentCommand\ShowCode{ m }{%
+	\colorbox{lightgray!50}{\lstinline!#1!}%
+}
+
+\begin{document}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+		\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+			\begin{center}
+				\renewcommand{\arraystretch}{1.25}%
+				\begin{tabular}{c}
+					{\Huge \texttt{inlinegraphicx}}\\
+					\\
+					{\LARGE Includegraphics, with an} \\
+					{\LARGE automatic inline positioning.} \\
+					\\
+					{\small \texttt{Version \TPversion{} -- \TPdate}}
+				\end{tabular}
+			\end{center}
+		\end{tcolorbox}
+	\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+		\texttt{Cédric Pierquet}\\
+		{\ttfamily c pierquet -- at -- outlook . fr}\\
+		\texttt{\url{https://github.com/cpierquet/inlinegraphicx}} \\
+	\end{tabular}
+\end{center}
+
+\hrule
+
+\vfill
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+{Inline insertion, \inlinegraphics{example-image-16x10} with automatic adjustments.}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\sffamily{\LARGE Inline insertion, \inlinegraphics{example-image-16x10} with automatic adjustments.}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+{Inline insertion, \inlinegraphics*{example-image-16x10} with automatic adjustments but without depth.}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\scalebox{2.25}[2.25]{Inline \inlinegraphics[scale=0.825]{example-image-16x10} proof with small resizing.}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\sffamily{\LARGE Inline insertion, (\inlinegraphics[strut={()}]{example-image-16x10}) with automatic adjustments and choice of optimal height.}
+\end{tcolorbox}
+
+\vfill~
+
+\vspace*{5mm}
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+%\hrule
+
+\pagebreak
+
+\section{Loading, useful packages}
+
+In order to load \ShowCode{inlinegraphicx}, simply use:
+
+\begin{DemoCode}{listing only}
+\usepackage{inlinegraphicx}
+\end{DemoCode}
+
+Loaded packages are \ShowCode{graphicx}, \ShowCode{simplekv} and \ShowCode{calc}.
+
+\section{Usage}
+
+The purpose of this package is to provide command, based on \ShowCode{\\includegraphics}, to insert graphic elements \textit{inline}, with automatic positioning and scaling.
+
+\smallskip
+
+The code determines (total)height and, if necessary, depth of letters in the current font, in order to position the image correctly :
+
+\begin{itemize}
+	\item (total)height is given by (total)height of {\setlength\fboxsep{0pt}\fbox{qH}} in the current font ;
+	\item depth is given by depth of {\setlength\fboxsep{0pt}\fbox{qH}} in the current font.
+\end{itemize}
+
+In order to adjust manually size/positioning, \ShowCode{[keys]} are available.
+
+\begin{DemoCode}{text only}
+\includegraphics[scale=3]{test_inlinegraphicx}
+\end{DemoCode}
+
+\section{The macro}
+
+\subsection{Arguments}
+
+The macro for inline insertion is \ShowCode{\\inlinegraphics}.
+
+\begin{DemoCode}{listing only}
+\inlinegraphics(*)[scale=...,strut=...]{image}
+\end{DemoCode}
+
+The starred version remove depth positioning, wheres normal version include depth.
+
+Available keys are:
+
+\begin{itemize}
+	\item \ShowCode{scale}: re-scaling of compute height (default \ShowCode{1}) ;
+	\item \ShowCode{strut}: characters for height/depth (default \ShowCode{qH}).
+\end{itemize}
+
+\subsection{Examples}
+
+\begin{DemoCode}{}
+Inline insertion, \inlinegraphics{example-image-16x10} with automatic adjustments.
+
+Inline insertion, \inlinegraphics[scale=0.75]{example-image-16x10} with automatic adjustments and scaling.
+
+Inline insertion, \inlinegraphics*{example-image-16x10} with automatic adjustments and without depth.
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\scalebox{3}[3]{Inline (\inlinegraphics[strut={()}]{example-image-16x10}) q\inlinegraphics{example-image-16x10}H insertion}.
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\sffamily{\Huge Inline (\inlinegraphics[strut={()}]{example-image-16x10}) q\inlinegraphics{example-image-16x9}H insertion}.
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\ttfamily{\LARGE Inline (\inlinegraphics[strut={(É)}]{example-image-16x10}É) q\inlinegraphics{example-image-16x10}H insertion}.
+\end{DemoCode}
+
+\pagebreak
+
+\section{History}
+
+\texttt{0.1.0: Initial version}
+
+\section{The code}
+
+\DemoCodeFile{inlinegraphicx.sty}
+
+\end{document}

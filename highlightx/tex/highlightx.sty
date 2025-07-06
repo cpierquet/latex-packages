@@ -1,0 +1,487 @@
+% Author     : C. Pierquet
+% Source     : Antal Spector-Zabusky
+% licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{highlightx}[2025/05/26 0.1.7 Macros pour surligner du texte, meme en mode paragraphe]
+
+%====HISTORIQUE
+% v 0.1.7	Ajout d'un mode fluo + crayon
+% v 0.1.6	Ajout d'une clé pour l'opacité du texte d'une formule
+% v 0.1.5	Mise à jour de la doc
+% v 0.1.4	Passage \tikzstyle vers \tikzset (merci à Sam C.)
+% v 0.1.3	Correction d'un bug avec le caractère ; (merci à Denis B.)
+% v 0.1.2	Version étoilée pour \genhighlightpar afin d'activer \NoAutoSpacing + retour du code paragraphe main levée
+% v 0.1.1	Suppression code paragraphe avec effet
+% v 0.1.0	Version initiale [fr] et [en]
+
+%====OPTION babel
+\newif\if@babel\@babeltrue
+\DeclareOption{nobabel}{\@babelfalse}
+\DeclareOption*{}
+\ProcessOptions\relax
+
+%====BASE
+\RequirePackage{etoolbox}
+\RequirePackage{soul}
+\RequirePackage{tikz}
+\RequirePackage{xstring}
+\RequirePackage{simplekv}
+\usetikzlibrary{tikzmark,calc,decorations.pathmorphing}
+\if@babel
+	\usetikzlibrary{babel}
+\fi
+\colorlet{hlcolback}{yellow!35}
+
+%====COMMANDES POUR FORMULES
+\tikzset{encadreformule/.style={decorate,decoration={random steps,amplitude=0.5pt,segment length=1em}}}
+\tikzset{borderformula/.style={decorate,decoration={random steps,amplitude=0.5pt,segment length=1em}}}
+
+\defKV[surlignformule]{%
+	Fond=\def\surlignformulefond{#1},%
+	Bord=\def\surlignformulebord{#1},%
+	Texte=\def\surlignformuletexte{#1},%
+	Offset=\def\surlignformuleoffset{#1},%
+	OpaciteTexte=\def\surlignformuleopac{#1}
+}
+\setKVdefault[surlignformule]{%
+	Fond=hlcolback,%
+	Bord=none,%
+	Texte=black,%
+	Offset=1pt/2pt,%
+	OpaciteTexte=1
+}
+
+\NewDocumentCommand\SurlignerFormule{ s O{} m D<>{} }{%
+	\useKVdefault[surlignformule]%
+	\setKV[surlignformule]{#2}%
+	\IfSubStr{\surlignformuleoffset}{/}%
+		{%
+			\StrCut{\surlignformuleoffset}{/}{\surlignformuleoffsetH}{\surlignformuleoffsetV}%
+		}%
+		{%
+			\def\surlignformuleoffsetH{\surlignformuleoffset}\def\surlignformuleoffsetV{\surlignformuleoffset}%
+		}%
+	\tikzmarknode[inner sep=0pt,outer sep=0pt]{formule}{\ensuremath{#3}}%
+	\begin{tikzpicture}[remember picture,overlay]
+		\IfBooleanTF{#1}%
+			{%
+				\fill[\surlignformulefond,draw=\surlignformulebord,#4] ([xshift=-\surlignformuleoffsetH,yshift=-\surlignformuleoffsetV]formule.south west) rectangle ([xshift=\surlignformuleoffsetH,yshift=\surlignformuleoffsetV]formule.north east) node[text=\surlignformuletexte,midway,text opacity=\surlignformuleopac] {\ensuremath{#3}} ;
+			}%
+			{%
+				\fill[\surlignformulefond,draw=\surlignformulebord,encadreformule,#4] ([xshift=-\surlignformuleoffsetH,yshift=-\surlignformuleoffsetV]formule.south west) rectangle ([xshift=\surlignformuleoffsetH,yshift=\surlignformuleoffsetV]formule.north east) node[text=\surlignformuletexte,midway,text opacity=\surlignformuleopac] {\ensuremath{#3}} ;
+			}%
+	\end{tikzpicture}%
+}
+
+\defKV[hlformula]{%
+	bg=\def\hlformulabg{#1},%
+	border=\def\hlformulaborder{#1},%
+	text=\def\surlignformulatext{#1},%
+	offset=\def\hlformulaoffset{#1},%
+	textopacity=\def\hlformulaopac{#1}
+}
+\setKVdefault[hlformula]{%
+	bg=hlcolback,%
+	border=none,%
+	text=black,%
+	offset=1pt/2pt,%
+	textopacity=1
+}
+
+\NewDocumentCommand\HighlightFormula{ s O{\surlignformulefond} m D<>{} }{%
+	\useKVdefault[hlformula]%
+	\setKV[hlformula]{#2}%
+	\IfSubStr{\hlformulaoffset}{/}%
+		{%
+			\StrCut{\hlformulaoffset}{/}{\hlformulaoffsetH}{\hlformulaoffsetV}%
+		}%
+		{%
+			\def\hlformulaoffsetH{\hlformulaoffset}\def\hlformulaoffsetV{\hlformulaoffset}%
+		}%
+	\tikzmarknode[inner sep=0pt,outer sep=0pt]{formula}{\ensuremath{#3}}%
+	\begin{tikzpicture}[remember picture,overlay]
+		\IfBooleanTF{#1}%
+			{%
+				\fill[\hlformulabg,draw=\hlformulaborder,#4] ([xshift=-\hlformulaoffsetH,yshift=-\hlformulaoffsetV]formula.south west) rectangle ([xshift=\hlformulaoffsetH,yshift=\hlformulaoffsetV]formula.north east) node[text=\surlignformulatext,midway,text opacity=\hlformulaopac] {\ensuremath{#3}} ;
+			}%
+			{%
+				\fill[\hlformulabg,draw=\hlformulaborder,borderformula,#4] ([xshift=-\hlformulaoffsetH,yshift=-\hlformulaoffsetV]formula.south west) rectangle ([xshift=\hlformulaoffsetH,yshift=\hlformulaoffsetV]formula.north east) node[text=\surlignformulatext,midway,text opacity=\hlformulaopac] {\ensuremath{#3}} ;
+			}
+	\end{tikzpicture}%
+}
+
+%====COMMANDES POUR PARAGRAPHES SIMPLES (sans effet, pour du tcbox par exemple)
+\NewDocumentCommand\genhighlightpar{ s O{hlcolback} m }{%
+	\IfBooleanTF{#1}%
+		{\sethlcolor{#2}\NoAutoSpacing\hl{#3}}%
+		{\sethlcolor{#2}\hl{#3}}%
+}
+
+%====COMMANDES POUR PARAGRAPHES avec effet, code de base de Antal Spector-Zabusky :-)
+\def\surlignparbg{yellow}
+\def\surlignparopac{0.25}
+\newlength{\tmp@hauteur@char}
+\newlength{\tmp@profondeur@char}
+\newdimen\highlight@previous
+\newdimen\highlight@current
+
+\defKV[surligpar]{%
+	Fond=\def\surlignparbg{#1},%
+	Bord=\def\surlignparborder{#1},%
+	Offset=\def\surlignparoffset{#1},%
+	Opacite=\def\surlignparopac{#1}
+}
+
+\setKVdefault[surligpar]{%
+	Fond=yellow,%
+	Bord=none,%
+	Offset=1pt,%
+	Opacite=0.25
+}
+
+\defKV[hlightpar]{%
+	bg=\def\surlignparbg{#1},%
+	border=\def\surlignparborder{#1},%
+	offset=\def\surlignparoffset{#1},%
+	opacity=\def\surlignparopac{#1}
+}
+
+\setKVdefault[hlightpar]{%
+	bg=yellow,%
+	border=none,%
+	offset=1pt,%
+	opacity=0.25
+}
+
+\newcommand{\highlight@DoHighlight}{
+	\fill[hlparhw] ($(begin highlight)+(-\surlignparoffsetH,1.05*\tmp@hauteur@char+\surlignparoffsetV)$) rectangle ($(end highlight)+(\surlignparoffsetH,-1.05*\tmp@profondeur@char-\surlignparoffsetV)$)
+}
+
+\newcommand{\highlight@BeginHighlight}{
+	\coordinate (begin highlight) at (0,0) 
+}
+
+\newcommand{\highlight@EndHighlight}{
+	\coordinate (end highlight) at (0,0) 
+}
+
+\NewDocumentCommand\SurlignerTexte{ s O{} D<>{} }{%
+	%étoilée = supprimer effet bordure
+	%1 = clés simplekv
+	%2 = options tikz
+	\useKVdefault[surligpar]%
+	\setKV[surligpar]{#2}%
+	\IfBooleanTF{#1}%
+		{%
+			\tikzset{hlparhw/.style={outer sep=-15pt, inner sep=0pt,every highlighter,this highlighter}}%
+		}%
+		{%
+			\tikzset{hlparhw/.style={encadreformule,outer sep=-15pt,inner sep=0pt,every highlighter,this highlighter}}%
+		}%
+	\IfSubStr{\surlignparoffset}{/}%
+		{%
+			\StrCut{\surlignparoffset}{/}{\surlignparoffsetH}{\surlignparoffsetV}%
+		}%
+		{%
+			\def\surlignparoffsetH{\surlignparoffset}\def\surlignparoffsetV{\surlignparoffset}%
+		}%
+	\tikzset{every highlighter/.style={color=\surlignparbg,fill opacity=\surlignparopac,draw=\surlignparborder,#3}}%
+	\settoheight{\tmp@hauteur@char}{\hbox{B}}%
+	\settodepth{\tmp@profondeur@char}{\hbox{q}}%
+	\tikzset{this highlighter/.style={#3}}%
+	\SOUL@setup
+	%
+	\def\SOUL@preamble{%
+		\begin{tikzpicture}[overlay, remember picture]
+			\highlight@BeginHighlight ;
+			\highlight@EndHighlight ;
+		\end{tikzpicture}%
+	}%
+	%
+	\def\SOUL@postamble{%
+		\begin{tikzpicture}[overlay, remember picture]
+			\highlight@EndHighlight ;
+			\highlight@DoHighlight ;
+		\end{tikzpicture}%
+	}%
+	%
+	\def\SOUL@everyhyphen{%
+		\discretionary{%
+			\SOUL@setkern\SOUL@hyphkern
+			\SOUL@sethyphenchar
+			{\tikz[overlay, remember picture] \highlight@EndHighlight ;}%
+		}{%
+		}{%
+			\SOUL@setkern\SOUL@charkern
+		}%
+	}%
+	%
+	\def\SOUL@everyexhyphen##1{%
+		\SOUL@setkern\SOUL@hyphkern
+		\hbox{##1}%
+		\discretionary{%
+			{\tikz[overlay, remember picture] \highlight@EndHighlight ;}%
+		}{%
+		}{%
+			\SOUL@setkern\SOUL@charkern
+		}%
+	}%
+	%
+	\def\SOUL@everysyllable{%
+		\begin{tikzpicture}[overlay, remember picture]
+			\path let \p0 = (begin highlight), \p1 = (0,0) in \pgfextra
+			\global\highlight@previous=\y0
+			\global\highlight@current =\y1
+			\endpgfextra (0,0) ;
+			\ifdim\highlight@current < \highlight@previous
+			\highlight@DoHighlight ; 
+			\highlight@BeginHighlight ;
+			\fi
+		\end{tikzpicture}%
+		\the\SOUL@syllable
+		{\tikz[overlay, remember picture] \highlight@EndHighlight ;}%
+	}%
+	\SOUL@
+}
+
+\NewDocumentCommand\HighlightText{ s O{} D<>{} }{%
+	%étoilée = supprimer effet bordure
+	%1 = clés simplekv
+	%2 = options tikz
+	\useKVdefault[hlightpar]%
+	\setKV[hlightpar]{#2}%
+	\IfBooleanTF{#1}%
+		{%
+			\tikzset{hlparhw/.style={outer sep=-15pt, inner sep=0pt,every highlighter,this highlighter}}%
+		}%
+		{%
+			\tikzset{hlparhw/.style={borderformula,outer sep=-15pt,inner sep=0pt,every highlighter,this highlighter}}%
+		}%
+	\IfSubStr{\surlignparoffset}{/}%
+		{%
+			\StrCut{\surlignparoffset}{/}{\surlignparoffsetH}{\surlignparoffsetV}%
+		}%
+		{%
+			\def\surlignparoffsetH{\surlignparoffset}\def\surlignparoffsetV{\surlignparoffset}%
+		}%
+	\tikzset{every highlighter/.style={color=\surlignparbg,fill opacity=\surlignparopac,draw=\surlignparborder,#3}}%
+	\settoheight{\tmp@hauteur@char}{\hbox{B}}%
+	\settodepth{\tmp@profondeur@char}{\hbox{q}}%
+	\tikzset{this highlighter/.style={#3}}%
+	\SOUL@setup
+	%
+	\def\SOUL@preamble{%
+		\begin{tikzpicture}[overlay, remember picture]
+			\highlight@BeginHighlight ;
+			\highlight@EndHighlight ;
+		\end{tikzpicture}%
+	}%
+	%
+	\def\SOUL@postamble{%
+		\begin{tikzpicture}[overlay, remember picture]
+			\highlight@EndHighlight ;
+			\highlight@DoHighlight ;
+		\end{tikzpicture}%
+	}%
+	%
+	\def\SOUL@everyhyphen{%
+		\discretionary{%
+			\SOUL@setkern\SOUL@hyphkern
+			\SOUL@sethyphenchar
+			{\tikz[overlay, remember picture] \highlight@EndHighlight ;}%
+		}{%
+		}{%
+			\SOUL@setkern\SOUL@charkern
+		}%
+	}%
+	%
+	\def\SOUL@everyexhyphen##1{%
+		\SOUL@setkern\SOUL@hyphkern
+		\hbox{##1}%
+		\discretionary{%
+			{\tikz[overlay, remember picture] \highlight@EndHighlight ;}%
+		}{%
+		}{%
+			\SOUL@setkern\SOUL@charkern
+		}%
+	}%
+	%
+	\def\SOUL@everysyllable{%
+		\begin{tikzpicture}[overlay, remember picture]
+			\path let \p0 = (begin highlight), \p1 = (0,0) in \pgfextra
+			\global\highlight@previous=\y0
+			\global\highlight@current =\y1
+			\endpgfextra (0,0) ;
+			\ifdim\highlight@current < \highlight@previous
+			\highlight@DoHighlight ;
+			\highlight@BeginHighlight ;
+			\fi
+		\end{tikzpicture}%
+		\the\SOUL@syllable
+		{\tikz[overlay, remember picture] \highlight@EndHighlight ;}%
+	}%
+	\SOUL@
+}
+
+%====COMMANDES AVEC CRAYON
+\newlength\fluotertextedecalx
+\newlength\fluotertextedecaly
+\colorlet{bgfluo}{darkgray!75!black}
+%angle=14.036
+
+%[fr]
+\defKV[FluoterTexte]{%
+	Couleur=\def\fluotertextecoul{#1},%
+	CouleurCorps=\def\fluotertextecoulcorps{#1},%
+	Echelle=\xdef\fluotertexteechelle{\fpeval{(#1)*0.25}},%
+	Inclinaison=\xdef\fluotertextepivot{\fpeval{90+(#1)}},%
+	DecalX=\setlength\fluotertextedecalx{#1},%
+	DecalY=\setlength\fluotertextedecaly{#1},%
+	Logo=\def\fluotertextelogo{#1},%
+	Noeud=\def\fluotertextenoeud{#1},%
+	EchelleLogo=\def\fluotexteechellelogo{#1},%
+	Ancre=\def\fluotertexteancre{#1}
+}
+\setKVdefault[FluoterTexte]{%
+	Couleur=yellow,%
+	CouleurCorps=bgfluo,%
+	Echelle=1,%
+	Inclinaison=0,%
+	DecalX=0.25ex,%
+	DecalY=-0.5ex,%
+	Logo={},%
+	EchelleLogo=3.25,%
+	Noeud=SURLIGN,%
+	Ancre=east,%
+	MainLevee=false
+}
+
+\tikzset{fluoter/.style={fill opacity=0.5,text opacity=1,line width=0pt,inner sep=0pt,outer sep=1pt}}
+\tikzset{fluoterlogo/.style={inner sep=0pt,text=\fluotertextecoulcorps,scale=\fluotexteechellelogo,text width=\fpeval{6/\fluotexteechellelogo}cm,align=center}}
+\newcommand\intfluotrace{%
+	\begin{scope}[shift={([xshift=\fluotertextedecalx,yshift=\fluotertextedecaly]\fluotertextenoeud.\fluotertexteancre)},scale=\fluotertexteechelle,rotate=\fluotertextepivot,transform shape,line width=\fpeval{\fluotertexteechelle*0.25}mm,line join=bevel]%on continue avec les rotations/décalages
+		\begin{scope}[shift={(-0.2,-1)}]%on commence par décaler l'origine en bas de la pointe
+			%pointe
+			\filldraw[fill=\fluotertextecoul,draw=\fluotertextecoul!80!\fluotertextecoulcorps] (0,0)--(1,0){[rounded corners=\fpeval{\fluotertexteechelle*1}mm]--(1,1.2)--(0.2,1)}--cycle;
+			%corps
+			\filldraw[\fluotertextecoulcorps] (0,0)--(-1,-3)--(2.5,-3)--(1,0)--cycle;
+			%manche
+			\filldraw[draw=\fluotertextecoulcorps,fill=\fluotertextecoul] (-1,-3)--(2.5,-3){[rounded corners=\fpeval{\fluotertexteechelle*2}mm]--(2.25,-9)--(-0.75,-9)}--cycle;
+			%logo éventuel (expérimental)
+			\ifstrempty{\fluotertextelogo}%
+				{}%
+				{%
+					\begin{scope}
+						\clip (-1,-3)--(2.5,-3)--(2.25,-9)--(-0.75,-9)--cycle ;
+						\draw (0.75,-6) node[rotate=-90,fluoterlogo] {\fluotertextelogo} ;
+					\end{scope}
+				}%
+		\end{scope}
+	\end{scope}
+}
+
+\NewDocumentCommand\TexteAFluoter{ O{} m }{%
+	\restoreKV[FluoterTexte]%
+	\setKV[FluoterTexte]{#1}%
+	\begin{tikzpicture}[baseline=(\fluotertextenoeud.base),remember picture]
+		\ifboolKV[FluoterTexte]{MainLevee}{\tikzset{fluoter/.append style={encadreformule}}}{}%
+		\node[fill=\fluotertextecoul,fluoter] (\fluotertextenoeud) {#2};
+	\end{tikzpicture}%
+}
+\NewDocumentCommand\AfficherFluo{ O{} }{%
+	\restoreKV[FluoterTexte]%
+	\setKV[FluoterTexte]{#1}%
+	\begin{tikzpicture}[remember picture,overlay]
+		\intfluotrace
+	\end{tikzpicture}%
+}
+
+\NewDocumentCommand\FluoterTexte{ O{} m }{%
+	\restoreKV[FluoterTexte]%
+	\setKV[FluoterTexte]{#1}%
+	\begin{tikzpicture}[baseline=(SURLIGN.base),remember picture]
+		\ifboolKV[FluoterTexte]{MainLevee}{\tikzset{fluoter/.append style={encadreformule}}}{}%
+		\node[fill=\fluotertextecoul,fluoter] (SURLIGN) {#2};
+	\end{tikzpicture}%
+	\begin{tikzpicture}[remember picture,overlay]
+		\intfluotrace
+	\end{tikzpicture}%
+}
+
+%[en]
+\defKV[fluohighlight]{%
+	color=\def\fluotertextecoul{#1},%
+	colorbody=\def\fluotertextecoulcorps{#1},%
+	scale=\xdef\fluotertexteechelle{\fpeval{(#1)*0.33}},%
+	rotate=\xdef\fluotertextepivot{\fpeval{90+(#1)}},%
+	xoffset=\setlength\fluotertextedecalx{#1},%
+	yoffset=\setlength\fluotertextedecaly{#1},%
+	logo=\def\fluotertextelogo{#1},%
+	node=\def\fluotertextenoeud{#1},%
+	logoscale=\def\fluotexteechellelogo{#1},%
+	anchor=\def\fluotertexteancre{#1}
+}
+\setKVdefault[fluohighlight]{%
+	color=yellow,%
+	colorbody=bgfluo,%
+	scale=1,%
+	rotate=0,%
+	xoffset=0.25ex,%
+	yoffset=-0.5ex,%
+	logo={},%
+	logoscale=3.25,%
+	node=HLIGHT,%
+	anchor=east,%
+	freehand=false
+}
+
+\tikzset{stylehighlight/.style={fill opacity=0.5,text opacity=1,line width=0pt,inner sep=0pt,outer sep=1pt}}
+\tikzset{stylehighlightlogo/.style={inner sep=0pt,text=\fluotertextecoulcorps,scale=\fluotexteechellelogo,text width=\fpeval{6/\fluotexteechellelogo}cm,align=center}}%test...
+\newcommand\inthlighttrace{%
+	\begin{scope}[shift={([xshift=\fluotertextedecalx,yshift=\fluotertextedecaly]\fluotertextenoeud.\fluotertexteancre)},scale=\fluotertexteechelle,rotate=\fluotertextepivot,transform shape,line width=\fpeval{\fluotertexteechelle*0.25}mm,line join=bevel]
+		\begin{scope}[shift={(-0.2,-1)}]
+			\filldraw[fill=\fluotertextecoul,draw=\fluotertextecoul!80!\fluotertextecoulcorps] (0,0)--(1,0){[rounded corners=\fpeval{\fluotertexteechelle*1}mm]--(1,1.2)--(0.2,1)}--cycle;
+			\filldraw[\fluotertextecoulcorps] (0,0)--(-1,-3)--(2.5,-3)--(1,0)--cycle;
+			\filldraw[draw=\fluotertextecoulcorps,fill=\fluotertextecoul] (-1,-3)--(2.5,-3){[rounded corners=\fpeval{\fluotertexteechelle*2}mm]--(2.25,-9)--(-0.75,-9)}--cycle;
+			\ifstrempty{\fluotertextelogo}%
+			{}%
+			{%
+				\begin{scope}
+					\clip (-1,-3)--(2.5,-3)--(2.25,-9)--(-0.75,-9)--cycle ;
+					\draw (0.75,-6) node[rotate=-90,stylehighlightlogo] {\fluotertextelogo} ;
+				\end{scope}
+			}%
+		\end{scope}
+	\end{scope}
+}
+
+\NewDocumentCommand\texttohighlight{ O{} m }{%
+	\restoreKV[fluohighlight]%
+	\setKV[fluohighlight]{#1}%
+	\begin{tikzpicture}[baseline=(\fluotertextenoeud.base),remember picture]
+		\ifboolKV[fluohighlight]{freehand}{\tikzset{stylehighlight/.append style={borderformula}}}{}%
+		\node[fill=\fluotertextecoul,stylehighlight] (\fluotertextenoeud) {#2};
+	\end{tikzpicture}%
+}
+\NewDocumentCommand\highlightafter{ O{} }{%
+	\restoreKV[fluohighlight]%
+	\setKV[fluohighlight]{#1}%
+	\begin{tikzpicture}[remember picture,overlay]
+		\intfluotrace
+	\end{tikzpicture}%
+}
+
+\NewDocumentCommand\highlightwithpen{ O{} m }{%
+	\restoreKV[fluohighlight]%
+	\setKV[fluohighlight]{#1}%
+	\begin{tikzpicture}[baseline=(SURLIGN.base),remember picture]
+		\ifboolKV[fluohighlight]{freehand}{\tikzset{stylehighlight/.append style={borderformula}}}{}%
+		\node[fill=\fluotertextecoul,stylehighlight] (SURLIGN) {#2};
+	\end{tikzpicture}%
+	\begin{tikzpicture}[remember picture,overlay]
+		\intfluotrace
+	\end{tikzpicture}%
+}
+
+\endinput

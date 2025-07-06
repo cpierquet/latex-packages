@@ -1,0 +1,640 @@
+% !TeX TXS-program:compile = txs:///lualatex
+
+\documentclass[french,11pt,a4paper]{article}
+%\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{fontspec}
+\setmonofont[Scale=MatchLowercase]{Inconsolatazi4}
+\usepackage{highlightx}
+\usepackage{enumitem}
+\usepackage{codehigh}
+\usepackage{multicol}
+\usepackage{tabularray}
+\usepackage{lipsum}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{fontawesome5}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+%\rhead{\sffamily\small\affloetalab[Legende]}
+\lfoot{\sffamily\small [highlightx]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=1.5cm]{geometry}
+\setlength{\parindent}{0pt}
+\def\TPversion{0.1.7}
+\def\TPdate{26 mai 2025}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,hooks}
+\sethlcolor{lightgray!25}
+\NewDocumentCommand\MontreCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+\usepackage{babel}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{highlightx}}\\
+				\\
+				{\LARGE Commandes pour surligner de formules ou} \\
+				{\LARGE des paragraphes (avec un effet main levée),} \\
+				{\LARGE à l'aide des packages \MontreCode{soul} et/ou \MontreCode{tikz}.} \\
+				{\LARGE $\rhd$ Commandes [fr] ou [en] $\lhd$} \\
+				\\
+				{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{tabular}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}} \\
+	\\
+	\texttt{Merci à Antal Spector-Zabusky pour le code dédié aux paragraphes !}
+	\\
+	\texttt{Merci à Denis Bitouzé pour ses retours !}
+\end{tabular}
+\end{center}
+
+\hrule
+
+\vfill
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+Surligner une formule en ligne, avec un effet \textit{main levée}, comme $\SurlignerFormule{f(x)=\displaystyle\frac{1}{1+x}}$.
+
+\vspace*{5mm}
+
+Surligner une formule en ligne, sans effet, comme $\SurlignerFormule*[Bord=red,Fond=teal!25]{f(x)=\displaystyle\int_0^4 x^2 + 1\,\text{d}x}$.
+\end{tcolorbox}
+
+\vspace*{5mm}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+Et en mode hors ligne :
+
+\[ \SurlignerFormule[Fond=green!25,Bord=red]{A=\begin{pmatrix}1&2\\3&4\end{pmatrix}}<thick>. \]
+\end{tcolorbox}
+
+\vspace*{5mm}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+Et on peut même mettre en forme un paragraphe généré aléatoirement grâce au site \textsf{\url{https://ipsum.one/}} par exemple : \og \SurlignerTexte{Enfin, comme le dernier coup de dix heures retentissait encore, il étendit la main et prit celle de Mme Rênal, qui la retira aussitôt. Julien, sans trop savoir ce qu’il faisait, la saisit de nouveau. Quoique bien ému lui-même, il fut frappé de la froideur glaciale de la main qu’il prenait ; il la serrait avec une force convulsive ; on fit un dernier effort pour la lui ôter, mais enfin cette main lui resta.} \fg
+\end{tcolorbox}
+
+\vspace*{5mm}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+Un deuxième, avec un peu de couleurs, généré aléatoirement grâce au site \textsf{\url{https://ipsum.one/}} par exemple : \og \SurlignerTexte*[Fond=orange,Bord=teal]{De là le succès du petit paysan Julien. Elle trouva des jouissances douces, et toutes brillantes du charme de la nouveauté, dans la sympathie de cette âme noble et fière. Mme de Rênal lui eut bientôt pardonné son ignorance extrême qui était une grâce de plus, et la rudesse de ses façons qu’elle parvint à corriger. Elle trouva qu’il valait la peine de l’écouter, même quand on parlait des choses les plus communes, même quand il s’agissait d’un pauvre chien écrasé, comme il traversait la rue, par la charrette d’un paysan allant au trot.} \fg
+\end{tcolorbox}
+
+%\vspace*{5mm}
+%
+%Et dans un paragraphe classique, on peut mettre des effets, comme par exemple avec le texte suivant, généré aléatoirement grâce au site \url{https://ipsum.one/} par exemple : \og \SurlignerTexte[orange!25,draw=teal]{Une scie à eau se compose d’un hangar au bord d’un ruisseau. Le toit est soutenu par une charpente qui porte sur quatre gros piliers en bois. À huit ou dix pieds d’élévation, au milieu du hangar, on voit une scie qui monte et descend, tandis qu’un mécanisme fort simple pousse contre cette scie une pièce de bois. C’est une roue mise en mouvement par le ruisseau qui fait aller ce double mécanisme ; celui de la scie qui monte et descend, et celui qui pousse doucement la pièce de bois vers la scie, qui la débite en planches.} \fg
+
+\vfill~
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+\hrule
+
+\vspace*{5mm}
+
+\section{Le package highlightx}
+
+\subsection{Solutions existantes}
+
+Le package \MontreCode{soul} permet de surligner du texte, de manière très efficace, mais avec des formules mathématiques le surlignage n'est pas forcément optimal.
+
+Il est également possible d'utiliser \MontreCode{fcolorbox} pour des formules mathématiques.
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+On peut surligner \hl{avec la commande \texttt{hl} du package \texttt{soul}}.\\
+Avec une formule, du style \hl{$\int_0^4 x^2\,\text{d}x$}, on constate un léger décalage.\\\\
+Aucun souci avec \texttt{hl} pour un paragraphe : \og \hl{Une scie à eau se compose d’un 
+hangar au bord d’un ruisseau. Le toit est soutenu par une charpente qui porte sur quatre 
+gros piliers en bois. À huit ou dix pieds d’élévation, au milieu du hangar, on voit une 
+scie qui monte et descend, tandis qu’un mécanisme fort simple pousse contre cette scie 
+une pièce de bois.} \fg.\\\\
+Et maintenant avec \texttt{fcolorbox} : \colorbox{lightgray!25}{$\int_0^4 x^2\,\text{d}x$}.
+\end{demohigh}
+
+\subsection{Remerciements}
+
+Je remercie Antal Spector-Zabusky qui m'a autorisé à utiliser son code pour le surlignage de paragraphes avec un effet \textit{main levée}, et qui m'a autorisé à le distribuer sous licence \textsf{LPPL 1.3c} !
+
+Le code est adapté d'une réponse issue de cette  \href{https://tex.stackexchange.com/questions/5959/cool-text-highlighting-in-latex}{\fbox{discussion}} sur \textsf{tex.stackexchange.com}.
+
+\pagebreak
+
+\subsection{Possibilités et limitations}
+
+L'idée du package \MontreCode{highlightx} est de proposer des commandes basiques, pour \textit{surligner} :
+
+\begin{itemize}
+	\item du texte simple ou multi-lignes (paragraphes) avec un effet de bordure à \textit{main levée} ;
+	\item des formules en mode math en ligne ou hors-ligne (grâce à \TikZ) avec un effet de bordure à \textit{main levée}.
+\end{itemize}
+
+{\small\faBomb}~Compte tenu du code utilisé pour le surlignage des paragraphes, il se peut que des dysfonctionnements apparaissent, notamment liés à \MontreCode{babel} et à l'utilisation de caractères \textit{actifs}.
+
+\subsection{Chargement}
+
+Le package se charge dans le préambule, via \MontreCode{\textbackslash usepackage\{highlightx\}}.
+
+Les seuls packages chargés sont :
+
+\begin{itemize}
+	\item \MontreCode{soul}, \MontreCode{etoolbox}, \MontreCode{xstring} et \MontreCode{simplekv}.
+	\item \MontreCode{tikz} avec les librairies \MontreCode{tikzmark,calc,decorations.pathmorphing,nbabel}.
+\end{itemize}
+
+Si l'utilisateur ne souhaite pas charger la librairie \MontreCode{babel} de \TikZ, il suffit de charger le package avec l'option \MontreCode{[nobabel]}.
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%chargement classique, avec la librairie babel de tikz
+\usepackage{highlightx}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%chargement sans la librairie babel de tikz
+\usepackage[nobabel]{highlightx}
+\end{codehigh}
+
+{\small\faAngleDoubleRight}~\MontreCode{highlightx} est compatible avec les compilations usuelles en \textsf{latex}, \textsf{pdflatex}, \textsf{lualatex} ou \textsf{xelatex}.
+
+\medskip
+
+{\small\faBomb}~Une double compilation est nécessaire afin de placer correctement les effets de surlignage !
+
+\subsection{Commandes disponibles}
+
+Les commandes proposées par le package \MontreCode{highlightx} sont :
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%Commande pour surligner une formule (mode math), avec ou sans effet
+\SurlignerFormule
+%Commande pour surligner du texte, avec ou sans effet
+\SurlignerTexte
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+Par exemple une formule en ligne comme $\SurlignerFormule{f(x)=\displaystyle\frac{1}{1+x}}$.\\
+
+Ou bien encore une formule en mode hors-ligne comme :
+%
+\[ \SurlignerFormule{A=\begin{pmatrix}1&2\\3&4\end{pmatrix}}. \]
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+Et : \og \SurlignerTexte{Une scie à eau se compose d’un 
+hangar au bord d’un ruisseau. Le toit est soutenu par une charpente qui porte sur quatre 
+gros piliers en bois. À huit ou dix pieds d’élévation, au milieu du hangar, on voit une 
+scie qui monte et descend, tandis qu’un mécanisme fort simple pousse contre cette scie 
+une pièce de bois.} \fg.
+\end{demohigh}
+
+%Par exemple $\SurlignerFormule{f(x)=\displaystyle\frac{1}{1+x}}$.\\
+%Ou bien :
+%\[ \SurlignerFormule{A=\begin{pmatrix}1&2\\3&4\end{pmatrix}}. \]
+%
+%Et : \og \SurlignerTexte{Une scie à eau se compose d’un 
+%hangar au bord d’un ruisseau. Le toit est soutenu par une charpente qui porte sur quatre 
+%gros piliers en bois. À huit ou dix pieds d’élévation, au milieu du hangar, on voit une 
+%scie qui monte et descend, tandis qu’un mécanisme fort simple pousse contre cette scie 
+%une pièce de bois.} \fg.
+
+\pagebreak
+
+\section{Les commandes}
+
+\subsection{Surligner une formule, avec  ou sans effet}
+
+La commande dédiée à la mise en évidence d'une formule mathématique est \MontreCode{\textbackslash SurlignerFormule} :
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%Commande pour surligner une formule (mode math)
+\SurlignerFormule(*)[Clés]{Formule}<options tikz>
+\end{codehigh}
+
+Concernant cette commande :
+
+\begin{itemize}
+	\item la version étoilée désactive l'effet \textit{main levée} ;
+	\item les clés disponibles sont :
+	\begin{itemize}
+		\item \MontreCode{Fond} pour la couleur de fond (\MontreCode{yellow!35} par défaut) ;
+		\item \MontreCode{Bord} pour une éventuelle bordure, \MontreCode{none} ou \MontreCode{couleur} (\MontreCode{none} par défaut) ;
+		\item \MontreCode{Texte} pour une couleur de texte (\MontreCode{black} par défaut) ;
+		\item \MontreCode{OpaciteTexte} pour l'opacité de la couleur de texte (\MontreCode{1} par défaut) ;
+		\item \MontreCode{Offset} pour \textit{élargir} le surlignage, sous la forme \MontreCode{Offset} ou \MontreCode{OffsetH/OffsetV} (\MontreCode{1pt/2pt} par défaut) ;
+	\end{itemize}
+	\item la formule est insérée dans un groupe \MontreCode{\textbackslash ensuremath} ;
+	\item les \textit{options tikz} sont optionnelles.
+\end{itemize}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+$\SurlignerFormule{f(x)=\displaystyle\frac{1}{1+x}}$.\\
+$\SurlignerFormule*[OpaciteTexte=0.75]{f(x)=\displaystyle\frac{1}{1+x}}$.\\
+$\SurlignerFormule[Fond=teal!35]{f(x)=\displaystyle\frac{1}{1+x}}$.\\
+$\SurlignerFormule[Fond=teal!35,Bord=red]{f(x)=\displaystyle\frac{1}{1+x}}<thick>$.\\
+$\SurlignerFormule[Offset=5mm/2mm]{f(x)=\displaystyle\frac{1}{1+x}}$\\
+$\SurlignerFormule*[Texte=red]{f(x)=\displaystyle\frac{1}{1+x}}$.\\
+\end{codehigh}
+
+$\SurlignerFormule{f(x)=\displaystyle\frac{1}{1+x}}$
+\qquad
+$\SurlignerFormule*[OpaciteTexte=0.75]{f(x)=\displaystyle\frac{1}{1+x}}$
+\qquad
+$\SurlignerFormule[Fond=teal!35]{f(x)=\displaystyle\frac{1}{1+x}}$
+\qquad
+$\SurlignerFormule[Fond=teal!35,Bord=red]{f(x)=\displaystyle\frac{1}{1+x}}<thick>$
+\qquad
+$\SurlignerFormule[Offset=5mm/2mm]{f(x)=\displaystyle\frac{1}{1+x}}$
+\qquad
+$\SurlignerFormule*[Texte=red]{f(x)=\displaystyle\frac{1}{1+x}}$.\\
+
+\bigskip
+
+Le style \textit{main levée} est fixé par défaut, mais peut être modifié en adaptant le style \TikZ{} suivant :
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%Style main levée
+\tikzset{encadreformule/.style={%
+    decorate,decoration={random steps,amplitude=0.5pt,segment length=1em}}%
+}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\tikzset{encadreformule/.style={%
+    decorate,decoration={random steps,amplitude=4mm,segment length=10mm}}%
+}
+
+$\SurlignerFormule{f(x)=\displaystyle\frac{1}{1+x}}$
+\end{codehigh}
+
+\tikzset{encadreformule/.style={%
+		decorate,decoration={random steps,amplitude=4mm,segment length=10mm}}%
+}
+
+$\SurlignerFormule{f(x)=\displaystyle\frac{1}{1+x}}$
+
+\tikzset{encadreformule/.style={%
+		decorate,decoration={random steps,amplitude=0.5pt,segment length=1em}}%
+}
+
+\pagebreak
+
+\subsection{Surligner un texte, y compris multilignes, avec  ou sans effet}
+
+La commande dédiée à la mise en évidence d'une formule mathématique est \MontreCode{\textbackslash SurlignerTexte} :
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%Commande pour surligner du texte
+\SurlignerTexte(*)[clés]<options tikz>{texte}
+\end{codehigh}
+
+Concernant cette commande, le fonctionnement est similaire à celui dédié aux formules :
+
+\begin{itemize}
+	\item la version étoilée désactive l'effet \textit{main levée} ;
+	\item les clés disponibles sont :
+	\begin{itemize}
+		\item \MontreCode{Fond} pour la couleur de fond (\MontreCode{yellow} par défaut) ;
+		\item \MontreCode{Bord} pour une éventuelle bordure, \MontreCode{none} ou \MontreCode{couleur} (\MontreCode{none} par défaut) ;
+		\item \MontreCode{Opacite} pour régler l'opacité du surlignage (\MontreCode{0.25} par défaut) ;
+		\item \MontreCode{Offset} pour \textit{élargir} le surlignage, sous la forme \MontreCode{Offset} ou \MontreCode{OffsetH/OffsetV} (\MontreCode{1pt} par défaut) ;
+	\end{itemize}
+	\item les \textit{options tikz} sont optionnelles.
+\end{itemize}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%Paragraphes venant du site https://ipsum.one/
+Un premier paragraphe : \og \SurlignerTexte{Quand Julien aperçut les ruines pittoresques de 
+l’ancienne église de Vergy, il remarqua que depuis l’avant-veille il n’avait pas pensé 
+une seule fois à Mme de Rênal. L’autre jour en partant, cette femme m’a rappelé la 
+distance infinie qui nous sépare, elle m’a traité comme le fils d’un ouvrier. Sans 
+doute elle a voulu me marquer son repentir de m’avoir laissé sa main la veille... 
+Elle est pourtant bien jolie, cette main ! quel charme ! quelle noblesse dans 
+les regards de cette femme !} \fg \\
+
+Un deuxième paragraphe : \og \SurlignerTexte[Fond=teal!35,Bord=red]{Ce ne fut que 
+dans la nuit du samedi au dimanche, après trois jours de pourparlers, que l’orgueil 
+de l’abbé Maslon plia devant la peur du maire qui se changeait en courage. Il fallut 
+écrire une lettre mielleuse à l’abbé Chélan, pour le prier d’assister à la cérémonie 
+de la relique de Bray-le-Haut, si toutefois son grand âge et ses infirmités le lui 
+permettaient. M. Chélan demanda et obtint une lettre d’invitation pour Julien qui 
+devait l’accompagner en qualité de sous-diacre.} \fg
+\end{demohigh}
+
+\pagebreak
+
+Le surlignage s'adapte également à la taille de la police courante :
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+Un troisième : \og {\LARGE\SurlignerTexte*[Fond=orange,Bord=violet]<thick>{%
+Quelle pitié notre provincial ne va-t-il pas inspirer aux jeunes lycéens de Paris qui, à 
+quinze ans, savent déjà entrer dans un café d’un air si distingué ? Mais ces enfants, 
+si bien stylés à quinze ans, à dix-huit tournent au commun. La timidité passionnée que 
+l’on rencontre en province se surmonte quelquefois et alors elle enseigne à vouloir. 
+En s’approchant de cette jeune fille si belle ; qui daignait lui adresser la parole, 
+il faut que je lui dise la vérité, pensa Julien, qui devenait courageux à force de 
+timidité vaincue.}} \fg
+\end{demohigh}
+
+Le surlignage s'adapte aussi à la police courante :
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+Un quatrième : \og {\sffamily\SurlignerTexte[Fond=green,Bord=green,Offset=2pt]{%
+Cette magnificence mélancolique, dégradée par la vue des briques nues et du plâtre encore 
+tout blanc, toucha Julien. Il s’arrêta en silence. À l’autre extrémité de la salle, 
+près de l’unique fenêtre par laquelle le jour pénétrait, il vit un miroir mobile en 
+acajou. Un jeune homme, en robe violette et en surplis de dentelle, mais la tête nue, 
+était arrêté à trois pas de la glace. Ce meuble semblait étrange en un tel lieu, et, 
+sans doute, y avait été apporté de la ville. Julien trouva que le jeune homme avait 
+l’air irrité ; de la main droite il donnait gravement des bénédictions du côté du 
+miroir.}} \fg
+\end{demohigh}
+
+\bigskip
+
+Le style \textit{main levée} est fixé par défaut, mais peut être modifié en adaptant le style \TikZ{} :
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%Style main levée
+\tikzset{encadreformule/.style={%
+    decorate,decoration={random steps,amplitude=0.5pt,segment length=1em}}%
+}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\tikzset{encadreformule/.style={
+    decorate,decoration={random steps,amplitude=2mm,segment length=10mm}}%
+}
+
+Un paragraphe : \og \SurlignerTexte{Quand Julien aperçut les ruines pittoresques de 
+l’ancienne église de Vergy, il remarqua que depuis l’avant-veille il n’avait pas pensé 
+une seule fois à Mme de Rênal. L’autre jour en partant, cette femme m’a rappelé la 
+distance infinie qui nous sépare, elle m’a traité comme le fils d’un ouvrier.} \fg
+\end{demohigh}
+
+\tikzset{encadreformule/.style={%
+		decorate,decoration={random steps,amplitude=0.5pt,segment length=1em}}%
+}
+
+\pagebreak
+
+\subsection{Surligner un texte court, avec fluo}
+
+Les commandes dédiées à la mise en évidence d'un petit élément textuel avec son fluo est :
+
+\begin{itemize}
+	\item \MontreCode{\textbackslash FluoterTexte} : pour surligner et afficher le fluo juste après ;
+	\item \MontreCode{\textbackslash TexteAFluoter} et \MontreCode{\textbackslash AfficherFluo} : pour surligner ultérieurement (en mode paragraphe par exemple).
+\end{itemize}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%mode 'tout en un'
+
+\FluoterTexte[%
+  Couleur=...,                    %couleur (yellow) du fluotage
+  CouleurCorps=...,               %couleur (darkgray) du corps
+  Echelle=...,                    %échelle globale (1) du fluo
+  Inclinaison=...,                %inclinaison (0) du fluo
+  Ancre=...,                      %ancrage (east) de la pointe du fluo
+  DecalX=...,                     %décalage H (0.25ex) par rapport à l'ancre
+  DecalY=...,                     %décalage V (-0.5ex) par rapport à l'ancre
+  Logo=...,                       %logo éventuel du fluo
+  Noeud=...,                      %nom (SURLIGN) du noeud tikz
+  EchelleLogo=...,                %échelle (3.25) pour le logo (à ajuster...)
+  MainLevee=...                   %booléen (F) pour mettre un effet 'main levée'
+  ]{texte ou formule}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%mode 'l'un puis l'autre'
+
+\TexteAFluoter[%
+  Couleur=...,                    %couleur (yellow) du fluotage
+  Noeud=...,                      %nom (SURLIGN) du noeud tikz
+  MainLevee=...                   %booléen (F) pour mettre un effet 'main levée'
+]{texte ou formule}
+
+%suite du texte-paragraphe-...
+
+\AfficherFluo[%
+  Couleur=...,                    %couleur (yellow) du fluotage
+  CouleurCorps=...,               %couleur (darkgray) du corps
+  Echelle=...,                    %échelle globale (1) du fluo
+  Inclinaison=...,                %inclinaison (0) du fluo
+  Ancre=...,                      %ancrage (east) de la pointe du fluo
+  DecalX=...,                     %décalage H (0.25ex) par rapport à l'ancre
+  DecalY=...,                     %décalage V (-0.5ex) par rapport à l'ancre
+  Logo=...,                       %logo éventuel du fluo
+  EchelleLogo=...,                %échelle (3.25) pour le logo (à ajuster...)
+  Noeud=...                       %nom (SURLIGN) du noeud tikz
+  ]
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+L’aventure de \TeX\ débute en 1976. Cette année-là, Donald Knuth reçoit les épreuves du deuxième volume de son œuvre majeure, \textit{The Art of Computer Programming}. Il reste stupéfait devant la piètre qualité d’impression. Les éditeurs avaient remplacé la composition au plomb par la photocomposition, une technique plus rapide et économique, \FluoterTexte[Inclinaison=-10,Couleur=cyan]{mais qui massacrait les formules mathématiques}.
+
+Cette déception aurait pu rester une simple anecdote. Mais ce professeur de Stanford décide de prendre les choses en main. Le 1er février 1977, il découvre les machines de composition numériques haute résolution. Cette révélation le pousse à se lancer dans ce qui deviendra l’un des projets personnels les plus audacieux de l’histoire informatique.
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+L’aventure de \TeX\ débute en 1976. Cette année-là, Donald Knuth reçoit les épreuves du deuxième volume de son œuvre majeure, \textit{The Art of Computer Programming}. Il reste stupéfait devant la piètre qualité d’impression. Les éditeurs avaient remplacé la composition au plomb par la photocomposition, une technique plus rapide et économique, \TexteAFluoter[Couleur=cyan]{mais qui massacrait les formules mathématiques}.
+
+Cette déception aurait pu rester une simple anecdote. Mais ce professeur de Stanford décide de prendre les choses en main. Le 1er février 1977, il découvre les machines de composition numériques haute résolution. Cette révélation le pousse à se lancer dans ce qui deviendra l’un des projets personnels les plus audacieux de l’histoire informatique.
+\AfficherFluo[Inclinaison=-10,Couleur=cyan,Echelle=1.15]
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+En ligne, on essaye en surlignant
+\FluoterTexte[Inclinaison=-20,Logo={\sffamily\bfseries FLUO\TeX}]{ce petit texte}.
+\end{demohigh}
+
+\pagebreak
+
+Les styles \TikZ, personnalisables, sont donnés ci-dessous, et peuvent être redéfinis localement ou globalement.
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%\fluotertextecoulcorps = couleur du corps du fluo
+%\fluotexteechellelogo  = échelle du logo
+
+\tikzset{fluoter/.style={%
+    fill opacity=0.5,text opacity=1,line width=0pt,inner sep=0pt,outer sep=1pt}}
+
+\tikzset{fluoterlogo/.style={%
+    inner sep=0pt,text=\fluotertextecoulcorps,scale=\fluoterechellelogo,%
+    text width=\fpeval{6/\fluotexteechellelogo}cm,align=center}}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\colorlet{fondfluo}{teal!75!black}
+\tikzset{fluoter/.style={fill opacity=0.5,text opacity=1,line width=0pt,inner sep=1mm,outer sep=0.5mm,encadreformule}}
+\tikzset{fluoterlogo/.append style={text=fondfluo}}
+%
+En ligne, deuxième essai, en surlignant la formule
+\FluoterTexte[%
+  Echelle=2,Inclinaison=-30,Couleur=pink,CouleurCorps=fondfluo,%
+  Ancre=south west,Logo={\sffamily\bfseries Et voilà !!\\\faCheckCircle[regular]},DecalY=-2ex]%
+  {$f'(x)=\displaystyle\frac{(2x+5)}{\textrm{e}^{-3x}}$}.
+\end{demohigh}
+
+\vspace*{4cm}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+On obtient de ce fait  \TexteAFluoter%
+  [MainLevee,Noeud=ESSAI,Couleur=lightgray]%
+  {$f'(x)=\displaystyle\frac{(2x+5)}{\textrm{e}^{3x}}$}.
+%
+\AfficherFluo%
+  [Noeud=ESSAI,Inclinaison=-14,Couleur=lightgray,Ancre=south east,%
+  Logo={\sffamily Ok pour\\ un tds !},DecalY=2ex]
+\AfficherFluo%
+  [Noeud=ESSAI,Couleur=lightgray,%
+  Logo={$\mathsf{\displaystyle\frac{u'v-v'u}{v^{2}}}$},Ancre=south west,%
+  Inclinaison=-30]
+\end{demohigh}
+
+\pagebreak
+
+\section{English commands}
+
+\subsection{Introduction}
+
+There's also english versions of the commands and keys :
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%Hightlight formula (math mode), with or without effect
+\HighlightFormula
+%Basic highlight text, with or without effect
+\HighlightText
+\end{codehigh}
+
+\subsection{Highlight formula}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%Hightlight formula (math mode)
+\HighlightFormula(*)[keys]{formula}<tikz options>
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+$\HighlightFormula{f(x)=\displaystyle\frac{1}{1+x}}$.\\
+$\HighlightFormula*[textopacity=0.75]{f(x)=\displaystyle\frac{1}{1+x}}$.\\
+$\HighlightFormula[bg=teal!35]{f(x)=\displaystyle\frac{1}{1+x}}$.\\
+$\HighlightFormula[bg=teal!35,border=red]{f(x)=\displaystyle\frac{1}{1+x}}<thick>$.\\
+$\HighlightFormula[offset=5mm/2mm]{f(x)=\displaystyle\frac{1}{1+x}}$\\
+$\HighlightFormula*[text=red]{f(x)=\displaystyle\frac{1}{1+x}}$.\\
+\end{codehigh}
+
+$\HighlightFormula{f(x)=\displaystyle\frac{1}{1+x}}$
+\qquad
+$\HighlightFormula*[textopacity=0.75]{f(x)=\displaystyle\frac{1}{1+x}}$
+\qquad
+$\HighlightFormula[bg=teal!35]{f(x)=\displaystyle\frac{1}{1+x}}$
+\qquad
+$\HighlightFormula[bg=teal!35,border=red]{f(x)=\displaystyle\frac{1}{1+x}}<thick>$
+\qquad
+$\HighlightFormula[offset=5mm/2mm]{f(x)=\displaystyle\frac{1}{1+x}}$
+\qquad
+$\HighlightFormula*[text=red]{f(x)=\displaystyle\frac{1}{1+x}}$.
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%handwriting style
+\tikzset{borderformula/.style={%
+    decorate,decoration={random steps,amplitude=0.5pt,segment length=1em}}%
+}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\tikzset{borderformula/.style={%
+    decorate,decoration={random steps,amplitude=4mm,segment length=10mm}}%
+}
+
+$\HighlightFormula{f(x)=\displaystyle\frac{1}{1+x}}$
+\end{codehigh}
+
+\tikzset{borderformula/.style={%
+		decorate,decoration={random steps,amplitude=4mm,segment length=10mm}}%
+}
+
+$\HighlightFormula{f(x)=\displaystyle\frac{1}{1+x}}$
+
+\tikzset{borderformula/.style={%
+		decorate,decoration={random steps,amplitude=0.5pt,segment length=1em}}%
+}
+
+\subsection{Highlight text or paragraphs, with or without effect}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%Highlight text, with effect
+\HighlightText(*)<keys>[tikz options]{text}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%Paragraphs from https://ipsum.one/
+A first one : \HighlightText{In order to modify it, he has only to press his hand lightly 
+on a small wheel, measuring hardly a foot in diameter, and placed within his reach. 
+Immediately the valves open, the steam from the boilers rushes along the conducting 
+tubes into the two cylinders of the small engine, the pistons move rapidly, and the 
+rudder instantly obeys. If this plan succeeds, a man will be able to direct the gigantic 
+body of the 'Great Eastern' with one finge}.
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%Paragraphs from https://ipsum.one/
+A second one : \HighlightText[bg=teal!35,border=red]{On Wednesday night the weather was 
+very bad, my balance was strangely variable, and I was obliged to lean with my knees 
+and elbows against the sideboard, to prevent myself from falling. Portmanteaus and 
+bags came in and out of my cabin ; an unusual hubbub reigned in the adjoining saloon, 
+in which two or three hundred packages were making expeditions from one end to the other, 
+knocking the tables and chairs with loud crashes ; doors slammed, the boards creaked, 
+the partitions made that groaning noise peculiar to pine wood ; bottles and glasses 
+jingled together in their racks, and a cataract of plates and dishes rolled about on 
+the pantry floors}.
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%Paragraphs from https://ipsum.one/
+A third one : \HighlightText*[bg=green,border=green]{A profound silence reigned among 
+the congregation ; the officers occupied the apsis of the church, and, in the midst of 
+them, stood Captain Anderson, as pastor. My friend Dean Pitferge was near him, his quick
+little eyes running over the whole assembly. I will venture to say he was there more out 
+of curiosity than anything else.}
+\end{demohigh}
+
+\end{document}

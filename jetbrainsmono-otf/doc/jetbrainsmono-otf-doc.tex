@@ -1,0 +1,367 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: lualatex: {shell: no, synctex: no, interaction: batchmode}
+
+\documentclass{article}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{jetbrainsmono-otf}
+\usepackage{listings}
+\usepackage{xcolor}
+\setlength{\parindent}{0pt}
+
+\newcommand\demotext{For \textsterling 45, almost anything can be found floating in fields.\\
+	!`THE DAZED BROWN FOX QUICKLY GAVE 12345--67890 JUMPS!\\
+	--- ?`But aren't Kafka's Schlo\ss{} and \AE sop's \OE uvres often na\"\i ve vis-\`a-vis the d\ae monic ph\oe nix's official r\^ole in fluffy souffl\'es?
+}
+
+\newcommand\samplettxt{oO08 iIlL1 g9qCGQ <=>}
+\newcommand\samplett[1][]{#1\samplettxt}
+\newcommand\samplettit[1][]{\textit{#1\samplettxt}}
+\newcommand\samplettbf[1][]{\textbf{#1\samplettxt}}
+\newcommand\samplettbfit[1][]{\textbf{\textit{#1\samplettxt}}}
+\newcommand\sampletttbl[1][]{& \samplett[#1] &  \samplettit[#1] & \samplettbf[#1] & \samplettbfit[#1]}
+
+\begin{document}
+
+\part*{jetbrainsmono-otf (v0.1)}
+
+\section{Usages}
+
+With \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|\usepackage{fontspec}| (so with \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|XeTeX| or \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|LuaLaTeX| compilation), you can use \texttt{JetBrainsMono} fonts, and (if needed) \textit{remove} ligature's features, in order to use (in fact) \texttt{JetBrainsMonoNL} fonts. Following \textsf{OpenType} fonts are supported :
+
+\begin{lstlisting}[language={[latex]TeX},basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\color{magenta},tabsize=4,frame=single]
+JetBrainsMono-Bold.otf						JetBrainsMono-BoldItalic.otf
+JetBrainsMono-ExtraBold.otf					JetBrainsMono-ExtraBoldItalic.otf
+JetBrainsMono-ExtraLight.otf				JetBrainsMono-ExtraLightItalic.otf
+JetBrainsMono-Italic.otf					JetBrainsMono-Light.otf
+JetBrainsMono-LightItalic.otf				JetBrainsMono-Medium.otf
+JetBrainsMono-MediumItalic.otf				JetBrainsMono-Regular.otf
+JetBrainsMono-SemiBold.otf					JetBrainsMono-SemiBoldItalic.otf
+JetBrainsMono-Thin.otf						JetBrainsMono-ThinItalic.otf
+\end{lstlisting}
+
+Two version of config/macro are available :
+
+\begin{tabular}{l}
+	~~~\lstinline[language={[latex]TeX},basicstyle=\ttfamily]|jetbrainsmono(-xxxx)| or \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|jetbrainscode(-xxxx)|
+	\\
+	~~~\lstinline[language={[latex]TeX},basicstyle=\ttfamily]|\jetbrainsmono(xxxx)| or \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|\jetbrainscode(xxxx)| \\
+\end{tabular}
+
+\section{The default settings}
+
+The \texttt{fontspec} config for the \textit{normal} version :
+
+\begin{lstlisting}[language={[latex]TeX},basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\color{magenta},tabsize=4,frame=single]
+\defaultfontfeatures[jetbrainsmono]           % or jetbrainscode
+{Extension=.otf,
+    UprightFont=JetBrainsMono-Regular,
+    ItalicFont=JetBrainsMono-Italic,
+    BoldFont=JetBrainsMono-Bold,
+    BoldItalicFont=JetBrainsMono-BoldItalic,
+    Contextuals=AlternateOff                   %for mono version
+}
+\end{lstlisting}
+
+The \texttt{fontspec} config for the other versions are :
+
+\begin{lstlisting}[language={[latex]TeX},basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\color{magenta},tabsize=4,frame=single]
+\defaultfontfeatures[jetbrainsmono-medium]     % or jetbrainscode-medium
+    {Extension=.otf,
+    UprightFont=JetBrainsMono-Medium,
+    ItalicFont=JetBrainsMono-MediumItalic,
+    BoldFont=JetBrainsMono-ExtraBold,
+    BoldItalicFont=JetBrainsMono-ExtraBoldItalic,
+    Contextuals=AlternateOff                   %for mono version
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language={[latex]TeX},basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\color{magenta},tabsize=4,frame=single]
+\defaultfontfeatures[jetbrainsmono-light]      % or jetbrainscode-light
+    {Extension=.otf,
+    UprightFont=JetBrainsMono-Light,
+    ItalicFont=JetBrainsMono-LightItalic,
+    BoldFont=JetBrainsMono-SemiBold,
+    BoldItalicFont=JetBrainsMono-SemiBoldItalic,
+    Contextuals=AlternateOff                   %for mono version
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language={[latex]TeX},basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\color{magenta},tabsize=4,frame=single]
+\defaultfontfeatures[jetbrainsmono-extralight] % or jetbrainscode-extralight
+    {Extension=.otf,
+    UprightFont=JetBrainsMono-ExtraLight,
+    ItalicFont=JetBrainsMono-ExtraLightItalic,
+    BoldFont=JetBrainsMono-Medium,
+    BoldItalicFont=JetBrainsMono-MediumItalic,
+    Contextuals=AlternateOff                   %for mono version
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language={[latex]TeX},basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\color{magenta},tabsize=4,frame=single]
+\defaultfontfeatures[jetbrainsmono-thin]       % or jetbrainscode-thin
+    {Extension=.otf,
+    UprightFont=JetBrainsMono-Thin,
+    ItalicFont=JetBrainsMono-ThinItalic,
+    BoldFont=JetBrainsMono-Regular,
+    BoldItalicFont=JetBrainsMono-Italic,
+    Contextuals=AlternateOff                   %for mono version
+}
+\end{lstlisting}
+
+\subsection{With config files}
+
+The idea is to propose \texttt{fontspec} config files to load correctly \texttt{JetBrainsMono} features.
+
+\begin{lstlisting}[language={[latex]TeX},basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\color{magenta},tabsize=4,frame=single]
+\usepackage{fontspec}
+\setmonofont{jetbrainsmono}[options]               %version regular
+\setmonofont{jetbrainsmono-medium}[options]        %version semilight
+\setmonofont{jetbrainsmono-light}[options]         %version light
+\setmonofont{jetbrainsmono-extralight}[options]    %version extralight
+\setmonofont{jetbrainsmono-thin}[options]          %version thin
+\end{lstlisting}
+
+\subsection{With the package loading}
+
+With \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|\usepackage[scale=...]{jetbrainsmono-oft}|, \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|fontspec| is loaded, and \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|fontfamily| are defined :
+
+\begin{lstlisting}[language={[latex]TeX},basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\color{magenta},tabsize=4,frame=single]
+\newfontfamily\jetbrainsmono{jetbrainsmono}
+\newfontfamily\jetbrainsmonomedium{jetbrainsmono-medium}
+\newfontfamily\jetbrainsmonolight{jetbrainsmono-light}
+\newfontfamily\jetbrainsmonoextralight{jetbrainsmono-extralight}
+\newfontfamily\jetbrainsmonothin{jetbrainsmono-thin}
+\end{lstlisting}
+
+\section{Font Samples}
+
+\subsection{Normal version}
+
+\setmonofont{jetbrainsmono}[Scale=MatchLowercase]
+
+\texttt{\demotext}\par\bigskip
+
+\texttt{\textit{\demotext}}\par\bigskip
+
+\texttt{\textbf{\demotext}}\par\bigskip
+
+\texttt{\textbf{\textit{\demotext}}}\par
+
+\subsection{Medium version}
+
+\setmonofont{JetBrainsMonoMedium}[Scale=MatchLowercase]
+
+\texttt{\demotext}\par\bigskip
+
+\texttt{\itshape\demotext}\par\bigskip
+
+\texttt{\bfseries\demotext}\par\bigskip
+
+\texttt{\bfseries\itshape\demotext}\par
+
+\subsection{Light version (Light - LightItalic - Regular - Italic)}
+
+\setmonofont{jetbrainsmono-light}[Scale=MatchLowercase]
+
+\texttt{\demotext}\par\bigskip
+
+\texttt{\itshape\demotext}\par\bigskip
+
+\texttt{\bfseries\demotext}\par\bigskip
+
+\texttt{\bfseries\itshape\demotext}\par
+
+\subsection{ExtraLight version (ExtraLight - ExtraLightItalic - SemiLightItalic - SemiLightItalic)}
+
+\setmonofont{jetbrainsmono-extralight}[Scale=MatchLowercase]
+
+\texttt{\demotext}\par\bigskip
+
+\texttt{\itshape\demotext}\par\bigskip
+
+\texttt{\bfseries\demotext}\par\bigskip
+
+\texttt{\bfseries\itshape\demotext}\par
+
+\subsection{Thin version}
+
+\setmonofont{jetbrainsmono-thin}[Scale=MatchLowercase]
+
+\texttt{\demotext}\par\bigskip
+
+\texttt{\itshape\demotext}\par\bigskip
+
+\texttt{\bfseries\demotext}\par\bigskip
+
+\texttt{\bfseries\itshape\demotext}\par
+
+\section{Simple code samples}
+
+\setmonofont{CMU Typewriter Text}[Scale=MatchLowercase]
+
+\noindent{\small \begin{tabular}{lllll}
+	\hline
+	Type & Normal & Italic & Bold & BoldItalic \\ \hline
+	ttdefault \sampletttbl[\ttfamily] \\ \hline
+	%mono
+	JBmono \sampletttbl[\jetbrainsmono] \\ \hline
+	JBmonomedium \sampletttbl[\jetbrainsmonomedium] \\ \hline
+	JBmonolight  \sampletttbl[\jetbrainsmonolight] \\ \hline
+	JBmonoextralight \sampletttbl[\jetbrainsmonoextralight] \\ \hline
+	JBmonothin \sampletttbl[\jetbrainsmonothin] \\ \hline
+	%code
+	JBcode \sampletttbl[\jetbrainscode] \\ \hline
+	JBcodemedium \sampletttbl[\jetbrainscodemedium] \\ \hline
+	JBcodelight \sampletttbl[\jetbrainscodelight] \\ \hline
+	JBcodeextralight \sampletttbl[\jetbrainscodeextralight] \\ \hline
+	JBcodethin \sampletttbl[\jetbrainscodethin] \\ \hline
+\end{tabular}}
+
+\section{Algorithm samples, without ligatures}
+
+\subsection{Normal version}
+
+\begin{lstlisting}[language=python,basicstyle=\footnotesize\jetbrainsmono,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single]
+def Fibonacci(n) :
+  # Check if input is 0 then it will print incorrect input
+  if n < 0 :
+    print("Incorrect input")
+  elif n == 0 :
+    return 0
+  elif n == 1 or n == 2 :
+    return 1
+  else :
+    return Fibonacci(n-1) + Fibonacci(n-2)
+\end{lstlisting}
+
+\subsection{Medium version}
+
+\begin{lstlisting}[language=python,basicstyle=\footnotesize\jetbrainsmonomedium,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single]
+def Fibonacci(n) :
+  # Check if input is 0 then it will print incorrect input
+  if n < 0 :
+    print("Incorrect input")
+  elif n == 0 :
+    return 0
+  elif n == 1 or n == 2 :
+    return 1
+  else :
+    return Fibonacci(n-1) + Fibonacci(n-2)
+\end{lstlisting}
+
+\subsection{Light version}
+
+\begin{lstlisting}[language=python,basicstyle=\footnotesize\jetbrainsmonolight,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single]
+def Fibonacci(n) :
+  # Check if input is 0 then it will print incorrect input
+  if n < 0 :
+    print("Incorrect input")
+  elif n == 0 :
+    return 0
+  elif n == 1 or n == 2 :
+    return 1
+  else :
+    return Fibonacci(n-1) + Fibonacci(n-2)
+\end{lstlisting}
+
+\subsection{ExtraLight version}
+
+\begin{lstlisting}[language=python,basicstyle=\footnotesize\jetbrainsmonoextralight,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single]
+def Fibonacci(n) :
+  # Check if input is 0 then it will print incorrect input
+  if n < 0 :
+    print("Incorrect input")
+  elif n == 0 :
+    return 0
+  elif n == 1 or n == 2 :
+    return 1
+  else :
+    return Fibonacci(n-1) + Fibonacci(n-2)
+\end{lstlisting}
+
+\subsection{Thin version}
+
+\begin{lstlisting}[language=python,basicstyle=\footnotesize\jetbrainsmonothin,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single]
+def Fibonacci(n) :
+  # Check if input is 0 then it will print incorrect input
+  if n < 0 :
+    print("Incorrect input")
+  elif n == 0 :
+    return 0
+  elif n == 1 or n == 2 :
+    return 1
+  else :
+    return Fibonacci(n-1) + Fibonacci(n-2)
+\end{lstlisting}
+
+\pagebreak
+
+\section{Algorithm code, with ligatures}
+
+\setmonofont{CMU Typewriter Text}[Scale=MatchLowercase]
+
+Regular version of the fonts, with ligatures enable, can be uses with \texttt{code} alias (\lstinline[language={[latex]TeX},basicstyle=\ttfamily]|\jetbrainscode|).
+
+\makeatletter
+\renewcommand*\verbatim@nolig@list{}
+\makeatother
+
+\begin{lstlisting}[language=python,basicstyle=\footnotesize\jetbrainscode,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single,columns=flexible,showstringspaces=false]
+\lstset{
+  language=python,
+  basicstyle=\footnotesize\jetbrainscode,
+  commentstyle=\itshape\color{gray},
+  keywordstyle=\bfseries\color{magenta},
+  tabsize=4,
+  frame=single,
+  columns=flexible,
+  showstringspaces=false
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=python,basicstyle=\footnotesize\jetbrainscode,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single,columns=flexible,showstringspaces=false]
+const similar = "oO08 iIlL1 g9qCGQ"
+const diacritics_etc = "â é ù ï ø ç Ã Ē Æ œ"
+
+window.toggleFavorite = (alias) => {
+  try {
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || []
+    if (favorites.indexOf(alias) > -1) {
+      favorites = favorites.filter((v) => {
+        return v !== alias
+      })
+    } else {
+      favorites.push(alias)
+    }
+    localStorage.setItem('favorites', JSON.stringify(Array.from(new Set(favorites))))
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('could not save favorite', err)
+  }
+  renderSelectList()
+  return false
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=python,basicstyle=\footnotesize\jetbrainscode,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single,columns=flexible,showstringspaces=false]
+def Fibonacci(n) :
+  # Check if input is 0 then it will print incorrect input
+  if n < 0 :
+    print("Incorrect input")
+  elif n == 0 :
+    return 0
+  elif 1 <= n <= 2 :
+    return 1
+  else :
+    return Fibonacci(n-1) + Fibonacci(n-2)
+\end{lstlisting}
+
+\pagebreak
+
+\section{History}
+
+\begin{verbatim}
+v0.1 Initial version
+\end{verbatim}
+
+\end{document}
