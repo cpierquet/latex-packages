@@ -1,0 +1,917 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: lualatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: lualatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[french,a4paper,11pt]{article}
+\def\SCversion{0.1.1}
+\def\SCdate{8 mai 2023}
+\usepackage[executable=python.exe]{pyluatex}
+\usepackage[svgnames]{xcolor}
+\usepackage{siunitx}
+\sisetup{locale=FR,output-decimal-marker={,},group-minimum-digits=4}
+\usepackage{amsmath,amssymb}
+%\usepackage{mathtools}
+\usepackage[bold-style=ISO,math-style=french]{unicode-math}
+\setmainfont{TeX Gyre Schola}
+\setmathfont{TeX Gyre Schola Math}
+\usepackage{SympyCalc}
+\usepackage{awesomebox}
+\usepackage{fontawesome5}
+\usepackage{enumitem}
+\usepackage{tabularray}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [SympyCalc]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+\newcommand\TableauDocumentation{%
+	\begin{tblr}{width=\linewidth,colspec={X[c]X[c]X[c]X[c]X[c]X[c]},cells={font=\sffamily}}
+		{\LARGE \LaTeX} & & & & &\\
+		& {\LARGE \hologo{pdfLaTeX}} & & & & \\
+		& & {\LARGE \hologo{LuaLaTeX}} & & & \\
+		& & & {\LARGE \TikZ} & & \\
+		& & & & {\LARGE \TeXLive} & \\
+		& & & & & {\LARGE \hologo{MiKTeX}} \\
+	\end{tblr}
+}
+
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=1.5cm]{geometry}
+\setlength{\parindent}{0pt}
+\definecolor{LightGray}{gray}{0.9}
+
+\usepackage[most]{tcolorbox}
+\NewDocumentCommand\e{ }{\mathrm{e}}
+\RenewDocumentCommand\i{ }{\mathrm{i}}
+\newtcblisting{bloctext}[1][]{%
+	enhanced,width=0.93\linewidth,flush right,%
+	bicolor,size=title,%
+	colback=cyan!5!white,%
+	colbacklower=cyan!1!white,%
+	colframe=cyan!75!black,%
+	listing options={%
+		style=tcblatex,basicstyle=\small\ttfamily,%
+		tabsize=4,%
+		commentstyle={\itshape\color{violet}},
+		keywordstyle={\bfseries\color{DodgerBlue}},%
+		classoffset=0,%
+		keywords={frac,dfrac,int,sqrt,mathcal},%
+		keywordstyle={\bfseries\color{DodgerBlue}},%
+		classoffset=1,%
+		morekeywords={sympycalc,dsympycalc,sympydev,dsympydev,sympyfact,dsympyfact,sympyderiv,dsympyderiv,sympyprim,dsympyprim,sympyintegr,dsympyintegr,sympylim,dsympylim,sympyfexpo,dsympyfexpo,sympyresol,dsympyresol,sympyresolC,dsympyresolC,sympynbderiv,dsympynbderiv,sympyimage,dsympyimage,pythonq},%
+		keywordstyle={\bfseries\color{purple}},%
+		classoffset=2,%
+		morekeywords={solve,radsimp,cancel},%
+		keywordstyle={\bfseries\color{ForestGreen}},%
+		classoffset=3,%
+		morekeywords={NoSimplif,Simplif},%
+		keywordstyle={\bfseries\color{OliveDrab}}
+	},%
+	overlay={\draw[cyan!75!black] ($(frame.north west)+(-0.035\linewidth,-0.025\linewidth)$) node[scale=1.66] {\faCode} ;},%
+	#1
+}
+
+\usepackage{babel}
+\usepackage{textualicomma}
+\DeclareMathSymbol{;}\mathbin{operators}{'73} % \mathpunct à l'origine
+
+\tcbset{vignettes/.style={%
+	nobeforeafter,box align=base,boxsep=0pt,enhanced,sharp corners=all,rounded corners=southeast,%
+	boxrule=0.75pt,left=7pt,right=1pt,top=0pt,bottom=0.25pt,%
+	}
+}
+
+\tcbset{vignetteMaJ/.style={%
+	fontupper={\vphantom{pf}\footnotesize\ttfamily},
+	vignettes,colframe=ForestGreen!50!black,coltitle=white,colback=ForestGreen!25,%
+	overlay={\begin{tcbclipinterior}%
+			\fill[fill=ForestGreen!75]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{Black}{\scalebox{0.85}[0.75]{\textbf{MàJ}}}}} ($(interior.north west)+(5pt,0pt)$);%
+	\end{tcbclipinterior}}
+	}
+}
+
+\newcommand\Cle[1]{{\bfseries\sffamily\textlangle #1\textrangle}}
+\newcommand\cmaj[1]{\tcbox[vignetteMaJ]{#1}\xspace}
+
+\begin{document}
+
+\setlength{\aweboxleftmargin}{0.07\linewidth}
+\setlength{\aweboxcontentwidth}{0.93\linewidth}
+\setlength{\aweboxvskip}{8pt}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\vspace{2cm}
+
+\begin{center}
+	\begin{minipage}{0.75\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{SympyCalc [fr]}}\\
+				\\
+				{\LARGE Des outils pour utiliser les} \\
+				\\
+				{\LARGE capacités de \textsf{sympy} de \faPython, } \\
+				\\
+				{\LARGE avec le package \textsf{pyluatex}.} \\
+			\end{tabular}
+			
+			\bigskip
+			
+			{\small \texttt{Version \SCversion{} -- \SCdate}}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://github.com/cpierquet/SympyCalc}}
+\end{tabular}
+\end{center}
+
+\begin{center}
+	\begin{minipage}{0.5\linewidth}
+		\begin{tcolorbox}[colframe=DarkBlue!50,colback=DarkBlue!5]
+			\begin{center}
+				\textsf{SymPy} est un module \textsf{Python} qui permet de faire du calcul symbolique.
+				
+				\texttt{\url{https://www.sympy.org/}}
+			\end{center}
+		\end{tcolorbox}
+	\end{minipage}
+\end{center}
+
+\vspace{0.25cm}
+
+{$\blacktriangleright$~~Compilation en \hologo{LuaLaTeX}, avec un accès \textsf{--shell-escape}, en \textit{partenariat} avec \textsf{pyluatex}.}
+
+\smallskip
+
+{$\blacktriangleright$~~Du calcul \textit{exact} avec des racines, de l'exponentielle, du logarithme, des complexes\ldots}
+
+\smallskip
+
+{$\blacktriangleright$~~Du calcul symbolique avec du développement, de la factorisation.}
+
+\smallskip
+
+{$\blacktriangleright$~~Des résolutions d'équations.}
+
+\smallskip
+
+{$\blacktriangleright$~~Du calcul différentiel, intégral.}
+
+\smallskip
+
+{$\blacktriangleright$~~Tout ce que \textsf{sympy} peut faire !}
+
+\vspace{1cm}
+
+\begin{center}
+	\begin{tcolorbox}[enhanced,colframe=ForestGreen,colback=lightgray!5,center,width=0.95\linewidth,drop fuzzy shadow=lightgray]
+	$1+\dfrac76 = \dsympycalc{1+7/6}$ et $\left(\e^5 +1 \right) \times \left(\e^5-1 \right) = \sympycalc{(exp(5)+1)*(exp(5)-1)}$
+	
+	\medskip
+	
+	\hfill$3+\i\sqrt{3} = \dsympyfexpo{3+I*sqrt(3)}$\hfill~
+	
+	\medskip
+	
+	\hfill$I=\displaystyle\int_0^{4} (x+3)\,\e^{2x}\,\text{d}x = \dsympyintegr{(x+3)*exp(2*x)}{0}{4}$
+	
+	\medskip
+	
+	\hfill$\lim\limits_{x \to +\infty} \sqrt{\dfrac{2x^2+1}{x^2-5}} = \sympylim{sqrt((2*x**2+1)/(x**2-5))}{+oo}$\hfill~
+	
+	\medskip
+	
+	$10\,\e^{4x+5}=2$ : $\mathcal{S}=\dsympyresol{10*exp(4*x+5)=2}$
+	
+	\hfill$f(t)=(t+3)\,\e^{2t} \implies f'(t) = \sympyderiv{(t+3)*exp(2*t)}[t]$
+	\end{tcolorbox}
+\end{center}
+
+\vspace{0.5cm}
+
+%\hfill{}\textit{Merci à Denis Bitouzé et à Gilles Le Bourhis pour leurs retours et idées !}
+
+%\smallskip
+
+\vfill
+
+\hrule
+
+\medskip
+
+\TableauDocumentation
+
+\medskip
+
+\hrule
+
+\medskip
+
+\newpage
+
+\phantomsection
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\newpage
+
+\part{Introduction}
+
+\section{Le package SympyCalc}
+
+\subsection{Introduction et conventions}
+
+\begin{noteblock}
+Le package \textit{propose} des outils pour utiliser les capacités du module \textsf{sympy} de \textsf{python} et les \textit{formater} en \LaTeX{} :
+
+\begin{itemize}
+	\item calcul exact (dans la mesure du possible) ;
+	\item calcul symbolique (dans la mesure du possible) :
+	\begin{itemize}
+		\item factorisation, développement, simplification ;
+		\item dérivation, intégration, limites ;
+		\item résolution d'équations.
+	\end{itemize}
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{noteblock}
+
+\begin{importantblock}
+À noter que les calculs -- en interne -- sont :
+
+\begin{itemize}
+	\item effectués par le module \textsf{sympy} ;
+	\item formatés par la fonction \texttt{latex()} du module \textsf{sympy} ;
+	\item sortis en \LaTeX{} avec quelques ajustements.
+\end{itemize}
+
+Les ajustements (qu'on pourrait qualifier de \textit{mini-patchs}) permettent :
+
+\begin{itemize}
+	\item de forcer les résultats sous forme de fraction (grâce -- en interne -- au recours à \texttt{S.One}) ;
+	\item d'utiliser la notation \texttt{ln} (\textsf{sympy} utilise \texttt{log} par défaut) ;
+	\item d'utiliser l'écriture du \texttt{e} et du \texttt{i} en \textsf{romain} ;
+	\item de forcer l'écriture du \og + \fg{} avant \og $\infty$ \fg.
+\end{itemize}
+
+Hormis le \textit{forçage} du \texttt{ln}, et du $\mathtt{+\infty}$, conventions sur \texttt{e} et \texttt{i} peuvent être \textit{désactivées}.
+\end{importantblock}
+
+\begin{tipblock}
+Le package propose également de quoi utiliser (et formater) toute commande exprimée en syntaxe \textsf{sympy}.
+
+\smallskip
+
+Le module \textsf{sympy} est chargé par le package, avec les variables symboliques \texttt{x}, \texttt{y}, \texttt{z} et \texttt{t}.
+\end{tipblock}
+
+\begin{warningblock}
+L'utilisation de \textsf{pyluatex} (en tant que passerelle entre \textsf{python} et \LaTeX) nécessite une compilation adaptée, à savoir en \hologo{LuaLaTeX} et en activant le mode \textsf{--shell-escape}. Le module \textsf{sympy} doit donc être installé pour que l'exécutable \textsf{python} qui sera paramétré le \textit{trouve} !.
+\end{warningblock}
+
+\subsection{Chargement du package}
+
+\begin{importantblock}
+Le package (qui ne charge \textit{que} \textsf{xstring}) se charge de manière classique, une fois \textsf{pyluatex} lui-même correctement chargé.
+
+\smallskip
+
+Compte-tenu de la spécificité de \textsf{pyluatex} et du paramétrage du chemin \textsf{python}, c'est à l'utilisateur de le charger en adéquation avec son installation !
+
+\smallskip
+
+Les packages adaptés aux formules mathématiques sont également nécessaires, mais compte-tenu de leurs diversités, l'utilisateur choisira celui (ceux) qu'il jugera nécessaire(s).
+\end{importantblock}
+
+\begin{bloctext}[listing only]
+%compilation en lualatex + shell-escape !!
+\usepackage{mathtools}                           %package pour les maths
+\usepackage[executable=python.exe]{pyluatex}     %à adapter !
+\usepackage{SympyCalc}
+\end{bloctext}
+
+\newpage
+
+\section{Philosophie du package}
+
+\subsection{Fonctionnement global}
+
+\begin{noteblock}
+Le package propose des commandes génériques, qui permettent de \textit{traiter} tout commande \textsf{sympy}, ainsi que des commandes spécifiques qui sont en fait des \textit{raccourcis} de commandes usuelles en \textsf{sympy}.
+
+\smallskip
+
+Autant que peut se faire, les commandes sont assez explicites sur leur fonctionnement, et elles reposent sur le même principe :
+
+\begin{itemize}
+	\item \texttt{\textbackslash \textcolor{purple}{sympy...}} : commande qui simplifie (par défaut), avec règles typographiques \texttt{[fr]} \textsf{romain} ;
+	\item \texttt{\textbackslash \textcolor{purple}{dsympy...}} : commande qui simplifie (par défaut), avec règles typographiques \texttt{[fr]} \textsf{romain}, et affichage en \texttt{\textbackslash displaystyle} ;
+	\item \texttt{\textbackslash \textcolor{purple}{sympy...*}} : commande qui simplifie (par défaut), avec règles typographiques \texttt{[fr]} \textsf{italique} ;
+	\item \texttt{\textbackslash \textcolor{purple}{dsympy...*}} : commande qui simplifie (par défaut), avec règles typographiques \texttt{[fr]} \textsf{italique}, et affichage en \texttt{\textbackslash displaystyle}.
+\end{itemize}
+
+Dans certains cas la \textit{simplification} ne propose pas une sortie \textit{classique}, et il est possible d'empêcher la simplification grâce à l'argument optionnel \texttt{<\textcolor{OliveDrab}{NoSimplif}>}.
+
+\smallskip
+
+La variable est par défaut \texttt{x}, mais peut-être modifiée grâce à l'argument \texttt{[variable]}.
+\end{noteblock}
+
+\subsection{Commandes disponibles}
+
+\begin{bloctext}[listing only]
+%commandes génériques
+\sympycalc(*)<NoSimplif>{commande sympy}
+\dsympycalc(*)<NoSimplif>{commande sympy}
+
+%commandes spécifiques, sortie standard, détaillées plus loin
+\sympyimage(*)<NoSimplif>{fonction sympy}[variable]{point}
+\sympydev(*)<NoSimplif>{expr sympy}[variable]
+\sympyfact(*)<NoSimplif>{expr sympy}
+\sympyderiv(*)<NoSimplif>{expr sympy}[variable]
+\sympynbderiv(*)<NoSimplif>{expr sympy}[variable]{point}[côté]
+\sympyprim(*)<NoSimplif>{expr sympy}[variable]
+\sympyintegr(*)<NoSimplif>{expr sympy}[variable]{borne inf}{borne sup}
+\sympylim(*)<NoSimplif>{expr sympy}[variable]{point}[côté]
+\sympyfexpo(*)<NoSimplif>{complexe sympy}
+\sympyresol(*){equation sympy}[variable]
+\sympyresolC(*){equation sympy}[variable]
+
+%commandes spécifiques, sortie displaystyle, détaillées plus loin
+\dsympydev(*)<NoSimplif>{expr sympy}[variable]
+\dsympyimage(*)<NoSimplif>{fonction sympy}[variable]{point}
+\dsympyfact(*)<NoSimplif>{expr sympy}
+\dsympyderiv(*)<NoSimplif>{expr sympy}[variable]
+\dsympynbderiv(*)<NoSimplif>{expr sympy}[variable]{point}[côté]
+\dsympyprim(*)<NoSimplif>{expr sympy}[variable]
+\dsympyintegr(*)<NoSimplif>{expr sympy}[variable]{borne inf}{borne sup}
+\dsympylim(*)<NoSimplif>{expr sympy}[variable]{point}[côté]
+\dsympyfexpo(*)<NoSimplif>{complexe sympy}
+\dsympyresol(*){equation sympy}[variable]
+\dsympyresolC(*){equation sympy}[variable]
+\end{bloctext}
+
+\begin{importantblock}
+Dans certains cas, la sortie obtenue n'est pas celle attendue, que ce soit avec ou sans \texttt{<Simplif>}, et donc il s'agira de saisir les commandes \textsf{sympy} \textit{manuellement}.
+\end{importantblock}
+
+\begin{tipblock}
+L'\og infini \fg{} est disponible en \textsf{sympy}, grâce à \texttt{+oo} ou \texttt{-oo}.
+
+\smallskip
+
+Un petit \textit{guide} pour \textsf{sympy} est disponible à : \url{https://hashdork.com/fr/sympy-library-guide/}.
+\end{tipblock}
+
+\section{Limitations}
+
+\begin{warningblock}
+Pour le moment c'est le package \textsf{pyluatex} qui est privilégié, mais des tests sont en cours pour une compatibilité éventuelle avec d'autres packages pouvant travailler avec \textsf{python}.
+\end{warningblock}
+
+\begin{warningblock}
+Le formatage des flottants n'est pas géré par \texttt{\textbackslash num} de \textsf{sinuitx}, donc l'écriture des éventuelles valeurs approchées ne seront pas forcément cohérentes avec les autres formatages dans le document\ldots
+
+\smallskip
+
+Le remplacement éventuel du \texttt{e} en \textsf{romain} risque de ne pas fonctionner quand le résultat contient du \og e tout seul \fg\ldots
+
+\smallskip
+
+Des espacements \textit{non voulus} peuvent apparaître lors de la transcription en \LaTeX, donc le résultat formaté peut être légèrement différent de ce que peut attendre l'utilisateur\ldots
+
+\smallskip
+
+La transformation automatique du \texttt{oo} en \texttt{+oo} ne détecte pas si le calcul est effectué avec des complexes, donc prudence sur les limites notamment\ldots
+\end{warningblock}
+
+\newpage
+
+\part{Les commandes}
+
+\section{La commande générique}
+
+\subsection{Présentation}
+
+\begin{cautionblock}
+La commande générique pour formater une sortie \textsf{sympy} est \texttt{\textbackslash \textcolor{purple}{sympycalc}} ou \texttt{\textbackslash \textcolor{purple}{dsympycalc}}.
+
+\smallskip
+
+Elle permet de \textit{parser} du code \textsf{sympy} et de formater la sortie avec les règles typographiques usuelles.
+\end{cautionblock}
+
+\begin{bloctext}[listing only]
+%commandes génériques
+\sympycalc(*)<NoSimplif>{commande sympy}
+\dsympycalc(*)<NoSimplif>{commande sympy}
+\end{bloctext}
+
+\subsection{Arguments}
+
+\begin{tipblock}
+Concernant son fonctionnement :
+
+\begin{itemize}
+	\item la version \Cle{*} permet de ne pas formater le \texttt{e} et le \texttt{i} en \textsf{romain} ;
+	\item le premier argument, optionnel et pouvant valoir \texttt{<\textcolor{OliveDrab}{NoSimplif}>} permet d'\textit{annuler} la simplification (attention au comportement de la \textit{simplification} par \textsf{sympy}\ldots)
+	\item le second argument, obligatoire et entre \texttt{\{...\}} est quant à lui la commande, en langage \textsf{sympy} à passer en \textsf{python}.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\subsection{Exemples}
+
+\begin{bloctext}
+On a $1+\frac76 = \sympycalc{1+7/6}$, ou $1+\dfrac76 = \dsympycalc{1+7/6}$
+\end{bloctext}
+
+\begin{bloctext}
+$1+\frac14+\frac17 + \sqrt{45} + \frac{2}{\sqrt{12}} =
+\sympycalc{1+1/4+1/7+sqrt(45)+2/sqrt(12)}$
+
+$1+\dfrac14+\dfrac17 + \sqrt{45} + \dfrac{2}{\sqrt{12}} =
+\dsympycalc{1+1/4+1/7+sqrt(45)+2/sqrt(12)}$
+\end{bloctext}
+
+\begin{bloctext}
+On a $\left(\e^5 +1 \right) \times \left(\e^5-1 \right) = \sympycalc{(exp(5)+1)*(exp(5)-1)}$
+\end{bloctext}
+
+\begin{bloctext}
+On a $\dfrac{x}{x+1} - \dfrac{x+2}{x-3} = \dsympycalc{radsimp(factor(x/(x+1) - (x+2)/(x-3)))}$
+\end{bloctext}
+
+\begin{bloctext}
+Les solutions de $\dfrac13x^2+9x+4=0$ sont
+$x_1 = \dsympycalc{solve(1/3*x**2+9*x+4,x)[0]}$ et
+$x_2 = \dsympycalc{solve(1/3*x**2+9*x+4,x)[1]}$
+\end{bloctext}
+
+\section{Quelques commandes spécifiques}
+
+\subsection{Images}
+
+\begin{cautionblock}
+\cmaj{0.1.1} La commande pour calculer une image via \textsf{sympy} est \texttt{\textbackslash \textcolor{purple}{sympyimage}} ou \texttt{\textbackslash \textcolor{purple}{dsympyimage}}.
+
+Il vaut mieux vérifier si le résultat formaté est conforme aux attentes, et sinon utiliser la commande générique.
+\end{cautionblock}
+
+\begin{bloctext}[listing only]
+%commandes pour cacluler une image
+\sympyimage(*)<NoSimplif>{fonction sympy}[variable]{point}
+\dsympyimage(*)<NoSimplif>{fonction sympy}[variable]{point}
+\end{bloctext}
+
+\begin{tipblock}
+Concernant son fonctionnement :
+
+\begin{itemize}
+	\item la version \Cle{*} permet de ne pas formater le \texttt{e} et le \texttt{i} en \textsf{romain} ;
+	\item le premier argument, optionnel et pouvant valoir \texttt{<\textcolor{OliveDrab}{NoSimplif}>} permet d'\textit{annuler} la simplification (attention au comportement de la \textit{simplification} par \textsf{sympy}\ldots)
+	\item le deuxième argument, obligatoire et entre \texttt{\{...\}} est quant à lui la fonction, en langage \textsf{sympy} à passer en \textsf{python} ;
+	\item les derniers arguments, optionnel entre \texttt{[...]} et obligatoire et entre \texttt{\{...\}} correspondent à la variable et le point.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{bloctext}
+$f(x)=\dfrac{2+\e^x}{3+4\e^{2x}}$ avec $a=5$ : $f(5)=\dsympyimage{(2+exp(x))/(3+4*exp(2*x))}{5}$
+\end{bloctext}
+
+\begin{bloctext}
+$g(t)=\sqrt{1+\ln(t)}$ avec $a=13$ : $g(13)=\sympyimage{sqrt(1+log(t))}[t]{13}$
+\end{bloctext}
+
+\begin{bloctext}
+$h(x)=2x^2+2,5x+7$ en $a=\sqrt{2}$ : 
+$h\left(\sqrt{2}\right)=\dsympyimage{2*x**2+5/2*x+7}{sqrt(2)}$
+\end{bloctext}
+
+\subsection{Développement}
+
+\begin{cautionblock}
+La commande pour développer une sortie \textsf{sympy} est \texttt{\textbackslash \textcolor{purple}{sympydev}} ou \texttt{\textbackslash \textcolor{purple}{dsympydev}}.
+
+Il vaut mieux vérifier si le résultat formaté est conforme aux attentes, et sinon utiliser la commande générique.
+\end{cautionblock}
+
+\begin{bloctext}[listing only]
+%commandes pour développer
+\sympydev(*)<NoSimplif>{commande sympy}[variable]
+\dsympydev(*)<NoSimplif>{commande sympy}[variable]
+\end{bloctext}
+
+\begin{tipblock}
+Concernant son fonctionnement :
+
+\begin{itemize}
+	\item la version \Cle{*} permet de ne pas formater le \texttt{e} et le \texttt{i} en \textsf{romain} ;
+	\item le premier argument, optionnel et pouvant valoir \texttt{<\textcolor{OliveDrab}{NoSimplif}>} permet d'\textit{annuler} la simplification (attention au comportement de la \textit{simplification} par \textsf{sympy}\ldots)
+	\item le deuxième argument, obligatoire et entre \texttt{\{...\}} est quant à lui la commande, en langage \textsf{sympy} à passer en \textsf{python} ;
+	\item le dernier argument, optionnel et entre \texttt{[...]} est la variable éventuelle.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{bloctext}
+$(1+\text{i})^5 = \sympydev{(1+I)**5}$          %typo [fr]
+
+$(1+i)^5 = \sympydev*{(1+I)**5}$
+
+$\dfrac{1}{(1+\text{i})^5} = \dsympydev{1/(1+I)**5}$
+\end{bloctext}
+
+\begin{bloctext}
+On a $(1+2x)^4 = \sympydev{(1+2*x)**4}$
+
+On a $\left(2t+\dfrac13\right)^3 = \dsympydev{(2*t+1/3)**3}[t]$
+\end{bloctext}
+
+\begin{bloctext}
+$\sin^2(x)+\cos^2(x) = \dsympydev{sin(x)**2+cos(x)**2}$
+
+$\left(\cos(x)+\sin(x)\right)^2 = \dsympydev{(sin(x)+cos(x))**2}$
+\end{bloctext}
+
+\subsection{Factorisation}
+
+\begin{cautionblock}
+La commande pour factoriser une sortie \textsf{sympy} est \texttt{\textbackslash \textcolor{purple}{sympyfact}} ou \texttt{\textbackslash \textcolor{purple}{dsympyfact}}.
+
+Il vaut mieux vérifier si le résultat formaté est conforme aux attentes, et sinon utiliser la commande générique.
+\end{cautionblock}
+
+\begin{bloctext}[listing only]
+%commandes pour factoriser
+\sympyfact(*)<NoSimplif>{commande sympy}
+\dsympyfact(*)<NoSimplif>{commande sympy}
+\end{bloctext}
+
+\begin{tipblock}
+Concernant son fonctionnement :
+
+\begin{itemize}
+	\item la version \Cle{*} permet de ne pas formater le \texttt{e} et le \texttt{i} en \textsf{romain} ;
+	\item le premier argument, optionnel et pouvant valoir \texttt{<\textcolor{OliveDrab}{NoSimplif}>} permet d'\textit{annuler} la simplification (attention au comportement de la \textit{simplification} par \textsf{sympy}\ldots)
+	\item le dernier argument, obligatoire et entre \texttt{\{...\}} est quant à lui la commande, en langage \textsf{sympy} à passer en \textsf{python}.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{bloctext}
+On a $x^3-x^2+x-1 = \sympyfact{x**3-x**2+x-1}$
+
+On a $\e^x-3\e^{2x} = \sympyfact{exp(x)-3*exp(2*x)}$   %typo [fr]
+
+On a $e^t-3e^{2t} = \sympyfact*{exp(t)-3*exp(2*t)}$
+\end{bloctext}
+
+\subsection{Résolution d'équations}
+
+\begin{cautionblock}
+La commande pour résoudre (dans les réels) une équation, grâce à \textsf{sympy} est \texttt{\textbackslash \textcolor{purple}{sympyresol}} ou \texttt{\textbackslash \textcolor{purple}{dsympyresol}}.
+
+La commande pour résoudre (dans les complexes) une équation, grâce à \textsf{sympy} est \texttt{\textbackslash \textcolor{purple}{sympyresolC}} ou \texttt{\textbackslash \textcolor{purple}{dsympyresolC}}.
+\end{cautionblock}
+
+\smallskip
+
+\begin{importantblock}
+Pour cette commande, la simplification en \textsf{sympy} n'est pas \textit{désactivable}.
+
+\smallskip
+
+Pour \textit{forcer} les résultats sous forme exact (fractions), il vaut mieux écrire les nombres sous forme fractionnaire.
+
+\smallskip
+
+Il vaut mieux vérifier si le résultat formaté est conforme aux attentes, et sinon utiliser la commande générique.
+\end{importantblock}
+
+\begin{bloctext}[listing only]
+%commandes pour résoudre dans R
+\sympyresol(*){equation sympy}[variable]
+\dsympyresol(*){equation sympy}[variable]
+
+%commandes pour résoudre dans C
+\sympyresolC(*){equation sympy}[variable]
+\dsympyresolC(*){equation sympy}[variable]
+\end{bloctext}
+
+\begin{tipblock}
+Concernant son fonctionnement :
+
+\begin{itemize}
+	\item la version \Cle{*} permet de ne pas formater le \texttt{e} et le \texttt{i} en \textsf{romain} ;
+	\item le premier argument, obligatoire et entre \texttt{\{...\}} est quant à lui l'équation, en langage \textsf{sympy} à passer en \textsf{python} (avec le signe \texttt{=}) ;
+	\item le second argument, optionnel et entre \texttt{[...]} est la variable.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{bloctext}
+Les solutions de $x^2-3=\num{0.5}$ sont $\mathcal{S}=\dsympyresol{x**2-3=0.5}$
+
+%mieux vaut passer par les écritures en fraction ;-)
+Les solutions de $x^2-3=\num{0.5}$ sont $\mathcal{S}=\dsympyresol{x**2-3=1/2}$
+\end{bloctext}
+
+\begin{bloctext}
+Les solutions réelles de $x^3-2,5x+16x=40$ sont $\mathcal{S}=\dsympyresol{x**3-5/2*x**2+16*x = 40}$
+
+Les solutions de $x^3-2,5x+16x=40$ sont $\mathcal{S}=\dsympyresolC{x**3-5/2*x**2+16*x = 40}$
+\end{bloctext}
+
+\begin{bloctext}
+Les solutions de $10\,\e^{4x+5}=2$ sont $\mathcal{S}=\dsympyresol{10*exp(4*x+5)=2}$
+\end{bloctext}
+
+\subsection{Dérivation locale}
+
+\begin{cautionblock}
+\cmaj{0.1.1} La commande pour dériver localement, grâce à \textsf{sympy} est \texttt{\textbackslash \textcolor{purple}{sympynbderiv}} ou \texttt{\textbackslash \textcolor{purple}{dsympynbderiv}}.
+
+Il vaut mieux vérifier si le résultat formaté est conforme aux attentes, et sinon utiliser la commande générique.
+\end{cautionblock}
+
+\begin{bloctext}[listing only]
+%commandes pour dériver localement
+\sympynbderiv(*)<NoSimplif>{expression sympy}[variable]{point}[côté]
+\dsympynbderiv(*)<NoSimplif>{expression sympy}[variable]{point}[côté]
+\end{bloctext}
+
+\begin{tipblock}
+Concernant son fonctionnement :
+
+\begin{itemize}
+	\item la version \Cle{*} permet de ne pas formater le \texttt{e} et le \texttt{i} en \textsf{romain} ;
+	\item le premier argument, optionnel et pouvant valoir \texttt{<\textcolor{OliveDrab}{NoSimplif}>} permet d'\textit{annuler} la simplification (attention au comportement de la \textit{simplification} par \textsf{sympy}\ldots)
+	\item le deuxième argument, obligatoire et entre \texttt{\{...\}} est quant à lui l'expression en langage \textsf{sympy} à passer en \textsf{python} ;
+	\item le troisième argument, optionnel et entre \texttt{[...]} est la variable ;
+	\item les derniers arguments, obligatoire et entre \texttt{\{...\}} et optionnel entre \texttt{[...]} correspondent à la valeur (et la position \texttt{[g]} ou \texttt{[d]}) en laquelle on souhaite travailler.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{bloctext}
+Si $f(x)=(x+3)\,\e^{2x}$, alors on peut montrer que $f'(2) = \sympynbderiv{(x+3)*exp(2*x)}{2}$
+\end{bloctext}
+
+\begin{bloctext}
+Le nombre dérivé de la fonction $x \mapsto \sqrt{x}$ en $a=2$ vaut 
+$\lim\limits_{x \to 2} \frac{\sqrt{x}-\sqrt{2}}{x-2} = \sympynbderiv{sqrt(x)}{2}$.
+
+Le nombre dérivé de la fonction $x \mapsto \sqrt{x}$ en $a=2$ vaut 
+$\lim\limits_{x \to 2} \dfrac{\sqrt{x}-\sqrt{2}}{x-2} = \dsympynbderiv{sqrt(x)}{2}$.
+\end{bloctext}
+
+\begin{bloctext}
+Le nombre dérivé de $\varphi(x) = 1+\dfrac{1}{(x+2)^2}$ en $a=-5$ vaut 
+$\lim\limits_{x \to -3} \frac{\varphi(x)-\varphi(-5)}{x-(-5)} = \sympynbderiv{1+1/(x+2)**2}{-5}$.
+
+Le nombre dérivé de $\varphi(x) = 1+\dfrac{1}{(x+2)^2}$ en $a=-5$ vaut 
+$\lim\limits_{x \to -3} \dfrac{\varphi(x)-\varphi(-5)}{x-(-5)} = \dsympynbderiv{1+1/(x+2)**2}{-5}$.
+\end{bloctext}
+
+\subsection{Dérivation globale}
+
+\begin{cautionblock}
+La commande pour dériver, grâce à \textsf{sympy} est \texttt{\textbackslash \textcolor{purple}{sympyderiv}} ou \texttt{\textbackslash \textcolor{purple}{dsympyderiv}}.
+
+Il vaut mieux vérifier si le résultat formaté est conforme aux attentes, et sinon utiliser la commande générique.
+\end{cautionblock}
+
+\begin{bloctext}[listing only]
+%commandes pour dériver
+\sympyderiv(*)<NoSimplif>{expression sympy}[variable]
+\dsympyderiv(*)<NoSimplif>{expression sympy}[variable]
+\end{bloctext}
+
+\begin{tipblock}
+Concernant son fonctionnement :
+
+\begin{itemize}
+	\item la version \Cle{*} permet de ne pas formater le \texttt{e} et le \texttt{i} en \textsf{romain} ;
+	\item le premier argument, optionnel et pouvant valoir \texttt{<\textcolor{OliveDrab}{NoSimplif}>} permet d'\textit{annuler} la simplification (attention au comportement de la \textit{simplification} par \textsf{sympy}\ldots)
+	\item le deuxième argument, obligatoire et entre \texttt{\{...\}} est quant à lui l'expression en langage \textsf{sympy} à passer en \textsf{python} ;
+	\item le troisième argument, optionnel et entre \texttt{[...]} est la variable.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{bloctext}
+Si $f(x)=(x+3)\,\e^{2x}$, alors on peut montrer que $f'(x) = \sympyderiv{(x+3)*exp(2*x)}$
+\end{bloctext}
+
+\begin{bloctext}
+La dérivée de $g(t)=\ln\left(\dfrac{1+x}{1-x}\right)$ sur
+$\left]-1;1\right[$ est $g'(t) = \dsympyderiv<NoSimplif>{ln((1+t)/(1-t))}[t]
+= \dsympyderiv{ln((1+t)/(1-t))}[t]$
+\end{bloctext}
+
+\begin{bloctext}
+La dérivée de $f(t)=t^2-8\ln(t)$ est 
+$f'(t)= \dsympyderiv{t**2-8*log(t)}[t] = \dsympycalc<NoSimplif>{cancel(2*t-8/t)}$
+\end{bloctext}
+
+\subsection{Intégration}
+
+\begin{cautionblock}
+Les commandes pour déterminer une primitive, grâce à \textsf{sympy} sont \texttt{\textbackslash \textcolor{purple}{sympyprim}} ou \texttt{\textbackslash \textcolor{purple}{dsympyprim}}.
+
+\smallskip
+
+Les commandes pour calculer une intégrale, grâce à \textsf{sympy} sont \texttt{\textbackslash \textcolor{purple}{sympyintegr}} ou \texttt{\textbackslash \textcolor{purple}{dsympysympyintegr}}.
+
+\smallskip
+
+Il vaut mieux vérifier si le résultat formaté est conforme aux attentes, et sinon utiliser la commande générique.
+\end{cautionblock}
+
+\begin{bloctext}[listing only]
+%commandes pour primitiver
+\sympyprim(*)<NoSimplif>{expr sympy}[variable]
+\dsympyprim(*)<NoSimplif>{expr sympy}[variable]
+
+%commandes pour intégrer
+\sympyintegr(*)<NoSimplif>{expr sympy}[variable]{borne inf}{borne sup}
+\dsympyintegr(*)<NoSimplif>{expr sympy}[variable]{borne inf}{borne sup}
+\end{bloctext}
+
+\begin{tipblock}
+Concernant son fonctionnement :
+
+\begin{itemize}
+	\item la version \Cle{*} permet de ne pas formater le \texttt{e} et le \texttt{i} en \textsf{romain} ;
+	\item le premier argument, optionnel et pouvant valoir \texttt{<\textcolor{OliveDrab}{NoSimplif}>} permet d'\textit{annuler} la simplification (attention au comportement de la \textit{simplification} par \textsf{sympy}\ldots)
+	\item le deuxième argument, obligatoire et entre \texttt{\{...\}} est quant à lui l'expression en langage \textsf{sympy} à passer en \textsf{python} ;
+	\item le troisième argument, optionnel et entre \texttt{[...]} est la variable ;
+	\item les derniers arguments, obligatoires et entre \texttt{\{...\}} correspondent aux bornes d'intégration (pour l'intégrale !).
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{bloctext}
+Une primitive de la fonction $f(x)=(1+x)^2$ est $F(x) = \dsympyprim{(1+x)**2}$
+
+Une primitive de la fonction $f(x)=(1+x)^2$ est $F(x) = \dsympyprim<NoSimplif>{(1+x)**2}$
+
+Une primitive de la fonction $f(x)=(1+t)^2$ est $F(t) = \dsympyprim<NoSimplif>{(1+t)**2}[t]$
+\end{bloctext}
+
+\begin{bloctext}
+On a $\displaystyle\int_1^3 (1+x)^2\,\text{d}x = \dsympyintegr{(1+x)**2}{1}{3}$
+
+$I=\displaystyle\int_0^{4} (t+3)\,\e^{2t}\,\text{d}t = \dsympyintegr{(t+3)*exp(2*t)}[t]{0}{4}$
+\end{bloctext}
+
+\subsection{Limites}
+
+\begin{cautionblock}
+Les commandes pour déterminer une limite, grâce à \textsf{sympy} sont \texttt{\textbackslash \textcolor{purple}{sympylim}} ou \texttt{\textbackslash \textcolor{purple}{dsympylim}}.
+
+\end{cautionblock}
+
+\begin{bloctext}[listing only]
+%commandes pour détemriner une limite
+\sympylim(*)<NoSimplif>{expr sympy}[variable]{point}[côté]
+\dsympylim(*)<NoSimplif>{expr sympy}[variable]{point}[côté]
+\end{bloctext}
+
+\begin{tipblock}
+Concernant son fonctionnement :
+
+\begin{itemize}
+	\item la version \Cle{*} permet de ne pas formater le \texttt{e} et le \texttt{i} en \textsf{romain} ;
+	\item le premier argument, optionnel et pouvant valoir \texttt{<\textcolor{OliveDrab}{NoSimplif}>} permet d'\textit{annuler} la simplification (attention au comportement de la \textit{simplification} par \textsf{sympy}\ldots)
+	\item le deuxième argument, obligatoire et entre \texttt{\{...\}} est quant à lui l'expression en langage \textsf{sympy} à passer en \textsf{python} ;
+	\item le troisième argument, optionnel et entre \texttt{[...]} est la variable ;
+	\item les derniers arguments, obligatoire et entre \texttt{\{...\}} et optionnel entre \texttt{[...]} correspondent à la valeur (et la position \texttt{[g]} ou \texttt{[d]}) en laquelle on souhaite travailler.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{bloctext}
+On a $\lim\limits_{x \to +\infty} \dfrac{1+\e^x}{x^2+1} = \sympylim{(1+exp(x))/(x**2+1)}{+oo}$
+\end{bloctext}
+
+\begin{bloctext}
+On a $\lim\limits_{x \to 1^+} \dfrac{x+2}{x^2-1} = \sympylim{(x+2)/(x**2-1)}{1}[d]$
+
+On a $\lim\limits_{x \to 1^-} \dfrac{x+2}{x^2-1} = \sympylim{(x+2)/(x**2-1)}{1}[g]$
+\end{bloctext}
+
+\begin{bloctext}
+On a $\lim\limits_{x \to +\infty} \sqrt{\dfrac{2x^2+1}{x^2-5}} = \sympylim{sqrt((2*x**2+1)/(x**2-5))}{+oo}$
+\end{bloctext}
+
+\subsection{Forme exponentielle d'un complexe}
+
+\begin{cautionblock}
+La commande pour déterminer une forme exponentielle, grâce à \textsf{sympy} est \texttt{\textbackslash \textcolor{purple}{sympyfexpo}} ou \texttt{\textbackslash \textcolor{purple}{dsympyfexpo}}.
+
+Il vaut mieux vérifier si le résultat formaté est conforme aux attentes, et sinon utiliser la commande générique.
+\end{cautionblock}
+
+\begin{bloctext}[listing only]
+%commandes pour détemriner une forme exponentielle
+\sympyfexpo(*)<NoSimplif>{complexe sympy}
+\dsympyfexpo(*)<NoSimplif>{complexe sympy}
+\end{bloctext}
+
+\begin{tipblock}
+Concernant son fonctionnement :
+
+\begin{itemize}
+	\item la version \Cle{*} permet de ne pas formater le \texttt{e} et le \texttt{i} en \textsf{romain} ;
+	\item le premier argument, optionnel et pouvant valoir \texttt{<\textcolor{OliveDrab}{NoSimplif}>} permet d'\textit{annuler} la simplification (attention au comportement de la \textit{simplification} par \textsf{sympy}\ldots)
+	\item le second argument, obligatoire et entre \texttt{\{...\}} est quant à lui le complexe en version \textsf{sympy} à passer en \textsf{python}.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{bloctext}
+On a $1+\i = \dsympyfexpo{1+I}$
+
+On a $3+\i\sqrt{3} = \dsympyfexpo{3+I*sqrt(3)}$
+
+On a $\dfrac{-\sqrt{2}}{1+\i} = \dsympyfexpo{(-sqrt(2))/(1+I)}$
+\end{bloctext}
+
+\newpage
+
+\part{Historique et évolutions}
+
+\section{Évolutions}
+
+\begin{tipblock}
+L'utilisateur du package pourra utiliser ses propres fonctions ou commandes \textsf{sympy}, qui pourront être déclarés grâce à l'environnement \texttt{pythonq}.
+\end{tipblock}
+
+\begin{bloctext}[listing only]
+\begin{pythonq}
+def tangente_exacte(expr,var,a) :
+	fdea = expr.subs(var,a)
+	fprimedea = limit((expr-fdea)/(var-a),var,a)
+	tgte = expand(fprimedea*(x-a) + fdea)
+	return tgte
+	
+\end{pythonq}
+\end{bloctext}
+
+\begin{pythonq}
+def tangente_exacte(expr,var,a) :
+	fdea = expr.subs(var,a)
+	fprimedea = limit((expr-fdea)/(var-a),var,a)
+	tgte = expand(fprimedea*(x-a) + fdea)
+	return tgte
+
+\end{pythonq}
+
+\begin{bloctext}
+La tangente à la courbe de la fonction $f(x)=\e^{2x}+3$ en $a=1$ a pour équation :\\
+$y = \sympycalc{tangente_exacte(exp(2*x)+3,x,1)}$.
+\end{bloctext}
+
+\begin{bloctext}
+La tangente à la courbe de la fonction $g(t)=\ln(x+3)$ en $a=4$ a pour équation :\\
+$y = \dsympycalc{tangente_exacte(log(t+3),t,4)}$.
+\end{bloctext}
+
+\section{Historique}
+
+\verb|v0.1.1|~:~~~~Commandes pour les nombres dérivés + images.
+
+\verb|v0.1.0|~:~~~~Version initiale.
+
+
+
+
+
+\end{document}

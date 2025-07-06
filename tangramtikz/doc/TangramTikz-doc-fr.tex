@@ -1,0 +1,832 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass{article}
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{TangramTikz}
+%\usepackage[upright]{fourier}
+%\usepackage[scaled=0.875]{helvet}
+%\renewcommand\ttdefault{lmtt}
+%\usepackage{cabin}
+\usepackage{amsmath,amssymb}
+\usepackage{fontawesome5}
+\usepackage{enumitem}
+\usepackage{tabularray}
+\usepackage{multicol}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [TangramTikz]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+
+%\usepackage{hvlogos}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+\newcommand\TableauDocumentation{%
+	\begin{tblr}{width=\linewidth,colspec={X[c]X[c]X[c]X[c]X[c]X[c]},cells={font=\sffamily}}
+		{\huge \LaTeX} & & & & &\\
+		& {\huge \hologo{pdfLaTeX}} & & & & \\
+		& & {\huge \hologo{LuaLaTeX}} & & & \\
+		& & & {\huge \TikZ} & & \\
+		& & & & {\huge \TeXLive} & \\
+		& & & & & {\huge \hologo{MiKTeX}} \\
+	\end{tblr}
+}
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=1.5cm]{geometry}
+\setlength{\parindent}{0pt}
+\definecolor{LightGray}{gray}{0.9}
+
+\def\TPversion{0.2.2}
+\def\TPdate{5 mai 2025}
+
+\usepackage[most]{tcolorbox}
+\usepackage{minted2}
+\tcbuselibrary{minted}
+\NewTCBListing{PresentationCode}{ O{blue} m }{%
+	sharp corners=downhill,enhanced,arc=12pt,skin=bicolor,%
+	colback=#1!1!white,colframe=#1!75!black,colbacklower=white,%
+	attach boxed title to top right={yshift=-\tcboxedtitleheight},title=Code \LaTeX,%
+	boxed title style={%
+		colframe=#1!75!black,colback=#1!15!white,%
+		,sharp corners=downhill,arc=12pt,%
+	},%
+	fonttitle=\color{#1!90!black}\itshape\ttfamily\footnotesize,%
+	listing engine=minted,minted style=colorful,
+	minted language=tex,minted options={tabsize=4,fontsize=\footnotesize,autogobble},
+	#2
+}
+
+\newcommand\Cle[1]{{\bfseries\sffamily\textlangle #1\textrangle}}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\vspace{2cm}
+
+\begin{center}
+	\begin{minipage}{0.75\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{TangramTikz [fr]}}\\
+				\\
+				{\LARGE Des tangrams, en Ti\textit{k}Z}, \\
+				\\
+				{\LARGE avec solution et/ou couleur.} \\
+			\end{tabular}
+			
+			\medskip
+			
+			{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
+\end{tabular}
+\end{center}
+
+\vspace{0.5cm}
+
+{$\blacktriangleright$~~Des commandes pour afficher des Tangrams prédéfinis.}
+
+\smallskip
+
+{$\blacktriangleright$~~Possibilité de créer un Tangram, avec le placement des pièces.}
+
+\smallskip
+
+{$\blacktriangleright$~~Idée(s) venant de \url{https://tex.stackexchange.com/questions/407449/typesetting-tangram-figures-in-latex}}
+
+\vspace{0.5cm}
+
+\begin{center}
+	\tikz {\pic[TangPuzz={blue}] at (0,0) {TangBigTri} ;}~~
+	\tikz {\pic[TangPuzz={orange}] at (0,0) {TangBigTri} ;}~~
+	\tikz {\pic[TangPuzz={purple}] at (0,0) {TangMedTri} ;}~~
+	\tikz {\pic[TangPuzz={yellow}] at (0,0) {TangSqua} ;}~~
+	\tikz {\pic[TangPuzz={green}] at (0,0) {TangSmalTri} ;}~~
+	\tikz {\pic[TangPuzz={cyan}] at (0,0) {TangSmalTri} ;}~~
+	\tikz {\pic[TangPuzz={magenta}] at (0,0) {TangPara} ;}~~
+	
+	\vspace*{1cm}
+	
+	\TangramTikz[Couleur=orange]<scale=1>{Maison}
+	\TangramTikz[Correction]<scale=1>{Maison}
+	\TangramTikz[CorrectionCouleur]<scale=1>{Maison}
+	\TangramTikz[ListeCouleurs={blue,red,black,orange,purple},CorrectionCouleur]<scale=1>{Maison}
+\end{center}
+
+\vspace{0.5cm}
+
+\hfill{}\textit{\small Merci à Eric Martin, enseignant-chercheur à Sydney, pour sa relecture attentive de la version anglaise !}
+
+\smallskip
+
+\hfill{}\textit{\small Merci à Sarah Hadley, resp. de laboratoire \&\ assistante de recherche à l'Université de Saskatchewan, pour ses retours et ses idées.}
+
+%\hfill{}\textit{Merci aux membres du groupe \faFacebook{} du \og Coin \LaTeX{} \fg{} pour leur aide et leurs idées !}
+
+%\hfill{}\textit{Merci à Denis Bitouzé et à Patrick Bideault pour leurs retours et idées !}
+
+\vfill
+
+\hrule
+
+\medskip
+
+\TableauDocumentation
+
+\medskip
+
+\hrule
+
+\medskip
+
+\newpage
+
+\phantomsection
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\newpage
+
+\part{Introduction}
+
+\section{Le package TangramTikz}
+
+\subsection{Source}
+
+Certaines idées viennent de \url{https://tex.stackexchange.com/questions/407449/typesetting-tangram-figures-in-latex}, avec une proposition de Andrew Stacey.
+
+\smallskip
+
+Le package a ensuite été \textit{construit} et \textit{modestement enrichi} autour de styles et méthodes proposées par Andrew Stacey.
+
+\subsection{Chargement du package, packages utilisés}
+
+Le package \textsf{TangramTikz} se charge dans le préambule via la commande :
+
+\begin{PresentationCode}{listing only}
+\usepackage{TangramTikz}
+\end{PresentationCode}
+
+Il est compatible avec les compilations usuelles en \textsf{latex}, \textsf{pdflatex}, \textsf{lualatex} ou \textsf{xelatex}.
+
+\medskip
+
+Il charge les packages et librairies suivantes :
+
+\begin{itemize}
+	\item \texttt{tikz} avec les librairies \Cle{calc} et \Cle{shapes.geometric} ;
+	\item \texttt{xstring}, \texttt{xparse}, \texttt{simplekv} et \texttt{listofitems}.
+\end{itemize}
+
+\subsection{\og Philosophie \fg{} du package}
+
+L'idée est de proposer, grâce à \TikZ, des \textsf{commandes} pour présenter un jeu de Tangram :
+
+\begin{itemize}
+	\item sous forme du puzzle avec pièces \textit{pleines} ;
+	\item sous forme du puzzle avec pièces \textit{avec une petite bordure} ;
+	\item sous forme du puzzle coloré avec pièces \textit{avec une petite bordure}.
+\end{itemize}
+
+\begin{PresentationCode}{listing only}
+%commande autonome pour afficher un Tangram
+\TangramTikz[clés]<options tikz>{nom_du_tangram}
+\end{PresentationCode}
+
+Il est également proposé un \textsf{environnement} ainsi qu'une \textsf{commande} pour construire soi-même le puzzle, en plaçant \textit{manuellement} les pièces.
+
+\begin{PresentationCode}{listing only}
+%environnement, avec clés en français, et placement des pièces
+\begin{EnvTangramTikz}[clés]<options tikz>
+	%placement des pièces
+	\PieceTangram[clés]<options pic>(decalH,decalV){TangGrandTri}
+	\PieceTangram[clés]<options pic>(decalH,decalV){TangGrandTri}
+	\PieceTangram[clés]<options pic>(decalH,decalV){TangMoyTri}
+	\PieceTangram[clés]<options pic>(decalH,decalV){TangPetTri}
+	\PieceTangram[clés]<options pic>(decalH,decalV){TangPetTri}
+	\PieceTangram[clés]<options pic>(decalH,decalV){TangCar}
+	\PieceTangram[clés]<options pic>(decalH,decalV){TangPara}
+	%\filldraw[black] (0,0) circle[radius=4pt] ; %repère pour les pièces
+\end{EnvTangramTikz}
+\end{PresentationCode}
+
+\pagebreak
+
+\part{Le fonctionnement}
+
+\section{Fonctionnement \og manuel \fg}
+
+\subsection{Les pièces du Tangram}
+
+Un Tangram est composé de 7 pièces (visibles sur la page de garde):
+
+\begin{itemize}
+	\item 2 grands triangles isocèles rectangles ;
+	\item 1 triangle isocèle rectangle ;
+	\item 2 petits triangles isocèles rectangles ;
+	\item 1 carré ;
+	\item 1 parallélogramme.
+\end{itemize}
+
+Chacune des pièces qui compose le Tangram est définie en langage \tikzlogo, sous forme d'un \texttt{pic} autonome.
+
+\medskip
+
+Le schéma suivant propose de visualiser les (5) pièces différentes :
+
+\begin{itemize}
+	\item avec leur \textcolor{purple}{\texttt{nom}} en code \tikzlogo{} ;
+	\item avec leur \textit{orientation} initiale ;
+	\item leur \textcolor{red}{\textit{origine}} initiale ;
+	\item leurs \textcolor{blue}{\textit{dimensions}} utiles (qui sont données en \textit{unité}).
+\end{itemize}
+
+\begin{center}
+	\begin{tikzpicture}[scale=1.25]
+		\draw[thin,lightgray!50] (-1,-1) grid (3,3) ;
+		\PieceTangram{TangGrandTri} \filldraw[red] (0,0) circle[radius=2pt] ;
+		\draw[thick,<->,>=latex] (0,-0.25)--(2,-0.25) node[blue,scale=1.5,midway,below,font=\large\sffamily] {2} ;
+		\draw[thick,<->,>=latex] (2.25,0)--++(0,2) node[blue,scale=1.5,midway,right,font=\large\sffamily] {2} ;
+		\draw[thick,<->,>=latex] (-0.15,0.15)--++(45:{sqrt(8)}) node[blue,scale=1.5,midway,sloped,above,font=\large\sffamily] {$\mathsf{2\sqrt{2}}$} ;
+		\draw (1,3) node[scale=1.5,purple,below=1pt,font=\Large\ttfamily] {TangGrandTri} ;
+	\end{tikzpicture}
+	~
+	\begin{tikzpicture}[scale=1.25]
+		\draw[thin,lightgray!50] (-1,-1) grid (3,3) ;
+		\PieceTangram{TangMoyTri} \filldraw[red] (0,0) circle[radius=2pt] ;
+		\draw[thick,<->,>=latex] (0,-0.25)--(2,-0.25) node[blue,scale=1.5,midway,below,font=\large\sffamily] {2} ;
+		\draw[thick,<->,>=latex] (-0.15,0.15)--++(45:{sqrt(2)}) node[blue,scale=1.5,midway,sloped,above,font=\large\sffamily] {$\mathsf{\sqrt{2}}$} ;
+		\draw[thick,<->,>=latex] (2.15,0.15)--++(135:{sqrt(2)}) node[blue,scale=1.5,midway,sloped,above,font=\large\sffamily] {$\mathsf{\sqrt{2}}$} ;
+		\draw (1,3) node[purple,scale=1.5,below=1pt,font=\Large\ttfamily] {TangMoyTri} ;
+	\end{tikzpicture}
+	~
+	\begin{tikzpicture}[scale=1.25]
+		\draw[thin,lightgray!50] (-1,-1) grid (3,3) ;
+		\PieceTangram{TangPetTri} \filldraw[red] (0,0) circle[radius=2pt] ;
+		\draw[thick,<->,>=latex] (0,-0.25)--(1,-0.25) node[blue,scale=1.5,midway,below,font=\large\sffamily] {1} ;
+		\draw[thick,<->,>=latex] (-0.15,0.15)--++(45:{sqrt(2)}) node[blue,scale=1.5,midway,sloped,above,font=\large\sffamily] {$\mathsf{\sqrt{2}}$} ;
+		\draw[thick,<->,>=latex] (1.25,0)--++(0,1) node[blue,scale=1.5,midway,right,font=\large\sffamily] {1} ;
+		\draw (1,3) node[purple,scale=1.5,below=1pt,font=\Large\ttfamily] {TangPetTri} ;
+	\end{tikzpicture}
+	
+	\smallskip
+	
+	\begin{tikzpicture}[scale=1.25]
+		\draw[thin,lightgray!50] (-1,-1) grid (3,3) ;
+		\PieceTangram{TangCar} \filldraw[red] (0,0) circle[radius=2pt] ;
+		\draw[thick,<->,>=latex] (0,-0.25)--(1,-0.25) node[blue,scale=1.5,midway,below,font=\large\sffamily] {1} ;
+		\draw[thick,<->,>=latex] (1.25,0)--++(0,1) node[blue,scale=1.5,midway,right,font=\large\sffamily] {1} ;
+		\draw[thick,dashed] (0,0)--(-0.65,0.65) (1,1)--(0.35,1.65) ;
+		\draw[thick,<->,>=latex] (-0.65,0.65)--++(45:{sqrt(2)}) node[blue,scale=1.5,midway,sloped,above,font=\large\sffamily] {$\mathsf{\sqrt{2}}$} ;
+		\draw (1,3) node[purple,scale=1.5,below=1pt,font=\Large\ttfamily] {TangCar} ;
+	\end{tikzpicture}
+	~
+	\begin{tikzpicture}[scale=1.25]
+		\draw[thin,lightgray!50] (-1,-1) grid (3,3) ;
+		\PieceTangram{TangPara} \filldraw[red] (0,0) circle[radius=2pt] ;
+		\draw[thick,<->,>=latex] (0,-0.25)--(1,-0.25) node[blue,scale=1.5,midway,below,font=\large\sffamily] {1} ;
+		\draw[thick,<->,>=latex] (-0.15,0.15)--++(45:{sqrt(2)}) node[blue,scale=1.5,midway,sloped,above,font=\large\sffamily] {$\mathsf{\sqrt{2}}$} ;
+		\draw[thick,<->,>=latex] (2.15,0)--++(0,1) node[blue,scale=1.5,midway,right,font=\large\sffamily] {1} ;
+		\draw[thick,<->,>=latex] (2.15,1.15)--++(135:{0.5*sqrt(2)}) node[blue,midway,sloped,above,font=\large\sffamily] {$\mathsf{0{,}5\sqrt{2}}$} ;
+		\draw[thick,dashed] (2,1)--++(0.15,0.15) (1,1)--++(45:{0.5*sqrt(2)+0.2}) ;
+		\draw (1,3) node[purple,scale=1.5,below=1pt,font=\Large\ttfamily] {TangPara} ;
+	\end{tikzpicture}
+\end{center}
+
+Chacune des \textit{pièces} peut donc être :
+
+\begin{itemize}
+	\item pivotée, grâce à l'option \tikzlogo{} \texttt{rotate=...} ;
+	\item retournée horizontalement ou verticalement, grâce aux options \tikzlogo{} \texttt{xscale=-1} et \texttt{yscale=-1} ;
+	\item déplacée, en la plaçant au point de coordonnées \texttt{(x,y)}.
+\end{itemize}
+
+Chaque pièce peut posséder un style prédéfini :
+
+\begin{itemize}
+	\item \texttt{TangPuzz} : pièce de puzzle, \textit{pleine}, pour laquelle on peut choisir une couleur (\Cle{black} par défaut) ;
+	\item \texttt{TangSol} : pièce de puzzle, \textit{avec bordure blanche}, pour laquelle on peut choisir une couleur (\Cle{black} par défaut).
+\end{itemize}
+
+\pagebreak
+
+\subsection{Placement des pièces}
+
+Une première manière de placer les \textit{pièces} est donc d'utiliser une syntaxe des \texttt{pic} en \tikzlogo{} :
+
+\begin{PresentationCode}{listing only}
+%environnement ou commande tikz
+\pic[style,rotate=...,xscale=...,yscale=...] at (x,y) {nom_piece} ;
+\end{PresentationCode}
+
+Le package \textsf{TangramTikz} propose également une commande spécifique pour placer les pièces :
+
+\begin{PresentationCode}{listing only}
+%environnement ou commande tikz
+\PieceTangram[style={couleur}]<xscale=...,yscale=...,rotate=...>(x,y){nom_piece}
+\end{PresentationCode}
+
+Un Tangram peut donc être \textit{constuit} manuellement, grâce aux 7 pièces du puzzle, en :
+
+\begin{itemize}
+	\item \textit{plaçant} les pièces à l'origine ;
+	\item en les \textit{pivotant}/\textit{retournant} pour l'orienter correctement ;
+	\item en les \textit{translatant} pour les placer correctement.
+\end{itemize}
+
+À noter que les options de positionnement \TikZ\ (\texttt{xscale/yscale/rotate}) sont lues de \textbf{droite à gauche}, et peuvent être mises dans l'ordre que l'on veut.
+
+\begin{PresentationCode}{}
+%version corrigée et coloriée (taille par défaut)
+\begin{EnvTangramTikz}
+	\PieceTangram[TangSol={green}]({0},{0}){TangCar}
+	\PieceTangram[TangSol={red}]({-1.5},{1}){TangGrandTri}
+	\PieceTangram[TangSol={red}]<rotate=-90>({0.5},{3}){TangGrandTri}
+	\PieceTangram[TangSol={purple}]<xscale=-1,rotate=0>({2.5},{2}){TangPara}
+	\PieceTangram[TangSol={blue}]({-1.5},{2}){TangPetTri}
+	\PieceTangram[TangSol={blue}]<xscale=-1,rotate=90>({-0.5},{2}){TangPetTri}
+	\PieceTangram[TangSol={orange}]({-0.5},{3}){TangMoyTri}
+	\filldraw[black] (0,0) circle[radius=2pt] ; %repère pour les pièces
+\end{EnvTangramTikz}
+%version "énoncé"  (taille par défaut)
+\begin{EnvTangramTikz}
+	\PieceTangram[TangPuzz]({0},{0}){TangCar}
+	\PieceTangram[TangPuzz]({-1.5},{1}){TangGrandTri}
+	\PieceTangram[TangPuzz]<rotate=-90>({0.5},{3}){TangGrandTri}
+	\PieceTangram[TangPuzz]<xscale=-1,rotate=0>({2.5},{2}){TangPara}
+	\PieceTangram[TangPuzz]({-1.5},{2}){TangPetTri}
+	\PieceTangram[TangPuzz]<xscale=-1,rotate=90>({-0.5},{2}){TangPetTri}
+	\PieceTangram[TangPuzz]({-0.5},{3}){TangMoyTri}
+\end{EnvTangramTikz}
+\end{PresentationCode}
+
+\pagebreak
+
+\section{Fonctionnement \og automatique \fg}
+
+\subsection{Commande}
+
+Un certain nombre de Tangrams sont prédéfinis dans le package \textsf{TangramTikz}, qui peuvent être \textit{appelés} grâce à une commande autonome.
+
+\begin{PresentationCode}{listing only}
+%commande autonome pour afficher un Tangram
+\TangramTikz[clés]<options tikz>{nom_du_tangram}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%commande autonome pour afficher le Tangram du Chat/Bateau/Kangourou, avec options par défaut
+\TangramTikz{Chat}~~\TangramTikz{Bateau}~~\TangramTikz{Kangourou}
+\end{PresentationCode}
+
+\subsection{Clés, options et arguments}
+
+Le premier argument, \textit{optionnel} et entre \texttt{[...]}, correspond aux clés et options :
+
+\begin{itemize}
+	\item le booléen \Cle{Puzzle} qui affiche les pièces (monochromes) de puzzle, sans bordure ; \hfill~défaut : \Cle{true}
+	\item le booléen \Cle{Correction} qui affiche les pièces (monochromes) du puzzle, avec bordure ; \hfill~défaut : \Cle{false}
+	\item le booléen \Cle{NoirBlanc} qui affiche les tracés des pièces avec bordure ; \hfill~défaut : \Cle{false}
+	\item \Cle{Couleur} qui paramètre la couleur globale du puzzle avec les booléens précédents ; \hfill~défaut : \Cle{black}
+	\item le booléen \Cle{CorrectionCouleur} qui affiche les pièces (colorées) du puzzle, avec bordure ; \hfill~défaut : \Cle{false}
+	\item \Cle{ListeCouleurs} qui est la couleur des pièces (\texttt{GT,MT,PT,CAR,PARA} ou \texttt{GT1,GT2,MT1,PT1,PT2,CAR,PARA}) ;
+	
+	\hfill~défaut : \Cle{red,orange,blue,green,purple}
+	\item \Cle{ListePieces} pour spécifier la liste des pièces à afficher (dans le même \textit{ordre} que les couleurs \textit{complètes}) ;
+	
+	\hfill~défaut : \Cle{1234567}
+	\item \Cle{Sep} qui est l'épaisseur de la bordure des pièces en mode \Cle{Correction} \hfill~défaut : \Cle{1pt}
+\end{itemize}
+
+Le deuxième argument, \textit{optionnel} et entre \texttt{<...>}, correspond aux options qui sont passés à l'environnement \tikzlogo{} qui sert de base à la commande, comme par exemple :
+
+\begin{itemize}
+	\item un changement d'unité(s), un changement d'échelle ;
+	\item une rotation, un alignement vertical ;
+	\item etc
+\end{itemize}
+
+Le troisième argument, \textit{obligatoire} et entre \texttt{\{...\}} est quant à lui le nom du Tangram issu de la \textit{base de données} présente dans le package (liste ci-après).
+
+\pagebreak
+
+\subsection{Aide à la manière de 'missing tan task'}
+
+Afin de travailler sur un fonctionnement \textit{missing tan task} (\href{https://www.researchgate.net/publication/371039854_Comparing_Mental_Effort_Difficulty_and_Confidence_Appraisals_in_Problem-Solving_A_Metacognitive_Perspective}{[lien]}), il est possible d'afficher un puzzle d'aide avec affichage du nom des pièces.
+
+\begin{PresentationCode}{listing only}
+%commande autonome pour afficher une aide type 'mtt'
+\TangramTikzAide[clés]<options tikz>
+\end{PresentationCode}
+
+Deux clés spécifiques sont disponibles, en plus de celles détaillées précédemment :
+
+\begin{itemize}
+	\item le booléen \Cle{Aide} pour afficher le nom des pièces ; \hfill~défaut : \Cle{true}
+	\item \Cle{Noms} pour donner le nom des pièces, dans l'ordre \texttt{GT1,GT2,MT1,PT1,PT2,CAR,PARA} ;
+	
+	\hfill~défaut : \Cle{A1,A2,D,B1,B2,E,C}
+\end{itemize}
+
+\begin{PresentationCode}{}
+\TangramTikzAide[Correction]
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikzAide[Correction,Couleur=teal]<scale=2,transform shape>
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikzAide[CorrectionCouleur,Aide=false]
+\end{PresentationCode}
+
+Le style des labels est donné (et peut-être redéfini) par le code suivant.
+
+\begin{PresentationCode}{listing only}
+\tikzset{tangramhelp/.style={text=white,inner sep=0pt,font=\sffamily\small\bfseries}}
+\end{PresentationCode}
+
+\pagebreak
+
+\subsection{Liste des Tangrams inclus dans le package}
+%
+\texttt{\begin{multicols}{5}
+	\begin{itemize}
+		\item Carre
+		\item Pingouin
+		\item Bateau
+		\item Maison
+		\item Sapin
+		\item Chat
+		\item Cygne
+		\item Pyramide
+		\item Canard
+		\item Fusee
+		\item Bougie
+		\item Chemise
+		\item Poisson
+		\item Voilier
+		\item Kangourou
+		\item Chien
+		\item Lapin
+		\item Avion
+		\item Coq
+		\item Coureur
+		\item Danseur
+		\item Chameau
+		\item Flamant
+		\item Coeur
+		\item Girafe
+		\item Cheval
+		\item Chevre
+		\item Lion
+		\item Usine
+		\item Ange
+		\item Tour
+		\item Ovni
+		\item Poule
+		\item Tortue
+		\item Crabe
+		\item Escargot
+		\item Oie
+		\item Vache
+		\item Cadeau
+		\item Homme
+		\item Cavalier
+		\item Fleche
+		\item Triangle
+	\end{itemize}
+\end{multicols}}
+
+\medskip
+
+\begin{PresentationCode}{}
+\TangramTikz{Fusee}~~
+\TangramTikz[Couleur=red]{Fusee}~~
+\TangramTikz[Correction]{Fusee}~~
+\TangramTikz[Correction,Couleur=lightgray]{Fusee}~~
+\TangramTikz[CorrectionCouleur,ListeCouleurs={orange,blue,yellow,green,pink},Sep=1mm]{Fusee}
+
+\TangramTikz<scale=1.5,rotate=30>{Fusee}~~
+\TangramTikz<scale=0.75,rotate=-90>{Fusee}~~
+\TangramTikz[NoirBlanc]<scale=0.5>{Fusee}
+\TangramTikz[ListePieces=134567,CorrectionCouleur,ListeCouleurs={cyan,green,red,pink,purple,orange,yellow},Sep=0pt]{Fusee}
+\end{PresentationCode}
+
+\pagebreak
+
+\part{Galerie de Tangrams disponibles}
+
+\begin{PresentationCode}{}
+\TangramTikz{Carre}
+\TangramTikz[NoirBlanc]{Carre}
+\TangramTikz[Correction]{Carre}
+\TangramTikz[CorrectionCouleur]{Carre}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Pingouin}
+\TangramTikz[Correction]{Pingouin}
+\TangramTikz[CorrectionCouleur]{Pingouin}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Bateau}
+\TangramTikz[Correction]{Bateau}
+\TangramTikz[CorrectionCouleur]{Bateau}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Maison}
+\TangramTikz[Correction]{Maison}
+\TangramTikz[CorrectionCouleur]{Maison}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Sapin}
+\TangramTikz[Correction]{Sapin}
+\TangramTikz[CorrectionCouleur]{Sapin}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Chat}
+\TangramTikz[Correction]{Chat}
+\TangramTikz[CorrectionCouleur]{Chat}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Cygne}
+\TangramTikz[Correction]{Cygne}
+\TangramTikz[CorrectionCouleur]{Cygne}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Pyramide}
+\TangramTikz[Correction]{Pyramide}
+\TangramTikz[CorrectionCouleur]{Pyramide}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Canard}
+\TangramTikz[Correction]{Canard}
+\TangramTikz[CorrectionCouleur]{Canard}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Fusee}
+\TangramTikz[Correction]{Fusee}
+\TangramTikz[CorrectionCouleur]{Fusee}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Bougie}
+\TangramTikz[Correction]{Bougie}
+\TangramTikz[CorrectionCouleur]{Bougie}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Chemise}
+\TangramTikz[Correction]{Chemise}
+\TangramTikz[CorrectionCouleur]{Chemise}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Poisson}
+\TangramTikz[Correction]{Poisson}
+\TangramTikz[CorrectionCouleur]{Poisson}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Voilier}
+\TangramTikz[Correction]{Voilier}
+\TangramTikz[CorrectionCouleur]{Voilier}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Kangourou}
+\TangramTikz[Correction]{Kangourou}
+\TangramTikz[CorrectionCouleur]{Kangourou}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Chien}
+\TangramTikz[Correction]{Chien}
+\TangramTikz[CorrectionCouleur]{Chien}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Lapin}
+\TangramTikz[Correction]{Lapin}
+\TangramTikz[CorrectionCouleur]{Lapin}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz<scale=0.75>{Avion}
+\TangramTikz[Correction]<scale=0.75>{Avion}
+\TangramTikz[CorrectionCouleur]<scale=0.75>{Avion}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Coq}
+\TangramTikz[Correction]{Coq}
+\TangramTikz[CorrectionCouleur]{Coq}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Coureur}
+\TangramTikz[Correction]{Coureur}
+\TangramTikz[CorrectionCouleur]{Coureur}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Danseur}
+\TangramTikz[Correction]{Danseur}
+\TangramTikz[CorrectionCouleur]{Danseur}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Chameau}
+\TangramTikz[Correction]{Chameau}
+\TangramTikz[CorrectionCouleur]{Chameau}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Flamant}
+\TangramTikz[Correction]{Flamant}
+\TangramTikz[CorrectionCouleur]{Flamant}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Coeur}
+\TangramTikz[Correction]{Coeur}
+\TangramTikz[CorrectionCouleur]{Coeur}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Girafe}
+\TangramTikz[Correction]{Girafe}
+\TangramTikz[CorrectionCouleur]{Girafe}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Cheval}
+\TangramTikz[Correction]{Cheval}
+\TangramTikz[CorrectionCouleur]{Cheval}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Chevre}
+\TangramTikz[Correction]{Chevre}
+\TangramTikz[CorrectionCouleur]{Chevre}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Lion}
+\TangramTikz[Correction]{Lion}
+\TangramTikz[CorrectionCouleur]{Lion}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Usine}
+\TangramTikz[Correction]{Usine}
+\TangramTikz[CorrectionCouleur]{Usine}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Ange}
+\TangramTikz[Correction]{Ange}
+\TangramTikz[CorrectionCouleur]{Ange}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Tour}
+\TangramTikz[Correction]{Tour}
+\TangramTikz[CorrectionCouleur]{Tour}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz<scale=0.75>{Ovni}
+\TangramTikz[Correction]<scale=0.75>{Ovni}
+\TangramTikz[CorrectionCouleur]<scale=0.75>{Ovni}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Poule}
+\TangramTikz[Correction]{Poule}
+\TangramTikz[CorrectionCouleur]{Poule}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Tortue}
+\TangramTikz[Correction]{Tortue}
+\TangramTikz[CorrectionCouleur]{Tortue}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Crabe}
+\TangramTikz[Correction]{Crabe}
+\TangramTikz[CorrectionCouleur]{Crabe}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz{Escargot}
+\TangramTikz[Correction]{Escargot}
+\TangramTikz[CorrectionCouleur]{Escargot}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz<scale=0.75>{Oie}
+\TangramTikz[Correction]<scale=0.75>{Oie}
+\TangramTikz[CorrectionCouleur]<scale=0.75>{Oie}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz<scale=0.75>{Vache}
+\TangramTikz[Correction]<scale=0.75>{Vache}
+\TangramTikz[CorrectionCouleur]<scale=0.75>{Vache}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz<scale=0.75>{Cadeau}
+\TangramTikz[Correction]<scale=0.75>{Cadeau}
+\TangramTikz[CorrectionCouleur]<scale=0.75>{Cadeau}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz<scale=0.75>{Homme}
+\TangramTikz[Correction]<scale=0.75>{Homme}
+\TangramTikz[CorrectionCouleur]<scale=0.75>{Homme}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz<scale=0.75>{Cavalier}
+\TangramTikz[Correction]<scale=0.75>{Cavalier}
+\TangramTikz[CorrectionCouleur]<scale=0.75>{Cavalier}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz<scale=0.75>{Fleche}
+\TangramTikz[Correction]<scale=0.75>{Fleche}
+\TangramTikz[CorrectionCouleur]<scale=0.75>{Fleche}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\TangramTikz<scale=0.75>{Triangle}
+\TangramTikz[Correction]<scale=0.75>{Triangle}
+\TangramTikz[CorrectionCouleur]<scale=0.75>{Triangle}
+\end{PresentationCode}
+
+\newpage
+
+\part{Historique}
+
+\verb|v0.2.2|~:~Bugfix et nouveaux modèles
+
+\verb|v0.2.0|~:~Clé \textsf{[ListePieces]}  + nouveaux modèles + améliorations pour les couleurs
+
+\verb|v0.1.8|~:~Clé \textsf{[NoirBlanc]} pour un affichage non coloré + modèles \textsf{Vache} et \textsf{Cadeau}
+
+\verb|v0.1.7|~:~Améliorations pour la version anglaise
+
+\verb|v0.1.6|~:~Nouveaux modèles
+
+\verb|v0.1.5|~:~Nouveaux modèles
+
+\verb|v0.1.4|~:~Nouveaux modèles
+
+\verb|v0.1.3|~:~Nouveaux modèles
+
+\verb|v0.1.2|~:~Nouveaux modèles
+
+\verb|v0.1.1|~:~Nouveaux modèles
+
+\verb|v0.1.0|~:~Version initiale
+
+\end{document}

@@ -1,0 +1,736 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[french,a4paper,11pt]{article}
+\usepackage[margin=2cm,includefoot]{geometry}
+\def\TPversion{0.1.1}
+\def\TPdate{28 Mai 2023}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{tikz2d-fr}
+\usepackage{tkz-euclide}
+\usepackage{awesomebox}
+\usepackage{fontawesome5}
+\usepackage{footnote}
+\makesavenoteenv{tabular}
+\usepackage{enumitem}
+\usepackage{tabularray}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [tikz2d-fr]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+
+%\usepackage{hvlogos}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+\newcommand\TableauDocumentation{%
+	\begin{tblr}{width=\linewidth,colspec={X[c]X[c]X[c]X[c]X[c]X[c]},cells={font=\sffamily}}
+		{\LARGE \LaTeX} & & & & &\\
+		& {\LARGE \hologo{pdfLaTeX}} & & & & \\
+		& & {\LARGE \hologo{LuaLaTeX}} & & & \\
+		& & & {\LARGE \TikZ} & & \\
+		& & & & {\LARGE \TeXLive} & \\
+		& & & & & {\LARGE \hologo{MiKTeX}} \\
+	\end{tblr}
+}
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\setlength{\parindent}{0pt}
+\definecolor{LightGray}{gray}{0.9}
+
+\usepackage{babel}
+\AddThinSpaceBeforeFootnotes
+\FrenchFootnotes
+
+\usepackage[most]{tcolorbox}
+\tcbuselibrary{listings}
+\newtcblisting{DemoCode}[1][]{%
+	enhanced,width=0.95\linewidth,center,%
+	bicolor,size=title,%
+	colback=cyan!2!white,%
+	colbacklower=cyan!1!white,%
+	colframe=cyan!75!black,%
+	listing options={%
+		breaklines=true,%
+		breakatwhitespace=true,%
+		style=tcblatex,basicstyle=\small\ttfamily,%
+		tabsize=4,%
+		commentstyle={\itshape\color{gray}},
+		keywordstyle={\color{blue}},%
+		classoffset=0,%
+		keywords={},%
+		alsoletter={-},%
+		keywordstyle={\color{blue}},%
+		classoffset=1,%
+		alsoletter={-},%
+		morekeywords={\draw,node,\coordinate,tikz3d-fr},%
+		keywordstyle={\color{violet}},%
+		classoffset=2,%
+		alsoletter={-},%
+		morekeywords={\TracerSegments,\DefinirPoints,\DefinirPoint,\MarquerPoint,\MarquerPoints,mainlevee,\ImagePoint,\ImagesPoints},%
+		keywordstyle={\color{green!50!black}},%
+		classoffset=3,%
+		morekeywords={Cap,Style,Couleurs,Cycle,Join,line,cap,line,join,Suite,Couleurs,DecalLabel,StyleMarque,Couleur,Math,TaillePolice},%
+		keywordstyle={\color{orange}}
+	},%
+	#1
+}
+
+\tcbset{vignettes/.style={%
+	nobeforeafter,box align=base,boxsep=0pt,enhanced,sharp corners=all,rounded corners=southeast,%
+	boxrule=0.75pt,left=7pt,right=1pt,top=0pt,bottom=0.25pt,%
+	}
+}
+
+\tcbset{vignetteMaJ/.style={%
+	fontupper={\vphantom{pf}\footnotesize\ttfamily},
+	vignettes,colframe=purple!50!black,coltitle=white,colback=purple!10,%
+	overlay={\begin{tcbclipinterior}%
+			\fill[fill=purple!75]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{black}{\scalebox{0.66}[0.66]{\textbf{MàJ}}}}} ($(interior.north west)+(5pt,0pt)$);%
+	\end{tcbclipinterior}}
+	}
+}
+
+\newcommand\Cle[1]{{\bfseries\sffamily\textlangle #1\textrangle}}
+\newcommand\cmaj[1]{\tcbox[vignetteMaJ]{#1}\xspace}
+
+\begin{document}
+
+\setlength{\aweboxleftmargin}{0.07\linewidth}
+\setlength{\aweboxcontentwidth}{0.93\linewidth}
+\setlength{\aweboxvskip}{8pt}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\vspace{2cm}
+
+\begin{center}
+	\begin{minipage}{0.75\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{tikz2d-fr}}\\
+				\\
+				{\LARGE Quelques commandes simplifiées (fr)} \\
+				\\
+				{\LARGE pour utiliser avec \TikZ.} \\
+			\end{tabular}
+			
+			\bigskip
+			
+			{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://github.com/cpierquet/tikz2dfr}}
+\end{tabular}
+\end{center}
+
+\vspace{0.25cm}
+
+{$\blacktriangleright$~~Définir des points par coordonnées.}
+
+\smallskip
+
+{$\blacktriangleright$~~Définir des points par transformations simples.}
+
+\smallskip
+
+{$\blacktriangleright$~~Tracer des segments, avec option(s) de couleurs.}
+
+\smallskip
+
+{$\blacktriangleright$~~Marquer des points.}
+
+\vspace{1cm}
+
+\begin{center}
+	\begin{tcolorbox}[enhanced,colframe=cyan,colback=cyan!2,center,width=0.95\linewidth,drop fuzzy shadow=lightgray]
+	\hfill
+	\begin{tikzpicture}
+		\DefinirPoints[Couleur=violet,DecalLabel=0pt]{A/0,0/b B/4,0/b C/3,2/h}
+		\TracerSegments[Suite,Cycle,Couleurs=red,Join=bevel]{A B C}
+	\end{tikzpicture}
+	\hspace{1cm}
+	\begin{tikzpicture}
+		\DefinirPoints[DecalLabel=1pt]{A/0,0/bg B/4,0/bd C/3,2/h}
+		\TracerSegments[Suite,Cycle,Couleurs={red,blue,green}]<thick,mainlevee>{A B C}
+		\MarquerPoints[StyleMarque=x]{A}\MarquerPoints[StyleMarque=+]{B}\MarquerPoints{C}
+	\end{tikzpicture}
+	\hfill~
+	
+	\vspace{1cm}
+	
+	\hfill~
+	\begin{tikzpicture}
+		\DefinirPoints*{A_1/0:2/ A_2/45:2/ A_3/90:2/ A_4/135:2/ A_5/180:2/ A_6/225:2/ A_7/270:2/ A_8/315:2/}
+		\TracerSegments[Suite,Cycle,Couleurs={red,blue,green,yellow,orange,pink,gray,violet}]<thick,mainlevee=1cm et 1mm>{A_1 A_2 A_3 A_4 A_5 A_6 A_7 A_8}
+		\TracerSegments[]<semithick,densely dotted,mainlevee>{A_1/A_5 A_2/A_6 A_3/A_7 A_4/A_8}
+	\end{tikzpicture}
+	\hfill~
+	\end{tcolorbox}
+\end{center}
+
+\vspace{0.5cm}
+
+%\hfill{}\textit{Merci à Denis Bitouzé et à Gilles Le Bourhis pour leurs retours et idées !}
+
+\smallskip
+
+\vfill
+
+\hrule
+
+\medskip
+
+\TableauDocumentation
+
+\medskip
+
+\hrule
+
+\medskip
+
+\newpage
+
+\phantomsection
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vfill
+
+\part{Historique}
+
+\verb|v0.1.1|~:~~~~Ajout d'une clé \Cle{[TaillePolice]} + Points définis par une transformation simple.
+
+\verb|v0.1.0|~:~~~~Version initiale.
+
+\newpage
+
+\part{Introduction}
+
+\section{Le package tikz2d-fr}
+
+\subsection{Introduction}
+
+\begin{noteblock}
+Le package propose des commandes basiques -- francisées -- pour travailler sur des figures simples en 2D, à l'aide de \TikZ{} avec :
+
+\begin{itemize}
+	\item de quoi simuler un tracé à \textit{main levée} ;
+	\item de quoi définir des points (et donc des nœuds) via \textsf{nom/coordonnées/positionlabel} ;
+	\item \cmaj{0.1.1} de quoi définir des points images par des transformations simples ;
+	\item de marquer des points (croix, disques) ;
+	\item de quoi tracer des segments (enchaînés ou non) en spécifiant les couleurs éventuelles.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{noteblock}
+
+\begin{importantblock}
+On peut voir ce modeste package comme un \textit{maigre} complément à \TikZ{} et \textsf{tkz-euclide}\footnotemark\footnotetext{\url{https://ctan.org/pkg/tkz-euclide}} qui permet de faire énormément de choses en géométrie euclidienne.
+
+\smallskip
+
+Ainsi, les éventuel points (nœuds) créés par \textsf{tikz2d-fr} seront réutilisables dans toute commande classique de \TikZ{} ou de \textsf{tkz-euclide}.
+
+\smallskip
+
+On peut donc \textit{utiliser} le package \textsf{tikz2d-fr} comme \textit{base} de travail avant des choses plus poussées !
+\end{importantblock}
+
+\subsection{Autres solutions}
+
+\begin{importantblock}
+À noter qu'il existe d'autres solutions graphiques, comme :
+
+\begin{itemize}
+	\item \textsf{\PSTricks} avec \textsf{pst-eucl}\footnotemark\footnotetext{\url{https://www.ctan.org/pkg/pst-eucl}} ;
+	\item \hologo{MetaPost} avec \textsf{ProfCollege} et son environnement \texttt{geometrie}\footnotemark\footnotetext{\url{https://www.ctan.org/pkg/profcollege}}.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{importantblock}
+
+\subsection{Chargement du package, packages utilisés}
+
+\begin{importantblock}
+Le package se charge, de manière classique, dans le préambule.
+
+Il n'existe pas d'option pour le package, et \texttt{xcolor} n'est pas chargé.
+\end{importantblock}
+
+\begin{DemoCode}[listing only]
+\documentclass{article}
+\usepackage{tikz2d-fr}
+
+\end{DemoCode}
+
+\begin{noteblock}
+\textsf{tikz2d-fr} charge les packages suivantes :
+
+\begin{itemize}
+	\item \texttt{tikz}, \texttt{xstring}, \texttt{simplekv}, \texttt{xintexpr} et \texttt{listofitems} ;
+	\item les librairies \texttt{\textit{tikz}.decorations} et \texttt{\textit{tikz}.decorations.pathmorphing}.
+\end{itemize}
+
+Il est compatible avec les compilations usuelles en \textsf{latex}, \textsf{pdflatex}, \textsf{lualatex} ou \textsf{xelatex}.
+\end{noteblock}
+
+\vfill~
+
+\pagebreak
+
+\part{Styles et commandes}
+
+\section{Tracé à main levée}
+
+\subsection{Idée}
+
+\begin{tipblock}
+L'idée est de \textit{proposer} un style \textit{tout prêt} pour simuler un tracé, en \TikZ, à \og main levée \fg.
+
+Il s'agit d'un style \textit{basique} utilisant la librairie \textsf{decorations} avec \textsf{random steps}.
+\end{tipblock}
+
+\begin{DemoCode}[listing only]
+\tikzset{%
+	mainlevee/.style args={#1et#2}{%
+		decorate,decoration={random steps, segment length=#1,amplitude=#2}},
+		mainlevee/.default={5mm et 0.6pt}
+	}
+\end{DemoCode}
+
+\subsection{Utilisation basique}
+
+\begin{cautionblock}
+Il s'agit ni plus ni moins d'un style \TikZ{} à intégrer dans les tracés et constructions \TikZ !
+
+\smallskip
+
+Pour ce style, deux paramètres peuvent être précisés via \Cle{mainlevee=\#1 et \#2} :
+
+\begin{itemize}
+	\item \Cle{\#1} correspond à l'option \textsf{segment length} (longueur des segments \textit{types}) ;
+	
+	\hfill{}défaut \Cle{5mm}
+	\item \Cle{\#2} correspond à l'option \textsf{amplitude} (amplitude maximale de la \textit{déformation}).
+	
+	\hfill{}défaut \Cle{0.6pt}
+\end{itemize}
+
+Les valeurs \Cle{mainlevee=5mm et 0.6pt} donnent des résultats -- à mon sens -- satisfaisants, mais l'utilisateur pourra modifier à loisir ces paramètres !
+\end{cautionblock}
+
+\begin{DemoCode}[listing only]
+%la grille a été rajoutée pour la sortie
+\begin{tikzpicture}
+	\draw[thick,mainlevee] (0,0) rectangle (4,4) ;
+\end{tikzpicture}
+
+\begin{tikzpicture}
+	\draw[thick,mainlevee=5mm et 2pt] (0,0) rectangle (4,4) ;
+\end{tikzpicture}
+
+\begin{tikzpicture}
+	\draw[thick,mainlevee=10mm et 3mm]  (0,0) rectangle (4,4) ;
+\end{tikzpicture}
+\end{DemoCode}
+
+\begin{DemoCode}[text only]
+\hfill~\begin{tikzpicture}
+		\draw[xstep=0.5,ystep=0.5,ultra thin,lightgray] (0,0) grid (4,4);
+		\draw[thick,mainlevee]  (0,0) rectangle (4,4) ;
+	\end{tikzpicture}
+	\hspace{1cm}
+	\begin{tikzpicture}
+		\draw[xstep=0.5,ystep=0.5,ultra thin,lightgray] (0,0) grid (4,4);
+		\draw[thick,mainlevee=5mm et 2pt]  (0,0) rectangle (4,4) ;
+	\end{tikzpicture}
+	\hspace{1cm}
+	\begin{tikzpicture}
+		\draw[xstep=0.5,ystep=0.5,ultra thin,lightgray] (0,0) grid (4,4);
+		\draw[thick,mainlevee=10mm et 3mm]  (0,0) rectangle (4,4) ;
+	\end{tikzpicture}
+	\hfill~
+\end{DemoCode}
+
+\pagebreak
+
+\section{Définir des points par coordonnées}
+
+\subsection{Commandes}
+
+\begin{cautionblock}
+Les commandes \textit{simplifiées} et \textit{francisées} disponibles sont :
+
+\begin{itemize}
+	\item \texttt{\textbackslash DefinirPoint} pour définir un point ;
+	\item \texttt{\textbackslash DefinirPoints} pour définir des points ;
+	\item \texttt{\textbackslash MarquerPoint} pour marquer (matérialiser) un point ;
+	\item \texttt{\textbackslash MarquerPoints} pour marquer (matérialiser) des points.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{cautionblock}
+
+\begin{DemoCode}[listing only]
+\begin{tikzpicture}[options tikz]
+	%créer/placer/nommer un point
+	\DefinirPoint(*)[clés]{noeud}{coordonnées}<label>
+	%créer/placer/nommer plusieurs points, sans modification des labels !
+	\DefinirPoints(*)[clés]{liste}
+	%marquer un point
+	\MarquerPoint[clés]{point}
+	%marquer plusieurs points
+	\MarquerPoints[clés]{liste}
+\end{tikzpicture}
+\end{DemoCode}
+
+\subsection{Clés, options et arguments}
+
+\begin{tipblock}
+Les versions étoilées désactivent l'affichage des labels des points.
+
+\smallskip
+
+L'argument optionnel et entre \texttt{[...]} propose les \Cle{clés} suivantes (communes ou spécifiques) :
+
+\begin{itemize}
+	\item \Cle{PosLabel} pour préciser la position (francisée) du label pour les points ; \hfill{}défaut : \Cle{b}
+	\item \cmaj{0.1.1} \Cle{TaillePolice} pour spécifier la taille de la police du label ;
+	
+	\hfill{}défaut : \Cle{\textbackslash normalsize}
+	\item \Cle{StyleMarque} parmi \Cle{x/o/+} pour spécifier le style de la marque des points ;
+	
+	\hfill{}défaut : \Cle{o}
+	\item \Cle{Math} : booléen pour afficher le label en mode math ; \hfill{}défaut : \Cle{false}
+	\item \Cle{TailleMarque} pour spécifier la taille de la marque des points (disque/ croix) ;
+	
+	\hfill{}défaut : \Cle{2pt}
+	\item \Cle{Couleur} pour paramétrer la couleur.\hfill{}défaut : \Cle{black}
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{tipblock}
+Les positions pour les labels des points sont \textit{francisées} :
+
+\begin{itemize}
+	\item \Cle{b} : \texttt{bas}
+	\item \Cle{h} : \texttt{haut}
+	\item \Cle{g} : \texttt{gauche}
+	\item \Cle{d} : \texttt{droite}
+	\item \Cle{hg} : \texttt{haut gauche}
+	\item \ldots
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{tipblock}
+De manière un peu plus spécifique :
+
+\begin{itemize}
+	\item le \texttt{<label>} pour la commande \texttt{\textbackslash DefinirPoint} est optionnel, et est identique à \texttt{\{nœud\}} ;
+	\item la \texttt{\{liste\}} pour la commande \texttt{\textbackslash DefinirPoints} est à donner -- par exemple -- sous la forme \texttt{A/xa,ya/poslabel B/alpha:r/poslabel ...}.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{DemoCode}[]
+\begin{tikzpicture}
+	\DefinirPoint{A}{0,0}
+	\DefinirPoints{B/4,0/ C/3,2/}
+	\DefinirPoints[Math]{H_1/-1,2.5/}
+	\MarquerPoints{A,B,C,H_1}
+\end{tikzpicture}
+\end{DemoCode}
+
+\begin{DemoCode}[]
+\begin{tikzpicture}
+	\DefinirPoints[DecalLabel=1pt,Couleur=blue,Math]{A/0,0/bg B/4,0/bd}
+	\DefinirPoints[DecalLabel=1pt,Couleur=red,TaillePolice=\LARGE]{C/3,2/h}
+	\MarquerPoints[StyleMarque=x,Couleur=violet]{A}
+	\MarquerPoints[Couleur=orange]{B}
+	\MarquerPoint[StyleMarque=+,Couleur=red]{C}
+\end{tikzpicture}
+\end{DemoCode}
+
+\pagebreak
+
+\section{Définir des points par transformation}
+
+\subsection{Commandes}
+
+\begin{cautionblock}
+\cmaj{0.1.1} Les commandes \textit{simplifiées} et \textit{francisées} disponibles sont :
+
+\begin{itemize}
+	\item \texttt{\textbackslash ImagePoint} pour définir un point par transformation ;
+	\item \texttt{\textbackslash ImagesPoints} pour définir des points par transformation.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{cautionblock}
+
+\begin{noteblock}
+Les \textit{transformations} disponibles sont (l'écriture \textit{mathématique} sert à illustrer la syntaxe \LaTeX{} utilisée) :
+
+\begin{itemize}
+	\item les translations glissées $t(A)=A+k\times\vec{u}$ ;
+	\item les rotations $r(A)=A+{\text{rot}}(\Omega,\theta)$ ;
+	\item les symétries centrales $s(A)=A+{\text{sym}}(I)$.
+\end{itemize}
+\end{noteblock}
+
+\begin{DemoCode}[listing only]
+\begin{tikzpicture}[options tikz]
+	%création des points utiles
+	\DefinirPoint... \DefinirPoints
+	%point défini par une transformation
+	\ImagePoint(*)[clés]{formule}<label point>
+	%points définis par des transformations, sans modification des labels !
+	\ImagesPoints(*)[clés]{formule § formule § ...}
+\end{tikzpicture}
+\end{DemoCode}
+
+\begin{DemoCode}[listing only]
+\begin{tikzpicture}[options tikz]
+	%création des points utiles
+	\DefinirPoint...
+	%point défini par une translation glissée
+	\ImagePoint(*)[clés]{PtArr=PTDep+t(k,DebVect>FinVect)}
+\end{tikzpicture}
+\end{DemoCode}
+
+\hfill
+\begin{tikzpicture}
+	\draw[thin,lightgray] (-2,-1) grid (5,3) ;
+	\DefinirPoints{A/0,0/}
+	\DefinirPoints*{K/-1,1/ L/2,2/}
+	\draw[semithick,->,>=latex] (K)--(L) node[midway,sloped,above] {$\vec{u}$} ;
+	\ImagePoint[Math]{A'=A+t(1.5,K>L)}
+	\draw[semithick,->,>=latex,gray,dashed] (A)--(A') node[midway,sloped,below] {$k\times\vec{u}$} ;
+	\MarquerPoints{A,A'}
+\end{tikzpicture}
+\hfill~
+
+\begin{DemoCode}[listing only]
+\begin{tikzpicture}[options tikz]
+	%création des points utiles
+	\DefinirPoint...
+	%point défini par une rotation
+	\ImagePoint{PtArr=PTDep+r(centre,angle)}
+	%point défini par une symétrie centrale
+\end{tikzpicture}
+\end{DemoCode}
+
+\hfill
+\begin{tikzpicture}
+	\draw[thin,lightgray] (-2,0) grid (4,4) ;
+	\DefinirPoint[Math]{Omega}{0,1}<\Omega>
+	\DefinirPoint{A}{3,0.5}
+	\ImagePoint[Math]{A'=A+r(Omega,55)}
+	\draw[semithick,->,>=latex,gray,dashed] (Omega)--(A) ;
+	\draw[semithick,->,>=latex,gray,dashed] (Omega)--(A') ;
+	\tkzPicAngle["$\mathcolor{gray}{\alpha}$",draw=gray,<->,angle eccentricity=1.2,angle radius=1cm](A,Omega,A')
+	\MarquerPoints{Omega,A,A'}
+\end{tikzpicture}
+\hfill~
+
+\begin{DemoCode}[listing only]
+\begin{tikzpicture}[options tikz]
+	%création des points utiles
+	\DefinirPoint...
+	\ImagePoint{PtArr=PTDep+s(centre)}
+\end{tikzpicture}
+\end{DemoCode}
+
+\hfill
+\begin{tikzpicture}
+	\draw[thin,lightgray] (-4,-1) grid (5,2) ;
+	\DefinirPoints{A/4,1/ I/0.5,0.5/}
+	\ImagePoint[Math]{A'=A+s(I)}
+	\draw[semithick,->,>=latex,gray,dashed] (I)--(A) node[midway,sloped] {$/\!/$} ;
+	\draw[semithick,->,>=latex,gray,dashed] (I)--(A') node[midway,sloped] {$/\!/$} ;
+	\MarquerPoints{A,I,A'}
+\end{tikzpicture}
+\hfill~
+
+\subsection{Clés, options et arguments}
+
+\begin{tipblock}
+Les versions étoilées désactivent l'affichage des labels des points.
+
+\smallskip
+
+L'argument optionnel et entre \texttt{[...]} propose les \Cle{clés} suivantes (communes ou spécifiques) :
+
+\begin{itemize}
+	\item \Cle{PosLabel} pour préciser la position (francisée) du label pour les points ; \hfill{}défaut : \Cle{b}
+	\item \Cle{TaillePolice} pour spécifier la taille de la police du label ;
+	
+	\hfill{}défaut : \Cle{\textbackslash normalsize}
+	\item \Cle{StyleMarque} parmi \Cle{x/o/+} pour spécifier le style de la marque des points ;
+	
+	\hfill{}défaut : \Cle{o}
+	\item \Cle{Math} : booléen pour afficher le label en mode math ; \hfill{}défaut : \Cle{false}
+	\item \Cle{TailleMarque} pour spécifier la taille de la marque des points (disque/ croix) ;
+	
+	\hfill{}défaut : \Cle{2pt}
+	\item \Cle{Couleur} pour paramétrer la couleur.\hfill{}défaut : \Cle{black}
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\pagebreak
+
+\begin{noteblock}
+On donne par exemple $A(0;0)$, $B(4;1)$ et $C(3;2)$ et on définit les points :
+%
+\begin{itemize}
+	\item $D$ image de $A$ par la translation de vecteur $\overrightarrow{AB}$ ;
+	\item $E$ image de $A$ par la translation de vecteur $\overrightarrow{CB}$ ;
+	\item $F$ image de $A$ par la translation-glissée de vecteur $2\overrightarrow{DB}$ ;
+	\item $G$ image de $F$ par la translation de vecteur $\overrightarrow{BD}$ ;
+	\item $K$ image de $G$ par la rotation de centre $F$ et d'angle 90° ;
+	\item $L$ image de $B$ par la symétrie centrale de centre $C$ ;
+	\item $H_1$ image de $A$ par la translation-glissée de vecteur $-0{,}5\overrightarrow{BA}$.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{noteblock}
+
+\begin{DemoCode}[tikz lower]
+\draw[thin,lightgray] (-5,-2) grid (8,5) ;
+\DefinirPoints[Math,TaillePolice=\LARGE]{A/0,0/ B/4,1/ C/3,2/}
+\ImagesPoints[TaillePolice=\tiny]{D=C+t(A>B) § E=A+t(C>B) § F=A+t(2,B>C) § G=F+t(B>D) § K=G+r(F,90) § L=B+s(C)}
+\ImagePoint[Math,TaillePolice=\scriptsize]{H_1=A+t(-0.5,B>A)}
+\MarquerPoints{A,B,C,D,E,F,G,K,L}
+\MarquerPoint{H_1}
+\end{DemoCode}
+
+\pagebreak
+
+\section{Tracer des segments}
+
+\subsection{Commandes}
+
+\begin{cautionblock}
+La commande \textit{simplifiée} et \textit{francisée} pour tracer des segments est \texttt{\textbackslash TracerSegments}.
+
+\smallskip
+
+Le fonctionnement de cette commande permet de définir les segments :
+
+\begin{itemize}
+	\item sous la forme \texttt{A/B C/D ...} dans le cas de segments \textit{non forcément contigus} ;
+	\item sous la forme \texttt{A B C ...} dans le cas de segments \textit{contigus} (avec possibilité de \textit{fermer} le chemin).
+\end{itemize}
+\end{cautionblock}
+
+\begin{DemoCode}[listing only]
+%version liste de segments (AB) et (CD) et ...
+\begin{tikzpicture}
+	\TracerSegments[clés]<options tikz>{ptA/ptB ptC/ptD ...}
+\end{tikzpicture}
+
+%version suite de points (AB) et (BC) et ...
+\begin{tikzpicture}
+	\TracerSegments[Suite,clés]<options tikz>{ptA ptB ptC ...}
+\end{tikzpicture}
+\end{DemoCode}
+
+\subsection{Clés, options et arguments}
+
+\begin{tipblock}
+Concernant les \textsf{clés}, qui correspondent au premier argument, optionnel et entre \texttt{[...]} (certaines clés sont inactives dans certaines situations\ldots) :
+
+\begin{itemize}
+	\item \Cle{Cap} : type de \textit{jointure} pour les segments individuels ;\hfill{}défaut \Cle{round}
+	\item \Cle{Join} : type de \textit{jointure} pour les segments enchaînés ;\hfill{}défaut \Cle{miter}
+	\item \Cle{Couleurs} : sous la forme \Cle{couleur unique} ou \Cle{liste,de,couleurs} (cohérente avec le nombre de segments !) ;
+	
+	\hfill{}défaut \Cle{black}
+	\item \Cle{Cycle} : booléen pour préciser qu'on veut \textit{fermer} le chemin ;\hfill{}défaut \Cle{false}
+	\item \Cle{Suite} : booléen pour préciser qu'on veut travaille avec des points enchaînés.
+	
+	\hfill{}défaut \Cle{false}
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{tipblock}
+Le deuxième argument, optionnel et entre \texttt{<...>} correspond aux options, en langage \TikZ{} à passer à l'ensemble des segments.
+
+\smallskip
+
+Le troisième argument, obligatoire et entre \texttt{\{...\}} correspond à la suite des segments à tracer :
+
+\begin{itemize}
+	\item sous la forme \texttt{ptA/ptB ptC/ptD ...} pour des segments individuels ;
+	\item sous la forme \texttt{ptA ptB ptC ...} (avec la clé \Cle{Suite}) pour des segments enchaînés.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{noteblock}
+À noter que dans le cas d'une succession de segments (\Cle{Suite}) monochromes, cela revient à un chemin et donc ce sera la clé \Cle{Join=...} qui sera utile.
+\end{noteblock}
+
+\pagebreak
+
+\begin{DemoCode}[]
+\begin{tikzpicture}
+	\TracerSegments[Suite,Couleurs={red,blue,green}]{0,0 4,0 1,3 0,0}
+\end{tikzpicture}
+\begin{tikzpicture}
+	\TracerSegments[Suite,Cap=butt,Couleurs={red,blue,green}]{0,0 4,0 1,3 0,0}
+\end{tikzpicture}
+\begin{tikzpicture}
+	\TracerSegments[Suite,Cap=rect,Couleurs={red,blue,green}]{0,0 4,0 1,3 0,0}
+\end{tikzpicture}
+\end{DemoCode}
+
+\begin{DemoCode}[]
+\begin{tikzpicture}
+	\TracerSegments[Cycle,Suite,Couleurs=blue,Join=round]{0,0 4,0 1,3}
+\end{tikzpicture}
+\begin{tikzpicture}
+	\TracerSegments[Couleurs={red,blue,green}]{0,0/4,0 1,3/0,0 4,0/1,3}
+\end{tikzpicture}
+\begin{tikzpicture}
+	\TracerSegments[Suite,Couleurs={yellow,orange}]{0,0 4,0 1,3}
+\end{tikzpicture}
+\end{DemoCode}
+
+\begin{DemoCode}[]
+\begin{tikzpicture}
+	\DefinirPoints[DecalLabel=1pt]{A/0,0/bg B/4,0/bd C/3,2/h}
+	\TracerSegments[Suite,Cycle,Couleurs={red,blue,green}]{A B C}
+	\MarquerPoints[StyleMarque=x]{A,B,C}
+\end{tikzpicture}
+\begin{tikzpicture}
+	\DefinirPoints[DecalLabel=1pt,Math]{A/0,0/bg B/4,0/bd C/3,2/h}
+	\TracerSegments[Couleurs={yellow,red}]{A/B B/C}
+	\TracerSegments[Couleurs=blue]{C/A}
+	\MarquerPoints{A,B,C}
+\end{tikzpicture}
+\end{DemoCode}
+
+\end{document}

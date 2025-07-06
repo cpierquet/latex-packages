@@ -1,0 +1,311 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{thematicpuzzle}[2025/05/05 0.1.2 Present 'puzzle' with different thematics, in TikZ]
+% 0.1.2	Bugfix + Compatibility with fa5/6
+% 0.1.1	Enhancments for colors
+% 0.1.0	Initial version
+
+%====Option
+\newif\if@fafive \@fafivetrue
+\newif\if@fasix \@fasixfalse
+\newif\if@fafivesix \@fafivesixfalse
+\DeclareOption{nofa}{\@fafivefalse\@fasixfalse\@fafivesixfalse}
+\DeclareOption{nonfa}{\@fafivefalse\@fasixfalse\@fafivesixfalse}
+\DeclareOption{fa6}{\@fafivefalse\@fafivesixfalse\@fasixtrue}
+\DeclareOption{fa5fa6}{\@fafivefalse\@fasixfalse\@fafivesixtrue}
+\DeclareOption*{}
+\ProcessOptions\relax
+
+%====PACKAGES
+\RequirePackage{tikz}
+\RequirePackage{simplekv}
+\RequirePackage{xstring}
+\RequirePackage{xintexpr}
+\RequirePackage{listofitems}
+\if@fafive
+	\RequirePackage{fontawesome5}
+\fi
+\if@fasix
+	\RequirePackage{fontawesome6}
+\fi
+\if@fafivesix
+	\RequirePackage[fa5alias]{fontawesome6}
+\fi
+%\RequirePackage{fontawesome5}
+
+%====ALIASES FA5 FRENCH
+\if@fasix
+	\newcommand\ThemProbas{\faDice}
+	\newcommand\ThemStats{\faChartBar}
+	\newcommand\ThemChimie{\faBong}
+	\newcommand\ThemArithm{\faListOl}
+	\newcommand\ThemGraphes{\faDiagramProject}
+	\newcommand\ThemComplexes{\faInfo}
+	\newcommand\ThemMPM{\faSitemap}
+	\newcommand\ThemCalculs{\faIcon{square-root-variable}}
+	\newcommand\ThemMatrices{\faTableCells}
+	\newcommand\ThemGeometrie{\faPenRuler}
+	\newcommand\ThemEspace{\faCube}
+	\newcommand\ThemPhysique{\faRocket}
+	\newcommand\ThemFonctions{\faChartArea}
+	\newcommand\ThemSuites{\faSignal}
+	\newcommand\ThemTableur{\faTable}
+	\newcommand\ThemAlgo{\faCode}
+	\newcommand\ThemEco{\faIcon{money-bill-wave}}
+	\newcommand\ThemPython{\faPython}
+	\newcommand\ThemLogique{\faYinYang}
+	\newcommand\VAlignTikz{current bounding box.center}
+\fi
+\if@fafive
+	\newcommand\ThemProbas{\faDice}
+	\newcommand\ThemStats{\faChartBar}
+	\newcommand\ThemChimie{\faBong}
+	\newcommand\ThemArithm{\faListOl}
+	\newcommand\ThemGraphes{\faProjectDiagram}
+	\newcommand\ThemComplexes{\faInfo}
+	\newcommand\ThemMPM{\faSitemap}
+	\newcommand\ThemCalculs{\faIcon{square-root-alt}}
+	\newcommand\ThemMatrices{\faTh}
+	\newcommand\ThemGeometrie{\faPencilRuler}
+	\newcommand\ThemEspace{\faCube}
+	\newcommand\ThemPhysique{\faRocket}
+	\newcommand\ThemFonctions{\faChartArea}
+	\newcommand\ThemSuites{\faSignal}
+	\newcommand\ThemTableur{\faTable}
+	\newcommand\ThemAlgo{\faCode}
+	\newcommand\ThemEco{\faIcon{money-bill-wave}}
+	\newcommand\ThemPython{\faPython}
+	\newcommand\ThemLogique{\faYinYang}
+	\newcommand\VAlignTikz{current bounding box.center}
+\fi
+
+%====FRENCH VERSION
+\defKV[puzzlethemes]{%
+	Epaisseur=\def\puzzthmthick{#1},%
+	Echelle=\def\puzzthmscale{#1},%
+	CouleursFond=\def\puzzthmbg{#1},%
+	CouleurBord=\def\puzzthmbc{#1},%
+	Labels=\def\puzzthmlab{#1},%
+	EchelleLabels=\def\puzzthmscalab{#1},%
+	PoliceLabels=\def\puzzthmfontlab{#1},%
+	CouleurIcones=\def\puzzthmcolicon{#1}
+}
+\setKVdefault[puzzlethemes]{%
+	Epaisseur=1pt,%
+	Echelle=1,%
+	CouleursFond={},%
+	CouleurBord=black,
+	Labels={},%
+	EchelleLabels=1.15,%
+	PoliceLabels=\tiny\sffamily,%
+	CouleurIcones=black
+}
+
+\NewDocumentCommand\PuzzleThemes{ O{} D<>{} m }{%
+	\def\tmprounded{0.05}%
+	\useKVdefault[puzzlethemes]%
+	\setKV[puzzlethemes]{#1}%
+	\setsepchar{,}%
+	\readlist*\PuzzleListeThemes{#3}%
+	\xdef\puzzthmnb{\PuzzleListeThemeslen}%
+	\xdef\puzztmpalea{\fpeval{2*randint(1,2)-3}}%
+	\foreach \i in {2,...,\inteval{\PuzzleListeThemeslen-1}}{%
+		\xdef\puzztmpalea{\puzztmpalea,\fpeval{2*randint(1,2)-3}}%
+	}%
+	\readlist*\PuzzleListeAlea{\puzztmpalea}%
+	\IfSubStr{\puzzthmbg}{,}%
+		{%
+			\StrCount{\puzzthmbg}{,}[\puzznbvirg]%
+			\xintifboolexpr{\puzznbvirg < \PuzzleListeThemeslen}%
+				{%
+					\xdef\nbrepet{\fpeval{round(\PuzzleListeThemeslen/(\puzznbvirg+1),0,1)}}%
+					\xdef\puzzlstcol{\puzzthmbg}%
+					\foreach \i in {2,...,\nbrepet}{%
+						\xdef\puzzlstcol{\puzzlstcol,\puzzthmbg}%
+					}%
+				}%
+				{%
+					\xdef\puzzlstcol{\puzzthmbg}%
+				}%
+		}%
+		{%
+			\xdef\puzzlstcol{\puzzthmbg}%
+			\foreach \i in {2,...,\PuzzleListeThemeslen}{%
+				\xdef\puzzlstcol{\puzzlstcol,\puzzthmbg}%
+			}%
+		}%
+	\readlist*\PuzzleListeCouleurs{\puzzlstcol}%
+	%environnement tikz
+	\begin{tikzpicture}[scale=\puzzthmscale,transform shape,#2]%
+		%styles
+		\tikzset{bordure/.style={\puzzthmbc,line width={0.5*\puzzthmscale*\puzzthmthick}}}%
+		\tikzset{label/.style={font=\puzzthmfontlab,text=\puzzthmcolicon}}%
+		\IfEq{\puzzthmbg}{}%
+			{\tikzset{fond/.style={}}}%
+			{\tikzset{fond/.style={fill=\puzzthmbgcol}}}%
+		%1ère pièce
+		\itemtomacro\PuzzleListeCouleurs[1]{\puzzthmbgcol}%
+		\itemtomacro\PuzzleListeAlea[1]{\tmprand}%
+		\draw[bordure,fond] (\tmprounded,0) -- (1,0) .. controls (1+\tmprand*0.66*0.00,0.0) and (1+\tmprand*0.66*-0.04,0.4) ..
+		(1+\tmprand*0.66*0.04,0.4) .. controls (1+\tmprand*0.66*0.11,0.4) and (1+\tmprand*0.66*0.26,0.2) .. 
+		(1+\tmprand*0.66*0.26,0.5) .. controls (1+\tmprand*0.66*0.26,0.8) and (1+\tmprand*0.66*0.11,0.6) .. 
+		(1+\tmprand*0.66*0.04,0.6) .. controls (1+\tmprand*0.66*-0.04,0.6) and (1+\tmprand*0.66*0.00,1.0) ..
+		(1+\tmprand*0.66*0.00,1.0) -- (1,1) -- (\tmprounded,1) to[out=180,in=90] (0,1-\tmprounded) -- (0,\tmprounded) to[out=-90,in=180] (\tmprounded,0) ;
+		%les pièces du milieu
+		\foreach \i in {1,...,\inteval{\PuzzleListeThemeslen-2}}{%
+			\xdef\ipu{\inteval{\i+1}}%
+			\itemtomacro\PuzzleListeAlea[\i]{\tmprandg}%
+			\itemtomacro\PuzzleListeAlea[\ipu]{\tmprandd}%
+			\itemtomacro\PuzzleListeCouleurs[\ipu]{\puzzthmbgcol}%
+			\draw[bordure,fond] (\i,0) .. controls (\i+\tmprandg*0.66*0.00,0.0) and (\i+\tmprandg*0.66*-0.04,0.4) ..
+			(\i+\tmprandg*0.66*0.04,0.4) .. controls (\i+\tmprandg*0.66*0.11,0.4) and (\i+\tmprandg*0.66*0.26,0.2) .. 
+			(\i+\tmprandg*0.66*0.26,0.5) .. controls (\i+\tmprandg*0.66*0.26,0.8) and (\i+\tmprandg*0.66*0.11,0.6) .. 
+			(\i+\tmprandg*0.66*0.04,0.6) .. controls (\i+\tmprandg*0.66*-0.04,0.6) and (\i+\tmprandg*0.66*0.00,1.0) ..
+			(\i+\tmprandg*0.66*0.00,1.0) -- (\ipu,1)
+			.. controls (\ipu-\tmprandd*0.66*0.00,1.0) and (\ipu+\tmprandd*0.66*-0.04,0.6) ..
+			(\ipu+\tmprandd*0.66*0.04,0.6) .. controls (\ipu+\tmprandd*0.66*0.11,0.6) and (\ipu+\tmprandd*0.66*0.26,0.8) .. 
+			(\ipu+\tmprandd*0.66*0.26,0.5) .. controls (\ipu+\tmprandd*0.66*0.26,0.2) and (\ipu+\tmprandd*0.66*0.11,0.4) .. 
+			(\ipu+\tmprandd*0.66*0.04,0.4) .. controls (\ipu+\tmprandd*0.66*-0.04,0.4) and (\ipu+\tmprandd*0.66*0.00,0.0) ..
+			(\ipu+\tmprandd*0.66*0.00,0.0) -- (\ipu,0) -- (\i,0);
+		}%
+		%dernière pièce
+		\itemtomacro\PuzzleListeCouleurs[\PuzzleListeThemeslen]{\puzzthmbgcol}%
+		\itemtomacro\PuzzleListeAlea[-1]{\tmprand}%
+		\draw[bordure,fond] (\puzzthmnb-1,0) .. controls (\puzzthmnb-1+\tmprand*0.66*0.00,0.0) and (\puzzthmnb-1+\tmprand*0.66*-0.04,0.4) ..
+		(\puzzthmnb-1+\tmprand*0.66*0.04,0.4) .. controls (\puzzthmnb-1+\tmprand*0.66*0.11,0.4) and (\puzzthmnb-1+\tmprand*0.66*0.26,0.2) .. 
+		(\puzzthmnb-1+\tmprand*0.66*0.26,0.5) .. controls (\puzzthmnb-1+\tmprand*0.66*0.26,0.8) and (\puzzthmnb-1+\tmprand*0.66*0.11,0.6) .. 
+		(\puzzthmnb-1+\tmprand*0.66*0.04,0.6) .. controls (\puzzthmnb-1+\tmprand*0.66*-0.04,0.6) and (\puzzthmnb-1+\tmprand*0.66*0.00,1.0) ..
+		(\puzzthmnb-1+\tmprand*0.66*0.00,1.0) -- (\puzzthmnb-1,1) -- (\puzzthmnb-\tmprounded,1) to[out=0,in=90] (\puzzthmnb,1-\tmprounded) -- (\puzzthmnb,\tmprounded) to[out=-90,in=0] (\puzzthmnb-\tmprounded,0) -- (\puzzthmnb-1,0) ;
+		%icones
+		\foreach \i in {1,...,\PuzzleListeThemeslen}{%
+			\draw ({\i-0.5},0.5) node[scale=1.25,text=\puzzthmcolicon] {\PuzzleListeThemes[\i]} ;
+		}%
+		%labels dessous
+		\IfEq{\puzzthmlab}{}%
+			{}%
+			{%
+				\readlist*\PuzzleListeLabels{\puzzthmlab}%
+				\foreach \i in {1,...,\PuzzleListeLabelslen}{%
+					\draw ({\i-0.5},0) node[below,inner sep=1pt,scale=\puzzthmscalab,label] {\PuzzleListeLabels[\i]} ;
+				}%
+			}%
+	\end{tikzpicture}%
+}
+
+%====ENGLISH VERSION
+\defKV[themepuzzle]{%
+	Thickness=\def\puzzthmthick{#1},%
+	Scale=\def\puzzthmscale{#1},%
+	BgColors=\def\puzzthmbg{#1},%
+	BorderColor=\def\puzzthmbc{#1},%
+	Labels=\def\puzzthmlab{#1},%
+	ScaleLabels=\def\puzzthmscalab{#1},%
+	FontLabels=\def\puzzthmfontlab{#1},%
+	IconsColor=\def\puzzthmcolicon{#1}
+}
+\setKVdefault[themepuzzle]{%
+	Thickness=1pt,%
+	Scale=1,%
+	BgColors={},%
+	BorderColor=black,
+	Labels={},%
+	ScaleLabels=1.15,%
+	FontLabels=\tiny\sffamily,%
+	IconsColor=black
+}
+
+\NewDocumentCommand\ThematicPuzzle{ O{} D<>{} m }{%
+	\def\tmprounded{0.05}%
+	\useKVdefault[themepuzzle]%
+	\setKV[themepuzzle]{#1}%
+	\setsepchar{,}%
+	\readlist*\PuzzleListeThemes{#3}%
+	\xdef\puzzthmnb{\PuzzleListeThemeslen}%
+	\xdef\puzztmpalea{\fpeval{2*randint(1,2)-3}}%
+	\foreach \i in {2,...,\inteval{\PuzzleListeThemeslen-1}}{%
+		\xdef\puzztmpalea{\puzztmpalea,\fpeval{2*randint(1,2)-3}}%
+	}%
+	\readlist*\PuzzleListeAlea{\puzztmpalea}%
+	\IfSubStr{\puzzthmbg}{,}%
+		{%
+			\StrCount{\puzzthmbg}{,}[\puzznbvirg]%
+			\xintifboolexpr{\puzznbvirg < \PuzzleListeThemeslen}%
+				{%
+					\xdef\nbrepet{\fpeval{round(\PuzzleListeThemeslen/(\puzznbvirg+1),0,1)}}%
+					\xdef\puzzlstcol{\puzzthmbg}%
+					\foreach \i in {2,...,\nbrepet}{%
+						\xdef\puzzlstcol{\puzzlstcol,\puzzthmbg}%
+					}%
+				}%
+				{%
+					\xdef\puzzlstcol{\puzzthmbg}%
+				}%
+		}%
+		{%
+			\xdef\puzzlstcol{\puzzthmbg}%
+			\foreach \i in {2,...,\PuzzleListeThemeslen}{%
+				\xdef\puzzlstcol{\puzzlstcol,\puzzthmbg}%
+			}%
+		}%
+	\readlist*\PuzzleListeCouleurs{\puzzlstcol}%
+	%environnement tikz
+	\begin{tikzpicture}[scale=\puzzthmscale,transform shape,#2]%
+		%styles
+		\tikzset{border/.style={\puzzthmbc,line width={0.5*\puzzthmscale*\puzzthmthick}}}%
+		\tikzset{label/.style={font=\puzzthmfontlab,text=\puzzthmcolicon}}%
+		\IfEq{\puzzthmbg}{}%
+			{\tikzset{background/.style={}}}%
+			{\tikzset{background/.style={fill=\puzzthmbgcol}}}%
+		%1ère pièce
+		\itemtomacro\PuzzleListeCouleurs[1]{\puzzthmbgcol}%
+		\itemtomacro\PuzzleListeAlea[1]{\tmprand}%
+		\draw[border,background] (\tmprounded,0) -- (1,0) .. controls (1+\tmprand*0.66*0.00,0.0) and (1+\tmprand*0.66*-0.04,0.4) ..
+		(1+\tmprand*0.66*0.04,0.4) .. controls (1+\tmprand*0.66*0.11,0.4) and (1+\tmprand*0.66*0.26,0.2) .. 
+		(1+\tmprand*0.66*0.26,0.5) .. controls (1+\tmprand*0.66*0.26,0.8) and (1+\tmprand*0.66*0.11,0.6) .. 
+		(1+\tmprand*0.66*0.04,0.6) .. controls (1+\tmprand*0.66*-0.04,0.6) and (1+\tmprand*0.66*0.00,1.0) ..
+		(1+\tmprand*0.66*0.00,1.0) -- (1,1) -- (\tmprounded,1) to[out=180,in=90] (0,1-\tmprounded) -- (0,\tmprounded) to[out=-90,in=180] (\tmprounded,0) ;
+		%les pièces du milieu
+		\foreach \i in {1,...,\inteval{\PuzzleListeThemeslen-2}}{%
+			\xdef\ipu{\inteval{\i+1}}%
+			\itemtomacro\PuzzleListeAlea[\i]{\tmprandg}%
+			\itemtomacro\PuzzleListeAlea[\ipu]{\tmprandd}%
+			\itemtomacro\PuzzleListeCouleurs[\ipu]{\puzzthmbgcol}%
+			\draw[border,background] (\i,0) .. controls (\i+\tmprandg*0.66*0.00,0.0) and (\i+\tmprandg*0.66*-0.04,0.4) ..
+			(\i+\tmprandg*0.66*0.04,0.4) .. controls (\i+\tmprandg*0.66*0.11,0.4) and (\i+\tmprandg*0.66*0.26,0.2) .. 
+			(\i+\tmprandg*0.66*0.26,0.5) .. controls (\i+\tmprandg*0.66*0.26,0.8) and (\i+\tmprandg*0.66*0.11,0.6) .. 
+			(\i+\tmprandg*0.66*0.04,0.6) .. controls (\i+\tmprandg*0.66*-0.04,0.6) and (\i+\tmprandg*0.66*0.00,1.0) ..
+			(\i+\tmprandg*0.66*0.00,1.0) -- (\ipu,1)
+			.. controls (\ipu-\tmprandd*0.66*0.00,1.0) and (\ipu+\tmprandd*0.66*-0.04,0.6) ..
+			(\ipu+\tmprandd*0.66*0.04,0.6) .. controls (\ipu+\tmprandd*0.66*0.11,0.6) and (\ipu+\tmprandd*0.66*0.26,0.8) .. 
+			(\ipu+\tmprandd*0.66*0.26,0.5) .. controls (\ipu+\tmprandd*0.66*0.26,0.2) and (\ipu+\tmprandd*0.66*0.11,0.4) .. 
+			(\ipu+\tmprandd*0.66*0.04,0.4) .. controls (\ipu+\tmprandd*0.66*-0.04,0.4) and (\ipu+\tmprandd*0.66*0.00,0.0) ..
+			(\ipu+\tmprandd*0.66*0.00,0.0) -- (\ipu,0) -- (\i,0);
+		}%
+		%dernière pièce
+		\itemtomacro\PuzzleListeCouleurs[\PuzzleListeThemeslen]{\puzzthmbgcol}%
+		\itemtomacro\PuzzleListeAlea[-1]{\tmprand}%
+		\draw[border,background] (\puzzthmnb-1,0) .. controls (\puzzthmnb-1+\tmprand*0.66*0.00,0.0) and (\puzzthmnb-1+\tmprand*0.66*-0.04,0.4) ..
+		(\puzzthmnb-1+\tmprand*0.66*0.04,0.4) .. controls (\puzzthmnb-1+\tmprand*0.66*0.11,0.4) and (\puzzthmnb-1+\tmprand*0.66*0.26,0.2) .. 
+		(\puzzthmnb-1+\tmprand*0.66*0.26,0.5) .. controls (\puzzthmnb-1+\tmprand*0.66*0.26,0.8) and (\puzzthmnb-1+\tmprand*0.66*0.11,0.6) .. 
+		(\puzzthmnb-1+\tmprand*0.66*0.04,0.6) .. controls (\puzzthmnb-1+\tmprand*0.66*-0.04,0.6) and (\puzzthmnb-1+\tmprand*0.66*0.00,1.0) ..
+		(\puzzthmnb-1+\tmprand*0.66*0.00,1.0) -- (\puzzthmnb-1,1) -- (\puzzthmnb-\tmprounded,1) to[out=0,in=90] (\puzzthmnb,1-\tmprounded) -- (\puzzthmnb,\tmprounded) to[out=-90,in=0] (\puzzthmnb-\tmprounded,0) -- (\puzzthmnb-1,0) ;
+		%icones
+		\foreach \i in {1,...,\PuzzleListeThemeslen}{%
+			\draw ({\i-0.5},0.5) node[scale=1.25,text=\puzzthmcolicon] {\PuzzleListeThemes[\i]} ;
+		}%
+		%labels dessous
+		\IfEq{\puzzthmlab}{}%
+			{}%
+			{%
+				\readlist*\PuzzleListeLabels{\puzzthmlab}%
+				\foreach \i in {1,...,\PuzzleListeLabelslen}{%
+					\draw ({\i-0.5},0) node[below,inner sep=1pt,scale=\puzzthmscalab,label] {\PuzzleListeLabels[\i]} ;
+				}%
+			}%
+	\end{tikzpicture}%
+}
+
+
+\endinput

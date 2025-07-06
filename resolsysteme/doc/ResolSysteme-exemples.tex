@@ -1,0 +1,171 @@
+% !TeX document-id = {f9c98d52-d889-44e1-8a1d-1b1aa5b344f6}
+% !TeX TXS-program:compile = txs:///pdflatex
+
+\documentclass[french,a4paper,10pt]{article}
+\def\RSver{0.1.8}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{ResolSysteme}
+\usepackage{systeme}
+\usepackage{babel}
+\usepackage[most]{tcolorbox}
+\sisetup{locale=FR,output-decimal-marker={,}}
+\newtcblisting{ShowCodeTeX}[1][]{colback=white,colframe=red!75!black,listing options={style=tcblatex,texcsstyle=*\color{red!70!black}},#1}
+
+\begin{document}
+
+\part*{ResolSysteme (\RSver), version \og classique \fg{}}
+
+\section{Préambule sans utiliser Python}
+
+\begin{ShowCodeTeX}[listing only]
+\documentclass[french,a4paper,10pt]{article}
+\usepackage[margin=1.5cm]{geometry}
+\usepackage{ResolSysteme}                     %version classique
+\usepackage{systeme}
+\sisetup{locale=FR,output-decimal-marker={,}}
+\end{ShowCodeTeX}
+
+\section{Affichage d'une matrice, 2×2 ou 3×3 ou 4×4}
+
+\begin{ShowCodeTeX}
+On considère les matrices $A=\AffMatrice(1,2 § 3,4)$
+et $B=\AffMatrice[n](-1,1/3,4 § 1/3,4,-1 § -1,0,0)$
+et $C=\AffMatrice(1,2,3,4 § 5,6,7,0 § 1,1,1,1 § 2,-3,-5,-6)$.
+\end{ShowCodeTeX}
+
+\section{Calculs avec des matrices, 2×2 ou 3×3 ou 4×4}
+
+\begin{ShowCodeTeX}
+$\ProduitMatrices(1,2)(3 § 4)[Aff]$ et $\ProduitMatrices(1,2)(3,4 § 5,6)[Aff]$ \\
+$\ProduitMatrices(-5,6 § 1,4)(2 § 7)[Aff]$ et $\ProduitMatrices(-5,6 § 1,4)(2,-4 § 7,0)[Aff]$
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+$\ProduitMatrices(1,2,3)(4 § 5 § 6)[Aff]$ et $\ProduitMatrices(1,2,3)(1,1,1 § 2,1,5 § 0,5,-6)[Aff]$\\
+$\ProduitMatrices(1,1,1 § 2,1,5 § 0,5,-6)(1 § 2 § 3)[Aff]$ et
+$\ProduitMatrices(1,1,1 § 2,1,5 § 0,5,-6)(1,2,3 § -5,-4,2 § 3,3,10)[Aff]$
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+$\ProduitMatrices(1,2,3,4)(5 § 6 § 7 § 8)[Aff]$\\
+$\ProduitMatrices(1,2,3,4)(1,1,1,5 § 2,1,5,6 § 0,5,-6,0 § 1,-5,4,2)[Aff]$\\
+$\ProduitMatrices(1,1,1,5 § 2,1,5,6 § 0,5,-6,0 § 1,-5,4,2)(1 § 2 § 3 § 4)[Aff]$\\
+$\ProduitMatrices(1,1,1,5 § 2,1,5,6 § 0,5,-6,0 § 1,-5,4,2)(1,5,4,0 § 2,-1,-1,5 § 3,0,1,2, § 4,6,9,10)[Aff]$
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+$\CarreMatrice(-5,6 § 1,4)[Aff]$ \\
+$\CarreMatrice(-5,6,8 § 1,4,-9 § 1,-1,1)[Aff]$\\
+$\CarreMatrice(1,2,3,4 § 5,6,7,0 § 1,1,1,1 § 2,-3,-5,-6)[Aff]$
+\end{ShowCodeTeX}
+
+\section{Déterminant d'une matrice, 2×2 ou 3×3 ou 4×4}
+
+\begin{ShowCodeTeX}
+Le déterminant de $A=\AffMatrice(1,2 § 3,4)$ est
+$\det(A)=\DetMatrice(1,2 § 3,4)$.
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+Le déterminant de $A=\AffMatrice(-1,0.5 § -1/2,4)$ est
+$\det(A)=\DetMatrice[dec](-1,0.5 § -1/2,4)$.
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+Le dét. de $A=\begin{pNiceMatrix} -1&\frac13&4 \\ \frac13&4&-1 \\ -1&0&0 \end{pNiceMatrix}$ est
+$\det(A) \approx \DetMatrice[dec=3](-1,1/3,4 § 1/3,4,-1 § -1,0,0)$.
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+Le dét. de $A=\begin{pNiceMatrix} 1&2&3&4\\5&6&7&0\\1&1&1&1\\2&-3&-5&-6 \end{pNiceMatrix}$
+est $\det(A)=\DetMatrice(1,2,3,4 § 5,6,7,0 § 1,1,1,1 § 2,-3,-5,-6)$.
+\end{ShowCodeTeX}
+
+\section{Inverse d'une matrice, 2×2 ou 3×3 ou 4×4}
+
+\begin{ShowCodeTeX}
+L'inverse de $A=\begin{pNiceMatrix} 1&2 \\ 3&4 \end{pNiceMatrix}$ est
+$A^{-1}=\MatriceInverse<cell-space-limits=2pt>(1,2 § 3,4)$.
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+L'inverse de $A=\begin{pNiceMatrix} 1&2 \\ 3&4 \end{pNiceMatrix}$ est
+$A^{-1}=\MatriceInverse*<cell-space-limits=2pt>(1,2 § 3,4)$.
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+L'inverse de $A=\begin{pNiceMatrix} 1&2 \\ 3&4 \end{pNiceMatrix}$ est
+$A^{-1}=\MatriceInverse[d]<cell-space-limits=2pt>(1,2 § 3,4)$.
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+L'inverse de $A=\begin{pNiceMatrix} 1&2&3\\4&5&6\\7&8&8 \end{pNiceMatrix}$ est
+$A^{-1}=\MatriceInverse<cell-space-limits=2pt>(1,2,3 § 4,5,6 § 7,8,8)$.
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+L'inverse de $A=\begin{pNiceMatrix} 1&2&3\\4&5&6\\7&8&8 \end{pNiceMatrix}$ est
+$A^{-1}=\MatriceInverse[n]<cell-space-limits=2pt>(1,2,3 § 4,5,6 § 7,8,8)$.
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+L'inverse de $A=\begin{pNiceMatrix} 1&2&3&4\\5&6&7&0\\1&1&1&1\\2&-3&-5&-6 \end{pNiceMatrix}$
+est $A^{-1}=\MatriceInverse[n]<cell-space-limits=2pt>(1,2,3,4 § 5,6,7,0 § 1,1,1,1 § 2,-3,-5,-6)$.
+\end{ShowCodeTeX}
+
+\section*{Résolution d'un système, 2×2 ou 3×3 ou 4×4}
+
+\begin{ShowCodeTeX}
+La solution de $\systeme{-9x-8y=-8,3x-6y=-7}$ est $\mathcal{S}=%
+\left\lbrace \SolutionSysteme(-9,-8 § 3,-6)(-8,-7) \right\rbrace$.
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+La solution de $\systeme{-9x-8y=-8,3x-6y=-7}$ est $\mathcal{S}=%
+\left\lbrace \SolutionSysteme*[d](-9,-8 § 3,-6)(-8,-7) \right\rbrace$.
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+La solution de $\systeme{x+y+z=-1,3x+2y-z=6,-x-y+2z=-5}$ est $\mathcal{S}=%
+\left\lbrace \SolutionSysteme(1,1,1 § 3,2,-1 § -1,-1,2)(-1,6,-5) \right\rbrace$.
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+La solution de $\systeme{x+y+z=-1,3x+2y-z=6,-x-y+2z=-5}$ est donnée par $X=%
+\SolutionSysteme(1,1,1 § 3,2,-1 § -1,-1,2)(-1,6,-5)[Matrice]$.
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+La solution de $\systeme{3x+y-2z=-1,2x-y+z=4,x-y-2z=5}$ est $\mathcal{S}=%
+\left\lbrace \SolutionSysteme(3,1,-2 § 2,-1,1 § 1,-1,-2)(-1,4,5) \right\rbrace$.
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+La solution de $\systeme{3x+y-2z=-1,2x-y+z=4,x-y-2z=5}$ est $\mathcal{S}=%
+\left\lbrace \SolutionSysteme[d](3,1,-2 § 2,-1,1 § 1,-1,-2)(-1,4,5) \right\rbrace$.
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+La solution de $\systeme[xyzt]{y+z+t=1,x+z+t=-1,x+y+t=1,x+y+z=0}$ est $\mathcal{S}=%
+\left\lbrace\SolutionSysteme[d](0,1,1,1 § 1,0,1,1 § 1,1,0,1 § 1,1,1,0)(1,-1,1,0)\right\rbrace$.
+\end{ShowCodeTeX}
+
+\begin{ShowCodeTeX}
+La solution de $\systeme[xyzt]{x+2y+3z+4t=-10,5x+6y+7z=0,x+y+z+t=4,-2x-3y-5z-6t=7}$ est $X=
+\SolutionSysteme
+    [dec]<cell-space-limits=2pt>
+    (1,2,3,4 § 5,6,7,0 § 1,1,1,1 § -2,-3,-5,-6)(-10,0,4,7)
+    [Matrice]$
+\end{ShowCodeTeX}
+
+\section{État stable d'une graphe probabiliste, 2×2}
+
+\begin{ShowCodeTeX}
+L'état stable du gr. prob. de matrice
+$M=\AffMatrice[dec](0.72,0.28 § 0.12,0.88)$
+
+est $\Pi = \EtatStable[d](0.72,0.28 § 0.12,0.88)$
+ou $\Pi = \EtatStable[dec](0.72,0.28 § 0.12,0.88)$.
+\end{ShowCodeTeX}
+
+\end{document}

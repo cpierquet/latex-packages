@@ -1,0 +1,1143 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: lualatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: lualatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[french,a4paper,11pt]{article}
+\def\TPversion{0.1.8}
+\def\TPdate{4 juillet 2024}
+\usepackage[executable=python.exe]{pyluatex}
+\usepackage[table,svgnames]{xcolor}
+\usepackage{amsmath,amssymb}
+\usepackage[bold-style=ISO,math-style=french]{unicode-math}
+\setmainfont{TeX Gyre Schola}
+\setmathfont{TeX Gyre Schola Math}
+\usepackage[pyluatex]{ResolSysteme}
+\usepackage{awesomebox}
+\usepackage{fontawesome5}
+\usepackage{systeme}
+\usepackage{enumitem}
+\usepackage{tabularray}
+\usepackage{multicol}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\sisetup{locale=FR,output-decimal-marker={,},group-minimum-digits=4}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [ResolSysteme]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+
+%\usepackage{hvlogos}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+\newcommand\TableauDocumentation{%
+	\begin{tblr}{width=\linewidth,colspec={X[c]X[c]X[c]X[c]X[c]X[c]},cells={font=\sffamily}}
+		{\LARGE \LaTeX} & & & & &\\
+		& {\LARGE \hologo{pdfLaTeX}} & & & & \\
+		& & {\LARGE \hologo{LuaLaTeX}} & & & \\
+		& & & {\LARGE \TikZ} & & \\
+		& & & & {\LARGE \TeXLive} & \\
+		& & & & & {\LARGE \hologo{MiKTeX}} \\
+	\end{tblr}
+}
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=1.5cm]{geometry}
+\setlength{\parindent}{0pt}
+\definecolor{LightGray}{gray}{0.9}
+
+\usepackage[french]{babel}
+
+\usepackage[most]{tcolorbox}
+\usetikzlibrary{calc}
+\tcbuselibrary{minted}
+\NewTCBListing{PresentationCode}{ O{blue} m }{%
+	sharp corners=downhill,enhanced,arc=12pt,skin=bicolor,%
+	colback=#1!1!white,colframe=#1!75!black,colbacklower=white,%
+	attach boxed title to top right={yshift=-\tcboxedtitleheight},title=Code \LaTeX,%
+	boxed title style={%
+		colframe=#1!75!black,colback=#1!15!white,%
+		,sharp corners=downhill,arc=12pt,%
+	},%
+	top=\baselineskip,%
+	fonttitle=\color{#1!90!black}\itshape\ttfamily\footnotesize,%
+	listing engine=minted,minted style=colorful,
+	minted language=tex,minted options={tabsize=4,fontsize=\small,autogobble},
+	#2
+}
+
+\NewTCBListing{PresentationCodePython}{ O{DarkRed} m }{%
+	sharp corners=downhill,enhanced,arc=12pt,skin=bicolor,%
+	colback=#1!1!white,colframe=#1!75!black,colbacklower=white,%
+	attach boxed title to top right={yshift=-\tcboxedtitleheight},title=Code Python,%
+	boxed title style={%
+		colframe=#1!75!black,colback=#1!15!white,%
+		,sharp corners=downhill,arc=12pt,%
+	},%
+	fonttitle=\color{#1!90!black}\itshape\ttfamily\footnotesize,%
+	listing engine=minted,minted style=colorful,
+	minted language=python,minted options={tabsize=2,fontsize=\footnotesize,autogobble},
+	#2
+}
+
+\tcbset{vignettes/.style={%
+	nobeforeafter,box align=base,boxsep=0pt,enhanced,sharp corners=all,rounded corners=southeast,%
+	boxrule=0.75pt,left=7pt,right=1pt,top=0pt,bottom=0.25pt,%
+	}
+}
+
+\tcbset{vignetteMaJ/.style={%
+	fontupper={\vphantom{pf}\footnotesize\ttfamily},
+	vignettes,colframe=ForestGreen!50!black,coltitle=white,colback=ForestGreen!25,%
+	overlay={\begin{tcbclipinterior}%
+			\fill[fill=ForestGreen!75]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{Black}{\scalebox{0.85}[0.75]{\textbf{MàJ}}}}} ($(interior.north west)+(5pt,0pt)$);%
+	\end{tcbclipinterior}}
+	}
+}
+
+\newcommand\Cle[1]{{\bfseries\sffamily\textlangle #1\textrangle}}
+\newcommand\cmaj[1]{\tcbox[vignetteMaJ]{#1}\xspace}
+
+\begin{document}
+
+\setlength{\aweboxleftmargin}{0.07\linewidth}
+\setlength{\aweboxcontentwidth}{0.93\linewidth}
+\setlength{\aweboxvskip}{8pt}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\vspace{2cm}
+
+\begin{center}
+	\begin{minipage}{0.75\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{ResolSysteme [fr]}}\\
+				\\
+				{\LARGE Des outils pour des matrices, } \\
+				\\
+				{\LARGE des systèmes linéaires,} \\
+				\\
+				{\LARGE avec xint ou pyluatex.} \\
+			\end{tabular}
+			
+			\bigskip
+			
+			{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://github.com/cpierquet/ResolSysteme}}
+\end{tabular}
+\end{center}
+
+\vspace{0.25cm}
+
+{$\blacktriangleright$~~Une commande pour afficher une matrice carrée (2×2, 3×3 ou 4×4) avec la syntaxe du package.}
+
+\smallskip
+
+{$\blacktriangleright$~~Quelques commandes pour effectuer des calculs matriciels (produit, carré, puissance).}
+
+\smallskip
+
+{$\blacktriangleright$~~Des commandes pour calculer le déterminant et l'inverse de matrices carrées (2×2, 3×3 ou 4×4).}
+
+\smallskip
+
+{$\blacktriangleright$~~Des commandes pour résoudre des systèmes linéaires (2×2, 3×3 ou 4×4).}
+
+\smallskip
+
+{$\blacktriangleright$~~Des commandes pour travailler sur des graphes probabilistes (2×2, 3×3 ou 4×4).}
+
+\vspace{1cm}
+
+\begin{center}
+	\begin{tcolorbox}[enhanced,colframe=ForestGreen,colback=lightgray!5,center,width=0.95\linewidth,drop fuzzy shadow=lightgray]
+	\verb|$M=\AffMatrice(1,2 § 3,4)$, et $M^3=\MatricePuissancePY(1,2 § 3,4)(3)$.|
+	
+	\medskip
+	
+	La matrice $M=\AffMatrice(1,2 § 3,4)$ au cube vaut $M^3=\MatricePuissancePY(1,2 § 3,4)(3)$.
+	
+	Le \textbf{déterminant} de $A=\begin{pNiceMatrix} -1&\frac12 \\ \frac12&4 \end{pNiceMatrix}$ est
+	$\det(A)=\DetMatrice[dec](-1,0.5 § 1/2,4)$.
+	
+	\medskip
+	
+	L'\textbf{inverse} de la matrice $A=\begin{pNiceMatrix} 1&2&3&4\\5&6&7&0\\1&1&1&1\\-2&-3&-5&-6 \end{pNiceMatrix}$ est $A^{-1}=\MatriceInversePY[n]<cell-space-limits=2pt>(1,2,3,4 § 5,6,7,0 § 1,1,1,1 § -2,-3,-5,-6)$.
+	
+	\medskip
+	
+	La \textbf{solution} de $\systeme[xyzt]{y+z+t=1,x+z+t=-1,x+y+t=1,x+y+z=0}$ est $\mathcal{S}=\left\lbrace\SolutionSystemePY[d](0,1,1,1 § 1,0,1,1 § 1,1,0,1 § 1,1,1,0)(1,-1,1,0)\right\rbrace$.
+	\end{tcolorbox}
+\end{center}
+
+\vspace{0.5cm}
+
+\hfill{}\textit{Merci à Denis Bitouzé et à Gilles Le Bourhis pour leurs retours et idées !}
+
+\smallskip
+
+\vfill
+
+\hrule
+
+\medskip
+
+\TableauDocumentation
+
+\medskip
+
+\hrule
+
+\bigskip
+
+{\footnotesize\sffamily\itshape À mon papa.}
+
+\newpage
+
+\phantomsection
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\newpage
+
+\part{Introduction}
+
+\section{Le package ResolSysteme}
+
+\subsection{Introduction}
+
+\begin{noteblock}
+La package \textit{propose} des outils pour travailler sur des matrices ou des systèmes linéaires ou des graphes probabilistes (de tailles réduites !) :
+
+\begin{itemize}
+	\item en calculant des \textbf{produits matriciels} \textit{simples} (dimensions réduites) ;
+	\item en affichant la \textbf{solution} (si elle existe) d'un système linéaire ;
+	\item en affichant le \textbf{déterminant} et l'éventuelle \textbf{inverse} de la matrice des coefficients ;
+	\item en déterminant un \textbf{état probabiliste} ou l'éventuel \textbf{état stable} d'un graphe probabiliste.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{noteblock}
+
+\begin{importantblock}
+À noter que les calculs -- en interne -- peuvent être effectués de deux manières :
+
+\begin{itemize}
+	\item via les packages \textsf{xint*} pour des formats \textbf{2×2} ou \textbf{3×3} (et dans une certaine mesure pour des \textbf{4×4}) ;
+	\item via \textsf{Python} et le package \textsf{pyluatex} (à charger manuellement du fait des options spécifiques) pour des formats \textbf{2×2}, \textbf{3×3} ou \textbf{4×4}.
+\end{itemize}
+
+Il n'est pas prévu -- pour le moment -- de travailler sur des matrices/systèmes plus grands, car l'idée est de pouvoir formater le résultat, ce qui se fait coefficient par coefficient.
+\end{importantblock}
+
+\begin{warningblock}
+L'utilisation de \textsf{pyluatex} nécessite une compilation adaptée, à savoir en \hologo{LuaLaTeX} et en activant le mode \textsf{--shell-escape}. 
+
+\smallskip
+
+La méthode par \textsf{Python} utilise quoi qu'il en soit le module \texttt{sympy}, qui doit donc être installé !
+\end{warningblock}
+
+\subsection{Packages utilisés, choix de formatage}
+
+\begin{noteblock}
+\textsf{ResolSysteme} charge les packages suivantes :
+
+\begin{itemize}
+	\item \texttt{xintexpr}, \texttt{xinttools}, \texttt{xstring} et \texttt{listofitems} ;
+	\item \texttt{sinuitx}, \texttt{nicefrac} et \texttt{nicematrix} ;
+\end{itemize}
+
+Il est compatible avec les compilations usuelles en \textsf{latex}, \textsf{pdflatex}, \textsf{lualatex} (obligatoire pour \textsf{pyluatex} !!) ou \textsf{xelatex}.
+\end{noteblock}
+
+\begin{importantblock}
+Les nombres sont formatés par la commande \texttt{\textbackslash num} de \textsf{sinuitx}, donc les options choisies par l'utilisateur se propageront aux résultats numériques.
+
+\smallskip
+
+L'affichage des matrices est gérée par le package \textsf{nicematrix}, et des options spécifiques \textit{simples} pourront être placées dans les différentes commandes.
+\end{importantblock}
+
+\subsection{Fichiers d'exemples}
+
+\begin{noteblock}
+En marge de la présente documentation, compilée en \textsf{lualatex} avec \textsf{shell-escape}, deux fichiers avec des exemples d'utilisation sont proposés :
+
+\begin{itemize}
+	\item \texttt{ResolSysteme-exemples} pour les commandes disponibles en version classique (\textsf{xint}) ;
+	\item \texttt{ResolSysteme-exemples-pyluatex} pour les commandes disponibles en version \textsf{Python} (\textsf{pyluatex}).
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{noteblock}
+
+\pagebreak
+
+\subsection{Chargement du package, et option}
+
+\begin{importantblock}
+Le package peut donc se charger de deux manières différentes, suivant si l'utilisateur utilise \textsf{Python} ou non. Les commandes \textit{classiques} sont disponibles même si \textsf{Python} est utilisé.
+\end{importantblock}
+
+\begin{PresentationCode}{listing only}
+%chargement du package sans passer par pyluatex, calculs via xint
+\usepackage{ResolSysteme}
+\end{PresentationCode}
+
+\begin{PresentationCode}{listing only}
+%chargement du package pyluatex et du package avec [pyluatex]
+\usepackage[options]{pyluatex}
+\usepackage[pyluatex]{ResolSysteme}
+\end{PresentationCode}
+
+\section{Comparaison avec d'autres solutions}
+
+\begin{noteblock}
+D'autres solutions existent pour faire du calcul matriciel, on peut pas exemple citer les excellents packages \textsf{calculator} ou \textsf{lualinalg} !
+
+\smallskip
+
+L'idée est ici de proposer une version, adaptée à des dimensions classiques, avec formatage des calculs, sous forme de fraction irréductible notamment. Les formatages étant effectués \textit{a posteriori}, j'ai choisi de limiter ce package à des formats de taille raisonnable (\textbf{1×2} à \textbf{4×4}).
+\end{noteblock}
+
+\part{Historique}
+
+\verb|v0.1.8|~:~~~~Correction de bugs, améliorations dans la documentation.
+
+\verb|v0.1.7|~:~~~~Correction de bugs dans certains calculs avec des fractions.
+
+\verb|v0.1.6|~:~~~~Correction de bugs dans certains calculs avec des fractions.
+
+\verb|v0.1.6|~:~~~~Correction de bugs dans certains calculs.
+
+\verb|v0.1.5|~:~~~~Inverse d'une matrice 4x4 et système 4x4 (même en normal).
+
+\verb|v0.1.4|~:~~~~Ajout de commandes pour du calcul matriciel sans \textsf{Python} (de taille raisonnable) ;
+
+\verb|      |~~~~~~commandes pour des graphes probabilistes.
+
+\verb|v0.1.3|~:~~~~Ajout de commandes pour du calcul matriciel (de taille raisonnable) ;
+
+\verb|      |~~~~~~inversion du comportement des commandes étoilées.
+
+\verb|v0.1.2|~:~~~~Ajout d'une commande d'affichage (formaté) d'une matrice 2×2, 3×3 ou 4×4.
+
+\verb|v0.1.1|~:~~~~Correction d'un bug avec le caractère \og ; \fg.
+
+\verb|v0.1.0|~:~~~~Version initiale.
+
+\pagebreak
+
+\part{Commandes et calculs matriciels}
+
+\section{Une commande interne : écriture sous forme d'une fraction}
+
+\subsection{La commande}
+
+\begin{cautionblock}
+En \textit{interne}, le code utilise une commande pour formater un résultat sous forme fractionnaire, avec gestion des entiers et gestion du signe \og $-$ \fg.
+\end{cautionblock}
+
+\begin{PresentationCode}{listing only}
+\ConvVersFrac(*)[option de formatage]{calcul}
+\end{PresentationCode}
+
+\subsection{Utilisation}
+
+\begin{tipblock}
+Concernant cette commande, qui est dans un bloc \texttt{ensuremath} :
+
+\begin{itemize}
+	\item \cmaj{0.1.3} la version \textit{étoilée} force l'écriture du signe \og $-$ \fg{} sur le numérateur ;
+	\item le premier argument, \textit{optionnel} et entre \textsf{[...]} permet de spécifier un formatage du résultat :
+	\begin{itemize}
+		\item \Cle{t} pour l'affichage de la fraction en mode \textsf{tfrac} ;
+		\item \Cle{d} pour l'affichage de la fraction en mode \textsf{dfrac} ;
+		\item \Cle{n} pour l'affichage de la fraction en mode \textsf{nicefrac} ;
+		\item \Cle{dec} pour l'affichage du résultat en mode \texttt{décimal} (sans arrondi !) ;
+		\item \Cle{dec=k} pour l'affichage du résultat en mode \texttt{décimal} arrondi à $10^{-k}$ ;
+	\end{itemize}
+	\item le second argument, \textit{obligatoire}, est quant à lui, le calcul en syntaxe \textsf{xint}.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{PresentationCode}{listing only}
+\ConvVersFrac{-10+1/3*(-5/16)}          %sortie par défaut 
+\ConvVersFrac*{-10+1/3*(-5/16)}         %sortie fraction avec - sur numérateur
+\ConvVersFrac[d]{-10+1/3*(-5/16)}       %sortie en displaystyle
+\ConvVersFrac[n]{-10+1/3*(-5/16)}       %sortie en nicefrac
+\ConvVersFrac[dec=4]{-10+1/3*(-5/16)}   %sortie en décimal arrondi à 0,0001
+\ConvVersFrac{2+91/7}                   %entier correctement formaté
+\end{PresentationCode}
+
+\begin{PresentationCode}{text only}
+\hfill\ConvVersFrac{-10+1/3*(-5/16)} \qquad
+\ConvVersFrac*{-10+1/3*(-5/16)} \qquad
+\ConvVersFrac[d]{-10+1/3*(-5/16)} \qquad
+\ConvVersFrac[n]{-10+1/3*(-5/16)} \qquad
+\ConvVersFrac[dec=4]{-10+1/3*(-5/16)} \qquad
+\ConvVersFrac{2+91/7}\hfill~
+\end{PresentationCode}
+
+\subsection{Interaction avec les commandes \og matricielles \fg, limitations}
+
+\begin{warningblock}
+En \textit{interne}, le formatage des résultats est donc géré par cette commande, et les options disponibles existent donc de la même manière pour les commandes liées aux systèmes linéaires et aux calculs matriciels.
+
+\smallskip
+
+Il ne sera par contre pas possible de spécifier des options différentes pour chacun des coefficients, autrement dit l'éventuelle option se propagera sur l'ensemble des résultats !
+
+\smallskip
+
+Les \textit{transformations} en fraction devraient pouvoir fonctionner avec des calculs \textit{classiques}, mais il est possible que, dans des cas \textit{spécifiques}, les résultats ne soient pas ceux attendus !
+\end{warningblock}
+
+\pagebreak
+
+\section{Affichage d'une matrice carrée}
+
+\subsection{La commande}
+
+\begin{cautionblock}
+Une commande (matricielle) est dédiée à l'affichage d'une matrice \textbf{2×2} ou \textbf{3×3} ou \textbf{4×4} (\textsf{Python} est ici non nécessaire !) :
+
+\begin{itemize}
+	\item en saisissant les coefficients via une syntaxe propre au package (l'affichage est géré en interne par \textsf{nicematrix}) ;
+	\item en calculant et convertissant éventuellement les coefficients sous forme de fraction (grâce à la commande précédente !).
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{cautionblock}
+
+\begin{PresentationCode}{listing only}
+%commande disponible avec les deux versions, pyluatex ou non
+\AffMatrice(*)[option de formatage]<(matrice)
+\end{PresentationCode}
+
+\subsection{Utilisation}
+
+\begin{tipblock}
+Concernant cette commande, qui est à insérer dans un environnement \textit{math} :
+
+\begin{itemize}
+	\item \cmaj{0.1.3} la version \textit{étoilée} force l'écriture du signe \og $-$ \fg{} sur le numérateur ;
+	\item le premier argument, \textit{optionnel} et entre \textsf{[...]} permet de spécifier un formatage du résultat :
+	\begin{itemize}
+		\item \Cle{t} pour l'affichage de la fraction en mode \textsf{tfrac} ;
+		\item \Cle{d} pour l'affichage de la fraction en mode \textsf{dfrac} ;
+		\item \Cle{n} pour l'affichage de la fraction en mode \textsf{nicefrac} ;
+		\item \Cle{dec} pour l'affichage du résultat en mode \texttt{décimal} (sans arrondi !) ;
+		\item \Cle{dec=k} pour l'affichage du résultat en mode \texttt{décimal} arrondi à $10^{-k}$ ;
+	\end{itemize}
+	\item le deuxième argument, \textit{optionnel} et entre \textsf{<...>} correspond aux \Cle{options} à passer à l'environnement \texttt{pNiceMatrix} ;
+	\item le troisième argument, \textit{obligatoire} et entre \textsf{(...)}, est quant à lui, la matrice donnée par ses coefficients \textsf{a11,a12,... § a21,a22,...} (syntaxe \textit{inspirée} de \texttt{sympy}).
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{PresentationCode}{}
+On considère les matrices $A=\AffMatrice(1,2 § 3,4)$
+et $B=\AffMatrice[n](-1,1/3,4 § 1/3,4,-1 § -1,0,0)$
+et $C=\AffMatrice(1,2,3,4 § 5,6,7,0 § 1,1,1,1 § 2,-3,-5,-6)$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+On considère la matrice
+$M=\AffMatrice[d]<cell-space-limits=2pt>(1+1/4,0,3+4/5 § 0,1,-5/3 § 1/2,0.45,6/7)$.
+\end{PresentationCode}
+
+\pagebreak
+
+\section{Calculs matriciels \og simples \fg}
+
+\subsection{Introduction}
+
+\begin{cautionblock}
+L'idée est de proposer des commandes pour effectuer des calculs matriciels \textit{simples} sur des matrices :
+
+\begin{itemize}
+	\item des produits matriciels :
+	\begin{itemize}[label=$\bullet$]
+		\item $(1\times2)\times(2\times1)$ ;
+		\item $(1\times2)\times(2\times2)$ ;
+		\item $(2\times2)\times(2\times2)$ ;
+		\item $(2\times2)\times(2\times1)$ ;
+		\item $(1\times3)\times(3\times1)$ ;
+		\item $(1\times3)\times(3\times3)$ ;
+		\item $(3\times3)\times(3\times3)$ ;
+		\item $(3\times3)\times(3\times1)$ ;
+		\item $(1\times4)\times(4\times1)$ ;
+		\item $(1\times4)\times(4\times4)$ ;
+		\item $(4\times4)\times(4\times4)$ ;
+		\item $(4\times4)\times(4\times1)$ ;
+	\end{itemize}
+	\item le carré d'une matrice 2×2 ou 3×3 ou 4×4 ;
+	\item la puissance d'une matrice 2×2 ou 3×3 ou 4×4 (via \textsf{Python}).
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{cautionblock}
+
+\begin{PresentationCode}{listing only}
+%commandes disponible avec les deux versions, pyluatex ou non
+\ProduitMatrices(*)[option de formatage]<options nicematrix>(matrice 1)(matrice 2)[Clé]
+\ProduitMatricesPY(*)[option de formatage]<options nicematrix>(matrice 1)(matrice 2)[Clé]
+\CarreMatrice(*)[option de formatage]<options nicematrix>(matrice)[Clé]
+
+%commande disponible avec l'option pyluatex
+\MatricePuissancePY(*)[option de formatage]<options nicematrix>(matrice)(puissance)[Clé]
+\end{PresentationCode}
+
+\begin{warningblock}
+Dans le cas où le produit matriciel n'existe pas (un test de dimensions est effectué), ou ne rentre pas dans le cadre des cas possibles, rien ne sera affiché !
+\end{warningblock}
+
+\subsection{Utilisation}
+
+\begin{tipblock}
+Concernant ces commandes, qui sont à insérer dans un environnement \textit{math} :
+
+\begin{itemize}
+	\item \cmaj{0.1.3} la version \textit{étoilée} force l'écriture du signe \og $-$ \fg{} sur le numérateur ;
+	\item le premier argument, \textit{optionnel} et entre \textsf{[...]} permet de spécifier un formatage du résultat :
+	\begin{itemize}
+		\item \Cle{t} pour l'affichage de la fraction en mode \textsf{tfrac} ;
+		\item \Cle{d} pour l'affichage de la fraction en mode \textsf{dfrac} ;
+		\item \Cle{n} pour l'affichage de la fraction en mode \textsf{nicefrac} ;
+		\item \Cle{dec} pour l'affichage du résultat en mode \texttt{décimal} (sans arrondi !) ;
+		\item \Cle{dec=k} pour l'affichage du résultat en mode \texttt{décimal} arrondi à $10^{-k}$ ;
+	\end{itemize}
+	\item le deuxième argument, \textit{optionnel} et entre \textsf{<...>} correspond aux \Cle{options} à passer à l'environnement \texttt{pNiceMatrix} ;
+	\item les arguments suivants, \textit{obligatoires} et entre \textsf{(...)}, sont quant à eux, les matrices données par leurs coefficients \textsf{a11,a12,... § a21,a22,...} (syntaxe \textit{inspirée} de \texttt{sympy}) ou la matrice et la puissance ;
+	\item le dernier argument, \textit{optionnel} et entre \textsf{[...]} propose l'unique \frquote{clé} \Cle{Aff} pour afficher le calcul avant le résultat.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{PresentationCode}{}
+$\ProduitMatrices(-5,6 § 1,4)(2 § 7)[Aff]$ et $\ProduitMatrices(-5,6 § 1,4)(2 § 7)$
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+$\ProduitMatrices[dec](0.5,0.3,0.2)(0.75,0.1,0.15 § 0.4,0.4,0.2 § 0.6,0.1,0.3)[Aff]$
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+$\ProduitMatrices(1,1,1,5 § 2,1,5,6 § 0,5,-6,0 § 1,-5,4,2)(1 § 2 § 3 § 4)[Aff]$
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+$\ProduitMatrices%
+	(1,1,1,5 § 2,1,5,6 § 0,5,-6,0 § 1,-5,4,2)%
+	(1,5,4,0 § 2,-1,-1,5 § 3,0,1,2, § 4,6,9,10)
+	[Aff]$
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+$\CarreMatrice(-5,6 § 1,4)[Aff]$
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+$\CarreMatrice(-5,6,8 § 1,4,-9 § 1,-1,1)[Aff]$
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+$\MatricePuissancePY(1,1 § 5,-2)(7)[Aff]$
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+$\MatricePuissancePY(1,1,-1 § 5,-2,1 § 0,5,2)(3)[Aff]$
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+$\MatricePuissancePY(1,1,1,1 § 5,-2,1,5 § 0,5,2,-1 § 0,1,1,1)(5)[Aff]$
+\end{PresentationCode}
+
+\pagebreak
+
+\section{Calcul de déterminant}
+
+\subsection{Introduction}
+
+\begin{cautionblock}
+Une commande est disponible pour calculer le déterminant d'une matrice :
+
+\begin{itemize}
+	\item \textbf{2×2} ou \textbf{3×3} ou \textbf{4×4}.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{cautionblock}
+
+\begin{PresentationCode}{listing only}
+%version classique
+\DetMatrice(*)[option de formatage](matrice)
+
+%version Python
+\DetMatricePY(*)[option de formatage](matrice)
+\end{PresentationCode}
+
+\subsection{Utilisation}
+
+\begin{tipblock}
+Concernant cette commande, qui est à insérer dans un environnement \textit{math} :
+
+\begin{itemize}
+	\item \cmaj{0.1.3} la version \textit{étoilée} force l'écriture du signe \og $-$ \fg{} sur le numérateur ;
+	\item le premier argument, \textit{optionnel} et entre \textsf{[...]} permet de spécifier un formatage du résultat :
+	\begin{itemize}
+		\item \Cle{t} pour l'affichage de la fraction en mode \textsf{tfrac} ;
+		\item \Cle{d} pour l'affichage de la fraction en mode \textsf{dfrac} ;
+		\item \Cle{n} pour l'affichage de la fraction en mode \textsf{nicefrac} ;
+		\item \Cle{dec} pour l'affichage du résultat en mode \texttt{décimal} (sans arrondi !) ;
+		\item \Cle{dec=k} pour l'affichage du résultat en mode \texttt{décimal} arrondi à $10^{-k}$ ;
+	\end{itemize}
+	\item le second argument, \textit{obligatoire} et entre \textsf{(...)}, est quant à lui, la matrice donnée par ses coefficients \textsf{a11,a12,... § a21,a22,...} (syntaxe \textit{inspirée} de \texttt{sympy}).
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{PresentationCode}{}
+%version classique
+Le dét. de $A=\AffMatrice(1,2 § 3,4)$ est
+$\det(A)=\DetMatrice(1,2 § 3,4)$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%version classique
+Le dét. de $A=\AffMatrice[dec](-1,0.5 § 1/2,4)$ est
+$\det(A)=\DetMatrice[dec](-1,0.5 § 1/2,4)$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%version classique
+Le dét. de $A=\AffMatrice[t](-1,1/3,4 § -1/3,4,-1 § -1,0,0)$ est
+$\det(A) \approx \DetMatrice[dec=3](-1,1/3,4 § -1/3,4,-1 § -1,0,0)$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+Le dét. de $A=\begin{pNiceMatrix} 1&2&3&4\\5&6&7&0\\1&1&1&1\\2&-3&-5&-6 \end{pNiceMatrix}$
+est $\det(A)=\DetMatrice(1,2,3,4 § 5,6,7,0 § 1,1,1,1 § 2,-3,-5,-6)$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%version Python
+Le dé. de $A=\AffMatrice(1,2 § 3,4)$ est
+$\det(A)=\DetMatricePY(1,2 § 3,4)$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+Le dét. de $A=\AffMatrice[dec](-1,0.5 § 1/2,4)$ est
+$\det(A)=\DetMatricePY[d](-1,0.5 § 1/2,4)$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%version Python
+Le dét. de $A=\AffMatrice(-1,1/3,4 § 1/3,4,-1 § -1,0,0)$ est
+$\det(A) \approx \DetMatricePY[dec=3](-1,1/3,4 § 1/3,4,-1 § -1,0,0)$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%version Python
+Le dét. de $A=\AffMatrice(1,2,3,4 § 5,6,7,0 § 1,1,1,1 § 2,-3,-5,-6)$
+est $\det(A)=\DetMatricePY(1,2,3,4 § 5,6,7,0 § 1,1,1,1 § 2,-3,-5,-6)$.
+\end{PresentationCode}
+
+\pagebreak
+
+\section{Inverse d'une matrice}
+
+\subsection{Introduction}
+
+\begin{cautionblock}
+Une commande (matricielle) disponible est pour calculer l'éventuelle inverse d'une matrice :
+
+\begin{itemize}
+	\item \textbf{2×2} ou \textbf{3×3} ou \textbf{4×4} (\cmaj{0.1.5}) pour le package \textit{classique} ;
+	\item \textbf{2×2} ou \textbf{3×3} ou \textbf{4×4} également pour la version \textsf{Python}.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{cautionblock}
+
+\begin{PresentationCode}{listing only}
+%version classique
+\MatriceInverse(*)[option de formatage]<options nicematrix>(matrice)[Clé]
+
+%version Python
+\MatriceInversePY(*)[option de formatage]<options nicematrix>(matrice)[Clé]
+\end{PresentationCode}
+
+\subsection{Utilisation}
+
+\begin{tipblock}
+Concernant cette commande, qui est à insérer dans un environnement \textit{math} :
+
+\begin{itemize}
+	\item \cmaj{0.1.3} la version \textit{étoilée} force l'écriture du signe \og $-$ \fg{} sur le numérateur ;
+	\item le premier argument, \textit{optionnel} et entre \textsf{[...]} permet de spécifier un formatage du résultat :
+	\begin{itemize}
+		\item \Cle{t} pour l'affichage de la fraction en mode \textsf{tfrac} ;
+		\item \Cle{d} pour l'affichage de la fraction en mode \textsf{dfrac} ;
+		\item \Cle{n} pour l'affichage de la fraction en mode \textsf{nicefrac} ;
+		\item \Cle{dec} pour l'affichage du résultat en mode \texttt{décimal} (sans arrondi !) ;
+		\item \Cle{dec=k} pour l'affichage du résultat en mode \texttt{décimal} arrondi à $10^{-k}$ ;
+	\end{itemize}
+	\item le deuxième argument, \textit{optionnel} et entre \textsf{<...>} correspond aux \Cle{options} à passer à l'environnement \texttt{pNiceMatrix} ;
+	\item le troisième argument, \textit{obligatoire} et entre \textsf{(...)}, est quant à lui, la matrice donnée par ses coefficients \textsf{a11,a12,... § a21,a22,...} (syntaxe \textit{inspirée} de \texttt{sympy}) ;
+	\item le dernier argument, \textit{optionnel} et entre \textsf{[...]} propose l'unique \frquote{clé} \Cle{Aff} pour afficher le calcul avant le résultat.
+\end{itemize}
+À noter que si la matrice n'est pas inversible, le texte \texttt{Matrice non inversible} est affiché.
+\end{tipblock}
+
+\begin{PresentationCode}{}
+%version classique
+L'inverse de $A=\AffMatrice(1,2 § 3,4)$ est
+$A^{-1}=\MatriceInverse<cell-space-limits=2pt>(1,2 § 3,4)$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%version classique
+L'inverse de $A=\AffMatrice(1,2,3 § 4,5,6 § 7,8,8)$ est
+$A^{-1}=\MatriceInverse[n]<cell-space-limits=2pt>(1,2,3 § 4,5,6 § 7,8,8)[Aff]$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%version Python
+L'inverse de $A=\AffMatrice(1,2 § 3,4)$ est
+$A^{-1}=\MatriceInversePY[d]<cell-space-limits=2pt>(1,2 § 3,4)[Aff]$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%version normale
+L'inv. de $A=\AffMatrice(1,2,3,4 § 5,6,7,0 § 1,1,1,1 § -2,-3,-5,-6)$ est
+$A^{-1}=
+\MatriceInverse[n]<cell-space-limits=2pt>(1,2,3,4 § 5,6,7,0 § 1,1,1,1 § -2,-3,-5,-6)$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%version Python
+L'inv. de $A=\AffMatrice(1,2,3,4 § 5,6,7,0 § 1,1,1,1 § -2,-3,-5,-6)$ est
+$A^{-1}=
+\MatriceInversePY[n]<cell-space-limits=2pt>(1,2,3,4 § 5,6,7,0 § 1,1,1,1 § -2,-3,-5,-6)$.
+\end{PresentationCode}
+
+\pagebreak
+
+\section{États avec un graphe probabiliste}
+
+\subsection{Introduction}
+
+\begin{cautionblock}
+\cmaj{0.1.4} Il existe des commandes pour travailler sur un graphe probabiliste (avec le package en version \textsf{Python}) :
+
+\begin{itemize}
+	\item afficher un état probabiliste (\textbf{1×2} ou \textbf{1×3} ou \textbf{1×4}, version normale ou version \textsf{Python}) ;
+	\item déterminer un état probabiliste à une certaine étape, uniquement en version \textsf{Python}.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{cautionblock}
+
+\begin{PresentationCode}{listing only}
+%version classique ou Python
+\AffEtatProb[opt de formatage]<opts nicematrix>(matrice ligne)
+\EtatProbPY[opt de formatage]<opts nicematrix>(état init)(mat de trans)(étape)
+\end{PresentationCode}
+
+\subsection{Utilisation}
+
+\begin{tipblock}
+Concernant la commande d'affichage d'un état, qui est à insérer dans un environnement \textit{math} :
+
+\begin{itemize}
+	\item le premier argument, \textit{optionnel} et entre \textsf{[...]} permet de spécifier un formatage du résultat :
+	\begin{itemize}
+		\item \Cle{t} pour l'affichage de la fraction en mode \textsf{tfrac} ;
+		\item \Cle{d} pour l'affichage de la fraction en mode \textsf{dfrac} ;
+		\item \Cle{n} pour l'affichage de la fraction en mode \textsf{nicefrac} ;
+		\item \Cle{dec} pour l'affichage du résultat en mode \texttt{décimal} (sans arrondi !) ;
+		\item \Cle{dec=k} pour l'affichage du résultat en mode \texttt{décimal} arrondi à $10^{-k}$ ;
+	\end{itemize}
+	\item le deuxième argument, \textit{optionnel} et entre \textsf{<...>} correspond aux \Cle{options} à passer à l'environnement \texttt{pNiceMatrix} ;
+	\item le troisième argument, \textit{obligatoire} et entre \textsf{(...)}, est quant à lui, la matrice donnée par ses coefficients \textsf{a11,a12,...} (syntaxe \textit{inspirée} de \texttt{sympy}).
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{tipblock}
+Concernant la commande d'affichage d'un état à une étape donnée, qui est à insérer dans un environnement \textit{math} :
+
+\begin{itemize}
+	\item le premier argument, \textit{optionnel} et entre \textsf{[...]} permet de spécifier un formatage du résultat \textsf{[dec] par défaut} :
+	\begin{itemize}
+		\item \Cle{t} pour l'affichage de la fraction en mode \textsf{tfrac} ;
+		\item \Cle{d} pour l'affichage de la fraction en mode \textsf{dfrac} ;
+		\item \Cle{n} pour l'affichage de la fraction en mode \textsf{nicefrac} ;
+		\item \Cle{dec} pour l'affichage du résultat en mode \texttt{décimal} (sans arrondi !) ;
+		\item \Cle{dec=k} pour l'affichage du résultat en mode \texttt{décimal} arrondi à $10^{-k}$ ;
+	\end{itemize}
+	\item le deuxième argument, \textit{optionnel} et entre \textsf{<...>} correspond aux \Cle{options} à passer à l'environnement \texttt{pNiceMatrix} ;
+	\item le troisième argument, \textit{obligatoire} et entre \textsf{(...)}, est quant à lui, la matrice donnée par ses coefficients \textsf{a11,a12,a13} (syntaxe \textit{inspirée} de \texttt{sympy}) ;
+	\item le quatrième argument, \textit{obligatoire} et entre \textsf{(...)}, est quant à lui, la matrice de transition donnée par ses coefficients \textsf{a11,a12,... § a21,a22,...} (syntaxe \textit{inspirée} de \texttt{sympy}) ;
+	\item le cinquième argument, \textit{obligatoire} et entre \textsf{(...)}, est quant à lui, le numéro de l'étape voulue
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{PresentationCode}{}
+État initial : $P_0 = \AffEtatProb[t](1/3,2/3)$.
+
+Matrice de transition :
+$M=\AffMatrice[dec](0.75,0.25 § 0.9,0.1)$
+
+État à l'instant 5 :
+$P_5 \approx \EtatProbPY[dec=3](1/3,2/3)%
+	(0.75,0.25 § 0.9,0.1)
+	(5)$
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+État initial : $P_0 = \AffEtatProb[dec](0.33,0.52,0.15)$.
+
+Matrice de transition :
+$M=\AffMatrice[dec]%
+(0.1,0.2,0.7 § 0.25,0.25,0.5 § 0.15,0.75,0.1)$
+
+État à l'instant 7 :
+$P_7 \approx \EtatProbPY[dec=3]
+	(0.33,0.52,0.15)%
+	(0.1,0.2,0.7 § 0.25,0.25,0.5 § 0.15,0.75,0.1)
+	(7)$
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+État initial : $P_0 = \AffEtatProb[dec](0.33,0.52,0.15,0)$.
+
+Matrice de transition :
+$M=\AffMatrice[dec]%
+(0.1,0.2,0.3,0.4 § 0.25,0.25,0.25,0.25 § 0.15,0.15,0.2,0.5 § 0.3,0.3,0.2,0.2)$
+
+État à l'instant 4 :
+$P_4 \approx \EtatProbPY[dec=3]
+	(0.33,0.52,0.15,0)%
+	(0.1,0.2,0.3,0.4 § 0.25,0.25,0.25,0.25 § 0.15,0.15,0.2,0.5 § 0.3,0.3,0.2,0.2)%
+	(4)$
+\end{PresentationCode}
+
+\pagebreak
+
+\part{Résolution de systèmes}
+
+\section{Résolution d'un système linéaire}
+
+\subsection{Introduction}
+
+\begin{cautionblock}
+Il existe une commande (matricielle) pour déterminer l'éventuelle solution d'un système linéaire qui s'écrit matriciellement $A\times X=B$:
+
+\begin{itemize}
+	\item \textbf{2×2} ou \textbf{3×3} ou \textbf{4×4} (\cmaj{0.1.5}) pour le package \textit{classique} ;
+	\item \textbf{2×2} ou \textbf{3×3} ou \textbf{4×4} également pour le package en version \textsf{Python}.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{cautionblock}
+
+\begin{PresentationCode}{listing only}
+%version classique
+\SolutionSysteme(*)[opt de formatage]<opts nicematrix>(matriceA)(matriceB)[Clé]
+
+%version Python
+\SolutionSystemePY(*)[opt de formatage]<opts nicematrix>(matriceA)(matriceB)[Clé]
+\end{PresentationCode}
+
+\subsection{Utilisation}
+
+\begin{tipblock}
+Concernant cette commande, qui est à insérer dans un environnement \textit{math} :
+
+\begin{itemize}
+	\item \cmaj{0.1.3} la version \textit{étoilée} force l'écriture du signe \og $-$ \fg{} sur le numérateur ;
+	\item le premier argument, \textit{optionnel} et entre \textsf{[...]} permet de spécifier un formatage du résultat :
+	\begin{itemize}
+		\item \Cle{t} pour l'affichage de la fraction en mode \textsf{tfrac} ;
+		\item \Cle{d} pour l'affichage de la fraction en mode \textsf{dfrac} ;
+		\item \Cle{n} pour l'affichage de la fraction en mode \textsf{nicefrac} ;
+		\item \Cle{dec} pour l'affichage du résultat en mode \texttt{décimal} (sans arrondi !) ;
+		\item \Cle{dec=k} pour l'affichage du résultat en mode \texttt{décimal} arrondi à $10^{-k}$ ;
+	\end{itemize}
+	\item le deuxième argument, \textit{optionnel} et entre \textsf{<...>} correspond aux \Cle{options} à passer à l'environnement \texttt{pNiceMatrix} ;
+	\item le troisième argument, \textit{obligatoire} et entre \textsf{(...)}, est quant à lui, la matrice $A$ donnée par ses coefficients \textsf{a11,a12,... § a21,a22,...} (syntaxe \textit{inspirée} de \texttt{sympy}) ;
+	\item le quatrième argument, \textit{obligatoire} et entre \textsf{(...)}, est quant à lui, la matrice $B$ donnée par ses coefficients \textsf{b11,b21,...} (syntaxe \textit{inspirée} de \texttt{sympy}) ;
+	\item le dernier argument, \textit{optionnel} et entre \textsf{[...]}, permet -- grâce à la \textit{clé} \Cle{Matrice} -- de présenter le vecteur solution.
+\end{itemize}
+À noter que si la matrice n'est pas inversible, le texte \texttt{Matrice non inversible} est affiché.
+
+\smallskip
+
+Pour afficher le système via la commande \texttt{\textbackslash systeme}, le package \textsf{systeme} doit être chargé.
+\end{tipblock}
+
+\begin{PresentationCode}{}
+%version classique
+La solution de $\systeme{3x+y-2z=-1,2x-y+z=4,x-y-2z=5}$ est $\mathcal{S}=%
+\left\lbrace \SolutionSysteme[d](3,1,-2 § 2,-1,1 § 1,-1,-2)(-1,4,5) \right\rbrace$.\\
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%version Python
+La solution de $\systeme{x+y+z=-1,3x+2y-z=6,-x-y+2z=-5}$ est $\mathcal{S}=%
+\left\lbrace \SolutionSystemePY(1,1,1 § 3,2,-1 § -1,-1,2)(-1,6,-5) \right\rbrace$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%version normal
+La solution de $\systeme[xyzt]{x+2y+3z+4t=-10,5x+6y+7z=0,x+y+z+t=4,-2x-3y-5z-6t=7}$
+est $\mathcal{S}=%
+	\left\lbrace
+		\SolutionSysteme%
+		[dec]<cell-space-limits=2pt>%
+		(1,2,3,4 § 5,6,7,0 § 1,1,1,1 § -2,-3,-5,-6)(-10,0,4,7)%
+\right\rbrace$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+La solution de $\systeme{\frac{2}{7}x + \frac{5}{9}y = 13,\frac{73}{37} x - 9y=-11}$
+est $\mathcal{S}=
+\left\lbrace \SolutionSysteme[d](2/7,5/9 § 73/37,-9)(13,-11) \right\rbrace$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%version Python
+La solution de $\systeme[xyzt]{x+2y+3z+4t=-10,5x+6y+7z=0,x+y+z+t=4,-2x-3y-5z-6t=7}$
+est $\mathcal{S}=%
+\left\lbrace
+	\SolutionSystemePY%
+		[dec]<cell-space-limits=2pt>%
+		(1,2,3,4 § 5,6,7,0 § 1,1,1,1 § -2,-3,-5,-6)(-10,0,4,7)%
+\right\rbrace$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%pas de solution
+La solution de $\systeme{x+2y=-5,4x+8y=1}$ est $\mathcal{S}=%
+\left\lbrace \SolutionSystemePY(1,2 § 4,8)(-5,1) \right\rbrace$.
+\end{PresentationCode}
+
+\section{Recherche d'un état stable (graphe probabiliste)}
+
+\subsection{Introduction}
+
+\begin{cautionblock}
+\cmaj{0.1.4} Il existe une commande (matricielle) pour déterminer l'éventuel état stable d'un graphe probabiliste :
+
+\begin{itemize}
+	\item \textbf{2×2} pour le package \textit{classique} ;
+	\item \textbf{2×2} ou \textbf{3×3} ou \textbf{4×4} pour le package en version \textsf{Python}.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{cautionblock}
+
+\begin{PresentationCode}{listing only}
+%version classique
+\EtatStable[opt de formatage]<opts nicematrix>(matriceA)
+
+%version Python
+\EtatStablePY[opt de formatage]<opts nicematrix>(matriceA)
+\end{PresentationCode}
+
+\subsection{Utilisation}
+
+\begin{tipblock}
+Concernant cette commande, qui est à insérer dans un environnement \textit{math} :
+
+\begin{itemize}
+	\item le premier argument, \textit{optionnel} et entre \textsf{[...]} permet de spécifier un formatage du résultat :
+	\begin{itemize}
+		\item \Cle{t} pour l'affichage de la fraction en mode \textsf{tfrac} ;
+		\item \Cle{d} pour l'affichage de la fraction en mode \textsf{dfrac} ;
+		\item \Cle{n} pour l'affichage de la fraction en mode \textsf{nicefrac} ;
+		\item \Cle{dec} pour l'affichage du résultat en mode \texttt{décimal} (sans arrondi !) ;
+		\item \Cle{dec=k} pour l'affichage du résultat en mode \texttt{décimal} arrondi à $10^{-k}$ ;
+	\end{itemize}
+	\item le deuxième argument, \textit{optionnel} et entre \textsf{<...>} correspond aux \Cle{options} à passer à l'environnement \texttt{pNiceMatrix} ;
+	\item le troisième argument, \textit{obligatoire} et entre \textsf{(...)}, est quant à lui, la matrice donnée par ses coefficients \textsf{a11,a12,... § a21,a22,...} (syntaxe \textit{inspirée} de \texttt{sympy}).
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{PresentationCode}{}
+%version classique
+L'état stable du gr. prob. de matrice
+$M=\AffMatrice[dec](0.72,0.28 § 0.12,0.88)$
+
+est $\Pi = \EtatStable[d](0.72,0.28 § 0.12,0.88)$
+ou $\Pi = \EtatStable[dec](0.72,0.28 § 0.12,0.88)$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%version Python
+L'état stable du gr. prob. de matrice
+$M=\AffMatrice[dec](0.72,0.28 § 0.12,0.88)$
+
+est $\Pi = \EtatStablePY[d](0.72,0.28 § 0.12,0.88)$
+ou $\Pi = \EtatStablePY[dec](0.72,0.28 § 0.12,0.88)$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%version Python
+L'état stable du gr. prob. de matrice
+$M=\AffMatrice[dec](0.9,0.03,0.07 § 0.30,0.43,0.27 § 0.14,0.07,0.79)$
+
+est $\Pi = \EtatStablePY[d](0.9,0.03,0.07 § 0.30,0.43,0.27 § 0.14,0.07,0.79)$
+ou $\Pi = \EtatStablePY[dec](0.9,0.03,0.07 § 0.30,0.43,0.27 § 0.14,0.07,0.79)$.
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+%version Python
+L'état stable du gr. prob. de matrice
+$M=\AffMatrice[dec]%
+	(0.1,0.2,0.3,0.4 § 0.25,0.25,0.25,0.25 § 0.15,0.15,0.2,0.5 § 0.3,0.3,0.2,0.2)$
+
+est $\Pi \approx
+\EtatStablePY[dec=5]%
+(0.1,0.2,0.3,0.4 § 0.25,0.25,0.25,0.25 § 0.15,0.15,0.2,0.5 § 0.3,0.3,0.2,0.2)$.
+\end{PresentationCode}
+
+
+\pagebreak
+
+\part{Fonctions Python utilisées}
+
+\begin{cautionblock}
+Les fonctions utilisées par les packages \textsf{pyluatex} ou \textsf{pythontex} sont données ci-dessous.
+
+Elles sont accessibles en \textit{natif} une fois l'option \textsf{pyluatex} activée, grâce notamment à la macro \texttt{\textbackslash py}.
+\end{cautionblock}
+
+\begin{PresentationCodePython}{listing only}
+#variables symboliques (pour du 4×4 maxi)
+import sympy as sy
+x = sy.Symbol('x')
+y = sy.Symbol('y')
+z = sy.Symbol('z')
+t = sy.Symbol('t')
+\end{PresentationCodePython}
+
+\begin{PresentationCodePython}{listing only}
+#résolution de systèmes
+def resol_systeme_QQ(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,u) :
+	solution=sy.solve([a*x+b*y+c*z+d*t-e,f*x+g*y+h*z+i*t-j,k*x+l*y+m*z+n*t-o,p*x+q*y+r*z+s*t-u],[x,y,z,t])
+	return solution
+
+def resol_systeme_TT(a,b,c,d,e,f,g,h,i,j,k,l) :
+	solution=sy.solve([a*x+b*y+c*z-d,e*x+f*y+g*z-h,i*x+j*y+k*z-l],[x,y,z])
+	return solution
+
+def resol_systeme_DD(a,b,c,d,e,f) :
+	solution=sy.solve([a*x+b*y-c,d*x+e*y-f],[x,y])
+	return solution
+\end{PresentationCodePython}
+
+\begin{PresentationCodePython}{listing only}
+#déterminant d'une matrice
+def det_matrice_QQ(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) :
+	MatTmp = sy.Matrix(([a,b,c,d],[e,f,g,h],[i,j,k,l],[m,n,o,p]))
+	DetMatTmp = MatTmp.det()
+	return DetMatTmp
+
+def det_matrice_TT(a,b,c,d,e,f,g,h,i) :
+	MatTmp = sy.Matrix(([a,b,c],[d,e,f],[g,h,i]))
+	DetMatTmp = MatTmp.det()
+	return DetMatTmp
+
+def det_matrice_DD(a,b,c,d) :
+	MatTmp = sy.Matrix(([a,b],[c,d]))
+	DetMatTmp = MatTmp.det()
+	return DetMatTmp
+\end{PresentationCodePython}
+
+\begin{PresentationCodePython}{listing only}
+#inverse d'une martrice
+def inverse_matrice_QQ(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) :
+	MatTmp = sy.Matrix(([a,b,c,d],[e,f,g,h],[i,j,k,l],[m,n,o,p]))
+	DetMatTmp = MatTmp.inv()
+	return DetMatTmp
+
+def inverse_matrice_DD(a,b,c,d) :
+	MatTmp = sy.Matrix(([a,b],[c,d]))
+	InvMatTmp = MatTmp.inv()
+	return InvMatTmp
+
+def inverse_matrice_TT(a,b,c,d,e,f,g,h,i) :
+	MatTmp = sy.Matrix(([a,b,c],[d,e,f],[g,h,i]))
+	InvMatTmp = MatTmp.inv()
+	return InvMatTmp
+\end{PresentationCodePython}
+
+\begin{PresentationCodePython}{listing only}
+#puissance d'une matrice
+def puissance_matrice_QQ(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,puiss) :
+	MatTmp = sy.Matrix(([a,b,c,d],[e,f,g,h],[i,j,k,l],[m,n,o,p]))
+	PuissMatTmp = MatTmp**puiss
+	return PuissMatTmp
+
+def puissance_matrice_TT(a,b,c,d,e,f,g,h,i,puiss) :
+	MatTmp = sy.Matrix(([a,b,c],[d,e,f],[g,h,i]))
+	PuissMatTmp = MatTmp**puiss
+	return PuissMatTmp
+
+def puissance_matrice_DD(a,b,c,d,puiss) :
+	MatTmp = sy.Matrix(([a,b],[c,d]))
+	PuissMatTmp = MatTmp**puiss
+	return PuissMatTmp
+\end{PresentationCodePython}
+
+\begin{PresentationCodePython}{listing only}
+def etat_prob_QQ(AA,BB,CC,DD,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,puiss) :
+	MatTmpInit = sy.Matrix(([AA,BB,CC,DD])).T
+	MatTmpTrans = sy.Matrix(([a,b,c,d],[e,f,g,h],[i,j,k,l],[m,n,o,p]))
+	EtatProbRes = MatTmpInit * MatTmpTrans**puiss
+	return EtatProbRes
+
+def etat_prob_TT(AA,BB,CC,a,b,c,d,e,f,g,h,i,puiss) :
+	MatTmpInit = sy.Matrix(([AA,BB,CC])).T
+	MatTmpTrans = sy.Matrix(([a,b,c],[d,e,f],[g,h,i]))
+	EtatProbRes = MatTmpInit * MatTmpTrans**puiss
+	return EtatProbRes
+
+def etat_prob_DD(AA,BB,a,b,c,d,puiss) :
+	MatTmpInit = sy.Matrix(([AA,BB])).T
+	MatTmpTrans = sy.Matrix(([a,b],[c,d]))
+	EtatProbRes = MatTmpInit * MatTmpTrans**puiss
+	return EtatProbRes
+\end{PresentationCodePython}
+
+\begin{PresentationCodePython}{listing only}
+def resol_etat_stable_TT(a,b,c,d,e,f,g,h,i) :
+	solution=sy.solve([(a-1)*x+d*y+g*z,b*x+(e-1)*y+h*z,c*x+f*y+(i-1)*z,x+y+z-1],[x,y,z])
+	return solution
+
+def resol_etat_stable_QQ(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) :
+	solution=sy.solve([(a-1)*x+e*y+i*z+m*t,b*x+(f-1)*y+j*z+n*t,
+	c*x+g*y+(k-1)*z+o*t,d*x+h*y+l*z+(p-1)*t,x+y+z+t-1],[x,y,z,t])
+	return solution
+\end{PresentationCodePython}
+
+\end{document}

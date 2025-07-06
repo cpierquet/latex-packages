@@ -1,0 +1,582 @@
+% !TeX TXS-program:compile = txs:///pdflatex
+
+\documentclass[11pt,a4paper]{ltxdoc}
+\usepackage{sim-os-menus}
+\usepackage{graphicx}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+%\rhead{\sffamily\small\affloetalab[Legende]}
+\lfoot{\sffamily\small [sim-os-menus]}
+\rfoot{\sffamily\small - \thepage{} -}
+%\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+\def\TPversion{0.1.6}
+\def\TPdate{05/05/2025}
+\usepackage{soul}
+\sethlcolor{lightgray!25}
+\NewDocumentCommand\MontreCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{sim-os-menus}}\\
+				\\
+				{\LARGE Simulate 'windows', 'terminal' or} \\
+				{\LARGE 'context menu' like in an OS.} \\
+				\\
+				{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{tabular}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}} \\
+\end{tabular}
+\end{center}
+
+\hrule
+
+\vfill
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\ContextMenu[Font=\sffamily,ListSeps={1,3/1/4/1/},ListOffsets={1,2,1,0}]{%
+	Menu1(>),Menu2,Menu3(>)(*),Menu4 §
+	SubMenuA(>),SubMenuB(>)(*) §
+	SubSubMenu1,SubSubMenu2,SubSubMenu3(>)(*),SubSubMenu4,SubSubMenu5(>) §
+	SSSSMa,SSSSMa(>)(*),SSSSMc §
+	OK(*),KO
+}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\begin{TermUnix}[Width=12cm,Align=center]{}
+test@DESKTOP:~$ ping -c 2 ctan.org
+PING ctan.org (5.35.249.60) 56(84) bytes of data.
+\end{TermUnix}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\begin{IMGViewer}[Width=12cm]{}
+\includegraphics[width=5cm]{example-image-b}
+\end{IMGViewer}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\begin{TermMac}[Width=14cm,Align=flush left]{}
+[test@server]$ ping -c 2 ctan.org
+PING ctan.org (5.35.249.60) 56(84) bytes of data.
+\end{TermMac}
+\end{tcolorbox}
+
+\vfill~
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+\hrule
+
+\vspace*{5mm}
+
+\section{Introduction}
+
+\subsection{Description}
+
+With this package you can create context menu, or terminal, or doc viewer, like in an OS.
+
+Global styles are mostly fixed, but some customizations are possible.
+
+\subsection{Loading}
+
+To load the package, simply use:
+
+\begin{quote}
+\begin{verbatim}
+\usepackage{sim-os-menus}
+\end{verbatim}
+\end{quote}
+
+The package loads the packages:
+
+\begin{itemize}
+	\item \MontreCode{tikz} (with \MontreCode{calc,positioning}), \MontreCode{pgf}, \MontreCode{pgffor};
+	\item \MontreCode{calc}, \MontreCode{fontawesome5};
+	\item \MontreCode{simplekv}, \MontreCode{xintexpr}, \MontreCode{listofitems}, \MontreCode{xstring};
+	\item \MontreCode{settobox}, \MontreCode{tabularray};
+	\item \MontreCode{tcolorbox} (with \MontreCode{breakable,fitting,skins,listings,listingsutf8,hooks}).
+\end{itemize}
+
+For \MontreCode{fontawesome5} and \MontreCode{fontawesome6} :
+
+\begin{quote}
+\begin{verbatim}
+\usepackage{sim-os-menus}                  %fa5, default
+\usepackage[fa6]{sim-os-menus}             %with fa6
+\end{verbatim}
+\end{quote}
+
+\vfill
+
+\subsection{History}
+
+\begin{quote}
+\begin{verbatim}
+0.1.6: Bugfix + pre-compatibity with fa5/fa6
+0.1.4: Mastodon or BlueSky posts 'like'
+0.1.3: Fofders/Files like in explorer
+0.1.2: Script editor viewer 'like'
+0.1.1: French version of the commands
+0.1.0: Initial version
+\end{verbatim}
+\end{quote}
+
+\pagebreak
+
+\section{The macros}
+
+\subsection{Context menu}
+
+I order to create a context menu, the command is:
+
+\begin{quote}
+\begin{verbatim}
+%----contextual menu
+\ContextMenu[keys]{list of items}<tikz options>
+\end{verbatim}
+\end{quote}
+
+Optional keys, between \MontreCode{[...]} are:
+
+\begin{itemize}
+	\item \MontreCode{ColBack}: background color;
+	\item \MontreCode{ColHL}: = highlight color;
+	\item \MontreCode{Rounded}: boolean for rounded corners (\MontreCode{true} by default);
+	\item \MontreCode{Font}: font for the items (\MontreCode{\textbackslash normalsize\textbackslash normalfont} by default);
+	\item \MontreCode{ColItems}: color(s) for the items (\MontreCode{black} by default);
+	\item \MontreCode{MarginV}: vertical margin of the lines (\MontreCode{6pt} by default);
+	\item \MontreCode{MarginH}: horizontal margin of the lines (\MontreCode{12pt} by default);
+	\item \MontreCode{Arrow}: character for the arrow (\MontreCode{\textbackslash faCaretRight} by default);
+	\item \MontreCode{ListSeps}: list for the possible sep lines (empty or for all the levels !);
+	\item \MontreCode{ListIcons}: list for the possible icons (empty or for all the levels/items !);
+	\item \MontreCode{ListOffsets}: list for the possible vertical offset of levels (from 2, \ldots !) (empty or for all the sub-levels !);
+	\item \MontreCode{Icons}: boolean for icons (\MontreCode{false} by default);
+	\item \MontreCode{Bar}: boolean for small vertical bar with icons (\MontreCode{true} by default);
+	\item \MontreCode{Space}: horizontal space between levels (\MontreCode{-0.125} by default).
+\end{itemize}
+
+\medskip
+
+The mandatory argument, between \MontreCode{\{...\}}, is given as:
+
+\smallskip
+
+\hfill\MontreCode{item1A,item1B,... § item2A,itemp2B,... § ...}\hfill~
+
+\begin{itemize}
+	\item if an item ends with \MontreCode{(*)}, this is the beginning of the next level (\underline{only one} by level !);
+	\item if an item ends with \MontreCode{(>)} (\underline{before} optional \MontreCode{(*)}), an arrow is written at the end of the line.
+\end{itemize}
+
+A correct usage of the syntax is necessary for the code !
+
+\vspace{5mm}
+
+A few tips, due to \MontreCode{ListIcons}, \MontreCode{ListOffsets} and \MontreCode{ListSeps} keys, which are \textit{sensitive}:
+
+\begin{itemize}
+	\item \MontreCode{ListIcons} must have the same number of elements than the number of levels/items (with possible empty items);
+	\item \MontreCode{ListSeps} must have the same number of elements than the number of levels (with possible empty items);
+	\item \MontreCode{ListOffsets} must have the same number of elements than the numbers of sub-levels (with 0 si no offset !).
+\end{itemize}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+%default style
+\ContextMenu{Item1A(>),Item1B,Item1C(>)(*),Item1D § Item2A(*),Item2B(>),Item2C}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+%custom style
+\ContextMenu[Rounded=false,ColBack=yellow,ColHL=teal,%
+  ListSeps={1,3/2},ColItems={black/white},Icons,Space=0,%
+  ListIcons={\faCut,\faIcon[regular]{copy},\faCopy,\faPaste / \faNotEqual}]
+  {Item1A(>)(*),Item1B,Item1C(>),Item1D § Item2A(*),Item2B(>),Item2C}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\ContextMenu[Font=\sffamily,ListSeps={1,3/1/4/1/},ListOffsets={1,2,1,0}]{%
+  Menu1(>),Menu2,Menu3(>)(*),Menu4 §
+  SubMenuA(>),SubMenuB(>)(*) §
+  SubSubMenu1,SubSubMenu2,SubSubMenu3(>)(*),SubSubMenu4,SubSubMenu5(>) §
+  SSSSMa,SSSSMa(>)(*),SSSSMc §
+  OK(*),KO
+}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Terminal}
+
+In order to create a terminal (Win/UNiX/Mac), environments are:
+
+\begin{quote}
+\begin{verbatim}
+%----Windows like terminal
+\begin{TermWin}[keys]{tcbox options}
+    ...
+\end{TermWin}
+
+%----UNiX like terminal
+\begin{TermUnix}[keys]{tcbox options}
+    ...
+\end{TermUnix}
+
+%----OSX like terminal
+\begin{TermMac}[keys]{tcbox options}
+    ...
+\end{TermMac}
+\end{verbatim}
+\end{quote}
+
+Optional keys, between \MontreCode{[...]} are:
+
+\begin{itemize}
+	\item \MontreCode{Title}: title of the terminal (\MontreCode{Terminal Win/UNiX/Mac} by default);
+	\item \MontreCode{Align}: horizontal alignment of the box (\MontreCode{center} by default);
+	\item \MontreCode{Width}: width of the box (\MontreCode{\textbackslash linewidth} by default).
+\end{itemize}
+
+\medskip
+
+The mandatory argument, between \MontreCode{\{...\}}, are options to give to the tcbox.
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{TermWin}{}
+Microsoft Windows [version 10.0.22000.493]
+(c) Microsoft Corporation. Tous droits réservés.
+C:\Users\test>ping ctan.org
+Envoi d'une requête 'ping' sur ctan.org [5.35.249.60] avec 32 octets de données:
+Réponse de 5.35.249.60: octets=32 temps=35 ms TTL=51
+Réponse de 5.35.249.60: octets=32 temps=37 ms TTL=51
+Réponse de 5.35.249.60: octets=32 temps=35 ms TTL=51
+Réponse de 5.35.249.60: octets=32 temps=39 ms TTL=51
+Statistiques Ping pour 5.35.249.60:
+Paquets: envoyés = 4, reçus = 4, perdus = 0 (perte 0%),
+Durée approximative des boucles en millisecondes:
+Minimum = 35ms, Maximum = 39ms, Moyenne = 36ms
+\end{TermWin}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{TermUnix}[Align=flush right]{hbox}
+test@DESKTOP:~$ ping -c 2 ctan.org
+PING ctan.org (5.35.249.60) 56(84) bytes of data.
+\end{TermUnix}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{TermMac}[Width=14cm,Align=flush left]{}
+[test@server]$ ping -c 2 ctan.org
+PING ctan.org (5.35.249.60) 56(84) bytes of data.
+\end{TermMac}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Viewers}
+
+In order to create a 'fake' viewer (for \textsf{pdf} or \textsf{img}), environments are:
+
+\begin{quote}
+\begin{verbatim}
+%----PDF Viewer like
+\begin{PDFViewer}[keys]{tcbox options}
+    ....
+\end{PDFViewer}
+
+%----Image Viewer like
+\begin{IMGViewer}[keys]{tcbox options}
+    ....
+\end{IMGViewer}
+
+%----Script editor like
+\begin{PYViewer}[keys]{tcbox options}
+    ....
+\end{PYViewer}
+\end{verbatim}
+\end{quote}
+
+Optional keys, between \MontreCode{[...]} are:
+
+\begin{itemize}
+	\item \MontreCode{Title}: title of the viewer;
+	\item \MontreCode{Align}: horizontal alignment of the box (\MontreCode{center} by default);
+	\item \MontreCode{Width}: width of the box (\MontreCode{\textbackslash linewidth} by default);
+	\item \MontreCode{Halign}: horizontal alignment fot the content (\MontreCode{left} by default);
+	\item \MontreCode{Icons}: boolean for the icons (\MontreCode{true} by default).
+\end{itemize}
+
+\medskip
+
+The mandatory argument, between \MontreCode{\{...\}}, are options to give to the tcbox.
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{PDFViewer}{hbox}
+\fbox{\includegraphics[page=35,width=6cm]{ProfLycee-doc.pdf}}%
+\fbox{\includegraphics[page=36,width=6cm]{ProfLycee-doc.pdf}}
+\end{PDFViewer}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{PDFViewer}[Width=14cm,Icons=false]{}
+\fbox{\includegraphics[page=65,width=4.75cm]{ProfLycee-doc.pdf}}
+\end{PDFViewer}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{IMGViewer}[Icons=false]{hbox}
+\includegraphics[width=5cm]{example-image-b}
+\end{IMGViewer}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{IMGViewer}[Width=12cm]{}
+\includegraphics[width=3cm]{example-image}
+\end{IMGViewer}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+%with listings, or piton, for example
+\begin{PYViewer}[width=12cm]{}
+\begin{lstlisting}%
+    [
+        language=python,basicstyle=\ttfamily\small,
+        keywordstyle=\color{green!50!black},tabsize=4,
+        keywordstyle={[2]\color{magenta}},
+        numbers=left,numbersep=3mm,xleftmargin=5mm,
+        aboveskip=0pt,belowskip=0pt,
+        numberstyle=\footnotesize\ttfamily\color{gray}
+    ]
+nterms = int(input("Entrez un nombre: "))
+
+n1 = 0
+n2 = 1
+
+print("\n la suite Fibonacci est: ")
+print(n1, ",", n2, end=", ")
+
+for i in range(2, nterms):
+    suivant = n1 + n2
+    print(suivant, end=", ")
+
+n1 = n2
+n2 = suivant
+\end{lstlisting}
+\end{PYViewer}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Folders/files as in explorer}
+
+The \MontreCode{forest} package, with his library \MontreCode{edges}, can present foldertrees.
+
+\begin{quote}
+\begin{verbatim}
+\begin{ForestDirTree}[keys]{forest options}
+    [folder,FTdir
+        [subfolder1,FTdir]
+        [subfolder2,FTdir
+            [file1,FTfile]
+            [file2,FTfile]
+        ...
+    ]
+        ...
+    ]
+\end{ForestDirTree}
+\end{verbatim}
+\end{quote}
+
+Available \textsf{keys}, betweeen \MontreCode{[...]}, are:
+
+\begin{itemize}
+	\item \MontreCode{font}: font of texts;
+	\item \MontreCode{coliconfolder}: \MontreCode{gray} by default;
+	\item \MontreCode{coliconfile}: \MontreCode{gray} by default;
+	\item \MontreCode{iconfolders}: boolean for folder icons;
+	\item \MontreCode{iconfiles}: boolean for file icons;
+	\item \MontreCode{vsep}: vertical space between items (\MontreCode{0.15em} by default);
+	\item \MontreCode{iconfolder}: icon for folder;
+	\item \MontreCode{iconfile}: icone for file.
+\end{itemize}
+
+\medskip
+
+\textsf{Folders} need to be given within \MontreCode{<folder\_name>,FTdir}.
+
+\textsf{Files} need to be given within \MontreCode{<file\_name>,FTfile}.
+
+\medskip
+
+Mandatory argument, between \MontreCode{\{...\}}, corresponds to \textsf{forest} specific commands.
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{ForestDirTree}{}
+    [folder,FTdir
+        [subfolder1,FTdir]
+        [subfolder2,FTdir
+            [file1,FTfile]
+            [file2,FTfile]
+        ]
+        [file3,FTfile]
+    ]
+\end{ForestDirTree}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{ForestDirTree}%
+    [font=\sffamily,coliconfolder=yellow!50!pink,iconfiles,coliconfile=teal,vsep=0.5em]%
+    {}
+    [folder,FTdir
+        [subfolder1,FTdir]
+        [subfolder2,FTdir
+            [file1,FTfile]
+            [file2,FTfile]
+        ]
+        [file3,FTfile]
+    ]
+\end{ForestDirTree}
+\end{tcblisting}
+
+Styles are global, but can be locally defined.
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\tikzset{FTedge/.style={thick,->,densely dashed,red,>=latex}}
+\begin{ForestDirTree}%
+    [font=\sffamily,coliconfolder=yellow!50!pink,iconfiles,coliconfile=teal,vsep=0.5em]%
+    {l sep=2em}
+    [folder,FTdir
+        [subfolder1,FTdir]
+        [subfolder2,FTdir
+            [file1,FTfile]
+            [file2,FTfile]
+        ]
+        [file3,FTfile]
+    ]
+\end{ForestDirTree}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Posts as in Mastodon or BlueSky}
+
+It's possible to present posts as in Mastodon or BlueSky.
+
+\begin{quote}
+\begin{verbatim}
+\begin{MastodonPost}[options]<tcolorbox keys>
+...
+\end{MastodonPost}
+
+\begin{BlueSkyPost}[options]<tcolorbox keys>
+...
+\end{BlueSkyPost}
+\end{verbatim}
+\end{quote}
+
+Available \textsf{keys}, betweeen \MontreCode{[...]}, are:
+
+\begin{itemize}
+	\item \MontreCode{width}: width of box;
+	\item \MontreCode{avatar}: image of the avatar (square if possible !);
+	\item \MontreCode{name}: pseudo of the account
+	\item \MontreCode{account}: account name;
+	\item \MontreCode{time}: time of post;
+	\item \MontreCode{counters}: counters for views/likes/shares;
+	\item \MontreCode{font}: font fir main text;
+	\item \MontreCode{colbg}: background color of box.
+\end{itemize}
+
+Headers and footers are given by following macros, and can be redefined if necessary !
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5,listing only}
+\newcommand\mastodonheader{%
+	\begin{tblr}{width=\linewidth,colspec={Q[c,m]X[m,l]Q[m,l]},
+		colsep=0pt,cells={font=\scriptsize\sffamily}}
+		$\vcenter{\hbox{\includegraphics[height=4ex]{\mastodonaccountavatar}}}$& {\hspace*{1.25ex}\mastodonaccountname \\ \hspace*{1.25ex}\color{darkgray}{\mastodonaccountadress}} & \color{darkgray}{\faGlobeAmericas~\mastodontime} \\
+	\end{tblr}\par\medskip
+}
+
+\newcommand\blueskyheader{%
+	{\scriptsize\sffamily\textbf{\mastodonaccountname}~
+	\textcolor{darkgray}{\mastodonaccountadress~
+	\textperiodcentered~\mastodontime}}\par\medskip
+}
+
+\newcommand\mastodonfooter{%
+	\textcolor{darkgray}{\scriptsize\scalebox{-1}[1]{\faShare}~\mastodonnumbers[1] \hfill \faRetweet~\mastodonnumbers[2] \hfill \faStar[regular]~\mastodonnumbers[3] \hfill \faBookmark[regular] \hfill \faEllipsisH}
+}
+
+\newcommand\blueskyfooter{%
+	\textcolor{darkgray}{\scriptsize\faComment*[regular]~\mastodonnumbers[1] \hfill \faRetweet~\mastodonnumbers[2] \hfill \faHeart[regular]~\mastodonnumbers[3] \hfill \faEllipsisH \hfill~}
+}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{MastodonPost}
+\textbf{TeX}, stylized within the system as \TeX, is a typesetting program which was designed and written by computer scientist and Stanford University professor Donald Knuth and first released in 1978. The term now refers to the system of extensions – which includes software programs called TeX engines, sets of TeX macros, and packages which provide extra typesetting functionality – built around the original TeX language. \TeX\ is a popular means of typesetting complex mathematical formulae; it has been noted as one of the most sophisticated digital typographical systems.
+
+\medskip
+
+\url{https://www.latex-project.org}
+\end{MastodonPost}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{BlueSkyPost}[width=12cm,account={\symbol{64}TeX.bluesky.social}]
+\textbf{TeX}, stylized within the system as \TeX, is a typesetting program which was designed and written by computer scientist and Stanford University professor Donald Knuth and first released in 1978. The term now refers to the system of extensions – which includes software programs called TeX engines, sets of TeX macros, and packages which provide extra typesetting functionality – built around the original TeX language. \TeX\ is a popular means of typesetting complex mathematical formulae; it has been noted as one of the most sophisticated digital typographical systems.
+
+\smallskip
+
+\hfill\includegraphics[width=0.667\linewidth]{example-image-16x9.pdf}\hfill~
+
+\smallskip
+
+\url{https://www.latex-project.org}
+\end{BlueSkyPost}
+\end{tcblisting}
+
+\end{document}

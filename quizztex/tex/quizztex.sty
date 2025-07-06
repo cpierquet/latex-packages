@@ -1,0 +1,819 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+%            : 'Who Wants to Be a Millionaire ?' is a Trademark from Sony Pictures Television.
+%            : 'Tout le monde veut prendre sa place' is a Tradematk from Air Productions.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{quizztex}[2024/09/10 0.1.4 Construire des quizz 'comme dans les jeux' ]
+%0.1.4	Macro pour modifier les paramètres par défaut des clés
+%0.1.3	Annulation du chargement de tikz.babel
+%0.1.2	Passage \tikzstyle vers \tikzset (merci à Sam C.)
+%0.1.1	Amélioration de la gestion des réponses dans WWTBAM + Position des Jokers (cc P. Bideault ;-))
+%0.1.0	Version initiale
+
+%------Packages utiles
+\RequirePackage{tikz,pgf,pgffor}
+\RequirePackage{xstring}
+\RequirePackage{simplekv}
+\RequirePackage{settobox}
+\RequirePackage{fontawesome5}
+\RequirePackage{calc}
+\RequirePackage{varwidth}
+%------Librairies
+\usetikzlibrary{calc,positioning,shapes.geometric,fadings}
+%\usetikzlibrary{babel}
+
+%------Longueurs globales
+\newlength{\HauteurQuest}
+\newlength{\HauteurReponse}
+
+%------Code Qui Veut Gagner des Millions
+%Couleurs
+\definecolor{ColorFondWWTBAM}{HTML}{5E57A4}%blue!66!violet!66!white
+\definecolor{ColorBonneWWTBAM}{HTML}{0AC759}%green!90!blue
+\definecolor{ColorMauvaiseWWTBAM}{HTML}{F1901C}%orange!75
+\definecolor{ColorWWBTAM}{HTML}{140676}%blue!25!black ou 140676
+\definecolor{ColorChoixWWBTAM}{HTML}{F40FDC}%violet!80
+\definecolor{ColorLettreWWBTAM}{HTML}{F32828}%red!75!purple
+
+%Boîtes et dimensions utiles
+\newsavebox{\boitequestionwwtbam}
+\newlength{\hauteurboitequestionwwtbam}
+\newlength{\texteboitequestionwwtbam}
+%réponse largeur
+\newlength{\texteboitereponsewwtbam}
+%boiteréponsea
+\newsavebox{\boitereponseawwtbam}
+\newlength{\hauteurboitereponseawwtbam}
+%boiteréponseb
+\newsavebox{\boitereponsebwwtbam}
+\newlength{\hauteurboitereponsebwwtbam}
+%boiteréponsec
+\newsavebox{\boitereponsecwwtbam}
+\newlength{\hauteurboitereponsecwwtbam}
+%boiteréponsed
+\newsavebox{\boitereponsedwwtbam}
+\newlength{\hauteurboitereponsedwwtbam}
+%gestion des largeurs
+\newlength{\largeurboitequestionwwtbam}
+\newlength{\largeurboitereponsewwtbam}
+\newlength{\largeurtexteboitereponsewwtbam}
+\newlength{\largeurtexteboitequestionwwtbam}
+%max des hauteurs
+\newlength{\hauteurmaxboitereponsewwtbam}
+\newlength{\hauteurnonautoquestionwwtbam}
+\newlength{\hauteurnonautoreponseswwtbam}
+%marges et largeurs
+\newlength{\largeurwwtbam}
+\newlength{\margeexterieurewwtbam}
+%niveaux & demi-hauteurs
+\newlength{\niveauABwwtbam}
+\newlength{\niveauCDwwtbam}
+\newlength{\HauteurNivJok}
+\newlength{\OffsetVwwtbam}
+\newlength{\EspacementVwwtbam}
+
+\defKV[wwtbam]{%
+	Largeur=\setlength{\largeurwwtbam}{#1},%
+	Marge=\setlength{\margeexterieurewwtbam}{#1},%
+	Hauteurs=\def\HauteursWWTBAM{#1},%
+	Couleur=\def\CouleurWWTBAM{#1},%
+	CouleurFond=\def\CouleurFondWWTBAM{#1},%
+	CouleurTexte=\def\CouleurTexteWWTBAM{#1},%
+	CouleurLettre=\def\CouleurLettreWWTBAM{#1},%
+	CouleurChoix=\def\CouleurChoixWWTBAM{#1},%
+	CouleurBonne=\def\CouleurBonneWWTBAM{#1},%
+	CouleurMauvaise=\def\CoulMauvaiseWWTBAM{#1},%
+	Choix=\def\ChoixWWTBAM{#1},%
+	Bonne=\def\BonneWWTBAM{#1},%
+	Mauvaise=\def\MauvaiseWWTBAM{#1},%
+	Affichage=\def\TypeAffichageWWTBAM{#1},%
+	EspacementV=\setlength{\EspacementVwwtbam}{#1},%
+	OffsetV=\setlength{\OffsetVwwtbam}{#1},%
+	AffChoix=\def\AffChoixWWTBAM{#1},%
+	AffJokers=\def\AffJokersWWTBAM{#1},%
+	CodeAvant=\def\CodeAvantWWTBAM{#1},%
+	PositionJokers=\def\PosJokersWWTBAM{#1}
+}
+
+\setKVdefault[wwtbam]{%
+	Largeur=14cm,%
+	Marge=0.5cm,%
+	Hauteurs=auto,%
+	Couleur=ColorWWBTAM,%
+	CouleurFond=ColorFondWWTBAM,%
+	CouleurLettre=ColorLettreWWBTAM,%3
+	CouleurBonne=ColorBonneWWTBAM,%
+	CouleurChoix=ColorChoixWWBTAM,%
+	CouleurMauvaise=ColorMauvaiseWWTBAM,%
+	CouleurTexte=white,%
+	Bonne={},%
+	Mauvaise={},%
+	Choix={},
+	Affichage={},%
+	EspacementV=10pt,%
+	OffsetV=6pt,%
+	Decorations=true,%
+	AffChoix=ABCD,%
+	Jokers=true,%
+	AffJokers=50.TEL.PUB,%
+	%CodeAvant=\bfseries\large\sffamily,%
+	CodeAvant={},%
+	Effet=true,%
+	PositionJokers=centre
+}
+
+\newcommand\SetDefautMillions[1]{\setKVdefault[wwtbam]{#1}}
+
+\NewDocumentCommand\LettreChoixMillions{ m }{%
+	\textcolor{\CouleurLettreWWTBAM}{\large\sffamily\bfseries{\vphantom{Q}#1}\,:}%
+}
+
+\NewDocumentCommand\QuizzMillions{ O{} m m m m m }{%clés + questions + 4 réponses
+	\useKVdefault[wwtbam]%
+	\setKV[wwtbam]{#1}%
+	%Couleurdescartouches
+	\def\CouleurFondAWWTBAM{\CouleurFondWWTBAM}%
+	\def\CouleurFondBWWTBAM{\CouleurFondWWTBAM}%
+	\def\CouleurFondCWWTBAM{\CouleurFondWWTBAM}%
+	\def\CouleurFondDWWTBAM{\CouleurFondWWTBAM}%
+	\IfEq{\TypeAffichageWWTBAM}{Choix}
+		{%
+			\IfStrEq{\ChoixWWTBAM}{A}
+				{\def\CouleurFondAWWTBAM{\CouleurChoixWWTBAM}}%
+				{}%
+			\IfStrEq{\ChoixWWTBAM}{B}
+				{\def\CouleurFondBWWTBAM{\CouleurChoixWWTBAM}}%
+				{}%
+			\IfStrEq{\ChoixWWTBAM}{C}
+				{\def\CouleurFondCWWTBAM{\CouleurChoixWWTBAM}}%
+				{}%
+			\IfStrEq{\ChoixWWTBAM}{D}
+				{\def\CouleurFondDWWTBAM{\CouleurChoixWWTBAM}}%
+				{}%
+		}%
+		{}%
+	\IfEq{\TypeAffichageWWTBAM}{PropSol}
+		{%
+			\IfStrEq{\BonneWWTBAM}{A}
+				{\def\CouleurFondAWWTBAM{\CouleurBonneWWTBAM}}%
+				{}%
+			\IfStrEq{\BonneWWTBAM}{B}
+				{\def\CouleurFondBWWTBAM{\CouleurBonneWWTBAM}}%
+				{}%
+			\IfStrEq{\BonneWWTBAM}{C}
+				{\def\CouleurFondCWWTBAM{\CouleurBonneWWTBAM}}%
+				{}%
+			\IfStrEq{\BonneWWTBAM}{D}
+				{\def\CouleurFondDWWTBAM{\CouleurBonneWWTBAM}}%
+				{}%
+			\IfStrEq{\MauvaiseWWTBAM}{A}
+				{\def\CouleurFondAWWTBAM{\CoulMauvaiseWWTBAM}}%
+				{}%
+			\IfStrEq{\MauvaiseWWTBAM}{B}
+				{\def\CouleurFondBWWTBAM{\CoulMauvaiseWWTBAM}}%
+				{}%
+			\IfStrEq{\MauvaiseWWTBAM}{C}
+				{\def\CouleurFondCWWTBAM{\CoulMauvaiseWWTBAM}}%
+				{}%
+			\IfStrEq{\MauvaiseWWTBAM}{D}
+				{\def\CouleurFondDWWTBAM{\CoulMauvaiseWWTBAM}}%
+				{}%
+		}%
+		{}%
+	\IfEq{\TypeAffichageWWTBAM}{Sol}
+		{%
+			\IfStrEq{\BonneWWTBAM}{A}
+				{\def\CouleurFondAWWTBAM{\CouleurBonneWWTBAM}}%
+				{}%
+			\IfStrEq{\BonneWWTBAM}{B}
+				{\def\CouleurFondBWWTBAM{\CouleurBonneWWTBAM}}%
+				{}%
+			\IfStrEq{\BonneWWTBAM}{C}
+				{\def\CouleurFondCWWTBAM{\CouleurBonneWWTBAM}}%
+				{}%
+			\IfStrEq{\BonneWWTBAM}{D}
+				{\def\CouleurFondDWWTBAM{\CouleurBonneWWTBAM}}%
+				{}%
+		}%
+		{}%
+	%dimensions de base
+	\ifboolKV[wwtbam]{Jokers}
+		{%
+			\IfStrEq{\PosJokersWWTBAM}{droite}%
+				{%
+					\addtolength{\largeurwwtbam}{-1.4cm}%
+				}{}%
+			\IfStrEq{\PosJokersWWTBAM}{gauche}%
+				{%
+					\addtolength{\largeurwwtbam}{-1.4cm}%
+				}{}%
+		}%
+		{}%
+	\setlength{\largeurboitequestionwwtbam}{\largeurwwtbam-2\margeexterieurewwtbam-15mm}%
+	\setlength{\texteboitequestionwwtbam}{\largeurboitequestionwwtbam-0.4cm}%
+	\setlength{\largeurboitereponsewwtbam}{0.5\largeurwwtbam-\margeexterieurewwtbam-15mm}%
+	\setlength{\texteboitereponsewwtbam}{\largeurboitereponsewwtbam-0.5cm}%
+	%Si les hauteurs sont en auto, on calcule tout
+	\IfStrEq{\HauteursWWTBAM}{auto}%
+		{%
+			%BlocQuestion
+			\sbox{\boitequestionwwtbam}{\parbox{\the\texteboitequestionwwtbam}{\centering\CodeAvantWWTBAM #2}}\settoboxtotalheight{\hauteurboitequestionwwtbam}{\boitequestionwwtbam}%
+			%BlocRépA
+			\sbox{\boitereponseawwtbam}{\parbox{\the\texteboitereponsewwtbam}{\LettreChoixMillions{A} \CodeAvantWWTBAM #3}}\settoboxtotalheight{\hauteurboitereponseawwtbam}{\boitereponseawwtbam}%
+			%BlocRépB
+			\sbox{\boitereponsebwwtbam}{\parbox{\the\texteboitereponsewwtbam}{\LettreChoixMillions{B} \CodeAvantWWTBAM #4}}\settoboxtotalheight{\hauteurboitereponsebwwtbam}{\boitereponsebwwtbam}%
+			%BlocRépC
+			\sbox{\boitereponsecwwtbam}{\parbox{\the\texteboitereponsewwtbam}{\LettreChoixMillions{C} \CodeAvantWWTBAM #5}}\settoboxtotalheight{\hauteurboitereponsecwwtbam}{\boitereponsecwwtbam}%
+			%BlocRépD
+			\sbox{\boitereponsedwwtbam}{\parbox{\the\texteboitereponsewwtbam}{\LettreChoixMillions{D} \CodeAvantWWTBAM #6}}\settoboxtotalheight{\hauteurboitereponsedwwtbam}{\boitereponsedwwtbam}%
+			%hauteurréponses
+			\pgfmathsetlength{\hauteurmaxboitereponsewwtbam}{max(\hauteurboitereponseawwtbam,\hauteurboitereponsebwwtbam,\hauteurboitereponsecwwtbam,\hauteurboitereponsedwwtbam)}%
+			%hauteur des boîtes
+			\setlength{\HauteurQuest}{\hauteurboitequestionwwtbam+2\OffsetVwwtbam}%
+			\setlength{\HauteurReponse}{\hauteurmaxboitereponsewwtbam+2\OffsetVwwtbam}%
+			%récup de la hauteur maximale
+			%Hrepab
+			\setlength{\niveauABwwtbam}{0.5\HauteurQuest+0.5\HauteurReponse+\EspacementVwwtbam}%
+			%Hrepcd
+			\setlength{\niveauCDwwtbam}{0.5\HauteurQuest+1.5\HauteurReponse+2\EspacementVwwtbam}%
+			%niveaujoker milieu
+			\IfStrEq{\PosJokersWWTBAM}{centre}%
+				{%
+					\setlength{\HauteurNivJok}{\niveauCDwwtbam+0.5\HauteurReponse+0.5\EspacementVwwtbam+0.35cm}%
+				}%
+				{}%
+			\IfStrEq{\PosJokersWWTBAM}{droite}%
+				{%
+					\setlength{\HauteurNivJok}{0.5\niveauABwwtbam+0.5\niveauCDwwtbam}%
+				}%
+				{}%
+			\IfStrEq{\PosJokersWWTBAM}{gauche}%
+				{%
+					\setlength{\HauteurNivJok}{0.5\niveauABwwtbam+0.5\niveauCDwwtbam}%
+				}%
+				{}%
+		}%
+		{%
+			\IfSubStr{\HauteursWWTBAM}{/}%
+				{\StrCut{\HauteursWWTBAM}{/}{\HauteurQuestionBrut}{\HauteurReponseBrut}}%
+				{\def\HauteurQuestBrut{\HauteursWWTBAM}\def\HauteurReponseBrut{\HauteursWWTBAM}}%
+			\setlength{\HauteurQuest}{\HauteurQuestionBrut+2\OffsetVwwtbam}%
+			\setlength{\HauteurReponse}{\HauteurReponseBrut+2\OffsetVwwtbam}%
+			%Hrepab
+			\setlength{\niveauABwwtbam}{0.5\HauteurQuest+0.5\HauteurReponse+\EspacementVwwtbam}%
+			%Hrepcd
+			\setlength{\niveauCDwwtbam}{0.5\HauteurQuest+1.5\HauteurReponse+2\EspacementVwwtbam}%
+			\IfStrEq{\PosJokersWWTBAM}{centre}%
+				{%
+					\setlength{\HauteurNivJok}{\niveauCDwwtbam+0.5\HauteurReponse+0.5\EspacementVwwtbam+0.35cm}%
+				}%
+				{}%
+			\IfStrEq{\PosJokersWWTBAM}{droite}%
+				{%
+					\setlength{\HauteurNivJok}{0.5\niveauABwwtbam+0.5\niveauCDwwtbam}%
+				}%
+				{}%
+			\IfStrEq{\PosJokersWWTBAM}{gauche}%
+				{%
+					\setlength{\HauteurNivJok}{0.5\niveauABwwtbam+0.5\niveauCDwwtbam}%
+				}%
+				{}%
+		}%
+	\begin{tikzpicture}
+		%styles
+		\tikzset{StyleCourtoucheQuestion/.style={anchor=west,inner sep=0pt,text width=\texteboitequestionwwtbam,text=\CouleurTexteWWTBAM,align=center}}
+		\tikzset{StyleCourtoucheReponse/.style={anchor=west,inner sep=0pt,text width=\texteboitereponsewwtbam,text=\CouleurTexteWWTBAM}}
+		\tikzset{StyleDecoration/.style={draw=\CouleurWWTBAM,diamond,semithick,fill=white,scale=0.4}}
+		%\tikzstyle{StyleCourtoucheQuestion}=[anchor=west,inner sep=0pt,text width=\texteboitequestionwwtbam,text=\CouleurTexteWWTBAM,align=center]
+		%\tikzstyle{StyleCourtoucheReponse}=[anchor=west,inner sep=0pt,text width=\texteboitereponsewwtbam,text=\CouleurTexteWWTBAM]
+		%\tikzstyle{StyleDecoration}=[draw=\CouleurWWTBAM,diamond,semithick,fill=white,scale=0.4]
+		%coordonnées importantes
+		\coordinate (CartoucheQuestion) at (0,0) ;%
+		\coordinate (CartoucheReponseA) at ({-0.5*\the\largeurwwtbam+\the\margeexterieurewwtbam+0.9cm},{-(\the\niveauABwwtbam)}) ;%
+		\coordinate (CartoucheReponseB) at ({0.9cm},{-(\the\niveauABwwtbam)}) ;%
+		\coordinate (CartoucheReponseC) at ({-0.5*\the\largeurwwtbam+\the\margeexterieurewwtbam+0.9cm},{-(\the\niveauCDwwtbam)}) ;%
+		\coordinate (CartoucheReponseD) at ({0.9cm},{-(\the\niveauCDwwtbam)}) ;
+		\IfStrEq{\PosJokersWWTBAM}{centre}%
+			{%
+				\coordinate (CartoucheJokerTEL) at ({0},{-(\the\HauteurNivJok)}) ;
+				\coordinate (CartoucheJokerCC) at  ({-1.15cm},{-(\the\HauteurNivJok)}) ;
+				\coordinate (CartoucheJokerPUB) at ({1.15cm},{-(\the\HauteurNivJok)}) ;
+			}%
+			{}%
+		\IfStrEq{\PosJokersWWTBAM}{droite}%
+			{%
+				\coordinate (CartoucheJokerTEL) at ({0.5*(\the\largeurwwtbam)+0.75cm},{-(\the\HauteurNivJok)}) ;
+				\coordinate (CartoucheJokerCC) at ({0.5*(\the\largeurwwtbam)+0.75cm},{-(\the\HauteurNivJok)+0.55cm}) ;
+				\coordinate (CartoucheJokerPUB) at ({0.5*(\the\largeurwwtbam)+0.75cm},{-(\the\HauteurNivJok)-0.55cm}) ;
+				
+			}%
+			{}%
+		\IfStrEq{\PosJokersWWTBAM}{gauche}%
+			{%
+				\coordinate (CartoucheJokerTEL) at ({-0.5*(\the\largeurwwtbam)-0.75cm},{-(\the\HauteurNivJok)}) ;
+				\coordinate (CartoucheJokerCC) at ({-0.5*(\the\largeurwwtbam)-0.75cm},{-(\the\HauteurNivJok)+0.55cm}) ;
+				\coordinate (CartoucheJokerPUB) at ({-0.5*(\the\largeurwwtbam)-0.75cm},{-(\the\HauteurNivJok)-0.55cm}) ;
+				
+			}%
+			{}%
+		%test
+		% \draw[red,fill=yellow] (CartoucheQuestion) circle[radius=2pt] node {question} ;
+		% \draw[red,fill=yellow] (CartoucheReponseA) circle[radius=2pt] node {A} ;
+		% \draw[red,fill=yellow] (CartoucheReponseB) circle[radius=2pt] node {B} ;
+		% \draw[red,fill=yellow] (CartoucheReponseC) circle[radius=2pt] node {C} ;
+		% \draw[red,fill=yellow] (CartoucheReponseD) circle[radius=2pt] node {D} ;
+		%CartoucheQuestion
+		\ifboolKV[wwtbam]{Effet}%
+			{%
+				%!80!black & {}
+				\filldraw[draw=\CouleurWWTBAM,thick,shading=axis,left color=\CouleurFondWWTBAM!90!black,right color=\CouleurFondWWTBAM!75,shading angle=45] ({-0.5*(\the\largeurwwtbam)},0)--++({\the\margeexterieurewwtbam},0) to[out=0,in=180]++(0.75,{0.5*(\the\HauteurQuest)}) --++({\the\largeurboitequestionwwtbam},0) to[out=0,in=180]++(0.75,{-0.5*(\the\HauteurQuest)})--++({\the\margeexterieurewwtbam},0)--++({-(\the\margeexterieurewwtbam)},0)to[out=180,in=0]++(-0.75,{-0.5*(\the\HauteurQuest)})--++({-(\the\largeurboitequestionwwtbam)},0)to[out=180,in=0]++(-0.75,{0.5*(\the\HauteurQuest)})--++({-(\the\margeexterieurewwtbam)},0) ;
+			}%
+			{%
+				\draw[\CouleurWWTBAM,thick,fill=\CouleurFondWWTBAM] ({-0.5*(\the\largeurwwtbam)},0)--++({\the\margeexterieurewwtbam},0) to[out=0,in=180]++(0.75,{0.5*(\the\HauteurQuest)}) --++({\the\largeurboitequestionwwtbam},0) to[out=0,in=180]++(0.75,{-0.5*(\the\HauteurQuest)})--++({\the\margeexterieurewwtbam},0)--++({-(\the\margeexterieurewwtbam)},0)to[out=180,in=0]++(-0.75,{-0.5*(\the\HauteurQuest)})--++({-(\the\largeurboitequestionwwtbam)},0)to[out=180,in=0]++(-0.75,{0.5*(\the\HauteurQuest)})--++({-(\the\margeexterieurewwtbam)},0) ;
+			}%
+		%CartoucheRéponseA
+		\ifboolKV[wwtbam]{Effet}%
+			{%
+				\filldraw[draw=\CouleurWWTBAM,thick,shading=axis,left color=\CouleurFondAWWTBAM!90!black,right color=\CouleurFondAWWTBAM!75,shading angle=45] ({-0.5*\the\largeurwwtbam},{-(\the\niveauABwwtbam)})--++({(\the\margeexterieurewwtbam)},0) to[out=0,in=180]++(0.75,{0.5*(\the\HauteurReponse)})--++({(\the\largeurboitereponsewwtbam)},0) to[out=0,in=180]++(0.75,{-0.5*(\the\HauteurReponse)}) to[out=180,in=0]++({-0.75},{-0.5*(\the\HauteurReponse)})--++({-(\the\largeurboitereponsewwtbam)},0)to[out=180,in=0]++(-0.75,{0.5*(\the\HauteurReponse)})--++({-(\the\margeexterieurewwtbam)},0) ;
+			}%
+			{%
+				\draw[\CouleurWWTBAM,thick,fill=\CouleurFondAWWTBAM] ({-0.5*\the\largeurwwtbam},{-(\the\niveauABwwtbam)})--++({(\the\margeexterieurewwtbam)},0) to[out=0,in=180]++(0.75,{0.5*(\the\HauteurReponse)})--++({(\the\largeurboitereponsewwtbam)},0) to[out=0,in=180]++(0.75,{-0.5*(\the\HauteurReponse)}) to[out=180,in=0]++({-0.75},{-0.5*(\the\HauteurReponse)})--++({-(\the\largeurboitereponsewwtbam)},0)to[out=180,in=0]++(-0.75,{0.5*(\the\HauteurReponse)})--++({-(\the\margeexterieurewwtbam)},0) ;
+			}%
+		%CartoucheRéponsesB
+		\ifboolKV[wwtbam]{Effet}%
+			{%
+				\filldraw[draw=\CouleurWWTBAM,thick,shading=axis,left color=\CouleurFondBWWTBAM!90!black,right color=\CouleurFondBWWTBAM!75,shading angle=45] ({0},{-(\the\niveauABwwtbam)}) to[out=0,in=180]++(0.75,{0.5*(\the\HauteurReponse)})--++({(\the\largeurboitereponsewwtbam)},0) to[out=0,in=180]++(0.75,{-0.5*(\the\HauteurReponse)})--++({(\the\margeexterieurewwtbam)},0)--++({-(\the\margeexterieurewwtbam)},0) to[out=180,in=0]++({-0.75},{-0.5*(\the\HauteurReponse)})--++({-(\the\largeurboitereponsewwtbam)},0)to[out=180,in=0]++(-0.75,{0.5*(\the\HauteurReponse)}) ;%
+			}%
+			{%
+				\draw[\CouleurWWTBAM,thick,fill=\CouleurFondBWWTBAM] ({0},{-(\the\niveauABwwtbam)}) to[out=0,in=180]++(0.75,{0.5*(\the\HauteurReponse)})--++({(\the\largeurboitereponsewwtbam)},0) to[out=0,in=180]++(0.75,{-0.5*(\the\HauteurReponse)})--++({(\the\margeexterieurewwtbam)},0)--++({-(\the\margeexterieurewwtbam)},0) to[out=180,in=0]++({-0.75},{-0.5*(\the\HauteurReponse)})--++({-(\the\largeurboitereponsewwtbam)},0)to[out=180,in=0]++(-0.75,{0.5*(\the\HauteurReponse)}) ;%
+			}%
+		%CartoucheRéponseC
+		\ifboolKV[wwtbam]{Effet}%
+			{%
+				\filldraw[draw=\CouleurWWTBAM,thick,shading=axis,left color=\CouleurFondCWWTBAM!90!black,right color=\CouleurFondCWWTBAM!75,shading angle=45] ({-0.5*\the\largeurwwtbam},{-(\the\niveauCDwwtbam)})--++({(\the\margeexterieurewwtbam)},0) to[out=0,in=180]++(0.75,{0.5*(\the\HauteurReponse)})--++({(\the\largeurboitereponsewwtbam)},0) to[out=0,in=180]++(0.75,{-0.5*(\the\HauteurReponse)}) to[out=180,in=0]++({-0.75},{-0.5*(\the\HauteurReponse)})--++({-(\the\largeurboitereponsewwtbam)},0)to[out=180,in=0]++(-0.75,{0.5*(\the\HauteurReponse)})--++({-(\the\margeexterieurewwtbam)},0) ;%
+			}%
+			{%
+				\draw[\CouleurWWTBAM,thick,fill=\CouleurFondCWWTBAM] ({-0.5*\the\largeurwwtbam},{-(\the\niveauCDwwtbam)})--++({(\the\margeexterieurewwtbam)},0) to[out=0,in=180]++(0.75,{0.5*(\the\HauteurReponse)})--++({(\the\largeurboitereponsewwtbam)},0) to[out=0,in=180]++(0.75,{-0.5*(\the\HauteurReponse)}) to[out=180,in=0]++({-0.75},{-0.5*(\the\HauteurReponse)})--++({-(\the\largeurboitereponsewwtbam)},0)to[out=180,in=0]++(-0.75,{0.5*(\the\HauteurReponse)})--++({-(\the\margeexterieurewwtbam)},0) ;%
+			}%
+		%CartoucheRéponsesD
+		\ifboolKV[wwtbam]{Effet}%
+			{%
+				\filldraw[draw=\CouleurWWTBAM,thick,shading=axis,left color=\CouleurFondDWWTBAM!90!black,right color=\CouleurFondDWWTBAM!75,shading angle=45] ({0},{-(\the\niveauCDwwtbam)}) to[out=0,in=180]++(0.75,{0.5*(\the\HauteurReponse)})--++({(\the\largeurboitereponsewwtbam)},0) to[out=0,in=180]++(0.75,{-0.5*(\the\HauteurReponse)})--++({(\the\margeexterieurewwtbam)},0)--++({-(\the\margeexterieurewwtbam)},0) to[out=180,in=0]++({-0.75},{-0.5*(\the\HauteurReponse)})--++({-(\the\largeurboitereponsewwtbam)},0)to[out=180,in=0]++(-0.75,{0.5*(\the\HauteurReponse)}) ;%
+			}%
+			{%
+				\draw[\CouleurWWTBAM,thick,fill=\CouleurFondDWWTBAM] ({0},{-(\the\niveauCDwwtbam)}) to[out=0,in=180]++(0.75,{0.5*(\the\HauteurReponse)})--++({(\the\largeurboitereponsewwtbam)},0) to[out=0,in=180]++(0.75,{-0.5*(\the\HauteurReponse)})--++({(\the\margeexterieurewwtbam)},0)--++({-(\the\margeexterieurewwtbam)},0) to[out=180,in=0]++({-0.75},{-0.5*(\the\HauteurReponse)})--++({-(\the\largeurboitereponsewwtbam)},0)to[out=180,in=0]++(-0.75,{0.5*(\the\HauteurReponse)}) ;%
+			}%
+		%labels question
+		\draw (CartoucheQuestion) node[inner sep=0pt,text=\CouleurTexteWWTBAM] {\parbox{\the\texteboitequestionwwtbam}{\centering\CodeAvantWWTBAM #2}} ;%
+		%labels réponses
+		\IfSubStr{\AffChoixWWTBAM}{A}
+			{%
+				\draw (CartoucheReponseA) node[StyleCourtoucheReponse] {\LettreChoixMillions{A} \CodeAvantWWTBAM #3} ;%
+				\ifboolKV[wwtbam]{Decorations}%
+					{%
+						\node[StyleDecoration] at ($(CartoucheReponseA)+(-0.25,0)$) {} ;%
+					}%
+					{}%
+			}%
+			{}%
+		\IfSubStr{\AffChoixWWTBAM}{B}
+			{%
+				\draw (CartoucheReponseB) node[StyleCourtoucheReponse] {\LettreChoixMillions{B} \CodeAvantWWTBAM #4} ;
+				\ifboolKV[wwtbam]{Decorations}
+					{%
+						\node[StyleDecoration] at ($(CartoucheReponseB)+(-0.25,0)$) {} ;
+					}%
+					{}%
+			}%
+			{}%
+		\IfSubStr{\AffChoixWWTBAM}{C}
+			{%
+				\draw (CartoucheReponseC) node[StyleCourtoucheReponse] {\LettreChoixMillions{C} \CodeAvantWWTBAM #5} ;
+				\ifboolKV[wwtbam]{Decorations}
+					{%
+						\node[StyleDecoration] at ($(CartoucheReponseC)+(-0.25,0)$) {} ;
+					}%
+					{}%
+			}%
+			{}%
+		\IfSubStr{\AffChoixWWTBAM}{D}
+			{%
+				\draw (CartoucheReponseD) node[StyleCourtoucheReponse] {\LettreChoixMillions{D} \CodeAvantWWTBAM #6} ;
+				\ifboolKV[wwtbam]{Decorations}
+					{%
+						\node[StyleDecoration] at ($(CartoucheReponseD)+(-0.25,0)$) {} ;
+					}%
+					{}%
+			}%
+			{}%
+		%décorations
+		\ifboolKV[wwtbam]{Jokers}
+			{%milieu du tikz = 0.5\NiveauCD
+				%50/50
+				\ifboolKV[wwtbam]{Effet}
+					{%
+						\filldraw[draw=\CouleurWWTBAM,thick,shading=axis,left color=\CouleurFondWWTBAM!90!black,right color=\CouleurFondWWTBAM!75,shading angle=45] (CartoucheJokerCC) ellipse (0.65cm and 0.35cm) ;
+					}%
+					{%
+						\draw[\CouleurWWTBAM,thick,fill=\CouleurFondDWWTBAM] (CartoucheJokerCC) ellipse (0.65cm and 0.35cm) ;
+					}%
+					\begin{scope}
+						\clip (CartoucheJokerCC) ellipse (0.65cm and 0.35cm) ;
+						\draw (CartoucheJokerCC) node[font=\bfseries\sffamily,\CouleurTexteWWTBAM] {50:50} ;
+						\IfSubStr{\AffJokersWWTBAM}{50}%
+							{}%
+							{%
+								\draw[ultra thick,red] ($(CartoucheJokerCC)+(-0.65,0.35)$)--++(1.3,-0.7) ;
+								\draw[ultra thick,red] ($(CartoucheJokerCC)+(-0.65,-0.35)$)--++(1.3,0.7) ;
+							}%
+					\end{scope}
+				%appel
+				\ifboolKV[wwtbam]{Effet}
+					{%
+						\filldraw[draw=\CouleurWWTBAM,thick,shading=axis,left color=\CouleurFondWWTBAM!90!black,right color=\CouleurFondWWTBAM!75,shading angle=45] (CartoucheJokerTEL) ellipse (0.65cm and 0.35cm) ;
+					}%
+					{%
+						\draw[\CouleurWWTBAM,thick,fill=\CouleurFondDWWTBAM] (CartoucheJokerTEL) ellipse (0.65cm and 0.35cm) ;
+					}%
+					\begin{scope}
+						\clip (CartoucheJokerTEL) ellipse (0.65cm and 0.35cm) ;
+						\draw (CartoucheJokerTEL) node[\CouleurTexteWWTBAM] {\faPhone} ;
+						\IfSubStr{\AffJokersWWTBAM}{TEL}%
+							{}%
+							{%
+								\draw[ultra thick,red] ($(CartoucheJokerTEL)+(-0.65,0.35)$)--++(1.3,-0.7) ;
+								\draw[ultra thick,red] ($(CartoucheJokerTEL)+(-0.65,-0.35)$)--++(1.3,0.7) ;
+							}%
+					\end{scope}
+				%public
+				\ifboolKV[wwtbam]{Effet}
+					{%
+						\filldraw[draw=\CouleurWWTBAM,thick,shading=axis,left color=\CouleurFondWWTBAM!90!black,right color=\CouleurFondWWTBAM!75,shading angle=45] (CartoucheJokerPUB) ellipse (0.65cm and 0.35cm) ;
+					}%
+					{%
+						\draw[\CouleurWWTBAM,thick,fill=\CouleurFondDWWTBAM] (CartoucheJokerPUB) ellipse (0.65cm and 0.35cm) ;
+					}%
+					\begin{scope}
+						\clip (CartoucheJokerPUB) ellipse (0.65cm and 0.35cm) ;
+						\draw (CartoucheJokerPUB) node[\CouleurTexteWWTBAM] {\faDiagnoses\!\!\raisebox{-0.2em}{\faDiagnoses}\!\!\faDiagnoses} ;
+						\IfSubStr{\AffJokersWWTBAM}{PUB}%
+							{}%
+							{%
+								\draw[ultra thick,red] ($(CartoucheJokerPUB)+(-0.65,0.35)$)--++(1.3,-0.7) ;
+								\draw[ultra thick,red] ($(CartoucheJokerPUB)+(-0.65,-0.35)$)--++(1.3,0.7) ;
+							}%
+					\end{scope}
+			}%
+			{}%
+	\end{tikzpicture}%
+}
+
+%------Code Tout le monde veut prende sa place
+
+%Couleurs
+\definecolor{ColorFondTLMVPSP}{HTML}{4E52E3}%blue!50!white
+\definecolor{ColorTLMVPSP}{HTML}{171A7A}%blue!85!white
+\definecolor{ColorChoixTLMVPSP}{HTML}{6DCFF6}%cyan!50
+\definecolor{ColorBonneTLMVPSP}{HTML}{0AC759}%green!90!blue
+\definecolor{ColorMauvaiseTLMVPSP}{HTML}{FF9F3F}%orange!75
+
+%Boîtes et dimensions utiles
+\newsavebox{\boitequestiontlmvpsp}
+\newlength{\hauteurboitequestiontlmvpsp}
+\newlength{\texteboitequestiontlmvpsp}
+%réponse largeur
+\newlength{\texteboitereponsetlmvpsp}
+%boiteréponsea
+\newsavebox{\boitereponseatlmvpsp}
+\newlength{\hauteurboitereponseatlmvpsp}
+%boiteréponseb
+\newsavebox{\boitereponsebtlmvpsp}
+\newlength{\hauteurboitereponsebtlmvpsp}
+%boiteréponsec
+\newsavebox{\boitereponsectlmvpsp}
+\newlength{\hauteurboitereponsectlmvpsp}
+%boiteréponsed
+\newsavebox{\boitereponsedtlmvpsp}
+\newlength{\hauteurboitereponsedtlmvpsp}
+%boîtethème
+\newsavebox{\boitethemetlmvpsp}
+\newlength{\hauteurboitethemetlmvpsp}
+\newlength{\largeurboitethemetlmvpsp}
+%gestion des largeurs
+\newlength{\largeurboitequestiontlmvpsp}
+\newlength{\largeurboitereponsetlmvpsp}
+\newlength{\largeurtexteboitereponsetlmvpsp}
+\newlength{\largeurtexteboitequestiontlmvpsp}
+%max des hauteurs
+\newlength{\hauteurmaxboitereponsetlmvpsp}
+\newlength{\hauteurnonautoquestiontlmvpsp}
+\newlength{\hauteurnonautoreponsestlmvpsp}
+%marges et largeurs
+\newlength{\largeurtlmvpsp}
+\newlength{\margemilieulmvpsp}
+%niveaux & demi-hauteurs
+\newlength{\niveauABtlmvpsp}
+\newlength{\niveauCDtlmvpsp}
+\newlength{\OffsetVtlmvpsp}
+\newlength{\EspacementVtlmvpsp}
+\newlength{\HauteurTheme}
+\newlength{\HauteurNivTheme}
+\newlength{\LargeurTheme}
+
+\defKV[TLMVPSP]{%
+	Largeur=\setlength{\largeurtlmvpsp}{#1},%
+	MargeMilieu=\setlength{\margemilieulmvpsp}{#1},%
+	Hauteurs=\def\HauteursTLMVPSP{#1},%
+	Couleur=\def\CouleurTLMVPSP{#1},%
+	CouleurFond=\def\CouleurFondTLMVPSP{#1},%
+	CouleurTexte=\def\CouleurTexteTLMVPSP{#1},%
+	CouleurChoix=\def\CouleurChoixTLMVPSP{#1},%
+	CouleurBonne=\def\CouleurBonneTLMVPSP{#1},%
+	CouleurMauvaise=\def\CouleurMauvaiseTLMVPSP{#1},%
+	Choix=\def\ChoixTLMVPSP{#1},%
+	Bonne=\def\BonneTLMVPSP{#1},%
+	Mauvaise=\def\MauvaiseTLMVPSP{#1},%
+	Affichage=\def\TypeAffichageTLMVPSP{#1},%
+	EspacementV=\setlength{\EspacementVtlmvpsp}{#1},%
+	Offset=\setlength{\OffsetVtlmvpsp}{#1},%
+	CodeAvant=\def\CodeAvantTLMVPSP{#1},%
+	Theme=\def\ThemeTLMVPSP{#1},%
+	Type=\def\TypeTLMVPSP{#1},%
+	Points=\def\PointsTLMVPSP{#1},%
+	EchellePoints=\def\EchellePointsTLMVPSP{#1}
+}
+
+\setKVdefault[TLMVPSP]{%
+	Largeur=14cm,%
+	MargeMilieu=1.2cm,%
+	Hauteurs=auto,%
+	Couleur=ColorTLMVPSP,%
+	CouleurTexte=white,%
+	CouleurFond=ColorFondTLMVPSP,%
+	CouleurBonne=ColorBonneTLMVPSP,%
+	CouleurChoix=ColorChoixTLMVPSP,%
+	CouleurMauvaise=ColorMauvaiseTLMVPSP,%
+	Bonne={},%
+	Mauvaise={},%
+	Choix={},
+	Affichage=Initial,%
+	Cadre=false,%
+	EspacementV=8pt,%
+	Offset=6pt,%
+	%CodeAvant=\bfseries\large\sffamily,%
+	CodeAvant={},%
+	Theme={},%
+	Type=Carre,%
+	Effet=true,%
+	Points={},%
+	EchellePoints=1
+}
+
+\newcommand\SetDefautPlace[1]{\setKVdefault[TLMVPSP]{#1}}
+
+\NewDocumentCommand\QuizzPrendrePlace{ O{} m m m m m }{%clés + questions + 4 réponses
+	\useKVdefault[TLMVPSP]%
+	\setKV[TLMVPSP]{#1}%
+	%Couleurdescartouches
+	\def\CouleurFondATLMVPSP{\CouleurFondTLMVPSP}%
+	\def\CouleurFondBTLMVPSP{\CouleurFondTLMVPSP}%
+	\def\CouleurFondCTLMVPSP{\CouleurFondTLMVPSP}%
+	\def\CouleurFondDTLMVPSP{\CouleurFondTLMVPSP}%
+	\IfEq{\TypeAffichageTLMVPSP}{Choix}
+		{%
+			\IfStrEq{\ChoixTLMVPSP}{A}
+				{\def\CouleurFondATLMVPSP{\CouleurChoixTLMVPSP}}%
+				{}%
+			\IfStrEq{\ChoixTLMVPSP}{B}
+				{\def\CouleurFondBTLMVPSP{\CouleurChoixTLMVPSP}}%
+				{}%
+			\IfStrEq{\ChoixTLMVPSP}{C}
+				{\def\CouleurFondCTLMVPSP{\CouleurChoixTLMVPSP}}%
+				{}%
+			\IfStrEq{\ChoixTLMVPSP}{D}
+				{\def\CouleurFondDTLMVPSP{\CouleurChoixTLMVPSP}}%
+				{}%
+		}%
+		{}%
+	\IfEq{\TypeAffichageTLMVPSP}{PropSol}
+		{%
+			\IfStrEq{\BonneTLMVPSP}{A}
+				{\def\CouleurFondATLMVPSP{\CouleurBonneTLMVPSP}}%
+				{}%
+			\IfStrEq{\BonneTLMVPSP}{B}
+				{\def\CouleurFondBTLMVPSP{\CouleurBonneTLMVPSP}}%
+				{}%
+			\IfStrEq{\BonneTLMVPSP}{C}
+				{\def\CouleurFondCTLMVPSP{\CouleurBonneTLMVPSP}}%
+				{}%
+			\IfStrEq{\BonneTLMVPSP}{D}
+				{\def\CouleurFondDTLMVPSP{\CouleurBonneTLMVPSP}}%
+				{}%
+			\IfStrEq{\MauvaiseTLMVPSP}{A}
+				{\def\CouleurFondATLMVPSP{\CouleurMauvaiseTLMVPSP}}%
+				{}%
+			\IfStrEq{\MauvaiseTLMVPSP}{B}
+				{\def\CouleurFondBTLMVPSP{\CouleurMauvaiseTLMVPSP}}%
+				{}%
+			\IfStrEq{\MauvaiseTLMVPSP}{C}
+				{\def\CouleurFondCTLMVPSP{\CouleurMauvaiseTLMVPSP}}%
+				{}%
+			\IfStrEq{\MauvaiseTLMVPSP}{D}
+				{\def\CouleurFondDTLMVPSP{\CouleurMauvaiseTLMVPSP}}%
+				{}%
+		}%
+		{}%
+	\IfEq{\TypeAffichageTLMVPSP}{Sol}
+		{%
+			\IfStrEq{\BonneTLMVPSP}{A}
+				{\def\CouleurFondATLMVPSP{\CouleurBonneTLMVPSP}}%
+				{}%
+			\IfStrEq{\BonneTLMVPSP}{B}
+				{\def\CouleurFondBTLMVPSP{\CouleurBonneTLMVPSP}}%
+				{}%
+			\IfStrEq{\BonneTLMVPSP}{C}
+				{\def\CouleurFondCTLMVPSP{\CouleurBonneTLMVPSP}}%
+				{}%
+			\IfStrEq{\BonneTLMVPSP}{D}
+				{\def\CouleurFondDTLMVPSP{\CouleurBonneTLMVPSP}}%
+				{}%
+		}%
+		{}%
+	%dimensions de base
+	\setlength{\texteboitequestiontlmvpsp}{\largeurtlmvpsp-0.4cm}%
+	\setlength{\largeurboitereponsetlmvpsp}{0.5\largeurtlmvpsp-0.5\margemilieulmvpsp}%
+	\setlength{\texteboitereponsetlmvpsp}{\largeurboitereponsetlmvpsp-0.4cm}%
+	%Si les hauteurs sont en auto, on calcule tout
+	%dimensions de base
+		\IfStrEq{\HauteursTLMVPSP}{auto}%
+			{%
+				%thème
+				\IfStrEq{\ThemeTLMVPSP}{}%
+					{}%
+					{%
+						\sbox{\boitethemetlmvpsp}{\CodeAvantTLMVPSP\ThemeTLMVPSP}%
+						\settoboxtotalheight{\hauteurboitethemetlmvpsp}{\boitethemetlmvpsp}%
+						\settoboxwidth{\largeurboitethemetlmvpsp}{\boitethemetlmvpsp}%
+					}%
+				%BlocQuestion
+				\sbox{\boitequestiontlmvpsp}{\parbox{\the\texteboitequestiontlmvpsp}{\centering\CodeAvantTLMVPSP #2}}\settoboxtotalheight{\hauteurboitequestiontlmvpsp}{\boitequestiontlmvpsp}%
+				%BlocRépA
+				\sbox{\boitereponseatlmvpsp}{\parbox{\the\texteboitereponsetlmvpsp}{\CodeAvantTLMVPSP #3}}\settoboxtotalheight{\hauteurboitereponseatlmvpsp}{\boitereponseatlmvpsp}%
+				%BlocRépB
+				\sbox{\boitereponsebtlmvpsp}{\parbox{\the\texteboitereponsetlmvpsp}{\CodeAvantTLMVPSP #4}}\settoboxtotalheight{\hauteurboitereponsebtlmvpsp}{\boitereponsebtlmvpsp}%
+				%BlocRépC
+				\sbox{\boitereponsectlmvpsp}{\parbox{\the\texteboitereponsetlmvpsp}{\CodeAvantTLMVPSP #5}}\settoboxtotalheight{\hauteurboitereponsectlmvpsp}{\boitereponsectlmvpsp}%
+				%BlocRépD
+				\sbox{\boitereponsedtlmvpsp}{\parbox{\the\texteboitereponsetlmvpsp}{\CodeAvantTLMVPSP #6}}\settoboxtotalheight{\hauteurboitereponsedtlmvpsp}{\boitereponsedtlmvpsp}%
+				%hauteurréponsesmax
+				\pgfmathsetlength{\hauteurmaxboitereponsetlmvpsp}{max(\hauteurboitereponseatlmvpsp,\hauteurboitereponsebtlmvpsp,\hauteurboitereponsectlmvpsp,\hauteurboitereponsedtlmvpsp)}%
+				%hauteur des boîtes
+				\setlength{\HauteurQuest}{\hauteurboitequestiontlmvpsp+2\OffsetVtlmvpsp}%
+				\setlength{\HauteurReponse}{\hauteurmaxboitereponsetlmvpsp+2\OffsetVtlmvpsp}%
+				\setlength{\HauteurTheme}{\hauteurboitethemetlmvpsp+2\OffsetVtlmvpsp}%
+				%Hrepab
+				\setlength{\niveauCDtlmvpsp}{0.5\HauteurQuest+0.5\HauteurReponse+\EspacementVtlmvpsp}%
+				%Hrepcd
+				\setlength{\niveauABtlmvpsp}{0.5\HauteurQuest+1.5\HauteurReponse+2\EspacementVtlmvpsp}%
+				%Htheme & Ltheme
+				\setlength{\HauteurNivTheme}{0.5\HauteurQuest+0.5\HauteurTheme+\EspacementVtlmvpsp}%
+				\setlength{\LargeurTheme}{\largeurboitethemetlmvpsp+0.8cm}%
+			}%
+			{%
+				\IfSubStr{\HauteursTLMVPSP}{/}%
+					{\StrCut{\HauteursTLMVPSP}{/}{\HauteurQuestionBrut}{\HauteurReponseBrut}}%
+					{\def\HauteurQuestBrut{\HauteursTLMVPSP}\def\HauteurReponseBrut{\HauteursTLMVPSP}}%
+				\setlength{\HauteurQuest}{\HauteurQuestionBrut+2\OffsetVtlmvpsp}%
+				\setlength{\HauteurReponse}{\HauteurReponseBrut+2\OffsetVtlmvpsp}%
+				%Hrepab
+				\setlength{\niveauCDtlmvpsp}{0.5\HauteurQuest+0.5\HauteurReponse+\EspacementVtlmvpsp}%
+				%Hrepcd
+				\setlength{\niveauABtlmvpsp}{0.5\HauteurQuest+1.5\HauteurReponse+2\EspacementVtlmvpsp}%
+				\setlength{\HauteurTheme}{1em+2\OffsetVtlmvpsp}%
+				%Htheme & Ltheme
+				\setlength{\HauteurNivTheme}{0.5\HauteurQuest+0.5\HauteurTheme+\EspacementVtlmvpsp}%
+				\setlength{\LargeurTheme}{0.5\largeurtlmvpsp}%
+			}%
+	%création de l'environnement
+	\begin{tikzpicture}
+		%\tikzstyle{StyleCourtoucheRepTlmvpsp}=[anchor=west,inner sep=0pt,text width=texteboitereponsewwtbam,align=justify]
+		\coordinate (CartoucheQuestion) at (0,0) ;
+		\coordinate (CartoucheReponseA) at ({-0.5*(\the\largeurtlmvpsp)},{(\the\niveauABtlmvpsp)}) ;
+		\coordinate (CartoucheReponseB) at ({0.5*(\the\largeurtlmvpsp)-(\the\largeurboitereponsetlmvpsp)},{(\the\niveauABtlmvpsp)}) ;
+		\coordinate (CartoucheReponseC) at ({-0.5*(\the\largeurtlmvpsp)},{(\the\niveauCDtlmvpsp)}) ;
+		\coordinate (CartoucheReponseD) at ({0.5*(\the\largeurtlmvpsp)-(\the\largeurboitereponsetlmvpsp)},{(\the\niveauCDtlmvpsp)}) ;
+		%test position boîtes
+		%\foreach \Po in {Question,ReponseA,ReponseB,ReponseC,ReponseD} {\filldraw[draw=red,yellow] (Cartouche\Po) circle[radius=2pt] ;}
+		%CartoucheQuestion
+		\ifboolKV[TLMVPSP]{Effet}
+			{%
+				\filldraw[rounded corners=2pt,draw=\CouleurTLMVPSP,thick,shading=axis,left color=\CouleurFondTLMVPSP!85!black,right color=\CouleurFondTLMVPSP!75,shading angle=-135] ({-0.5*(\the\largeurtlmvpsp)},{-0.5*(\the\HauteurQuest)}) rectangle++ ({\the\largeurtlmvpsp},{\the\HauteurQuest}) ;
+			}%
+			{%
+				\draw[rounded corners=2pt,\CouleurTLMVPSP,thick,fill=\CouleurFondTLMVPSP!75] ({-0.5*(\the\largeurtlmvpsp)},{-0.5*(\the\HauteurQuest)}) rectangle++ ({\the\largeurtlmvpsp},{\the\HauteurQuest}) ;
+			}%
+		\draw[rounded corners=3.25pt,thick,\CouleurTLMVPSP,opacity=0.25] ($({-0.5*(\the\largeurtlmvpsp)},{-0.5*(\the\HauteurQuest)})+(-1.25pt,-1.25pt)$) rectangle++ ($({\the\largeurtlmvpsp},{\the\HauteurQuest})+(2.5pt,2.5pt)$) ;
+		%CartoucheScore
+		\draw[rounded corners=3.5pt,thick,\CouleurTLMVPSP,opacity=0.25] ($({-0.275*(\the\margemilieulmvpsp)},{\the\niveauCDtlmvpsp-0.5*(\the\HauteurReponse)})+(-1.25pt,-1.25pt)$) rectangle++ ($({0.55*(\the\margemilieulmvpsp)},{\the\margemilieulmvpsp})+(2.5pt,2.5pt)$) ;
+		\begin{scope}
+			\clip[rounded corners=2pt] ({-0.275*(\the\margemilieulmvpsp)},{\the\niveauCDtlmvpsp-0.5*(\the\HauteurReponse)}) rectangle++ ({0.55*(\the\margemilieulmvpsp)},{\the\margemilieulmvpsp}) ;
+			\draw[thick,draw=none,fill=\CouleurFondTLMVPSP] ($({-0.275*(\the\margemilieulmvpsp)},{\the\niveauCDtlmvpsp-0.5*(\the\HauteurReponse)})+(0,{\the\margemilieulmvpsp})$) --++ ({0.55*\the\margemilieulmvpsp},0)--++ (0,{-0.38*\the\margemilieulmvpsp}) --++ ({-0.55*\the\margemilieulmvpsp},{-0.24*\the\margemilieulmvpsp}) -- cycle ;
+			\draw[thick,draw=none,fill=violet!50] ({-0.275*(\the\margemilieulmvpsp)},{\the\niveauCDtlmvpsp-0.5*(\the\HauteurReponse)}) --++ ({0.55*\the\margemilieulmvpsp},0)--++ (0,{0.62*\the\margemilieulmvpsp}) --++ ({-0.55*\the\margemilieulmvpsp},{-0.24*\the\margemilieulmvpsp}) -- cycle ;
+		\end{scope}
+		\draw[rounded corners=2pt,\CouleurTLMVPSP,thick] ({-0.275*(\the\margemilieulmvpsp)},{\the\niveauCDtlmvpsp-0.5*(\the\HauteurReponse)}) rectangle++ ({0.55*(\the\margemilieulmvpsp)},{\the\margemilieulmvpsp}) ;
+		%labels
+		\draw (CartoucheQuestion) node[inner sep=0pt,text=\CouleurTexteTLMVPSP] {\parbox{\the\texteboitequestiontlmvpsp}{\centering\CodeAvantTLMVPSP #2}} ;
+		% %les cartouches suivant le type de réponses choisies
+		\IfStrEq{\TypeTLMVPSP}{Cash}%
+			{}{}%
+		\IfStrEq{\TypeTLMVPSP}{Carre}%
+			{%
+				%CartoucheRéponseA
+				\ifboolKV[TLMVPSP]{Effet}
+					{%
+						\filldraw[rounded corners=2pt,draw=\CouleurTLMVPSP,thick,shading=axis,left color=\CouleurFondATLMVPSP!85!black,right color=\CouleurFondATLMVPSP!75,shading angle=-135] ({-0.5*(\the\largeurtlmvpsp)},{(\the\niveauABtlmvpsp-0.5*\the\HauteurReponse)}) rectangle++ ({\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse}) ;
+					}%
+					{%
+						\draw[rounded corners=2pt,\CouleurTLMVPSP,thick,fill=\CouleurFondATLMVPSP!75] ({-0.5*(\the\largeurtlmvpsp)},{(\the\niveauABtlmvpsp-0.5*\the\HauteurReponse)}) rectangle++ ({\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse}) ;
+					}%
+				\draw[rounded corners=3.5pt,thick,\CouleurTLMVPSP,opacity=0.25] ($({-0.5*(\the\largeurtlmvpsp)},{(\the\niveauABtlmvpsp-0.5*\the\HauteurReponse)})+(-1.25pt,-1.25pt)$) rectangle++ ($({\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse})+(2.5pt,2.5pt)$) ;
+				%CartoucheRéponsesB
+				\ifboolKV[TLMVPSP]{Effet}
+					{%
+						\filldraw[rounded corners=2pt,draw=\CouleurTLMVPSP,thick,shading=axis,left color=\CouleurFondBTLMVPSP!85!black,right color=\CouleurFondBTLMVPSP!75,shading angle=-135] ({0.5*(\the\largeurtlmvpsp)},{(\the\niveauABtlmvpsp-0.5*\the\HauteurReponse)}) rectangle++ ({-\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse}) ;
+					}%
+					{%
+						\draw[rounded corners=2pt,\CouleurTLMVPSP,thick,fill=\CouleurFondBTLMVPSP!75] ({0.5*(\the\largeurtlmvpsp)},{(\the\niveauABtlmvpsp-0.5*\the\HauteurReponse)}) rectangle++ ({-\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse}) ;
+					}%
+				\draw[rounded corners=3.5pt,thick,\CouleurTLMVPSP,opacity=0.25] ($({0.5*(\the\largeurtlmvpsp)},{(\the\niveauABtlmvpsp-0.5*\the\HauteurReponse)})+(1.25pt,-1.25pt)$) rectangle++ ($({-\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse})+(-2.5pt,2.5pt)$) ;
+				% CartoucheRéponseC
+				\ifboolKV[TLMVPSP]{Effet}
+					{%
+						\filldraw[rounded corners=2pt,draw=\CouleurTLMVPSP,thick,shading=axis,left color=\CouleurFondCTLMVPSP!85!black,right color=\CouleurFondCTLMVPSP!75,shading angle=-135] ({-0.5*(\the\largeurtlmvpsp)},{(\the\niveauCDtlmvpsp-0.5*\the\HauteurReponse)}) rectangle++ ({\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse}) ;
+					}%
+					{%
+						\draw[rounded corners=2pt,\CouleurTLMVPSP,thick,fill=\CouleurFondCTLMVPSP!75] ({-0.5*(\the\largeurtlmvpsp)},{(\the\niveauCDtlmvpsp-0.5*\the\HauteurReponse)}) rectangle++ ({\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse}) ;
+					}%
+				\draw[rounded corners=3.5pt,thick,\CouleurTLMVPSP,opacity=0.25] ($({-0.5*(\the\largeurtlmvpsp)},{(\the\niveauCDtlmvpsp-0.5*\the\HauteurReponse)})+(-1.25pt,-1.25pt)$) rectangle++ ($({\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse})+(2.5pt,2.5pt)$) ;
+				% CartoucheRéponsesD
+				\ifboolKV[TLMVPSP]{Effet}
+					{%
+						\filldraw[rounded corners=2pt,draw=\CouleurTLMVPSP,thick,shading=axis,left color=\CouleurFondDTLMVPSP!85!black,right color=\CouleurFondDTLMVPSP!75,shading angle=-135] ({0.5*(\the\largeurtlmvpsp)},{(\the\niveauCDtlmvpsp-0.5*\the\HauteurReponse)}) rectangle++ ({-\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse}) ;
+					}%
+					{%
+						\draw[rounded corners=2pt,\CouleurTLMVPSP,thick,fill=\CouleurFondDTLMVPSP!75] ({0.5*(\the\largeurtlmvpsp)},{(\the\niveauCDtlmvpsp-0.5*\the\HauteurReponse)}) rectangle++ ({-\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse}) ;
+					}%
+				\draw[rounded corners=3.5pt,thick,\CouleurTLMVPSP,opacity=0.25] ($({0.5*(\the\largeurtlmvpsp)},{(\the\niveauCDtlmvpsp-0.5*\the\HauteurReponse)})+(1.25pt,-1.25pt)$) rectangle++ ($({-\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse})+(-2.5pt,2.5pt)$) ;
+				%labels
+				\draw (CartoucheReponseA) node[right=0.15cm,anchor=west,text=\CouleurTexteTLMVPSP,text width=\the\texteboitereponsetlmvpsp] {\CodeAvantTLMVPSP #3} ;
+				\draw (CartoucheReponseB) node[right=0.15cm,anchor=west,text=\CouleurTexteTLMVPSP,text width=\the\texteboitereponsetlmvpsp] {\CodeAvantTLMVPSP #4} ;
+				\draw (CartoucheReponseC) node[right=0.15cm,anchor=west,text=\CouleurTexteTLMVPSP,text width=\the\texteboitereponsetlmvpsp] {\CodeAvantTLMVPSP #5} ;
+				\draw (CartoucheReponseD) node[right=0.15cm,anchor=west,text=\CouleurTexteTLMVPSP,text width=\the\texteboitereponsetlmvpsp] {\CodeAvantTLMVPSP #6} ;
+			}%
+			{}%
+		\IfStrEq{\TypeTLMVPSP}{Duo}%
+			{%
+				% CartoucheRéponseC
+				\ifboolKV[TLMVPSP]{Effet}
+					{%
+						\filldraw[rounded corners=2pt,draw=\CouleurTLMVPSP,thick,shading=axis,left color=\CouleurFondCTLMVPSP!85!black,right color=\CouleurFondCTLMVPSP!75,shading angle=-135] ({-0.5*(\the\largeurtlmvpsp)},{(\the\niveauCDtlmvpsp-0.5*\the\HauteurReponse)}) rectangle++ ({\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse}) ;
+					}%
+					{%
+						\draw[rounded corners=2pt,\CouleurTLMVPSP,thick,fill=\CouleurFondCTLMVPSP!75] ({-0.5*(\the\largeurtlmvpsp)},{(\the\niveauCDtlmvpsp-0.5*\the\HauteurReponse)}) rectangle++ ({\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse}) ;
+					}%
+				\draw[rounded corners=3.5pt,thick,\CouleurTLMVPSP,opacity=0.25] ($({-0.5*(\the\largeurtlmvpsp)},{(\the\niveauCDtlmvpsp-0.5*\the\HauteurReponse)})+(-1.25pt,-1.25pt)$) rectangle++ ($({\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse})+(2.5pt,2.5pt)$) ;
+				% CartoucheRéponsesD
+				\ifboolKV[TLMVPSP]{Effet}
+					{%
+						\filldraw[rounded corners=2pt,draw=\CouleurTLMVPSP,thick,shading=axis,left color=\CouleurFondDTLMVPSP!85!black,right color=\CouleurFondDTLMVPSP!75,shading angle=-135] ({0.5*(\the\largeurtlmvpsp)},{(\the\niveauCDtlmvpsp-0.5*\the\HauteurReponse)}) rectangle++ ({-\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse}) ;
+					}%
+					{%
+						\draw[rounded corners=2pt,\CouleurTLMVPSP,thick,fill=\CouleurFondDTLMVPSP!75] ({0.5*(\the\largeurtlmvpsp)},{(\the\niveauCDtlmvpsp-0.5*\the\HauteurReponse)}) rectangle++ ({-\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse}) ;
+					}%
+				\draw[rounded corners=3.5pt,thick,\CouleurTLMVPSP,opacity=0.25] ($({0.5*(\the\largeurtlmvpsp)},{(\the\niveauCDtlmvpsp-0.5*\the\HauteurReponse)})+(1.25pt,-1.25pt)$) rectangle++ ($({-\the\largeurboitereponsetlmvpsp},{\the\HauteurReponse})+(-2.5pt,2.5pt)$) ;
+				%labels
+				\draw (CartoucheReponseA) node[right=0.15cm,anchor=west,text=\CouleurTexteTLMVPSP,text width=\the\texteboitereponsetlmvpsp] {\CodeAvantTLMVPSP #3} ;
+				\draw (CartoucheReponseB) node[right=0.15cm,anchor=west,text=\CouleurTexteTLMVPSP,text width=\the\texteboitereponsetlmvpsp] {\CodeAvantTLMVPSP #4} ;
+				\draw (CartoucheReponseC) node[right=0.15cm,anchor=west,text=\CouleurTexteTLMVPSP,text width=\the\texteboitereponsetlmvpsp] {\CodeAvantTLMVPSP #5} ;
+				\draw (CartoucheReponseD) node[right=0.15cm,anchor=west,text=\CouleurTexteTLMVPSP,text width=\the\texteboitereponsetlmvpsp] {\CodeAvantTLMVPSP #6} ;
+			}%
+			{}%
+		%thème
+		\IfStrEq{\ThemeTLMVPSP}{}%
+			{}%
+			{%
+				\draw[rounded corners=3.5pt,thick,\CouleurTLMVPSP,opacity=0.25] ($({-0.5*(\the\LargeurTheme)},{(-0.5*(\the\HauteurTheme)-\the\HauteurNivTheme)})+(-1.25pt,-1.25pt)$) rectangle++ ($({\the\LargeurTheme},{\the\HauteurTheme})+(2.5pt,2.5pt)$) ;
+				\draw[rounded corners=2pt,\CouleurTLMVPSP,thick,fill=white] ({-0.5*(\the\LargeurTheme)},{(-0.5*(\the\HauteurTheme)-\the\HauteurNivTheme)}) rectangle++ ({\the\LargeurTheme},{\the\HauteurTheme}) ;
+				\draw (0,{-\the\HauteurNivTheme}) node[text=\CouleurTLMVPSP,font=\bfseries\large\sffamily] {\ThemeTLMVPSP} ;
+			}%
+		\IfSubStr{\PointsTLMVPSP}{/}%
+			{%
+				\StrCut{\PointsTLMVPSP}{/}{\PtsChallenger}{\PtsChampion}%
+				\draw ({-0.275*(\the\margemilieulmvpsp)},{\the\niveauCDtlmvpsp-0.5*(\the\HauteurReponse)+\the\margemilieulmvpsp-1pt}) node[inner sep=0pt,below right=2pt,text=\CouleurTexteTLMVPSP,font=\bfseries\large\sffamily,scale=\EchellePointsTLMVPSP] {\PtsChallenger} ;
+				\draw ({0.275*(\the\margemilieulmvpsp)},{\the\niveauCDtlmvpsp-0.5*(\the\HauteurReponse)+1pt}) node[inner sep=0pt,above left=2pt,text=\CouleurTexteTLMVPSP,font=\bfseries\large\sffamily,scale=\EchellePointsTLMVPSP] {\PtsChampion} ;
+			}{}%
+	\end{tikzpicture}%
+}
+
+\endinput

@@ -1,0 +1,668 @@
+% Author                         : C. Pierquet
+% licence                        : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+% Copyright                      : Scrabble, TradeMark by Hasbro or Mattel
+% Inspiration                    : Mark Wibrow in https://tex.stackexchange.com/questions/194780/tikz-drawing-a-rectangle-with-spikes-on-borders
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{Scrabble}[2025/05/05 0.1.8 Scrabble]
+% 0.1.8		Bugfix
+% 0.1.7		Clé pour mélanger les mots en ligne
+% 0.1.6		Correction d'un bug avec le jeton joker + améliorations dans la doc et dans la version [DE]
+% 0.1.5		Ajout de lettres spéciales en Allemand et en Espagnol
+% 0.1.4		Ajout d'un mode inline
+% 0.1.3		Refonte des commandes fr/en + gestion mot
+% 0.1.2		Clé <EchelleLabels> pour les labels des cases
+% 0.1.1		Commandes en/fr
+% 0.1		Version initiale
+
+%------Packages utiles
+\RequirePackage{tikz}
+\RequirePackage{pgf,pgffor}
+%\RequirePackage{xstring}
+%\RequirePackage{xparse}
+\RequirePackage{randintlist}
+%\RequirePackage{simplekv}
+%\RequirePackage{listofitems}
+\RequirePackage{calc}
+%librairies tikz
+\usetikzlibrary{calc,shapes.geometric}
+
+%score par lettre, codes pays par ISO 639-1
+%1=Ä (DE:=6)
+%0=Ö (DE:=8)
+%4=Ü (DE:=8)
+%6=CH (SP:=5)
+%7=Ñ (SP:=8)
+%8=RR (SP:=8)
+%9=LL (SP:=8)
+\def\AlphabetMajuscule{ABCDEFGHIJKLMNOPQRSTUVWXYZ1046789}
+\def\AlphabetMinuscule{abcdefghijklmnopqrstuvwxyz1046789}
+\setsepchar{,}%
+\def\PointsScrabbleFR{1,3,3,2,1,4,2,4,1,8,10,1,1,1,1,3,8,1,1,1,1,4,10,10,10,10, , , , , , , }
+\readlist*{\PtsScrbFR}{\PointsScrabbleFR}
+\def\PointsScrabbleEN{1,3,3,2,1,4,2,4,1,8,5,1,3,1,1,3,10,1,1,1,1,4,4,8,4,10, , , , , , , }
+\readlist*{\PtsScrbEN}{\PointsScrabbleEN}
+\def\PointsScrabbleDE{1,3,4,1,1,2,2,2,2,1,6,4,2,3,2,4,10,1,1,1,1,6,3,8,10,3,6,8,6, , , , }
+\readlist*{\PtsScrbDE}{\PointsScrabbleDE}
+\def\PointsScrabbleES{1,3,3,2,1,4,2,4,1,8, ,1,3,1,1,3,5,1,1,1,1,4, ,8,4,10, , , ,5,8,8,8}
+\readlist*{\PtsScrbES}{\PointsScrabbleES}
+
+\newcommand\scrabblescorelettre[2][EN]{%avec gestion du Joker par *
+	\IfStrEq{#2}{*}%
+		{}%
+		{%
+			\IfSubStr{\AlphabetMajuscule}{#2}%MAJ ou min
+				{\StrPosition{\AlphabetMajuscule}{#2}[\pos]}%index MAJ
+				{\StrPosition{\AlphabetMinuscule}{#2}[\pos]}%index min
+			\IfStrEq{#1}{FR}%
+				{\PtsScrbFR[\pos]}{}%scoreFR
+			\IfStrEq{#1}{EN}%
+				{\PtsScrbEN[\pos]}{}%scoreEN
+			\IfStrEq{#1}{DE}%
+				{\PtsScrbDE[\pos]}{}%scoreDE
+			\IfStrEq{#1}{ES}%
+				{\PtsScrbES[\pos]}{}%scoreSP
+		}%
+}
+
+%commandes localisées des cases
+\newcommand\SCRBMCT[1]{%mot x3
+	\IfStrEq{#1}{FR}{MOT\\COMPTE\\TRIPLE}{}%
+	\IfStrEq{#1}{EN}{TRIPLE\\WORD\\SCORE}{}%
+	%\IfStrEq{#1}{DE}{\scalebox{2}[2]{3W}}{}%
+	\IfStrEq{#1}{DE}{DREI\\FACHER\\WORT\\WERT}{}%
+	\IfStrEq{#1}{ES}{TRIPLE\\TANTO\\DE\\PALABRA}{}%
+}
+\newcommand\SCRBMCD[1]{%mot x2
+	\IfStrEq{#1}{FR}{MOT\\COMPTE\\DOUBLE}{}%
+	\IfStrEq{#1}{EN}{DOUBLE\\WORD\\SCORE}{}%
+	%\IfStrEq{#1}{DE}{\scalebox{2}[2]{2W}}{}%
+	\IfStrEq{#1}{DE}{DOPPELTER\\WORT\\WERT}{}%
+	\IfStrEq{#1}{ES}{DOBLE\\TANTO\\DE\\PALABRA}{}%
+}
+\newcommand\SCRBLCT[1]{%lettre x3
+	\IfStrEq{#1}{FR}{LETTRE\\COMPTE\\TRIPLE}{}%
+	\IfStrEq{#1}{EN}{TRIPLE\\LETTER\\SCORE}{}%
+	%\IfStrEq{#1}{DE}{\scalebox{2}[2]{3B}}{}%
+	\IfStrEq{#1}{DE}{DREI\\FACHER\\BUCHSTABEN\\WERT}{}%
+	\IfStrEq{#1}{ES}{TRIPLE\\TANTO\\DE\\LETRA}{}%
+}
+\newcommand\SCRBLCD[1]{%lettre x2
+	\IfStrEq{#1}{FR}{LETTRE\\COMPTE\\DOUBLE}{}%
+	\IfStrEq{#1}{EN}{DOUBLE\\LETTER\\SCORE}{}%
+	%\IfStrEq{#1}{DE}{\scalebox{2}[2]{2B}}{}%
+	\IfStrEq{#1}{DE}{DOPPELTER\\BUCHSTABEN\\WERT}{}%
+	\IfStrEq{#1}{ES}{DOBLE\\TANTO\\DE\\LETRA}{}%
+}
+
+%styles case + jetons
+%idées de https://tex.stackexchange.com/questions/194780/tikz-drawing-a-rectangle-with-spikes-on-borders
+\tikzset{%fr
+	scorelettre/.style={
+		font=\sffamily\bfseries\tiny,align=center,draw=none,fill=none
+	},
+	pics/.cd,
+	pointes/.style args={#1#2#3}{
+		code={
+			\fill [#3,scale=0.5*0.9] (-1,1) {\foreach \i in {0,1,2,3}{%
+			[rotate=-\i*90] -- (-#1*#2,1) {\foreach \j in {1,...,#1} {-- ++(#2,#2) -- ++(#2,-#2)} -- (1,1)}}} -- cycle;
+		}
+	},
+	casecentrale/.style={
+		code={
+			\path pic {pointes={2}{0.15}{red!25}};
+			\node [scale=\fpeval{\PLSCRBBLEechelleLabel*0.9},star,fill,star point ratio=2.35] {};%
+		}
+	},
+	jeton/.style={
+		code={
+			\IfStrEq{#1}{*}{\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {};}%
+				{%
+					\IfInteger{#1}%
+						{%
+							\IfEq{#1}{1}%c'est Ä
+								{%
+									\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\"A};%
+									\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangue]{#1} };%
+								}{}%
+							\IfEq{#1}{0}%c'est Ö
+								{%
+									\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\"O};%
+									\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangue]{#1} };%
+								}{}%
+							\IfEq{#1}{4}%c'est Ü
+								{%
+									\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\"U};%
+									\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangue]{#1} };%
+								}{}%
+							\IfEq{#1}{6}%c'est CH
+								{%
+									\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\scalebox{0.5}[1]{CH}};%
+									\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangue]{#1} };%
+								}{}%
+							\IfEq{#1}{7}%c'est Ñ
+								{%
+									\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\~{N}};%
+									\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangue]{#1} };%
+								}{}%
+							\IfEq{#1}{8}%c'est RR
+								{%
+									\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\scalebox{0.5}[1]{RR}};%
+									\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangue]{#1} };%
+								}{}%
+							\IfEq{#1}{9}%c'est LL
+								{%
+									\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\scalebox{0.5}[1]{LL}};%
+									\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangue]{#1} };%
+								}{}%
+						}%
+						{%
+							\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\expandafter\MakeUppercase\expandafter{#1}};%
+							\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangue]{#1} };%
+						}%
+				}%
+		}
+	},
+	placemotH/.style={
+		code={
+			\StrLen{#1}[\lgmot]%
+			\foreach \l in {1,2,...,\lgmot} {\StrChar{#1}{\l}[\ll] \path ({\l-2},-1) pic {jeton={\ll}};}
+		}
+	},
+	placemotV/.style={
+		code={
+			\StrLen{#1}[\lgmot]%
+			\foreach \l in {1,2,...,\lgmot} {\StrChar{#1}{\l}[\ll] \path (-1,-{\l}) pic {jeton={\ll}};}
+		}
+	},
+	motcomptetriplefr/.style={
+		code={
+			\path pic {pointes={3}{0.15}{red!75}};%
+			\ifboolKV[PLSCRABBLETIKZFR]{Labels}%
+				{\IfStrEq{\PLSCRBBLElangue}{DE}{\def\tmpscalecaseMCT{0.8}}{\def\tmpscalecaseMCT{1}}\node [scorelettre,xscale=\fpeval{\PLSCRBBLEechelleLabel*0.8*\tmpscalecaseMCT},yscale=\fpeval{\PLSCRBBLEechelleLabel*0.8}] { \SCRBMCT{\PLSCRBBLElangue} };}{}
+		}
+	},
+	motcomptedoublefr/.style={
+		code={
+			\path pic {pointes={2}{0.15}{red!25}};%
+			\ifboolKV[PLSCRABBLETIKZFR]{Labels}%
+				{\IfStrEq{\PLSCRBBLElangue}{DE}{\def\tmpscalecaseMCD{0.75}}{\def\tmpscalecaseMCD{1}}\node [scorelettre,xscale=\fpeval{\PLSCRBBLEechelleLabel*0.8*\tmpscalecaseMCD},yscale=\fpeval{\PLSCRBBLEechelleLabel*0.8}] { \SCRBMCD{\PLSCRBBLElangue} };}
+				{}%
+		}
+	},
+	lettrecomptetriplefr/.style={
+		code={
+			\path pic {pointes={3}{0.15}{blue!50!cyan!75}};%
+			\ifboolKV[PLSCRABBLETIKZFR]{Labels}%
+				{\IfStrEq{\PLSCRBBLElangue}{DE}{\def\tmpscalecaseLCT{0.7}}{\def\tmpscalecaseLCT{1}}\node [scorelettre,xscale=\fpeval{\PLSCRBBLEechelleLabel*0.8*\tmpscalecaseLCT},yscale=\fpeval{\PLSCRBBLEechelleLabel*0.8}] { \SCRBLCT{\PLSCRBBLElangue} };}{}
+		}
+	},
+	lettrecomptedoublefr/.style={
+		code={
+			\path pic {pointes={2}{0.15}{blue!50!cyan!50}};%
+			\ifboolKV[PLSCRABBLETIKZFR]{Labels}%
+				{\IfStrEq{\PLSCRBBLElangue}{DE}{\def\tmpscalecaseLCD{0.7}}{\def\tmpscalecaseLCD{1}}\node [scorelettre,xscale=\fpeval{\PLSCRBBLEechelleLabel*0.8*\tmpscalecaseLCD},yscale=\fpeval{\PLSCRBBLEechelleLabel*0.8}] { \SCRBLCD{\PLSCRBBLElangue} };}{}
+		}
+	},
+	motcomptetripleen/.style={
+		code={
+			\path pic {pointes={3}{0.15}{red!75}};%
+			\ifboolKV[PLSCRABBLETIKZEN]{Labels}%
+				{\IfStrEq{\PLSCRBBLElangue}{DE}{\def\tmpscalecaseMCT{0.8}}{\def\tmpscalecaseMCT{1}}\node [scorelettre,xscale=\fpeval{\PLSCRBBLEechelleLabel*0.8*\tmpscalecaseMCT},yscale=\fpeval{\PLSCRBBLEechelleLabel*0.8}] { \SCRBMCT{\PLSCRBBLElangue} };}{}
+		}
+	},
+	motcomptedoubleen/.style={
+		code={
+			\path pic {pointes={2}{0.15}{red!25}};%
+			\ifboolKV[PLSCRABBLETIKZEN]{Labels}%
+				{\IfStrEq{\PLSCRBBLElangue}{DE}{\def\tmpscalecaseMCD{0.75}}{\def\tmpscalecaseMCD{1}}\node [scorelettre,xscale=\fpeval{\PLSCRBBLEechelleLabel*0.8*\tmpscalecaseMCD},yscale=\fpeval{\PLSCRBBLEechelleLabel*0.8}] { \SCRBMCD{\PLSCRBBLElangue} };}
+				{}%
+		}
+	},
+	lettrecomptetripleen/.style={
+		code={
+			\path pic {pointes={3}{0.15}{blue!50!cyan!75}};%
+			\ifboolKV[PLSCRABBLETIKZEN]{Labels}%
+				{\IfStrEq{\PLSCRBBLElangue}{DE}{\def\tmpscalecaseLCT{0.7}}{\def\tmpscalecaseLCT{1}}\node [scorelettre,xscale=\fpeval{\PLSCRBBLEechelleLabel*0.8*\tmpscalecaseLCT},yscale=\fpeval{\PLSCRBBLEechelleLabel*0.8}] { \SCRBLCT{\PLSCRBBLElangue} };}{}
+		}
+	},
+	lettrecomptedoubleen/.style={
+		code={
+			\path pic {pointes={2}{0.15}{blue!50!cyan!50}};%
+			\ifboolKV[PLSCRABBLETIKZEN]{Labels}%
+				{\IfStrEq{\PLSCRBBLElangue}{DE}{\def\tmpscalecaseLCD{0.7}}{\def\tmpscalecaseLCD{1}}\node [scorelettre,xscale=\fpeval{\PLSCRBBLEechelleLabel*0.8*\tmpscalecaseLCD},yscale=\fpeval{\PLSCRBBLEechelleLabel*0.8}] { \SCRBLCD{\PLSCRBBLElangue} };}{}
+		}
+	}
+}
+
+%commande pour placer un mot fr/en
+\newcommand\ScrabblePlaceMot[3][H]{%
+	\IfStrEq{#1}{H}%
+		{\path (#3) pic {placemotH={#2}};}
+		{\path (#3) pic {placemotV={#2}};}
+}
+\newcommand\ScrabblePutWord[3][H]{%
+	\IfStrEq{#1}{H}%
+		{\path (#3) pic {placemotH={#2}};}
+		{\path (#3) pic {placemotV={#2}};}
+}
+
+%clés en/fr
+\defKV[PLSCRABBLETIKZFR]{%
+	Echelle=\xdef\PLSCRBBLEechelle{#1},%
+	EchelleLabels=\xdef\PLSCRBBLEechelleLabel{#1}
+}
+\defKV[PLSCRABBLETIKZEN]{%
+	Scale=\xdef\PLSCRBBLEechelle{#1},%
+	ScaleLabels=\xdef\PLSCRBBLEechelleLabel{#1}
+}
+\setKVdefault[PLSCRABBLETIKZFR]{%
+	Echelle=1,%
+	EchelleLabels=1,%
+	Cadre=true,%
+	Labels=true,%
+	Aide=false
+}
+\setKVdefault[PLSCRABBLETIKZEN]{%
+	Scale=1,%
+	ScaleLabels=1,%
+	Border=true,%
+	Labels=true,%
+	Help=false
+}
+
+%commandes génériques autonomes pour plateau
+\NewDocumentCommand\PlateauScrabble{ D<>{FR} O{} }{%1=lng,2=options
+	\xdef\PLSCRBBLElangue{#1}%
+	\useKVdefault[PLSCRABBLETIKZFR]%
+	\setKV[PLSCRABBLETIKZFR]{#2}%
+	\begin{tikzpicture}[scale=\PLSCRBBLEechelle,every node/.style={scale=\PLSCRBBLEechelle}]%
+		%plateau
+		\fill[gray!25] (-.5,-.5) rectangle ++(15,15);%
+		\draw[white,line width=\fpeval{\PLSCRBBLEechelle*0.1} cm, shift={(-.5,-.5)}] grid (15,15);%
+		\foreach \scrcase in{(\x,\y),(\y,14-\x),(14-\x,14-\y),(14-\y,\x)}{%
+			\foreach \x/\y in {0/0,7/0}{\path \scrcase pic {motcomptetriplefr};}
+			\foreach \x/\y in {1/1,2/2,3/3,4/4}{\path \scrcase pic {motcomptedoublefr};}
+			\foreach \x/\y in {1/5,5/1,5/5}{\path \scrcase pic {lettrecomptetriplefr};}
+			\foreach \x/\y in {3/0,0/3,2/6,6/2,6/6}{\path \scrcase pic {lettrecomptedoublefr};}
+		}%
+		\path (7,7) pic {casecentrale};%
+		\ifboolKV[PLSCRABBLETIKZFR]{Cadre}{\draw[line width=\fpeval{\PLSCRBBLEechelle*0.075} cm] (-0.6,-0.6) rectangle (14.6,14.6) ;}{}
+	\end{tikzpicture}%
+}
+\NewDocumentCommand\ScrabbleBoard{ D<>{EN} O{} }{%1=lng,2=options
+	\xdef\PLSCRBBLElangue{#1}%
+	\useKVdefault[PLSCRABBLETIKZEN]%
+	\setKV[PLSCRABBLETIKZEN]{#2}%
+	\begin{tikzpicture}[scale=\PLSCRBBLEechelle,every node/.style={scale=\PLSCRBBLEechelle}]%
+		%plateau
+		\fill[gray!25] (-.5,-.5) rectangle ++(15,15);%
+		\draw[white,line width=\fpeval{\PLSCRBBLEechelle*0.1} cm, shift={(-.5,-.5)}] grid (15,15);%
+		\foreach \scrcase in{(\x,\y),(\y,14-\x),(14-\x,14-\y),(14-\y,\x)}{%
+			\foreach \x/\y in {0/0,7/0}{\path \scrcase pic {motcomptetripleen};}
+			\foreach \x/\y in {1/1,2/2,3/3,4/4}{\path \scrcase pic {motcomptedoubleen};}
+			\foreach \x/\y in {1/5,5/1,5/5}{\path \scrcase pic {lettrecomptetripleen};}
+			\foreach \x/\y in {3/0,0/3,2/6,6/2,6/6}{\path \scrcase pic {lettrecomptedoubleen};}
+		}%
+		\path (7,7) pic {casecentrale};%
+		\ifboolKV[PLSCRABBLETIKZEN]{Border}{\draw[line width=\fpeval{\PLSCRBBLEechelle*0.075} cm] (-0.6,-0.6) rectangle (14.6,14.6) ;}{}%
+	\end{tikzpicture}%
+}
+
+%environnement FR pour plateau, pour placer des mots
+\NewDocumentEnvironment{EnvScrabbleFR}{ D<>{FR} O{} }%1=LANG,2=options
+{%
+	\xdef\PLSCRBBLElangue{#1}%
+	\useKVdefault[PLSCRABBLETIKZFR]%
+	\setKV[PLSCRABBLETIKZFR]{#2}%
+	\begin{tikzpicture}[scale=\PLSCRBBLEechelle,every node/.style={scale=\PLSCRBBLEechelle}]%
+		%plateau
+		\fill[gray!25] (-.5,-.5) rectangle ++(15,15);%
+		\draw[white,line width=\fpeval{\PLSCRBBLEechelle*0.1} cm, shift={(-.5,-.5)}] grid (15,15);%
+		\foreach \scrcase in{(\x,\y),(\y,14-\x),(14-\x,14-\y),(14-\y,\x)}{%cases spéciales
+			\foreach \x/\y in {0/0,7/0} {\path \scrcase pic {motcomptetriplefr};}
+			\foreach \x/\y in {1/1,2/2,3/3,4/4} {\path \scrcase pic {motcomptedoublefr};}
+			\foreach \x/\y in {1/5,5/1,5/5} {\path \scrcase pic {lettrecomptetriplefr};}
+			\foreach \x/\y in {3/0,0/3,2/6,6/2,6/6} {\path \scrcase pic {lettrecomptedoublefr};}
+		}%
+		\path (7,7) pic {casecentrale};%
+		\ifboolKV[PLSCRABBLETIKZFR]{Cadre}%
+			{\draw[line width=\fpeval{\PLSCRBBLEechelle*0.075} cm] (-0.6,-0.6) rectangle (14.6,14.6) ;}%
+			{}%
+		\ifboolKV[PLSCRABBLETIKZFR]{Aide}%
+			{%
+				\foreach \nb in {1,2,...,15}
+					{\draw[gray] ({\nb-1},-0.65) node[below,font=\sffamily] {\nb};\draw[gray] (-0.65,{\nb-1}) node[left,font=\sffamily] {\nb};}%
+			}%
+			{}%
+}%
+{%
+	\end{tikzpicture}%
+}
+
+%environnement EN pour plateau, pour placer des mots
+\NewDocumentEnvironment{EnvScrabble}{ D<>{EN} O{} }%1=LANG,2=options
+{%
+	\xdef\PLSCRBBLElangue{#1}%
+	\useKVdefault[PLSCRABBLETIKZEN]%
+	\setKV[PLSCRABBLETIKZEN]{#2}%
+	\begin{tikzpicture}[scale=\PLSCRBBLEechelle,every node/.style={scale=\PLSCRBBLEechelle}]%
+		%plateau
+		\fill[gray!25] (-.5,-.5) rectangle ++(15,15);%
+		\draw[white,line width=\fpeval{\PLSCRBBLEechelle*0.1} cm, shift={(-.5,-.5)}] grid (15,15);%
+		\foreach \scrcase in{(\x,\y),(\y,14-\x),(14-\x,14-\y),(14-\y,\x)}{%cases spéciales
+			\foreach \x/\y in {0/0,7/0} {\path \scrcase pic {motcomptetripleen};}
+			\foreach \x/\y in {1/1,2/2,3/3,4/4} {\path \scrcase pic {motcomptedoubleen};}
+			\foreach \x/\y in {1/5,5/1,5/5} {\path \scrcase pic {lettrecomptetripleen};}
+			\foreach \x/\y in {3/0,0/3,2/6,6/2,6/6} {\path \scrcase pic {lettrecomptedoubleen};}
+		}%
+		\path (7,7) pic {casecentrale};%
+		\ifboolKV[PLSCRABBLETIKZEN]{Border}%
+			{\draw[line width=\fpeval{\PLSCRBBLEechelle*0.075} cm] (-0.6,-0.6) rectangle (14.6,14.6) ;}%
+			{}%
+		\ifboolKV[PLSCRABBLETIKZEN]{Help}%
+			{%
+				\foreach \nb in {1,2,...,15}
+					{\draw[gray] ({\nb-1},-0.65) node[below,font=\sffamily] {\nb};\draw[gray] (-0.65,{\nb-1}) node[left,font=\sffamily] {\nb};}%
+			}%
+			{}%
+}%
+{%
+	\end{tikzpicture}%
+}
+
+%place mot inline
+\newlength{\tmp@scrabword@total@height}
+\newlength{\tmp@scrabword@depth}
+
+\defKV[SCRABBLEWORDINLINEFR]{%
+	CouleurFond=\def\ScrWordInlColFond{#1},%
+	Police=\def\ScrWordInlFonte{#1},%
+	CouleurPolice=\def\ScrWordInlColFonte{#1},%
+	Langue=\def\ScrWordInlLang{#1},%
+	Offset=\def\ScrWordInlOffset{#1},%
+	Echelle=\def\ScrWordInlScale{#1}
+}
+
+\setKVdefault[SCRABBLEWORDINLINEFR]{%
+	CouleurFond=yellow!40,%
+	Police=\bfseries\sffamily,%
+	CouleurPolice=black,%
+	Langue=FR,%
+	Offset=0.1pt,%
+	Score=true,%
+	Echelle=0.6,%
+	Melange=false
+}
+
+\NewDocumentCommand\MotScrabble{ O{} m }{%
+	\useKVdefault[SCRABBLEWORDINLINEFR]%
+	\setKV[SCRABBLEWORDINLINEFR]{#1}%
+	\settototalheight{\tmp@scrabword@total@height}{\hbox{ABCDEFGHIJKLMNOPQQRSTUVWXYZabcdefghijklmnopqqrstuvwxyz}}%
+	\settodepth{\tmp@scrabword@depth}{\hbox{q}}%
+	\StrLen{#2}[\lgmot]%
+	\ifboolKV[SCRABBLEWORDINLINEFR]{Melange}%
+		{%
+			\randintlist[min=1,max=\lgmot,nb=\lgmot]{\mylistmelangemot}%\mylistC
+			\def\tmpmotscrabble{}%
+			\foreach \i in {1,...,\lgmot}%
+				{%
+					\getitemfromrandintlist{\mylistmelangemot}{\i}[\myindice]%
+					\StrChar{#2}{\myindice}[\mytmpletter]%
+					\xdef\tmpmotscrabble{\tmpmotscrabble\mytmpletter}%
+				}%
+		}%
+		{%
+			\xdef\tmpmotscrabble{#2}%
+		}%
+	\raisebox{-\tmp@scrabword@depth+0.025\tmp@scrabword@total@height}{%
+		\foreach \l in {1,2,...,\lgmot}%
+			{%
+				\StrChar{\tmpmotscrabble}{\l}[\ll]%
+				\IfStrEq{\ll}{*}%
+					{%
+						{\tikz \filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) ;}%
+					}%
+					{%
+						\IfInteger{\ll}%
+							{%
+								\IfEq{\ll}{1}%c'est Ä
+									{%
+										{\tikz {%
+											\filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) node[inner sep=0pt,midway,font=\ScrWordInlFonte,scale=\ScrWordInlScale,text=\ScrWordInlColFonte] {\scalebox{1}[0.85]{\"A}};%
+											\ifboolKV[SCRABBLEWORDINLINEFR]{Score}%
+												{\draw ({0.9\tmp@scrabword@total@height},0) node[inner sep=0pt,above left={0.075\tmp@scrabword@total@height},font=\ScrWordInlFonte,scale={0.25*\ScrWordInlScale},text=\ScrWordInlColFonte] { \scrabblescorelettre[\ScrWordInlLang]{\ll} } ;}
+												{}%
+											}%
+										}%
+									}%
+									{}%
+								\IfEq{\ll}{0}%c'est Ö
+									{%
+										{\tikz {%
+											\filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) node[inner sep=0pt,midway,font=\ScrWordInlFonte,scale=\ScrWordInlScale,text=\ScrWordInlColFonte] {\scalebox{1}[0.85]{\"O}};%
+											\ifboolKV[SCRABBLEWORDINLINEFR]{Score}%
+												{\draw ({0.9\tmp@scrabword@total@height},0) node[inner sep=0pt,above left={0.075\tmp@scrabword@total@height},font=\ScrWordInlFonte,scale={0.25*\ScrWordInlScale},text=\ScrWordInlColFonte] { \scrabblescorelettre[\ScrWordInlLang]{\ll} } ;}
+												{}%
+											}%
+										}%
+									}%
+									{}%
+								\IfEq{\ll}{4}%c'est Ü
+									{%
+										{\tikz {%
+											\filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) node[inner sep=0pt,midway,font=\ScrWordInlFonte,scale=\ScrWordInlScale,text=\ScrWordInlColFonte] {\scalebox{1}[0.85]{\"U}};%
+											\ifboolKV[SCRABBLEWORDINLINEFR]{Score}%
+												{\draw ({0.9\tmp@scrabword@total@height},0) node[inner sep=0pt,above left={0.075\tmp@scrabword@total@height},font=\ScrWordInlFonte,scale={0.25*\ScrWordInlScale},text=\ScrWordInlColFonte] { \scrabblescorelettre[\ScrWordInlLang]{\ll} } ;}
+												{}%
+											}%
+										}%
+									}%
+									{}%
+								\IfEq{\ll}{6}%c'est CH
+									{%
+										{\tikz {%
+											\filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) node[inner sep=0pt,midway,font=\ScrWordInlFonte,scale=\ScrWordInlScale,text=\ScrWordInlColFonte] {\scalebox{0.5}[1]{CH}};%
+											\ifboolKV[SCRABBLEWORDINLINEFR]{Score}%
+												{\draw ({0.9\tmp@scrabword@total@height},0) node[inner sep=0pt,above left={0.075\tmp@scrabword@total@height},font=\ScrWordInlFonte,scale={0.25*\ScrWordInlScale},text=\ScrWordInlColFonte] { \scrabblescorelettre[\ScrWordInlLang]{\ll} } ;}
+												{}%
+											}%
+										}%
+									}%
+									{}%
+								\IfEq{\ll}{7}%c'est Ñ
+									{%
+										{\tikz {%
+											\filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) node[inner sep=0pt,midway,font=\ScrWordInlFonte,scale=\ScrWordInlScale,text=\ScrWordInlColFonte] {\scalebox{1}[0.85]{\~{N}}};%
+											\ifboolKV[SCRABBLEWORDINLINEFR]{Score}%
+												{\draw ({0.9\tmp@scrabword@total@height},0) node[inner sep=0pt,above left={0.075\tmp@scrabword@total@height},font=\ScrWordInlFonte,scale={0.25*\ScrWordInlScale},text=\ScrWordInlColFonte] { \scrabblescorelettre[\ScrWordInlLang]{\ll} } ;}
+												{}%
+											}%
+										}%
+									}%
+									{}%
+								\IfEq{\ll}{8}%c'est RR
+									{%
+										{\tikz {%
+											\filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) node[inner sep=0pt,midway,font=\ScrWordInlFonte,scale=\ScrWordInlScale,text=\ScrWordInlColFonte] {\scalebox{0.5}[1]{RR}};%
+											\ifboolKV[SCRABBLEWORDINLINEFR]{Score}%
+												{\draw ({0.9\tmp@scrabword@total@height},0) node[inner sep=0pt,above left={0.075\tmp@scrabword@total@height},font=\ScrWordInlFonte,scale={0.25*\ScrWordInlScale},text=\ScrWordInlColFonte] { \scrabblescorelettre[\ScrWordInlLang]{\ll} } ;}
+												{}%
+											}%
+										}%
+									}%
+									{}%
+								\IfEq{\ll}{9}%c'est LL
+									{%
+										{\tikz {%
+											\filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) node[inner sep=0pt,midway,font=\ScrWordInlFonte,scale=\ScrWordInlScale,text=\ScrWordInlColFonte] {\scalebox{0.5}[1]{LL}};%
+											\ifboolKV[SCRABBLEWORDINLINEFR]{Score}%
+												{\draw ({0.9\tmp@scrabword@total@height},0) node[inner sep=0pt,above left={0.075\tmp@scrabword@total@height},font=\ScrWordInlFonte,scale={0.25*\ScrWordInlScale},text=\ScrWordInlColFonte] { \scrabblescorelettre[\ScrWordInlLang]{\ll} } ;}
+												{}%
+											}%
+										}%
+									}%
+									{}%
+							}%
+							{%
+								{\tikz {%
+									\filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) node[inner sep=0pt,midway,font=\ScrWordInlFonte,scale=\ScrWordInlScale,text=\ScrWordInlColFonte] {\expandafter\MakeUppercase\expandafter{\ll}};%
+									\ifboolKV[SCRABBLEWORDINLINEFR]{Score}%
+										{\draw ({0.9\tmp@scrabword@total@height},0) node[inner sep=0pt,above left={0.075\tmp@scrabword@total@height},font=\ScrWordInlFonte,scale={0.25*\ScrWordInlScale},text=\ScrWordInlColFonte] { \scrabblescorelettre[\ScrWordInlLang]{\ll} } ;}
+										{}%
+									}%
+								}%
+							}%
+					}%
+			\ifnum \l<\lgmot\hspace*{\ScrWordInlOffset}\fi%
+			}%
+	}%
+}
+
+\defKV[SCRABBLEWORDINLINEEN]{%
+	Colback=\def\ScrWordInlColFond{#1},%
+	Font=\def\ScrWordInlFonte{#1},%
+	Colfonte=\def\ScrWordInlColFonte{#1},%
+	Lang=\def\ScrWordInlLang{#1},%
+	Offset=\def\ScrWordInlOffset{#1},%
+	Scale=\def\ScrWordInlScale{#1}
+}
+
+\setKVdefault[SCRABBLEWORDINLINEEN]{%
+	Colback=yellow!40,%
+	Font=\bfseries\sffamily,%
+	Colfonte=black,%
+	Lang=EN,%
+	Offset=0.1pt,%
+	Score=true,%
+	Scale=0.6,%
+	Shuffle=false
+}
+
+\NewDocumentCommand\ScrabbleWord{ O{} m }{%
+	\useKVdefault[SCRABBLEWORDINLINEEN]%
+	\setKV[SCRABBLEWORDINLINEEN]{#1}%
+	\settototalheight{\tmp@scrabword@total@height}{\hbox{ABCDEFGHIJKLMNOPQQRSTUVWXYZabcdefghijklmnopqqrstuvwxyz}}%
+	\settodepth{\tmp@scrabword@depth}{\hbox{q}}%
+	\StrLen{#2}[\lgmot]%
+	\ifboolKV[SCRABBLEWORDINLINEEN]{Shuffle}%
+		{%
+			\randintlist[min=1,max=\lgmot,nb=\lgmot]{\mylistmelangemot}%\mylistC
+			\def\tmpmotscrabble{}%
+			\foreach \i in {1,...,\lgmot}%
+				{%
+					\getitemfromrandintlist{\mylistmelangemot}{\i}[\myindice]%
+					\StrChar{#2}{\myindice}[\mytmpletter]%
+					\xdef\tmpmotscrabble{\tmpmotscrabble\mytmpletter}%
+				}%
+		}%
+		{%
+			\xdef\tmpmotscrabble{#2}%
+		}%
+	\raisebox{-\tmp@scrabword@depth+0.025\tmp@scrabword@total@height}{%
+		\foreach \l in {1,2,...,\lgmot}%
+			{%
+				\StrChar{\tmpmotscrabble}{\l}[\ll]%
+				\IfStrEq{\ll}{*}%
+					{%
+						{\tikz \filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) ;}%
+					}%
+					{%
+						\IfInteger{\ll}%
+							{%
+								\IfEq{\ll}{1}%c'est Ä
+									{%
+										{\tikz {%
+											\filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) node[inner sep=0pt,midway,font=\ScrWordInlFonte,scale=\ScrWordInlScale,text=\ScrWordInlColFonte] {\scalebox{1}[0.85]{\"A}};%
+											\ifboolKV[SCRABBLEWORDINLINEEN]{Score}%
+												{\draw ({0.9\tmp@scrabword@total@height},0) node[inner sep=0pt,above left={0.075\tmp@scrabword@total@height},font=\ScrWordInlFonte,scale={0.25*\ScrWordInlScale},text=\ScrWordInlColFonte] { \scrabblescorelettre[\ScrWordInlLang]{\ll} } ;}
+												{}%
+											}%
+										}%
+									}%
+									{}%
+								\IfEq{\ll}{0}%c'est Ö
+									{%
+										{\tikz {%
+											\filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) node[inner sep=0pt,midway,font=\ScrWordInlFonte,scale=\ScrWordInlScale,text=\ScrWordInlColFonte] {\scalebox{1}[0.85]{\"O}};%
+											\ifboolKV[SCRABBLEWORDINLINEEN]{Score}%
+												{\draw ({0.9\tmp@scrabword@total@height},0) node[inner sep=0pt,above left={0.075\tmp@scrabword@total@height},font=\ScrWordInlFonte,scale={0.25*\ScrWordInlScale},text=\ScrWordInlColFonte] { \scrabblescorelettre[\ScrWordInlLang]{\ll} } ;}
+												{}%
+											}%
+										}%
+									}%
+									{}%
+								\IfEq{\ll}{4}%c'est Ü
+									{%
+										{\tikz {%
+											\filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) node[inner sep=0pt,midway,font=\ScrWordInlFonte,scale=\ScrWordInlScale,text=\ScrWordInlColFonte] {\scalebox{1}[0.85]{\"U}};%
+											\ifboolKV[SCRABBLEWORDINLINEEN]{Score}%
+												{\draw ({0.9\tmp@scrabword@total@height},0) node[inner sep=0pt,above left={0.075\tmp@scrabword@total@height},font=\ScrWordInlFonte,scale={0.25*\ScrWordInlScale},text=\ScrWordInlColFonte] { \scrabblescorelettre[\ScrWordInlLang]{\ll} } ;}
+												{}%
+											}%
+										}%
+									}%
+									{}%
+								\IfEq{\ll}{6}%c'est CH
+									{%
+										{\tikz {%
+											\filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) node[inner sep=0pt,midway,font=\ScrWordInlFonte,scale=\ScrWordInlScale,text=\ScrWordInlColFonte] {\scalebox{0.5}[1]{CH}};%
+											\ifboolKV[SCRABBLEWORDINLINEEN]{Score}%
+												{\draw ({0.9\tmp@scrabword@total@height},0) node[inner sep=0pt,above left={0.075\tmp@scrabword@total@height},font=\ScrWordInlFonte,scale={0.25*\ScrWordInlScale},text=\ScrWordInlColFonte] { \scrabblescorelettre[\ScrWordInlLang]{\ll} } ;}
+												{}%
+											}%
+										}%
+									}%
+									{}%
+								\IfEq{\ll}{7}%c'est Ñ
+									{%
+										{\tikz {%
+											\filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) node[inner sep=0pt,midway,font=\ScrWordInlFonte,scale=\ScrWordInlScale,text=\ScrWordInlColFonte] {\scalebox{1}[0.85]{\~{N}}};%
+											\ifboolKV[SCRABBLEWORDINLINEEN]{Score}%
+												{\draw ({0.9\tmp@scrabword@total@height},0) node[inner sep=0pt,above left={0.075\tmp@scrabword@total@height},font=\ScrWordInlFonte,scale={0.25*\ScrWordInlScale},text=\ScrWordInlColFonte] { \scrabblescorelettre[\ScrWordInlLang]{\ll} } ;}
+												{}%
+											}%
+										}%
+									}%
+									{}%
+								\IfEq{\ll}{8}%c'est RR
+									{%
+										{\tikz {%
+											\filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) node[inner sep=0pt,midway,font=\ScrWordInlFonte,scale=\ScrWordInlScale,text=\ScrWordInlColFonte] {\scalebox{0.5}[1]{RR}};%
+											\ifboolKV[SCRABBLEWORDINLINEEN]{Score}%
+												{\draw ({0.9\tmp@scrabword@total@height},0) node[inner sep=0pt,above left={0.075\tmp@scrabword@total@height},font=\ScrWordInlFonte,scale={0.25*\ScrWordInlScale},text=\ScrWordInlColFonte] { \scrabblescorelettre[\ScrWordInlLang]{\ll} } ;}
+												{}%
+											}%
+										}%
+									}%
+									{}%
+								\IfEq{\ll}{9}%c'est LL
+									{%
+										{\tikz {%
+											\filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) node[inner sep=0pt,midway,font=\ScrWordInlFonte,scale=\ScrWordInlScale,text=\ScrWordInlColFonte] {\scalebox{0.5}[1]{LL}};%
+											\ifboolKV[SCRABBLEWORDINLINEEN]{Score}%
+												{\draw ({0.9\tmp@scrabword@total@height},0) node[inner sep=0pt,above left={0.075\tmp@scrabword@total@height},font=\ScrWordInlFonte,scale={0.25*\ScrWordInlScale},text=\ScrWordInlColFonte] { \scrabblescorelettre[\ScrWordInlLang]{\ll} } ;}
+												{}%
+											}%
+										}%
+									}%
+									{}%
+							}%
+							{%
+								{\tikz {%
+									\filldraw[\ScrWordInlColFond,rounded corners={0.15\tmp@scrabword@total@height}] (0,0) rectangle++ ({0.9\tmp@scrabword@total@height},{0.9\tmp@scrabword@total@height}) node[inner sep=0pt,midway,font=\ScrWordInlFonte,scale=\ScrWordInlScale,text=\ScrWordInlColFonte] {\expandafter\MakeUppercase\expandafter{\ll}};%
+									\ifboolKV[SCRABBLEWORDINLINEFR]{Score}%
+										{\draw ({0.9\tmp@scrabword@total@height},0) node[inner sep=0pt,above left={0.075\tmp@scrabword@total@height},font=\ScrWordInlFonte,scale={0.25*\ScrWordInlScale},text=\ScrWordInlColFonte] { \scrabblescorelettre[\ScrWordInlLang]{\ll} } ;}
+										{}%
+									}%
+								}%
+							}%
+					}%
+			\ifnum \l<\lgmot\hspace*{\ScrWordInlOffset}\fi%
+			}%
+	}%
+}
+
+
+
+\endinput

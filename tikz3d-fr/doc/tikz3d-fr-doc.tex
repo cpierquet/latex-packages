@@ -1,0 +1,911 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[french,a4paper,11pt]{article}
+\usepackage[margin=2cm,includefoot]{geometry}
+\def\TPversion{0.1.5}
+\def\TPdate{22 mai 2025}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{tikz3d-fr}
+\usepackage{awesomebox}
+\usepackage{fontawesome5}
+\usepackage{footnote}
+\makesavenoteenv{tabular}
+\usepackage{enumitem}
+\usepackage{tabularray}
+\UseTblrLibrary{diagbox}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [tikz3d-fr]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+
+%\usepackage{hvlogos}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+\newcommand\TableauDocumentation{%
+	\begin{tblr}{width=\linewidth,colspec={X[c]X[c]X[c]X[c]X[c]X[c]},cells={font=\sffamily}}
+		{\LARGE \LaTeX} & & & & &\\
+		& {\LARGE \hologo{pdfLaTeX}} & & & & \\
+		& & {\LARGE \hologo{LuaLaTeX}} & & & \\
+		& & & {\LARGE \TikZ} & & \\
+		& & & & {\LARGE \TeXLive} & \\
+		& & & & & {\LARGE \hologo{MiKTeX}} \\
+	\end{tblr}
+}
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\setlength{\parindent}{0pt}
+\definecolor{LightGray}{gray}{0.9}
+
+\usepackage{babel}
+\AddThinSpaceBeforeFootnotes
+\FrenchFootnotes
+
+\usepackage[most]{tcolorbox}
+\usetikzlibrary{calc}
+\usepackage{minted2}
+\tcbuselibrary{minted}
+\NewTCBListing{PresCodeTex}{ O{cyan} m }{%
+	enhanced,width=0.93\linewidth,flush right,boxrule=0.75pt,colframe=#1!85!black,%
+	sharp corners,top=0mm,bottom=0mm,left=0.4em,right=5mm,%
+	before skip=\baselineskip,after skip=\baselineskip,%
+	colback=white,
+	fontupper=\footnotesize,fontlower=\footnotesize,%
+	watermark text={\faCode},watermark opacity=0.25,watermark zoom=0.50,%
+	title={{\scriptsize\faCode} Code \LaTeX},
+	lefttitle=0.4em,
+	fonttitle=\bfseries\footnotesize\sffamily,colbacktitle=darkgray!50!#1,%
+	listing engine=minted,minted style=colorful,minted language=tex,
+	minted options={tabsize=4,fontsize=\footnotesize,autogobble,breaklines=true},
+	#2,%
+	overlay={\draw[#1!85!black] ($(frame.north west)+(-0.035\linewidth,-0.025\linewidth)$) node[scale=1.66] {\faCode} ;}
+}
+
+\NewTCBListing{PresCode}{ O{cyan} m }{%
+	enhanced,width=0.93\linewidth,flush right,boxrule=0.75pt,colframe=#1!85!black,%
+	sharp corners,top=0mm,bottom=0mm,left=0.4em,right=5mm,%
+	before skip=\baselineskip,after skip=\baselineskip,%
+	colback=white,
+	fontupper=\footnotesize,fontlower=\footnotesize,%
+	watermark text={\faCogs},watermark opacity=0.25,watermark zoom=0.50,%
+	title={{\scriptsize\faCogs} Code \LaTeX{} et sortie \LaTeX},
+	lefttitle=0.4em,
+	fonttitle=\bfseries\footnotesize\sffamily,colbacktitle=darkgray!50!#1,%
+	listing engine=minted,minted style=colorful,minted language=tex,
+	minted options={tabsize=4,fontsize=\footnotesize,autogobble,breaklines=true},
+	#2,%
+	overlay={%
+		\draw[#1!85!black] ($(frame.north west)+(-0.035\linewidth,-0.025\linewidth)$) node[scale=1.66] {\faCode} ;
+		\draw[#1!85!black] ($(segmentation.west)+(-0.035\linewidth,-0.025\linewidth)$) node[scale=1.66] {\faFilePdf} ;
+		
+	}
+}
+
+\NewTCBListing{PresCodeSortie}{ O{cyan} m }{%
+	enhanced,width=0.93\linewidth,flush right,boxrule=0.75pt,colframe=#1!85!black,%
+	sharp corners,top=0mm,bottom=0mm,left=0.4em,right=5mm,%
+	before skip=\baselineskip,after skip=\baselineskip,%
+	colback=white,
+	fontupper=\footnotesize,fontlower=\footnotesize,%
+	watermark text={\faFilePdf},watermark opacity=0.25,watermark zoom=0.50,%
+	title={{\scriptsize\faFilePdf} Sortie \LaTeX},
+	lefttitle=0.4em,
+	fonttitle=\bfseries\footnotesize\sffamily,colbacktitle=darkgray!50!#1,%
+	listing engine=minted,minted style=colorful,minted language=tex,
+	minted options={tabsize=4,fontsize=\footnotesize,autogobble,breaklines=true},
+	#2,%
+	overlay={\draw[#1!85!black] ($(frame.north west)+(-0.035\linewidth,-0.025\linewidth)$) node[scale=1.66] {\faFilePdf} ;}
+}
+
+\NewTCBListing{PresentationCode}{ O{blue} m }{%
+	sharp corners=downhill,enhanced,arc=12pt,skin=bicolor,%
+	colback=#1!1!white,colframe=#1!75!black,colbacklower=white,%
+	attach boxed title to top right={yshift=-\tcboxedtitleheight},title=Code \LaTeX,%
+	boxed title style={%
+		colframe=#1!75!black,colback=#1!15!white,%
+		,sharp corners=downhill,arc=12pt,%
+	},%
+	top=\baselineskip,%
+	fonttitle=\color{#1!90!black}\itshape\ttfamily\footnotesize,%
+	listing engine=minted,minted style=colorful,
+	minted language=tex,minted options={tabsize=4,fontsize=\small,autogobble},
+	#2
+}
+
+\tcbset{vignettes/.style={%
+	nobeforeafter,box align=base,boxsep=0pt,enhanced,sharp corners=all,rounded corners=southeast,%
+	boxrule=0.75pt,left=7pt,right=1pt,top=0pt,bottom=0.25pt,%
+	}
+}
+
+\tcbset{vignetteMaJ/.style={%
+	fontupper={\vphantom{pf}\footnotesize\ttfamily},
+	vignettes,colframe=ForestGreen!50!black,coltitle=white,colback=purple!25,%
+	overlay={\begin{tcbclipinterior}%
+			\fill[fill=purple!75]($(interior.south west)$) rectangle node[rotate=90]{\tiny \sffamily{\textcolor{Black}{\scalebox{0.85}[0.75]{\textbf{MàJ}}}}} ($(interior.north west)+(5pt,0pt)$);%
+	\end{tcbclipinterior}}
+	}
+}
+
+\newcommand\Cle[1]{{\bfseries\sffamily\textlangle #1\textrangle}}
+\newcommand\cmaj[1]{\tcbox[vignetteMaJ]{#1}\xspace}
+
+\begin{document}
+
+\setlength{\aweboxleftmargin}{0.07\linewidth}
+\setlength{\aweboxcontentwidth}{0.93\linewidth}
+\setlength{\aweboxvskip}{8pt}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\vspace{2cm}
+
+\begin{center}
+	\begin{minipage}{0.75\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{tikz3d-fr}}\\
+				\\
+				{\LARGE Quelques commandes (fr) pour} \\
+				\\
+				{\LARGE un peu de 3D avec \TikZ.} \\
+			\end{tabular}
+			
+			\bigskip
+			
+			{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
+\end{tabular}
+\end{center}
+
+\vspace{0.25cm}
+
+{$\blacktriangleright$~~Un environnement avec déclaration des unités.}
+
+\smallskip
+
+{$\blacktriangleright$~~Une commande pour afficher un pavé, avec personnalisations.}
+
+\smallskip
+
+{$\blacktriangleright$~~Deux commandes pour afficher des empilements de \og petits cubes \fg.}
+
+\vspace{1cm}
+
+\begin{center}
+	\begin{tcolorbox}[enhanced,colframe=cyan,colback=cyan!2,center,width=0.95\linewidth,drop fuzzy shadow=lightgray]
+	\begin{EnvTikzEspace}
+		\PaveTikzTriDim[Cube,Largeur=2.5,AffLabel,Couleur=blue!50!black,CouleurSommets=red]
+	\end{EnvTikzEspace}
+	
+	\vspace*{-2cm}
+	
+	\hfill\BlocPetitsCubes[violet]{1,2,3,4,5 / 0,2,1,1,3 / 0,2,1,1,2 / 1,1,1,1,1}\hfill~
+	
+	\vspace*{-2cm}
+	
+	\def\listecouleursdes{red!25,blue!25,yellow!25,orange!25,green!25}\TirageAleaDesTriDim[EspaceH=-2mm]{5}
+	\hfill
+	\begin{EmpilementCubes}
+		\PlaquePetitsCubes[cyan/red/green/yellow]{ 3111-1-4 / 233123 / 2-1112 }
+		\PlaquePetitsCubes[cyan/red]{ 111 / -21 }
+		\PlaquePetitsCubes[cyan/red/green]{ 3-2 }
+	\end{EmpilementCubes}
+	\end{tcolorbox}
+\end{center}
+
+\vspace{0.5cm}
+
+%\hfill{}\textit{Merci à Denis Bitouzé et à Gilles Le Bourhis pour leurs retours et idées !}
+
+\smallskip
+
+\vfill
+
+\hrule
+
+\medskip
+
+\TableauDocumentation
+
+\medskip
+
+\hrule
+
+\medskip
+
+\newpage
+
+\phantomsection
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\pagebreak
+
+\part{Historique}
+
+\verb|v0.1.5|~:~~~~Bugfix
+
+\verb|v0.1.4|~:~~~~Bugfix
+
+\verb|v0.1.3|~:~~~~Affichage de dés en 3d (avec aléatoire possible)
+
+\verb|v0.1.2|~:~~~~Option pour l'épaisseur des traits + \textsf{[line join=round]} pour les cubes
+
+\verb|v0.1.1|~:~~~~Tracé des segments individuels avec l'option \textsf{[line cap=round]}
+
+\verb|v0.1.0|~:~~~~Version initiale
+
+\pagebreak
+
+\part{Introduction}
+
+\section{Le package tikz3d-fr}
+
+\subsection{Introduction}
+
+\begin{noteblock}
+Le package propose des commandes basiques -- et francisées -- pour travailler sur des figures simples en 3D, à l'aide de \TikZ{} en utilisant des coordonnées tridimensionnelles :
+
+\begin{itemize}
+	\item un environnement avec gestion des unités $x/y/z$ ;
+	\item une commande pour tracer et personnaliser un cube ;
+	\item des commandes pour créer/afficher/nommer des points de l'espace ;
+	\item des commandes pour tracer un ou plusieurs segments ;
+	\item des commandes et un environnement pour travailler sur des \textit{empilements} de cubes ;
+	\item des commandes pour représenter des dés en perspective (avec aléatoire possible).
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{noteblock}
+
+\begin{importantblock}
+Il existe d'autres solutions pour travailler avec de la 3D en \LaTeX, comme par exemple les packages \textsf{ProfCollege}\footnotemark\footnotetext{\url{https://www.ctan.org/pkg/profcollege}} (de Christophe Poulain, qui utilise \hologo{MetaPost}, et qui est certainement beaucoup plus performant) ou \textsf{pst-ob3d}\footnotemark\footnotetext{\url{https://www.ctan.org/pkg/pst-ob3d}} (de Herbert Voß et Denis Girou, qui utilise \pstricks).
+
+\smallskip
+
+L'idée est de proposer une utilisation des capacités (natives) 3D de \TikZ, en proposant des commandes \textit{simplifiées} et \textit{francisées} pour des figures simples (tétraèdres, cubes, pyramides, pavés) utilisées fréquemment dans des exercices de géométrie dans l'espace dans l'enseignement secondaires en France.
+\end{importantblock}
+
+\subsection{Chargement du package, packages utilisés}
+
+\begin{importantblock}
+Le package se charge, de manière classique, dans le préambule.
+
+Il n'existe pas d'option pour le package, et \texttt{xcolor} n'est pas chargé.
+\end{importantblock}
+
+\begin{PresCodeTex}{listing only}
+\usepackage{tikz3d-fr}
+\end{PresCodeTex}
+
+\begin{noteblock}
+\textsf{tikz3d-fr} charge les packages suivantes :
+
+\begin{itemize}
+	\item \texttt{tikz}, \texttt{xstring}, \texttt{xintexpr}, \texttt{simplekv} et \texttt{xinttools} et \texttt{listofitems}, \texttt{tikz-3dplot} et \texttt{randomlist}  ;
+	\item la librairie \texttt{\textit{tikz}.calc}.
+\end{itemize}
+
+Il est compatible avec les compilations usuelles en \textsf{latex}, \textsf{pdflatex}, \textsf{lualatex} ou \textsf{xelatex}.
+\end{noteblock}
+
+\vfill~
+
+\pagebreak
+
+\part{Environnement 3D et commandes de base}
+
+\section{Création de l'environnement}
+
+\subsection{Commande}
+
+\begin{cautionblock}
+L'environnement dédié à la création de figures en 3D avec \TikZ{} est \texttt{EnvTikzEspace}.
+
+Il permet de définir les unités et \textit{angles} des différents axes.
+\end{cautionblock}
+
+\begin{PresCodeTex}{listing only}
+\begin{EnvTikzEspace}[Clés]<options tikz>
+	%commandes
+\end{EnvTikzEspace}
+\end{PresCodeTex}
+
+\subsection{Clés et options}
+
+\begin{tipblock}
+Le premier argument, optionnel et entre \texttt{[...]} propose les \Cle{clés} suivantes :
+
+\begin{itemize}
+	\item \Cle{UniteX}, à donner sous la forme \Cle{\{angle\string:longueur\}} pour le vecteur de base $\vec{\imath}$ ;
+	
+	\hfill{}défaut : \Cle{\{-15\string:1cm\}},%
+	\item \Cle{UniteY}, à donner sous la forme \Cle{\{angle\string:longueur\}} pour le vecteur de base $\vec{\jmath}$ ;
+	
+	\hfill{}défaut : \Cle{\{20\string:0.65cm\}}
+	\item \Cle{UniteZ}, à donner sous la forme \Cle{\{angle\string:longueur\}} pour le vecteur de base $\vec{k}$ ;
+	
+	\hfill{}défaut : \Cle{\{90\string:1cm\}}
+	\item Le booléen \Cle{VueClassique} pour un affichage en perspective habituelle.\hfill~défaut : \Cle{false}
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{tipblock}
+Le second argument, optionnel et entre \texttt{<...>} est quant à lui relatif à des arguments à passer à l'environnement \TikZ{} créé, comme par exemple un alignement vertical, etc
+\end{tipblock}
+
+\begin{PresCode}{}
+\begin{EnvTikzEspace}
+	\draw[->,>=latex] (0,0,0)--(1,0,0) node[right] {$\vec{\imath}$} ;
+	\draw[->,>=latex] (0,0,0)--(0,1,0) node[right] {$\vec{\jmath}$} ;
+	\draw[->,>=latex] (0,0,0)--(0,0,1) node[above] {$\vec{k}$} ;
+\end{EnvTikzEspace}
+\end{PresCode}
+
+\begin{PresCode}{}
+\begin{EnvTikzEspace}[UniteX={-145:1.25cm},UniteY={0:1.75cm},UniteZ={90:1.75cm}]
+	\draw[->,>=latex] (0,0,0)--(1,0,0) node[right] {$\vec{\imath}$} ;
+	\draw[->,>=latex] (0,0,0)--(0,1,0) node[right] {$\vec{\jmath}$} ;
+	\draw[->,>=latex] (0,0,0)--(0,0,1) node[above] {$\vec{k}$} ;
+\end{EnvTikzEspace}
+\end{PresCode}
+
+\begin{PresCode}{}
+\begin{EnvTikzEspace}[VueClassique]
+	\draw[->,>=latex] (0,0,0)--(1,0,0) node[right] {$\vec{\imath}$} ;
+	\draw[->,>=latex] (0,0,0)--(0,1,0) node[right] {$\vec{\jmath}$} ;
+	\draw[->,>=latex] (0,0,0)--(0,0,1) node[above] {$\vec{k}$} ;
+\end{EnvTikzEspace}
+\end{PresCode}
+
+\begin{noteblock}
+Une fois l'environnement, via son \textit{repère}, est créé, toute commande en \TikZ{} est utilisable avec les coordonnées \texttt{(x,y,z)} ou bien les \texttt{scope} avec les \texttt{canva}.
+\end{noteblock}
+
+\begin{PresCode}{}
+\begin{EnvTikzEspace}[UniteX={-145:0.575cm},UniteY={0:0.7cm},UniteZ={90:0.7cm}]
+	\filldraw[red] (2,4,3) circle[radius=1pt] ; \draw[red] (0,0,0) -- (2,4,3) ;
+	\draw[thin,->,>=latex] (0,0,0)--(3,0,0) ;
+	\draw[thin,->,>=latex] (0,0,0)--(0,5,0) ;
+	\draw[thin,->,>=latex] (0,0,0)--(0,0,4) ;
+	\draw[->,>=latex] (0,0,0)--(1,0,0) ;
+	\draw[->,>=latex] (0,0,0)--(0,1,0) ;
+	\draw[->,>=latex] (0,0,0)--(0,0,1) ;
+	\draw[dashed] (0,0,3)--(2,4,3)--(2,4,0)--(0,0,0) (2,4,0)--(2,0,0) (2,4,0)--(0,4,0) ;
+\end{EnvTikzEspace}
+\end{PresCode}
+
+\pagebreak
+
+\section{Points et segments}
+
+\subsection{Commandes}
+
+\begin{cautionblock}
+Les commandes \textit{simplifiées} et \textit{francisées} disponibles sont :
+
+\begin{itemize}
+	\item \texttt{\textbackslash PlacePointEspace} pour placer un point dans l'espace ;
+	\item \texttt{\textbackslash PlacePointsEspace} pour placer des points dans l'espace ;
+	\item \texttt{\textbackslash MarquePointEspace} pour marquer (matérialiser) un point dans l'espace ;
+	\item \texttt{\textbackslash MarquePointsEspace} pour marquer (matérialiser) un point dans l'espace ;
+	\item \texttt{\textbackslash TraceSegmentEspace} pour tracer un segment dans l'espace ;
+	\item \texttt{\textbackslash TraceSegmentsEspace} pour tracer des segments dans l'espace.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{cautionblock}
+
+\begin{PresCodeTex}{listing only}
+\begin{EnvTikzEspace}[Clés]<options tikz>
+	%créer/placer/nommer un point
+	\PlacePointEspace(*)[clés]{nœud}{coordonnées}<label>
+	%créer/placer/nommer plusieurs points
+	\PlacePointsEspace(*)[clés]{liste}
+	%marquer un point
+	\MarquePointEspace[clés]{point}
+	%marquer plusieurs points
+	\MarquePointsEspace[clés]{liste}
+	%tracer un segment
+	\TraceSegmentEspace[clés](point)(point)
+	%tracer plusieurs segments
+	\TraceSegmentsEspace[clés]{liste}
+\end{EnvTikzEspace}
+\end{PresCodeTex}
+
+\subsection{Clés, options et arguments}
+
+\begin{tipblock}
+Les versions étoilées désactivent l'affichage des labels des points.
+
+\smallskip
+
+L'argument optionnel et entre \texttt{[...]} propose les \Cle{clés} suivantes (communes ou spécifiques) :
+
+\begin{itemize}
+	\item \Cle{PosLabel} pour préciser la position (francisée) du label pour les points ; \hfill{}défaut : \Cle{b}
+	\item \Cle{StyleMarque} parmi \Cle{x/o} pour spécifier le style de la marque des points ;
+	
+	\hfill{}défaut : \Cle{o}
+	\item \Cle{TailleMarque} pour spécifier la taille de la marque des points (disque ou croix) ;
+	
+	\hfill{}défaut : \Cle{2pt}
+	\item \Cle{Couleur} pour paramétrer la couleur.\hfill{}défaut : \Cle{black}
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{tipblock}
+Les positions pour les labels des points sont \textit{francisées} :
+
+\begin{itemize}
+	\item \Cle{b} : \texttt{bas}
+	\item \Cle{h} : \texttt{haut}
+	\item \Cle{g} : \texttt{gauche}
+	\item \Cle{d} : \texttt{droite}
+	\item \Cle{hg} : \texttt{haut gauche}
+	\item \ldots
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{tipblock}
+De manière un peu plus spécifique :
+
+\begin{itemize}
+	\item le \texttt{<label>} pour la commande \texttt{\textbackslash PlacePointEspace} est optionnel, et est identique à \texttt{\{nœud\}} ;
+	\item la \texttt{\{liste\}} pour la commande \texttt{\textbackslash PlacePointsEspace} est à donner -- par exemple -- sous la forme \texttt{A/0,0,0/bg B/5,2,1/hd} ;
+	\item la \texttt{\{liste\}} pour la commande \texttt{\textbackslash TraceSegmentsEspace} est à donner -- par exemple -- sous la forme \texttt{A/B A/C A/D B/D} ;
+	\item les \texttt{[clés]} pour les segments correspondent aux options en langage \TikZ.
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\begin{PresCode}{}
+\begin{EnvTikzEspace}[VueClassique]
+	%placement des points avec labels
+	\PlacePointsEspace[Couleur=red]{A/0,0,0/bg B/4,0,0/bd C/4,4,0/hd D/0,4,0/hg E/0,0,4/bg F/4,0,4/bd G/4,4,4/hd H/0,4,4/hg}
+	%segments pointillés
+	\TraceSegmentsEspace[thick,dashed,purple]{A/D D/C D/H}
+	%segments pleins
+	\TraceSegmentsEspace[thick,blue]{A/B B/C C/G G/H H/E E/A E/F B/F F/G}
+	%Marques points
+	\MarquePointsEspace[Couleur=orange]{A,B,C,D,E,F,G,H}
+\end{EnvTikzEspace}
+\end{PresCode}
+
+\pagebreak
+
+\section{Pavés}
+
+\subsection{Commandes}
+
+\begin{cautionblock}
+La commande \textit{simplifiée} et \textit{francisée} pour afficher un pavé (ou un cube !) est la commande \texttt{\textbackslash PaveTikzTriDim}.
+\end{cautionblock}
+
+\begin{PresCodeTex}{listing only}
+\begin{EnvTikzEspace}[Clés]<options tikz>
+	\PaveTikzTriDim[clés]
+\end{EnvTikzEspace}
+\end{PresCodeTex}
+
+\begin{PresCode}{}
+\begin{EnvTikzEspace}[VueClassique]
+	\PaveTikzTriDim
+\end{EnvTikzEspace}
+\hspace{1cm}
+\begin{EnvTikzEspace}
+	\PaveTikzTriDim
+\end{EnvTikzEspace}
+\end{PresCode}
+
+\subsection{Clés et options}
+
+\begin{tipblock}
+Quelques \Cle{clés} sont disponibles pour cette commande :
+
+\begin{itemize}
+	\item \Cle{Largeur} : largeur du pavé ;\hfill{}défaut \Cle{2}
+	\item \Cle{Profondeur} : profondeur du pavé ;\hfill{}défaut \Cle{1}
+	\item \Cle{Hauteur} : hauteur du pavé ;\hfill{}défaut \Cle{1.25}
+	\item \Cle{Sommets} : liste des sommets (avec délimiteur § !) ;\hfill{}défaut \Cle{A§B§C§D§E§F§G§H}
+	\item \Cle{Math} : booléen pour forcer le mode math des sommets ;\hfill{}défaut \Cle{false}
+	\item \Cle{Epaisseur} : épaisseur des arêtes (en \textit{langage simplifié} \TikZ) ;\hfill{}défaut \Cle{thick}
+	\item \Cle{AffLabel} : booléen pour afficher les noms des sommets ;\hfill{}défaut \Cle{false}
+	\item \Cle{Plein} : booléen pour ne pas afficher les arêtes \textit{invisibles} ;\hfill{}défaut \Cle{false}
+	\item \Cle{Cube} : booléen pour préciser qu'il s'agit d'un cube (seule \Cle{Largeur} est util(isé)e) ;
+	
+	\hfill{}défaut \Cle{false}
+	\item \Cle{Couleur} : couleur des arêtes ; \hfill{}défaut \Cle{black}
+	
+	\item \Cle{CouleurSommets} : couleur des sommets.\hfill{}défaut \Cle{black}
+\end{itemize}
+\vspace*{-\baselineskip}\leavevmode
+\end{tipblock}
+
+\pagebreak
+
+\begin{PresCode}{}
+\begin{EnvTikzEspace}
+	\PaveTikzTriDim[Cube,Largeur=3,Couleur=red,CouleurSommets=blue,AffLabel]
+\end{EnvTikzEspace}
+\end{PresCode}
+
+\begin{PresCode}{}
+\begin{EnvTikzEspace}[VueClassique]<scale=2>
+	\PaveTikzTriDim[Largeur=3,Profondeur=4,Hauteur=2,Plein,Couleur=gray,AffLabel, CouleurSommets=gray]
+\end{EnvTikzEspace}
+\end{PresCode}
+
+\newpage
+
+\part{Empilements de cubes}
+
+\section{Environnement dédié}
+
+\begin{cautionblock}
+L'environnement dédié à la création de figures type \textit{empilement de cubes} est\ldots{} \texttt{EmpilementCubes}.
+
+Il existe deux manières de définir les empilements :
+
+\begin{itemize}
+	\item en travaillant par \textit{plaques} verticales de l'arrière vers l'avant ;
+	\item en travaillant par les \textit{hauteurs} des colonnes, de l'arrière vers l'avant \textbf{et} de gauche à droite.
+\end{itemize}
+
+L'unité de base des cubes est fixée au départ à $0{,}5$\,cm.
+\end{cautionblock}
+
+\begin{importantblock}
+Les axes (et de ce fait la vue proposée !) sont fixés, non modifiables, donc cette partie est beaucoup moins performante que ce propose le package \textsf{ProfCollege} avec sa commande \texttt{\textbackslash VueCubes} !
+\end{importantblock}
+
+\begin{PresCodeTex}{listing only}
+\begin{EmpilementCubes}[échelle]<options tikz>
+	%commandes
+\end{EmpilementCubes}
+\end{PresCodeTex}
+
+\section{Création par \textit{plaques}}
+
+\subsection{Commandes}
+
+\begin{cautionblock}
+La commande pour créer une plaque \textit{verticale} est \texttt{\textbackslash PlaquePetitsCubes}, avec la contrainte de créer la \textit{figure} de l'arrière vers l'avant.
+
+Il existe également la commande \texttt{\textbackslash PlaqueVide} pour \textit{passer} une ligne.
+\end{cautionblock}
+
+\begin{PresCodeTex}{listing only}
+\begin{EmpilementCubes}[échelle]<options tikz>
+	\PlaquePetitsCubes[couleur(s)]{empilement}[épaisseur traits]
+	\PlaqueVide[nb]
+\end{EmpilementCubes}
+\end{PresCodeTex}
+
+\begin{importantblock}
+Les plaques créées sont affichées l'une \textit{devant} l'autre, et elles sont -- par défaut -- collées les unes aux autres.
+\end{importantblock}
+
+\subsection{Options et arguments}
+
+\begin{tipblock}
+Le premier argument, optionnel et entre \texttt{[...]} permet de spécifier une couleur (\texttt{cyan} par défaut) ou une liste de couleurs qui seront utilisées pour la création des plaques :
+
+\begin{itemize}
+	\item soit une couleur unique, qui sera \textit{codée} par \texttt{1} pour la création des cubes ;
+	\item soit plusieurs couleurs, sous la forme \texttt{couleur1/couleur2/couleur3/...} qui seront codées par \texttt{1}, \texttt{2}, \ldots{} pour la création des cubes.
+\end{itemize}
+
+Le second argument, obligatoire et entre \texttt{\{...\}} est quant à lui la liste, des lignes à construire, avec comme ordres :
+
+\begin{itemize}
+	\item du bas vers le haut (caractère de séparation \texttt{/}) ;
+	\item de la gauche vers la droite (caractère de séparation \texttt{,}) ;
+	\item un \texttt{-} code un \textit{trou}, et un numéro code une couleur (comme définie(s) précédemment).
+\end{itemize}
+
+Le dernier argument, optionnel et entre \texttt{[...]} permet de spécifier une dimension pour les tracés (\texttt{0.2pt} par défaut).
+
+\medskip
+
+Cette manière permet de créer des plaques avec couleurs \textit{individuelles} et des \textit{trous} éventuels.
+\end{tipblock}
+
+\begin{PresCode}{}
+\begin{EmpilementCubes}
+	%plaque
+	%de bas en haut : couleurs VBRB-B-J / RVVBRV / J-BBBR
+	\PlaquePetitsCubes[cyan/red/green/yellow]{ 3121-1-4 / 233123 / 4-1112 }
+\end{EmpilementCubes}
+\end{PresCode}
+
+\begin{PresCode}{}
+\begin{EmpilementCubes}
+	%plaque n°1 (fond)
+	\PlaquePetitsCubes{ 1111 / 1111 }[0.4pt]
+	\PlaqueVide[2]
+	%plaque n°2
+	\PlaquePetitsCubes[cyan/red]{ 111- / -211  }[0.4pt]
+	\PlaqueVide[2]
+	%plaque n°3 (devant)
+	\PlaquePetitsCubes{ 1111 / ---1 }[0.4pt]
+\end{EmpilementCubes}
+\end{PresCode}
+
+\begin{PresCode}{}
+\begin{EmpilementCubes}
+	%plaque n°1 (fond)
+	\PlaquePetitsCubes{ 1111 / 1111 }
+	%plaque n°2
+	\PlaquePetitsCubes[cyan/red]{ 111- / -211  }
+	%plaque n°3 (devant)
+	\PlaquePetitsCubes{ 1111 / ---1 }
+\end{EmpilementCubes}
+\end{PresCode}
+
+
+\begin{PresCode}{}
+\begin{EmpilementCubes}[1.75]
+	\PlaquePetitsCubes[cyan/red/green/yellow]{ 3111-1-4 / 233123 / 2-1112 }[1pt]
+	\PlaquePetitsCubes[cyan/red]{ 111 / -21 }[1pt]
+	\PlaquePetitsCubes[cyan/red/green]{ 3-2 }[1pt]
+\end{EmpilementCubes}
+\end{PresCode}
+
+\pagebreak
+
+\section{Création par \textit{hauteurs}}
+
+\subsection{Commande}
+
+\begin{tipblock}
+L'idée, reprise du package \textsf{ProfCollege}\footnotemark\footnotetext{\url{https://www.ctan.org/pkg/profcollege}} permet d'afficher une empilement de cubes (monochromes, et sans trou) en précisant -- grâce à un système de \textit{grille} -- les hauteurs des colonnes.
+
+La commande qui permet de réaliser cet empilement est \texttt{\textbackslash BlocPetitsCubes}.
+\end{tipblock}
+
+\begin{PresCodeTex}{listing only}
+%création dans un environnement dédié
+\begin{EmpilementCubes}[échelle]<options tikz>
+	\BlocPetitsCubes*[couleur]{grille des hauteurs}[epaisseur traits]
+\end{EmpilementCubes}
+\end{PresCodeTex}
+
+\begin{PresCodeTex}{listing only}
+%création autonome
+\BlocPetitsCubes[couleur]{grille des hauteurs}[epaisseur traits]
+\end{PresCodeTex}
+
+\begin{cautionblock}
+Le support de la grille des hauteurs est donc à donner sous forme \textit{rectangulaire}, en respectant un nombre \textit{homogène} de colonnes par ligne !
+\end{cautionblock}
+
+\begin{importantblock}
+Voici une grille permettant d’anticiper la création d'un assemblage (en spécifiant les hauteurs) :
+
+\begin{center}
+	\begin{EnvTikzEspace}[UniteX={-22:1cm},UniteY={22:1cm}]
+		\foreach \x in {0,...,4} {\draw[semithick] (\x,-0.2,0)--++(0,5.4,0) ;}
+		\foreach \y in {0,...,5} {\draw[semithick] (-0.2,\y,0)--++(4.4,0,0) ;}
+		\foreach \y/\n in {0.5/1,1.5/2,2.5/3,3.5/4,4.5/5}
+			{\draw (0.5,\y,0) node[font=\small\sffamily] {\n} ;}
+		\foreach \y/\n in {0.5/0,1.5/2,2.5/1,3.5/1,4.5/3}
+			{\draw (1.5,\y,0) node[font=\small\sffamily] {\n} ;}
+		\foreach \y/\n in {0.5/0,1.5/2,2.5/1,3.5/1,4.5/2}
+			{\draw (2.5,\y,0) node[font=\small\sffamily] {\n} ;}
+		\foreach \y/\n in {0.5/1,1.5/1,2.5/1,3.5/1,4.5/1}
+			{\draw (3.5,\y,0) node[font=\small\sffamily] {\n} ;}
+	\end{EnvTikzEspace}
+\end{center}
+\end{importantblock}
+
+\subsection{Options et arguments}
+
+\begin{tipblock}
+Le premier argument, optionnel et entre \texttt{[...]} permet de spécifier une couleur (\texttt{cyan} par défaut).
+
+Le second argument, obligatoire et entre \texttt{\{...\}} est quant à lui la liste des hauteurs, comme présentée précédemment :
+
+\begin{itemize}
+	\item le caractère de séparation des \textit{plaques} est le \texttt{/} ;
+	\item pour chaque plaque, le caractère de séparation des colonnes est le \texttt{,}.
+\end{itemize}
+
+Le dernier argument, optionnel et entre \texttt{[...]} permet de spécifier une dimension pour les tracés (\texttt{0.2pt} par défaut).
+\end{tipblock}
+
+\begin{importantblock}
+Par exemple, la \textit{grille} associée à l'empilement précédent est :
+
+\smallskip
+
+\hfill\texttt{1,2,3,4,5 / 0,2,1,1,3 / 0,2,1,1,2 / 1,1,1,1,1}\hfill~
+\end{importantblock}
+
+\vfill~
+
+\begin{PresCode}{}
+\begin{EmpilementCubes}
+	\BlocPetitsCubes*{1,2,3,4,5}
+\end{EmpilementCubes}
+\end{PresCode}
+
+\begin{PresCode}{}
+%commande autonome, taille par défaut
+\BlocPetitsCubes{1,2,3,4,5 / 0,2,1,1,3 / 0,2,1,1,2 / 1,1,1,1,1}
+\end{PresCode}
+
+\begin{PresCode}{}
+\begin{EmpilementCubes}[2]
+	\BlocPetitsCubes*[violet]{1,2,3,4,5 / 0,2,1,1,3 / 0,2,1,1,2 / 1,1,1,1,1}[0.8pt]
+\end{EmpilementCubes}
+\end{PresCode}
+
+\newpage
+
+\part{Dés à jouer, en 3D}
+
+\section{Fonctionnement global}
+
+\begin{tipblock}
+L'idée est de proposer des commandes pour travailler avec des dés, en 3D, avec possibilité de les \textit{lancer} de manière aléatoire.
+
+\smallskip
+
+La commande peut être autonome pour afficher dé par dé, mais elle peut être également à intégrer dans un environnement \texttt{tikzpicture}.
+\end{tipblock}
+
+\begin{importantblock}
+Par défaut, les dés ont une hauteur proche de 1~cm (sans la perspective).
+
+\smallskip
+
+L'orientation est \textit{globalement} fixée, mais il est possible (dans une certaine mesure) de pivoter les dés (suivants les angles $\theta$ et $\phi$ des coordonnées sphériques).
+
+\smallskip
+
+Il est également possible de spécifier un \textit{angle de vue}, droite ou gauche.
+\end{importantblock}
+
+
+\begin{PresCodeTex}{listing only}
+%affichage indépendant
+\DeTriDim[clés]{numéro(s)}
+\end{PresCodeTex}
+
+\begin{PresCodeTex}{listing only}
+%affichage dans un environnement
+\begin{tikzpicture}
+	\DeTriDim*[clés]{numéro(s)}
+\end{tikzpicture}
+\end{PresCodeTex}
+
+\begin{PresCodeTex}{listing only}
+%tirages aléatoires
+\TirageAleaDesTriDim[clés]{tirages}
+\end{PresCodeTex}
+
+\begin{PresCode}{}
+\DeTriDim{6/2}~\DeTriDim{1/5}~\DeTriDim{6/4}~\DeTriDim{3/2}
+\end{PresCode}
+
+\begin{PresCode}{}
+\begin{tikzpicture}
+	%\tdplotsetmaincoords{70}{110}
+	\DeTriDim*[Echelle=2]{6/2}
+	\DeTriDim*[Echelle=2,Origine={(2,-0.2)}]{6/5}
+	\DeTriDim*[Echelle=2,Origine={(4,-0.4)},]{6/3}
+	\DeTriDim*[Echelle=2,Origine={(6,-0.6)},Hasard]{}
+\end{tikzpicture}
+\end{PresCode}
+
+\begin{PresCode}{}
+\TirageAleaDesTriDim[Vue=G,Yams,Echelle=3,Couleurs={red!25,blue!25,yellow!25}]{3}
+\end{PresCode}
+
+\section{Influence des paramètres}
+
+\subsection{Clés et options}
+
+\begin{tipblock}
+Quelques \Cle{clés} sont disponibles pour cette commande (elles ne sont pas toutes utilisées par les toutes les commandes) :
+
+\begin{itemize}
+	\item \Cle{Echelle} : échelle pour modifier la taille ;\hfill{}défaut \Cle{1}
+	\item \Cle{Couleur} : couleur (individuelle) ;\hfill{}défaut \Cle{lightgray!25}
+	\item \Cle{CouleurPoints} : couleurs des points ;\hfill{}défaut \Cle{black}
+	\item \Cle{Phi} : angle $\phi$ de la perpective ;\hfill{}défaut \Cle{110}
+	\item \Cle{Theta} : angle $\theta$ de la perpective ;\hfill{}défaut \Cle{70}
+	\item \Cle{Vue} : vue de la perspective (\texttt{D/G}) ;\hfill{}défaut \Cle{D}
+	\item \Cle{Hasard} : booléen pour un tirage aléatoire ;\hfill{}défaut \Cle{false}
+	\item \Cle{Origine} : origine du dé pour la version \texttt{tikzpicture} ;
+	\item en ce qui concerne les clés spécifiques au tirage :
+	\begin{itemize}
+		\item \Cle{EspaceH} : espace horizontal entre les dés ;\hfill{}défaut \Cle{0mm}
+		\item \Cle{Couleurs} : liste des couleurs pour les dés ;\hfill{}défaut \Cle{lightgray!25}
+		\item \Cle{Yams} : booléen pour forcer un affichage en ligne.\hfill{}défaut \Cle{false}
+	\end{itemize}
+\end{itemize}
+
+Hormis dans le cas où \texttt{Harsard=true}, l'argument obligatoire, pour l'affichage unique, est à donner sous la forme \texttt{face de devant/face du dessus} (l'autre face visible est déterminée automatiquement).
+\end{tipblock}
+
+\subsection{Exemples}
+
+\begin{PresCode}{}
+\TirageAleaDesTriDim[EspaceH=-2mm]{5}
+
+\TirageAleaDesTriDim[EspaceH=1mm,Echelle=2,Couleurs=darkgray,CouleurPoints=white]{5}
+\end{PresCode}
+
+\begin{PresCode}{}
+\def\listecouleursdes{red!25,blue!25,yellow!25,orange!25,green!25}
+
+\TirageAleaDesTriDim[Yams,Couleurs=brown!10]{10}
+
+\TirageAleaDesTriDim[Yams,Echelle=2,Couleurs=\listecouleursdes,CouleurPoints=magenta]{5}
+
+\TirageAleaDesTriDim[Vue=G,Yams,Echelle=3,Couleurs=\listecouleursdes]{3}
+\end{PresCode}
+
+\subsection{Angles de rotation}
+
+\begin{cautionblock}
+Les paramètres $\theta$ et $\phi$ peuvent être modifiés, en fonction du rendu souhaité.
+
+Mais comme toutes les faces ne sont pas traitées (du fait de la perspective), il est conseillé de rester dans une \textit{fenêtre classique}.
+\end{cautionblock}
+
+\begin{tipblock}
+Vue \texttt{D} :
+
+\begin{tblr}{hlines,vlines,colspec={*{5}{Q[m,c]}}}
+	\diagbox{$\phi$}{$\theta$} & 60 & \textbf{70} & 80 & 85 \\
+	95 & \DeTriDim[Hasard,Theta=60,Phi=95]<baseline=0pt>{} & \DeTriDim[Hasard,Theta=70,Phi=95]<baseline=0pt>{} & \DeTriDim[Hasard,Theta=80,Phi=95]<baseline=0pt>{} & \DeTriDim[Hasard,Theta=85,Phi=95]<baseline=0pt>{} \\
+	100 & \DeTriDim[Hasard,Theta=60,Phi=100]<baseline=0pt>{} & \DeTriDim[Hasard,Theta=70,Phi=100]<baseline=0pt>{} & \DeTriDim[Hasard,Theta=80,Phi=100]<baseline=0pt>{} & \DeTriDim[Hasard,Theta=85,Phi=100]<baseline=0pt>{} \\
+	\textbf{110} & \DeTriDim[Hasard,Theta=60,Phi=95]<baseline=0pt>{} & \DeTriDim[Hasard,Theta=70,Phi=110,Couleur=red!25]<baseline=0pt>{} & \DeTriDim[Hasard,Theta=80,Phi=110]<baseline=0pt>{} & \DeTriDim[Hasard,Theta=85,Phi=110]<baseline=0pt>{} \\
+	120 & \DeTriDim[Hasard,Theta=60,Phi=120]<baseline=0pt>{} & \DeTriDim[Hasard,Theta=70,Phi=120]<baseline=0pt>{} & \DeTriDim[Hasard,Theta=80,Phi=120]<baseline=0pt>{} & \DeTriDim[Hasard,Theta=85,Phi=120]<baseline=0pt>{} \\
+\end{tblr}
+\end{tipblock}
+
+\begin{tipblock}
+Vue \texttt{G} :
+
+\begin{tblr}{hlines,vlines,colspec={*{5}{Q[m,c]}}}
+	\diagbox{$\phi$}{$\theta$} & 60 & \textbf{70} & 80 & 85 \\
+	95 & \DeTriDim[Vue=G,Hasard,Theta=60,Phi=95]<baseline=0pt>{} & \DeTriDim[Vue=G,Hasard,Theta=70,Phi=95]<baseline=0pt>{} & \DeTriDim[Vue=G,Hasard,Theta=80,Phi=95]<baseline=0pt>{} & \DeTriDim[Vue=G,Hasard,Theta=85,Phi=95]<baseline=0pt>{} \\
+	100 & \DeTriDim[Vue=G,Hasard,Theta=60,Phi=100]<baseline=0pt>{} & \DeTriDim[Vue=G,Hasard,Theta=70,Phi=100]<baseline=0pt>{} & \DeTriDim[Vue=G,Hasard,Theta=80,Phi=100]<baseline=0pt>{} & \DeTriDim[Vue=G,Hasard,Theta=85,Phi=100]<baseline=0pt>{} \\
+	\textbf{110} & \DeTriDim[Vue=G,Hasard,Theta=60,Phi=95]<baseline=0pt>{} & \DeTriDim[Vue=G,Hasard,Theta=70,Phi=110,Couleur=red!25]<baseline=0pt>{} & \DeTriDim[Vue=G,Hasard,Theta=80,Phi=110]<baseline=0pt>{} & \DeTriDim[Vue=G,Hasard,Theta=85,Phi=110]<baseline=0pt>{} \\
+	120 & \DeTriDim[Vue=G,Hasard,Theta=60,Phi=120]<baseline=0pt>{} & \DeTriDim[Vue=G,Hasard,Theta=70,Phi=120]<baseline=0pt>{} & \DeTriDim[Vue=G,Hasard,Theta=80,Phi=120]<baseline=0pt>{} & \DeTriDim[Vue=G,Hasard,Theta=85,Phi=120]<baseline=0pt>{} \\
+\end{tblr}
+\end{tipblock}
+
+
+\end{document}

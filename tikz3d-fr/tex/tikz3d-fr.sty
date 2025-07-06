@@ -1,0 +1,591 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c
+% or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{tikz3d-fr}[2025/05/22 0.1.5 Aide pour l'utilisation de TikZ 3D]
+%0.1.5	Bugfix
+%0.1.4	Bugfix
+%0.1.3	Dés à jouer en 3D
+%0.1.2	Option pour l'épaisseur des traits + [line join=round] pour les cubes
+%0.1.1	Segments avec [line cap=round]
+%0.1.0	Version initiale
+
+%------Packages utiles
+\RequirePackage{tikz}
+\RequirePackage{tikz-3dplot}
+\RequirePackage{xstring}
+\RequirePackage{simplekv}
+\RequirePackage{randomlist}
+\RequirePackage{xinttools}
+\RequirePackage{xintexpr}
+\RequirePackage{listofitems}
+%------Librairies tikz
+\usetikzlibrary{calc}
+%\usetikzlibrary{babel}
+
+%%------Param3D pour l'environnement
+\defKV[paramstridim]{%
+	UniteX=\def\PLTriDimUx{#1},%
+	UniteY=\def\PLTriDimUy{#1},%
+	UniteZ=\def\PLTriDimUz{#1}
+}
+\setKVdefault[paramstridim]{%
+	UniteX={-15:1cm},%
+	UniteY={20:0.65cm},%
+	UniteZ={90:1cm},%
+	VueClassique=false
+}
+
+\NewDocumentEnvironment{EnvTikzEspace}{ O{} D<>{} }%1=clés,2=paramtikz(comme line join... scale...)
+{
+	\useKVdefault[paramstridim]%
+	\setKV[paramstridim]{#1}%
+	\ifboolKV[paramstridim]{VueClassique}
+		{%
+			\def\PLTriDimUx{0:1cm}%
+			\def\PLTriDimUy{30:0.5cm}%
+			\def\PLTriDimUz{90:1cm}%
+		}{}%
+	\begin{tikzpicture}[x={(\PLTriDimUx)},y={(\PLTriDimUy)},z={(\PLTriDimUz)},#2]
+}
+{
+	\end{tikzpicture}
+}
+
+\NewDocumentCommand\VecteursBase{ O{3} }{%
+	\IfEq{#1}{3}%
+		{%
+			\draw[->,>=latex] (0,0,0) -- (1,0,0) node[pos=1.1]{x};
+			\draw[->,>=latex] (0,0,0) -- (0,1,0) node[pos=1.1]{y};
+			\draw[->,>=latex] (0,0,0) -- (0,0,1) node[pos=1.1]{z};
+		}{}%
+	\IfEq{#1}{2}%
+		{%
+			\draw[->,>=latex] (0,0,0) -- (1,0,0) node[pos=1.1]{x};
+			\draw[->,>=latex] (0,0,0) -- (0,1,0) node[pos=1.1]{y};
+		}{}%
+}
+
+%%------PaveDroitTikZ
+\defKV[paramspavetridim]{%
+	Largeur=\def\PFPaveLgDDD{#1},%
+	Profondeur=\def\PFPavePfDDD{#1},%
+	Hauteur=\def\PFPaveHtDDD{#1},%
+	Sommets=\def\PFPaveSommetsDDD{#1},%
+	Epaisseur=\def\PFPaveThickDDD{#1},%
+	Couleur=\def\PFPaveCouleurDDD{#1},%
+	CouleurSommets=\xdef\PFPaveCouleurSommDDD{#1}
+}
+\setKVdefault[paramspavetridim]{%
+	AffLabel=false,%
+	Plein=false,%
+	Largeur=2,%
+	Profondeur=1,%
+	Hauteur=1.25,%
+	Epaisseur=thick,%
+	Sommets=A§B§C§D§E§F§G§H,%
+	Cube=false,%
+	Math=false,%
+	Couleur=black,%
+	CouleurSommets=black
+}
+
+\NewDocumentCommand\PaveTikzTriDim{ O{} }{%
+	\useKVdefault[paramspavetridim]%
+	\setKV[paramspavetridim]{#1}%
+	\ifboolKV[paramspavetridim]{Cube}
+		{%
+			\xdef\PFPavePfDDD{\PFPaveLgDDD}%
+			\xdef\PFPaveHtDDD{\PFPaveLgDDD}%
+		}{}
+	\setsepchar{§}%
+	\readlist*\PFListeSommets\PFPaveSommetsDDD
+	\itemtomacro\PFListeSommets[1]\PaveA
+	\itemtomacro\PFListeSommets[2]\PaveB
+	\itemtomacro\PFListeSommets[3]\PaveC
+	\itemtomacro\PFListeSommets[4]\PaveD
+	\itemtomacro\PFListeSommets[5]\PaveE
+	\itemtomacro\PFListeSommets[6]\PaveF
+	\itemtomacro\PFListeSommets[7]\PaveG
+	\itemtomacro\PFListeSommets[8]\PaveH
+	%les nœuds du pave
+	\coordinate (\PaveA) at (0,0,0) ;
+	\coordinate (\PaveB) at ({\PFPaveLgDDD},0,0) ;
+	\coordinate (\PaveC) at ({\PFPaveLgDDD},{\PFPavePfDDD},0) ;
+	\coordinate (\PaveD) at (0,{\PFPavePfDDD},0) ;
+	\coordinate (\PaveE) at (0,0,{\PFPaveHtDDD}) ;
+	\coordinate (\PaveF) at ({\PFPaveLgDDD},0,{\PFPaveHtDDD}) ;
+	\coordinate (\PaveG) at ({\PFPaveLgDDD},{\PFPavePfDDD},{\PFPaveHtDDD}) ;
+	\coordinate (\PaveH) at (0,{\PFPavePfDDD},{\PFPaveHtDDD}) ;
+	\ifboolKV[paramspavetridim]{AffLabel}
+		{%
+			\draw (\PaveA) node[below left,\PFPaveCouleurSommDDD] {\ifboolKV[paramspavetridim]{Math}{$\PaveA$}{\PaveA}} ;
+			\draw (\PaveB) node[below right,\PFPaveCouleurSommDDD] {\ifboolKV[paramspavetridim]{Math}{$\PaveB$}{\PaveB}} ;
+			\draw (\PaveC) node[above right,\PFPaveCouleurSommDDD] {\ifboolKV[paramspavetridim]{Math}{$\PaveC$}{\PaveC}} ;
+			\ifboolKV[paramspavetridim]{Plein}
+				{}
+				{%
+					\draw (\PaveD) node[above left,\PFPaveCouleurSommDDD] {\ifboolKV[paramspavetridim]{Math}{$\PaveD$}{\PaveD}} ;
+				}%
+				\draw (\PaveE) node[below left,\PFPaveCouleurSommDDD] {\ifboolKV[paramspavetridim]{Math}{$\PaveE$}{\PaveE}} ;
+				\draw (\PaveF) node[below right,\PFPaveCouleurSommDDD] {\ifboolKV[paramspavetridim]{Math}{$\PaveF$}{\PaveF}} ;
+				\draw (\PaveG) node[above right,\PFPaveCouleurSommDDD] {\ifboolKV[paramspavetridim]{Math}{$\PaveG$}{\PaveG}} ;
+				\draw (\PaveH) node[above left,\PFPaveCouleurSommDDD] {\ifboolKV[paramspavetridim]{Math}{$\PaveH$}{\PaveH}} ;%
+		}%
+		{}%on affiche rien
+	\ifboolKV[paramspavetridim]{Plein}
+		{}
+		{%
+			\draw[\PFPaveCouleurDDD,dashed,\PFPaveThickDDD,line join=bevel] (\PaveA)--(\PaveD)--(\PaveC) (\PaveD)--(\PaveH) ;%
+		}%
+	\draw[\PFPaveCouleurDDD,\PFPaveThickDDD,line join=bevel] (\PaveE)--(\PaveF)--(\PaveG)--(\PaveH)--cycle ;
+	\draw[\PFPaveCouleurDDD,\PFPaveThickDDD,line join=bevel] (\PaveE)--(\PaveA)--(\PaveB)--(\PaveF)--cycle ;
+	\draw[\PFPaveCouleurDDD,\PFPaveThickDDD,line join=bevel] (\PaveC)--(\PaveG)--(\PaveF)--(\PaveB)--cycle ;
+}
+
+%%------Commandes internes pour les nœuds et points
+\NewDocumentCommand\TransfPosTikz{ m }{%défaut below
+	\def\PosTmpLabel{below}
+	\IfEq{#1}{b}{\def\PosTmpLabel{below}}{}
+	\IfEq{#1}{d}{\def\PosTmpLabel{right}}{}
+	\IfEq{#1}{h}{\def\PosTmpLabel{above}}{}
+	\IfEq{#1}{g}{\def\PosTmpLabel{left}}{}
+	\IfEq{#1}{bg}{\def\PosTmpLabel{below left}}{}
+	\IfEq{#1}{bd}{\def\PosTmpLabel{below right}}{}
+	\IfEq{#1}{hg}{\def\PosTmpLabel{above left}}{}
+	\IfEq{#1}{hd}{\def\PosTmpLabel{above right}}{}
+}
+\tikzset{pics/croix/.style args={#1/#2}{
+		code={
+			\draw[line width={0.5*#1},rotate=#2] (-#1,0) -- (#1,0);
+			\draw[line width={0.5*#1},rotate=#2] (0,-#1) -- (0, #1);
+		}
+	},
+	pics/croix/.default={2pt/0}
+}
+
+%%------Créer/Placer/Nommer Point(s) 3d
+\defKV[TkzTriDimPoint]{%
+	PosLabel=\def\TrimDimLabel{#1},%
+	DecalLabel=\def\TrimDimDecalLabel{#1},%
+	StyleMarque=\def\TrimDimStylePt{#1},%
+	TailleMarque=\def\TrimDimtaillePt{#1},%
+	Couleur=\def\TrimDimCoul{#1}
+}
+
+\setKVdefault[TkzTriDimPoint]{%
+	PosLabel={b},%
+	DecalLabel=1pt,%
+	StyleMarque=o,%
+	TailleMarque=2pt,%
+	Couleur=black
+}
+
+\NewDocumentCommand\PlacePointEspace{ s O{} m m D<>{#3} }{%
+	%*=label
+	%2=clés
+	%3=nom nœud
+	%4=coordonnées x,y,z
+	%5=label si différent
+	\useKVdefault[TkzTriDimPoint]%
+	\setKV[TkzTriDimPoint]{#2}%
+	\TransfPosTikz{\TrimDimLabel}
+	\coordinate (#3) at (#4) ;
+	\IfBooleanTF{#1}%on désactive le label avec (*)
+		{}%
+		{\draw (#3) node[\TrimDimCoul,\PosTmpLabel=\TrimDimDecalLabel] {#5} ;}%
+}
+
+\NewDocumentCommand\PlacePointsEspace{ s O{} m }{%
+	%*=labels off
+	%2=clés
+	%3=liste nom/coordonnées/pos
+	\useKVdefault[TkzTriDimPoint]%
+	\setKV[TkzTriDimPoint]{#2}%
+	\setsepchar[.]{ ./}%
+	\readlist*\ListePtsEspace{#3}
+	\foreach \i in {1,2,...,\ListePtsEspacelen}
+		{%
+			\IfBooleanTF{#1}%on désactive le label avec (*)
+				{%
+					\PlacePointEspace*[#2]{\ListePtsEspace[\i,1]}{\ListePtsEspace[\i,2]}
+				}%
+				{%
+					\PlacePointEspace[#2,PosLabel={\ListePtsEspace[\i,3]}]{\ListePtsEspace[\i,1]}{\ListePtsEspace[\i,2]}
+				}%
+		}%
+}
+
+\NewDocumentCommand\MarquePointEspace{ O{} m }{%
+	%1=clés
+	%2=nom nœud
+	\useKVdefault[TkzTriDimPoint]%
+	\setKV[TkzTriDimPoint]{#1}%
+	\IfStrEq{\TrimDimStylePt}{o}%
+		{\filldraw[\TrimDimCoul] (#2) circle[radius=\TrimDimtaillePt] ;}{}%
+	\IfStrEq{\TrimDimStylePt}{x}%
+		{\draw[\TrimDimCoul] (#2) pic{croix=\TrimDimtaillePt/45} ;}{}%
+}
+
+\NewDocumentCommand\MarquePointsEspace{ O{} m }{%
+	%1=clés
+	%2=liste nom/coordonnées/pos
+	\useKVdefault[TkzTriDimPoint]%
+	\setKV[TkzTriDimPoint]{#1}%
+	\foreach \i in {#2}
+		{%
+			\MarquePointEspace[#1]{\i}
+		}%
+}
+
+%%------Créer Segment(s) 3d
+\NewDocumentCommand\TraceSegmentEspace{ O{} r() r() }{%1=optionstikz,2=A,3=B
+	\draw[#1,line cap=round] (#2)--(#3) ;
+}
+
+\NewDocumentCommand\TraceSegmentsEspace{ O{} m }{%1=optionstikz,2=liste A/B C/D
+	\setsepchar[.]{ ./}%
+	\readlist*\ListePtsEspace{#2}
+	\foreach \i in {1,2,...,\ListePtsEspacelen}
+		{\draw[#1,line cap=round] (\ListePtsEspace[\i,1])--(\ListePtsEspace[\i,2]) ;}
+}
+
+%--Petits Cubes
+%%------EmpilementCubes
+\NewDocumentEnvironment{EmpilementCubes}{ O{1} D<>{} }%
+{
+	\begin{tikzpicture}[x={(-160:0.5cm)},y={(-25:0.45cm)},z={(90:0.5cm)},scale=#1,#2]
+}
+{
+	\end{tikzpicture}
+}
+
+\NewDocumentCommand\PetitCube{ O{cyan} O{0.2pt} m }{%
+	\StrBefore[1]{#3}{,}[\xtmp]%
+	\StrBetween[1,2]{#3}{,}{,}[\ytmp]%
+	\StrBehind[2]{#3}{,}[\ztmp]%
+	\draw[fill=#1!70,line width=#2,line join=round,line cap=round] ({\xtmp+1},\ytmp,\ztmp)--++(0,1,0)--++(0,0,-1)--++(0,-1,0)--cycle;
+	\draw[fill=#1!80,line width=#2,line join=round,line cap=round] (\xtmp,{\ytmp+1},\ztmp)--++(1,0,0)--++(0,0,-1)--++(-1,0,0)--cycle; 
+	\draw[fill=#1!35!white,line width=#2,line join=round,line cap=round] (\xtmp,\ytmp,\ztmp)--++(1,0,0)--++(0,1,0)--++(-1,0,0)--cycle;
+}
+
+\newcounter{lgblocs}%compteur des lignes, qui sera incrémenté
+\NewDocumentCommand\PlaqueVide{ O{1} }{\addtocounter{lgblocs}{#1}}%passer une plaque
+\NewDocumentCommand\PlaquePetitsCubes{ O{cyan} m O{0.2pt} }{%poser un cube (attention à l'ordre)
+	\setsepchar[.]{/}%
+	%lecture des couleurs
+	\readlist*\ListeCouleurs{#1}
+	%code
+	\readlist*\ListeTraitee{#2}
+	\def\hauteur{\ListeTraiteelen}
+	\addtocounter{lgblocs}{1}
+	\def\y{\thelgblocs}
+	\foreach \i in {1,...,\ListeTraiteelen}%
+		{%
+			%on stocke la ligne à afficher en hauteur
+			\itemtomacro\ListeTraitee[\i]{\lignetmp}
+			%on stocke le nombre de colonnes à afficher
+			\StrLen{\lignetmp}[\colonnetmp]
+			\foreach \j in {\colonnetmp,...,1}%
+				{%
+					\StrChar{\lignetmp}{\j}[\elementtmp]
+					\IfStrEq{\elementtmp}{-}%
+						{}%
+						{%
+							\itemtomacro\ListeCouleurs[\elementtmp]{\elementcouleur}
+							\PetitCube[\elementcouleur][#3]{-\j,\y,\i}
+						}%
+				}%
+		}%
+}
+
+\NewDocumentCommand\BlocPetitsCubes{ s O{cyan} m O{0.2pt} }{%
+	%*pour autonome
+	%2=couleur unique
+	%3=liste des hauteurs (attention à l'ordre)
+	\setsepchar[.]{/.,}
+	\readlist*\ListeTraitee{#3}
+	\def\Largeur{\ListeTraiteelen}
+	%on lit la Profondeur
+	\itemtomacro\ListeTraitee[1]{\ListeTMP}
+	\setsepchar{,}
+	\readlist*\ListeTraiteeB{\ListeTMP}
+	\def\Profondeur{\ListeTraiteeBlen}
+	\IfBooleanTF{#1}
+		{}
+		{\begin{EnvTikzEspace}[UniteX={-160:0.5cm},UniteY={-25:0.45cm},UniteZ={90:0.5cm}]}
+	%Placement des cubes
+	\foreach \y in {1,...,\Largeur}%
+		{%
+			\foreach \x in {\Profondeur,...,1}
+			{%
+				\itemtomacro\ListeTraitee[\y,\x]{\Hauteur}
+				\xintifboolexpr{\Hauteur == 0}%
+					{}%
+					{%
+						\foreach \z in {1,...,\Hauteur}{\PetitCube[#2][#4]{-\x,\y,\z}}
+					}%
+			}%
+		}%
+	\IfBooleanTF{#1}
+		{}
+		{\end{EnvTikzEspace}}
+}
+
+%====DÉS EN 3D
+\newlength{\detridimoffseth}
+\setlength{\detridimoffseth}{0mm}
+
+\defKV[DeTriDim]{%
+	Echelle=\def\detridimscale{#1},%
+	Couleur=\def\detridimcouleur{#1},%
+	EspaceH=\setlength{\detridimoffseth}{#1},%
+	Couleurs=\def\detridimcouleurs{#1},%
+	CouleurPoints=\def\detridimcouleurpts{#1},%
+	Phi=\def\detridimphi{#1},%
+	Theta=\def\detridimtheta{#1},%
+	Vue=\def\deftridimvue{#1},%
+	Origine=\def\deftridimorigin{#1}
+}
+\setKVdefault[DeTriDim]{%
+	Echelle=1,%
+	Couleur=lightgray!25,%
+	CouleurPoints=black,%
+	Hasard=false,%
+	EspaceH={0mm},%
+	Couleurs=lightgray!25,%
+	Phi=110,%
+	Theta=70,%
+	Vue=D,%
+	Origine={(0,0)},%
+	Yams=false
+}
+
+\NewDocumentCommand\FaceDeTriDim{ m }{%
+	%1 = face avec points communs si besoin pour simplifier le code
+	\xintifboolexpr{#1 == 2 'or' #1 == 4 'or' #1 == 5 'or' #1 == 6}%
+		{%
+			\fill[\detridimcouleurpts] (0.5,0.5) circle[radius=1/6] ; % HG
+			\fill[\detridimcouleurpts] (-0.5,-0.5) circle[radius=1/6] ; % BD
+		}%
+		{}%
+	\xintifboolexpr{#1 == 3 'or' #1 == 4 'or' #1 == 5 'or' #1 == 6}%
+		{%
+			\fill[\detridimcouleurpts] (-0.5,0.5) circle[radius=1/6] ; % HD
+			\fill[\detridimcouleurpts] (0.5,-0.5) circle[radius=1/6] ; % BG
+		}%
+		{}%
+	\xintifboolexpr{#1 == 1 'or' #1 == 3 'or' #1 == 5}%
+		{%
+			\fill[\detridimcouleurpts] (0,0) circle[radius=1/6] ; % CENTRE
+		}%
+		{}%
+	\xintifboolexpr{#1 == 6}%
+		{%
+			\fill[\detridimcouleurpts] (0.5,0) circle[radius=1/6] ; % MG
+			\fill[\detridimcouleurpts] (-0.5,0) circle[radius=1/6] ; % MD
+		}%
+		{}%
+}
+
+%liste pour les faces
+\NewList{detridimfaceU}\SetList{detridimfaceU}{2,3,4,5}
+\NewList{detridimfaceD}\SetList{detridimfaceD}{1,3,4,6}
+\NewList{detridimfaceT}\SetList{detridimfaceT}{1,2,6,5}
+\NewList{detridimfaceQ}\SetList{detridimfaceQ}{1,5,6,2}
+\NewList{detridimfaceC}\SetList{detridimfaceC}{1,3,6,4}
+\NewList{detridimfaceS}\SetList{detridimfaceS}{2,4,5,3}
+
+%commande autonome
+\NewDocumentCommand\DeTriDim{ s O{} D<>{} m }{%
+	%* = mode non autonome
+	%1 = clés
+	%2 = options tikzpicture
+	%3 = faces devant/dessus
+	\restoreKV[DeTriDim]%
+	\setKV[DeTriDim]{#2}%
+	%si aléatoire
+	\ifboolKV[DeTriDim]{Hasard}%
+		{%
+			\xdef\detridimfacedevant{\xinteval{randrange(1,7)}}%
+			\xintifboolexpr{\detridimfacedevant == 1}%
+				{%
+					\GetRandomItem{detridimfaceU}{detridimfacedessus}%
+				}%
+				{}%
+			\xintifboolexpr{\detridimfacedevant == 2}%
+				{%
+					\GetRandomItem{detridimfaceD}{detridimfacedessus}%
+				}%
+				{}%
+			\xintifboolexpr{\detridimfacedevant == 3}%
+				{%
+					\GetRandomItem{detridimfaceT}{detridimfacedessus}%
+				}%
+				{}%
+			\xintifboolexpr{\detridimfacedevant == 4}%
+				{%
+					\GetRandomItem{detridimfaceQ}{detridimfacedessus}%
+				}%
+				{}%
+			\xintifboolexpr{\detridimfacedevant == 5}%
+				{%
+					\GetRandomItem{detridimfaceC}{detridimfacedessus}%
+				}%
+				{}%
+			\xintifboolexpr{\detridimfacedevant == 6}%
+				{%
+					\GetRandomItem{detridimfaceS}{detridimfacedessus}%
+				}%
+				{}%
+			\xdef\detridimfaces{\detridimfacedevant/\detridimfacedessus}%
+		}%
+		{%
+			\xdef\detridimfaces{#4}%
+			\StrCut{#4}{/}{\detridimfacedevant}{\detridimfacedessus}%
+		}%
+	\IfStrEq{\deftridimvue}{D}%
+		{%
+			\IfStrEqCase{\detridimfaces}{%
+				{1/2}{\def\detridimfacedroite{3}}%
+				{1/3}{\def\detridimfacedroite{5}}%
+				{1/5}{\def\detridimfacedroite{4}}%
+				{1/4}{\def\detridimfacedroite{2}}%
+				%
+				{2/1}{\def\detridimfacedroite{4}}%
+				{2/4}{\def\detridimfacedroite{6}}%
+				{2/6}{\def\detridimfacedroite{3}}%
+				{2/3}{\def\detridimfacedroite{1}}%
+				%
+				{3/1}{\def\detridimfacedroite{2}}%
+				{3/2}{\def\detridimfacedroite{6}}%
+				{3/6}{\def\detridimfacedroite{5}}%
+				{3/5}{\def\detridimfacedroite{1}}%
+				%
+				{4/1}{\def\detridimfacedroite{5}}%
+				{4/5}{\def\detridimfacedroite{6}}%
+				{4/6}{\def\detridimfacedroite{2}}%
+				{4/2}{\def\detridimfacedroite{1}}%
+				%
+				{5/1}{\def\detridimfacedroite{3}}%
+				{5/3}{\def\detridimfacedroite{6}}%
+				{5/6}{\def\detridimfacedroite{4}}%
+				{5/4}{\def\detridimfacedroite{1}}%
+				%
+				{6/2}{\def\detridimfacedroite{4}}%
+				{6/4}{\def\detridimfacedroite{5}}%
+				{6/5}{\def\detridimfacedroite{3}}%
+				{6/3}{\def\detridimfacedroite{2}}%
+			}%
+		}%
+		{%
+			\IfStrEqCase{\detridimfaces}{%
+				{1/2}{\def\detridimfacedroite{4}}%
+				{1/3}{\def\detridimfacedroite{2}}%
+				{1/5}{\def\detridimfacedroite{3}}%
+				{1/4}{\def\detridimfacedroite{5}}%
+				%
+				{2/1}{\def\detridimfacedroite{3}}%
+				{2/4}{\def\detridimfacedroite{1}}%
+				{2/6}{\def\detridimfacedroite{4}}%
+				{2/3}{\def\detridimfacedroite{6}}%
+				%
+				{3/1}{\def\detridimfacedroite{5}}%
+				{3/2}{\def\detridimfacedroite{1}}%
+				{3/6}{\def\detridimfacedroite{2}}%
+				{3/5}{\def\detridimfacedroite{6}}%
+				%
+				{4/1}{\def\detridimfacedroite{2}}%
+				{4/5}{\def\detridimfacedroite{1}}%
+				{4/6}{\def\detridimfacedroite{5}}%
+				{4/2}{\def\detridimfacedroite{6}}%
+				%
+				{5/1}{\def\detridimfacedroite{3}}%
+				{5/3}{\def\detridimfacedroite{6}}%
+				{5/6}{\def\detridimfacedroite{4}}%
+				{5/4}{\def\detridimfacedroite{1}}%
+				%
+				{6/2}{\def\detridimfacedroite{3}}%
+				{6/4}{\def\detridimfacedroite{2}}%
+				{6/5}{\def\detridimfacedroite{4}}%
+				{6/3}{\def\detridimfacedroite{5}}%
+			}%
+		}%
+	\IfStrEq{\deftridimvue}{D}{\def\tmpdetridimxscale{1}}{\def\tmpdetridimxscale{-1}}%
+	\IfBooleanF{#1}{\begin{tikzpicture}[#3]}%
+	\tdplotsetmaincoords{\detridimtheta}{\detridimphi}
+		\begin{scope}[shift={(\deftridimorigin)},scale=\fpeval{0.5*\detridimscale},xscale=\tmpdetridimxscale,thick,tdplot_main_coords,rounded corners=\fpeval{\detridimscale*0.5*0.33}cm,fill=\detridimcouleur]
+			\begin{scope}[canvas is xy plane at z=-1]
+				\filldraw (-1,-1) rectangle (1,1);
+			\end{scope}
+			\begin{scope}[canvas is xz plane at y=-1]
+				\filldraw (-1,-1) rectangle (1,1);
+			\end{scope}
+			\begin{scope}[canvas is yz plane at x=-1]
+				\filldraw (-1,-1) rectangle (1,1);
+			\end{scope}
+			\begin{scope}[canvas is xy plane at z=1]%face du dessus
+				\filldraw (-1,-1) rectangle (1,1);
+				\FaceDeTriDim{\detridimfacedessus}
+			\end{scope}
+			\begin{scope}[canvas is xz plane at y=1]%face de droite
+				\filldraw (-1,-1) rectangle (1,1);
+				\FaceDeTriDim{\detridimfacedroite}
+			\end{scope}
+			\begin{scope}[canvas is yz plane at x=1]%face de devant
+				\filldraw (-1,-1) rectangle (1,1);
+				\FaceDeTriDim{\detridimfacedevant}
+			\end{scope}
+		\end{scope}
+	\IfBooleanF{#1}{\end{tikzpicture}}%
+}
+
+\NewDocumentCommand\TirageAleaDesTriDim{ O{} D<>{} m }{%
+	\restoreKV[DeTriDim]%
+	\setKV[DeTriDim]{#1}%
+	\setsepchar{,}%
+	\readlist*\detridimlstcolors{\detridimcouleurs}%
+	\ifboolKV[DeTriDim]{Yams}%
+	{%
+		\begin{tikzpicture}[#2]
+			\ifnum\detridimlstcolorslen=1\relax
+			\foreach \i in {1,...,#3}{%
+				\IfStrEq{\deftridimvue}{D}%
+					{%
+						\DeTriDim*[#1,Hasard,Couleur=\detridimcouleurs,Origine={(\i*\detridimscale,-\i*\detridimscale*0.1)}]{}%
+					}%
+					{%
+						\DeTriDim*[#1,Hasard,Couleur=\detridimcouleurs,Origine={(-\i*\detridimscale,-\i*\detridimscale*0.1)}]{}%
+					}%
+			}%
+			\else%
+			\foreach \i in {1,...,#3}{%
+				\itemtomacro\detridimlstcolors[\i]{\tmpdetridimcolor}%
+				\IfStrEq{\deftridimvue}{D}%
+					{%
+						\DeTriDim*[#1,Hasard,Couleur=\tmpdetridimcolor,Origine={(\i*\detridimscale,-\i*\detridimscale*0.1)}]{}%
+					}%
+					{%
+						\DeTriDim*[#1,Hasard,Couleur=\tmpdetridimcolor,Origine={(-\i*\detridimscale,-\i*\detridimscale*0.1)}]{}%
+					}%
+			}%
+			\fi%
+		\end{tikzpicture}
+	}%
+	{%
+		\ifnum\detridimlstcolorslen=1\relax
+		\foreach \i in {1,...,#3}{%
+			\DeTriDim[#1,Hasard,Couleur=\detridimcouleurs]<#2>{}\ifnum\i<#3\relax\hspace*{\detridimoffseth}\fi%
+		}%
+		\else%
+		\foreach \i in {1,...,#3}{%
+			\itemtomacro\detridimlstcolors[\i]{\tmpdetridimcolor}%
+			\DeTriDim[#1,Hasard,Couleur=\tmpdetridimcolor]<#2>{}\ifnum\i<#3\relax\hspace*{\detridimoffseth}\fi%
+		}%
+		\fi%
+	}%
+}
+
+
+\endinput

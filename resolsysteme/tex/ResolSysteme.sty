@@ -1,0 +1,3251 @@
+% Author.........: C. Pierquet
+% licence........: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{ResolSysteme}[2024/07/04 v0.1.8 Quelques commandes pour travailler avec des matrices et des sytemes lineaires]
+% 0.1.8 Correction de bugs dans certains calculs, amélioration de la documentation
+% 0.1.7 Correction de bugs dans certains calculs
+% 0.1.6 Correction de bugs dans certains calculs
+% 0.1.5 Inverse d'une matrice en 4x4 (même en normal !) + Système 4x4 (en normal !)
+% 0.1.4	Travail sur graphe probabiliste (2x2/3x3/4x4 en python, ou 2x2 en normal...) + Calculs 4x4 en normal
+% 0.1.3	Produit matriciel + Puissance matricielle (2x2/3x3 carré en normal, 2x2/3x3/4x4 avec python) + Inversion comportement commandes étoilées
+% 0.1.2	Ajout pour afficher une matrice, à l'aide d'une syntaxe similaire aux autres commandes
+% 0.1.1	Correction d'un bug avec le séparateur ";"
+% 0.1.0	Version initiale
+
+%------Option(s)
+\newif\if@pyluatex \@pyluatexfalse
+\DeclareOption{pyluatex}{\@pyluatextrue}
+\DeclareOption*{}
+\ProcessOptions\relax
+
+%------Packages utiles
+\RequirePackage{nicematrix}
+\RequirePackage{ifthen}
+\RequirePackage{xintexpr}
+\RequirePackage{xinttools}
+\RequirePackage{listofitems}
+\RequirePackage{siunitx}
+\RequirePackage{nicefrac}
+\RequirePackage{xstring}
+
+%-------Option pyluatex pour les scripts python via pyluatex !
+\if@pyluatex %package pyluatex à charger par l'utilisateur !
+\begin{python}
+import sympy as sy
+x = sy.Symbol('x')
+y = sy.Symbol('y')
+z = sy.Symbol('z')
+t = sy.Symbol('t')
+
+def resol_systeme_QQ(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,u) :
+	solution=sy.solve([a*x+b*y+c*z+d*t-e,f*x+g*y+h*z+i*t-j,k*x+l*y+m*z+n*t-o,p*x+q*y+r*z+s*t-u],[x,y,z,t])
+	return solution
+
+def resol_systeme_TT(a,b,c,d,e,f,g,h,i,j,k,l) :
+	solution=sy.solve([a*x+b*y+c*z-d,e*x+f*y+g*z-h,i*x+j*y+k*z-l],[x,y,z])
+	return solution
+
+def resol_systeme_DD(a,b,c,d,e,f) :
+	solution=sy.solve([a*x+b*y-c,d*x+e*y-f],[x,y])
+	return solution
+
+def det_matrice_QQ(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) :
+	MatTmp = sy.Matrix(([a,b,c,d],[e,f,g,h],[i,j,k,l],[m,n,o,p]))
+	DetMatTmp = MatTmp.det()
+	return DetMatTmp
+
+def det_matrice_TT(a,b,c,d,e,f,g,h,i) :
+	MatTmp = sy.Matrix(([a,b,c],[d,e,f],[g,h,i]))
+	DetMatTmp = MatTmp.det()
+	return DetMatTmp
+
+def det_matrice_DD(a,b,c,d) :
+	MatTmp = sy.Matrix(([a,b],[c,d]))
+	DetMatTmp = MatTmp.det()
+	return DetMatTmp
+
+def inverse_matrice_QQ(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) :
+	MatTmp = sy.Matrix(([a,b,c,d],[e,f,g,h],[i,j,k,l],[m,n,o,p]))
+	DetMatTmp = MatTmp.inv()
+	return DetMatTmp
+
+def inverse_matrice_DD(a,b,c,d) :
+	MatTmp = sy.Matrix(([a,b],[c,d]))
+	InvMatTmp = MatTmp.inv()
+	return InvMatTmp
+
+def inverse_matrice_TT(a,b,c,d,e,f,g,h,i) :
+	MatTmp = sy.Matrix(([a,b,c],[d,e,f],[g,h,i]))
+	InvMatTmp = MatTmp.inv()
+	return InvMatTmp
+
+def puissance_matrice_QQ(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,puiss) :
+	MatTmp = sy.Matrix(([a,b,c,d],[e,f,g,h],[i,j,k,l],[m,n,o,p]))
+	PuissMatTmp = MatTmp**puiss
+	return PuissMatTmp
+
+def puissance_matrice_TT(a,b,c,d,e,f,g,h,i,puiss) :
+	MatTmp = sy.Matrix(([a,b,c],[d,e,f],[g,h,i]))
+	PuissMatTmp = MatTmp**puiss
+	return PuissMatTmp
+
+def puissance_matrice_DD(a,b,c,d,puiss) :
+	MatTmp = sy.Matrix(([a,b],[c,d]))
+	PuissMatTmp = MatTmp**puiss
+	return PuissMatTmp
+
+def resol_etat_stable_TT(a,b,c,d,e,f,g,h,i) :
+	solution=sy.solve([(a-1)*x+d*y+g*z,b*x+(e-1)*y+h*z,c*x+f*y+(i-1)*z,x+y+z-1],[x,y,z])
+	return solution
+
+def resol_etat_stable_QQ(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) :
+	solution=sy.solve([(a-1)*x+e*y+i*z+m*t,b*x+(f-1)*y+j*z+n*t,c*x+g*y+(k-1)*z+o*t,d*x+h*y+l*z+(p-1)*t,x+y+z+t-1],[x,y,z,t])
+	return solution
+
+def etat_prob_QQ(AA,BB,CC,DD,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,puiss) :
+	MatTmpInit = sy.Matrix(([AA,BB,CC,DD])).T
+	MatTmpTrans = sy.Matrix(([a,b,c,d],[e,f,g,h],[i,j,k,l],[m,n,o,p]))
+	EtatProbRes = MatTmpInit * MatTmpTrans**puiss
+	return EtatProbRes
+
+def etat_prob_TT(AA,BB,CC,a,b,c,d,e,f,g,h,i,puiss) :
+	MatTmpInit = sy.Matrix(([AA,BB,CC])).T
+	MatTmpTrans = sy.Matrix(([a,b,c],[d,e,f],[g,h,i]))
+	EtatProbRes = MatTmpInit * MatTmpTrans**puiss
+	return EtatProbRes
+
+def etat_prob_DD(AA,BB,a,b,c,d,puiss) :
+	MatTmpInit = sy.Matrix(([AA,BB])).T
+	MatTmpTrans = sy.Matrix(([a,b],[c,d]))
+	EtatProbRes = MatTmpInit * MatTmpTrans**puiss
+	return EtatProbRes
+
+\end{python}
+\fi
+
+%------conversion en fraction, version interne !
+\NewDocumentCommand\ConvVersFrac{ s O{} m }{%
+	%*=moins sur le numérateur
+	%2=argument.optionnel[d/t/dec=...]
+	%3=argument mandataire {calcul ou fraction}
+	\def\calculargument{\xintPRaw{\xintIrr{\xinteval{#3}}}}%on calcule et on transforme en A/B
+	\IfSubStr{\calculargument}{/}%on teste si le symbole / apparaît
+	{%si oui := fraction
+		\StrBefore{\calculargument}{/}[\numerateur]%on extrait le numérateur
+		\StrBehind{\calculargument}{/}[\denominateur]%on extrait le dénominateur
+		\ifblank{#2}%
+		{%
+			\IfBooleanTF{#1}%
+			{\ensuremath{\frac{\num{\numerateur}}{\num{\denominateur}}}}%
+			{%
+				\ifthenelse{\numerateur < 0}%
+					{\ensuremath{-\frac{\num{\fpeval{abs(\numerateur)}}}{\num{\denominateur}}}}%
+					{\ensuremath{\frac{\num{\numerateur}}{\num{\denominateur}}}}%
+			}%
+		}%
+		{}%si l'argument optionnel est vide
+		\IfStrEq{#2}{d}%
+		{%
+			\IfBooleanTF{#1}%
+			{\ensuremath{\dfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+			{%
+				\ifthenelse{\numerateur < 0}%
+					{\ensuremath{-\dfrac{\num{\fpeval{abs(\numerateur)}}}{\num{\denominateur}}}}%
+					{\ensuremath{\dfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+			}%
+		}%
+		{}%si l'argument optionnel est vide
+		\IfStrEq{#2}{t}%
+		{%
+			\IfBooleanTF{#1}%
+			{\ensuremath{\tfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+			{%
+				\ifthenelse{\numerateur < 0}%
+					{\ensuremath{-\tfrac{\num{\fpeval{abs(\numerateur)}}}{\num{\denominateur}}}}%
+					{\ensuremath{\tfrac{\num{\numerateur}}{\num{\denominateur}}}}%
+			}%
+		}%
+		{}%si l'argument optionnel est vide
+		\IfStrEq{#2}{n}%
+		{%
+			\ensuremath{\nicefrac{\num{\numerateur}}{\num{\denominateur}}}
+		}%
+		{}%si l'argument optionnel est vide
+		\IfSubStr{#2}{dec}%on veut la forme décimale
+		{%
+			\IfSubStr{#2}{=}%si on rajoute une précision
+				{%
+					\StrBehind{#2}{=}[\precdecimal]%
+					\ensuremath{\num{\xintfloateval{round(#3,\precdecimal)}}}%
+				}%
+				{%
+					\ensuremath{\num{\xintfloateval{#3}}}%
+				}%
+		}%
+		{}%si l'argument optionnel est vide
+	}{%si non := entier
+		\num{\calculargument}%on affiche l'entier, avec le package siunitx
+	}%
+}
+
+%------Affichage d'une matrice classique, 2x2 ou 3x3 ou 4x4
+\NewDocumentCommand\AffMatrice{ s O{} D<>{} r() }{%
+	%*=fractions avec - sur le numérateur
+	%2=options conversion
+	%3=options nicematrix
+	%4=matrice (,,§,,)
+	%---------------------
+	%lectures des matrices
+	\setsepchar{§/,}%
+	\readlist*\MAMATRICEA{#4}%
+	%les coeffs de A et le déterminant et les coeff de l'inverse
+	\ifnum \MAMATRICEAlen=3
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[2,1]\MatD
+		\itemtomacro\MAMATRICEA[2,2]\MatE
+		\itemtomacro\MAMATRICEA[2,3]\MatF
+		\itemtomacro\MAMATRICEA[3,1]\MatG
+		\itemtomacro\MAMATRICEA[3,2]\MatH
+		\itemtomacro\MAMATRICEA[3,3]\MatI
+		%les conversions
+		\IfBooleanTF{#1}%
+			{%
+				\def\MatAffA{\ConvVersFrac*[#2]{\MatA}}%
+				\def\MatAffB{\ConvVersFrac*[#2]{\MatB}}%
+				\def\MatAffC{\ConvVersFrac*[#2]{\MatC}}%
+				\def\MatAffD{\ConvVersFrac*[#2]{\MatD}}%
+				\def\MatAffE{\ConvVersFrac*[#2]{\MatE}}%
+				\def\MatAffF{\ConvVersFrac*[#2]{\MatF}}%
+				\def\MatAffG{\ConvVersFrac*[#2]{\MatG}}%
+				\def\MatAffH{\ConvVersFrac*[#2]{\MatH}}%
+				\def\MatAffI{\ConvVersFrac*[#2]{\MatI}}%
+			}%
+			{%
+				\def\MatAffA{\ConvVersFrac[#2]{\MatA}}%
+				\def\MatAffB{\ConvVersFrac[#2]{\MatB}}%
+				\def\MatAffC{\ConvVersFrac[#2]{\MatC}}%
+				\def\MatAffD{\ConvVersFrac[#2]{\MatD}}%
+				\def\MatAffE{\ConvVersFrac[#2]{\MatE}}%
+				\def\MatAffF{\ConvVersFrac[#2]{\MatF}}%
+				\def\MatAffG{\ConvVersFrac[#2]{\MatG}}%
+				\def\MatAffH{\ConvVersFrac[#2]{\MatH}}%
+				\def\MatAffI{\ConvVersFrac[#2]{\MatI}}%
+			}%
+		%l'affichage
+		\begin{pNiceMatrix}[#3]
+			{\MatAffA}&{\MatAffB}&{\MatAffC} \\
+			{\MatAffD}&{\MatAffE}&{\MatAffF} \\
+			{\MatAffG}&{\MatAffH}&{\MatAffI}
+		\end{pNiceMatrix}%
+	\fi
+	\ifnum \MAMATRICEAlen=2
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[2,1]\MatC
+		\itemtomacro\MAMATRICEA[2,2]\MatD
+		%les conversions
+		\IfBooleanTF{#1}%
+			{%
+				\def\MatAffA{\ConvVersFrac*[#2]{\MatA}}%
+				\def\MatAffB{\ConvVersFrac*[#2]{\MatB}}%
+				\def\MatAffC{\ConvVersFrac*[#2]{\MatC}}%
+				\def\MatAffD{\ConvVersFrac*[#2]{\MatD}}%
+			}%
+			{%
+				\def\MatAffA{\ConvVersFrac[#2]{\MatA}}%
+				\def\MatAffB{\ConvVersFrac[#2]{\MatB}}%
+				\def\MatAffC{\ConvVersFrac[#2]{\MatC}}%
+				\def\MatAffD{\ConvVersFrac[#2]{\MatD}}%
+			}%
+		%l'affichage
+		\begin{pNiceMatrix}[#3]
+			{\MatAffA}&{\MatAffB} \\
+			{\MatAffC}&{\MatAffD}
+		\end{pNiceMatrix}%
+	\fi
+	\ifnum \MAMATRICEAlen=4
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[1,4]\MatD
+		\itemtomacro\MAMATRICEA[2,1]\MatE
+		\itemtomacro\MAMATRICEA[2,2]\MatF
+		\itemtomacro\MAMATRICEA[2,3]\MatG
+		\itemtomacro\MAMATRICEA[2,4]\MatH
+		\itemtomacro\MAMATRICEA[3,1]\MatI
+		\itemtomacro\MAMATRICEA[3,2]\MatJ
+		\itemtomacro\MAMATRICEA[3,3]\MatK
+		\itemtomacro\MAMATRICEA[3,4]\MatL
+		\itemtomacro\MAMATRICEA[4,1]\MatM
+		\itemtomacro\MAMATRICEA[4,2]\MatN
+		\itemtomacro\MAMATRICEA[4,3]\MatO
+		\itemtomacro\MAMATRICEA[4,4]\MatP
+		%les conversions
+		\IfBooleanTF{#1}%
+			{%
+				\def\MatAffA{\ConvVersFrac*[#2]{\MatA}}%
+				\def\MatAffB{\ConvVersFrac*[#2]{\MatB}}%
+				\def\MatAffC{\ConvVersFrac*[#2]{\MatC}}%
+				\def\MatAffD{\ConvVersFrac*[#2]{\MatD}}%
+				\def\MatAffE{\ConvVersFrac*[#2]{\MatE}}%
+				\def\MatAffF{\ConvVersFrac*[#2]{\MatF}}%
+				\def\MatAffG{\ConvVersFrac*[#2]{\MatG}}%
+				\def\MatAffH{\ConvVersFrac*[#2]{\MatH}}%
+				\def\MatAffI{\ConvVersFrac*[#2]{\MatI}}%
+				\def\MatAffJ{\ConvVersFrac*[#2]{\MatJ}}%
+				\def\MatAffK{\ConvVersFrac*[#2]{\MatK}}%
+				\def\MatAffL{\ConvVersFrac*[#2]{\MatL}}%
+				\def\MatAffM{\ConvVersFrac*[#2]{\MatM}}%
+				\def\MatAffN{\ConvVersFrac*[#2]{\MatN}}%
+				\def\MatAffO{\ConvVersFrac*[#2]{\MatO}}%
+				\def\MatAffP{\ConvVersFrac*[#2]{\MatP}}%
+			}%
+			{%
+				\def\MatAffA{\ConvVersFrac[#2]{\MatA}}%
+				\def\MatAffB{\ConvVersFrac[#2]{\MatB}}%
+				\def\MatAffC{\ConvVersFrac[#2]{\MatC}}%
+				\def\MatAffD{\ConvVersFrac[#2]{\MatD}}%
+				\def\MatAffE{\ConvVersFrac[#2]{\MatE}}%
+				\def\MatAffF{\ConvVersFrac[#2]{\MatF}}%
+				\def\MatAffG{\ConvVersFrac[#2]{\MatG}}%
+				\def\MatAffH{\ConvVersFrac[#2]{\MatH}}%
+				\def\MatAffI{\ConvVersFrac[#2]{\MatI}}%
+				\def\MatAffJ{\ConvVersFrac[#2]{\MatJ}}%
+				\def\MatAffK{\ConvVersFrac[#2]{\MatK}}%
+				\def\MatAffL{\ConvVersFrac[#2]{\MatL}}%
+				\def\MatAffM{\ConvVersFrac[#2]{\MatM}}%
+				\def\MatAffN{\ConvVersFrac[#2]{\MatN}}%
+				\def\MatAffO{\ConvVersFrac[#2]{\MatO}}%
+				\def\MatAffP{\ConvVersFrac[#2]{\MatP}}%
+			}%
+		%l'affichage
+		\begin{pNiceMatrix}[#3]
+			{\MatAffA} & {\MatAffB} & {\MatAffC} & {\MatAffD} \\
+			{\MatAffE} & {\MatAffF} & {\MatAffG} & {\MatAffH} \\
+			{\MatAffI} & {\MatAffJ} & {\MatAffK} & {\MatAffL} \\
+			{\MatAffM} & {\MatAffN} & {\MatAffO} & {\MatAffP} \\
+			\end{pNiceMatrix}%
+	\fi
+}
+
+%------Affichage d'une matrice classique, 2x2 ou 3x3 ou 4x4
+\NewDocumentCommand\AffEtatProb{ O{} D<>{} r() }{%
+	%1=options conversion
+	%2=options nicematrix
+	%3=matrice (,,,,)
+	%---------------------
+	%lectures des matrices
+	\setsepchar{,}%
+	\readlist*\MAMATRICEA{#3}%
+	%les coeffs de A et le déterminant et les coeff de l'inverse
+	\ifnum \MAMATRICEAlen=3
+		\itemtomacro\MAMATRICEA[1]\MatA
+		\itemtomacro\MAMATRICEA[2]\MatB
+		\itemtomacro\MAMATRICEA[3]\MatC
+		%les conversions
+		\def\MatAffA{\ConvVersFrac*[#1]{\MatA}}%
+		\def\MatAffB{\ConvVersFrac*[#1]{\MatB}}%
+		\def\MatAffC{\ConvVersFrac*[#1]{\MatC}}%
+		%l'affichage
+		\begin{pNiceMatrix}[#2]
+			{\MatAffA}&{\MatAffB}&{\MatAffC}
+		\end{pNiceMatrix}%
+	\fi
+	\ifnum \MAMATRICEAlen=2
+		\itemtomacro\MAMATRICEA[1]\MatA
+		\itemtomacro\MAMATRICEA[2]\MatB
+		\def\MatAffA{\ConvVersFrac*[#1]{\MatA}}%
+		\def\MatAffB{\ConvVersFrac*[#1]{\MatB}}%
+		%l'affichage
+		\begin{pNiceMatrix}[#2]
+			{\MatAffA}&{\MatAffB}
+		\end{pNiceMatrix}%
+	\fi
+	\ifnum \MAMATRICEAlen=4
+		\itemtomacro\MAMATRICEA[1]\MatA
+		\itemtomacro\MAMATRICEA[2]\MatB
+		\itemtomacro\MAMATRICEA[3]\MatC
+		\itemtomacro\MAMATRICEA[4]\MatD
+		\def\MatAffA{\ConvVersFrac*[#1]{\MatA}}%
+		\def\MatAffB{\ConvVersFrac*[#1]{\MatB}}%
+		\def\MatAffC{\ConvVersFrac*[#1]{\MatC}}%
+		\def\MatAffD{\ConvVersFrac*[#1]{\MatD}}%
+		%l'affichage
+		\begin{pNiceMatrix}[#2]
+			{\MatAffA} & {\MatAffB} & {\MatAffC} & {\MatAffD}
+			\end{pNiceMatrix}%
+	\fi
+}
+
+\NewDocumentCommand\CarreMatrice{ s O{} D<>{} r() O{} }{%
+	%*=fractions avec - sur le numérateur
+	%2=options conversion
+	%3=options nicematrix
+	%4=matrice (,,§,,)
+	%5=affichage énoncé avec [Aff]
+	%---------------------
+	%lectures des matrices
+	\setsepchar{§/,}%
+	\readlist*\MAMATRICEA{#4}%
+	%les coeffs de A
+	\ifnum \MAMATRICEAlen=4
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[1,4]\MatD
+		\itemtomacro\MAMATRICEA[2,1]\MatE
+		\itemtomacro\MAMATRICEA[2,2]\MatF
+		\itemtomacro\MAMATRICEA[2,3]\MatG
+		\itemtomacro\MAMATRICEA[2,4]\MatH
+		\itemtomacro\MAMATRICEA[3,1]\MatI
+		\itemtomacro\MAMATRICEA[3,2]\MatJ
+		\itemtomacro\MAMATRICEA[3,3]\MatK
+		\itemtomacro\MAMATRICEA[3,4]\MatL
+		\itemtomacro\MAMATRICEA[4,1]\MatM
+		\itemtomacro\MAMATRICEA[4,2]\MatN
+		\itemtomacro\MAMATRICEA[4,3]\MatO
+		\itemtomacro\MAMATRICEA[4,4]\MatP
+		%les conversions
+		\IfBooleanTF{#1}%
+			{%
+				\def\MatSQA{\ConvVersFrac*[#2]{\MatA*\MatA+\MatB*\MatE+\MatC*\MatI+\MatD*\MatM}}%
+				\def\MatSQB{\ConvVersFrac*[#2]{\MatA*\MatB+\MatB*\MatF+\MatC*\MatJ+\MatD*\MatN}}%
+				\def\MatSQC{\ConvVersFrac*[#2]{\MatA*\MatC+\MatB*\MatG+\MatC*\MatK+\MatD*\MatO}}%
+				\def\MatSQD{\ConvVersFrac*[#2]{\MatA*\MatD+\MatB*\MatH+\MatC*\MatL+\MatD*\MatP}}%
+				\def\MatSQE{\ConvVersFrac*[#2]{\MatA*\MatE+\MatE*\MatF+\MatG*\MatI+\MatH*\MatM}}%
+				\def\MatSQF{\ConvVersFrac*[#2]{\MatB*\MatE+\MatF*\MatF+\MatG*\MatJ+\MatH*\MatN}}%
+				\def\MatSQG{\ConvVersFrac*[#2]{\MatC*\MatE+\MatF*\MatG+\MatG*\MatK+\MatH*\MatO}}%
+				\def\MatSQH{\ConvVersFrac*[#2]{\MatD*\MatE+\MatF*\MatH+\MatG*\MatL+\MatH*\MatP}}%
+				\def\MatSQI{\ConvVersFrac*[#2]{\MatA*\MatI+\MatE*\MatJ+\MatI*\MatK+\MatL*\MatM}}%
+				\def\MatSQJ{\ConvVersFrac*[#2]{\MatB*\MatI+\MatF*\MatJ+\MatJ*\MatK+\MatL*\MatN}}%
+				\def\MatSQK{\ConvVersFrac*[#2]{\MatC*\MatI+\MatG*\MatJ+\MatK*\MatK+\MatL*\MatO}}%
+				\def\MatSQL{\ConvVersFrac*[#2]{\MatD*\MatI+\MatH*\MatJ+\MatK*\MatL+\MatL*\MatP}}%
+				\def\MatSQM{\ConvVersFrac*[#2]{\MatA*\MatM+\MatE*\MatN+\MatI*\MatO+\MatM*\MatP}}%
+				\def\MatSQN{\ConvVersFrac*[#2]{\MatB*\MatM+\MatF*\MatN+\MatJ*\MatO+\MatN*\MatP}}%
+				\def\MatSQO{\ConvVersFrac*[#2]{\MatC*\MatM+\MatG*\MatN+\MatK*\MatO+\MatO*\MatP}}%
+				\def\MatSQP{\ConvVersFrac*[#2]{\MatD*\MatM+\MatH*\MatN+\MatL*\MatO+\MatP*\MatP}}%
+			}%
+			{%
+				\def\MatSQA{\ConvVersFrac[#2]{\MatA*\MatA+\MatB*\MatE+\MatC*\MatI+\MatD*\MatM}}%
+				\def\MatSQB{\ConvVersFrac[#2]{\MatA*\MatB+\MatB*\MatF+\MatC*\MatJ+\MatD*\MatN}}%
+				\def\MatSQC{\ConvVersFrac[#2]{\MatA*\MatC+\MatB*\MatG+\MatC*\MatK+\MatD*\MatO}}%
+				\def\MatSQD{\ConvVersFrac[#2]{\MatA*\MatD+\MatB*\MatH+\MatC*\MatL+\MatD*\MatP}}%
+				\def\MatSQE{\ConvVersFrac[#2]{\MatA*\MatE+\MatE*\MatF+\MatG*\MatI+\MatH*\MatM}}%
+				\def\MatSQF{\ConvVersFrac[#2]{\MatB*\MatE+\MatF*\MatF+\MatG*\MatJ+\MatH*\MatN}}%
+				\def\MatSQG{\ConvVersFrac[#2]{\MatC*\MatE+\MatF*\MatG+\MatG*\MatK+\MatH*\MatO}}%
+				\def\MatSQH{\ConvVersFrac[#2]{\MatD*\MatE+\MatF*\MatH+\MatG*\MatL+\MatH*\MatP}}%
+				\def\MatSQI{\ConvVersFrac[#2]{\MatA*\MatI+\MatE*\MatJ+\MatI*\MatK+\MatL*\MatM}}%
+				\def\MatSQJ{\ConvVersFrac[#2]{\MatB*\MatI+\MatF*\MatJ+\MatJ*\MatK+\MatL*\MatN}}%
+				\def\MatSQK{\ConvVersFrac[#2]{\MatC*\MatI+\MatG*\MatJ+\MatK*\MatK+\MatL*\MatO}}%
+				\def\MatSQL{\ConvVersFrac[#2]{\MatD*\MatI+\MatH*\MatJ+\MatK*\MatL+\MatL*\MatP}}%
+				\def\MatSQM{\ConvVersFrac[#2]{\MatA*\MatM+\MatE*\MatN+\MatI*\MatO+\MatM*\MatP}}%
+				\def\MatSQN{\ConvVersFrac[#2]{\MatB*\MatM+\MatF*\MatN+\MatJ*\MatO+\MatN*\MatP}}%
+				\def\MatSQO{\ConvVersFrac[#2]{\MatC*\MatM+\MatG*\MatN+\MatK*\MatO+\MatO*\MatP}}%
+				\def\MatSQP{\ConvVersFrac[#2]{\MatD*\MatM+\MatH*\MatN+\MatL*\MatO+\MatP*\MatP}}%
+			}%
+		%l'affichage
+		\IfStrEq{#5}{Aff}%si matrice
+			{%
+				\IfBooleanTF{#1}%
+					{%
+						{\begin{pNiceMatrix}[#3]
+							\ConvVersFrac*[#2]{\MatA} & \ConvVersFrac*[#2]{\MatB} & \ConvVersFrac*[#2]{\MatC} & \ConvVersFrac*[#2]{\MatD} \\
+							\ConvVersFrac*[#2]{\MatE} & \ConvVersFrac*[#2]{\MatF} & \ConvVersFrac*[#2]{\MatG} & \ConvVersFrac*[#2]{\MatH} \\
+							\ConvVersFrac*[#2]{\MatI} & \ConvVersFrac*[#2]{\MatJ} & \ConvVersFrac*[#2]{\MatK} & \ConvVersFrac*[#2]{\MatL} \\
+							\ConvVersFrac*[#2]{\MatM} & \ConvVersFrac*[#2]{\MatN} & \ConvVersFrac*[#2]{\MatO} & \ConvVersFrac*[#2]{\MatP} 
+						\end{pNiceMatrix}}^2=
+					}%
+					{%
+						{\begin{pNiceMatrix}[#3]
+							\ConvVersFrac[#2]{\MatA} & \ConvVersFrac[#2]{\MatB} & \ConvVersFrac[#2]{\MatC} & \ConvVersFrac[#2]{\MatD} \\
+							\ConvVersFrac[#2]{\MatE} & \ConvVersFrac[#2]{\MatF} & \ConvVersFrac[#2]{\MatG} & \ConvVersFrac[#2]{\MatH} \\
+							\ConvVersFrac[#2]{\MatI} & \ConvVersFrac[#2]{\MatJ} & \ConvVersFrac[#2]{\MatK} & \ConvVersFrac[#2]{\MatL} \\
+							\ConvVersFrac[#2]{\MatM} & \ConvVersFrac[#2]{\MatN} & \ConvVersFrac[#2]{\MatO} & \ConvVersFrac[#2]{\MatP}
+						\end{pNiceMatrix}}^2=
+					}%
+			}{}%
+		\begin{pNiceMatrix}[#3]
+			{\MatSQA}&{\MatSQB}&{\MatSQC}&{\MatSQD}\\
+			{\MatSQE}&{\MatSQF}&{\MatSQG}&{\MatSQH}\\
+			{\MatSQI}&{\MatSQJ}&{\MatSQK}&{\MatSQL}\\
+			{\MatSQM}&{\MatSQN}&{\MatSQO}&{\MatSQP}
+		\end{pNiceMatrix}%
+	\fi
+	\ifnum \MAMATRICEAlen=3
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[2,1]\MatD
+		\itemtomacro\MAMATRICEA[2,2]\MatE
+		\itemtomacro\MAMATRICEA[2,3]\MatF
+		\itemtomacro\MAMATRICEA[3,1]\MatG
+		\itemtomacro\MAMATRICEA[3,2]\MatH
+		\itemtomacro\MAMATRICEA[3,3]\MatI
+		%les conversions
+		\IfBooleanTF{#1}%
+			{%
+				\def\MatSQA{\ConvVersFrac*[#2]{\MatA*\MatA+\MatB*\MatD+\MatC*\MatG}}%
+				\def\MatSQB{\ConvVersFrac*[#2]{\MatA*\MatB+\MatB*\MatE+\MatC*\MatH}}%
+				\def\MatSQC{\ConvVersFrac*[#2]{\MatA*\MatC+\MatB*\MatF+\MatC*\MatI}}%
+				\def\MatSQD{\ConvVersFrac*[#2]{\MatD*\MatA+\MatE*\MatD+\MatF*\MatG}}%
+				\def\MatSQE{\ConvVersFrac*[#2]{\MatD*\MatB+\MatE*\MatE+\MatF*\MatH}}%
+				\def\MatSQF{\ConvVersFrac*[#2]{\MatD*\MatC+\MatE*\MatF+\MatF*\MatI}}%
+				\def\MatSQG{\ConvVersFrac*[#2]{\MatG*\MatA+\MatH*\MatD+\MatI*\MatG}}%
+				\def\MatSQH{\ConvVersFrac*[#2]{\MatG*\MatB+\MatH*\MatE+\MatI*\MatH}}%
+				\def\MatSQI{\ConvVersFrac*[#2]{\MatG*\MatC+\MatH*\MatF+\MatI*\MatI}}%
+			}%
+			{%
+				\def\MatSQA{\ConvVersFrac[#2]{\MatA*\MatA+\MatB*\MatD+\MatC*\MatG}}%
+				\def\MatSQB{\ConvVersFrac[#2]{\MatA*\MatB+\MatB*\MatE+\MatC*\MatH}}%
+				\def\MatSQC{\ConvVersFrac[#2]{\MatA*\MatC+\MatB*\MatF+\MatC*\MatI}}%
+				\def\MatSQD{\ConvVersFrac[#2]{\MatD*\MatA+\MatE*\MatD+\MatF*\MatG}}%
+				\def\MatSQE{\ConvVersFrac[#2]{\MatD*\MatB+\MatE*\MatE+\MatF*\MatH}}%
+				\def\MatSQF{\ConvVersFrac[#2]{\MatD*\MatC+\MatE*\MatF+\MatF*\MatI}}%
+				\def\MatSQG{\ConvVersFrac[#2]{\MatG*\MatA+\MatH*\MatD+\MatI*\MatG}}%
+				\def\MatSQH{\ConvVersFrac[#2]{\MatG*\MatB+\MatH*\MatE+\MatI*\MatH}}%
+				\def\MatSQI{\ConvVersFrac[#2]{\MatG*\MatC+\MatH*\MatF+\MatI*\MatI}}%
+			}%
+		%l'affichage
+		\IfStrEq{#5}{Aff}%si matrice
+			{%
+				\IfBooleanTF{#1}%
+					{%
+						{\begin{pNiceMatrix}[#3]
+							\ConvVersFrac*[#2]{\MatA} & \ConvVersFrac*[#2]{\MatB} & \ConvVersFrac*[#2]{\MatC} \\
+							\ConvVersFrac*[#2]{\MatD} & \ConvVersFrac*[#2]{\MatE} & \ConvVersFrac*[#2]{\MatF} \\
+							\ConvVersFrac*[#2]{\MatG} & \ConvVersFrac*[#2]{\MatH} & \ConvVersFrac*[#2]{\MatI}
+						\end{pNiceMatrix}}^2=
+					}%
+					{%
+						{\begin{pNiceMatrix}[#3]
+							\ConvVersFrac[#2]{\MatA} & \ConvVersFrac[#2]{\MatB} & \ConvVersFrac[#2]{\MatC} \\
+							\ConvVersFrac[#2]{\MatD} & \ConvVersFrac[#2]{\MatE} & \ConvVersFrac[#2]{\MatF} \\
+							\ConvVersFrac[#2]{\MatG} & \ConvVersFrac[#2]{\MatH} & \ConvVersFrac[#2]{\MatI}
+						\end{pNiceMatrix}}^2=
+					}%
+			}{}%
+		\begin{pNiceMatrix}[#3]
+			{\MatSQA}&{\MatSQB}&{\MatSQC} \\
+			{\MatSQD}&{\MatSQE}&{\MatSQF} \\
+			{\MatSQG}&{\MatSQH}&{\MatSQI}
+		\end{pNiceMatrix}%
+	\fi
+	\ifnum \MAMATRICEAlen=2
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[2,1]\MatC
+		\itemtomacro\MAMATRICEA[2,2]\MatD
+		%les conversions
+		\IfBooleanTF{#1}%
+			{%
+				\def\MatSQA{\ConvVersFrac*[#2]{\MatA*\MatA+\MatB*\MatC}}%
+				\def\MatSQB{\ConvVersFrac*[#2]{\MatA*\MatB+\MatB*\MatD}}%
+				\def\MatSQC{\ConvVersFrac*[#2]{\MatC*\MatA+\MatD*\MatC}}%
+				\def\MatSQD{\ConvVersFrac*[#2]{\MatC*\MatB+\MatD*\MatD}}%
+			}%
+			{%
+				\def\MatSQA{\ConvVersFrac[#2]{\MatA*\MatA+\MatB*\MatC}}%
+				\def\MatSQB{\ConvVersFrac[#2]{\MatA*\MatB+\MatB*\MatD}}%
+				\def\MatSQC{\ConvVersFrac[#2]{\MatC*\MatA+\MatD*\MatC}}%
+				\def\MatSQD{\ConvVersFrac[#2]{\MatC*\MatB+\MatD*\MatD}}%
+			}%
+		%l'affichage
+		\IfStrEq{#5}{Aff}%si matrice
+			{%
+				\IfBooleanTF{#1}%
+					{%
+						{\begin{pNiceMatrix}[#3]
+							\ConvVersFrac*[#2]{\MatA} & \ConvVersFrac*[#2]{\MatB} \\
+							\ConvVersFrac*[#2]{\MatC} & \ConvVersFrac*[#2]{\MatD}
+						\end{pNiceMatrix}}^2=
+					}%
+					{%
+						{\begin{pNiceMatrix}[#3]
+							\ConvVersFrac[#2]{\MatA} & \ConvVersFrac[#2]{\MatB} \\
+							\ConvVersFrac[#2]{\MatC} & \ConvVersFrac[#2]{\MatD}
+						\end{pNiceMatrix}}^2=
+					}%
+			}{}%
+		\begin{pNiceMatrix}[#3]
+			{\MatSQA}&{\MatSQB} \\
+			{\MatSQC}&{\MatSQD}
+		\end{pNiceMatrix}%
+	\fi
+}
+
+%------Commande classique, 2x2 ou 3x3
+\NewDocumentCommand\MatriceInverse{ s O{} D<>{} r() O{} }{%
+	%*=fractions avec - sur le numérateur
+	%2=options conversion
+	%3=options nicematrix
+	%4=matrice(,,§,,)
+	%5=Affichage énoncé avec [Aff]
+	%---------------------
+	%lectures des matrices
+	\setsepchar{§/,}%
+	\readlist*\MAMATRICEA{#4}%
+	\def\MatDim{\MAMATRICEAlen}%
+	%les coeffs de A et le déterminant et les coeff de l'inverse
+	\ifnum \MAMATRICEAlen=4
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[1,4]\MatD
+		\itemtomacro\MAMATRICEA[2,1]\MatE
+		\itemtomacro\MAMATRICEA[2,2]\MatF
+		\itemtomacro\MAMATRICEA[2,3]\MatG
+		\itemtomacro\MAMATRICEA[2,4]\MatH
+		\itemtomacro\MAMATRICEA[3,1]\MatI
+		\itemtomacro\MAMATRICEA[3,2]\MatJ
+		\itemtomacro\MAMATRICEA[3,3]\MatK
+		\itemtomacro\MAMATRICEA[3,4]\MatL
+		\itemtomacro\MAMATRICEA[4,1]\MatM
+		\itemtomacro\MAMATRICEA[4,2]\MatN
+		\itemtomacro\MAMATRICEA[4,3]\MatO
+		\itemtomacro\MAMATRICEA[4,4]\MatP
+		%le déterminant
+		\def\DETMATRICE{\xinteval{\MatA*\MatF*\MatK*\MatP-\MatA*\MatF*\MatL*\MatO-\MatA*\MatG*\MatJ*\MatP+\MatA*\MatG*\MatL*\MatN+\MatA*\MatH*\MatJ*\MatO-\MatA*\MatH*\MatK*\MatN-\MatB*\MatE*\MatK*\MatP+\MatB*\MatE*\MatL*\MatO+\MatB*\MatG*\MatI*\MatP-\MatB*\MatG*\MatL*\MatM-\MatB*\MatH*\MatI*\MatO+\MatB*\MatH*\MatK*\MatM+\MatC*\MatE*\MatJ*\MatP-\MatC*\MatE*\MatL*\MatN-\MatC*\MatF*\MatI*\MatP+\MatC*\MatF*\MatL*\MatM+\MatC*\MatH*\MatI*\MatN-\MatC*\MatH*\MatJ*\MatM-\MatD*\MatE*\MatJ*\MatO+\MatD*\MatE*\MatK*\MatN+\MatD*\MatF*\MatI*\MatO-\MatD*\MatF*\MatK*\MatM-\MatD*\MatG*\MatI*\MatN+\MatD*\MatG*\MatJ*\MatM}}%
+		%matrice inverse, si elle existe...
+		\xintifboolexpr{\DETMATRICE == 0}%
+			{\text{Matrice non inversible}}%
+			{%
+				\IfBooleanTF{#1}%
+					{%
+						\def\MatInvA{\ConvVersFrac*[#2]{(\MatF*\MatK*\MatP+\MatG*\MatL*\MatN+\MatH*\MatJ*\MatO-\MatF*\MatL*\MatO-\MatG*\MatJ*\MatP-\MatH*\MatK*\MatN)/(\DETMATRICE)}}%
+						\def\MatInvB{\ConvVersFrac*[#2]{(\MatB*\MatL*\MatO+\MatC*\MatJ*\MatP+\MatD*\MatK*\MatN-\MatB*\MatK*\MatP-\MatC*\MatL*\MatN-\MatD*\MatJ*\MatO)/(\DETMATRICE)}}%
+						\def\MatInvC{\ConvVersFrac*[#2]{(\MatB*\MatG*\MatP+\MatC*\MatH*\MatN+\MatD*\MatF*\MatO-\MatB*\MatH*\MatO-\MatC*\MatF*\MatP-\MatD*\MatG*\MatN)/(\DETMATRICE)}}%
+						\def\MatInvD{\ConvVersFrac*[#2]{(\MatB*\MatH*\MatK+\MatC*\MatF*\MatL+\MatD*\MatG*\MatJ-\MatB*\MatG*\MatL-\MatC*\MatH*\MatJ-\MatD*\MatF*\MatK)/(\DETMATRICE)}}%
+						\def\MatInvE{\ConvVersFrac*[#2]{(\MatE*\MatL*\MatO+\MatG*\MatI*\MatP+\MatH*\MatK*\MatM-\MatE*\MatK*\MatP-\MatG*\MatL*\MatM-\MatH*\MatI*\MatO)/(\DETMATRICE)}}%
+						\def\MatInvF{\ConvVersFrac*[#2]{(\MatA*\MatK*\MatP+\MatC*\MatL*\MatM+\MatD*\MatI*\MatO-\MatA*\MatL*\MatO-\MatC*\MatI*\MatP-\MatD*\MatK*\MatM)/(\DETMATRICE)}}%
+						\def\MatInvG{\ConvVersFrac*[#2]{(\MatA*\MatH*\MatO+\MatC*\MatE*\MatP+\MatD*\MatG*\MatM-\MatA*\MatG*\MatP-\MatC*\MatH*\MatM-\MatD*\MatE*\MatO)/(\DETMATRICE)}}%
+						\def\MatInvH{\ConvVersFrac*[#2]{(\MatA*\MatG*\MatL+\MatC*\MatH*\MatI+\MatD*\MatE*\MatK-\MatA*\MatH*\MatK-\MatC*\MatE*\MatL-\MatD*\MatG*\MatI)/(\DETMATRICE)}}%
+						\def\MatInvI{\ConvVersFrac*[#2]{(\MatE*\MatJ*\MatP+\MatF*\MatL*\MatM+\MatH*\MatI*\MatN-\MatE*\MatL*\MatN-\MatF*\MatI*\MatP-\MatH*\MatJ*\MatM)/(\DETMATRICE)}}%
+						\def\MatInvJ{\ConvVersFrac*[#2]{(\MatA*\MatL*\MatN+\MatB*\MatI*\MatP+\MatD*\MatJ*\MatM-\MatA*\MatJ*\MatP-\MatB*\MatL*\MatM-\MatD*\MatI*\MatN)/(\DETMATRICE)}}%
+						\def\MatInvK{\ConvVersFrac*[#2]{(\MatA*\MatF*\MatP+\MatB*\MatH*\MatM+\MatD*\MatE*\MatN-\MatA*\MatH*\MatN-\MatB*\MatE*\MatP-\MatD*\MatF*\MatM)/(\DETMATRICE)}}%
+						\def\MatInvL{\ConvVersFrac*[#2]{(\MatA*\MatH*\MatJ+\MatB*\MatE*\MatL+\MatD*\MatF*\MatI-\MatA*\MatF*\MatL-\MatB*\MatH*\MatI-\MatD*\MatE*\MatJ)/(\DETMATRICE)}}%
+						\def\MatInvM{\ConvVersFrac*[#2]{(\MatE*\MatK*\MatN+\MatF*\MatI*\MatO+\MatG*\MatJ*\MatM-\MatE*\MatJ*\MatO-\MatF*\MatK*\MatM-\MatG*\MatI*\MatN)/(\DETMATRICE)}}%
+						\def\MatInvN{\ConvVersFrac*[#2]{(\MatA*\MatJ*\MatO+\MatB*\MatK*\MatM+\MatC*\MatI*\MatN-\MatA*\MatK*\MatN-\MatB*\MatI*\MatO-\MatC*\MatJ*\MatM)/(\DETMATRICE)}}%
+						\def\MatInvO{\ConvVersFrac*[#2]{(\MatA*\MatG*\MatN+\MatB*\MatE*\MatO+\MatC*\MatF*\MatM-\MatA*\MatF*\MatO-\MatB*\MatG*\MatM-\MatC*\MatE*\MatN)/(\DETMATRICE)}}%
+						\def\MatInvP{\ConvVersFrac*[#2]{(\MatA*\MatF*\MatK+\MatB*\MatG*\MatI+\MatC*\MatE*\MatJ-\MatA*\MatG*\MatJ-\MatB*\MatE*\MatK-\MatC*\MatF*\MatI)/(\DETMATRICE)}}%
+					}%
+					{%
+						\def\MatInvA{\ConvVersFrac[#2]{(\MatF*\MatK*\MatP+\MatG*\MatL*\MatN+\MatH*\MatJ*\MatO-\MatF*\MatL*\MatO-\MatG*\MatJ*\MatP-\MatH*\MatK*\MatN)/(\DETMATRICE)}}%
+						\def\MatInvB{\ConvVersFrac[#2]{(\MatB*\MatL*\MatO+\MatC*\MatJ*\MatP+\MatD*\MatK*\MatN-\MatB*\MatK*\MatP-\MatC*\MatL*\MatN-\MatD*\MatJ*\MatO)/(\DETMATRICE)}}%
+						\def\MatInvC{\ConvVersFrac[#2]{(\MatB*\MatG*\MatP+\MatC*\MatH*\MatN+\MatD*\MatF*\MatO-\MatB*\MatH*\MatO-\MatC*\MatF*\MatP-\MatD*\MatG*\MatN)/(\DETMATRICE)}}%
+						\def\MatInvD{\ConvVersFrac[#2]{(\MatB*\MatH*\MatK+\MatC*\MatF*\MatL+\MatD*\MatG*\MatJ-\MatB*\MatG*\MatL-\MatC*\MatH*\MatJ-\MatD*\MatF*\MatK)/(\DETMATRICE)}}%
+						\def\MatInvE{\ConvVersFrac[#2]{(\MatE*\MatL*\MatO+\MatG*\MatI*\MatP+\MatH*\MatK*\MatM-\MatE*\MatK*\MatP-\MatG*\MatL*\MatM-\MatH*\MatI*\MatO)/(\DETMATRICE)}}%
+						\def\MatInvF{\ConvVersFrac[#2]{(\MatA*\MatK*\MatP+\MatC*\MatL*\MatM+\MatD*\MatI*\MatO-\MatA*\MatL*\MatO-\MatC*\MatI*\MatP-\MatD*\MatK*\MatM)/(\DETMATRICE)}}%
+						\def\MatInvG{\ConvVersFrac[#2]{(\MatA*\MatH*\MatO+\MatC*\MatE*\MatP+\MatD*\MatG*\MatM-\MatA*\MatG*\MatP-\MatC*\MatH*\MatM-\MatD*\MatE*\MatO)/(\DETMATRICE)}}%
+						\def\MatInvH{\ConvVersFrac[#2]{(\MatA*\MatG*\MatL+\MatC*\MatH*\MatI+\MatD*\MatE*\MatK-\MatA*\MatH*\MatK-\MatC*\MatE*\MatL-\MatD*\MatG*\MatI)/(\DETMATRICE)}}%
+						\def\MatInvI{\ConvVersFrac[#2]{(\MatE*\MatJ*\MatP+\MatF*\MatL*\MatM+\MatH*\MatI*\MatN-\MatE*\MatL*\MatN-\MatF*\MatI*\MatP-\MatH*\MatJ*\MatM)/(\DETMATRICE)}}%
+						\def\MatInvJ{\ConvVersFrac[#2]{(\MatA*\MatL*\MatN+\MatB*\MatI*\MatP+\MatD*\MatJ*\MatM-\MatA*\MatJ*\MatP-\MatB*\MatL*\MatM-\MatD*\MatI*\MatN)/(\DETMATRICE)}}%
+						\def\MatInvK{\ConvVersFrac[#2]{(\MatA*\MatF*\MatP+\MatB*\MatH*\MatM+\MatD*\MatE*\MatN-\MatA*\MatH*\MatN-\MatB*\MatE*\MatP-\MatD*\MatF*\MatM)/(\DETMATRICE)}}%
+						\def\MatInvL{\ConvVersFrac[#2]{(\MatA*\MatH*\MatJ+\MatB*\MatE*\MatL+\MatD*\MatF*\MatI-\MatA*\MatF*\MatL-\MatB*\MatH*\MatI-\MatD*\MatE*\MatJ)/(\DETMATRICE)}}%
+						\def\MatInvM{\ConvVersFrac[#2]{(\MatE*\MatK*\MatN+\MatF*\MatI*\MatO+\MatG*\MatJ*\MatM-\MatE*\MatJ*\MatO-\MatF*\MatK*\MatM-\MatG*\MatI*\MatN)/(\DETMATRICE)}}%
+						\def\MatInvN{\ConvVersFrac[#2]{(\MatA*\MatJ*\MatO+\MatB*\MatK*\MatM+\MatC*\MatI*\MatN-\MatA*\MatK*\MatN-\MatB*\MatI*\MatO-\MatC*\MatJ*\MatM)/(\DETMATRICE)}}%
+						\def\MatInvO{\ConvVersFrac[#2]{(\MatA*\MatG*\MatN+\MatB*\MatE*\MatO+\MatC*\MatF*\MatM-\MatA*\MatF*\MatO-\MatB*\MatG*\MatM-\MatC*\MatE*\MatN)/(\DETMATRICE)}}%
+						\def\MatInvP{\ConvVersFrac[#2]{(\MatA*\MatF*\MatK+\MatB*\MatG*\MatI+\MatC*\MatE*\MatJ-\MatA*\MatG*\MatJ-\MatB*\MatE*\MatK-\MatC*\MatF*\MatI)/(\DETMATRICE)}}%
+					}%
+				\IfStrEq{#5}{Aff}%si matrice
+					{%
+						\IfBooleanTF{#1}%
+							{%
+								{\begin{pNiceMatrix}[#3]
+									\ConvVersFrac*[#2]{\MatA} & \ConvVersFrac*[#2]{\MatB} & \ConvVersFrac*[#2]{\MatC} & \ConvVersFrac*[#2]{\MatD} \\
+									\ConvVersFrac*[#2]{\MatE} & \ConvVersFrac*[#2]{\MatF} & \ConvVersFrac*[#2]{\MatG} & \ConvVersFrac*[#2]{\MatH} \\
+									\ConvVersFrac*[#2]{\MatI} & \ConvVersFrac*[#2]{\MatJ} & \ConvVersFrac*[#2]{\MatK} & \ConvVersFrac*[#2]{\MatL} \\
+									\ConvVersFrac*[#2]{\MatM} & \ConvVersFrac*[#2]{\MatN} & \ConvVersFrac*[#2]{\MatO} & \ConvVersFrac*[#2]{\MatP}
+								\end{pNiceMatrix}}^{-1}=
+							}%
+							{%
+								{\begin{pNiceMatrix}[#3]
+									\ConvVersFrac[#2]{\MatA} & \ConvVersFrac[#2]{\MatB} & \ConvVersFrac[#2]{\MatC} & \ConvVersFrac[#2]{\MatD} \\
+									\ConvVersFrac[#2]{\MatE} & \ConvVersFrac[#2]{\MatF} & \ConvVersFrac[#2]{\MatG} & \ConvVersFrac[#2]{\MatH} \\
+									\ConvVersFrac[#2]{\MatI} & \ConvVersFrac[#2]{\MatJ} & \ConvVersFrac[#2]{\MatK} & \ConvVersFrac[#2]{\MatL} \\
+									\ConvVersFrac[#2]{\MatM} & \ConvVersFrac[#2]{\MatN} & \ConvVersFrac[#2]{\MatO} & \ConvVersFrac[#2]{\MatP}
+								\end{pNiceMatrix}}^{-1}=
+							}%
+					}{}%
+				\begin{pNiceMatrix}[#3]
+					{\MatInvA}&{\MatInvB}&{\MatInvC}&{\MatInvD}\\
+					{\MatInvE}&{\MatInvF}&{\MatInvG}&{\MatInvH}\\
+					{\MatInvI}&{\MatInvJ}&{\MatInvK}&{\MatInvL}\\
+					{\MatInvM}&{\MatInvN}&{\MatInvO}&{\MatInvP}
+				\end{pNiceMatrix}%
+			}%
+	\fi
+	\ifnum \MAMATRICEAlen=3
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[2,1]\MatD
+		\itemtomacro\MAMATRICEA[2,2]\MatE
+		\itemtomacro\MAMATRICEA[2,3]\MatF
+		\itemtomacro\MAMATRICEA[3,1]\MatG
+		\itemtomacro\MAMATRICEA[3,2]\MatH
+		\itemtomacro\MAMATRICEA[3,3]\MatI
+		%le déterminant
+		\def\DETMATRICE{\xinteval{\MatA*\MatE*\MatI+\MatD*\MatH*\MatC+\MatB*\MatF*\MatG-\MatG*\MatE*\MatC-\MatD*\MatB*\MatI-\MatA*\MatH*\MatF}}%
+		%matrice inverse, si elle existe...
+		\xintifboolexpr{\DETMATRICE == 0}%
+			{\text{Matrice non inversible}}%
+			{%
+				\IfBooleanTF{#1}%
+					{%
+						\def\MatInvA{\ConvVersFrac*[#2]{(\MatE*\MatI-\MatH*\MatF)/(\DETMATRICE)}}%
+						\def\MatInvB{\ConvVersFrac*[#2]{(-\MatB*\MatI+\MatC*\MatH)/(\DETMATRICE)}}%
+						\def\MatInvC{\ConvVersFrac*[#2]{(\MatB*\MatF-\MatC*\MatE)/(\DETMATRICE)}}%
+						\def\MatInvD{\ConvVersFrac*[#2]{(-\MatD*\MatI+\MatF*\MatG)/(\DETMATRICE)}}%
+						\def\MatInvE{\ConvVersFrac*[#2]{(\MatA*\MatI-\MatC*\MatG)/(\DETMATRICE)}}%
+						\def\MatInvF{\ConvVersFrac*[#2]{(-\MatA*\MatF+\MatD*\MatC)/(\DETMATRICE)}}%
+						\def\MatInvG{\ConvVersFrac*[#2]{(\MatD*\MatH-\MatE*\MatG)/(\DETMATRICE)}}%
+						\def\MatInvH{\ConvVersFrac*[#2]{(-\MatA*\MatH+\MatB*\MatG)/(\DETMATRICE)}}%
+						\def\MatInvI{\ConvVersFrac*[#2]{(\MatA*\MatE-\MatB*\MatD)/(\DETMATRICE)}}%
+					}%
+					{%
+						\def\MatInvA{\ConvVersFrac[#2]{(\MatE*\MatI-\MatH*\MatF)/(\DETMATRICE)}}%
+						\def\MatInvB{\ConvVersFrac[#2]{(-\MatB*\MatI+\MatC*\MatH)/(\DETMATRICE)}}%
+						\def\MatInvC{\ConvVersFrac[#2]{(\MatB*\MatF-\MatC*\MatE)/(\DETMATRICE)}}%
+						\def\MatInvD{\ConvVersFrac[#2]{(-\MatD*\MatI+\MatF*\MatG)/(\DETMATRICE)}}%
+						\def\MatInvE{\ConvVersFrac[#2]{(\MatA*\MatI-\MatC*\MatG)/(\DETMATRICE)}}%
+						\def\MatInvF{\ConvVersFrac[#2]{(-\MatA*\MatF+\MatD*\MatC)/(\DETMATRICE)}}%
+						\def\MatInvG{\ConvVersFrac[#2]{(\MatD*\MatH-\MatE*\MatG)/(\DETMATRICE)}}%
+						\def\MatInvH{\ConvVersFrac[#2]{(-\MatA*\MatH+\MatB*\MatG)/(\DETMATRICE)}}%
+						\def\MatInvI{\ConvVersFrac[#2]{(\MatA*\MatE-\MatB*\MatD)/(\DETMATRICE)}}%
+					}%
+				\IfStrEq{#5}{Aff}%si matrice
+					{%
+						\IfBooleanTF{#1}%
+							{%
+								{\begin{pNiceMatrix}[#3]
+									\ConvVersFrac*[#2]{\MatA} & \ConvVersFrac*[#2]{\MatB} & \ConvVersFrac*[#2]{\MatC} \\
+									\ConvVersFrac*[#2]{\MatD} & \ConvVersFrac*[#2]{\MatE} & \ConvVersFrac*[#2]{\MatF} \\
+									\ConvVersFrac*[#2]{\MatG} & \ConvVersFrac*[#2]{\MatH} & \ConvVersFrac*[#2]{\MatI} \\
+								\end{pNiceMatrix}}^{-1}=
+							}%
+							{%
+								{\begin{pNiceMatrix}[#3]
+									\ConvVersFrac[#2]{\MatA} & \ConvVersFrac[#2]{\MatB} & \ConvVersFrac[#2]{\MatC} \\
+									\ConvVersFrac[#2]{\MatD} & \ConvVersFrac[#2]{\MatE} & \ConvVersFrac[#2]{\MatF} \\
+									\ConvVersFrac[#2]{\MatG} & \ConvVersFrac[#2]{\MatH} & \ConvVersFrac[#2]{\MatI} \\
+								\end{pNiceMatrix}}^{-1}=
+							}%
+					}{}%
+				\begin{pNiceMatrix}[#3]
+					{\MatInvA}&{\MatInvB}&{\MatInvC} \\
+					{\MatInvD}&{\MatInvE}&{\MatInvF} \\
+					{\MatInvG}&{\MatInvH}&{\MatInvI}
+				\end{pNiceMatrix}%
+			}%
+	\fi
+	\ifnum \MAMATRICEAlen=2
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[2,1]\MatC
+		\itemtomacro\MAMATRICEA[2,2]\MatD
+		%le déterminant
+		\def\DETMATRICE{\xinteval{\MatA*\MatD-\MatB*\MatC}}%
+		%matrice inverse, si elle existe...
+		\xintifboolexpr{\DETMATRICE == 0}%
+			{\text{Matrice non inversible}}%
+			{%
+				\IfBooleanTF{#1}%
+				{%
+					\def\MatInvA{\ConvVersFrac*[#2]{(\MatD)/(\DETMATRICE)}}%
+					\def\MatInvB{\ConvVersFrac*[#2]{(-\MatB)/(\DETMATRICE)}}%
+					\def\MatInvC{\ConvVersFrac*[#2]{(-\MatC)/(\DETMATRICE)}}%
+					\def\MatInvD{\ConvVersFrac*[#2]{(\MatA)/(\DETMATRICE)}}%
+				}%
+				{%
+					\def\MatInvA{\ConvVersFrac[#2]{(\MatD)/(\DETMATRICE)}}%
+					\def\MatInvB{\ConvVersFrac[#2]{(-\MatB)/(\DETMATRICE)}}%
+					\def\MatInvC{\ConvVersFrac[#2]{(-\MatC)/(\DETMATRICE)}}%
+					\def\MatInvD{\ConvVersFrac[#2]{(\MatA)/(\DETMATRICE)}}%
+				}%
+				\IfStrEq{#5}{Aff}%si matrice
+					{%
+						\IfBooleanTF{#1}%
+							{%
+								{\begin{pNiceMatrix}[#3]
+									\ConvVersFrac*[#2]{\MatA} & \ConvVersFrac*[#2]{\MatB} \\
+									\ConvVersFrac*[#2]{\MatC} & \ConvVersFrac*[#2]{\MatD}
+								\end{pNiceMatrix}}^{-1}=
+							}%
+							{%
+								{\begin{pNiceMatrix}[#3]
+									\ConvVersFrac[#2]{\MatA} & \ConvVersFrac[#2]{\MatB} \\
+									\ConvVersFrac[#2]{\MatC} & \ConvVersFrac[#2]{\MatD}
+								\end{pNiceMatrix}}^{-1}=
+							}%
+					}{}%
+				\begin{pNiceMatrix}[#3]
+					{\MatInvA}&{\MatInvB} \\
+					{\MatInvC}&{\MatInvD}
+				\end{pNiceMatrix}%
+			}%
+	\fi
+}
+
+\NewDocumentCommand\DetMatrice{ s O{} r() }{%
+	%*=fractions avec - sur le numérateur
+	%2=options conversion
+	%3=matrice (,,§,,)
+	%---------------------
+	%lectures des matrices
+	\setsepchar{§/,}%
+	\readlist*\MAMATRICEA{#3}%
+	%les coeffs de A et le déterminant et les coeff de l'inverse
+	\ifnum \MAMATRICEAlen=4
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[1,4]\MatD
+		\itemtomacro\MAMATRICEA[2,1]\MatE
+		\itemtomacro\MAMATRICEA[2,2]\MatF
+		\itemtomacro\MAMATRICEA[2,3]\MatG
+		\itemtomacro\MAMATRICEA[2,4]\MatH
+		\itemtomacro\MAMATRICEA[3,1]\MatI
+		\itemtomacro\MAMATRICEA[3,2]\MatJ
+		\itemtomacro\MAMATRICEA[3,3]\MatK
+		\itemtomacro\MAMATRICEA[3,4]\MatL
+		\itemtomacro\MAMATRICEA[4,1]\MatM
+		\itemtomacro\MAMATRICEA[4,2]\MatN
+		\itemtomacro\MAMATRICEA[4,3]\MatO
+		\itemtomacro\MAMATRICEA[4,4]\MatP
+		%le déterminant
+		\def\DETMATRICE{\xinteval{\MatA*\MatF*\MatK*\MatP-\MatA*\MatF*\MatL*\MatO-\MatA*\MatG*\MatJ*\MatP+\MatA*\MatG*\MatL*\MatN+\MatA*\MatH*\MatJ*\MatO-\MatA*\MatH*\MatK*\MatN-\MatB*\MatE*\MatK*\MatP+\MatB*\MatE*\MatL*\MatO+\MatB*\MatG*\MatI*\MatP-\MatB*\MatG*\MatL*\MatM-\MatB*\MatH*\MatI*\MatO+\MatB*\MatH*\MatK*\MatM+\MatC*\MatE*\MatJ*\MatP-\MatC*\MatE*\MatL*\MatN-\MatC*\MatF*\MatI*\MatP+\MatC*\MatF*\MatL*\MatM+\MatC*\MatH*\MatI*\MatN-\MatC*\MatH*\MatJ*\MatM-\MatD*\MatE*\MatJ*\MatO+\MatD*\MatE*\MatK*\MatN+\MatD*\MatF*\MatI*\MatO-\MatD*\MatF*\MatK*\MatM-\MatD*\MatG*\MatI*\MatN+\MatD*\MatG*\MatJ*\MatM}}%
+	\fi
+	\ifnum \MAMATRICEAlen=3
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[2,1]\MatD
+		\itemtomacro\MAMATRICEA[2,2]\MatE
+		\itemtomacro\MAMATRICEA[2,3]\MatF
+		\itemtomacro\MAMATRICEA[3,1]\MatG
+		\itemtomacro\MAMATRICEA[3,2]\MatH
+		\itemtomacro\MAMATRICEA[3,3]\MatI
+		%le déterminant
+		\def\DETMATRICE{\xinteval{\MatA*\MatE*\MatI+\MatD*\MatH*\MatC+\MatB*\MatF*\MatG-\MatG*\MatE*\MatC-\MatD*\MatB*\MatI-\MatA*\MatH*\MatF}}%
+	\fi
+	\ifnum \MAMATRICEAlen=2
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[2,1]\MatC
+		\itemtomacro\MAMATRICEA[2,2]\MatD
+		%le déterminant
+		\def\DETMATRICE{\xinteval{\MatA*\MatD-\MatB*\MatC}}%
+	\fi
+	\IfBooleanTF{#1}%
+		{%
+			\ConvVersFrac*[#2]{\DETMATRICE}%
+		}%
+		{%
+			\ConvVersFrac[#2]{\DETMATRICE}%
+		}%
+}
+
+\NewDocumentCommand\SolutionSysteme{ s O{} D<>{} r() r() O{} }{%
+	%*=fractions avec - sur le numérateur
+	%2=options conversion
+	%3=options nicematrix
+	%4=matrice (,,;,,) principale
+	%5=matrice (;;) second membre
+	%6=résultat sous forme d'une matrice
+	%---------------------
+	%lectures des matrices
+	\setsepchar{§/,}%
+	\readlist*\MAMATRICEA{#4}%
+	\setsepchar{,}%
+	\readlist*\MAMATRICEB{#5}%
+	\def\MatDim{\MAMATRICEAlen}%
+	%les coeffs de A et le déterminant et les coeff de l'inverse
+	\ifnum \MAMATRICEAlen=4
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[1,4]\MatD
+		\itemtomacro\MAMATRICEA[2,1]\MatE
+		\itemtomacro\MAMATRICEA[2,2]\MatF
+		\itemtomacro\MAMATRICEA[2,3]\MatG
+		\itemtomacro\MAMATRICEA[2,4]\MatH
+		\itemtomacro\MAMATRICEA[3,1]\MatI
+		\itemtomacro\MAMATRICEA[3,2]\MatJ
+		\itemtomacro\MAMATRICEA[3,3]\MatK
+		\itemtomacro\MAMATRICEA[3,4]\MatL
+		\itemtomacro\MAMATRICEA[4,1]\MatM
+		\itemtomacro\MAMATRICEA[4,2]\MatN
+		\itemtomacro\MAMATRICEA[4,3]\MatO
+		\itemtomacro\MAMATRICEA[4,4]\MatP
+		%le déterminant
+		\def\DETMATRICE{\xinteval{\MatA*\MatF*\MatK*\MatP-\MatA*\MatF*\MatL*\MatO-\MatA*\MatG*\MatJ*\MatP+\MatA*\MatG*\MatL*\MatN+\MatA*\MatH*\MatJ*\MatO-\MatA*\MatH*\MatK*\MatN-\MatB*\MatE*\MatK*\MatP+\MatB*\MatE*\MatL*\MatO+\MatB*\MatG*\MatI*\MatP-\MatB*\MatG*\MatL*\MatM-\MatB*\MatH*\MatI*\MatO+\MatB*\MatH*\MatK*\MatM+\MatC*\MatE*\MatJ*\MatP-\MatC*\MatE*\MatL*\MatN-\MatC*\MatF*\MatI*\MatP+\MatC*\MatF*\MatL*\MatM+\MatC*\MatH*\MatI*\MatN-\MatC*\MatH*\MatJ*\MatM-\MatD*\MatE*\MatJ*\MatO+\MatD*\MatE*\MatK*\MatN+\MatD*\MatF*\MatI*\MatO-\MatD*\MatF*\MatK*\MatM-\MatD*\MatG*\MatI*\MatN+\MatD*\MatG*\MatJ*\MatM}}%
+		%les coeffs de B
+		\itemtomacro\MAMATRICEB[1]\MatBA
+		\itemtomacro\MAMATRICEB[2]\MatBB
+		\itemtomacro\MAMATRICEB[3]\MatBC
+		\itemtomacro\MAMATRICEB[4]\MatBD
+		%matrice inverse, si elle existe...
+		\xintifboolexpr{\DETMATRICE == 0}%
+			{\text{Matrice non inversible}}%
+			{%
+				\def\MatInvA{(\MatF*\MatK*\MatP+\MatG*\MatL*\MatN+\MatH*\MatJ*\MatO-\MatF*\MatL*\MatO-\MatG*\MatJ*\MatP-\MatH*\MatK*\MatN)/(\DETMATRICE)}%
+				\def\MatInvB{(\MatB*\MatL*\MatO+\MatC*\MatJ*\MatP+\MatD*\MatK*\MatN-\MatB*\MatK*\MatP-\MatC*\MatL*\MatN-\MatD*\MatJ*\MatO)/(\DETMATRICE)}%
+				\def\MatInvC{(\MatB*\MatG*\MatP+\MatC*\MatH*\MatN+\MatD*\MatF*\MatO-\MatB*\MatH*\MatO-\MatC*\MatF*\MatP-\MatD*\MatG*\MatN)/(\DETMATRICE)}%
+				\def\MatInvD{(\MatB*\MatH*\MatK+\MatC*\MatF*\MatL+\MatD*\MatG*\MatJ-\MatB*\MatG*\MatL-\MatC*\MatH*\MatJ-\MatD*\MatF*\MatK)/(\DETMATRICE)}%
+				\def\MatInvE{(\MatE*\MatL*\MatO+\MatG*\MatI*\MatP+\MatH*\MatK*\MatM-\MatE*\MatK*\MatP-\MatG*\MatL*\MatM-\MatH*\MatI*\MatO)/(\DETMATRICE)}%
+				\def\MatInvF{(\MatA*\MatK*\MatP+\MatC*\MatL*\MatM+\MatD*\MatI*\MatO-\MatA*\MatL*\MatO-\MatC*\MatI*\MatP-\MatD*\MatK*\MatM)/(\DETMATRICE)}%
+				\def\MatInvG{(\MatA*\MatH*\MatO+\MatC*\MatE*\MatP+\MatD*\MatG*\MatM-\MatA*\MatG*\MatP-\MatC*\MatH*\MatM-\MatD*\MatE*\MatO)/(\DETMATRICE)}%
+				\def\MatInvH{(\MatA*\MatG*\MatL+\MatC*\MatH*\MatI+\MatD*\MatE*\MatK-\MatA*\MatH*\MatK-\MatC*\MatE*\MatL-\MatD*\MatG*\MatI)/(\DETMATRICE)}%
+				\def\MatInvI{(\MatE*\MatJ*\MatP+\MatF*\MatL*\MatM+\MatH*\MatI*\MatN-\MatE*\MatL*\MatN-\MatF*\MatI*\MatP-\MatH*\MatJ*\MatM)/(\DETMATRICE)}%
+				\def\MatInvJ{(\MatA*\MatL*\MatN+\MatB*\MatI*\MatP+\MatD*\MatJ*\MatM-\MatA*\MatJ*\MatP-\MatB*\MatL*\MatM-\MatD*\MatI*\MatN)/(\DETMATRICE)}%
+				\def\MatInvK{(\MatA*\MatF*\MatP+\MatB*\MatH*\MatM+\MatD*\MatE*\MatN-\MatA*\MatH*\MatN-\MatB*\MatE*\MatP-\MatD*\MatF*\MatM)/(\DETMATRICE)}%
+				\def\MatInvL{(\MatA*\MatH*\MatJ+\MatB*\MatE*\MatL+\MatD*\MatF*\MatI-\MatA*\MatF*\MatL-\MatB*\MatH*\MatI-\MatD*\MatE*\MatJ)/(\DETMATRICE)}%
+				\def\MatInvM{(\MatE*\MatK*\MatN+\MatF*\MatI*\MatO+\MatG*\MatJ*\MatM-\MatE*\MatJ*\MatO-\MatF*\MatK*\MatM-\MatG*\MatI*\MatN)/(\DETMATRICE)}%
+				\def\MatInvN{(\MatA*\MatJ*\MatO+\MatB*\MatK*\MatM+\MatC*\MatI*\MatN-\MatA*\MatK*\MatN-\MatB*\MatI*\MatO-\MatC*\MatJ*\MatM)/(\DETMATRICE)}%
+				\def\MatInvO{(\MatA*\MatG*\MatN+\MatB*\MatE*\MatO+\MatC*\MatF*\MatM-\MatA*\MatF*\MatO-\MatB*\MatG*\MatM-\MatC*\MatE*\MatN)/(\DETMATRICE)}%
+				\def\MatInvP{(\MatA*\MatF*\MatK+\MatB*\MatG*\MatI+\MatC*\MatE*\MatJ-\MatA*\MatG*\MatJ-\MatB*\MatE*\MatK-\MatC*\MatF*\MatI)/(\DETMATRICE)}%
+				%
+				\IfBooleanTF{#1}%version étoilée := moinsdevant
+					{%
+						\def\MatResA{\ConvVersFrac*[#2]{\MatInvA*\MatBA+\MatInvB*\MatBB+\MatInvC*\MatBC+\MatInvD*\MatBD}}%
+						\def\MatResB{\ConvVersFrac*[#2]{\MatInvE*\MatBA+\MatInvF*\MatBB+\MatInvG*\MatBC+\MatInvH*\MatBD}}%
+						\def\MatResC{\ConvVersFrac*[#2]{\MatInvI*\MatBA+\MatInvJ*\MatBB+\MatInvK*\MatBC+\MatInvL*\MatBD}}%
+						\def\MatResD{\ConvVersFrac*[#2]{\MatInvM*\MatBA+\MatInvN*\MatBB+\MatInvO*\MatBC+\MatInvP*\MatBD}}%
+					}%
+					{%
+						\def\MatResA{\ConvVersFrac[#2]{\MatInvA*\MatBA+\MatInvB*\MatBB+\MatInvC*\MatBC+\MatInvD*\MatBD}}%
+						\def\MatResB{\ConvVersFrac[#2]{\MatInvE*\MatBA+\MatInvF*\MatBB+\MatInvG*\MatBC+\MatInvH*\MatBD}}%
+						\def\MatResC{\ConvVersFrac[#2]{\MatInvI*\MatBA+\MatInvJ*\MatBB+\MatInvK*\MatBC+\MatInvL*\MatBD}}%
+						\def\MatResD{\ConvVersFrac[#2]{\MatInvM*\MatBA+\MatInvN*\MatBB+\MatInvO*\MatBC+\MatInvP*\MatBD}}%
+					}%
+				\IfStrEq{#6}{Matrice}%si matrice
+					{%
+						\begin{pNiceMatrix}[#3]
+							{\MatResA} \\
+							{\MatResB} \\
+							{\MatResC} \\
+							{\MatResD}
+						\end{pNiceMatrix}%
+					}%
+					{%
+						\left( {\MatResA} ; {\MatResB} ; {\MatResC} ; {\MatResD} \right)%
+					}%
+			}%
+	\fi
+	\ifnum \MAMATRICEAlen=3
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[2,1]\MatD
+		\itemtomacro\MAMATRICEA[2,2]\MatE
+		\itemtomacro\MAMATRICEA[2,3]\MatF
+		\itemtomacro\MAMATRICEA[3,1]\MatG
+		\itemtomacro\MAMATRICEA[3,2]\MatH
+		\itemtomacro\MAMATRICEA[3,3]\MatI
+		%le déterminant
+		\def\DETMATRICE{\xinteval{(\MatA)*(\MatE)*(\MatI)+(\MatD)*(\MatH)*(\MatC)+(\MatB)*(\MatF)*(\MatG)-(\MatG)*(\MatE)*(\MatC)-(\MatD)*(\MatB)*(\MatI)-(\MatA)*(\MatH)*(\MatF)}}%
+		%les coeffs de B
+		\itemtomacro\MAMATRICEB[1]\MatBA
+		\itemtomacro\MAMATRICEB[2]\MatBB
+		\itemtomacro\MAMATRICEB[3]\MatBC
+		%matrice inverse, si elle existe...
+		\xintifboolexpr{\DETMATRICE == 0}%
+			{\text{Matrice non inversible}}%
+			{%
+				\def\MatInvA{(\MatE*\MatI-\MatH*\MatF)/(\DETMATRICE)}%
+				\def\MatInvB{(-\MatB*\MatI+\MatC*\MatH)/(\DETMATRICE)}%
+				\def\MatInvC{(\MatB*\MatF-\MatC*\MatE)/(\DETMATRICE)}%
+				\def\MatInvD{(-\MatD*\MatI+\MatF*\MatG)/(\DETMATRICE)}%
+				\def\MatInvE{(\MatA*\MatI-\MatC*\MatG)/(\DETMATRICE)}%
+				\def\MatInvF{(-\MatA*\MatF+\MatD*\MatC)/(\DETMATRICE)}%
+				\def\MatInvG{(\MatD*\MatH-\MatE*\MatG)/(\DETMATRICE)}%
+				\def\MatInvH{(-\MatA*\MatH+\MatB*\MatG)/(\DETMATRICE)}%
+				\def\MatInvI{(\MatA*\MatE-\MatB*\MatD)/(\DETMATRICE)}%
+				%
+				\IfBooleanTF{#1}%version étoilée := moinsdevant
+					{%
+						\def\MatResA{\ConvVersFrac*[#2]{\MatInvA*\MatBA+\MatInvB*\MatBB+\MatInvC*\MatBC}}%
+						\def\MatResB{\ConvVersFrac*[#2]{\MatInvD*\MatBA+\MatInvE*\MatBB+\MatInvF*\MatBC}}%
+						\def\MatResC{\ConvVersFrac*[#2]{\MatInvG*\MatBA+\MatInvH*\MatBB+\MatInvI*\MatBC}}%
+					}%
+					{%
+						\def\MatResA{\ConvVersFrac[#2]{\MatInvA*\MatBA+\MatInvB*\MatBB+\MatInvC*\MatBC}}%
+						\def\MatResB{\ConvVersFrac[#2]{\MatInvD*\MatBA+\MatInvE*\MatBB+\MatInvF*\MatBC}}%
+						\def\MatResC{\ConvVersFrac[#2]{\MatInvG*\MatBA+\MatInvH*\MatBB+\MatInvI*\MatBC}}%
+					}%
+				\IfStrEq{#6}{Matrice}%si matrice
+					{%
+						\begin{pNiceMatrix}[#3]
+							{\MatResA} \\
+							{\MatResB} \\
+							{\MatResC}
+						\end{pNiceMatrix}%
+					}%
+					{%
+						\left( {\MatResA} ; {\MatResB} ; {\MatResC} \right)%
+					}%
+			}%
+	\fi
+	\ifnum \MAMATRICEAlen=2
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[2,1]\MatC
+		\itemtomacro\MAMATRICEA[2,2]\MatD
+		%le déterminant
+		\def\DETMATRICE{\xinteval{(\MatA)*(\MatD)-(\MatB)*(\MatC)}}%
+		%les coeffs de B
+		\itemtomacro\MAMATRICEB[1]\MatBA
+		\itemtomacro\MAMATRICEB[2]\MatBB
+		%matrice inverse, si elle existe...
+		\xintifboolexpr{\DETMATRICE == 0}%
+			{\text{Matrice non inversible}}%
+			{%
+				\def\MatInvA{(\MatD)/(\DETMATRICE)}%
+				\def\MatInvB{(-\MatB)/(\DETMATRICE)}%
+				\def\MatInvC{(-\MatC)/(\DETMATRICE)}%
+				\def\MatInvD{(\MatA)/(\DETMATRICE)}%
+				%
+				\IfBooleanTF{#1}%
+					{%
+						\def\MatResA{\ConvVersFrac*[#2]{(\MatInvA)*(\MatBA)+(\MatInvB)*(\MatBB)}}%
+						\def\MatResB{\ConvVersFrac*[#2]{(\MatInvC)*(\MatBA)+(\MatInvD)*(\MatBB)}}%
+					}%
+					{%
+						\def\MatResA{\ConvVersFrac[#2]{(\MatInvA)*(\MatBA)+(\MatInvB)*(\MatBB)}}%
+						\def\MatResB{\ConvVersFrac[#2]{(\MatInvC)*(\MatBA)+(\MatInvD)*(\MatBB)}}%
+					}%
+				\IfStrEq{#6}{Matrice}%si matrice
+					{%
+						\begin{pNiceMatrix}[#3]
+							{\MatResA} \\
+							{\MatResB}
+						\end{pNiceMatrix}%
+					}%
+					{%
+						\left( {\MatResA} ; {\MatResB} \right)%
+					}%
+			}%
+	\fi
+}
+
+\NewDocumentCommand\EtatStable{ O{} D<>{} r() }{%
+	%1=options conversion
+	%2=options nicematrix
+	%3=matrice (,,;,,)
+	%---------------------
+	%lectures des matrices
+	\setsepchar{§/,}%
+	\readlist*\MAMATRICEA{#3}%
+	%les coeffs de A et la résolution du système
+	\ifnum \MAMATRICEAlen=2
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[2,1]\MatC
+		\itemtomacro\MAMATRICEA[2,2]\MatD
+		\def\MatEtStabA{\ConvVersFrac[#1]{\MatC/(\MatB+\MatC)}}
+		\def\MatEtStabB{\ConvVersFrac[#1]{\MatB/(\MatB+\MatC)}}
+		\begin{pNiceMatrix}[#2]
+			{\MatEtStabA} & {\MatEtStabB}
+		\end{pNiceMatrix}%
+	\fi
+}
+
+\NewDocumentCommand\ProduitMatrices{ s O{} D<>{} r() r() O{} }{%
+	%*=fractions avec - sur le numérateur
+	%2=options conversion
+	%3=options nicematrix globales ?
+	%4=matrice (,,§,,) A
+	%5=matrice (,,§,,) B
+	%---------------------
+	%lectures des matrices et dimensions
+	\setsepchar{§/,}%
+	\readlist*\MatA{#4}%
+	\readlist*\MatB{#5}%
+	\def\NbLigMatA{\MatAlen}%
+	\def\NbLigMatB{\MatBlen}%
+	\itemtomacro\MatA[1]{\MatAligne}%
+	\itemtomacro\MatB[1]{\MatBligne}%
+	\setsepchar{,}%
+	\readlist*\TmpA{\MatAligne}%
+	\readlist*\TmpB{\MatBligne}%
+	\def\NbColMatA{\TmpAlen}%
+	\def\NbColMatB{\TmpBlen}%
+	%test de dimensions !!
+	\xintifboolexpr{\NbColMatA != \NbLigMatB}
+		{\text{Erreur de dimensions}}%
+		{
+			\xintifboolexpr{\NbLigMatA==1 'and' \NbColMatA==2 'and' \NbLigMatB==2 'and' \NbColMatB==1}% (1,2)*(2,1)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatB[1]\CoeffBa
+					\itemtomacro\MatB[2]\CoeffBb
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatRes{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb}}%
+						}%
+						{%
+							\def\MatRes{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffBa} \\ \ConvVersFrac*[#2]{\CoeffBb} \end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffBa} \\ \ConvVersFrac[#2]{\CoeffBb} \end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						\MatRes
+					\end{pNiceMatrix}%
+				}{}%fin 1,2*2,1
+			\xintifboolexpr{\NbLigMatA==1 'and' \NbColMatA==2 'and' \NbLigMatB==2 'and' \NbColMatB==2}% (1,2)*(2,2)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatB[1,1]\CoeffBa
+					\itemtomacro\MatB[1,2]\CoeffBb
+					\itemtomacro\MatB[2,1]\CoeffBc
+					\itemtomacro\MatB[2,2]\CoeffBd
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBc}}%
+							\def\MatResB{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBd}}%
+						}%
+						{%
+							\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBc}}%
+							\def\MatResB{\ConvVersFrac[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBd}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffBa} & \ConvVersFrac*[#2]{\CoeffBb} \\ \ConvVersFrac*[#2]{\CoeffBc} & \ConvVersFrac*[#2]{\CoeffBd} \end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffBa} & \ConvVersFrac[#2]{\CoeffBb} \\ \ConvVersFrac[#2]{\CoeffBc} & \ConvVersFrac[#2]{\CoeffBd} \end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						\MatResA & \MatResB
+					\end{pNiceMatrix}%
+				}{}%fin 1,2*2,1
+			\xintifboolexpr{\NbLigMatA==1 'and' \NbColMatA==3 'and' \NbLigMatB==3 'and' \NbColMatB==1}% (1,3)*(3,1)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatA[1,3]\CoeffAc
+					\itemtomacro\MatB[1]\CoeffBa
+					\itemtomacro\MatB[2]\CoeffBb
+					\itemtomacro\MatB[3]\CoeffBc
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatRes{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb+\CoeffAc*\CoeffBc}}%
+						}%
+						{%
+							\def\MatRes{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb+\CoeffAc*\CoeffBc}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} & \ConvVersFrac*[#2]{\CoeffAc} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffBa} & \ConvVersFrac*[#2]{\CoeffBb} & \ConvVersFrac*[#2]{\CoeffBc} \end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} & \ConvVersFrac[#2]{\CoeffAc} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffBa} \\ \ConvVersFrac[#2]{\CoeffBb} \\ \ConvVersFrac[#2]{\CoeffBc} \end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						\MatRes
+					\end{pNiceMatrix}%
+				}{}%fin 1,3*3,1
+			\xintifboolexpr{\NbLigMatA==1 'and' \NbColMatA==3 'and' \NbLigMatB==3 'and' \NbColMatB==3}% (1,3)*(3,3)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatA[1,3]\CoeffAc
+					\itemtomacro\MatB[1,1]\CoeffBa
+					\itemtomacro\MatB[1,2]\CoeffBb
+					\itemtomacro\MatB[1,3]\CoeffBc
+					\itemtomacro\MatB[2,1]\CoeffBd
+					\itemtomacro\MatB[2,2]\CoeffBe
+					\itemtomacro\MatB[2,3]\CoeffBf
+					\itemtomacro\MatB[3,1]\CoeffBg
+					\itemtomacro\MatB[3,2]\CoeffBh
+					\itemtomacro\MatB[3,3]\CoeffBi
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBd+\CoeffAc*\CoeffBg}}%
+							\def\MatResB{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBe+\CoeffAc*\CoeffBh}}%
+							\def\MatResC{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBc+\CoeffAb*\CoeffBf+\CoeffAc*\CoeffBi}}%
+						}%
+						{%
+							\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBd+\CoeffAc*\CoeffBg}}%
+							\def\MatResB{\ConvVersFrac[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBe+\CoeffAc*\CoeffBh}}%
+							\def\MatResC{\ConvVersFrac[#2]{\CoeffAa*\CoeffBc+\CoeffAb*\CoeffBf+\CoeffAc*\CoeffBi}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} & \ConvVersFrac*[#2]{\CoeffAc} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac*[#2]{\CoeffBa} & \ConvVersFrac*[#2]{\CoeffBb} & \ConvVersFrac*[#2]{\CoeffBc} \\
+										\ConvVersFrac*[#2]{\CoeffBd} & \ConvVersFrac*[#2]{\CoeffBe} & \ConvVersFrac*[#2]{\CoeffBf} \\
+										\ConvVersFrac*[#2]{\CoeffBg} & \ConvVersFrac*[#2]{\CoeffBh} & \ConvVersFrac*[#2]{\CoeffBi} 
+									\end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} & \ConvVersFrac[#2]{\CoeffAc} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac[#2]{\CoeffBa} & \ConvVersFrac[#2]{\CoeffBb} & \ConvVersFrac[#2]{\CoeffBc} \\
+										\ConvVersFrac[#2]{\CoeffBd} & \ConvVersFrac[#2]{\CoeffBe} & \ConvVersFrac[#2]{\CoeffBf} \\
+										\ConvVersFrac[#2]{\CoeffBg} & \ConvVersFrac[#2]{\CoeffBh} & \ConvVersFrac[#2]{\CoeffBi} 
+									\end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						\MatResA & \MatResB & \MatResC
+					\end{pNiceMatrix}%
+				}{}%fin 1,3*3,3
+			\xintifboolexpr{\NbLigMatA==2 'and' \NbColMatA==2 'and' \NbLigMatB==2 'and' \NbColMatB==1}% (2,2)*(2,1)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatA[2,1]\CoeffAc
+					\itemtomacro\MatA[2,2]\CoeffAd
+					\itemtomacro\MatB[1]\CoeffBa
+					\itemtomacro\MatB[2]\CoeffBb
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb}}%
+							\def\MatResB{\ConvVersFrac*[#2]{\CoeffAc*\CoeffBa+\CoeffAd*\CoeffBb}}%
+						}%
+						{%
+							\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb}}%
+							\def\MatResB{\ConvVersFrac[#2]{\CoeffAc*\CoeffBa+\CoeffAd*\CoeffBb}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} \\ \ConvVersFrac*[#2]{\CoeffAc} & \ConvVersFrac*[#2]{\CoeffAd} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffBa} \\ \ConvVersFrac*[#2]{\CoeffBb} \end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} \\ \ConvVersFrac[#2]{\CoeffAc} & \ConvVersFrac[#2]{\CoeffAd} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffBa} \\ \ConvVersFrac[#2]{\CoeffBb} \end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						\MatResA \\ \MatResB
+					\end{pNiceMatrix}%
+				}{}%fin 2,2*2,1
+			\xintifboolexpr{\NbLigMatA==2 'and' \NbColMatA==2 'and' \NbLigMatB==2 'and' \NbColMatB==2}% (2,2)*(2,2)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatA[2,1]\CoeffAc
+					\itemtomacro\MatA[2,2]\CoeffAd
+					\itemtomacro\MatB[1,1]\CoeffBa
+					\itemtomacro\MatB[1,2]\CoeffBb
+					\itemtomacro\MatB[2,1]\CoeffBc
+					\itemtomacro\MatB[2,2]\CoeffBd
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBc}}%
+							\def\MatResB{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBd}}%
+							\def\MatResC{\ConvVersFrac*[#2]{\CoeffAc*\CoeffBa+\CoeffAd*\CoeffBc}}%
+							\def\MatResD{\ConvVersFrac*[#2]{\CoeffAc*\CoeffBb+\CoeffAd*\CoeffBd}}%
+						}%
+						{%
+							\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBc}}%
+							\def\MatResB{\ConvVersFrac[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBd}}%
+							\def\MatResC{\ConvVersFrac[#2]{\CoeffAc*\CoeffBa+\CoeffAd*\CoeffBc}}%
+							\def\MatResD{\ConvVersFrac[#2]{\CoeffAc*\CoeffBb+\CoeffAd*\CoeffBd}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} \\ \ConvVersFrac*[#2]{\CoeffAc} & \ConvVersFrac*[#2]{\CoeffAd} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffBa} & \ConvVersFrac*[#2]{\CoeffBb} \\ \ConvVersFrac*[#2]{\CoeffBc} & \ConvVersFrac*[#2]{\CoeffBd} \end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} \\ \ConvVersFrac[#2]{\CoeffAc} & \ConvVersFrac[#2]{\CoeffAd} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffBa} & \ConvVersFrac[#2]{\CoeffBb} \\ \ConvVersFrac[#2]{\CoeffBc} & \ConvVersFrac[#2]{\CoeffBd} \end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						\MatResA & \MatResB \\ \MatResC & \MatResD
+					\end{pNiceMatrix}%
+				}{}%fin 2,2*2,1
+			\xintifboolexpr{\NbLigMatA==3 'and' \NbColMatA==3 'and' \NbLigMatB==3 'and' \NbColMatB==1}% (3,3)*(3,1)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatA[1,3]\CoeffAc
+					\itemtomacro\MatA[2,1]\CoeffAd
+					\itemtomacro\MatA[2,2]\CoeffAe
+					\itemtomacro\MatA[2,3]\CoeffAf
+					\itemtomacro\MatA[3,1]\CoeffAg
+					\itemtomacro\MatA[3,2]\CoeffAh
+					\itemtomacro\MatA[3,3]\CoeffAi
+					\itemtomacro\MatB[1]\CoeffBa
+					\itemtomacro\MatB[2]\CoeffBb
+					\itemtomacro\MatB[3]\CoeffBc
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb+\CoeffAc*\CoeffBc}}%
+							\def\MatResB{\ConvVersFrac*[#2]{\CoeffAd*\CoeffBa+\CoeffAe*\CoeffBb+\CoeffAf*\CoeffBc}}%
+							\def\MatResC{\ConvVersFrac*[#2]{\CoeffAg*\CoeffBa+\CoeffAh*\CoeffBb+\CoeffAi*\CoeffBc}}%
+						}%
+						{%
+							\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb+\CoeffAc*\CoeffBc}}%
+							\def\MatResB{\ConvVersFrac[#2]{\CoeffAd*\CoeffBa+\CoeffAe*\CoeffBb+\CoeffAf*\CoeffBc}}%
+							\def\MatResC{\ConvVersFrac[#2]{\CoeffAg*\CoeffBa+\CoeffAh*\CoeffBb+\CoeffAi*\CoeffBc}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} & \ConvVersFrac*[#2]{\CoeffAc} \\
+										\ConvVersFrac*[#2]{\CoeffAd} & \ConvVersFrac*[#2]{\CoeffAe} & \ConvVersFrac*[#2]{\CoeffAf} \\
+										\ConvVersFrac*[#2]{\CoeffAg} & \ConvVersFrac*[#2]{\CoeffAh} & \ConvVersFrac*[#2]{\CoeffAi}
+									\end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffBa} \\ \ConvVersFrac*[#2]{\CoeffBb} \\ \ConvVersFrac*[#2]{\CoeffBc} \end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} & \ConvVersFrac[#2]{\CoeffAc} \\
+										\ConvVersFrac[#2]{\CoeffAd} & \ConvVersFrac[#2]{\CoeffAe} & \ConvVersFrac[#2]{\CoeffAf} \\
+										\ConvVersFrac[#2]{\CoeffAg} & \ConvVersFrac[#2]{\CoeffAh} & \ConvVersFrac[#2]{\CoeffAi}
+									\end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffBa} \\ \ConvVersFrac[#2]{\CoeffBb} \\ \ConvVersFrac[#2]{\CoeffBc} \end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						\MatResA \\ \MatResB \\ \MatResC
+					\end{pNiceMatrix}%
+				}{}%fin 3,3*3,1
+			\xintifboolexpr{\NbLigMatA==3 'and' \NbColMatA==3 'and' \NbLigMatB==3 'and' \NbColMatB==3}% (3,3)*(3,3)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatA[1,3]\CoeffAc
+					\itemtomacro\MatA[2,1]\CoeffAd
+					\itemtomacro\MatA[2,2]\CoeffAe
+					\itemtomacro\MatA[2,3]\CoeffAf
+					\itemtomacro\MatA[3,1]\CoeffAg
+					\itemtomacro\MatA[3,2]\CoeffAh
+					\itemtomacro\MatA[3,3]\CoeffAi
+					\itemtomacro\MatB[1,1]\CoeffBa
+					\itemtomacro\MatB[1,2]\CoeffBb
+					\itemtomacro\MatB[1,3]\CoeffBc
+					\itemtomacro\MatB[2,1]\CoeffBd
+					\itemtomacro\MatB[2,2]\CoeffBe
+					\itemtomacro\MatB[1,3]\CoeffBf
+					\itemtomacro\MatB[3,1]\CoeffBg
+					\itemtomacro\MatB[3,2]\CoeffBh
+					\itemtomacro\MatB[3,3]\CoeffBi
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBd+\CoeffAc*\CoeffBg}}%
+							\def\MatResB{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBe+\CoeffAc*\CoeffBh}}%
+							\def\MatResC{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBc+\CoeffAb*\CoeffBf+\CoeffAc*\CoeffBi}}%
+							\def\MatResD{\ConvVersFrac*[#2]{\CoeffAd*\CoeffBa+\CoeffAe*\CoeffBd+\CoeffAf*\CoeffBg}}%
+							\def\MatResE{\ConvVersFrac*[#2]{\CoeffAd*\CoeffBb+\CoeffAe*\CoeffBe+\CoeffAf*\CoeffBh}}%
+							\def\MatResF{\ConvVersFrac*[#2]{\CoeffAd*\CoeffBc+\CoeffAe*\CoeffBf+\CoeffAf*\CoeffBi}}%
+							\def\MatResG{\ConvVersFrac*[#2]{\CoeffAg*\CoeffBa+\CoeffAh*\CoeffBd+\CoeffAi*\CoeffBg}}%
+							\def\MatResH{\ConvVersFrac*[#2]{\CoeffAg*\CoeffBb+\CoeffAh*\CoeffBe+\CoeffAi*\CoeffBh}}%
+							\def\MatResI{\ConvVersFrac*[#2]{\CoeffAg*\CoeffBc+\CoeffAh*\CoeffBf+\CoeffAi*\CoeffBi}}%
+						}%
+						{%
+							\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBd+\CoeffAc*\CoeffBg}}%
+							\def\MatResB{\ConvVersFrac[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBe+\CoeffAc*\CoeffBh}}%
+							\def\MatResC{\ConvVersFrac[#2]{\CoeffAa*\CoeffBc+\CoeffAb*\CoeffBf+\CoeffAc*\CoeffBi}}%
+							\def\MatResD{\ConvVersFrac[#2]{\CoeffAd*\CoeffBa+\CoeffAe*\CoeffBd+\CoeffAf*\CoeffBg}}%
+							\def\MatResE{\ConvVersFrac[#2]{\CoeffAd*\CoeffBb+\CoeffAe*\CoeffBe+\CoeffAf*\CoeffBh}}%
+							\def\MatResF{\ConvVersFrac[#2]{\CoeffAd*\CoeffBc+\CoeffAe*\CoeffBf+\CoeffAf*\CoeffBi}}%
+							\def\MatResG{\ConvVersFrac[#2]{\CoeffAg*\CoeffBa+\CoeffAh*\CoeffBd+\CoeffAi*\CoeffBg}}%
+							\def\MatResH{\ConvVersFrac[#2]{\CoeffAg*\CoeffBb+\CoeffAh*\CoeffBe+\CoeffAi*\CoeffBh}}%
+							\def\MatResI{\ConvVersFrac[#2]{\CoeffAg*\CoeffBc+\CoeffAh*\CoeffBf+\CoeffAi*\CoeffBi}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} & \ConvVersFrac*[#2]{\CoeffAc} \\
+										\ConvVersFrac*[#2]{\CoeffAd} & \ConvVersFrac*[#2]{\CoeffAe} & \ConvVersFrac*[#2]{\CoeffAf} \\
+										\ConvVersFrac*[#2]{\CoeffAg} & \ConvVersFrac*[#2]{\CoeffAh} & \ConvVersFrac*[#2]{\CoeffAi}
+									\end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac*[#2]{\CoeffBa} & \ConvVersFrac*[#2]{\CoeffBb} & \ConvVersFrac*[#2]{\CoeffBc} \\
+										\ConvVersFrac*[#2]{\CoeffBd} & \ConvVersFrac*[#2]{\CoeffBe} & \ConvVersFrac*[#2]{\CoeffBf} \\
+										\ConvVersFrac*[#2]{\CoeffBg} & \ConvVersFrac*[#2]{\CoeffBh} & \ConvVersFrac*[#2]{\CoeffBi}
+									\end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} & \ConvVersFrac[#2]{\CoeffAc} \\
+										\ConvVersFrac[#2]{\CoeffAd} & \ConvVersFrac[#2]{\CoeffAe} & \ConvVersFrac[#2]{\CoeffAf} \\
+										\ConvVersFrac[#2]{\CoeffAg} & \ConvVersFrac[#2]{\CoeffAh} & \ConvVersFrac[#2]{\CoeffAi}
+									\end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac[#2]{\CoeffBa} & \ConvVersFrac[#2]{\CoeffBb} & \ConvVersFrac[#2]{\CoeffBc} \\
+										\ConvVersFrac[#2]{\CoeffBd} & \ConvVersFrac[#2]{\CoeffBe} & \ConvVersFrac[#2]{\CoeffBf} \\
+										\ConvVersFrac[#2]{\CoeffBg} & \ConvVersFrac[#2]{\CoeffBh} & \ConvVersFrac[#2]{\CoeffBi}
+									\end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						\MatResA & \MatResB & \MatResC \\ \MatResD & \MatResE & \MatResF \\ \MatResG & \MatResH & \MatResI
+					\end{pNiceMatrix}%
+				}{}%fin 3,3*3,3
+			\xintifboolexpr{\NbLigMatA==1 'and' \NbColMatA==4 'and' \NbLigMatB==4 'and' \NbColMatB==1}% (1,4)*(4,1)
+			{%
+				\itemtomacro\MatA[1,1]\CoeffAa
+				\itemtomacro\MatA[1,2]\CoeffAb
+				\itemtomacro\MatA[1,3]\CoeffAc
+				\itemtomacro\MatA[1,4]\CoeffAd
+				\itemtomacro\MatB[1]\CoeffBa
+				\itemtomacro\MatB[2]\CoeffBb
+				\itemtomacro\MatB[3]\CoeffBc
+				\itemtomacro\MatB[4]\CoeffBd
+				\IfBooleanTF{#1}%version étoilée := moins sur num
+					{%
+						\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb+\CoeffAc*\CoeffBc+\CoeffAd*\CoeffBd}}%
+					}%
+					{%
+						\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb+\CoeffAc*\CoeffBc+\CoeffAd*\CoeffBd}}%
+					}%
+				\IfStrEq{#6}{Aff}%si matrice
+					{%
+						\IfBooleanTF{#1}%
+							{%
+								\begin{pNiceMatrix}[#3]
+									\ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} & \ConvVersFrac*[#2]{\CoeffAc} & \ConvVersFrac*[#2]{\CoeffAd}
+								\end{pNiceMatrix}
+								\times
+								\begin{pNiceMatrix}[#3]
+									\ConvVersFrac*[#2]{\CoeffBa} \\
+									\ConvVersFrac*[#2]{\CoeffBb} \\
+									\ConvVersFrac*[#2]{\CoeffBc} \\
+									\ConvVersFrac*[#2]{\CoeffBd}
+								\end{pNiceMatrix}
+								=
+							}%
+							{%
+								\begin{pNiceMatrix}[#3]
+									\ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} & \ConvVersFrac[#2]{\CoeffAc} & \ConvVersFrac[#2]{\CoeffAd}
+								\end{pNiceMatrix}
+								\times
+								\begin{pNiceMatrix}[#3]
+									\ConvVersFrac[#2]{\CoeffBa} \\
+									\ConvVersFrac[#2]{\CoeffBb} \\
+									\ConvVersFrac[#2]{\CoeffBc} \\
+									\ConvVersFrac[#2]{\CoeffBd}
+								\end{pNiceMatrix}
+								=
+							}%
+					}{}%
+				\begin{pNiceMatrix}[#3]
+					{\MatResA}
+				\end{pNiceMatrix}%
+			}{}%fin 1,4*4,1
+			\xintifboolexpr{\NbLigMatA==1 'and' \NbColMatA==4 'and' \NbLigMatB==4 'and' \NbColMatB==4}% (1,4)*(4,4)
+			{%
+				\itemtomacro\MatA[1,1]\CoeffAa
+				\itemtomacro\MatA[1,2]\CoeffAb
+				\itemtomacro\MatA[1,3]\CoeffAc
+				\itemtomacro\MatA[1,4]\CoeffAd
+				\itemtomacro\MatB[1,1]\CoeffBa
+				\itemtomacro\MatB[1,2]\CoeffBb
+				\itemtomacro\MatB[1,3]\CoeffBc
+				\itemtomacro\MatB[1,4]\CoeffBd
+				\itemtomacro\MatB[2,1]\CoeffBe
+				\itemtomacro\MatB[2,2]\CoeffBf
+				\itemtomacro\MatB[2,3]\CoeffBg
+				\itemtomacro\MatB[2,4]\CoeffBh
+				\itemtomacro\MatB[3,1]\CoeffBi
+				\itemtomacro\MatB[3,2]\CoeffBj
+				\itemtomacro\MatB[3,3]\CoeffBk
+				\itemtomacro\MatB[3,4]\CoeffBl
+				\itemtomacro\MatB[4,1]\CoeffBm
+				\itemtomacro\MatB[4,2]\CoeffBn
+				\itemtomacro\MatB[4,3]\CoeffBo
+				\itemtomacro\MatB[4,4]\CoeffBp
+				\IfBooleanTF{#1}%version étoilée := moins sur num
+					{%
+						\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBe+\CoeffAc*\CoeffBi+\CoeffAd*\CoeffBm}}%
+						\def\MatResB{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBf+\CoeffAc*\CoeffBj+\CoeffAd*\CoeffBn}}%
+						\def\MatResC{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBc+\CoeffAb*\CoeffBg+\CoeffAc*\CoeffBk+\CoeffAd*\CoeffBo}}%
+						\def\MatResD{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBd+\CoeffAb*\CoeffBh+\CoeffAc*\CoeffBl+\CoeffAd*\CoeffBp}}%
+					}%
+					{%
+						\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBe+\CoeffAc*\CoeffBi+\CoeffAd*\CoeffBm}}%
+						\def\MatResB{\ConvVersFrac[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBf+\CoeffAc*\CoeffBj+\CoeffAd*\CoeffBn}}%
+						\def\MatResC{\ConvVersFrac[#2]{\CoeffAa*\CoeffBc+\CoeffAb*\CoeffBg+\CoeffAc*\CoeffBk+\CoeffAd*\CoeffBo}}%
+						\def\MatResD{\ConvVersFrac[#2]{\CoeffAa*\CoeffBd+\CoeffAb*\CoeffBh+\CoeffAc*\CoeffBl+\CoeffAd*\CoeffBp}}%
+					}%
+				\IfStrEq{#6}{Aff}%si matrice
+					{%
+						\IfBooleanTF{#1}%
+							{%
+								\begin{pNiceMatrix}[#3]
+									\ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} & \ConvVersFrac*[#2]{\CoeffAc} & \ConvVersFrac*[#2]{\CoeffAd}
+								\end{pNiceMatrix}
+								\times
+								\begin{pNiceMatrix}[#3]
+									\ConvVersFrac*[#2]{\CoeffBa} & \ConvVersFrac*[#2]{\CoeffBb} & \ConvVersFrac*[#2]{\CoeffBc} & \ConvVersFrac*[#2]{\CoeffBd} \\
+									\ConvVersFrac*[#2]{\CoeffBe} & \ConvVersFrac*[#2]{\CoeffBf} & \ConvVersFrac*[#2]{\CoeffBg} & \ConvVersFrac*[#2]{\CoeffBh} \\
+									\ConvVersFrac*[#2]{\CoeffBi} & \ConvVersFrac*[#2]{\CoeffBj} & \ConvVersFrac*[#2]{\CoeffBk} & \ConvVersFrac*[#2]{\CoeffBl} \\
+									\ConvVersFrac*[#2]{\CoeffBm} & \ConvVersFrac*[#2]{\CoeffBn} & \ConvVersFrac*[#2]{\CoeffBo} & \ConvVersFrac*[#2]{\CoeffBp}
+								\end{pNiceMatrix}
+								=
+							}%
+							{%
+								\begin{pNiceMatrix}[#3]
+									\ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} & \ConvVersFrac[#2]{\CoeffAc} & \ConvVersFrac[#2]{\CoeffAd}
+								\end{pNiceMatrix}
+								\times
+								\begin{pNiceMatrix}[#3]
+									\ConvVersFrac[#2]{\CoeffBa} & \ConvVersFrac[#2]{\CoeffBb} & \ConvVersFrac[#2]{\CoeffBc} & \ConvVersFrac[#2]{\CoeffBd} \\
+									\ConvVersFrac[#2]{\CoeffBe} & \ConvVersFrac[#2]{\CoeffBf} & \ConvVersFrac[#2]{\CoeffBg} & \ConvVersFrac[#2]{\CoeffBh} \\
+									\ConvVersFrac[#2]{\CoeffBi} & \ConvVersFrac[#2]{\CoeffBj} & \ConvVersFrac[#2]{\CoeffBk} & \ConvVersFrac[#2]{\CoeffBl} \\
+									\ConvVersFrac[#2]{\CoeffBm} & \ConvVersFrac[#2]{\CoeffBn} & \ConvVersFrac[#2]{\CoeffBo} & \ConvVersFrac[#2]{\CoeffBp}
+								\end{pNiceMatrix}
+								=
+							}%
+					}{}%
+				\begin{pNiceMatrix}[#3]
+					{\MatResA} & {\MatResB} & {\MatResC} & {\MatResD}
+				\end{pNiceMatrix}%
+			}{}%fin 1,4*4,4
+			\xintifboolexpr{\NbLigMatA==4 'and' \NbColMatA==4 'and' \NbLigMatB==4 'and' \NbColMatB==1}% (4,4)*(4,1)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatA[1,3]\CoeffAc
+					\itemtomacro\MatA[1,4]\CoeffAd
+					\itemtomacro\MatA[2,1]\CoeffAe
+					\itemtomacro\MatA[2,2]\CoeffAf
+					\itemtomacro\MatA[2,3]\CoeffAg
+					\itemtomacro\MatA[2,4]\CoeffAh
+					\itemtomacro\MatA[3,1]\CoeffAi
+					\itemtomacro\MatA[3,2]\CoeffAj
+					\itemtomacro\MatA[3,3]\CoeffAk
+					\itemtomacro\MatA[3,4]\CoeffAl
+					\itemtomacro\MatA[4,1]\CoeffAm
+					\itemtomacro\MatA[4,2]\CoeffAn
+					\itemtomacro\MatA[4,3]\CoeffAo
+					\itemtomacro\MatA[4,4]\CoeffAp
+					\itemtomacro\MatB[1]\CoeffBa
+					\itemtomacro\MatB[2]\CoeffBb
+					\itemtomacro\MatB[3]\CoeffBc
+					\itemtomacro\MatB[4]\CoeffBd
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb+\CoeffAc*\CoeffBc+\CoeffAd*\CoeffBd}}%
+							\def\MatResB{\ConvVersFrac*[#2]{\CoeffAe*\CoeffBa+\CoeffAf*\CoeffBb+\CoeffAg*\CoeffBc+\CoeffAh*\CoeffBd}}%
+							\def\MatResC{\ConvVersFrac*[#2]{\CoeffAi*\CoeffBa+\CoeffAj*\CoeffBb+\CoeffAk*\CoeffBc+\CoeffAl*\CoeffBd}}%
+							\def\MatResD{\ConvVersFrac*[#2]{\CoeffAm*\CoeffBa+\CoeffAn*\CoeffBb+\CoeffAo*\CoeffBc+\CoeffAp*\CoeffBd}}%
+						}%
+						{%
+							\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb+\CoeffAc*\CoeffBc+\CoeffAd*\CoeffBd}}%
+							\def\MatResB{\ConvVersFrac[#2]{\CoeffAe*\CoeffBa+\CoeffAf*\CoeffBb+\CoeffAg*\CoeffBc+\CoeffAh*\CoeffBd}}%
+							\def\MatResC{\ConvVersFrac[#2]{\CoeffAi*\CoeffBa+\CoeffAj*\CoeffBb+\CoeffAk*\CoeffBc+\CoeffAl*\CoeffBd}}%
+							\def\MatResD{\ConvVersFrac[#2]{\CoeffAm*\CoeffBa+\CoeffAn*\CoeffBb+\CoeffAo*\CoeffBc+\CoeffAp*\CoeffBd}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} & \ConvVersFrac*[#2]{\CoeffAc} & \ConvVersFrac*[#2]{\CoeffAd} \\
+										\ConvVersFrac*[#2]{\CoeffAe} & \ConvVersFrac*[#2]{\CoeffAf} & \ConvVersFrac*[#2]{\CoeffAg} & \ConvVersFrac*[#2]{\CoeffAh} \\
+										\ConvVersFrac*[#2]{\CoeffAi} & \ConvVersFrac*[#2]{\CoeffAj} & \ConvVersFrac*[#2]{\CoeffAk} & \ConvVersFrac*[#2]{\CoeffAl} \\
+										\ConvVersFrac*[#2]{\CoeffAm} & \ConvVersFrac*[#2]{\CoeffAn} & \ConvVersFrac*[#2]{\CoeffAo} & \ConvVersFrac*[#2]{\CoeffAp}
+									\end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac*[#2]{\CoeffBa} \\ \ConvVersFrac*[#2]{\CoeffBb} \\ \ConvVersFrac*[#2]{\CoeffBc} \\ \ConvVersFrac*[#2]{\CoeffBd}
+									\end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} & \ConvVersFrac[#2]{\CoeffAc} & \ConvVersFrac[#2]{\CoeffAd} \\
+										\ConvVersFrac[#2]{\CoeffAe} & \ConvVersFrac[#2]{\CoeffAf} & \ConvVersFrac[#2]{\CoeffAg} & \ConvVersFrac[#2]{\CoeffAh} \\
+										\ConvVersFrac[#2]{\CoeffAi} & \ConvVersFrac[#2]{\CoeffAj} & \ConvVersFrac[#2]{\CoeffAk} & \ConvVersFrac[#2]{\CoeffAl} \\
+										\ConvVersFrac[#2]{\CoeffAm} & \ConvVersFrac[#2]{\CoeffAn} & \ConvVersFrac[#2]{\CoeffAo} & \ConvVersFrac[#2]{\CoeffAp}
+									\end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac[#2]{\CoeffBa} \\ \ConvVersFrac[#2]{\CoeffBb} \\ \ConvVersFrac[#2]{\CoeffBc} \\ \ConvVersFrac[#2]{\CoeffBd}
+									\end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						{\MatResA} \\ {\MatResB} \\ {\MatResC} \\ {\MatResD}
+					\end{pNiceMatrix}%
+				}{}%fin 4x4,4,1
+			\xintifboolexpr{\NbLigMatA==4 'and' \NbColMatA==4 'and' \NbLigMatB==4 'and' \NbColMatB==4}% (4,4)*(4,4)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatA[1,3]\CoeffAc
+					\itemtomacro\MatA[1,4]\CoeffAd
+					\itemtomacro\MatA[2,1]\CoeffAe
+					\itemtomacro\MatA[2,2]\CoeffAf
+					\itemtomacro\MatA[2,3]\CoeffAg
+					\itemtomacro\MatA[2,4]\CoeffAh
+					\itemtomacro\MatA[3,1]\CoeffAi
+					\itemtomacro\MatA[3,2]\CoeffAj
+					\itemtomacro\MatA[3,3]\CoeffAk
+					\itemtomacro\MatA[3,4]\CoeffAl
+					\itemtomacro\MatA[4,1]\CoeffAm
+					\itemtomacro\MatA[4,2]\CoeffAn
+					\itemtomacro\MatA[4,3]\CoeffAo
+					\itemtomacro\MatA[4,4]\CoeffAp
+					\itemtomacro\MatB[1,1]\CoeffBa
+					\itemtomacro\MatB[1,2]\CoeffBb
+					\itemtomacro\MatB[1,3]\CoeffBc
+					\itemtomacro\MatB[1,4]\CoeffBd
+					\itemtomacro\MatB[2,1]\CoeffBe
+					\itemtomacro\MatB[2,2]\CoeffBf
+					\itemtomacro\MatB[2,3]\CoeffBg
+					\itemtomacro\MatB[2,4]\CoeffBh
+					\itemtomacro\MatB[3,1]\CoeffBi
+					\itemtomacro\MatB[3,2]\CoeffBj
+					\itemtomacro\MatB[3,3]\CoeffBk
+					\itemtomacro\MatB[3,4]\CoeffBl
+					\itemtomacro\MatB[4,1]\CoeffBm
+					\itemtomacro\MatB[4,2]\CoeffBn
+					\itemtomacro\MatB[4,3]\CoeffBo
+					\itemtomacro\MatB[4,4]\CoeffBp
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBe+\CoeffAc*\CoeffBi+\CoeffAd*\CoeffBm}}%
+							\def\MatResB{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBf+\CoeffAc*\CoeffBj+\CoeffAd*\CoeffBn}}%
+							\def\MatResC{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBc+\CoeffAb*\CoeffBg+\CoeffAc*\CoeffBk+\CoeffAd*\CoeffBo}}%
+							\def\MatResD{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBd+\CoeffAb*\CoeffBh+\CoeffAc*\CoeffBl+\CoeffAd*\CoeffBp}}%
+							\def\MatResE{\ConvVersFrac*[#2]{\CoeffAe*\CoeffBa+\CoeffAf*\CoeffBe+\CoeffAg*\CoeffBi+\CoeffAh*\CoeffBm}}%
+							\def\MatResF{\ConvVersFrac*[#2]{\CoeffAe*\CoeffBb+\CoeffAf*\CoeffBf+\CoeffAg*\CoeffBj+\CoeffAh*\CoeffBn}}%
+							\def\MatResG{\ConvVersFrac*[#2]{\CoeffAe*\CoeffBc+\CoeffAf*\CoeffBg+\CoeffAg*\CoeffBk+\CoeffAh*\CoeffBo}}%
+							\def\MatResH{\ConvVersFrac*[#2]{\CoeffAe*\CoeffBd+\CoeffAf*\CoeffBh+\CoeffAg*\CoeffBl+\CoeffAh*\CoeffBp}}%
+							\def\MatResI{\ConvVersFrac*[#2]{\CoeffAi*\CoeffBa+\CoeffAj*\CoeffBe+\CoeffAk*\CoeffBi+\CoeffAl*\CoeffBm}}%
+							\def\MatResJ{\ConvVersFrac*[#2]{\CoeffAi*\CoeffBb+\CoeffAj*\CoeffBf+\CoeffAk*\CoeffBj+\CoeffAl*\CoeffBn}}%
+							\def\MatResK{\ConvVersFrac*[#2]{\CoeffAi*\CoeffBc+\CoeffAj*\CoeffBg+\CoeffAk*\CoeffBk+\CoeffAl*\CoeffBo}}%
+							\def\MatResL{\ConvVersFrac*[#2]{\CoeffAi*\CoeffBd+\CoeffAj*\CoeffBh+\CoeffAk*\CoeffBl+\CoeffAl*\CoeffBp}}%
+							\def\MatResM{\ConvVersFrac*[#2]{\CoeffAm*\CoeffBa+\CoeffAn*\CoeffBe+\CoeffAo*\CoeffBi+\CoeffAp*\CoeffBm}}%
+							\def\MatResN{\ConvVersFrac*[#2]{\CoeffAm*\CoeffBb+\CoeffAn*\CoeffBf+\CoeffAo*\CoeffBj+\CoeffAp*\CoeffBn}}%
+							\def\MatResO{\ConvVersFrac*[#2]{\CoeffAm*\CoeffBc+\CoeffAn*\CoeffBg+\CoeffAo*\CoeffBk+\CoeffAp*\CoeffBo}}%
+							\def\MatResP{\ConvVersFrac*[#2]{\CoeffAm*\CoeffBd+\CoeffAn*\CoeffBh+\CoeffAo*\CoeffBl+\CoeffAp*\CoeffBp}}%
+						}%
+						{%
+							\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBe+\CoeffAc*\CoeffBi+\CoeffAd*\CoeffBm}}%
+							\def\MatResB{\ConvVersFrac[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBf+\CoeffAc*\CoeffBj+\CoeffAd*\CoeffBn}}%
+							\def\MatResC{\ConvVersFrac[#2]{\CoeffAa*\CoeffBc+\CoeffAb*\CoeffBg+\CoeffAc*\CoeffBk+\CoeffAd*\CoeffBo}}%
+							\def\MatResD{\ConvVersFrac[#2]{\CoeffAa*\CoeffBd+\CoeffAb*\CoeffBh+\CoeffAc*\CoeffBl+\CoeffAd*\CoeffBp}}%
+							\def\MatResE{\ConvVersFrac[#2]{\CoeffAe*\CoeffBa+\CoeffAf*\CoeffBe+\CoeffAg*\CoeffBi+\CoeffAh*\CoeffBm}}%
+							\def\MatResF{\ConvVersFrac[#2]{\CoeffAe*\CoeffBb+\CoeffAf*\CoeffBf+\CoeffAg*\CoeffBj+\CoeffAh*\CoeffBn}}%
+							\def\MatResG{\ConvVersFrac[#2]{\CoeffAe*\CoeffBc+\CoeffAf*\CoeffBg+\CoeffAg*\CoeffBk+\CoeffAh*\CoeffBo}}%
+							\def\MatResH{\ConvVersFrac[#2]{\CoeffAe*\CoeffBd+\CoeffAf*\CoeffBh+\CoeffAg*\CoeffBl+\CoeffAh*\CoeffBp}}%
+							\def\MatResI{\ConvVersFrac[#2]{\CoeffAi*\CoeffBa+\CoeffAj*\CoeffBe+\CoeffAk*\CoeffBi+\CoeffAl*\CoeffBm}}%
+							\def\MatResJ{\ConvVersFrac[#2]{\CoeffAi*\CoeffBb+\CoeffAj*\CoeffBf+\CoeffAk*\CoeffBj+\CoeffAl*\CoeffBn}}%
+							\def\MatResK{\ConvVersFrac[#2]{\CoeffAi*\CoeffBc+\CoeffAj*\CoeffBg+\CoeffAk*\CoeffBk+\CoeffAl*\CoeffBo}}%
+							\def\MatResL{\ConvVersFrac[#2]{\CoeffAi*\CoeffBd+\CoeffAj*\CoeffBh+\CoeffAk*\CoeffBl+\CoeffAl*\CoeffBp}}%
+							\def\MatResM{\ConvVersFrac[#2]{\CoeffAm*\CoeffBa+\CoeffAn*\CoeffBe+\CoeffAo*\CoeffBi+\CoeffAp*\CoeffBm}}%
+							\def\MatResN{\ConvVersFrac[#2]{\CoeffAm*\CoeffBb+\CoeffAn*\CoeffBf+\CoeffAo*\CoeffBj+\CoeffAp*\CoeffBn}}%
+							\def\MatResO{\ConvVersFrac[#2]{\CoeffAm*\CoeffBc+\CoeffAn*\CoeffBg+\CoeffAo*\CoeffBk+\CoeffAp*\CoeffBo}}%
+							\def\MatResP{\ConvVersFrac[#2]{\CoeffAm*\CoeffBd+\CoeffAn*\CoeffBh+\CoeffAo*\CoeffBl+\CoeffAp*\CoeffBp}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} & \ConvVersFrac*[#2]{\CoeffAc} & \ConvVersFrac*[#2]{\CoeffAd} \\
+										\ConvVersFrac*[#2]{\CoeffAe} & \ConvVersFrac*[#2]{\CoeffAf} & \ConvVersFrac*[#2]{\CoeffAg} & \ConvVersFrac*[#2]{\CoeffAh} \\
+										\ConvVersFrac*[#2]{\CoeffAi} & \ConvVersFrac*[#2]{\CoeffAj} & \ConvVersFrac*[#2]{\CoeffAk} & \ConvVersFrac*[#2]{\CoeffAl} \\
+										\ConvVersFrac*[#2]{\CoeffAm} & \ConvVersFrac*[#2]{\CoeffAn} & \ConvVersFrac*[#2]{\CoeffAo} & \ConvVersFrac*[#2]{\CoeffAp}
+									\end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac*[#2]{\CoeffBa} & \ConvVersFrac*[#2]{\CoeffBb} & \ConvVersFrac*[#2]{\CoeffBc} & \ConvVersFrac*[#2]{\CoeffBd} \\
+										\ConvVersFrac*[#2]{\CoeffBe} & \ConvVersFrac*[#2]{\CoeffBf} & \ConvVersFrac*[#2]{\CoeffBg} & \ConvVersFrac*[#2]{\CoeffBh} \\
+										\ConvVersFrac*[#2]{\CoeffBi} & \ConvVersFrac*[#2]{\CoeffBj} & \ConvVersFrac*[#2]{\CoeffBk} & \ConvVersFrac*[#2]{\CoeffBl} \\
+										\ConvVersFrac*[#2]{\CoeffBm} & \ConvVersFrac*[#2]{\CoeffBn} & \ConvVersFrac*[#2]{\CoeffBo} & \ConvVersFrac*[#2]{\CoeffBp}
+									\end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} & \ConvVersFrac[#2]{\CoeffAc} & \ConvVersFrac[#2]{\CoeffAd} \\
+										\ConvVersFrac[#2]{\CoeffAe} & \ConvVersFrac[#2]{\CoeffAf} & \ConvVersFrac[#2]{\CoeffAg} & \ConvVersFrac[#2]{\CoeffAh} \\
+										\ConvVersFrac[#2]{\CoeffAi} & \ConvVersFrac[#2]{\CoeffAj} & \ConvVersFrac[#2]{\CoeffAk} & \ConvVersFrac[#2]{\CoeffAl} \\
+										\ConvVersFrac[#2]{\CoeffAm} & \ConvVersFrac[#2]{\CoeffAn} & \ConvVersFrac[#2]{\CoeffAo} & \ConvVersFrac[#2]{\CoeffAp}
+									\end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac[#2]{\CoeffBa} & \ConvVersFrac[#2]{\CoeffBb} & \ConvVersFrac[#2]{\CoeffBc} & \ConvVersFrac[#2]{\CoeffBd} \\
+										\ConvVersFrac[#2]{\CoeffBe} & \ConvVersFrac[#2]{\CoeffBf} & \ConvVersFrac[#2]{\CoeffBg} & \ConvVersFrac[#2]{\CoeffBh} \\
+										\ConvVersFrac[#2]{\CoeffBi} & \ConvVersFrac[#2]{\CoeffBj} & \ConvVersFrac[#2]{\CoeffBk} & \ConvVersFrac[#2]{\CoeffBl} \\
+										\ConvVersFrac[#2]{\CoeffBm} & \ConvVersFrac[#2]{\CoeffBn} & \ConvVersFrac[#2]{\CoeffBo} & \ConvVersFrac[#2]{\CoeffBp}
+									\end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						{\MatResA} & {\MatResB} & {\MatResC} & {\MatResD} \\
+						{\MatResE} & {\MatResF} & {\MatResG} & {\MatResH} \\
+						{\MatResI} & {\MatResJ} & {\MatResK} & {\MatResL} \\
+						{\MatResM} & {\MatResN} & {\MatResO} & {\MatResP}
+					\end{pNiceMatrix}%
+				}{}%fin 4x4,4,4
+		}%
+}
+
+
+%------Commandes via pyluatex
+\if@pyluatex %package pyluatex à charger par l'utilisateur !
+\NewDocumentCommand\SolutionSystemePY{ s O{} D<>{} r() r() O{} }{%
+	%*=fractions avec - sur le numérateur
+	%2=Option Fraction
+	%3=matrice du système
+	%4=second membre
+	%5=option NiceMatrix
+	%6=résultat sous forme d'une matrice
+	%---------------------
+	%lectures des matrices
+	\setsepchar{§/,}%
+	\readlist*\MAMATRICEA{#4}%
+	\setsepchar{,}%
+	\readlist*\MAMATRICEB{#5}%
+	%système QuatreQuatre
+	\ifnum \MAMATRICEAlen=4
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[1,4]\MatD
+		\itemtomacro\MAMATRICEA[2,1]\MatE
+		\itemtomacro\MAMATRICEA[2,2]\MatF
+		\itemtomacro\MAMATRICEA[2,3]\MatG
+		\itemtomacro\MAMATRICEA[2,4]\MatH
+		\itemtomacro\MAMATRICEA[3,1]\MatI
+		\itemtomacro\MAMATRICEA[3,2]\MatJ
+		\itemtomacro\MAMATRICEA[3,3]\MatK
+		\itemtomacro\MAMATRICEA[3,4]\MatL
+		\itemtomacro\MAMATRICEA[4,1]\MatM
+		\itemtomacro\MAMATRICEA[4,2]\MatN
+		\itemtomacro\MAMATRICEA[4,3]\MatO
+		\itemtomacro\MAMATRICEA[4,4]\MatP
+		%les coeffs de B
+		\itemtomacro\MAMATRICEB[1]\MatBA
+		\itemtomacro\MAMATRICEB[2]\MatBB
+		\itemtomacro\MAMATRICEB[3]\MatBC
+		\itemtomacro\MAMATRICEB[4]\MatBD
+		%les solutions
+		\def\DETMATRICE{\xinteval{\py{det_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)}}}%
+		\xintifboolexpr{\DETMATRICE == 0}%
+			{\text{Matrice non inversible}}%
+			{%
+			\IfBooleanTF{#1}%
+				{
+					\def\MatResA{\ConvVersFrac*[#2]{\py{resol_systeme_QQ(\MatA,\MatB,\MatC,\MatD,\MatBA,\MatE,\MatF,\MatG,\MatH,\MatBB,\MatI,\MatJ,\MatK,\MatL,\MatBC,\MatM,\MatN,\MatO,\MatP,\MatBD)[x]}}}%
+					\def\MatResB{\ConvVersFrac*[#2]{\py{resol_systeme_QQ(\MatA,\MatB,\MatC,\MatD,\MatBA,\MatE,\MatF,\MatG,\MatH,\MatBB,\MatI,\MatJ,\MatK,\MatL,\MatBC,\MatM,\MatN,\MatO,\MatP,\MatBD)[y]}}}%
+					\def\MatResC{\ConvVersFrac*[#2]{\py{resol_systeme_QQ(\MatA,\MatB,\MatC,\MatD,\MatBA,\MatE,\MatF,\MatG,\MatH,\MatBB,\MatI,\MatJ,\MatK,\MatL,\MatBC,\MatM,\MatN,\MatO,\MatP,\MatBD)[z]}}}%
+					\def\MatResD{\ConvVersFrac*[#2]{\py{resol_systeme_QQ(\MatA,\MatB,\MatC,\MatD,\MatBA,\MatE,\MatF,\MatG,\MatH,\MatBB,\MatI,\MatJ,\MatK,\MatL,\MatBC,\MatM,\MatN,\MatO,\MatP,\MatBD)[t]}}}%
+				}%
+				{%
+					\def\MatResA{\ConvVersFrac[#2]{\py{resol_systeme_QQ(\MatA,\MatB,\MatC,\MatD,\MatBA,\MatE,\MatF,\MatG,\MatH,\MatBB,\MatI,\MatJ,\MatK,\MatL,\MatBC,\MatM,\MatN,\MatO,\MatP,\MatBD)[x]}}}%
+					\def\MatResB{\ConvVersFrac[#2]{\py{resol_systeme_QQ(\MatA,\MatB,\MatC,\MatD,\MatBA,\MatE,\MatF,\MatG,\MatH,\MatBB,\MatI,\MatJ,\MatK,\MatL,\MatBC,\MatM,\MatN,\MatO,\MatP,\MatBD)[y]}}}%
+					\def\MatResC{\ConvVersFrac[#2]{\py{resol_systeme_QQ(\MatA,\MatB,\MatC,\MatD,\MatBA,\MatE,\MatF,\MatG,\MatH,\MatBB,\MatI,\MatJ,\MatK,\MatL,\MatBC,\MatM,\MatN,\MatO,\MatP,\MatBD)[z]}}}%
+					\def\MatResD{\ConvVersFrac[#2]{\py{resol_systeme_QQ(\MatA,\MatB,\MatC,\MatD,\MatBA,\MatE,\MatF,\MatG,\MatH,\MatBB,\MatI,\MatJ,\MatK,\MatL,\MatBC,\MatM,\MatN,\MatO,\MatP,\MatBD)[t]}}}%
+				}%
+				\IfStrEq{#6}{Matrice}%si matrice
+				{%
+					\begin{pNiceMatrix}[#3]
+						{\MatResA} \\
+						{\MatResB} \\
+						{\MatResC} \\
+						{\MatResD}
+					\end{pNiceMatrix}%
+				}%
+				{%
+					\left( {\MatResA} ; {\MatResB} ; {\MatResC} ; {\MatResD} \right)%
+				}%
+			}%
+	\fi
+	%système TroisTrois
+	\ifnum \MAMATRICEAlen=3
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[2,1]\MatD
+		\itemtomacro\MAMATRICEA[2,2]\MatE
+		\itemtomacro\MAMATRICEA[2,3]\MatF
+		\itemtomacro\MAMATRICEA[3,1]\MatG
+		\itemtomacro\MAMATRICEA[3,2]\MatH
+		\itemtomacro\MAMATRICEA[3,3]\MatI
+		%les coeffs de B
+		\itemtomacro\MAMATRICEB[1]\MatBA
+		\itemtomacro\MAMATRICEB[2]\MatBB
+		\itemtomacro\MAMATRICEB[3]\MatBC
+		%les solutions
+		\def\DETMATRICE{\xinteval{\py{det_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)}}}%
+		\xintifboolexpr{\DETMATRICE == 0}%
+			{\text{Matrice non inversible}}%
+			{%
+				\IfBooleanTF{#1}%
+					{
+						\def\MatResA{\ConvVersFrac*[#2]{\py{resol_systeme_TT(\MatA,\MatB,\MatC,\MatBA,\MatD,\MatE,\MatF,\MatBB,\MatG,\MatH,\MatI,\MatBC)[x]}}}%
+						\def\MatResB{\ConvVersFrac*[#2]{\py{resol_systeme_TT(\MatA,\MatB,\MatC,\MatBA,\MatD,\MatE,\MatF,\MatBB,\MatG,\MatH,\MatI,\MatBC)[y]}}}%
+						\def\MatResC{\ConvVersFrac*[#2]{\py{resol_systeme_TT(\MatA,\MatB,\MatC,\MatBA,\MatD,\MatE,\MatF,\MatBB,\MatG,\MatH,\MatI,\MatBC)[z]}}}%
+					}%
+					{%
+						\def\MatResA{\ConvVersFrac[#2]{\py{resol_systeme_TT(\MatA,\MatB,\MatC,\MatBA,\MatD,\MatE,\MatF,\MatBB,\MatG,\MatH,\MatI,\MatBC)[x]}}}%
+						\def\MatResB{\ConvVersFrac[#2]{\py{resol_systeme_TT(\MatA,\MatB,\MatC,\MatBA,\MatD,\MatE,\MatF,\MatBB,\MatG,\MatH,\MatI,\MatBC)[y]}}}%
+						\def\MatResC{\ConvVersFrac[#2]{\py{resol_systeme_TT(\MatA,\MatB,\MatC,\MatBA,\MatD,\MatE,\MatF,\MatBB,\MatG,\MatH,\MatI,\MatBC)[z]}}}%
+					}%
+				\IfStrEq{#6}{Matrice}%si matrice
+					{%
+						\begin{pNiceMatrix}[#3]
+							{\MatResA} \\
+							{\MatResB} \\
+							{\MatResC}
+						\end{pNiceMatrix}%
+					}%
+					{%
+						\left( {\MatResA} ; {\MatResB} ; {\MatResC} \right)%
+					}%
+			}%
+	\fi
+	%système DeuxDeux
+	\ifnum \MAMATRICEAlen=2
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[2,1]\MatC
+		\itemtomacro\MAMATRICEA[2,2]\MatD
+		%les coeffs de B
+		\itemtomacro\MAMATRICEB[1]\MatBA
+		\itemtomacro\MAMATRICEB[2]\MatBB
+		%solutions
+		\def\DETMATRICE{\xinteval{\py{det_matrice_DD(\MatA,\MatB,\MatC,\MatD)}}}%
+		\xintifboolexpr{\DETMATRICE == 0}%
+			{\text{Matrice non inversible}}%
+			{%
+				\IfBooleanTF{#1}%
+				{
+					\def\MatResA{\ConvVersFrac*[#2]{\py{resol_systeme_DD(\MatA,\MatB,\MatBA,\MatC,\MatD,\MatBB)[x]}}}%
+					\def\MatResB{\ConvVersFrac*[#2]{\py{resol_systeme_DD(\MatA,\MatB,\MatBA,\MatC,\MatD,\MatBB)[y]}}}%
+				}%
+				{%
+					\def\MatResA{\ConvVersFrac[#2]{\py{resol_systeme_DD(\MatA,\MatB,\MatBA,\MatC,\MatD,\MatBB)[x]}}}%
+					\def\MatResB{\ConvVersFrac[#2]{\py{resol_systeme_DD(\MatA,\MatB,\MatBA,\MatC,\MatD,\MatBB)[y]}}}%
+				}%
+				\IfStrEq{#6}{Matrice}%si matrice
+					{%
+						\begin{pNiceMatrix}[#3]
+							{\MatResA} \\
+							{\MatResB}
+						\end{pNiceMatrix}%
+					}%
+					{%
+						\left( {\MatResA} ; {\MatResB} \right)%
+					}%
+			}%
+	\fi
+}
+
+\NewDocumentCommand\MatriceInversePY{ s O{} D<>{} r() O{} }{%
+	%*=fractions avec - sur le numérateur
+	%2=options conversion
+	%3=options nicematrix
+	%4=matrice (,,;,,)
+	%---------------------
+	%lectures des matrices
+	\setsepchar{§/,}%
+	\readlist*\MAMATRICEA{#4}%
+	%les coeffs de A et le déterminant et les coeff de l'inverse
+	\ifnum \MAMATRICEAlen=4
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[1,4]\MatD
+		\itemtomacro\MAMATRICEA[2,1]\MatE
+		\itemtomacro\MAMATRICEA[2,2]\MatF
+		\itemtomacro\MAMATRICEA[2,3]\MatG
+		\itemtomacro\MAMATRICEA[2,4]\MatH
+		\itemtomacro\MAMATRICEA[3,1]\MatI
+		\itemtomacro\MAMATRICEA[3,2]\MatJ
+		\itemtomacro\MAMATRICEA[3,3]\MatK
+		\itemtomacro\MAMATRICEA[3,4]\MatL
+		\itemtomacro\MAMATRICEA[4,1]\MatM
+		\itemtomacro\MAMATRICEA[4,2]\MatN
+		\itemtomacro\MAMATRICEA[4,3]\MatO
+		\itemtomacro\MAMATRICEA[4,4]\MatP
+		%les solutions
+		\def\DETMATRICE{\xinteval{\py{det_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)}}}%
+		\xintifboolexpr{\DETMATRICE == 0}%
+			{\text{Matrice non inversible}}%
+			{%
+			\IfBooleanTF{#1}%
+			{
+				\def\MatInvA{\ConvVersFrac*[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[0]}}}%
+				\def\MatInvB{\ConvVersFrac*[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[1]}}}%
+				\def\MatInvC{\ConvVersFrac*[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[2]}}}%
+				\def\MatInvD{\ConvVersFrac*[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[3]}}}%
+				\def\MatInvE{\ConvVersFrac*[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[4]}}}%
+				\def\MatInvF{\ConvVersFrac*[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[5]}}}%
+				\def\MatInvG{\ConvVersFrac*[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[6]}}}%
+				\def\MatInvH{\ConvVersFrac*[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[7]}}}%
+				\def\MatInvI{\ConvVersFrac*[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[8]}}}%
+				\def\MatInvJ{\ConvVersFrac*[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[9]}}}%
+				\def\MatInvK{\ConvVersFrac*[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[10]}}}%
+				\def\MatInvL{\ConvVersFrac*[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[11]}}}%
+				\def\MatInvM{\ConvVersFrac*[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[12]}}}%
+				\def\MatInvN{\ConvVersFrac*[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[13]}}}%
+				\def\MatInvO{\ConvVersFrac*[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[14]}}}%
+				\def\MatInvP{\ConvVersFrac*[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[15]}}}%
+			}%
+			{%
+				\def\MatInvA{\ConvVersFrac[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[0]}}}%
+				\def\MatInvB{\ConvVersFrac[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[1]}}}%
+				\def\MatInvC{\ConvVersFrac[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[2]}}}%
+				\def\MatInvD{\ConvVersFrac[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[3]}}}%
+				\def\MatInvE{\ConvVersFrac[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[4]}}}%
+				\def\MatInvF{\ConvVersFrac[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[5]}}}%
+				\def\MatInvG{\ConvVersFrac[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[6]}}}%
+				\def\MatInvH{\ConvVersFrac[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[7]}}}%
+				\def\MatInvI{\ConvVersFrac[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[8]}}}%
+				\def\MatInvJ{\ConvVersFrac[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[9]}}}%
+				\def\MatInvK{\ConvVersFrac[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[10]}}}%
+				\def\MatInvL{\ConvVersFrac[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[11]}}}%
+				\def\MatInvM{\ConvVersFrac[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[12]}}}%
+				\def\MatInvN{\ConvVersFrac[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[13]}}}%
+				\def\MatInvO{\ConvVersFrac[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[14]}}}%
+				\def\MatInvP{\ConvVersFrac[#2]{\py{inverse_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[15]}}}%
+			}%
+			\IfStrEq{#5}{Aff}%si matrice
+				{%
+					\IfBooleanTF{#1}%
+						{%
+							{\begin{pNiceMatrix}[#3]
+								\ConvVersFrac*[#2]{\MatA} & \ConvVersFrac*[#2]{\MatB} & \ConvVersFrac*[#2]{\MatC} & \ConvVersFrac*[#2]{\MatD} \\
+								\ConvVersFrac*[#2]{\MatE} & \ConvVersFrac*[#2]{\MatF} & \ConvVersFrac*[#2]{\MatG} & \ConvVersFrac*[#2]{\MatH} \\
+								\ConvVersFrac*[#2]{\MatI} & \ConvVersFrac*[#2]{\MatJ} & \ConvVersFrac*[#2]{\MatK} & \ConvVersFrac*[#2]{\MatL} \\
+								\ConvVersFrac*[#2]{\MatM} & \ConvVersFrac*[#2]{\MatN} & \ConvVersFrac*[#2]{\MatO} & \ConvVersFrac*[#2]{\MatO} \\
+							\end{pNiceMatrix}}^{-1}
+							=
+						}%
+						{%
+							{\begin{pNiceMatrix}[#3]
+								\ConvVersFrac[#2]{\MatA} & \ConvVersFrac[#2]{\MatB} & \ConvVersFrac[#2]{\MatC} & \ConvVersFrac[#2]{\MatD} \\
+								\ConvVersFrac[#2]{\MatE} & \ConvVersFrac[#2]{\MatF} & \ConvVersFrac[#2]{\MatG} & \ConvVersFrac[#2]{\MatH} \\
+								\ConvVersFrac[#2]{\MatI} & \ConvVersFrac[#2]{\MatJ} & \ConvVersFrac[#2]{\MatK} & \ConvVersFrac[#2]{\MatL} \\
+								\ConvVersFrac[#2]{\MatM} & \ConvVersFrac[#2]{\MatN} & \ConvVersFrac[#2]{\MatO} & \ConvVersFrac[#2]{\MatO} \\
+							\end{pNiceMatrix}}^{-1}
+							=
+						}%
+				}{}%
+			\begin{pNiceMatrix}[#3]
+				{\MatInvA} & {\MatInvB} & {\MatInvC} & {\MatInvD} \\
+				{\MatInvE} & {\MatInvF} & {\MatInvG} & {\MatInvH} \\
+				{\MatInvI} & {\MatInvJ} & {\MatInvK} & {\MatInvL} \\
+				{\MatInvM} & {\MatInvN} & {\MatInvO} & {\MatInvP} \\
+			\end{pNiceMatrix}%
+		}%
+	\fi
+	\ifnum \MAMATRICEAlen=3
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[2,1]\MatD
+		\itemtomacro\MAMATRICEA[2,2]\MatE
+		\itemtomacro\MAMATRICEA[2,3]\MatF
+		\itemtomacro\MAMATRICEA[3,1]\MatG
+		\itemtomacro\MAMATRICEA[3,2]\MatH
+		\itemtomacro\MAMATRICEA[3,3]\MatI
+		\def\DETMATRICE{\xinteval{\py{det_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)}}}%
+		\xintifboolexpr{\DETMATRICE == 0}%
+			{\text{Matrice non inversible}}%
+			{%
+			\IfBooleanTF{#1}%
+			{%
+				\def\MatInvA{\ConvVersFrac*[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[0]}}}
+				\def\MatInvB{\ConvVersFrac*[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[1]}}}
+				\def\MatInvC{\ConvVersFrac*[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[2]}}}
+				\def\MatInvD{\ConvVersFrac*[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[3]}}}
+				\def\MatInvE{\ConvVersFrac*[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[4]}}}
+				\def\MatInvF{\ConvVersFrac*[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[5]}}}
+				\def\MatInvG{\ConvVersFrac*[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[6]}}}
+				\def\MatInvH{\ConvVersFrac*[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[7]}}}
+				\def\MatInvI{\ConvVersFrac*[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[8]}}}
+			}%
+			{%
+				\def\MatInvA{\ConvVersFrac[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[0]}}}
+				\def\MatInvB{\ConvVersFrac[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[1]}}}
+				\def\MatInvC{\ConvVersFrac[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[2]}}}
+				\def\MatInvD{\ConvVersFrac[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[3]}}}
+				\def\MatInvE{\ConvVersFrac[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[4]}}}
+				\def\MatInvF{\ConvVersFrac[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[5]}}}
+				\def\MatInvG{\ConvVersFrac[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[6]}}}
+				\def\MatInvH{\ConvVersFrac[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[7]}}}
+				\def\MatInvI{\ConvVersFrac[#2]{\py{inverse_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[8]}}}
+			}%
+			\IfStrEq{#5}{Aff}%si matrice
+				{%
+					\IfBooleanTF{#1}%
+						{%
+							{\begin{pNiceMatrix}[#3]
+								\ConvVersFrac*[#2]{\MatA} & \ConvVersFrac*[#2]{\MatB} & \ConvVersFrac*[#2]{\MatC} \\
+								\ConvVersFrac*[#2]{\MatD} & \ConvVersFrac*[#2]{\MatE} & \ConvVersFrac*[#2]{\MatF} \\
+								\ConvVersFrac*[#2]{\MatG} & \ConvVersFrac*[#2]{\MatH} & \ConvVersFrac*[#2]{\MatI}
+							\end{pNiceMatrix}}^{-1}
+							=
+						}%
+						{%
+							{\begin{pNiceMatrix}[#3]
+								\ConvVersFrac[#2]{\MatA} & \ConvVersFrac[#2]{\MatB} & \ConvVersFrac[#2]{\MatC} \\
+								\ConvVersFrac[#2]{\MatD} & \ConvVersFrac[#2]{\MatE} & \ConvVersFrac[#2]{\MatF} \\
+								\ConvVersFrac[#2]{\MatG} & \ConvVersFrac[#2]{\MatH} & \ConvVersFrac[#2]{\MatI}
+							\end{pNiceMatrix}}^{-1}
+							=
+						}%
+				}{}%
+			\begin{pNiceMatrix}[#3]
+				{\MatInvA} & {\MatInvB} & {\MatInvC} \\
+				{\MatInvD} & {\MatInvE} & {\MatInvF} \\
+				{\MatInvG} & {\MatInvH} & {\MatInvI}
+			\end{pNiceMatrix}%
+			}%
+	\fi
+	\ifnum \MAMATRICEAlen=2
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[2,1]\MatC
+		\itemtomacro\MAMATRICEA[2,2]\MatD
+		\def\DETMATRICE{\xinteval{\py{det_matrice_DD(\MatA,\MatB,\MatC,\MatD)}}}%
+		\xintifboolexpr{\DETMATRICE == 0}%
+			{\text{Matrice non inversible}}%
+			{%
+			\IfBooleanTF{#1}%
+			{%
+				\def\MatInvA{\ConvVersFrac*[#2]{\py{inverse_matrice_DD(\MatA,\MatB,\MatC,\MatD)[0]}}}
+				\def\MatInvB{\ConvVersFrac*[#2]{\py{inverse_matrice_DD(\MatA,\MatB,\MatC,\MatD)[1]}}}
+				\def\MatInvC{\ConvVersFrac*[#2]{\py{inverse_matrice_DD(\MatA,\MatB,\MatC,\MatD)[2]}}}
+				\def\MatInvD{\ConvVersFrac*[#2]{\py{inverse_matrice_DD(\MatA,\MatB,\MatC,\MatD)[3]}}}
+			}%
+			{%
+				\def\MatInvA{\ConvVersFrac[#2]{\py{inverse_matrice_DD(\MatA,\MatB,\MatC,\MatD)[0]}}}
+				\def\MatInvB{\ConvVersFrac[#2]{\py{inverse_matrice_DD(\MatA,\MatB,\MatC,\MatD)[1]}}}
+				\def\MatInvC{\ConvVersFrac[#2]{\py{inverse_matrice_DD(\MatA,\MatB,\MatC,\MatD)[2]}}}
+				\def\MatInvD{\ConvVersFrac[#2]{\py{inverse_matrice_DD(\MatA,\MatB,\MatC,\MatD)[3]}}}
+			}%
+			\IfStrEq{#5}{Aff}%si matrice
+				{%
+					\IfBooleanTF{#1}%
+						{%
+							{\begin{pNiceMatrix}[#3]
+								\ConvVersFrac*[#2]{\MatA} & \ConvVersFrac*[#2]{\MatB} \\
+								\ConvVersFrac*[#2]{\MatC} & \ConvVersFrac*[#2]{\MatD}
+							\end{pNiceMatrix}}^{-1}
+							=
+						}%
+						{%
+							{\begin{pNiceMatrix}[#3]
+								\ConvVersFrac[#2]{\MatA} & \ConvVersFrac[#2]{\MatB} \\
+								\ConvVersFrac[#2]{\MatC} & \ConvVersFrac[#2]{\MatD}
+							\end{pNiceMatrix}}^{-1}
+							=
+						}%
+				}{}%
+			\begin{pNiceMatrix}[#3]
+				{\MatInvA} & {\MatInvB} \\
+				{\MatInvC} & {\MatInvD}
+			\end{pNiceMatrix}%
+		}%
+	\fi
+}
+
+\NewDocumentCommand\EtatStablePY{ s O{} D<>{} r() }{%
+	%*=fractions avec - sur le numérateur
+	%2=options conversion
+	%3=options nicematrix
+	%4=matrice (,,;,,)
+	%---------------------
+	%lectures des matrices
+	\setsepchar{§/,}%
+	\readlist*\MAMATRICEA{#4}%
+	%les coeffs de A et la résolution du système
+	\ifnum \MAMATRICEAlen=2
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[2,1]\MatC
+		\itemtomacro\MAMATRICEA[2,2]\MatD
+		\IfBooleanTF{#1}%
+		{%
+			\def\MatEtStabA{\ConvVersFrac*[#2]{\MatC/(\MatB+\MatC)}}
+			\def\MatEtStabB{\ConvVersFrac*[#2]{\MatB/(\MatB+\MatC)}}
+		}%
+		{%
+			\def\MatEtStabA{\ConvVersFrac[#2]{\MatC/(\MatB+\MatC)}}
+			\def\MatEtStabB{\ConvVersFrac[#2]{\MatB/(\MatB+\MatC)}}
+		}%
+		\begin{pNiceMatrix}[#3]
+			{\MatEtStabA} & {\MatEtStabB}
+		\end{pNiceMatrix}%
+	\fi
+	\ifnum \MAMATRICEAlen=3
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[2,1]\MatD
+		\itemtomacro\MAMATRICEA[2,2]\MatE
+		\itemtomacro\MAMATRICEA[2,3]\MatF
+		\itemtomacro\MAMATRICEA[3,1]\MatG
+		\itemtomacro\MAMATRICEA[3,2]\MatH
+		\itemtomacro\MAMATRICEA[3,3]\MatI
+		\IfBooleanTF{#1}%
+		{%
+			\def\MatEtStabA{\ConvVersFrac*[#2]{\py{resol_etat_stable_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[x]}}}
+			\def\MatEtStabB{\ConvVersFrac*[#2]{\py{resol_etat_stable_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[y]}}}
+			\def\MatEtStabC{\ConvVersFrac*[#2]{\py{resol_etat_stable_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[z]}}}
+		}%
+		{%
+			\def\MatEtStabA{\ConvVersFrac[#2]{\py{resol_etat_stable_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[x]}}}
+			\def\MatEtStabB{\ConvVersFrac[#2]{\py{resol_etat_stable_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[y]}}}
+			\def\MatEtStabC{\ConvVersFrac[#2]{\py{resol_etat_stable_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)[z]}}}
+		}%
+		\begin{pNiceMatrix}[#3]
+			{\MatEtStabA} & {\MatEtStabB} & {\MatEtStabC}
+		\end{pNiceMatrix}%
+	\fi
+	\ifnum \MAMATRICEAlen=4
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[1,4]\MatD
+		\itemtomacro\MAMATRICEA[2,1]\MatE
+		\itemtomacro\MAMATRICEA[2,2]\MatF
+		\itemtomacro\MAMATRICEA[2,3]\MatG
+		\itemtomacro\MAMATRICEA[2,4]\MatH
+		\itemtomacro\MAMATRICEA[3,1]\MatI
+		\itemtomacro\MAMATRICEA[3,2]\MatJ
+		\itemtomacro\MAMATRICEA[3,3]\MatK
+		\itemtomacro\MAMATRICEA[3,4]\MatL
+		\itemtomacro\MAMATRICEA[4,1]\MatM
+		\itemtomacro\MAMATRICEA[4,2]\MatN
+		\itemtomacro\MAMATRICEA[4,3]\MatO
+		\itemtomacro\MAMATRICEA[4,4]\MatP
+		\IfBooleanTF{#1}%
+		{%
+			\def\MatEtStabA{\ConvVersFrac*[#2]{\py{resol_etat_stable_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[x]}}}
+			\def\MatEtStabB{\ConvVersFrac*[#2]{\py{resol_etat_stable_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[y]}}}
+			\def\MatEtStabC{\ConvVersFrac*[#2]{\py{resol_etat_stable_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[z]}}}
+			\def\MatEtStabD{\ConvVersFrac*[#2]{\py{resol_etat_stable_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[t]}}}
+		}%
+		{%
+			\def\MatEtStabA{\ConvVersFrac[#2]{\py{resol_etat_stable_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[x]}}}
+			\def\MatEtStabB{\ConvVersFrac[#2]{\py{resol_etat_stable_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[y]}}}
+			\def\MatEtStabC{\ConvVersFrac[#2]{\py{resol_etat_stable_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[z]}}}
+			\def\MatEtStabD{\ConvVersFrac[#2]{\py{resol_etat_stable_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)[t]}}}
+		}%
+		\begin{pNiceMatrix}[#3]
+			{\MatEtStabA} & {\MatEtStabB} & {\MatEtStabC} & {\MatEtStabD}
+		\end{pNiceMatrix}%
+	\fi
+}
+
+\NewDocumentCommand\MatricePuissancePY{ s O{} D<>{} r() r() O{} }{%
+	%*=fractions avec - sur le numérateur
+	%2=options conversion
+	%3=options nicematrix
+	%4=matrice (,,;,,)
+	%5=puissance
+	%6=affichage de l'énoncé
+	%---------------------
+	%lectures des matrices
+	\setsepchar{§/,}%
+	\readlist*\MAMATRICEA{#4}%
+	%les coeffs de A et le déterminant et les coeff de l'inverse
+	\ifnum \MAMATRICEAlen=4
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[1,4]\MatD
+		\itemtomacro\MAMATRICEA[2,1]\MatE
+		\itemtomacro\MAMATRICEA[2,2]\MatF
+		\itemtomacro\MAMATRICEA[2,3]\MatG
+		\itemtomacro\MAMATRICEA[2,4]\MatH
+		\itemtomacro\MAMATRICEA[3,1]\MatI
+		\itemtomacro\MAMATRICEA[3,2]\MatJ
+		\itemtomacro\MAMATRICEA[3,3]\MatK
+		\itemtomacro\MAMATRICEA[3,4]\MatL
+		\itemtomacro\MAMATRICEA[4,1]\MatM
+		\itemtomacro\MAMATRICEA[4,2]\MatN
+		\itemtomacro\MAMATRICEA[4,3]\MatO
+		\itemtomacro\MAMATRICEA[4,4]\MatP
+		%les solutions
+		\IfBooleanTF{#1}%
+		{
+			\def\MatPuissA{\ConvVersFrac*[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[0]}}}%
+			\def\MatPuissB{\ConvVersFrac*[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[1]}}}%
+			\def\MatPuissC{\ConvVersFrac*[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[2]}}}%
+			\def\MatPuissD{\ConvVersFrac*[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[3]}}}%
+			\def\MatPuissE{\ConvVersFrac*[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[4]}}}%
+			\def\MatPuissF{\ConvVersFrac*[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[5]}}}%
+			\def\MatPuissG{\ConvVersFrac*[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[6]}}}%
+			\def\MatPuissH{\ConvVersFrac*[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[7]}}}%
+			\def\MatPuissI{\ConvVersFrac*[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[8]}}}%
+			\def\MatPuissJ{\ConvVersFrac*[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[9]}}}%
+			\def\MatPuissK{\ConvVersFrac*[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[10]}}}%
+			\def\MatPuissL{\ConvVersFrac*[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[11]}}}%
+			\def\MatPuissM{\ConvVersFrac*[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[12]}}}%
+			\def\MatPuissN{\ConvVersFrac*[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[13]}}}%
+			\def\MatPuissO{\ConvVersFrac*[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[14]}}}%
+			\def\MatPuissP{\ConvVersFrac*[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[15]}}}%
+		}%
+		{%
+			\def\MatPuissA{\ConvVersFrac[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[0]}}}%
+			\def\MatPuissB{\ConvVersFrac[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[1]}}}%
+			\def\MatPuissC{\ConvVersFrac[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[2]}}}%
+			\def\MatPuissD{\ConvVersFrac[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[3]}}}%
+			\def\MatPuissE{\ConvVersFrac[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[4]}}}%
+			\def\MatPuissF{\ConvVersFrac[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[5]}}}%
+			\def\MatPuissG{\ConvVersFrac[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[6]}}}%
+			\def\MatPuissH{\ConvVersFrac[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[7]}}}%
+			\def\MatPuissI{\ConvVersFrac[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[8]}}}%
+			\def\MatPuissJ{\ConvVersFrac[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[9]}}}%
+			\def\MatPuissK{\ConvVersFrac[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[10]}}}%
+			\def\MatPuissL{\ConvVersFrac[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[11]}}}%
+			\def\MatPuissM{\ConvVersFrac[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[12]}}}%
+			\def\MatPuissN{\ConvVersFrac[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[13]}}}%
+			\def\MatPuissO{\ConvVersFrac[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[14]}}}%
+			\def\MatPuissP{\ConvVersFrac[#2]{\py{puissance_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[15]}}}%
+		}%
+		\IfStrEq{#6}{Aff}%si matrice
+				{%
+					\IfBooleanTF{#1}%
+						{%
+							{\begin{pNiceMatrix}[#3]
+								\ConvVersFrac*[#2]{\MatA} & \ConvVersFrac*[#2]{\MatB} & \ConvVersFrac*[#2]{\MatC} & \ConvVersFrac*[#2]{\MatD} \\
+								\ConvVersFrac*[#2]{\MatE} & \ConvVersFrac*[#2]{\MatF} & \ConvVersFrac*[#2]{\MatG} & \ConvVersFrac*[#2]{\MatH} \\
+								\ConvVersFrac*[#2]{\MatI} & \ConvVersFrac*[#2]{\MatJ} & \ConvVersFrac*[#2]{\MatK} & \ConvVersFrac*[#2]{\MatL} \\
+								\ConvVersFrac*[#2]{\MatM} & \ConvVersFrac*[#2]{\MatN} & \ConvVersFrac*[#2]{\MatO} & \ConvVersFrac*[#2]{\MatO} \\
+							\end{pNiceMatrix}}^{#5}
+							=
+						}%
+						{%
+							{\begin{pNiceMatrix}[#3]
+								\ConvVersFrac[#2]{\MatA} & \ConvVersFrac[#2]{\MatB} & \ConvVersFrac[#2]{\MatC} & \ConvVersFrac[#2]{\MatD} \\
+								\ConvVersFrac[#2]{\MatE} & \ConvVersFrac[#2]{\MatF} & \ConvVersFrac[#2]{\MatG} & \ConvVersFrac[#2]{\MatH} \\
+								\ConvVersFrac[#2]{\MatI} & \ConvVersFrac[#2]{\MatJ} & \ConvVersFrac[#2]{\MatK} & \ConvVersFrac[#2]{\MatL} \\
+								\ConvVersFrac[#2]{\MatM} & \ConvVersFrac[#2]{\MatN} & \ConvVersFrac[#2]{\MatO} & \ConvVersFrac[#2]{\MatO} \\
+							\end{pNiceMatrix}}^{#5}
+							=
+						}%
+				}{}%
+		\begin{pNiceMatrix}[#3]
+			{\MatPuissA} & {\MatPuissB} & {\MatPuissC} & {\MatPuissD} \\
+			{\MatPuissE} & {\MatPuissF} & {\MatPuissG} & {\MatPuissH} \\
+			{\MatPuissI} & {\MatPuissJ} & {\MatPuissK} & {\MatPuissL} \\
+			{\MatPuissM} & {\MatPuissN} & {\MatPuissO} & {\MatPuissP} \\
+		\end{pNiceMatrix}%
+	\fi
+	\ifnum \MAMATRICEAlen=3
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[2,1]\MatD
+		\itemtomacro\MAMATRICEA[2,2]\MatE
+		\itemtomacro\MAMATRICEA[2,3]\MatF
+		\itemtomacro\MAMATRICEA[3,1]\MatG
+		\itemtomacro\MAMATRICEA[3,2]\MatH
+		\itemtomacro\MAMATRICEA[3,3]\MatI
+		%les solutions
+		\IfBooleanTF{#1}%
+		{
+			\def\MatPuissA{\ConvVersFrac*[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[0]}}}%
+			\def\MatPuissB{\ConvVersFrac*[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[1]}}}%
+			\def\MatPuissC{\ConvVersFrac*[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[2]}}}%
+			\def\MatPuissD{\ConvVersFrac*[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[3]}}}%
+			\def\MatPuissE{\ConvVersFrac*[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[4]}}}%
+			\def\MatPuissF{\ConvVersFrac*[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[5]}}}%
+			\def\MatPuissG{\ConvVersFrac*[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[6]}}}%
+			\def\MatPuissH{\ConvVersFrac*[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[7]}}}%
+			\def\MatPuissI{\ConvVersFrac*[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[8]}}}%
+		}%
+		{%
+			\def\MatPuissA{\ConvVersFrac[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[0]}}}%
+			\def\MatPuissB{\ConvVersFrac[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[1]}}}%
+			\def\MatPuissC{\ConvVersFrac[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[2]}}}%
+			\def\MatPuissD{\ConvVersFrac[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[3]}}}%
+			\def\MatPuissE{\ConvVersFrac[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[4]}}}%
+			\def\MatPuissF{\ConvVersFrac[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[5]}}}%
+			\def\MatPuissG{\ConvVersFrac[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[6]}}}%
+			\def\MatPuissH{\ConvVersFrac[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[7]}}}%
+			\def\MatPuissI{\ConvVersFrac[#2]{\py{puissance_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[8]}}}%
+		}%
+		\IfStrEq{#6}{Aff}%si matrice
+				{%
+					\IfBooleanTF{#1}%
+						{%
+							{\begin{pNiceMatrix}[#3]
+								\ConvVersFrac*[#2]{\MatA} & \ConvVersFrac*[#2]{\MatB} & \ConvVersFrac*[#2]{\MatC} \\
+								\ConvVersFrac*[#2]{\MatD} & \ConvVersFrac*[#2]{\MatE} & \ConvVersFrac*[#2]{\MatF} \\
+								\ConvVersFrac*[#2]{\MatG} & \ConvVersFrac*[#2]{\MatH} & \ConvVersFrac*[#2]{\MatI}
+							\end{pNiceMatrix}}^{#5}
+							=
+						}%
+						{%
+							{\begin{pNiceMatrix}[#3]
+								\ConvVersFrac[#2]{\MatA} & \ConvVersFrac[#2]{\MatB} & \ConvVersFrac[#2]{\MatC} \\
+								\ConvVersFrac[#2]{\MatD} & \ConvVersFrac[#2]{\MatE} & \ConvVersFrac[#2]{\MatF} \\
+								\ConvVersFrac[#2]{\MatG} & \ConvVersFrac[#2]{\MatH} & \ConvVersFrac[#2]{\MatI}
+							\end{pNiceMatrix}}^{#5}
+							=
+						}%
+				}{}%
+		\begin{pNiceMatrix}[#3]
+			{\MatPuissA} & {\MatPuissB} & {\MatPuissC} \\
+			{\MatPuissD} & {\MatPuissE} & {\MatPuissF} \\
+			{\MatPuissG} & {\MatPuissH} & {\MatPuissI}
+		\end{pNiceMatrix}%
+	\fi
+	\ifnum \MAMATRICEAlen=2
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[2,1]\MatC
+		\itemtomacro\MAMATRICEA[2,2]\MatD
+		%les solutions
+		\IfBooleanTF{#1}%
+		{
+			\def\MatPuissA{\ConvVersFrac*[#2]{\py{puissance_matrice_DD(\MatA,\MatB,\MatC,\MatD,#5)[0]}}}%
+			\def\MatPuissB{\ConvVersFrac*[#2]{\py{puissance_matrice_DD(\MatA,\MatB,\MatC,\MatD,#5)[1]}}}%
+			\def\MatPuissC{\ConvVersFrac*[#2]{\py{puissance_matrice_DD(\MatA,\MatB,\MatC,\MatD,#5)[2]}}}%
+			\def\MatPuissD{\ConvVersFrac*[#2]{\py{puissance_matrice_DD(\MatA,\MatB,\MatC,\MatD,#5)[3]}}}%
+		}%
+		{%
+			\def\MatPuissA{\ConvVersFrac[#2]{\py{puissance_matrice_DD(\MatA,\MatB,\MatC,\MatD,#5)[0]}}}%
+			\def\MatPuissB{\ConvVersFrac[#2]{\py{puissance_matrice_DD(\MatA,\MatB,\MatC,\MatD,#5)[1]}}}%
+			\def\MatPuissC{\ConvVersFrac[#2]{\py{puissance_matrice_DD(\MatA,\MatB,\MatC,\MatD,#5)[2]}}}%
+			\def\MatPuissD{\ConvVersFrac[#2]{\py{puissance_matrice_DD(\MatA,\MatB,\MatC,\MatD,#5)[3]}}}%
+		}%
+		\IfStrEq{#6}{Aff}%si matrice
+				{%
+					\IfBooleanTF{#1}%
+						{%
+							{\begin{pNiceMatrix}[#3]
+								\ConvVersFrac*[#2]{\MatA} & \ConvVersFrac*[#2]{\MatB} \\
+								\ConvVersFrac*[#2]{\MatC} & \ConvVersFrac*[#2]{\MatD}
+							\end{pNiceMatrix}}^{#5}
+							=
+						}%
+						{%
+							{\begin{pNiceMatrix}[#3]
+								\ConvVersFrac[#2]{\MatA} & \ConvVersFrac[#2]{\MatB} \\
+								\ConvVersFrac[#2]{\MatC} & \ConvVersFrac[#2]{\MatD}
+							\end{pNiceMatrix}}^{#5}
+							=
+						}%
+				}{}%
+		\begin{pNiceMatrix}[#3]
+			{\MatPuissA} & {\MatPuissB} \\
+			{\MatPuissC} & {\MatPuissD}
+		\end{pNiceMatrix}%
+	\fi
+}
+
+\NewDocumentCommand\DetMatricePY{ s O{} r() }{%
+	%*=fractions avec - sur le numérateur
+	%2=options conversion
+	%3=matrice (,,;,,)
+	%---------------------
+	%lectures des matrices
+	\setsepchar{§/,}%
+	\readlist*\MAMATRICEA{#3}%
+	\def\MatDim{\MAMATRICEAlen}%
+	%les coeffs de A et le déterminant et les coeff de l'inverse
+	\ifnum \MAMATRICEAlen=4
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[1,4]\MatD
+		\itemtomacro\MAMATRICEA[2,1]\MatE
+		\itemtomacro\MAMATRICEA[2,2]\MatF
+		\itemtomacro\MAMATRICEA[2,3]\MatG
+		\itemtomacro\MAMATRICEA[2,4]\MatH
+		\itemtomacro\MAMATRICEA[3,1]\MatI
+		\itemtomacro\MAMATRICEA[3,2]\MatJ
+		\itemtomacro\MAMATRICEA[3,3]\MatK
+		\itemtomacro\MAMATRICEA[3,4]\MatL
+		\itemtomacro\MAMATRICEA[4,1]\MatM
+		\itemtomacro\MAMATRICEA[4,2]\MatN
+		\itemtomacro\MAMATRICEA[4,3]\MatO
+		\itemtomacro\MAMATRICEA[4,4]\MatP
+		%les solutions
+		\def\DETMATRICE{\xinteval{\py{det_matrice_QQ(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP)}}}%
+	\fi
+	\ifnum \MAMATRICEAlen=3
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[2,1]\MatD
+		\itemtomacro\MAMATRICEA[2,2]\MatE
+		\itemtomacro\MAMATRICEA[2,3]\MatF
+		\itemtomacro\MAMATRICEA[3,1]\MatG
+		\itemtomacro\MAMATRICEA[3,2]\MatH
+		\itemtomacro\MAMATRICEA[3,3]\MatI
+		\def\DETMATRICE{\xinteval{\py{det_matrice_TT(\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI)}}}%
+	\fi
+	\ifnum \MAMATRICEAlen=2
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[2,1]\MatC
+		\itemtomacro\MAMATRICEA[2,2]\MatD
+		\def\DETMATRICE{\xinteval{\py{det_matrice_DD(\MatA,\MatB,\MatC,\MatD)}}}%
+	\fi
+	\IfBooleanTF{#1}%
+		{%
+			\ConvVersFrac*[#2]{\DETMATRICE}%
+		}%
+		{%
+			\ConvVersFrac[#2]{\DETMATRICE}%
+		}%
+}
+
+\NewDocumentCommand\ProduitMatricesPY{ s O{} D<>{} r() r() O{} }{%
+	%*=fractions avec - sur le numérateur
+	%2=options conversion
+	%3=options nicematrix globales ?
+	%4=matrice (,,§,,) A
+	%5=matrice (,,§,,) B
+	%---------------------
+	%lectures des matrices et dimensions
+	\setsepchar{§/,}%
+	\readlist*\MatA{#4}%
+	\readlist*\MatB{#5}%
+	\def\NbLigMatA{\MatAlen}%
+	\def\NbLigMatB{\MatBlen}%
+	\itemtomacro\MatA[1]{\MatAligne}%
+	\itemtomacro\MatB[1]{\MatBligne}%
+	\setsepchar{,}%
+	\readlist*\TmpA{\MatAligne}%
+	\readlist*\TmpB{\MatBligne}%
+	\def\NbColMatA{\TmpAlen}%
+	\def\NbColMatB{\TmpBlen}%
+	%test de dimensions !!
+	\xintifboolexpr{\NbColMatA != \NbLigMatB}
+		{\text{Erreur de dimensions}}%
+		{
+			\xintifboolexpr{\NbLigMatA==1 'and' \NbColMatA==2 'and' \NbLigMatB==2 'and' \NbColMatB==1}% (1,2)*(2,1)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatB[1]\CoeffBa
+					\itemtomacro\MatB[2]\CoeffBb
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatRes{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb}}%
+						}%
+						{%
+							\def\MatRes{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffBa} \\ \ConvVersFrac*[#2]{\CoeffBb} \end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffBa} \\ \ConvVersFrac[#2]{\CoeffBb} \end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						\MatRes
+					\end{pNiceMatrix}%
+				}{}%fin 1,2*2,1
+			\xintifboolexpr{\NbLigMatA==1 'and' \NbColMatA==2 'and' \NbLigMatB==2 'and' \NbColMatB==2}% (1,2)*(2,2)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatB[1,1]\CoeffBa
+					\itemtomacro\MatB[1,2]\CoeffBb
+					\itemtomacro\MatB[2,1]\CoeffBc
+					\itemtomacro\MatB[2,2]\CoeffBd
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBc}}%
+							\def\MatResB{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBd}}%
+						}%
+						{%
+							\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBc}}%
+							\def\MatResB{\ConvVersFrac[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBd}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffBa} & \ConvVersFrac*[#2]{\CoeffBb} \\ \ConvVersFrac*[#2]{\CoeffBc} & \ConvVersFrac*[#2]{\CoeffBd} \end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffBa} & \ConvVersFrac[#2]{\CoeffBb} \\ \ConvVersFrac[#2]{\CoeffBc} & \ConvVersFrac[#2]{\CoeffBd} \end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						\MatResA & \MatResB
+					\end{pNiceMatrix}%
+				}{}%fin 1,2*2,1
+			\xintifboolexpr{\NbLigMatA==1 'and' \NbColMatA==3 'and' \NbLigMatB==3 'and' \NbColMatB==1}% (1,3)*(3,1)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatA[1,3]\CoeffAc
+					\itemtomacro\MatB[1]\CoeffBa
+					\itemtomacro\MatB[2]\CoeffBb
+					\itemtomacro\MatB[3]\CoeffBc
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatRes{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb+\CoeffAc*\CoeffBc}}%
+						}%
+						{%
+							\def\MatRes{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb+\CoeffAc*\CoeffBc}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} & \ConvVersFrac*[#2]{\CoeffAc} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffBa} & \ConvVersFrac*[#2]{\CoeffBb} & \ConvVersFrac*[#2]{\CoeffBc} \end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} & \ConvVersFrac[#2]{\CoeffAc} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffBa} \\ \ConvVersFrac[#2]{\CoeffBb} \\ \ConvVersFrac[#2]{\CoeffBc} \end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						\MatRes
+					\end{pNiceMatrix}%
+				}{}%fin 1,3*3,1
+			\xintifboolexpr{\NbLigMatA==1 'and' \NbColMatA==3 'and' \NbLigMatB==3 'and' \NbColMatB==3}% (1,3)*(3,3)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatA[1,3]\CoeffAc
+					\itemtomacro\MatB[1,1]\CoeffBa
+					\itemtomacro\MatB[1,2]\CoeffBb
+					\itemtomacro\MatB[1,3]\CoeffBc
+					\itemtomacro\MatB[2,1]\CoeffBd
+					\itemtomacro\MatB[2,2]\CoeffBe
+					\itemtomacro\MatB[2,3]\CoeffBf
+					\itemtomacro\MatB[3,1]\CoeffBg
+					\itemtomacro\MatB[3,2]\CoeffBh
+					\itemtomacro\MatB[3,3]\CoeffBi
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBd+\CoeffAc*\CoeffBg}}%
+							\def\MatResB{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBe+\CoeffAc*\CoeffBh}}%
+							\def\MatResC{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBc+\CoeffAb*\CoeffBf+\CoeffAc*\CoeffBi}}%
+						}%
+						{%
+							\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBd+\CoeffAc*\CoeffBg}}%
+							\def\MatResB{\ConvVersFrac[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBe+\CoeffAc*\CoeffBh}}%
+							\def\MatResC{\ConvVersFrac[#2]{\CoeffAa*\CoeffBc+\CoeffAb*\CoeffBf+\CoeffAc*\CoeffBi}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} & \ConvVersFrac*[#2]{\CoeffAc} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac*[#2]{\CoeffBa} & \ConvVersFrac*[#2]{\CoeffBb} & \ConvVersFrac*[#2]{\CoeffBc} \\
+										\ConvVersFrac*[#2]{\CoeffBd} & \ConvVersFrac*[#2]{\CoeffBe} & \ConvVersFrac*[#2]{\CoeffBf} \\
+										\ConvVersFrac*[#2]{\CoeffBg} & \ConvVersFrac*[#2]{\CoeffBh} & \ConvVersFrac*[#2]{\CoeffBi} 
+									\end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} & \ConvVersFrac[#2]{\CoeffAc} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac[#2]{\CoeffBa} & \ConvVersFrac[#2]{\CoeffBb} & \ConvVersFrac[#2]{\CoeffBc} \\
+										\ConvVersFrac[#2]{\CoeffBd} & \ConvVersFrac[#2]{\CoeffBe} & \ConvVersFrac[#2]{\CoeffBf} \\
+										\ConvVersFrac[#2]{\CoeffBg} & \ConvVersFrac[#2]{\CoeffBh} & \ConvVersFrac[#2]{\CoeffBi} 
+									\end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						\MatResA & \MatResB & \MatResC
+					\end{pNiceMatrix}%
+				}{}%fin 1,3*3,3
+			\xintifboolexpr{\NbLigMatA==2 'and' \NbColMatA==2 'and' \NbLigMatB==2 'and' \NbColMatB==1}% (2,2)*(2,1)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatA[2,1]\CoeffAc
+					\itemtomacro\MatA[2,2]\CoeffAd
+					\itemtomacro\MatB[1]\CoeffBa
+					\itemtomacro\MatB[2]\CoeffBb
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb}}%
+							\def\MatResB{\ConvVersFrac*[#2]{\CoeffAc*\CoeffBa+\CoeffAd*\CoeffBb}}%
+						}%
+						{%
+							\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb}}%
+							\def\MatResB{\ConvVersFrac[#2]{\CoeffAc*\CoeffBa+\CoeffAd*\CoeffBb}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} \\ \ConvVersFrac*[#2]{\CoeffAc} & \ConvVersFrac*[#2]{\CoeffAd} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffBa} \\ \ConvVersFrac*[#2]{\CoeffBb} \end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} \\ \ConvVersFrac[#2]{\CoeffAc} & \ConvVersFrac[#2]{\CoeffAd} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffBa} \\ \ConvVersFrac[#2]{\CoeffBb} \end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						\MatResA \\ \MatResB
+					\end{pNiceMatrix}%
+				}{}%fin 2,2*2,1
+			\xintifboolexpr{\NbLigMatA==2 'and' \NbColMatA==2 'and' \NbLigMatB==2 'and' \NbColMatB==2}% (2,2)*(2,2)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatA[2,1]\CoeffAc
+					\itemtomacro\MatA[2,2]\CoeffAd
+					\itemtomacro\MatB[1,1]\CoeffBa
+					\itemtomacro\MatB[1,2]\CoeffBb
+					\itemtomacro\MatB[2,1]\CoeffBc
+					\itemtomacro\MatB[2,2]\CoeffBd
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBc}}%
+							\def\MatResB{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBb+\CoeffAd*\CoeffBd}}%
+							\def\MatResC{\ConvVersFrac*[#2]{\CoeffAc*\CoeffBa+\CoeffAd*\CoeffBc}}%
+							\def\MatResD{\ConvVersFrac*[#2]{\CoeffAc*\CoeffBb+\CoeffAd*\CoeffBd}}%
+						}%
+						{%
+							\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBc}}%
+							\def\MatResB{\ConvVersFrac[#2]{\CoeffAa*\CoeffBb+\CoeffAd*\CoeffBd}}%
+							\def\MatResC{\ConvVersFrac[#2]{\CoeffAc*\CoeffBa+\CoeffAd*\CoeffBc}}%
+							\def\MatResD{\ConvVersFrac[#2]{\CoeffAc*\CoeffBb+\CoeffAd*\CoeffBd}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} \\ \ConvVersFrac*[#2]{\CoeffAc} & \ConvVersFrac*[#2]{\CoeffAd} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffBa} & \ConvVersFrac*[#2]{\CoeffBb} \\ \ConvVersFrac*[#2]{\CoeffBc} & \ConvVersFrac*[#2]{\CoeffBd} \end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} \\ \ConvVersFrac[#2]{\CoeffAc} & \ConvVersFrac[#2]{\CoeffAd} \end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffBa} & \ConvVersFrac[#2]{\CoeffBb} \\ \ConvVersFrac[#2]{\CoeffBc} & \ConvVersFrac[#2]{\CoeffBd} \end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						\MatResA & \MatResB \\ \MatResC & \MatResD
+					\end{pNiceMatrix}%
+				}{}%fin 2,2*2,1
+			\xintifboolexpr{\NbLigMatA==3 'and' \NbColMatA==3 'and' \NbLigMatB==3 'and' \NbColMatB==1}% (3,3)*(3,1)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatA[1,3]\CoeffAc
+					\itemtomacro\MatA[2,1]\CoeffAd
+					\itemtomacro\MatA[2,2]\CoeffAe
+					\itemtomacro\MatA[2,3]\CoeffAf
+					\itemtomacro\MatA[3,1]\CoeffAg
+					\itemtomacro\MatA[3,2]\CoeffAh
+					\itemtomacro\MatA[3,3]\CoeffAi
+					\itemtomacro\MatB[1]\CoeffBa
+					\itemtomacro\MatB[2]\CoeffBb
+					\itemtomacro\MatB[3]\CoeffBc
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb+\CoeffAc*\CoeffBc}}%
+							\def\MatResB{\ConvVersFrac*[#2]{\CoeffAd*\CoeffBa+\CoeffAe*\CoeffBb+\CoeffAf*\CoeffBc}}%
+							\def\MatResC{\ConvVersFrac*[#2]{\CoeffAg*\CoeffBa+\CoeffAh*\CoeffBb+\CoeffAi*\CoeffBc}}%
+						}%
+						{%
+							\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb+\CoeffAc*\CoeffBc}}%
+							\def\MatResB{\ConvVersFrac[#2]{\CoeffAd*\CoeffBa+\CoeffAe*\CoeffBb+\CoeffAf*\CoeffBc}}%
+							\def\MatResC{\ConvVersFrac[#2]{\CoeffAg*\CoeffBa+\CoeffAh*\CoeffBb+\CoeffAi*\CoeffBc}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} & \ConvVersFrac*[#2]{\CoeffAc} \\
+										\ConvVersFrac*[#2]{\CoeffAd} & \ConvVersFrac*[#2]{\CoeffAe} & \ConvVersFrac*[#2]{\CoeffAf} \\
+										\ConvVersFrac*[#2]{\CoeffAg} & \ConvVersFrac*[#2]{\CoeffAh} & \ConvVersFrac*[#2]{\CoeffAi}
+									\end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac*[#2]{\CoeffBa} \\ \ConvVersFrac*[#2]{\CoeffBb} \\ \ConvVersFrac*[#2]{\CoeffBc} \end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} & \ConvVersFrac[#2]{\CoeffAc} \\
+										\ConvVersFrac[#2]{\CoeffAd} & \ConvVersFrac[#2]{\CoeffAe} & \ConvVersFrac[#2]{\CoeffAf} \\
+										\ConvVersFrac[#2]{\CoeffAg} & \ConvVersFrac[#2]{\CoeffAh} & \ConvVersFrac[#2]{\CoeffAi}
+									\end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3] \ConvVersFrac[#2]{\CoeffBa} \\ \ConvVersFrac[#2]{\CoeffBb} \\ \ConvVersFrac[#2]{\CoeffBc} \end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						\MatResA \\ \MatResB \\ \MatResC
+					\end{pNiceMatrix}%
+				}{}%fin 3,3*3,1
+			\xintifboolexpr{\NbLigMatA==3 'and' \NbColMatA==3 'and' \NbLigMatB==3 'and' \NbColMatB==3}% (3,3)*(3,3)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatA[1,3]\CoeffAc
+					\itemtomacro\MatA[2,1]\CoeffAd
+					\itemtomacro\MatA[2,2]\CoeffAe
+					\itemtomacro\MatA[2,3]\CoeffAf
+					\itemtomacro\MatA[3,1]\CoeffAg
+					\itemtomacro\MatA[3,2]\CoeffAh
+					\itemtomacro\MatA[3,3]\CoeffAi
+					\itemtomacro\MatB[1,1]\CoeffBa
+					\itemtomacro\MatB[1,2]\CoeffBb
+					\itemtomacro\MatB[1,3]\CoeffBc
+					\itemtomacro\MatB[2,1]\CoeffBd
+					\itemtomacro\MatB[2,2]\CoeffBe
+					\itemtomacro\MatB[1,3]\CoeffBf
+					\itemtomacro\MatB[3,1]\CoeffBg
+					\itemtomacro\MatB[3,2]\CoeffBh
+					\itemtomacro\MatB[3,3]\CoeffBi
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBd+\CoeffAc*\CoeffBg}}%
+							\def\MatResB{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBe+\CoeffAc*\CoeffBh}}%
+							\def\MatResC{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBc+\CoeffAb*\CoeffBf+\CoeffAc*\CoeffBi}}%
+							\def\MatResD{\ConvVersFrac*[#2]{\CoeffAd*\CoeffBa+\CoeffAe*\CoeffBd+\CoeffAf*\CoeffBg}}%
+							\def\MatResE{\ConvVersFrac*[#2]{\CoeffAd*\CoeffBb+\CoeffAe*\CoeffBe+\CoeffAf*\CoeffBh}}%
+							\def\MatResF{\ConvVersFrac*[#2]{\CoeffAd*\CoeffBc+\CoeffAe*\CoeffBf+\CoeffAf*\CoeffBi}}%
+							\def\MatResG{\ConvVersFrac*[#2]{\CoeffAg*\CoeffBa+\CoeffAh*\CoeffBd+\CoeffAi*\CoeffBg}}%
+							\def\MatResH{\ConvVersFrac*[#2]{\CoeffAg*\CoeffBb+\CoeffAh*\CoeffBe+\CoeffAi*\CoeffBh}}%
+							\def\MatResI{\ConvVersFrac*[#2]{\CoeffAg*\CoeffBc+\CoeffAh*\CoeffBf+\CoeffAi*\CoeffBi}}%
+						}%
+						{%
+							\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBd+\CoeffAc*\CoeffBg}}%
+							\def\MatResB{\ConvVersFrac[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBe+\CoeffAc*\CoeffBh}}%
+							\def\MatResC{\ConvVersFrac[#2]{\CoeffAa*\CoeffBc+\CoeffAb*\CoeffBf+\CoeffAc*\CoeffBi}}%
+							\def\MatResD{\ConvVersFrac[#2]{\CoeffAd*\CoeffBa+\CoeffAe*\CoeffBd+\CoeffAf*\CoeffBg}}%
+							\def\MatResE{\ConvVersFrac[#2]{\CoeffAd*\CoeffBb+\CoeffAe*\CoeffBe+\CoeffAf*\CoeffBh}}%
+							\def\MatResF{\ConvVersFrac[#2]{\CoeffAd*\CoeffBc+\CoeffAe*\CoeffBf+\CoeffAf*\CoeffBi}}%
+							\def\MatResG{\ConvVersFrac[#2]{\CoeffAg*\CoeffBa+\CoeffAh*\CoeffBd+\CoeffAi*\CoeffBg}}%
+							\def\MatResH{\ConvVersFrac[#2]{\CoeffAg*\CoeffBb+\CoeffAh*\CoeffBe+\CoeffAi*\CoeffBh}}%
+							\def\MatResI{\ConvVersFrac[#2]{\CoeffAg*\CoeffBc+\CoeffAh*\CoeffBf+\CoeffAi*\CoeffBi}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} & \ConvVersFrac*[#2]{\CoeffAc} \\
+										\ConvVersFrac*[#2]{\CoeffAd} & \ConvVersFrac*[#2]{\CoeffAe} & \ConvVersFrac*[#2]{\CoeffAf} \\
+										\ConvVersFrac*[#2]{\CoeffAg} & \ConvVersFrac*[#2]{\CoeffAh} & \ConvVersFrac*[#2]{\CoeffAi}
+									\end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac*[#2]{\CoeffBa} & \ConvVersFrac*[#2]{\CoeffBb} & \ConvVersFrac*[#2]{\CoeffBc} \\
+										\ConvVersFrac*[#2]{\CoeffBd} & \ConvVersFrac*[#2]{\CoeffBe} & \ConvVersFrac*[#2]{\CoeffBf} \\
+										\ConvVersFrac*[#2]{\CoeffBg} & \ConvVersFrac*[#2]{\CoeffBh} & \ConvVersFrac*[#2]{\CoeffBi}
+									\end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} & \ConvVersFrac[#2]{\CoeffAc} \\
+										\ConvVersFrac[#2]{\CoeffAd} & \ConvVersFrac[#2]{\CoeffAe} & \ConvVersFrac[#2]{\CoeffAf} \\
+										\ConvVersFrac[#2]{\CoeffAg} & \ConvVersFrac[#2]{\CoeffAh} & \ConvVersFrac[#2]{\CoeffAi}
+									\end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac[#2]{\CoeffBa} & \ConvVersFrac[#2]{\CoeffBb} & \ConvVersFrac[#2]{\CoeffBc} \\
+										\ConvVersFrac[#2]{\CoeffBd} & \ConvVersFrac[#2]{\CoeffBe} & \ConvVersFrac[#2]{\CoeffBf} \\
+										\ConvVersFrac[#2]{\CoeffBg} & \ConvVersFrac[#2]{\CoeffBh} & \ConvVersFrac[#2]{\CoeffBi}
+									\end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						\MatResA & \MatResB & \MatResC \\ \MatResD & \MatResE & \MatResF \\ \MatResG & \MatResH & \MatResI
+					\end{pNiceMatrix}%
+				}{}%fin 3,3*3,3
+			\xintifboolexpr{\NbLigMatA==1 'and' \NbColMatA==4 'and' \NbLigMatB==4 'and' \NbColMatB==1}% (1,4)*(4,1)
+			{%
+				\itemtomacro\MatA[1,1]\CoeffAa
+				\itemtomacro\MatA[1,2]\CoeffAb
+				\itemtomacro\MatA[1,3]\CoeffAc
+				\itemtomacro\MatA[1,4]\CoeffAd
+				\itemtomacro\MatB[1]\CoeffBa
+				\itemtomacro\MatB[2]\CoeffBb
+				\itemtomacro\MatB[3]\CoeffBc
+				\itemtomacro\MatB[4]\CoeffBd
+				\IfBooleanTF{#1}%version étoilée := moins sur num
+					{%
+						\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb+\CoeffAc*\CoeffBc+\CoeffAd*\CoeffBd}}%
+					}%
+					{%
+						\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb+\CoeffAc*\CoeffBc+\CoeffAd*\CoeffBd}}%
+					}%
+				\IfStrEq{#6}{Aff}%si matrice
+					{%
+						\IfBooleanTF{#1}%
+							{%
+								\begin{pNiceMatrix}[#3]
+									\ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} & \ConvVersFrac*[#2]{\CoeffAc} & \ConvVersFrac*[#2]{\CoeffAd}
+								\end{pNiceMatrix}
+								\times
+								\begin{pNiceMatrix}[#3]
+									\ConvVersFrac*[#2]{\CoeffBa} \\
+									\ConvVersFrac*[#2]{\CoeffBb} \\
+									\ConvVersFrac*[#2]{\CoeffBc} \\
+									\ConvVersFrac*[#2]{\CoeffBd}
+								\end{pNiceMatrix}
+								=
+							}%
+							{%
+								\begin{pNiceMatrix}[#3]
+									\ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} & \ConvVersFrac[#2]{\CoeffAc} & \ConvVersFrac[#2]{\CoeffAd}
+								\end{pNiceMatrix}
+								\times
+								\begin{pNiceMatrix}[#3]
+									\ConvVersFrac[#2]{\CoeffBa} \\
+									\ConvVersFrac[#2]{\CoeffBb} \\
+									\ConvVersFrac[#2]{\CoeffBc} \\
+									\ConvVersFrac[#2]{\CoeffBd}
+								\end{pNiceMatrix}
+								=
+							}%
+					}{}%
+				\begin{pNiceMatrix}[#3]
+					{\MatResA}
+				\end{pNiceMatrix}%
+			}{}%fin 1,4*4,1
+			\xintifboolexpr{\NbLigMatA==1 'and' \NbColMatA==4 'and' \NbLigMatB==4 'and' \NbColMatB==4}% (1,4)*(4,4)
+			{%
+				\itemtomacro\MatA[1,1]\CoeffAa
+				\itemtomacro\MatA[1,2]\CoeffAb
+				\itemtomacro\MatA[1,3]\CoeffAc
+				\itemtomacro\MatA[1,4]\CoeffAd
+				\itemtomacro\MatB[1,1]\CoeffBa
+				\itemtomacro\MatB[1,2]\CoeffBb
+				\itemtomacro\MatB[1,3]\CoeffBc
+				\itemtomacro\MatB[1,4]\CoeffBd
+				\itemtomacro\MatB[2,1]\CoeffBe
+				\itemtomacro\MatB[2,2]\CoeffBf
+				\itemtomacro\MatB[2,3]\CoeffBg
+				\itemtomacro\MatB[2,4]\CoeffBh
+				\itemtomacro\MatB[3,1]\CoeffBi
+				\itemtomacro\MatB[3,2]\CoeffBj
+				\itemtomacro\MatB[3,3]\CoeffBk
+				\itemtomacro\MatB[3,4]\CoeffBl
+				\itemtomacro\MatB[4,1]\CoeffBm
+				\itemtomacro\MatB[4,2]\CoeffBn
+				\itemtomacro\MatB[4,3]\CoeffBo
+				\itemtomacro\MatB[4,4]\CoeffBp
+				\IfBooleanTF{#1}%version étoilée := moins sur num
+					{%
+						\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBe+\CoeffAc*\CoeffBi+\CoeffAd*\CoeffBm}}%
+						\def\MatResB{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBf+\CoeffAc*\CoeffBj+\CoeffAd*\CoeffBn}}%
+						\def\MatResC{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBc+\CoeffAb*\CoeffBg+\CoeffAc*\CoeffBk+\CoeffAd*\CoeffBo}}%
+						\def\MatResD{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBd+\CoeffAb*\CoeffBh+\CoeffAc*\CoeffBl+\CoeffAd*\CoeffBp}}%
+					}%
+					{%
+						\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBe+\CoeffAc*\CoeffBi+\CoeffAd*\CoeffBm}}%
+						\def\MatResB{\ConvVersFrac[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBf+\CoeffAc*\CoeffBj+\CoeffAd*\CoeffBn}}%
+						\def\MatResC{\ConvVersFrac[#2]{\CoeffAa*\CoeffBc+\CoeffAb*\CoeffBg+\CoeffAc*\CoeffBk+\CoeffAd*\CoeffBo}}%
+						\def\MatResD{\ConvVersFrac[#2]{\CoeffAa*\CoeffBd+\CoeffAb*\CoeffBh+\CoeffAc*\CoeffBl+\CoeffAd*\CoeffBp}}%
+					}%
+				\IfStrEq{#6}{Aff}%si matrice
+					{%
+						\IfBooleanTF{#1}%
+							{%
+								\begin{pNiceMatrix}[#3]
+									\ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} & \ConvVersFrac*[#2]{\CoeffAc} & \ConvVersFrac*[#2]{\CoeffAd}
+								\end{pNiceMatrix}
+								\times
+								\begin{pNiceMatrix}[#3]
+									\ConvVersFrac*[#2]{\CoeffBa} & \ConvVersFrac*[#2]{\CoeffBb} & \ConvVersFrac*[#2]{\CoeffBc} & \ConvVersFrac*[#2]{\CoeffBd} \\
+									\ConvVersFrac*[#2]{\CoeffBe} & \ConvVersFrac*[#2]{\CoeffBf} & \ConvVersFrac*[#2]{\CoeffBg} & \ConvVersFrac*[#2]{\CoeffBh} \\
+									\ConvVersFrac*[#2]{\CoeffBi} & \ConvVersFrac*[#2]{\CoeffBj} & \ConvVersFrac*[#2]{\CoeffBk} & \ConvVersFrac*[#2]{\CoeffBl} \\
+									\ConvVersFrac*[#2]{\CoeffBm} & \ConvVersFrac*[#2]{\CoeffBn} & \ConvVersFrac*[#2]{\CoeffBo} & \ConvVersFrac*[#2]{\CoeffBp}
+								\end{pNiceMatrix}
+								=
+							}%
+							{%
+								\begin{pNiceMatrix}[#3]
+									\ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} & \ConvVersFrac[#2]{\CoeffAc} & \ConvVersFrac[#2]{\CoeffAd}
+								\end{pNiceMatrix}
+								\times
+								\begin{pNiceMatrix}[#3]
+									\ConvVersFrac[#2]{\CoeffBa} & \ConvVersFrac[#2]{\CoeffBb} & \ConvVersFrac[#2]{\CoeffBc} & \ConvVersFrac[#2]{\CoeffBd} \\
+									\ConvVersFrac[#2]{\CoeffBe} & \ConvVersFrac[#2]{\CoeffBf} & \ConvVersFrac[#2]{\CoeffBg} & \ConvVersFrac[#2]{\CoeffBh} \\
+									\ConvVersFrac[#2]{\CoeffBi} & \ConvVersFrac[#2]{\CoeffBj} & \ConvVersFrac[#2]{\CoeffBk} & \ConvVersFrac[#2]{\CoeffBl} \\
+									\ConvVersFrac[#2]{\CoeffBm} & \ConvVersFrac[#2]{\CoeffBn} & \ConvVersFrac[#2]{\CoeffBo} & \ConvVersFrac[#2]{\CoeffBp}
+								\end{pNiceMatrix}
+								=
+							}%
+					}{}%
+				\begin{pNiceMatrix}[#3]
+					{\MatResA} & {\MatResB} & {\MatResC} & {\MatResD}
+				\end{pNiceMatrix}%
+			}{}%fin 1,4*4,4
+			\xintifboolexpr{\NbLigMatA==4 'and' \NbColMatA==4 'and' \NbLigMatB==4 'and' \NbColMatB==1}% (4,4)*(4,1)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatA[1,3]\CoeffAc
+					\itemtomacro\MatA[1,4]\CoeffAd
+					\itemtomacro\MatA[2,1]\CoeffAe
+					\itemtomacro\MatA[2,2]\CoeffAf
+					\itemtomacro\MatA[2,3]\CoeffAg
+					\itemtomacro\MatA[2,4]\CoeffAh
+					\itemtomacro\MatA[3,1]\CoeffAi
+					\itemtomacro\MatA[3,2]\CoeffAj
+					\itemtomacro\MatA[3,3]\CoeffAk
+					\itemtomacro\MatA[3,4]\CoeffAl
+					\itemtomacro\MatA[4,1]\CoeffAm
+					\itemtomacro\MatA[4,2]\CoeffAn
+					\itemtomacro\MatA[4,3]\CoeffAo
+					\itemtomacro\MatA[4,4]\CoeffAp
+					\itemtomacro\MatB[1]\CoeffBa
+					\itemtomacro\MatB[2]\CoeffBb
+					\itemtomacro\MatB[3]\CoeffBc
+					\itemtomacro\MatB[4]\CoeffBd
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb+\CoeffAc*\CoeffBc+\CoeffAd*\CoeffBd}}%
+							\def\MatResB{\ConvVersFrac*[#2]{\CoeffAe*\CoeffBa+\CoeffAf*\CoeffBb+\CoeffAg*\CoeffBc+\CoeffAh*\CoeffBd}}%
+							\def\MatResC{\ConvVersFrac*[#2]{\CoeffAi*\CoeffBa+\CoeffAj*\CoeffBb+\CoeffAk*\CoeffBc+\CoeffAl*\CoeffBd}}%
+							\def\MatResD{\ConvVersFrac*[#2]{\CoeffAm*\CoeffBa+\CoeffAn*\CoeffBb+\CoeffAo*\CoeffBc+\CoeffAp*\CoeffBd}}%
+						}%
+						{%
+							\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBb+\CoeffAc*\CoeffBc+\CoeffAd*\CoeffBd}}%
+							\def\MatResB{\ConvVersFrac[#2]{\CoeffAe*\CoeffBa+\CoeffAf*\CoeffBb+\CoeffAg*\CoeffBc+\CoeffAh*\CoeffBd}}%
+							\def\MatResC{\ConvVersFrac[#2]{\CoeffAi*\CoeffBa+\CoeffAj*\CoeffBb+\CoeffAk*\CoeffBc+\CoeffAl*\CoeffBd}}%
+							\def\MatResD{\ConvVersFrac[#2]{\CoeffAm*\CoeffBa+\CoeffAn*\CoeffBb+\CoeffAo*\CoeffBc+\CoeffAp*\CoeffBd}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} & \ConvVersFrac*[#2]{\CoeffAc} & \ConvVersFrac*[#2]{\CoeffAd} \\
+										\ConvVersFrac*[#2]{\CoeffAe} & \ConvVersFrac*[#2]{\CoeffAf} & \ConvVersFrac*[#2]{\CoeffAg} & \ConvVersFrac*[#2]{\CoeffAh} \\
+										\ConvVersFrac*[#2]{\CoeffAi} & \ConvVersFrac*[#2]{\CoeffAj} & \ConvVersFrac*[#2]{\CoeffAk} & \ConvVersFrac*[#2]{\CoeffAl} \\
+										\ConvVersFrac*[#2]{\CoeffAm} & \ConvVersFrac*[#2]{\CoeffAn} & \ConvVersFrac*[#2]{\CoeffAo} & \ConvVersFrac*[#2]{\CoeffAp}
+									\end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac*[#2]{\CoeffBa} \\ \ConvVersFrac*[#2]{\CoeffBb} \\ \ConvVersFrac*[#2]{\CoeffBc} \\ \ConvVersFrac*[#2]{\CoeffBd}
+									\end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} & \ConvVersFrac[#2]{\CoeffAc} & \ConvVersFrac[#2]{\CoeffAd} \\
+										\ConvVersFrac[#2]{\CoeffAe} & \ConvVersFrac[#2]{\CoeffAf} & \ConvVersFrac[#2]{\CoeffAg} & \ConvVersFrac[#2]{\CoeffAh} \\
+										\ConvVersFrac[#2]{\CoeffAi} & \ConvVersFrac[#2]{\CoeffAj} & \ConvVersFrac[#2]{\CoeffAk} & \ConvVersFrac[#2]{\CoeffAl} \\
+										\ConvVersFrac[#2]{\CoeffAm} & \ConvVersFrac[#2]{\CoeffAn} & \ConvVersFrac[#2]{\CoeffAo} & \ConvVersFrac[#2]{\CoeffAp}
+									\end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac[#2]{\CoeffBa} \\ \ConvVersFrac[#2]{\CoeffBb} \\ \ConvVersFrac[#2]{\CoeffBc} \\ \ConvVersFrac[#2]{\CoeffBd}
+									\end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						{\MatResA} \\ {\MatResB} \\ {\MatResC} \\ {\MatResD}
+					\end{pNiceMatrix}%
+				}{}%fin 4x4,4,1
+			\xintifboolexpr{\NbLigMatA==4 'and' \NbColMatA==4 'and' \NbLigMatB==4 'and' \NbColMatB==4}% (4,4)*(4,4)
+				{%
+					\itemtomacro\MatA[1,1]\CoeffAa
+					\itemtomacro\MatA[1,2]\CoeffAb
+					\itemtomacro\MatA[1,3]\CoeffAc
+					\itemtomacro\MatA[1,4]\CoeffAd
+					\itemtomacro\MatA[2,1]\CoeffAe
+					\itemtomacro\MatA[2,2]\CoeffAf
+					\itemtomacro\MatA[2,3]\CoeffAg
+					\itemtomacro\MatA[2,4]\CoeffAh
+					\itemtomacro\MatA[3,1]\CoeffAi
+					\itemtomacro\MatA[3,2]\CoeffAj
+					\itemtomacro\MatA[3,3]\CoeffAk
+					\itemtomacro\MatA[3,4]\CoeffAl
+					\itemtomacro\MatA[4,1]\CoeffAm
+					\itemtomacro\MatA[4,2]\CoeffAn
+					\itemtomacro\MatA[4,3]\CoeffAo
+					\itemtomacro\MatA[4,4]\CoeffAp
+					\itemtomacro\MatB[1,1]\CoeffBa
+					\itemtomacro\MatB[1,2]\CoeffBb
+					\itemtomacro\MatB[1,3]\CoeffBc
+					\itemtomacro\MatB[1,4]\CoeffBd
+					\itemtomacro\MatB[2,1]\CoeffBe
+					\itemtomacro\MatB[2,2]\CoeffBf
+					\itemtomacro\MatB[2,3]\CoeffBg
+					\itemtomacro\MatB[2,4]\CoeffBh
+					\itemtomacro\MatB[3,1]\CoeffBi
+					\itemtomacro\MatB[3,2]\CoeffBj
+					\itemtomacro\MatB[3,3]\CoeffBk
+					\itemtomacro\MatB[3,4]\CoeffBl
+					\itemtomacro\MatB[4,1]\CoeffBm
+					\itemtomacro\MatB[4,2]\CoeffBn
+					\itemtomacro\MatB[4,3]\CoeffBo
+					\itemtomacro\MatB[4,4]\CoeffBp
+					\IfBooleanTF{#1}%version étoilée := moins sur num
+						{%
+							\def\MatResA{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBe+\CoeffAc*\CoeffBi+\CoeffAd*\CoeffBm}}%
+							\def\MatResB{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBf+\CoeffAc*\CoeffBj+\CoeffAd*\CoeffBn}}%
+							\def\MatResC{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBc+\CoeffAb*\CoeffBg+\CoeffAc*\CoeffBk+\CoeffAd*\CoeffBo}}%
+							\def\MatResD{\ConvVersFrac*[#2]{\CoeffAa*\CoeffBd+\CoeffAb*\CoeffBh+\CoeffAc*\CoeffBl+\CoeffAd*\CoeffBp}}%
+							\def\MatResE{\ConvVersFrac*[#2]{\CoeffAe*\CoeffBa+\CoeffAf*\CoeffBe+\CoeffAg*\CoeffBi+\CoeffAh*\CoeffBm}}%
+							\def\MatResF{\ConvVersFrac*[#2]{\CoeffAe*\CoeffBb+\CoeffAf*\CoeffBf+\CoeffAg*\CoeffBj+\CoeffAh*\CoeffBn}}%
+							\def\MatResG{\ConvVersFrac*[#2]{\CoeffAe*\CoeffBc+\CoeffAf*\CoeffBg+\CoeffAg*\CoeffBk+\CoeffAh*\CoeffBo}}%
+							\def\MatResH{\ConvVersFrac*[#2]{\CoeffAe*\CoeffBd+\CoeffAf*\CoeffBh+\CoeffAg*\CoeffBl+\CoeffAh*\CoeffBp}}%
+							\def\MatResI{\ConvVersFrac*[#2]{\CoeffAi*\CoeffBa+\CoeffAj*\CoeffBe+\CoeffAk*\CoeffBi+\CoeffAl*\CoeffBm}}%
+							\def\MatResJ{\ConvVersFrac*[#2]{\CoeffAi*\CoeffBb+\CoeffAj*\CoeffBf+\CoeffAk*\CoeffBj+\CoeffAl*\CoeffBn}}%
+							\def\MatResK{\ConvVersFrac*[#2]{\CoeffAi*\CoeffBc+\CoeffAj*\CoeffBg+\CoeffAk*\CoeffBk+\CoeffAl*\CoeffBo}}%
+							\def\MatResL{\ConvVersFrac*[#2]{\CoeffAi*\CoeffBd+\CoeffAj*\CoeffBh+\CoeffAk*\CoeffBl+\CoeffAl*\CoeffBp}}%
+							\def\MatResM{\ConvVersFrac*[#2]{\CoeffAm*\CoeffBa+\CoeffAn*\CoeffBe+\CoeffAo*\CoeffBi+\CoeffAp*\CoeffBm}}%
+							\def\MatResN{\ConvVersFrac*[#2]{\CoeffAm*\CoeffBb+\CoeffAn*\CoeffBf+\CoeffAo*\CoeffBj+\CoeffAp*\CoeffBn}}%
+							\def\MatResO{\ConvVersFrac*[#2]{\CoeffAm*\CoeffBc+\CoeffAn*\CoeffBg+\CoeffAo*\CoeffBk+\CoeffAp*\CoeffBo}}%
+							\def\MatResP{\ConvVersFrac*[#2]{\CoeffAm*\CoeffBd+\CoeffAn*\CoeffBh+\CoeffAo*\CoeffBl+\CoeffAp*\CoeffBp}}%
+						}%
+						{%
+							\def\MatResA{\ConvVersFrac[#2]{\CoeffAa*\CoeffBa+\CoeffAb*\CoeffBe+\CoeffAc*\CoeffBi+\CoeffAd*\CoeffBm}}%
+							\def\MatResB{\ConvVersFrac[#2]{\CoeffAa*\CoeffBb+\CoeffAb*\CoeffBf+\CoeffAc*\CoeffBj+\CoeffAd*\CoeffBn}}%
+							\def\MatResC{\ConvVersFrac[#2]{\CoeffAa*\CoeffBc+\CoeffAb*\CoeffBg+\CoeffAc*\CoeffBk+\CoeffAd*\CoeffBo}}%
+							\def\MatResD{\ConvVersFrac[#2]{\CoeffAa*\CoeffBd+\CoeffAb*\CoeffBh+\CoeffAc*\CoeffBl+\CoeffAd*\CoeffBp}}%
+							\def\MatResE{\ConvVersFrac[#2]{\CoeffAe*\CoeffBa+\CoeffAf*\CoeffBe+\CoeffAg*\CoeffBi+\CoeffAh*\CoeffBm}}%
+							\def\MatResF{\ConvVersFrac[#2]{\CoeffAe*\CoeffBb+\CoeffAf*\CoeffBf+\CoeffAg*\CoeffBj+\CoeffAh*\CoeffBn}}%
+							\def\MatResG{\ConvVersFrac[#2]{\CoeffAe*\CoeffBc+\CoeffAf*\CoeffBg+\CoeffAg*\CoeffBk+\CoeffAh*\CoeffBo}}%
+							\def\MatResH{\ConvVersFrac[#2]{\CoeffAe*\CoeffBd+\CoeffAf*\CoeffBh+\CoeffAg*\CoeffBl+\CoeffAh*\CoeffBp}}%
+							\def\MatResI{\ConvVersFrac[#2]{\CoeffAi*\CoeffBa+\CoeffAj*\CoeffBe+\CoeffAk*\CoeffBi+\CoeffAl*\CoeffBm}}%
+							\def\MatResJ{\ConvVersFrac[#2]{\CoeffAi*\CoeffBb+\CoeffAj*\CoeffBf+\CoeffAk*\CoeffBj+\CoeffAl*\CoeffBn}}%
+							\def\MatResK{\ConvVersFrac[#2]{\CoeffAi*\CoeffBc+\CoeffAj*\CoeffBg+\CoeffAk*\CoeffBk+\CoeffAl*\CoeffBo}}%
+							\def\MatResL{\ConvVersFrac[#2]{\CoeffAi*\CoeffBd+\CoeffAj*\CoeffBh+\CoeffAk*\CoeffBl+\CoeffAl*\CoeffBp}}%
+							\def\MatResM{\ConvVersFrac[#2]{\CoeffAm*\CoeffBa+\CoeffAn*\CoeffBe+\CoeffAo*\CoeffBi+\CoeffAp*\CoeffBm}}%
+							\def\MatResN{\ConvVersFrac[#2]{\CoeffAm*\CoeffBb+\CoeffAn*\CoeffBf+\CoeffAo*\CoeffBj+\CoeffAp*\CoeffBn}}%
+							\def\MatResO{\ConvVersFrac[#2]{\CoeffAm*\CoeffBc+\CoeffAn*\CoeffBg+\CoeffAo*\CoeffBk+\CoeffAp*\CoeffBo}}%
+							\def\MatResP{\ConvVersFrac[#2]{\CoeffAm*\CoeffBd+\CoeffAn*\CoeffBh+\CoeffAo*\CoeffBl+\CoeffAp*\CoeffBp}}%
+						}%
+					\IfStrEq{#6}{Aff}%si matrice
+						{%
+							\IfBooleanTF{#1}%
+								{%
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac*[#2]{\CoeffAa} & \ConvVersFrac*[#2]{\CoeffAb} & \ConvVersFrac*[#2]{\CoeffAc} & \ConvVersFrac*[#2]{\CoeffAd} \\
+										\ConvVersFrac*[#2]{\CoeffAe} & \ConvVersFrac*[#2]{\CoeffAf} & \ConvVersFrac*[#2]{\CoeffAg} & \ConvVersFrac*[#2]{\CoeffAh} \\
+										\ConvVersFrac*[#2]{\CoeffAi} & \ConvVersFrac*[#2]{\CoeffAj} & \ConvVersFrac*[#2]{\CoeffAk} & \ConvVersFrac*[#2]{\CoeffAl} \\
+										\ConvVersFrac*[#2]{\CoeffAm} & \ConvVersFrac*[#2]{\CoeffAn} & \ConvVersFrac*[#2]{\CoeffAo} & \ConvVersFrac*[#2]{\CoeffAp}
+									\end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac*[#2]{\CoeffBa} & \ConvVersFrac*[#2]{\CoeffBb} & \ConvVersFrac*[#2]{\CoeffBc} & \ConvVersFrac*[#2]{\CoeffBd} \\
+										\ConvVersFrac*[#2]{\CoeffBe} & \ConvVersFrac*[#2]{\CoeffBf} & \ConvVersFrac*[#2]{\CoeffBg} & \ConvVersFrac*[#2]{\CoeffBh} \\
+										\ConvVersFrac*[#2]{\CoeffBi} & \ConvVersFrac*[#2]{\CoeffBj} & \ConvVersFrac*[#2]{\CoeffBk} & \ConvVersFrac*[#2]{\CoeffBl} \\
+										\ConvVersFrac*[#2]{\CoeffBm} & \ConvVersFrac*[#2]{\CoeffBn} & \ConvVersFrac*[#2]{\CoeffBo} & \ConvVersFrac*[#2]{\CoeffBp}
+									\end{pNiceMatrix}
+									=
+								}%
+								{%
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac[#2]{\CoeffAa} & \ConvVersFrac[#2]{\CoeffAb} & \ConvVersFrac[#2]{\CoeffAc} & \ConvVersFrac[#2]{\CoeffAd} \\
+										\ConvVersFrac[#2]{\CoeffAe} & \ConvVersFrac[#2]{\CoeffAf} & \ConvVersFrac[#2]{\CoeffAg} & \ConvVersFrac[#2]{\CoeffAh} \\
+										\ConvVersFrac[#2]{\CoeffAi} & \ConvVersFrac[#2]{\CoeffAj} & \ConvVersFrac[#2]{\CoeffAk} & \ConvVersFrac[#2]{\CoeffAl} \\
+										\ConvVersFrac[#2]{\CoeffAm} & \ConvVersFrac[#2]{\CoeffAn} & \ConvVersFrac[#2]{\CoeffAo} & \ConvVersFrac[#2]{\CoeffAp}
+									\end{pNiceMatrix}
+									\times
+									\begin{pNiceMatrix}[#3]
+										\ConvVersFrac[#2]{\CoeffBa} & \ConvVersFrac[#2]{\CoeffBb} & \ConvVersFrac[#2]{\CoeffBc} & \ConvVersFrac[#2]{\CoeffBd} \\
+										\ConvVersFrac[#2]{\CoeffBe} & \ConvVersFrac[#2]{\CoeffBf} & \ConvVersFrac[#2]{\CoeffBg} & \ConvVersFrac[#2]{\CoeffBh} \\
+										\ConvVersFrac[#2]{\CoeffBi} & \ConvVersFrac[#2]{\CoeffBj} & \ConvVersFrac[#2]{\CoeffBk} & \ConvVersFrac[#2]{\CoeffBl} \\
+										\ConvVersFrac[#2]{\CoeffBm} & \ConvVersFrac[#2]{\CoeffBn} & \ConvVersFrac[#2]{\CoeffBo} & \ConvVersFrac[#2]{\CoeffBp}
+									\end{pNiceMatrix}
+									=
+								}%
+						}{}%
+					\begin{pNiceMatrix}[#3]
+						{\MatResA} & {\MatResB} & {\MatResC} & {\MatResD} \\
+						{\MatResE} & {\MatResF} & {\MatResG} & {\MatResH} \\
+						{\MatResI} & {\MatResJ} & {\MatResK} & {\MatResL} \\
+						{\MatResM} & {\MatResN} & {\MatResO} & {\MatResP}
+					\end{pNiceMatrix}%
+				}{}%fin 4x4,4,4
+		}%
+}
+
+\NewDocumentCommand\EtatProbPY{ O{dec} D<>{} r() r() r() }{%
+	%1=options conversion
+	%2=options nicematrix
+	%3=matrice initiale
+	%4=matrice (,,;,,)
+	%5=niveau
+	%---------------------
+	%lectures des matrices
+	\setsepchar{,}%
+	\readlist*\MAMATRICEINIT{#3}%
+	\setsepchar{§/,}%
+	\readlist*\MAMATRICEA{#4}%
+	%les coeffs de A et le déterminant et les coeff de l'inverse
+	\ifnum \MAMATRICEAlen=4
+		\itemtomacro\MAMATRICEINIT[1]\MatInitA
+		\itemtomacro\MAMATRICEINIT[2]\MatInitB
+		\itemtomacro\MAMATRICEINIT[3]\MatInitC
+		\itemtomacro\MAMATRICEINIT[4]\MatInitD
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[1,4]\MatD
+		\itemtomacro\MAMATRICEA[2,1]\MatE
+		\itemtomacro\MAMATRICEA[2,2]\MatF
+		\itemtomacro\MAMATRICEA[2,3]\MatG
+		\itemtomacro\MAMATRICEA[2,4]\MatH
+		\itemtomacro\MAMATRICEA[3,1]\MatI
+		\itemtomacro\MAMATRICEA[3,2]\MatJ
+		\itemtomacro\MAMATRICEA[3,3]\MatK
+		\itemtomacro\MAMATRICEA[3,4]\MatL
+		\itemtomacro\MAMATRICEA[4,1]\MatM
+		\itemtomacro\MAMATRICEA[4,2]\MatN
+		\itemtomacro\MAMATRICEA[4,3]\MatO
+		\itemtomacro\MAMATRICEA[4,4]\MatP
+		%les solutions
+		\def\MatPuissA{\ConvVersFrac[#1]{\py{etat_prob_QQ(\MatInitA,\MatInitB,\MatInitC,\MatInitD,\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[0]}}}%
+		\def\MatPuissB{\ConvVersFrac[#1]{\py{etat_prob_QQ(\MatInitA,\MatInitB,\MatInitC,\MatInitD,\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[1]}}}%
+		\def\MatPuissC{\ConvVersFrac[#1]{\py{etat_prob_QQ(\MatInitA,\MatInitB,\MatInitC,\MatInitD,\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[2]}}}%
+		\def\MatPuissD{\ConvVersFrac[#1]{\py{etat_prob_QQ(\MatInitA,\MatInitB,\MatInitC,\MatInitD,\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,\MatJ,\MatK,\MatL,\MatM,\MatN,\MatO,\MatP,#5)[3]}}}%
+		%
+		\begin{pNiceMatrix}[#2]
+			{\MatPuissA} & {\MatPuissB} & {\MatPuissC} & {\MatPuissD}
+		\end{pNiceMatrix}%
+	\fi
+	\ifnum \MAMATRICEAlen=3
+		\itemtomacro\MAMATRICEINIT[1]\MatInitA
+		\itemtomacro\MAMATRICEINIT[2]\MatInitB
+		\itemtomacro\MAMATRICEINIT[3]\MatInitC
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[1,3]\MatC
+		\itemtomacro\MAMATRICEA[2,1]\MatD
+		\itemtomacro\MAMATRICEA[2,2]\MatE
+		\itemtomacro\MAMATRICEA[2,3]\MatF
+		\itemtomacro\MAMATRICEA[3,1]\MatG
+		\itemtomacro\MAMATRICEA[3,2]\MatH
+		\itemtomacro\MAMATRICEA[3,3]\MatI
+		%les solutions
+		\def\MatPuissA{\ConvVersFrac[#1]{\py{etat_prob_TT(\MatInitA,\MatInitB,\MatInitC,\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[0]}}}%
+		\def\MatPuissB{\ConvVersFrac[#1]{\py{etat_prob_TT(\MatInitA,\MatInitB,\MatInitC,\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[1]}}}%
+		\def\MatPuissC{\ConvVersFrac[#1]{\py{etat_prob_TT(\MatInitA,\MatInitB,\MatInitC,\MatA,\MatB,\MatC,\MatD,\MatE,\MatF,\MatG,\MatH,\MatI,#5)[2]}}}%
+		%
+		\begin{pNiceMatrix}[#2]
+			{\MatPuissA} & {\MatPuissB} & {\MatPuissC}
+		\end{pNiceMatrix}%
+	\fi
+	\ifnum \MAMATRICEAlen=2
+		\itemtomacro\MAMATRICEINIT[1]\MatInitA
+		\itemtomacro\MAMATRICEINIT[2]\MatInitB
+		\itemtomacro\MAMATRICEA[1,1]\MatA
+		\itemtomacro\MAMATRICEA[1,2]\MatB
+		\itemtomacro\MAMATRICEA[2,1]\MatC
+		\itemtomacro\MAMATRICEA[2,2]\MatD
+		%les solutions
+		\def\MatPuissA{\ConvVersFrac[#1]{\py{etat_prob_DD(\MatInitA,\MatInitB,\MatA,\MatB,\MatC,\MatD,#5)[0]}}}%
+		\def\MatPuissB{\ConvVersFrac[#1]{\py{etat_prob_DD(\MatInitA,\MatInitB,\MatA,\MatB,\MatC,\MatD,#5)[1]}}}%
+		%
+		\begin{pNiceMatrix}[#2]
+			{\MatPuissA} & {\MatPuissB}
+		\end{pNiceMatrix}%
+	\fi
+}
+
+\fi
+
+\endinput

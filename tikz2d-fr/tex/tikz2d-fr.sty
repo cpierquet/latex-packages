@@ -1,0 +1,290 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c
+% or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{tikz2d-fr}[2023/05/28 0.1.1 Petites aides pour l'utilisation de TikZ 2D]
+%0.1.1	Ajout de [TaillePolice] + Commandes Point(s) par transformations (trans / rotat / sym)
+%0.1.0	Version initiale
+
+%------Packages utiles
+\RequirePackage{tikz,pgffor}
+\RequirePackage{xstring}
+\RequirePackage{xintexpr}
+\RequirePackage{simplekv}
+\RequirePackage{listofitems}
+%------Librairies tikz
+\usetikzlibrary{calc}
+\usetikzlibrary{decorations,decorations.pathmorphing}
+
+%------Style main levée (avant dans ProfLycee)
+\tikzset{%
+	mainlevee/.style args={#1et#2}{decorate,decoration={random steps,segment length=#1,amplitude=#2}},
+	mainlevee/.default={5mm et 0.6pt}
+}
+
+%------Points
+%%------Commandes internes pour les nœuds et points
+\NewDocumentCommand\TransfPosTikzDD{ m }{%défaut below
+	\def\PosTmpLabel{below}
+	\IfEq{#1}{b}{\def\PosTmpLabel{below}}{}
+	\IfEq{#1}{d}{\def\PosTmpLabel{right}}{}
+	\IfEq{#1}{h}{\def\PosTmpLabel{above}}{}
+	\IfEq{#1}{g}{\def\PosTmpLabel{left}}{}
+	\IfEq{#1}{bg}{\def\PosTmpLabel{below left}}{}
+	\IfEq{#1}{bd}{\def\PosTmpLabel{below right}}{}
+	\IfEq{#1}{hg}{\def\PosTmpLabel{above left}}{}
+	\IfEq{#1}{hd}{\def\PosTmpLabel{above right}}{}
+}
+\tikzset{pics/croixdd/.style args={#1/#2}{
+		code={
+			\draw[line width={0.4*#1},rotate=#2] (-#1,0) -- (#1,0);
+			\draw[line width={0.4*#1},rotate=#2] (0,-#1) -- (0, #1);
+		}
+	},
+	pics/croixdd/.default={4pt/0}
+}
+
+%%------Créer/Placer/Nommer Point(s) 2d
+\defKV[TkzTwoDimPoint]{%
+	PosLabel=\def\TwoDimLabel{#1},%
+	DecalLabel=\def\TwoDimDecalLabel{#1},%
+	StyleMarque=\def\TwoDimStylePt{#1},%
+	TailleMarque=\def\TwoDimtaillePt{#1},%
+	Couleur=\def\TwoDimCoul{#1},%
+	TaillePolice=\def\TwoDimFonte{#1}
+}
+
+\setKVdefault[TkzTwoDimPoint]{%
+	PosLabel={b},%
+	DecalLabel=2pt,%
+	StyleMarque=o,%
+	TailleMarque=2.5pt,%
+	Couleur=black,%
+	Math=false,%
+	TaillePolice=\normalsize
+}
+
+\NewDocumentCommand\DefinirPoint{ s O{} m m D<>{#3} }{%
+	%*=label
+	%2=clés
+	%3=nom nœud
+	%4=coordonnées x,y
+	%5=label si différent
+	\useKVdefault[TkzTwoDimPoint]%
+	\setKV[TkzTwoDimPoint]{#2}%
+	\TransfPosTikzDD{\TwoDimLabel}
+	\coordinate (#3) at (#4) ;
+	\IfBooleanTF{#1}%on désactive le label avec (*)
+		{}%
+		{\draw (#3) node[\TwoDimCoul,\PosTmpLabel=\TwoDimDecalLabel,font=\TwoDimFonte] {\ifboolKV[TkzTwoDimPoint]{Math}{$#5$}{#5}} ;}%
+}
+
+\NewDocumentCommand\DefinirPoints{ s O{} m }{%
+	%*=labels off
+	%2=clés
+	%3=liste nom/coordonnées/pos
+	%\useKVdefault[TkzTwoDimPoint]%
+	%\setKV[TkzTwoDimPoint]{#2}%
+	\setsepchar[.]{ ./}%
+	\readlist*\ListePtsPlan{#3}
+	\xintifboolexpr{\ListePtsPlanlen == 1}%
+		{%
+			\IfBooleanTF{#1}%on désactive le label avec (*)
+				{%
+					\DefinirPoint*[#2]{\ListePtsPlan[1,1]}{\ListePtsPlan[1,2]}
+				}%
+					{%
+					\DefinirPoint[#2,PosLabel={\ListePtsPlan[1,3]}]{\ListePtsPlan[1,1]}{\ListePtsPlan[1,2]}
+				}%
+		}%
+		{%
+			\foreach \i in {1,2,...,\ListePtsPlanlen}
+				{%
+					\IfBooleanTF{#1}%on désactive le label avec (*)
+						{%
+							\DefinirPoint*[#2]{\ListePtsPlan[\i,1]}{\ListePtsPlan[\i,2]}
+						}%
+						{%
+							\DefinirPoint[#2,PosLabel={\ListePtsPlan[\i,3]}]{\ListePtsPlan[\i,1]}{\ListePtsPlan[\i,2]}
+						}%
+				}%
+		}%
+}
+
+\NewDocumentCommand\MarquerPoint{ O{} m }{%
+	%1=clés
+	%2=nom nœud
+	\useKVdefault[TkzTwoDimPoint]%
+	\setKV[TkzTwoDimPoint]{#1}%
+	\IfStrEq{\TwoDimStylePt}{o}%
+		{\filldraw[\TwoDimCoul] (#2) circle[radius={\TwoDimtaillePt-0.5pt}] ;}{}%
+	\IfStrEq{\TwoDimStylePt}{x}%
+		{\draw[\TwoDimCoul] (#2) pic{croixdd=\TwoDimtaillePt/45} ;}{}%
+	\IfStrEq{\TwoDimStylePt}{+}%
+		{\draw[\TwoDimCoul] (#2) pic{croixdd=\TwoDimtaillePt/0} ;}{}%
+}
+
+\NewDocumentCommand\MarquerPoints{ O{} m }{%
+	%1=clés
+	%2=liste nom/coordonnées/pos
+	%\useKVdefault[TkzTwoDimPoint]%
+	%\setKV[TkzTwoDimPoint]{#1}%
+	\foreach \i in {#2}
+	{%
+		\MarquerPoint[#1]{\i}
+	}%
+}
+
+%------Tracer des segments
+\defKV[TraceSegments]{%
+	Cap=\xdef\TracSegCap{#1},%
+	Join=\xdef\TracSegJoin{#1},%
+	Couleurs=\xdef\TracSegCoul{#1}
+}
+
+\setKVdefault[TraceSegments]{%
+	Cap=round,%
+	Couleurs=black,%
+	Cycle=false,%
+	Join=miter,%
+	Suite=false
+}
+
+\NewDocumentCommand\TracerSegments{ O{} D<>{thick} m }{%
+	\useKVdefault[TraceSegments]%
+	\setKV[TraceSegments]{#1}%
+	\ifboolKV[TraceSegments]{Suite}%si on enchaîne les points A->B->C, sinon A/B A/C ...
+		{%
+			\setsepchar{ }%
+			\readlist*\LPTSEGM{#3}%
+			\IfSubStr{\TracSegCoul}{,}%si ',' := un par un, sinon enchaine
+				{%
+					\setsepchar{,}%
+					\readlist*\LCSEGM{\TracSegCoul}%
+					\ifboolKV[TraceSegments]{Cycle}%
+						{%
+							\foreach \i in {1,2,...,\inteval{\LPTSEGMlen-1}}%
+								{%
+									\draw[color={\LCSEGM[\i]},line cap={\TracSegCap},#2] (\LPTSEGM[\i]) -- (\LPTSEGM[\inteval{\i+1}]) ;
+								}%
+							\draw[color={\LCSEGM[-1]},line cap={\TracSegCap},#2] (\LPTSEGM[-1]) -- (\LPTSEGM[1]) ;
+						}%
+						{%
+							\foreach \i in {1,2,...,\inteval{\LPTSEGMlen-1}}%
+								{%
+									\draw[color={\LCSEGM[\i]},line cap={\TracSegCap},#2] (\LPTSEGM[\i]) -- (\LPTSEGM[\inteval{\i+1}]) ;
+								}%
+						}%
+				}%
+				{%
+					\StrSubstitute{#3}{ }{)--(}[\tmplstpts]%
+					\xdef\tmplstptsconv{(\tmplstpts)}%
+					\ifboolKV[TraceSegments]{Cycle}%
+						{%
+							\draw[color={\TracSegCoul},line join={\TracSegJoin},#2] \tmplstptsconv--cycle ;
+						}%
+						{%
+							\draw[color={\TracSegCoul},line join={\TracSegJoin},#2] \tmplstptsconv ;
+						}%
+				}%
+		}%
+		{%
+			\setsepchar[.]{ ./}%
+			\readlist*\LPTSEGM{#3}%
+			\IfSubStr{\TracSegCoul}{,}%si ',' := un par un, sinon enchaine
+				{%
+					\setsepchar{,}
+					\readlist*\LCSEGM{\TracSegCoul}%
+					\xintifboolexpr{\LPTSEGMlen == 1}%
+						{%
+							\draw[color={\LCSEGM[1]},line cap={\TracSegCap},#2] (\LPTSEGM[1,1]) -- (\LPTSEGM[1,2]) ;
+						}%
+						{%
+							\foreach \i in {1,2,...,\LPTSEGMlen}%
+								{%
+									\draw[color={\LCSEGM[\i]},line cap={\TracSegCap},#2] (\LPTSEGM[\i,1]) -- (\LPTSEGM[\i,2]) ;
+								}%
+						}%
+					
+				}%
+				{%
+					\xintifboolexpr{\LPTSEGMlen == 1}%
+						{%
+							\draw[color={\TracSegCoul},line cap={\TracSegCap},#2] (\LPTSEGM[1,1]) -- (\LPTSEGM[1,2]) ;
+						}%
+						{%
+							\foreach \i in {1,2,...,\LPTSEGMlen}%
+							{%
+								\draw[color={\TracSegCoul},line cap={\TracSegCap},#2] (\LPTSEGM[\i,1]) -- (\LPTSEGM[\i,2]) ;
+							}%
+						}%
+				}%
+		}%
+}
+
+%------Définir des points par transformations
+\NewDocumentCommand\ImagePoint{ s O{} m D<>{\tmpptdef} }{%
+	\useKVdefault[TkzTwoDimPoint]%
+	\setKV[TkzTwoDimPoint]{#2}%
+	%si c'est un translation
+	\IfSubStr{#3}{t(}%
+		{%
+			\StrBefore{#3}{=}[\tmpptdef]%
+			\StrBetween{#3}{=}{+}[\tmpptdeb]%
+			\IfSubStr{#3}{,}%
+				{%
+					\StrBetween{#3}{t(}{,}[\tmpk]%
+					\StrBetween{#3}{,}{>}[\tmpvecdeb]%
+					\StrBetween{#3}{>}{)}[\tmpvecfin]%
+				}%
+				{%
+					\xdef\tmpk{1}%
+					\StrBetween{#3}{t(}{>}[\tmpvecdeb]%
+				}%
+			\StrBetween{#3}{>}{)}[\tmpvecfin]%
+			\TransfPosTikzDD{\TwoDimLabel}%
+			\coordinate (\tmpptdef) at ($(\tmpptdeb) + \tmpk*(\tmpvecfin) - \tmpk*(\tmpvecdeb)$) ;
+		}{}%
+	%si c'est une rotation
+	\IfSubStr{#3}{r(}%
+		{%
+			\StrBefore{#3}{=}[\tmpptdef]%
+			\StrBetween{#3}{=}{+}[\tmpptdeb]%
+			\StrBetween{#3}{r(}{,}[\tmpptcenter]%
+			\StrBetween{#3}{,}{)}[\tmpangle]%
+			\TransfPosTikzDD{\TwoDimLabel}%
+			\coordinate (\tmpptdef) at ([rotate around={\tmpangle:(\tmpptcenter)}]\tmpptdeb);
+		}{}%
+	%si c'est une symetrie
+	\IfSubStr{#3}{s(}%
+		{%
+			\StrBefore{#3}{=}[\tmpptdef]%
+			\StrBetween{#3}{=}{+}[\tmpptdeb]%
+			\StrBetween{#3}{s(}{)}[\tmpptcenter]%
+			\TransfPosTikzDD{\TwoDimLabel}%
+			\coordinate (\tmpptdef) at ([rotate around={180:(\tmpptcenter)}]\tmpptdeb);
+		}%
+		{}%
+	\IfBooleanTF{#1}%on désactive le label avec (*)
+		{}%
+		{\draw (\tmpptdef) node[\TwoDimCoul,\PosTmpLabel=\TwoDimDecalLabel,font=\TwoDimFonte] {\ifboolKV[TkzTwoDimPoint]{Math}{$#4$}{#4}} ;}%
+}
+
+\NewDocumentCommand\ImagesPoints{ s O{} m }{%
+	\useKVdefault[TkzTwoDimPoint]%
+	\setKV[TkzTwoDimPoint]{#2}%
+	\setsepchar{§}%
+	\readlist*\listetmptransf{#3}%
+	\foreachitem \formule \in \listetmptransf{%
+		\IfBooleanTF{#1}%
+			{%
+				\ImagePoint*[#2]{\formule}%
+			}%
+			{%
+				\ImagePoint[#2]{\formule}%
+			}%
+	}%
+}
+
+\endinput

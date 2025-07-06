@@ -1,0 +1,240 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[11pt,a4paper]{ltxdoc}
+\usepackage{thematicpuzzle}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{listings,listingsutf8}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [thematicpuzzle]}
+\rfoot{\sffamily\small - \thepage{} -}
+\usepackage{hologo}
+\usepackage{xspace}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+\def\TPversion{0.1.2}
+\def\TPdate{05/05/2025}
+\usepackage{soul}
+\usepackage{codehigh}
+\usepackage{tabularray}
+\sethlcolor{lightgray!25}
+\NewDocumentCommand\MontreCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+\usepackage[english]{babel}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{thematicpuzzle [en]}}\\
+				\\
+				{\LARGE Present a horizontal 'puzzle',} \\
+				{\LARGE with different themes.} \\
+				\\
+				{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{tabular}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}} \\
+\end{tabular}
+\end{center}
+
+\hrule
+
+\vfill
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5,halign=center]
+\ThematicPuzzle[BgColors={yellow!50,purple!50}]{A,B,C,D,E,F,G,H}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5,halign=center]
+\ThematicPuzzle[Thickness=1.25pt,Scale=2.75,BgColors={yellow!10,orange!10,green!10,teal!10,purple!10},Labels={Angry,Python,Cool,Apple,Battery},BorderColor=darkgray,IconsColor=teal!50!black]{\faAngry,\faPython,\faAngellist,\faApple*,\faBatteryHalf}
+\end{tcolorbox}
+
+\vfill
+
+\hfill{\footnotesize\itshape Tks to quark67 for his feedbacks.}
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+\hrule
+
+\vspace*{5mm}
+
+\section{Introduction}
+
+\subsection{Description}
+
+With this package, it is possible to create a \textit{horizontal banner}, in the form of a puzzle, with different themes.
+
+The styles are \textit{globally} fixed, but it is possible to configure:
+
+\begin{itemize}
+	\item colors;
+	\item icons;
+	\item labels.
+\end{itemize}
+
+The interior \textit{borders} are randomly oriented to the left or to the right, and the code takes care of coloring (if applicable) the parts satisfactorily.
+
+\subsection{Decorations}
+
+For the moment, the \textit{decorations} of the parts must be declared as characters, for example with icons from the \MontreCode{fontawesome5} package (loaded by the package).
+
+\smallskip
+
+Ultimately, it may be possible to insert images or \TikZ\ codes, this is one of the areas for improvement.
+
+\subsection{Loading}
+
+To load the package, simply add in the preamble :
+
+\begin{quote}
+\begin{verbatim}
+\usepackage{thematicpuzzle}                  %with fa5, default
+\usepackage[fa6]{thematicpuzzle}             %with fa6 (test)
+\end{verbatim}
+\end{quote}
+
+The useful and loaded packages are:
+
+\begin{itemize}
+	\item \MontreCode{tikz}, \MontreCode{fontawesome} et \MontreCode{xintexpr} ;
+	\item \MontreCode{simplekv}, \MontreCode{listofitems} et \MontreCode{xstring}.
+\end{itemize}
+
+\vfill
+
+\subsection{History}
+
+\begin{quote}
+\begin{verbatim}
+0.1.2: Bugfix + pre-compatibility with fa6
+0.1.1: Enhancements for colors
+0.1.0: Initial release
+\end{verbatim}
+\end{quote}
+
+\pagebreak
+
+\section{The macro}
+
+\subsection{General usage, keys and options}
+
+In order to create a \textit{theme puzzle}, the command is:
+
+\begin{quote}
+\begin{verbatim}
+%----thematic puzzle
+\ThematicPuzzle[keys]<tikz options>{decoration list}
+\end{verbatim}
+\end{quote}
+
+The \textsf{keys}, optional and between \MontreCode{[...]}, are:
+
+\begin{itemize}
+	\item \MontreCode{Thickness} := thickness of the lines (\MontreCode{1pt} by default);
+	\item \MontreCode{Scale} := global scale of the figure (\MontreCode{1} by default);
+	\item \MontreCode{BgColors} := background color(s) (see paragraph on colors);
+	\item \MontreCode{BorderColor} := color(s) of the borders (\MontreCode{black} by default);
+	\item \MontreCode{Labels} := (optional) labels of the themes (\MontreCode{\{\}} by default);
+	\item \MontreCode{ScaleLabels} := label scale (\MontreCode{1.15} by default);
+	\item \MontreCode{FontLabels} := label font (\MontreCode{\textbackslash tiny\textbackslash sffamily} by default);
+	\item \MontreCode{IconsColor} := color of icons and labels (\MontreCode{black} by default).
+\end{itemize}
+
+\medskip
+
+The optional argument, between \MontreCode{<...>}, corresponds to specific options (in \TikZ\ language) to pass to the created environment.
+
+\smallskip
+
+The obligatory argument, between \MontreCode{\{...\}}, corresponds to the list of decorations (in the form of \textit{characters}) of the different puzzle pieces, within form \MontreCode{\{deco<1>,deco<2>,...,deco<n>\}}
+
+\subsection{The colors of the boxes}
+
+Concerning the color of the boxes, it's the key \MontreCode{BgColors} which is in charge.
+
+It can work in several ways:
+
+\begin{itemize}
+	\item by default it is empty, which does not color the boxes ;
+	\item it can be given in a single form, via \MontreCode{BgColors=mycolor}, in which case all the boxes are of the same color;
+	\item we can give it in the form of a list \MontreCode{BgColors=\{mycolorA,mycolorB,...\}} and:
+	\begin{itemize}
+		\item in the case where the number of colors is sufficient, they are used one after the other;
+		\item otherwise, the code takes care of \textit{repeating} the pattern of the proposed colors.
+	\end{itemize}
+\end{itemize}
+
+\pagebreak
+
+\subsection{Examples}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\ThematicPuzzle{\faAngry,\faArchway,\faAtlas,\faAtom}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\ThematicPuzzle[Labels={Maths,History,Geo,Chemistry},BgColors={yellow!25,red!25}]%
+  {\faAngry,\faArchway,\faAtlas,\faAtom}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\ThematicPuzzle%
+  [Scale=2,BgColors=yellow!25,Labels={Maths,History,Geo,Chemistry}]%
+  {\faAngry,\faArchway,\faAtlas,\faAtom}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\ThematicPuzzle%
+  [Scale=3,BgColors={yellow!10,orange!10,red!10,teal!10},
+  Labels={Maths,History,Geo,Chemistry}]%
+  {\faAngry,\faArchway,\faAtlas,\faAtom}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\ThematicPuzzle%
+  [Thickness=2pt,Scale=1.25,
+  BgColors={yellow!10,orange!10,red!10,teal!10,purple!10,gray!10},
+  IconsColor=teal!50!black]%
+  {P,Y,T,H,O,N}
+\end{tcblisting}
+
+\end{document}

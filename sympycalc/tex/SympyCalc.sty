@@ -1,0 +1,464 @@
+% Author                         : C. Pierquet
+% licence                        : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{SympyCalc}[2023/05/08 v0.1.1 Sympy commands with TeX printing]
+% 0.1.1		Ajout du nombre dérivé + calcul image
+% 0.1		Version initiale
+
+%------Packages utiles
+\RequirePackage{xstring}
+
+%------Scripts python
+\begin{python}
+#initialisations
+from sympy import *
+init_printing()
+x, y, z, t = symbols('x y z t')
+
+#commandes génériques
+def latex_fr(expr) :
+	return latex(expr,imaginary_unit='ri',ln_notation=True,decimal_separator='comma').replace("e^","\\text{e}^")
+
+def latex_frit(expr) :
+	return latex(expr,ln_notation=True,decimal_separator='comma')
+
+def latex_fr_simpl(expr) :
+	return latex(simplify(expr),imaginary_unit='ri',ln_notation=True,decimal_separator='comma').replace("e^","\\text{e}^")
+
+def latex_frit_simpl(expr) :
+	return latex(simplify(expr),ln_notation=True,decimal_separator='comma')
+
+#commandes de résolutions
+def latex_fr_resol(expr,var) :
+	if '=' in expr :
+		expr = expr.replace('=','-(') + ')'
+	res = solve(expr,var)
+	res = [simplify(element) for element in res if 'I' not in str(element)]
+	res = latex(res,imaginary_unit='ri',ln_notation=True,decimal_separator='comma')
+	res = res.replace("e^","\\text{e}^")
+	res = res.replace("\\ ","")
+	res = res.replace("[","\\{")
+	res = res.replace("]","\\}")
+	return res
+
+def latex_frit_resol(expr,var) :
+	if '=' in expr :
+		expr = expr.replace('=','-+(') + ')'
+	res = solve(expr,var)
+	res = [simplify(element) for element in res if 'I' not in str(element)]
+	res = latex(res,ln_notation=True,decimal_separator='comma')
+	res = res.replace("e^","\\text{e}^")
+	res = res.replace("\\ ","")
+	res = res.replace("[","\\{")
+	res = res.replace("]","\\}")
+	return res
+
+def latex_fr_resolC(expr,var) :
+	if '=' in expr :
+		expr = expr.replace('=','-(') + ')'
+	res = solve(expr,var)
+	res = [simplify(element) for element in res]
+	res = latex(res,imaginary_unit='ri',ln_notation=True,decimal_separator='comma')
+	res = res.replace("e^","\\text{e}^")
+	res = res.replace("\\ ","")
+	res = res.replace("[","\\{")
+	res = res.replace("]","\\}")
+	return res
+
+def latex_frit_resolC(expr,var) :
+	if '=' in expr :
+		expr = expr.replace('=','-+(') + ')'
+	res = solve(expr,var)
+	res = [simplify(element) for element in res]
+	res = latex(res,ln_notation=True,decimal_separator='comma')
+	res = res.replace("e^","\\text{e}^")
+	res = res.replace("\\ ","")
+	res = res.replace("[","\\{")
+	res = res.replace("]","\\}")
+	return res
+
+#commandes de nombres dérivés
+def latex_fr_nbderiv(expr,var,pta,pos) :
+	tmpf = Lambda(var,expr)
+	res = (tmpf(var)-tmpf(pta))/(var-pta)
+	res = limit(res,var,pta,pos)
+	res = latex(res,ln_notation=True,decimal_separator='comma')
+	res = res.replace("e^","\\text{e}^")
+	return res
+
+def latex_frit_nbderiv(expr,var,pta,pos) :
+	tmpf = Lambda(var,expr)
+	res = (tmpf(var)-tmpf(pta))/(var-pta)
+	res = limit(res,var,pta,pos)
+	res = latex(res,ln_notation=True,decimal_separator='comma')
+	return res
+
+def latex_fr_nbderiv_simpl(expr,var,pta,pos) :
+	tmpf = Lambda(var,expr)
+	res = (tmpf(var)-tmpf(pta))/(var-pta)
+	res = simplify(limit(res,var,pta,pos))
+	res = latex(res,ln_notation=True,decimal_separator='comma')
+	res = res.replace("e^","\\text{e}^")
+	return res
+
+def latex_frit_nbderiv_simpl(expr,var,pta,pos) :
+	tmpf = Lambda(var,expr)
+	res = (tmpf(var)-tmpf(pta))/(var-pta)
+	res = simplify(limit(res,var,pta,pos))
+	res = latex(res,ln_notation=True,decimal_separator='comma')
+	return res
+
+#Patch pour +oo
+def patch_oo(res) :
+	if res == '\\infty' :
+		return '+\\infty'
+	else :
+		return res
+
+#Commande de forme exponentielle
+def forme_expo(z) :
+	return abs(z)*exp(I*arg(z))
+
+#Commande de calcul d'image
+def imagefct(expr,var,pta) :
+	return expr.subs(var,pta)
+
+\end{python}
+
+%------Commandes de base
+\NewDocumentCommand\sympycalc{ s D<>{Simplif} m }{%
+	\StrSubstitute{#3}{/}{*S.One/}[\argtmp]%
+	\IfBooleanTF{#1}%*=frit, no*=fr
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{latex_frit_simpl(\argtmp)}%
+				}%
+				{%
+					\py{latex_frit(\argtmp)}%
+				}%
+		}%
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{latex_fr_simpl(\argtmp)}%
+				}%
+				{%
+					\py{latex_fr(\argtmp)}%
+				}%
+		}%
+}
+\NewDocumentCommand\dsympycalc{ s D<>{Simplif} m }{%
+	\IfBooleanTF{#1}%
+		{\displaystyle\sympycalc*<#2>{#3}}%
+		{\displaystyle\sympycalc<#2>{#3}}%
+}
+
+%------Image
+\NewDocumentCommand\sympyimage{ s D<>{Simplif} m O{x} m }{%
+	\StrSubstitute{#3}{/}{*S.One/}[\argtmp]%
+	\IfBooleanTF{#1}%*=frit, no*=fr
+	{%
+		\IfStrEq{#2}{Simplif}%
+		{%
+			\py{latex_frit_simpl(imagefct(\argtmp,#4,#5))}%
+		}%
+		{%
+			\py{latex_frit(imagefct(\argtmp,#4,#5))}%
+		}%
+	}%
+	{%
+		\IfStrEq{#2}{Simplif}%
+		{%
+			\py{latex_fr_simpl(imagefct(\argtmp,#4,#5))}%
+		}%
+		{%
+			\py{latex_fr(imagefct(\argtmp,#4,#5))}%
+		}%
+	}%
+}
+\NewDocumentCommand\dsympyimage{ s D<>{Simplif} m O{x} m }{%
+	\IfBooleanTF{#1}%
+	{\displaystyle\sympyimage*<#2>{#3}[#4]{#5}}%
+	{\displaystyle\sympyimage<#2>{#3}[#4]{#5}}%
+}
+
+%------Développer
+\NewDocumentCommand\sympydev{ s D<>{Simplif} m O{x} }{%
+	\StrSubstitute{#3}{/}{*S.One/}[\argtmp]%
+	\IfBooleanTF{#1}%*=frit, no*=fr
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{latex_frit_simpl(expand(\argtmp,#4))}%
+				}%
+				{%
+					\py{latex_frit(expand(\argtmp,#4))}%
+				}%
+		}%
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{latex_fr_simpl(expand(\argtmp,#4))}%
+				}%
+				{%
+					\py{latex_fr(expand(\argtmp,#4))}%
+				}%
+		}%
+}
+\NewDocumentCommand\dsympydev{ s D<>{Simplif} m O{x} }{%
+	\IfBooleanTF{#1}%
+		{\displaystyle\sympydev*<#2>{#3}[#4]}%
+		{\displaystyle\sympydev<#2>{#3}[#4]}%
+}
+
+%------Factoriser
+\NewDocumentCommand\sympyfact{ s D<>{Simplif} m }{%
+	\StrSubstitute{#3}{/}{*S.One/}[\argtmp]%
+	\IfBooleanTF{#1}%*=frit, no*=fr
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{latex_frit_simpl(factor(\argtmp))}%
+				}%
+				{%
+					\py{latex_frit(factor(\argtmp))}%
+				}%
+		}%
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{latex_fr_simpl(factor(\argtmp))}%
+				}%
+				{%
+					\py{latex_fr(factor(\argtmp))}%
+				}%
+		}%
+}
+\NewDocumentCommand\dsympyfact{ s D<>{Simplif} m }{%
+	\IfBooleanTF{#1}%
+		{\displaystyle\sympyfact*<#2>{#3}}%
+		{\displaystyle\sympyfact<#2>{#3}}%
+}
+
+%------Image
+
+%------Dériver
+\NewDocumentCommand\sympyderiv{ s D<>{Simplif} m O{x} }{%
+	\StrSubstitute{#3}{/}{*S.One/}[\argtmp]%
+	\IfBooleanTF{#1}%*=frit, no*=fr
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{latex_frit_simpl(diff(\argtmp,#4))}%
+				}%
+				{%
+					\py{latex_frit(diff(\argtmp,#4))}%
+				}%
+		}%
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{latex_fr_simpl(diff(\argtmp,#4))}%
+				}%
+				{%
+					\py{latex_fr(diff(\argtmp,#4))}%
+				}%
+		}%
+}
+\NewDocumentCommand\dsympyderiv{ s D<>{Simplif} m O{x} }{%
+	\IfBooleanTF{#1}%
+		{\displaystyle\sympyderiv*<#2>{#3}[#4]}%
+		{\displaystyle\sympyderiv<#2>{#3}[#4]}%
+}
+
+%------Primitiver
+\NewDocumentCommand\sympyprim{ s D<>{Simplif} m O{x} }{%
+	\StrSubstitute{#3}{/}{*S.One/}[\argtmp]%
+	\IfBooleanTF{#1}%*=frit, no*=fr
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{latex_frit_simpl(integrate(\argtmp,#4))}%
+				}%
+				{%
+					\py{latex_frit(integrate(\argtmp,#4))}%
+				}%
+		}%
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{latex_fr_simpl(integrate(\argtmp,#4))}%
+				}%
+				{%
+					\py{latex_fr(integrate(\argtmp,#4))}%
+				}%
+		}%
+}
+\NewDocumentCommand\dsympyprim{ s D<>{Simplif} m O{x} }{%
+	\IfBooleanTF{#1}%
+		{\displaystyle\sympyprim*<#2>{#3}[#4]}%
+		{\displaystyle\sympyprim<#2>{#3}[#4]}%
+}
+
+%------Intégrer
+\NewDocumentCommand\sympyintegr{ s D<>{Simplif} m O{x} m m }{%
+	\StrSubstitute{#3}{/}{*S.One/}[\argtmp]%
+	\IfBooleanTF{#1}%*=frit, no*=fr
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{patch_oo(latex_frit_simpl(integrate(\argtmp,(#4,#5,#6))))}%
+				}%
+				{%
+					\py{patch_oo(latex_frit(integrate(\argtmp,(#4,#5,#6))))}%
+				}%
+		}%
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{patch_oo(latex_fr_simpl(integrate(\argtmp,(#4,#5,#6))))}%
+				}%
+				{%
+					\py{patch_oo(latex_fr(integrate(\argtmp,(#4,#5,#6))))}%
+				}%
+		}%
+}
+\NewDocumentCommand\dsympyintegr{ s D<>{Simplif} m O{x} m m }{%
+	\IfBooleanTF{#1}%
+		{\displaystyle\sympyintegr*<#2>{#3}[#4]{#5}{#6}}%
+		{\displaystyle\sympyintegr<#2>{#3}[#4]{#5}{#6}}%
+}
+
+%------Limite
+\NewDocumentCommand\sympylim{ s D<>{Simplif} m O{x} m O{} }{%
+	\StrSubstitute{#3}{/}{*S.One/}[\argtmp]%
+	\def\poslim{'+-'}
+	\IfStrEq{#6}{g}%
+		{\def\poslim{'-'}}{}
+	\IfStrEq{#6}{d}%
+		{\def\poslim{'+'}}{}
+	\IfBooleanTF{#1}%*=frit, no*=fr
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{patch_oo(latex_frit_simpl(limit(\argtmp,#4,#5,\poslim)))}%
+				}%
+				{%
+					\py{patch_oo(latex_frit(limit(\argtmp,#4,#5,\poslim)))}%
+				}%
+		}%
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{patch_oo(latex_fr_simpl(limit(\argtmp,#4,#5,\poslim)))}%
+				}%
+				{%
+					\py{patch_oo(latex_fr(limit(\argtmp,#4,#5,\poslim)))}%
+				}%
+		}%
+}
+\NewDocumentCommand\dsympylim{ s D<>{Simplif} m O{x} m O{} }{%
+	\IfBooleanTF{#1}%
+		{\displaystyle\sympylim*<#2>{#3}[#4]{#5}[#6]}%
+		{\displaystyle\sympylim<#2>{#3}[#4]{#5}[#6]}%
+}
+
+%------Nb deriv
+\NewDocumentCommand\sympynbderiv{ s D<>{Simplif} m O{x} m O{} }{%
+	\StrSubstitute{#3}{/}{*S.One/}[\argtmp]%
+	\def\poslim{'+-'}
+	\IfStrEq{#6}{g}%
+		{\def\poslim{'-'}}{}
+	\IfStrEq{#6}{d}%
+		{\def\poslim{'+'}}{}
+	\IfBooleanTF{#1}%*=frit, no*=fr
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{patch_oo(latex_fr_nbderiv_simpl(\argtmp,#4,#5,\poslim))}%
+				}%
+				{%
+					\py{patch_oo(latex_frit_nbderiv_simpl(\argtmp,#4,#5,\poslim))}%
+				}%
+		}%
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{patch_oo(latex_fr_nbderiv(\argtmp,#4,#5,\poslim))}%
+				}%
+				{%
+					\py{patch_oo(latex_frit_nbderiv(\argtmp,#4,#5,\poslim))}%
+				}%
+		}%
+}
+\NewDocumentCommand\dsympynbderiv{ s D<>{Simplif} m O{x} m O{} }{%
+	\IfBooleanTF{#1}%
+		{\displaystyle\sympynbderiv*<#2>{#3}[#4]{#5}[#6]}%
+		{\displaystyle\sympynbderiv<#2>{#3}[#4]{#5}[#6]}%
+}
+
+%------FormeExpo
+\NewDocumentCommand\sympyfexpo{ s D<>{NoSimplif} m }{%
+	%\StrSubstitute{#3}{/}{*S.One/}[\argtmp]%
+	\IfBooleanTF{#1}%*=frit, no*=fr
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{latex_frit_simpl(forme_expo(#3))}%
+				}%
+				{%
+					\py{latex_frit(forme_expo(#3))}%
+				}%
+		}%
+		{%
+			\IfStrEq{#2}{Simplif}%
+				{%
+					\py{latex_fr_simpl(forme_expo(#3))}%
+				}%
+				{%
+					\py{latex_fr(forme_expo(#3))}%
+				}%
+		}%
+}
+\NewDocumentCommand\dsympyfexpo{ s D<>{NoSimplif} m }{%
+	\IfBooleanTF{#1}%
+		{\displaystyle\sympyfexpo*<#2>{#3}}%
+		{\displaystyle\sympyfexpo<#2>{#3}}%
+}
+
+%------Solutions (R ou C)
+\NewDocumentCommand\sympyresol{ s D<>{Simplif} m O{x} }{%
+	\StrSubstitute{#3}{/}{*S.One/}[\argtmp]%
+	\IfBooleanTF{#1}%*=frit, no*=fr
+		{%
+			\py{latex_frit_resol('\argtmp',#4)}%
+		}%
+		{%
+			\py{latex_fr_resol('\argtmp',#4)}%
+		}%
+}
+\NewDocumentCommand\dsympyresol{ s D<>{Simplif} m O{x} }{%
+	\IfBooleanTF{#1}%
+		{\displaystyle\sympyresol*<#2>{#3}[#4]}%
+		{\displaystyle\sympyresol<#2>{#3}[#4]}%
+}
+
+\NewDocumentCommand\sympyresolC{ s D<>{Simplif} m O{x} }{%
+	\StrSubstitute{#3}{/}{*S.One/}[\argtmp]%
+	\IfBooleanTF{#1}%*=frit, no*=fr
+		{%
+			\py{latex_frit_resolC('\argtmp',#4)}%
+		}%
+		{%
+			\py{latex_fr_resolC('\argtmp',#4)}%
+		}%
+}
+\NewDocumentCommand\dsympyresolC{ s D<>{Simplif} m O{x} }{%
+	\IfBooleanTF{#1}%
+		{\displaystyle\sympyresolC*<#2>{#3}[#4]}%
+		{\displaystyle\sympyresolC<#2>{#3}[#4]}%
+}
+
+\endinput

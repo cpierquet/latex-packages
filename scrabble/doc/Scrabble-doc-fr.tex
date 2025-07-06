@@ -1,0 +1,431 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass{article}
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{Scrabble}
+%\usepackage[upright]{fourier}
+%\usepackage[scaled=0.875]{helvet}
+%\renewcommand\ttdefault{lmtt}
+%\usepackage{cabin}
+\usepackage{amsmath,amssymb}
+\usepackage{fontawesome5}
+\usepackage{enumitem}
+\usepackage{tabularray}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [Scrabble]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+
+%\usepackage{hvlogos}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+\newcommand\TableauDocumentation{%
+	\begin{tblr}{width=\linewidth,colspec={X[c]X[c]X[c]X[c]X[c]X[c]},cells={font=\sffamily}}
+		{\huge \LaTeX} & & & & &\\
+		& {\huge \hologo{pdfLaTeX}} & & & & \\
+		& & {\huge \hologo{LuaLaTeX}} & & & \\
+		& & & {\huge \TikZ} & & \\
+		& & & & {\huge \TeXLive} & \\
+		& & & & & {\huge \hologo{MiKTeX}} \\
+	\end{tblr}
+}
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=1.5cm]{geometry}
+\setlength{\parindent}{0pt}
+\definecolor{LightGray}{gray}{0.9}
+
+\def\TPversion{0.1.8}
+\def\TPdate{5 mai 2025}
+
+\usepackage[most]{tcolorbox}
+\usepackage{minted2}
+\tcbuselibrary{minted}
+\NewTCBListing{PresentationCode}{ O{blue} m }{%
+	sharp corners=downhill,enhanced,arc=12pt,skin=bicolor,%
+	colback=#1!1!white,colframe=#1!75!black,colbacklower=white,%
+	attach boxed title to top right={yshift=-\tcboxedtitleheight},title=Code \LaTeX,%
+	boxed title style={%
+		colframe=#1!75!black,colback=#1!15!white,%
+		,sharp corners=downhill,arc=12pt,%
+	},%
+	fonttitle=\color{#1!90!black}\itshape\ttfamily\footnotesize,%
+	listing engine=minted,minted style=colorful,
+	minted language=tex,minted options={tabsize=4,fontsize=\footnotesize,autogobble},
+	#2
+}
+
+\newcommand\Cle[1]{{\bfseries\sffamily\textlangle #1\textrangle}}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\vspace{2cm}
+
+\begin{center}
+	\begin{minipage}{0.75\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{Scrabble [fr]}}\\
+				\\
+				{\LARGE Un plateau de Scrabble,} \\
+				\\
+				{\LARGE avec mots ou non.} \\
+				\\
+				{Scrabble\texttrademark{} est une marque déposée de Hasbro\texttrademark{} et Mattel\texttrademark{}.}
+			\end{tabular}
+			
+			\medskip
+			
+			{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
+\end{tabular}
+\end{center}
+
+\vspace{0.5cm}
+
+{$\blacktriangleright$~~Quelques commandes pour afficher un plateau de Scrabble, avec ou sans mots.}
+
+\smallskip
+
+{$\blacktriangleright$~~Possibilité de mettre le plateau et les points pour les versions Française, Anglaise, Allemande et Espagnole.}
+
+\smallskip
+
+{$\blacktriangleright$~~Possibilité d'insérer un mot en mode \textit{en ligne}, en mode mélange ou non.}
+
+\smallskip
+
+{$\blacktriangleright$~~Idée(s) venant de \scalebox{0.8}[1]{\ttfamily\url{ https://tex.stackexchange.com/questions/194780/tikz-drawing-a-rectangle-with-spikes-on-borders}}}
+%
+%{\centering \small \url{https://tex.stackexchange.com/questions/194780/tikz-drawing-a-rectangle-with-spikes-on-borders}}
+
+\vspace{0.15cm}
+
+\begin{center}
+	\PlateauScrabble[Echelle=0.5]
+	~~~~
+	\begin{EnvScrabbleFR}[Echelle=0.5]
+		\ScrabblePlaceMot{TIKZ}{1,13}
+		\ScrabblePlaceMot[V]{pstricks}{1,15}
+		\ScrabblePlaceMot[V]{KaTeX}{3,13}
+		\ScrabblePlaceMot{cleveref}{1,10}
+		\ScrabblePlaceMot[V]{METAPOST}{7,11}
+		\ScrabblePlaceMot{LUALATEX}{5,8}
+		\ScrabblePlaceMot[V]{ProfLy*ee}{11,15}
+		\ScrabblePlaceMot{PROFCOLLE*E}{1,1}
+		\ScrabblePlaceMot{SYNTAXE}{7,5}
+		\ScrabblePlaceMot[V]{STRIN*}{10,6}
+	\end{EnvScrabbleFR}
+\end{center}
+
+\vspace{0.5cm}
+
+%\hfill{}\textit{Merci aux membres du groupe \faFacebook{} du \og Coin \LaTeX{} \fg{} pour leur aide et leurs idées !}
+
+\hfill{}\textit{Merci à Denis Bitouzé, à Patrick Bideault, à quark67 et à jmbeckers pour leurs retours et idées !}
+
+\vfill
+
+\hrule
+
+\medskip
+
+\TableauDocumentation
+
+\medskip
+
+\hrule
+
+\medskip
+
+\newpage
+
+\part*{Introduction}
+
+\section{Le package Scrabble}
+
+\subsection{Source}
+
+Certaines idées viennent de \scalebox{0.75}[1]{\ttfamily\url{ https://tex.stackexchange.com/questions/194780/tikz-drawing-a-rectangle-with-spikes-on-borders}}, avec une proposition de Mark Wibrow.
+
+\smallskip
+
+Le package a ensuite été \textit{construit} et \textit{modestement enrichi} autour de styles et méthodes proposées par Mark Wibrow.
+
+\subsection{Chargement du package, packages utilisés}
+
+Le package \textsf{Scrabble} se charge dans le préambule via la commande :
+
+\begin{PresentationCode}{listing only}
+\usepackage{Scrabble}
+\end{PresentationCode}
+
+Il est compatible avec les compilations usuelles en \textsf{latex}, \textsf{pdflatex}, \textsf{lualatex} ou \textsf{xelatex}.
+
+\medskip
+
+Il charge les packages et librairies suivantes :
+
+\begin{itemize}
+	\item \texttt{tikz} avec les librairies \Cle{calc} et \Cle{shapes.geometric} ;
+	\item \texttt{pgf} et \texttt{pgffor} ;
+	\item \texttt{xstring}, \texttt{xparse}, \texttt{simplekv} et \texttt{listofitems}.
+\end{itemize}
+
+\subsection{\og Philosophie \fg{} du package}
+
+L'idée est de proposer, grâce à des commandes en \TikZ, des \textsf{commandes} ou \textsf{environnements} pour présenter un plateau de Scrabble\texttrademark{} :
+
+\begin{itemize}
+	\item \textit{autonome} ;
+	\item dans un \textit{environnement} avec rajout éventuel de mots.
+\end{itemize}
+
+\begin{PresentationCode}{listing only}
+%commande autonome pour afficher le plateau (vide)
+\PlateauScrabble<langue>[clés]
+
+%environnement francisé, avec clés en français, avec mot(s)
+\begin{EnvScrabbleFR}<langue>[clés]
+	\ScrabblePlaceMot[orientation]{mot}{coordonnées de la case de départ}
+	\ScrabblePlaceMot[orientation]{mot}{coordonnées de la case de départ}
+\end{EnvScrabbleFR}
+\end{PresentationCode}
+
+\subsection{Langues}
+
+Les \textsf{commandes}, \textsf{environnements} et \textsf{clés} proposées le sont en version \textsf{française} (et \textsf{anglaise}, voir fin de la doc), et les cases et points peuvent être affichées en :
+
+\begin{itemize}
+	\item français (code ISO 639-1 FR) ;
+	\item anglais (code ISO 639-1 EN) ;
+	\item allemand (code ISO 639-1 DE) ;
+	\item espagnol (code ISO 639-1 ES).
+\end{itemize}
+
+\pagebreak
+
+\section{Commandes, clés et options}
+
+\subsection{Le plateau seul}
+
+Le premier argument, \textit{optionnel}, entre \texttt{<...>} est la \Cle{langue} d'affichage peut-être choisie parmi :
+
+\hfill\Cle{FR} (français, par défaut), \Cle{EN} (anglais), \Cle{DE} (allemand) et \Cle{ES} (espagnol).\hfill~
+
+\smallskip
+
+Le second argument, \textit{optionnel}, entre \texttt{[...]} propose les \Cle{clés} :
+
+\begin{itemize}
+	\item \Cle{Echelle} pour spécifier l'échelle d'affichage (l'unité de base étant 1~cm) ; \hfill~défaut : \Cle{1}
+	\item \Cle{Echellelabels} pour spécifier l'échelle d'affichage des labels ; \hfill~défaut : \Cle{1}
+	\item le booléen \Cle{Cadre} pour afficher un cadre autour du plateau ; \hfill~défaut : \Cle{true}
+	\item le booléen \Cle{Labels} pour afficher le \textit{nom} des cases ;\hfill~défaut : \Cle{true}
+	\item le booléen \Cle{Aide} pour afficher une aide pour repérer les cases ;\hfill~défaut : \Cle{false}
+\end{itemize}
+
+\begin{PresentationCode}{}
+\PlateauScrabble[Labels=false,Echelle=0.55]\\     %plateau sans le nom des cases
+\PlateauScrabble<EN>[Echelle=0.55,Cadre=false]    %plateau en anglais, sans cadre
+\end{PresentationCode}
+
+\newpage
+
+\subsection{Le plateau avec des mots}
+
+Il s'agit dans ce cas d'utiliser l'\textsf{environnement} ainsi que la \textsf{commande} spécifique pour placer les mots.
+
+\smallskip
+
+En ce qui concerne les options de l'\textsf{environnement}, ce sont les mêmes que pour la \textsf{commande} autonome.
+
+\smallskip
+
+Pour le placement des mots :
+
+\begin{itemize}
+	\item le premier argument, \textit{optionnel}, entre \texttt{[...]} est l'orientation du mot, à choisir entre \Cle{H} (par défaut) et \Cle{V} (en fait toute autre lettre que \Cle{H} !) ;
+	\item le deuxième argument, \textit{obligatoire}, entre \texttt{\{...\}}, est le mot à placer, en majuscules ou minuscules ;
+	\item le dernier argument, \textit{obligatoire}, entre \texttt{\{...\}}, correspond aux coordonnées de la case sur laquelle sera placée le début du mot (la case \texttt{(1,1)} étant la case au bord Bas/Gauche).
+\end{itemize}
+
+\textbf{Remarque 1 :} la langue choisie permettra également d'avoir les jetons avec le \textit{bon} nombre de points !
+
+\smallskip
+
+\textbf{Remarque 2 :} le \textit{blanc} (ou \textit{joker}) est obtenu par la lettre \texttt{*}.
+
+\begin{PresentationCode}{}
+\begin{EnvScrabbleFR}[Echelle=0.75,Labels=false,Aide]
+	\ScrabblePlaceMot{TIKZ}{1,13}
+	\ScrabblePlaceMot[V]{pstricks}{1,15}
+	\ScrabblePlaceMot[V]{KaTeX}{3,13}
+	\ScrabblePlaceMot{cleveref}{1,10}
+	\ScrabblePlaceMot[V]{METAPOST}{7,11}
+	\ScrabblePlaceMot{LUALATEX}{5,8}
+	\ScrabblePlaceMot[V]{ProfLy*ee}{11,15}
+	\ScrabblePlaceMot{PROFCOLLE*E}{1,1}
+	\ScrabblePlaceMot{SYNTAXE}{7,5}
+	\ScrabblePlaceMot[V]{STRIN*}{10,6}
+\end{EnvScrabbleFR}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\begin{EnvScrabbleFR}<FR>[Echelle=0.55]
+	\ScrabblePlaceMot{TIKZ}{1,13}  \ScrabblePlaceMot[V]{pstricks}{1,15}
+	\draw (7,15) node[font=\LARGE\sffamily] {Version française} ; %code rajouté
+\end{EnvScrabbleFR}~~~
+\begin{EnvScrabbleFR}<EN>[Echelle=0.55]
+	\ScrabblePlaceMot{TIKZ}{1,13} \ScrabblePlaceMot[V]{pstricks}{1,15}
+	\draw (7,15) node[font=\LARGE\sffamily] {Version anglaise} ; %code rajouté
+\end{EnvScrabbleFR}\\
+\begin{EnvScrabbleFR}<DE>[Echelle=0.55]
+	\ScrabblePlaceMot{TIKZ}{1,13} \ScrabblePlaceMot[V]{pstricks}{1,15}
+	\draw (7,15) node[font=\LARGE\sffamily] {Version allemande} ; %code rajouté
+\end{EnvScrabbleFR}~~~
+\begin{EnvScrabbleFR}<ES>[Echelle=0.55]
+	\ScrabblePlaceMot{RO7OSO}{1,12} \ScrabblePlaceMot[V]{pstricks}{1,15}
+	\draw (7,15) node[font=\LARGE\sffamily] {Version espagnole} ; %code rajouté
+\end{EnvScrabbleFR}
+\end{PresentationCode}
+
+\newpage
+
+\subsection{Mot \textit{en ligne}}
+
+Il s'agit ici de proposer une commande pour insérer un mot en mode \textit{en ligne}, avec ajustement automatique de la taille et de la position.
+
+\begin{PresentationCode}{listing only}
+%commande pour placer un mot en ligne
+\MotScrabble[clés]{mot}
+\end{PresentationCode}
+
+Le premier argument, \textit{optionnel}, entre \texttt{[...]} permet de paramétrer les \Cle{clés} :
+
+\begin{itemize}
+	\item \Cle{CouleurFond} pour la couleur des cases ; \hfill~défaut : \Cle{yellow!40}
+	\item \Cle{Police} pour la police des caractères ; \hfill~défaut : \Cle{\textbackslash bfseries\textbackslash sffamily}
+	\item \Cle{CouleurPolice} pour la couleur des caractères ; \hfill~défaut : \Cle{black}
+	\item \Cle{Langue} pour choisir la langue (pour les nombres de points) ; \hfill~défaut : \Cle{FR}
+	\item \Cle{Offset} pour spécifier un espacement horizontal entre les jetons ; \hfill~défaut : \Cle{0.1pt}
+	\item \Cle{Echelle} pour spécifier une échelle de base pour les textes ; \hfill~défaut : \Cle{0.6}
+	\item \Cle{Melange} (booléen) pour mélanger les lettres ; \hfill~défaut : \Cle{false}
+	\item \Cle{Score} qui est un booléen pour afficher le score de chaque jeton.\hfill~défaut : \Cle{true}
+\end{itemize}
+
+\textbf{Remarque 1 :} le code se charge de positionner le jeton pour un alignement et une mise à l'échelle \textit{satisfaisants} en fonction de la police active.
+
+\smallskip
+
+\textbf{Remarque 2 :} le \textit{blanc} (ou \textit{joker}) est obtenu par le caractère \texttt{*}.
+
+\begin{PresentationCode}{}
+Essai de mot de Scrabble en ligne \MotScrabble{TE*ST} pour voir !
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+{\Huge\sffamily En ligne \MotScrabble[CouleurFond=teal!5,CouleurPolice=orange]{PYTHAG*RE} pour voir !}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\scalebox{3}[3]{En ligne \MotScrabble[Langue=EN,Police=\ttfamily,Echelle=0.75,Melange]{PYTHAG*RE} pour voir !}
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+{\LARGE En ligne \MotScrabble[Score=false,Offset=1pt,CouleurFond=orange!50]{PSTRICKS} pour voir !}
+\end{PresentationCode}
+
+\newpage
+
+\subsection{Commandes anglaises}
+
+Le package ayant potentiellement une portée \textit{internationale}, les commandes existent également en version \textit{anglaise}. Dans ce cas, les \Cle{clés} sont également à donner en anglais.
+
+\begin{PresentationCode}{}
+\ScrabbleBoard[Scale=0.5] \ScrabbleBoard[Labels=false,Scale=0.5]
+\end{PresentationCode}
+
+\begin{PresentationCode}{}
+\begin{EnvScrabble}[Scale=0.5]
+	\ScrabblePutWord{TIKZ}{1,13}  \ScrabblePutWord[V]{pstricks}{1,15}
+	\draw (7,15) node[font=\LARGE\sffamily] {Version anglaise} ; %code rajouté
+\end{EnvScrabble}~~~
+\begin{EnvScrabble}<ES>[Scale=0.5]
+	\ScrabblePutWord{TIKZ}{1,13} \ScrabblePutWord[V]{pstricks}{1,15}
+	\draw (7,15) node[font=\LARGE\sffamily] {Version espagnole} ; %code rajouté
+\end{EnvScrabble}
+\end{PresentationCode}
+
+\newpage
+
+\subsection{Lettres spéciales}
+
+Il est possible d'utiliser des jetons spéciaux, pour les langues \textsf{<DE>} et \textsf{<ES>}, mais pour des raisons de compatibilité, les caractères spéciaux sont \textit{codés} par des chiffres :
+
+\begin{itemize}
+	\item \texttt{0} code la lettre \fbox{\"O} avec le score 8 ;
+	\item \texttt{1} code la lettre \fbox{\"A} avec le score 6 ;
+	\item \texttt{4} code la lettre \fbox{\"U} avec le score 6 ;
+	\item \texttt{6} code la \textit{lettre} \fbox{CH} avec le score 5 ;
+	\item \texttt{7} code la \textit{lettre} \fbox{\~{N}} avec le score 8 ;
+	\item \texttt{8} code la \textit{lettre} \fbox{RR} avec le score 8 ;
+	\item \texttt{9} code la \textit{lettre} \fbox{LL} avec le score 8.
+\end{itemize}
+
+\begin{PresentationCode}{}
+{\Huge \MotScrabble[Langue=DE,Police=\ttfamily,Echelle=0.75]{104AAA}}
+
+{\Huge \MotScrabble[Langue=ES,Police=\sffamily,Echelle=0.75]{RO7OSO689}}
+\end{PresentationCode}
+
+\newpage
+
+\part*{Historique}
+
+\verb|v0.1.8|~:~~~~Correction de bugs
+
+\verb|v0.1.7|~:~~~~Ajout d'une clé \textsf{[Melange]} pour la version en ligne.
+
+\verb|v0.1.6|~:~~~~Correction d'un bug avec les jokers ; améliorations du plateau \textsf{<DE>}
+
+\verb|v0.1.5|~:~~~~Ajout de lettres spéciales pour \textsf{<DE>} et \textsf{<ES>}
+
+\verb|v0.1.4|~:~~~~Ajout d'une commande pour placer en \textit{mot} en mode \og en ligne \fg
+
+\verb|v0.1.3|~:~~~~Meilleure gestion de la saisie des mots (sans virgule, majuscule ou minuscule)
+
+\verb|v0.1.2|~:~~~~Clé \textsf{<EchelleLabels>} pour modifier l'échelle des noms des cases
+
+\verb|v0.1  |~:~~~~Version initiale
+
+\end{document}

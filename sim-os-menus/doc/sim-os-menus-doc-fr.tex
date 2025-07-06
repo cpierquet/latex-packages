@@ -1,0 +1,583 @@
+% !TeX TXS-program:compile = txs:///pdflatex
+
+\documentclass[11pt,a4paper]{ltxdoc}
+\usepackage{sim-os-menus}
+\usepackage{graphicx}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+%\rhead{\sffamily\small\affloetalab[Legende]}
+\lfoot{\sffamily\small [sim-os-menus]}
+\rfoot{\sffamily\small - \thepage{} -}
+%\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+\def\TPversion{0.1.6}
+\def\TPdate{05/05/2025}
+\usepackage{soul}
+\sethlcolor{lightgray!25}
+\NewDocumentCommand\MontreCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+\usepackage[french]{babel}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{sim-os-menus [fr]}}\\
+				\\
+				{\LARGE Présenter un 'terminal', une 'visionneuse'} \\
+				{\LARGE ou un 'menu contextuel' comme sur un ordi.} \\
+				\\
+				{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{tabular}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}} \\
+\end{tabular}
+\end{center}
+
+\hrule
+
+\vfill
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\MenuContextuel[Police=\sffamily,ListeSeps={1,3/1/4/1/},ListeDecals={1,2,1,0}]{%
+	Menu1(>),Menu2,Menu3(>)(*),Menu4 §
+	SousMenuA(>),SousMenuB(>)(*) §
+	SousSousMenu1,SousSousMenu2,SousSousMenu3(>)(*),SousSousMenu4,SousSousMenu5(>) §
+	SSSSMa,SSSSMa(>)(*),SSSSMc §
+	OK(*),KO
+}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\begin{TerminalUnix}[largeur=12cm,Align=center]{}
+test@DESKTOP:~$ ping -c 2 ctan.org
+PING ctan.org (5.35.249.60) 56(84) bytes of data.
+\end{TerminalUnix}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\begin{VisionnIMG}[Largeur=12cm]{}
+\includegraphics[width=5cm]{example-image-b}
+\end{VisionnIMG}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\begin{TerminalMac}[Largeur=14cm,Align=flush left]{}
+[test@server]$ ping -c 2 ctan.org
+PING ctan.org (5.35.249.60) 56(84) bytes of data.
+\end{TerminalMac}
+\end{tcolorbox}
+
+\vfill~
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+\hrule
+
+\vspace*{5mm}
+
+\section{Introduction}
+
+\subsection{Description}
+
+Avec ce packages, il est possible de créer un \og faux \fg{} terminal, ou un \og faux \fg{} menu contextuel, ou encore une \og fausse \fg{} visionneuse, comme sur un écran d'ordinateur !
+
+Les styles sont \textit{globalement} fixés, mais quelques personnalisations sont possibles.
+
+\subsection{Chargement}
+
+Pour charger le package, il suffit d'ajouter dans le préambule :
+
+\begin{quote}
+\begin{verbatim}
+\usepackage{sim-os-menus}
+\end{verbatim}
+\end{quote}
+
+Les packages utiles, et chargés sont :
+
+\begin{itemize}
+	\item \MontreCode{tikz} (avec \MontreCode{calc,positioning}), \MontreCode{pgf}, \MontreCode{pgffor} ;
+	\item \MontreCode{calc}, \MontreCode{fontawesome5}, \MontreCode{forest} (avec \MontreCode{edges}) ;
+	\item \MontreCode{simplekv}, \MontreCode{xintexpr}, \MontreCode{listofitems}, \MontreCode{xstring} ;
+	\item \MontreCode{settobox}, \MontreCode{tabularray} ;
+	\item \MontreCode{tcolorbox} (avec \MontreCode{breakable,fitting,skins,listings,listingsutf8,hooks}).
+\end{itemize}
+
+À noter que pour conserver une compatibilité avec les packages \MontreCode{fontawesome5} et \MontreCode{fontawesome6}, une option de chargement est possible :
+
+\begin{quote}
+\begin{verbatim}
+\usepackage{sim-os-menus}                  %chargement de fa5, par défaut
+\usepackage[fa6]{sim-os-menus}             %chargement de fa6
+\end{verbatim}
+\end{quote}
+
+\vfill
+
+\subsection{Historique}
+
+\begin{quote}
+\begin{verbatim}
+0.1.6 : Correction de bugs + pré-compatibilité avec fa5/fa6
+0.1.4 : Mastodon/BlueSky
+0.1.3 : Arborescence type explorateur
+0.1.2 : Visionneuse 'like' de scripts
+0.1.1 : Ajout des commandes en [fr]
+0.1.0 : Version initiale
+\end{verbatim}
+\end{quote}
+
+\pagebreak
+
+\section{Les commandes disponibles}
+
+\subsection{Menu contextuel}
+
+Dans le but de créer un menu contextuel, la commande est :
+
+\begin{quote}
+\begin{verbatim}
+%----menu contextuel
+\MenuContextuel[clés]{liste des items}<options tikz>
+\end{verbatim}
+\end{quote}
+
+Les \textsf{clés}, optionnelles et entre \MontreCode{[...]}, sont :
+
+\begin{itemize}
+	\item \MontreCode{CoulFond} := couleur du fond ;
+	\item \MontreCode{CoulSurlig} : = couleur du surlignage ;
+	\item \MontreCode{Arrondi} := booléen pour arrondir les coins (\MontreCode{true} par défaut) ;
+	\item \MontreCode{Police} := police pour les items (\MontreCode{\textbackslash normalsize\textbackslash normalfont} par défaut) ;
+	\item \MontreCode{CoulItems} := couleur(s) des items (\MontreCode{black} par défaut) ;
+	\item \MontreCode{MargeV} := marge verticale des lignes (\MontreCode{6pt} par défaut) ;
+	\item \MontreCode{MargeH} := marge horizontale des lignes (\MontreCode{12pt} par défaut) ;
+	\item \MontreCode{Fleche} := caractère pour la flèche (\MontreCode{\textbackslash faCaretRight} par défaut) ;
+	\item \MontreCode{ListeSeps} := liste des éventuels séparateurs (vide ou pour tous les niveaux !) ;
+	\item \MontreCode{ListeIcones} := liste des éventuelles icones  (vide ou pour tous les niveaux/items !) ;
+	\item \MontreCode{ListeDecals} := liste des éventuels décalages verticaux pour les sous-menus (à partir du n°2, \ldots !) (vide ou pour tous les sous-niveaux !) ;
+	\item \MontreCode{Icones} := booléen pour afficher les icones (\MontreCode{false} par défaut) ;
+	\item \MontreCode{Barre} := booléen pour une petite barre verticale après les éventuelles icones small vertical bar with icons (\MontreCode{true} par défaut) ;
+	\item \MontreCode{Space} := espacement horizontal entre les sous-menus (\MontreCode{-0.125} par défaut).
+\end{itemize}
+
+\medskip
+
+L'argument obligatoire, entre \MontreCode{\{...\}}, correspond à la liste des items, sous la forme :
+
+\smallskip
+
+\hfill\MontreCode{item1A,item1B,... § item2A,itemp2B,... § ...}\hfill~
+
+\begin{itemize}
+	\item si un item se termine par \MontreCode{(*)}, cela correspond au \textit{début} du sous-menu suivant (\underline{un seul} par niveau !) ;
+	\item si un item se termine par \MontreCode{(>)} (\underline{avant} un éventuel \MontreCode{(*)}), une \textit{flèche} est écrite à la fin de la ligne de l'item.
+\end{itemize}
+
+Une syntaxe correcte est fondamentale pour que le code présente correctement le menu contextuel !
+
+\vspace{5mm}
+
+Quelques conseils, du fait des \textsf{clés sensibles} \MontreCode{ListeIcones}, \MontreCode{ListeDecals} et \MontreCode{ListeSeps} :
+
+\begin{itemize}
+	\item \MontreCode{ListeIcones} doit avoir le même nombre d'éléments que le nombre de menus/items (avec des items vides possibles) ;
+	\item \MontreCode{ListeSeps} doit avoir le même nombre d'éléments que le nombre de niveaux (avec des niveaux vides possibles) ;
+	\item \MontreCode{ListeDecals} doit avoir le même nombre d'éléments que le nombre de sous-menus (Avec 0 si pas de décalage !).
+\end{itemize}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+%style par défaut
+\MenuContextuel{Item1A(>),Item1B,Item1C(>)(*),Item1D § Item2A(*),Item2B(>),Item2C}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+%style personnalisé
+\MenuContextuel[Arrondi=false,CoulFond=yellow,CoulSurlign=teal,%
+  ListeSeps={1,3/2},CoulItems={black/white},Icones,Espacement=0,%
+  ListeIcones={\faCut,\faIcon[regular]{copy},\faCopy,\faPaste / \faNotEqual}]
+  {Item1A(>)(*),Item1B,Item1C(>),Item1D § Item2A(*),Item2B(>),Item2C}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\MenuContextuel[Police=\sffamily,ListeSeps={1,3/1/4/1/},ListeDecals={1,2,1,0}]{%
+  Menu1(>),Menu2,Menu3(>)(*),Menu4 §
+  SousMenuA(>),SousMenuB(>)(*) §
+  SousSousMenu1,SousSousMenu2,SousSousMenu3(>)(*),SousSousMenu4,SousSousMenu5(>) §
+  SSSSMa,SSSSMa(>)(*),SSSSMc §
+  OK(*),KO
+}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Terminal}
+
+Pour créer un \og faux \fg{} terminal (Win/UNiX/Mac), les environnements sont :
+
+\begin{quote}
+\begin{verbatim}
+%----Terminal Windows
+\begin{TerminalWin}[clés]{options tcbox}
+    ...
+\end{TerminalWin}
+
+%----Terminal UNiX
+\begin{TerminalUnix}[clés]{options tcbox}
+    ...
+\end{TerminalUnix}
+
+%----Terminal OSX
+\begin{TerminalMac}[clés]{options tcbox}
+    ...
+\end{TerminalMac}
+\end{verbatim}
+\end{quote}
+
+Les \textsf{clés}, optionnelles et entre \MontreCode{[...]}, sont :
+
+\begin{itemize}
+	\item \MontreCode{Titre} := titre du terminal (\MontreCode{Terminal Win/UNiX/Mac} par défaut) ;
+	\item \MontreCode{Align} := alignement horizontal (paragraphe) du terminal (\MontreCode{center} par défaut) ;
+	\item \MontreCode{Largeur} := largeur du terminal (\MontreCode{\textbackslash linewidth} par défaut) ;
+	\item \MontreCode{Icones} := booléen pour afficher des icones (\MontreCode{true} par défaut).
+\end{itemize}
+
+\medskip
+
+L'argument obligatoire, entre \MontreCode{\{...\}}, correspond à des options spécifiques, à passer à la \textsf{tcolorbox}.
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{TerminalWin}{}
+Microsoft Windows [version 10.0.22000.493]
+(c) Microsoft Corporation. Tous droits réservés.
+C:\Users\test>ping ctan.org
+Envoi d'une requête 'ping' sur ctan.org [5.35.249.60] avec 32 octets de données :
+Réponse de 5.35.249.60 : octets=32 temps=35 ms TTL=51
+Réponse de 5.35.249.60 : octets=32 temps=37 ms TTL=51
+Réponse de 5.35.249.60 : octets=32 temps=35 ms TTL=51
+Réponse de 5.35.249.60 : octets=32 temps=39 ms TTL=51
+Statistiques Ping pour 5.35.249.60:
+Paquets : envoyés = 4, reçus = 4, perdus = 0 (perte 0%),
+Durée approximative des boucles en millisecondes :
+Minimum = 35ms, Maximum = 39ms, Moyenne = 36ms
+\end{TerminalWin}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{TerminalUnix}[Align=flush right]{hbox}
+test@DESKTOP:~$ ping -c 2 ctan.org
+PING ctan.org (5.35.249.60) 56(84) bytes of data.
+\end{TerminalUnix}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{TerminalMac}[Largeur=14cm,Align=flush left]{}
+[test@server]$ ping -c 2 ctan.org
+PING ctan.org (5.35.249.60) 56(84) bytes of data.
+\end{TerminalMac}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Visionneuses}
+
+Pour créer une \og fausse\fg{} visionneuse, les environnements sont :
+
+\begin{quote}
+\begin{verbatim}
+%----Visionneuse PDF
+\begin{VisionnPDF}[clés]{options tcbox}
+    ....
+\end{VisionnPDF}
+
+%----Visionneuse d'images
+\begin{VisionnIMG}[clés]{options tcbox}
+    ....
+\end{VisionnIMG}
+
+%----Visionneuse de script python
+\begin{VisionnPY}[clés]{options tcbox}
+    ....
+\end{VisionnPY}
+\end{verbatim}
+\end{quote}
+
+Les \textsf{clés}, optionnelles et entre \MontreCode{[...]}, sont :
+
+\begin{itemize}
+	\item \MontreCode{Titre} := titre de la visionneuse par défaut ;
+	\item \MontreCode{Align} := alignement horizontal (paragraphe) de la visionneuse (\MontreCode{center} par défaut) ;
+	\item \MontreCode{AlignH} := alignement horizontal (du contenu) de la visionneuse (\MontreCode{center} par défaut) ;
+	\item \MontreCode{Largeur} := largeur de la visionneuse (\MontreCode{\textbackslash linewidth} par défaut) ;
+	\item \MontreCode{Icones} := booléen pour afficher des icones (\MontreCode{true} par défaut).
+\end{itemize}
+
+\medskip
+
+L'argument obligatoire, entre \MontreCode{\{...\}}, correspond à des options spécifiques, à passer à la \textsf{tcolorbox}.
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{VisionnPDF}{hbox}
+\fbox{\includegraphics[page=35,width=6cm]{ProfLycee-doc.pdf}}%
+\fbox{\includegraphics[page=36,width=6cm]{ProfLycee-doc.pdf}}
+\end{VisionnPDF}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{VisionnPDF}[Largeur=14cm,Icones=false]{}
+\fbox{\includegraphics[page=65,width=4.75cm]{ProfLycee-doc.pdf}}
+\end{VisionnPDF}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{VisionnIMG}[Icones=false]{hbox}
+\includegraphics[width=5cm]{example-image-b}
+\end{VisionnIMG}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{VisionnIMG}[Largeur=12cm]{}
+\includegraphics[width=3cm]{example-image}
+\end{VisionnIMG}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+%avec un environnement de présentation de codes si nécessaire
+\begin{VisionnPY}[Largeur=12cm]{}
+\begin{lstlisting}%
+    [
+        language=python,basicstyle=\ttfamily\small,
+        keywordstyle=\color{green!50!black},tabsize=4,
+        keywordstyle={[2]\color{magenta}},
+        numbers=left,numbersep=3mm,xleftmargin=5mm,
+        aboveskip=0pt,belowskip=0pt,
+        numberstyle=\footnotesize\ttfamily\color{gray}
+    ]
+nterms = int(input("Entrez un nombre: "))
+
+n1 = 0
+n2 = 1
+
+print("\n la suite Fibonacci est : ")
+print(n1, ",", n2, end=", ")
+
+for i in range(2, nterms):
+    suivant = n1 + n2
+    print(suivant, end=", ")
+
+n1 = n2
+n2 = suivant
+\end{lstlisting}
+\end{VisionnPY}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Arborescence de dossiers/fichiers}
+
+Le package \MontreCode{forest}, et sa librairie \MontreCode{edges}, permet de présenter des arbres, à la manière d'une arborescence de fichiers.
+
+\begin{quote}
+\begin{verbatim}
+\begin{ArborDossiers}[clés]{options forest}
+    [dossier,ADdos
+        [sous-dossier,ADdos]
+        [sous-dossier,ADdos
+            [fichier1,ADfic]
+            [fichier2,ADfic]
+        ...
+    ]
+        ...
+    ]
+\end{ArborDossiers}
+\end{verbatim}
+\end{quote}
+
+Les \textsf{clés}, optionnelles et entre \MontreCode{[...]}, sont :
+
+\begin{itemize}
+	\item \MontreCode{Police} := police des labels ;
+	\item \MontreCode{CoulIcoD} := couleur des icones \textsf{dossier} (\MontreCode{gray} par défaut) ;
+	\item \MontreCode{CoulIcoF} := couleur des icones \textsf{fichier} (\MontreCode{gray} par défaut) ;
+	\item \MontreCode{AffIcoD} := booléen pour afficher les icones \textsf{dossier} ;
+	\item \MontreCode{AffIcoF} := booléen pour afficher les icones \textsf{fichier} ;
+	\item \MontreCode{EspaceV} := espace vertical entre les items (\MontreCode{0.15em} par défaut) ;
+	\item \MontreCode{IcoD} := icone par défaut \textsf{dossier} ;
+	\item \MontreCode{IcoF} := icone par défaut \textsf{fichier}.
+\end{itemize}
+
+\medskip
+
+Les \textsf{dossiers} sont à déclarer sous la forme \MontreCode{<nom\_dossier>,ADdos}.
+
+Les \textsf{fichiers} sont à déclarer sous la forme \MontreCode{<nom\_fichier>,ADfic}.
+
+\medskip
+
+L'argument obligatoire, entre \MontreCode{\{...\}}, correspond à des options spécifiques, à passer en langage \textsf{forest}.
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{ArborDossiers}{}
+    [dossier,ADdos
+        [sous-dossier,ADdos]
+        [sous-dossier,ADdos
+            [fichier1,ADfic]
+            [fichier2,ADfic]
+        ]
+        [fichier3,ADfic]
+    ]
+\end{ArborDossiers}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{ArborDossiers}%
+    [Police=\sffamily,CoulIcoD=yellow!50!pink,AffIcoF,CoulIcoF=teal,EspaceV=0.5em]%
+    {}
+    [dossier,ADdos
+        [sous-dossier,ADdos]
+        [sous-dossier,ADdos
+            [fichier1,ADfic]
+            [fichier2,ADfic]
+        ]
+        [fichier3,ADfic]
+    ]
+\end{ArborDossiers}
+\end{tcblisting}
+
+Les styles sont définis de manière globale, et ils peuvent être redéfinis si besoin.
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\tikzset{ADtrait/.style={thick,->,densely dashed,red,>=latex}}
+\begin{ArborDossiers}%
+    [Police=\sffamily,CoulIcoD=yellow!50!pink,AffIcoF,CoulIcoF=teal,EspaceV=0.5em]%
+    {l sep=2em}
+    [dossier,ADdos
+        [sous-dossier,ADdos]
+        [sous-dossier,ADdos
+            [fichier1,ADfic]
+            [fichier2,ADfic]
+        ]
+        [fichier3,ADfic]
+    ]
+\end{ArborDossiers}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Pouets comme sous Mastodon ou BlueSky}
+
+Il est possible de présenter des messages comme sur les plateformes Mastodon ou BlueSky.
+
+\begin{quote}
+\begin{verbatim}
+\begin{MastodonPost}[clés]<options tcolorbox>
+...
+\end{MastodonPost}
+
+\begin{BlueSkyPost}[clés]<options tcolorbox>
+...
+\end{BlueSkyPost}
+\end{verbatim}
+\end{quote}
+
+Les \textsf{clés} disponibles sont, à donner entre \MontreCode{[...]} :
+\begin{itemize}
+	\item \MontreCode{width} : largeur de la boîte ;
+	\item \MontreCode{avatar} : avatar du compte  (si possible en format \textit{carré});
+	\item \MontreCode{name} : pseudo du compte ;
+	\item \MontreCode{account} : compte ;
+	\item \MontreCode{time} : temps passé depuis le post ;
+	\item \MontreCode{counters} : compteurs pour les views/likes/shares ;
+	\item \MontreCode{font} : police du message ;
+	\item \MontreCode{colbg} : couleur de fond de la boîte.
+\end{itemize}
+
+Les entêtes et pies peuvent être redéfinis grâce aux macros suivante :
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5,listing only}
+\newcommand\mastodonheader{%
+	\begin{tblr}{width=\linewidth,colspec={Q[c,m]X[m,l]Q[m,l]},
+			colsep=0pt,cells={font=\scriptsize\sffamily}}
+		$\vcenter{\hbox{\includegraphics[height=4ex]{\mastodonaccountavatar}}}$& {\hspace*{1.25ex}\mastodonaccountname \\ \hspace*{1.25ex}\color{darkgray}{\mastodonaccountadress}} & \color{darkgray}{\faGlobeAmericas~\mastodontime} \\
+	\end{tblr}\par\medskip
+}
+
+\newcommand\blueskyheader{%
+	{\scriptsize\sffamily\textbf{\mastodonaccountname}~
+	\textcolor{darkgray}{\mastodonaccountadress~
+	\textperiodcentered~\mastodontime}}\par\medskip
+}
+
+\newcommand\mastodonfooter{%
+	\textcolor{darkgray}{\scriptsize\scalebox{-1}[1]{\faShare}~\mastodonnumbers[1] \hfill \faRetweet~\mastodonnumbers[2] \hfill \faStar[regular]~\mastodonnumbers[3] \hfill \faBookmark[regular] \hfill \faEllipsisH}
+}
+
+\newcommand\blueskyfooter{%
+	\textcolor{darkgray}{\scriptsize\faComment*[regular]~\mastodonnumbers[1] \hfill \faRetweet~\mastodonnumbers[2] \hfill \faHeart[regular]~\mastodonnumbers[3] \hfill \faEllipsisH \hfill~}
+}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{MastodonPost}
+\textbf{TeX} est un système logiciel libre de composition de documents, indépendant du matériel utilisé pour la visualisation ou l'impression. Il a été créé à partir de 1977 par le mathématicien et informaticien Donald Knuth, excédé par la piètre qualité de la typographie des logiciels d'édition de l'époque. \TeX\ a vu le jour pour la première fois en 1978. Il est principalement conçu pour l'édition de documents techniques et est largement utilisé par les scientifiques, particulièrement en mathématiques, physique, bio-informatique, astronomie et informatique. Il est également extensible et permet notamment l'édition de documents plus complexes (affiches, plaquettes publicitaires, partitions musicales\ldots).
+
+\medskip
+
+\url{https://www.latex-project.org}
+\end{MastodonPost}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\begin{BlueSkyPost}[width=12cm,account={\symbol{64}TeX.bluesky.social}]
+\textbf{TeX} est un système logiciel libre de composition de documents, indépendant du matériel utilisé pour la visualisation ou l'impression. Il a été créé à partir de 1977 par le mathématicien et informaticien Donald Knuth, excédé par la piètre qualité de la typographie des logiciels d'édition de l'époque. \TeX\ a vu le jour pour la première fois en 1978. Il est principalement conçu pour l'édition de documents techniques et est largement utilisé par les scientifiques, particulièrement en mathématiques, physique, bio-informatique, astronomie et informatique. Il est également extensible et permet notamment l'édition de documents plus complexes (affiches, plaquettes publicitaires, partitions musicales\ldots).
+
+\smallskip
+
+\hfill\includegraphics[width=0.667\linewidth]{example-image-16x9.pdf}\hfill~
+
+\smallskip
+
+\url{https://www.latex-project.org}
+\end{BlueSkyPost}
+\end{tcblisting}
+
+\end{document}

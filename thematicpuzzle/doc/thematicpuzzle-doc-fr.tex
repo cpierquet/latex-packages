@@ -1,0 +1,307 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[11pt,a4paper]{ltxdoc}
+\usepackage{thematicpuzzle}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{tcolorbox}
+\tcbuselibrary{listings,listingsutf8}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [thematicpuzzle]}
+\rfoot{\sffamily\small - \thepage{} -}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+\def\TPversion{0.1.2}
+\def\TPdate{05/05/2024}
+\usepackage{soul}
+\usepackage{codehigh}
+\usepackage{tabularray}
+\sethlcolor{lightgray!25}
+\NewDocumentCommand\MontreCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+\usepackage[french]{babel}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{thematicpuzzle [fr]}}\\
+				\\
+				{\LARGE Présenter un 'puzzle' horizontal,} \\
+				{\LARGE avec différents thèmes.} \\
+				\\
+				{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{tabular}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}} \\
+\end{tabular}
+\end{center}
+
+\hrule
+
+\vfill
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5,halign=center]
+\PuzzleThemes[CouleursFond={yellow!50,purple!50}]{A,B,C,D,E,F,G,H}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5,halign=center]
+\PuzzleThemes[Epaisseur=1.25pt,Echelle=2.75,CouleursFond={yellow!10,orange!10,green!10,teal!10,purple!10},Labels={Probas,Stats,Python,Suites,Matrices},CouleurBord=darkgray,CouleurIcones=teal!75!black]{\ThemProbas,\ThemStats,\ThemPython,\ThemSuites,\ThemMatrices}
+\end{tcolorbox}
+
+\vfill
+
+\hfill{\footnotesize\itshape Merci à quark67 pour ses retours.}
+
+\vspace*{5mm}
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+\hrule
+
+\vspace*{5mm}
+
+\section{Introduction}
+
+\subsection{Description}
+
+Avec ce package, il est possible de créer un \textit{bandeau horizontal}, sous forme de puzzle, avec différentes thématiques.
+
+Les styles sont \textit{globalement} fixés, mais il est possible de configurer :
+
+\begin{itemize}
+	\item les couleurs ;
+	\item les icones ;
+	\item les labels.
+\end{itemize}
+
+Les \textit{bordures} intérieures sont aléatoirement orientées vers la gauche ou vers la droite, et le code se charge de colorier (le cas échéant) les pièces de manière satisfaisante.
+
+\subsection{Décorations}
+
+Pour le moment, les \textit{décorations} des pièces sont à déclarer comme des caractères, par exemple avec des icônes du package \MontreCode{fontawesome} (chargé par le package).
+
+\smallskip
+
+À terme, il sera peut-être possible d'insérer des images ou des codes \TikZ, cela fait partie des pistes d'améliorations.
+
+\subsection{Chargement}
+
+Pour charger le package, il suffit d'ajouter dans le préambule :
+
+\begin{quote}
+\begin{verbatim}
+\usepackage{thematicpuzzle}                  %avec fontawesome5, par défaut
+\usepackage[fa6]{thematicpuzzle}             %avec fontawesome6 (en test)
+\end{verbatim}
+\end{quote}
+
+Les packages utiles, et chargés sont :
+
+\begin{itemize}
+	\item \MontreCode{tikz}, \MontreCode{fontawesome} et \MontreCode{xintexpr} ;
+	\item \MontreCode{simplekv}, \MontreCode{listofitems} et \MontreCode{xstring}.
+\end{itemize}
+
+\vfill
+
+\subsection{Historique}
+
+\begin{quote}
+\begin{verbatim}
+0.1.2 : Bugfix  + pre-compatibilité avec fontawesome6
+0.1.1 : Amélioration de la gestion des couleurs
+0.1.0 : Version initiale
+\end{verbatim}
+\end{quote}
+
+\pagebreak
+
+\section{La commande}
+
+\subsection{Fonctionnement global}
+
+Dans le but de créer un \textit{puzzle de thèmes}, la commande est :
+
+\begin{quote}
+\begin{verbatim}
+%----puzzle de thèmes
+\PuzzleThemes[clés]<options tikz>{liste des décorations}
+\end{verbatim}
+\end{quote}
+
+\subsection{Clés, arguments}
+
+Les \textsf{clés}, optionnelles et entre \MontreCode{[...]}, sont :
+
+\begin{itemize}
+	\item \MontreCode{Epaisseur} := épaisseur des traits (\MontreCode{1pt} par défaut) ;
+	\item \MontreCode{Echelle} := échelle globale de la figure (\MontreCode{1} par défaut) ;
+	\item \MontreCode{CouleursFond} := couleur(s) de fond (voir paragraphe sur les couleurs) ;
+	\item \MontreCode{CouleurBord} := couleur des bordures (\MontreCode{black} par défaut) ;
+	\item \MontreCode{Labels} := libellés (optionnels) des thèmes (\MontreCode{\{\}} par défaut) ;
+	\item \MontreCode{EchelleLabels} := échelle des libellés (\MontreCode{1.15} par défaut) ;
+	\item \MontreCode{PoliceLabels} := police des libellés (\MontreCode{\textbackslash tiny\textbackslash sffamily} par défaut) ;
+	\item \MontreCode{CouleurIcones} := couleur des icônes et les libellés (\MontreCode{black} par défaut).
+\end{itemize}
+
+\medskip
+
+L'argument optionnel, entre \MontreCode{<...>}, correspond à des options spécifiques (en langage \TikZ) à passer à l'environnement créé.
+
+\smallskip
+
+L'argument obligatoire, entre \MontreCode{\{...\}}, correspond à la liste des décorations (sous forme de \textit{caractères}) des différentes pièces de puzzle, sous la forme \MontreCode{\{Déco<1>,Déco<2>,...,Déco<n>\}}
+
+\subsection{Les couleurs des cases}
+
+Concernant la couleur de cases, c'est la clé \MontreCode{CouleursFond} qui en est en charge.
+
+Elle peut fonctionner de plusieurs manières :
+
+\begin{itemize}
+	\item par défaut elle est vide, ce qui ne colorie pas les cases ;
+	\item on peut la donner sous forme unique, via \MontreCode{CouleursFond=macouleur}, au quel cas toutes les cases sont de la même couleur ;
+	\item on peut la donner sous forme d'une liste \MontreCode{CouleursFond=\{macouleurA,macouleurB,...\}} et :
+	\begin{itemize}
+		\item dans le cas où le nombre de couleurs est suffisant, elles sont utilisées l'une après l'autre ;
+		\item dans le cas contraire, le code se charge de \textit{répéter} le motif des couleurs proposées.
+	\end{itemize}
+\end{itemize}
+
+\subsection{Raccourcis pour certaines décorations}
+
+Des \textit{raccourcis} francisés ont été créés dans le package, pour des saisies simplifiées des décorations :
+
+\begin{center}
+	\begin{tblr}{hlines,colspec={Q[m,l]Q[m,c]}}
+		\fakeverb{\ThemProbas} & \ThemProbas \\
+		\fakeverb{\ThemStats} & \ThemStats \\
+		\fakeverb{\ThemChimie} & \ThemChimie \\
+		\fakeverb{\ThemArithm} & \ThemArithm \\
+		\fakeverb{\ThemGraphes} & \ThemGraphes \\
+		\fakeverb{\ThemComplexes} & \ThemComplexes \\
+		\fakeverb{\ThemMPM} & \ThemMPM \\
+		\fakeverb{\ThemCalculs} & \ThemCalculs \\
+		\fakeverb{\ThemMatrices} & \ThemMatrices \\
+		\fakeverb{\ThemGeometrie} & \ThemGeometrie \\
+	\end{tblr}
+	\hspace{1cm}
+	\begin{tblr}{hlines,colspec={Q[m,l]Q[m,c]}}
+		\fakeverb{\ThemEspace} & \ThemEspace \\
+		\fakeverb{\ThemPhysique} & \ThemPhysique \\
+		\fakeverb{\ThemFonctions} & \ThemFonctions \\
+		\fakeverb{\ThemSuites} & \ThemSuites \\
+		\fakeverb{\ThemTableur} & \ThemTableur \\
+		\fakeverb{\ThemAlgo} & \ThemAlgo \\
+		\fakeverb{\ThemEco} & \ThemEco \\
+		\fakeverb{\ThemPython} & \ThemPython \\
+		\fakeverb{\ThemLogique} & \ThemLogique \\
+	\end{tblr}
+\end{center}
+
+\subsection{Exemples}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\PuzzleThemes{\faAngry,\faArchway,\faAtlas,\faAtom}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\PuzzleThemes[Labels={Maths,Histoire,Géo,Chimie},CouleursFond={yellow!25,red!25}]%
+  {\faAngry,\faArchway,\faAtlas,\faAtom}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\PuzzleThemes%
+  [Echelle=2,CouleursFond=yellow!25,Labels={Maths,Histoire,Géo,Chimie}]%
+  {\faAngry,\faArchway,\faAtlas,\faAtom}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\PuzzleThemes%
+  [Echelle=3,CouleursFond={yellow!10,orange!10,red!10,teal!10},
+  Labels={Maths,Histoire,Géo,Chimie}]%
+  {\faAngry,\faArchway,\faAtlas,\faAtom}
+\end{tcblisting}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\PuzzleThemes%
+  [Epaisseur=2pt,Echelle=1.25,
+  CouleursFond={yellow!10,orange!10,red!10,teal!10,purple!10},
+  Labels={Probas,Stats,Python,Suites,Matrices},CouleurBord=brown,
+  CouleurIcones=teal!75!black]%
+  {\ThemProbas,\ThemStats,\ThemPython,\ThemSuites,\ThemMatrices}
+\end{tcblisting}
+
+\pagebreak
+
+\section{La commande en anglais}
+
+Le package propose également la commande et ses clés en version anglaise.
+
+\begin{quote}
+\begin{verbatim}
+%----commande anglaise
+\ThematicPuzzle[clés]<options tikz>{liste des décorations}
+\end{verbatim}
+\end{quote}
+
+Les \textsf{clés}, toujours optionnelles et entre \MontreCode{[...]}, sont :
+
+\begin{itemize}
+	\item \MontreCode{Thickness} ;
+	\item \MontreCode{Scale} ;
+	\item \MontreCode{BgColors} ;
+	\item \MontreCode{BorderColor} ;
+	\item \MontreCode{Labels} ;
+	\item \MontreCode{ScaleLabels} ;
+	\item \MontreCode{FontLabels} ;
+	\item \MontreCode{IconsColor}.
+\end{itemize}
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5}
+\ThematicPuzzle%
+  [Thickness=2pt,Scale=1.25,
+  BgColors={yellow!10,orange!10,red!10,teal!10,purple!10,gray!10},
+  IconsColor=teal!75!black]%
+  {P,Y,T,H,O,N}
+\end{tcblisting}
+
+\end{document}

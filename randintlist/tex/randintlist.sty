@@ -1,0 +1,249 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{randintlist}[2025/05/05 0.1.4 Create a list of random numbers with or without multiple values]
+
+%------History
+% 0.1.4	Bugfix
+% 0.1.3	new usage of extracting element (with storing \macro)
+% 0.1.2	Changing name of macro
+% 0.1.1	Possibility to exclude values
+% 0.1.0	Initial version
+
+%------Packages
+\RequirePackage{simplekv}
+\RequirePackage{listofitems}
+\RequirePackage{randomlist}
+\RequirePackage{xintexpr}
+\RequirePackage{xstring}
+\RequirePackage{ifthen}
+
+%-----Macros (latex3) for sorting and seed
+\ExplSyntaxOn
+\cs_new_eq:NN \randintseed \sys_gset_rand_seed:n
+\NewDocumentCommand\intascsortlist{m}
+{
+	\clist_sort:Nn #1
+	{
+		\fp_compare:nNnTF {##1} > {##2}
+		{ \sort_return_swapped: }
+		{ \sort_return_same: }
+	}
+}
+\NewDocumentCommand\intdessortlist{m}
+{
+	\clist_sort:Nn #1
+	{
+		\fp_compare:nNnTF {##1} < {##2}
+		{ \sort_return_swapped: }
+		{ \sort_return_same: }
+	}
+}
+\ExplSyntaxOff
+
+%----Internal macro (latex2) for testing if element is in list
+\newcommand\ifintvalueinlist[2]{\IfSubStr{,#2,}{,#1,}}
+
+\newcommand\boolvalueinlist[2]{\IfSubStr{,#2,}{,#1,}{\def\resisinlist{1}}{\def\resisinlist{0}}}
+
+\newcommand\testifintvalueinlist[4]{%
+	\IfSubStr{,#2,}{,#1,}{\xdef\RESTMPVALUE{1}}{\xdef\RESTMPVALUE{0}}%
+	\xintifboolexpr{ \RESTMPVALUE == 1}{#3}{#4}%
+}
+
+%----Macro for generating
+\defKV[randomlistintegers]{%
+	min=\def\TAEEmin{#1},%
+	max=\def\TAEEmax{#1},%
+	nb=\def\TAEEnb{#1},%
+	sep=\def\TAEEsep{#1},%
+	sort=\def\TAEEtri{#1},%
+	seed=\def\TAEEseed{#1},%
+	exclude=\def\TAEEexcluded{#1}
+}
+
+\setKVdefault[randomlistintegers]{%
+	min=1,%
+	max=50,%
+	nb=6,%
+	sep={,},%
+	sort=no,%
+	repeat=false,%
+	seed={-},%
+	exclude={}
+}
+
+\NewList{tmprandintlist}
+
+\NewDocumentCommand\randintlist{ O{} m }{%1=keys,2=listname
+	\useKVdefault[randomlistintegers]%
+	\setKV[randomlistintegers]{#1}%
+	\ifboolKV[randomlistintegers]{repeat}%repeat or not
+		{%repeat allowed
+			\IfStrEq{\TAEEseed}{-}%
+				{}%
+				{%
+					\randintseed{\TAEEseed}%
+				}%
+			%list creation of first element
+			\def\resisinlist{1}%
+			\whiledo{\resisinlist=1}{%
+				\xdef\tmpresrandint{\fpeval{randint(\TAEEmin,\TAEEmax)}}%
+				\boolvalueinlist{\tmpresrandint}{\TAEEexcluded}%
+			}%
+			\xdef#2{\tmpresrandint}%
+			%list creation of other elements
+			\xintFor* ##1 in {\xintSeq{2}{\TAEEnb}}%
+				\do{%
+					\def\resisinlist{1}%
+					\whiledo{\resisinlist=1}{%
+						\xdef\tmpresrandint{\fpeval{randint(\TAEEmin,\TAEEmax)}}%
+						\boolvalueinlist{\tmpresrandint}{\TAEEexcluded}%
+					}%
+				\xdef#2{#2,\tmpresrandint}%
+				}%
+		}%
+		{%no repeating
+			%randomize numbers
+			\IfStrEq{\TAEEseed}{-}%
+				{}%
+				{%
+					\RLsetrandomseed{\TAEEseed}%
+				}%
+			\ClearList{tmprandintlist}%clearing the list
+			\xintFor* ##1 in {\xintSeq{\TAEEmin}{\TAEEmax}}%
+				\do{%
+					\ifintvalueinlist{##1}{\TAEEexcluded}%
+						{}%
+						{%
+							\InsertRandomItem{tmprandintlist}{##1}%
+						}%
+				}%
+			%list creation (first then other)
+			\xdef#2{\tmprandintlist[0]}%
+			\xintFor* ##1 in {\xintSeq{1}{\TAEEnb-1}}%
+				\do{%
+					\xdef#2{#2,\tmprandintlist[##1]}%
+				}%
+		}%
+	%sorting
+	\IfStrEq{\TAEEtri}{asc}%if ascending
+		{\intascsortlist{#2}}%
+		{}%
+	\IfStrEq{\TAEEtri}{des}%if descending
+		{\intdessortlist{#2}}%
+		{}%
+	\StrSubstitute{#2}{,}{\TAEEsep}[#2]%swipping separator if necessary
+}
+
+%-----Macro for extracting
+\NewDocumentCommand\getitemfromrandintlist{ O{,} m m o }{%
+	\IfStrEq{#1}{/}%
+		{%useful
+			\setsepchar[.]{#1}%
+		}%
+		{%
+			\setsepchar{#1}%
+		}%
+	\readlist*\TMPLISTRANDINT{#2}%
+	\IfNoValueTF{#4}{\TMPLISTRANDINT[#3]}{\itemtomacro\TMPLISTRANDINT[#3]#4}%
+}
+
+%-----french version
+\defKV[randomlisteentiers]{%
+	Min=\def\TAEEmin{#1},%
+	Max=\def\TAEEmax{#1},%
+	Nb=\def\TAEEnb{#1},%
+	Sep=\def\TAEEsep{#1},%
+	Tri=\def\TAEEtri{#1},%
+	Graine=\def\TAEEseed{#1},%
+	Exclure=\def\TAEEexcluded{#1}
+}
+
+\setKVdefault[randomlisteentiers]{%
+	Min=1,%
+	Max=50,%
+	Nb=6,%
+	Sep={,},%
+	Tri=non,%
+	Repet=false,%
+	Graine={-},%
+	Exclure={}
+}
+
+\NewDocumentCommand\ListeRandint{ O{} m }{%1=keys,2=listname
+	\useKVdefault[randomlisteentiers]%
+	\setKV[randomlisteentiers]{#1}%
+	\ifboolKV[randomlisteentiers]{Repet}%repeat or not
+		{%repeat allowed
+			\IfStrEq{\TAEEseed}{-}%
+				{}%
+				{%
+					\randintseed{\TAEEseed}%
+				}%
+			%list creation of first element
+			\def\resisinlist{1}%
+			\whiledo{\resisinlist=1}{%
+				\xdef\tmpresrandint{\fpeval{randint(\TAEEmin,\TAEEmax)}}%
+				\boolvalueinlist{\tmpresrandint}{\TAEEexcluded}%
+			}%
+			\xdef#2{\tmpresrandint}%
+			%list creation of other elements
+			\xintFor* ##1 in {\xintSeq{2}{\TAEEnb}}%
+				\do{%
+					\def\resisinlist{1}%
+					\whiledo{\resisinlist=1}{%
+						\xdef\tmpresrandint{\fpeval{randint(\TAEEmin,\TAEEmax)}}%
+						\boolvalueinlist{\tmpresrandint}{\TAEEexcluded}%
+					}%
+				\xdef#2{#2,\tmpresrandint}%
+				}%
+		}%
+		{%no repeating
+			%randomize numbers
+			\IfStrEq{\TAEEseed}{-}%
+				{}%
+				{%
+					\RLsetrandomseed{\TAEEseed}%
+				}%
+			\ClearList{tmprandintlist}%clearing the list
+			\xintFor* ##1 in {\xintSeq{\TAEEmin}{\TAEEmax}}%
+				\do{%
+					\ifintvalueinlist{##1}{\TAEEexcluded}%
+						{}%
+						{%
+							\InsertRandomItem{tmprandintlist}{##1}%
+						}%
+				}%
+			%list creation (first then other)
+			\xdef#2{\tmprandintlist[0]}%
+			\xintFor* ##1 in {\xintSeq{1}{\TAEEnb-1}}%
+				\do{%
+					\xdef#2{#2,\tmprandintlist[##1]}%
+				}%
+		}%
+	%sorting
+	\IfStrEq{\TAEEtri}{croiss}%if ascending
+		{\intascsortlist{#2}}%
+		{}%
+	\IfStrEq{\TAEEtri}{decroiss}%if descending
+		{\intdessortlist{#2}}%
+		{}%
+	\StrSubstitute{#2}{,}{\TAEEsep}[#2]%swipping separator if necessary
+}
+
+%-----Macro for extracting
+\NewDocumentCommand\ExtraireEltListeRandint{ O{,} m m o }{%
+	\IfStrEq{#1}{/}%
+		{%useful
+			\setsepchar[.]{#1}%
+		}%
+		{%
+			\setsepchar{#1}%
+		}%
+	\readlist*\TMPLISTRANDINT{#2}%
+	\IfNoValueTF{#4}{\TMPLISTRANDINT[#3]}{\itemtomacro\TMPLISTRANDINT[#3]#4}%
+}
+
+\endinput
