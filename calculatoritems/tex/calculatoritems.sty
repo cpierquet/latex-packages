@@ -1,0 +1,1106 @@
+% Author        : C. Pierquet
+% licence       : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{calculatoritems}[2025/02/03 0.1.3 Menus from classic calculators]
+
+%====HISTORIQUE
+% v 0.1.3	New styles for graph math+
+% v 0.1.2	New version with resizebox (better render and calc)
+% v 0.1.1	Sample keys + fonts config for LUA + shortcut with img pdf
+% v 0.1.0	Initial version
+
+%====OPTION
+\newif\if@xelua \@xeluafalse
+\newif\if@amssymb \@amssymbtrue
+\DeclareOption{xelua}{\@xeluatrue}
+\DeclareOption{noamssymb}{\@amssymbfalse}
+\DeclareOption*{}
+\ProcessOptions\relax
+
+%====SPECIAL FONTS
+\if@xelua
+	\@ifpackageloaded{fontspec}{}{\RequirePackage{fontspec}}
+	\newfontfamily\fontNWKS{SourceCodePro-Medium}[Scale=MatchLowercase] %numworks
+	\newfontfamily\fontCASIOA{AnonymousPro}[Scale=MatchLowercase] %casio35
+	%\newfontfamily\fontCASIOB{AlegreyaSans}[Scale=MatchLowercase] %casio90
+	\newfontfamily\fontCASIOB{FreeSans}[Scale=MatchLowercase] %casio90
+	\newfontfamily\fontTI{AnonymousPro}[Scale=MatchLowercase] %ti
+	\newfontfamily\fontHP{AlegreyaSans}[Scale=MatchLowercase] %ti
+	\newfontfamily\fontKEY{Inconsolatazi4}[Scale=MatchLowercase] %global keys
+	\RequirePackage{xstring}
+	\RequirePackage{listofitems}
+	%===== following font files must be downloaded manually (https://packages.cpierquet.fr/packages/graphiques/calculatoritems/calculatoritems_fonts.zip)
+	\defaultfontfeatures[numworks]{Extension=.ttf,UprightFont=numworks-keys-regular,BoldFont=numworks-keys-bold}
+	\newfontfamily{\fontkeyNWKS}{numworks}[Scale=MatchLowercase]
+	\defaultfontfeatures[casiofx]{Extension=.ttf,UprightFont=CFX06}
+	\newfontfamily{\fontkeyCASIOfx}{casiofx}[Scale=MatchLowercase]
+	\defaultfontfeatures[casiocw]{Extension=.ttf,UprightFont=CASIO ClassWiz CW02}
+	\newfontfamily{\fontkeyCASIOcw}{casiocw}[Scale=MatchLowercase]
+	\defaultfontfeatures[texasfr]{Extension=.ttf,UprightFont=TI83PremiumCEKeys}
+	\newfontfamily{\fontkeyTIfr}{texasfr}[Scale=MatchLowercase]
+	\defaultfontfeatures[texasen]{Extension=.ttf,UprightFont=TI84PlusCEKeys}
+	\newfontfamily{\fontkeyTI}{texasen}[Scale=MatchLowercase]
+	%===== end external files
+\else
+	\newcommand\fontNWKS{\fontencoding{T1}\fontfamily{SourceCodePro-TLF}\selectfont} %nwks
+	\newcommand\fontCASIOA{\fontencoding{T1}\fontfamily{AnonymousPro}\fontseries{sb}\selectfont} %casio35
+	\newcommand\fontCASIOB{\fontencoding{T1}\fontfamily{AlegreyaSans-TLF}\fontseries{sb}\selectfont} %casio90
+	\newcommand\fontTI{\fontencoding{T1}\fontfamily{AnonymousPro}\fontseries{sb}\selectfont} %ti
+	\newcommand\fontHP{\fontencoding{T1}\fontfamily{AlegreyaSans-TLF}\fontseries{sb}\selectfont} %casio90
+	\newcommand\fontKEY{\fontencoding{T1}\fontfamily{SourceCodePro-TLF}\fontseries{sb}\selectfont} %global keys
+\fi
+
+%====BASE
+\if@amssymb
+	\RequirePackage{amssymb}
+	\newcommand\nwkstri{\footnotesize\textcolor{orange}{$\blacktriangleright$}}
+\fi
+\RequirePackage{xstring}
+\RequirePackage{settobox}
+\RequirePackage{ifthen}
+\RequirePackage{calc}
+\RequirePackage{simplekv}
+\RequirePackage{tcolorbox}
+\RequirePackage{circledtext}
+\usetikzlibrary{calc}
+\tcbuselibrary{skins}
+
+%====DIMs & Useful
+\newlength\calcsimmenusfsep
+\setlength\calcsimmenusfsep{1pt}
+\newlength\calcsimmenusmenutc
+\newlength\calcsimmenusitemtc
+\newlength\calcsimmenusdepth
+\newlength\calcsimmenusheight
+\newcommand\tidots{\scalebox{0.44}[0.55]{...}}
+\newcommand\casiodots{\circledtext[resize=real,width=0.75em]{$\cdots$}}
+
+%====TCSTYLES
+\tcbset{casiotc/.style={%
+		enhanced,fontupper=\calcsimmenusfont,nobeforeafter,%
+		box align=base,boxsep=\calcsimmenusfsep,%
+		boxrule=0.8pt,left=0pt,right=0pt,top=0pt,%
+		bottom=-\calcsimmenusfsep
+		%bottom=\dimexpr1pt-\calcsimmenusdepth\relax,no borderline
+	}
+}
+\tcbset{casiotcmenunoir/.style={%
+		width=\calcsimmenusmenutc,colframe=black,colback=black,%
+		colupper=white,sharp corners,rounded corners=southeast,%
+		arc=3pt,arc is angular,add to width=2pt
+	}
+}
+\tcbset{casiotcmenublanc/.style={%
+		enhanced,frame hidden,width=\calcsimmenusmenutc,%
+		colframe=black,colback=white,colupper=black,%
+		sharp corners,add to width=2pt,
+		borderline north={0.75pt}{0pt}{black},
+		borderline west={0.75pt}{0pt}{black}
+	}
+}
+\tcbset{casiotcitemnoir/.style={%
+		width=\calcsimmenusmenutc,colframe=black,%
+		colback=black,colupper=white,sharp corners,add to width=2pt
+	}
+}
+\tcbset{casiotcitemsel/.style={%
+		width=\calcsimmenusitemtc,sharp corners,%
+		colframe=black,colback=black,colupper=white
+	}
+}
+
+\tcbset{casioqd/.style={%
+		fontupper=\calcsimmenusfont,nobeforeafter,%
+		box align=base,boxsep=\calcsimmenusfsep,%
+		boxrule=0.8pt,left=0pt,right=0pt,top=0pt,%
+		bottom=-\calcsimmenusfsep
+		%bottom=\dimexpr1pt-\calcsimmenusdepth\relax,%
+	}
+}
+\tcbset{casioqdmenunoir/.style={%
+		enhanced,width=\calcsimmenusmenutc,colframe=black,%
+		colback=black,colupper=white,arc=1pt,add to width=2pt
+	}
+}
+\tcbset{casioqdmenublanc/.style={%
+		width=\calcsimmenusmenutc,colframe=black,colback=white,%
+		colupper=black,rounded corners,arc=1pt,add to width=2pt
+	}
+}
+\tcbset{casioqditemnoir/.style={%
+		width=\calcsimmenusmenutc,colframe=black,colback=black,%
+		colupper=white,sharp corners,add to width=2pt
+	}
+}
+\tcbset{casioqditemsel/.style={%
+		width=\calcsimmenusitemtc,sharp corners,colframe=black,%
+		colback=black,colupper=white,sharp corners,add to width=2pt
+	}
+}
+\tcbset{casiomathtab/.style={%
+	width=\calcsimmenusitemtc,sharp corners,colframe=black,%
+	colback=black,colupper=white,sharp corners,add to width=2pt
+}
+}
+\tcbset{vignettemenunwks/.style={%
+		top=\dimexpr0.45pt+0.5\calcsimmenusfsep\relax,bottom=\dimexpr1pt-\calcsimmenusdepth\relax,%
+		left=2pt,right=2pt,fontupper=\calcsimmenusfont,nobeforeafter,%
+		box align=base,boxrule=0.45pt,boxsep=0.5\calcsimmenusfsep,sharp corners=all
+	}
+}
+\tcbset{vignettemenuti/.style={%
+		size=tight,boxrule=0.45pt,fontupper=\calcsimmenusfont,%
+		nobeforeafter,left=0.45pt,right=0.45pt,top=0.15pt,%
+		bottom=0.15pt,box align=base
+	}
+}
+\tcbset{vignettemenuhp/.style={%
+		enhanced,fontupper=\calcsimmenusfont,nobeforeafter,%
+		box align=base,boxsep=\calcsimmenusfsep,%
+		boxrule=0.8pt,left=0pt,right=0pt,top=0pt,%
+		bottom=-\calcsimmenusfsep
+		%bottom=\dimexpr1pt-\calcsimmenusdepth\relax,%
+	}
+}
+\tcbset{vignettemenuhpnorth/.style={%
+		width=\calcsimmenusmenutc,colupper=white,colback=darkgray!90,colframe=darkgray,%
+		sharp corners=north,add to width=2pt
+	}
+}
+\tcbset{vignettemenuhpround/.style={%
+		width=\calcsimmenusmenutc,colupper=white,colback=darkgray!90,colframe=darkgray,%
+		rounded corners,arc=1pt,add to width=2pt
+	}
+}
+\tcbset{vignettemenuhpitemsel/.style={%
+		width=\calcsimmenusitemtc,sharp corners,colframe=cyan!15,%
+		colback=cyan!15,colupper=black,sharp corners
+	}
+}
+\tcbset{vignettemenuhpitem/.style={%
+		sharp corners,colframe=cyan!15,colback=cyan!15,colupper=black,sharp corners
+	}
+}
+
+%====KEYS
+\defKV[calcsimmenus]{%
+	model=\def\calcsimmenusmodel{#1},%
+	type=\def\calcsimmenustype{#1},%
+	fsep=\setlength\calcsimmenusfsep{#1},%
+	font=\def\calcsimmenusfont{#1},%
+	len=\def\calcsimmenuslen{#1},%
+	bg=\def\calcsimmenusbg{#1},%
+	rightsymb=\def\calcsimmenusrsymb{#1},%
+	colorfont=\def\calcsimmenuscolfont{#1}
+}
+\setKVdefault[calcsimmenus]{%
+	model={},%
+	type={},%
+	fsep=0.5pt,%
+	font={\bfseries\ttfamily},%
+	len=auto,%
+	bg=white,%
+	rightsymb={},%
+	colorfont=black
+}
+
+%testing with resizebox, but carefull with width & height...
+\newsavebox{\calcitembox}
+\newsavebox{\calcglobitembox}
+\newsavebox{\calcglobitemvbox}
+\newlength\calcboxwidth
+\newlength\calcboxheight
+\newcommand\calcboxiftoobig[3]{%
+	% #1: Width to check against, like \textwidth
+	% #2: Height to check against, like \textwidth
+	% #3: The content, like a tabular
+	\savebox{\calcitembox}{\calcsimmenusfont#3}%
+	\settowidth{\calcboxwidth}{\usebox{\calcitembox}}%on stocke la largeur
+	\settototalheight{\calcboxheight}{\usebox{\calcitembox}}%on stocke la hauteur
+	\ifthenelse{\calcboxwidth < #1}%on commence par la largeur
+		{%
+			\ifthenelse{\calcboxheight < #2}%on continue avec la hauteur
+				{%
+					\usebox{\calcitembox}%tout est ok, on ne touche à rien, et on laisse tel quel
+				}%
+				{%
+					\resizebox*{\calcboxwidth}{#2}{\usebox{\calcitembox}}%largeur ok mais resize hauteur
+				}%
+		}%
+		{%
+			\ifthenelse{\calcboxheight < #2}%on continue avec la hauteur
+				{%
+					\resizebox*{#1}{\calcboxheight}{\usebox{\calcitembox}}%largeur ko mais hauteur ok
+				}%
+				{%
+					\resizebox*{#1}{#2}{\usebox{\calcitembox}}%largeur ko et hauteur ko
+				}%
+		}%
+}
+
+\NewDocumentCommand\CalcItemMenu{ O{} m }{%
+	\restoreKV[calcsimmenus]%
+	\setKV[calcsimmenus]{#1}%
+	\IfEq{\calcsimmenusmodel}{}%gen model
+		{%
+			\IfEq{\calcsimmenustype}{}%white bg
+				{%
+					{\setlength{\fboxsep}{\calcsimmenusfsep}\fcolorbox{black}{white}{\vphantom{()}\calcsimmenusfont#2}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{black}%black bg
+				{%
+					{\setlength{\fboxsep}{\calcsimmenusfsep}\fcolorbox{black}{black}{\vphantom{()}\calcsimmenusfont\textcolor{white}{#2}}}%
+				}%
+				{}%
+			{}%
+		}%
+		{}%
+	\IfEq{\calcsimmenusmodel}{35+}%
+		{%
+			\savebox{\calcglobitembox}{\calcsimmenusfont XXXX}%
+			\savebox{\calcglobitemvbox}{\calcsimmenusfont ()}%
+			\settowidth{\calcsimmenusmenutc}{\usebox{\calcglobitembox}}%on stocke la largeur
+			\settototalheight{\calcsimmenusheight}{\usebox{\calcglobitemvbox}}%on stocke la hauteur
+			%\settowidth{\calcsimmenusmenutc}{\hbox{\calcsimmenusfont MMMM}}%
+			%\addtolength{\calcsimmenusmenutc}{2pt}%
+			\settowidth{\calcsimmenusitemtc}{\hbox{\calcsimmenusfont MMMMMMMMMMMMMMMMMMM}}%
+			%\settodepth{\calcsimmenusdepth}{\hbox{\calcsimmenusfont qXX/}}%
+			% \IfEq{\calcsimmenuslen}{auto}%
+				% {%
+					% \StrLen{#2}[\calcsimmenusnbchar]%
+					% \xdef\calcsimmenushscale{\fpeval{min(4/(\calcsimmenusnbchar),1)}}%
+					% \xdef\calcsimmenusvscale{\fpeval{0.95*\calcsimmenushscale}}%
+				% }%
+				% {%
+					% \xdef\calcsimmenushscale{\fpeval{min(4/(\calcsimmenuslen),1)}}%
+					% \xdef\calcsimmenusvscale{\fpeval{0.95*\calcsimmenushscale}}%
+				% }%
+			\IfEq{\calcsimmenustype}{}%white menu
+				{%
+					{\tcbox[tcbox width=minimum center,casiotc,casiotcmenublanc]{\vphantom{()}\calcboxiftoobig{\calcsimmenusmenutc}{\calcsimmenusheight}{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{bmenu}%black menu
+				{%
+					{\tcbox[tcbox width=minimum center,casiotc,casiotcmenunoir]{\vphantom{()}\calcboxiftoobig{\calcsimmenusmenutc}{\calcsimmenusheight}{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{item}%item
+				{%
+					{\tcbox[tcbox width=minimum center,casiotc,casiotcitemnoir]{\vphantom{()}\calcboxiftoobig{\calcsimmenusmenutc}{\calcsimmenusheight}{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{itemsel}%item sel
+				{%
+					{\tcbox[tcbox width=minimum left,casiotc,casiotcitemsel]{\makebox[\calcsimmenusitemtc]{\vphantom{()}{#2}\hfill{\calcsimmenusrsymb}}}}%
+				}%
+				{}%
+		}%
+		{}%
+	\IfEq{\calcsimmenusmodel}{90+}%
+		{%
+			\savebox{\calcglobitembox}{\calcsimmenusfont XXXXX}%
+			\savebox{\calcglobitemvbox}{\calcsimmenusfont ()}%
+			\settowidth{\calcsimmenusmenutc}{\usebox{\calcglobitembox}}%on stocke la largeur
+			\settototalheight{\calcsimmenusheight}{\usebox{\calcglobitemvbox}}%on stocke la hauteur
+			%\settowidth{\calcsimmenusmenutc}{\hbox{\calcsimmenusfont XXXXX}}%
+			%\settototalheight{\calcsimmenusheight}{\hbox{\calcsimmenusfont qXXX/}}%
+			%\addtolength{\calcsimmenusmenutc}{2pt}%
+			\settowidth{\calcsimmenusitemtc}{\hbox{\calcsimmenusfont XXXXXXXXXXXXXXXXXXXX}}%
+			\settodepth{\calcsimmenusdepth}{\hbox{\calcsimmenusfont qXXX/}}%
+			% \IfEq{\calcsimmenuslen}{auto}%
+				% {%
+					% \StrLen{#2}[\calcsimmenusnbchar]%
+					% \xdef\calcsimmenushscale{\fpeval{min(5/(\calcsimmenusnbchar),1)}}%
+					% \xdef\calcsimmenusvscale{0.95}%{\fpeval{0.95*\calcsimmenushscale}}%
+				% }%
+				% {%
+					% \xdef\calcsimmenushscale{\fpeval{min(5/(\calcsimmenuslen),1)}}%
+					% \xdef\calcsimmenusvscale{0.95}%{\fpeval{0.95*\calcsimmenushscale}}%
+				% }%
+			\IfEq{\calcsimmenustype}{}%white menu
+				{%
+					{\tcbox[tcbox width=minimum center,casioqd,casioqdmenublanc]{\vphantom{()}\calcboxiftoobig{\calcsimmenusmenutc}{\calcsimmenusheight}{#2}}}%
+					%{\tcbox[tcbox width=minimum center,casioqd,casioqdmenublanc]{\vphantom{qH}\scalebox{\calcsimmenushscale}[\calcsimmenusvscale]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{bmenu}%black menu
+				{%
+					{\tcbox[tcbox width=minimum center,casioqd,casioqdmenunoir,overlay={\path[fill=\calcsimmenusbg]($(frame.south east) + (0.1pt,-0.1pt)$) -- ++ (0pt,3.2pt)  -- ++ (-3.2pt,-3.2pt) -- cycle;}]{\vphantom{()}\calcboxiftoobig{\calcsimmenusmenutc}{\calcsimmenusheight}{#2}}}%
+					%{\tcbox[tcbox width=minimum center,casioqd,casioqdmenunoir,overlay={\path[fill=\calcsimmenusbg]($(frame.south east) + (0.1pt,-0.1pt)$) -- ++ (0pt,3.2pt)  -- ++ (-3.2pt,-3.2pt) -- cycle;}]{\vphantom{qH}\scalebox{\calcsimmenushscale}[\calcsimmenusvscale]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{item}%item
+				{%
+					{\tcbox[tcbox width=minimum center,casioqd,casioqditemnoir]{\vphantom{()}\calcboxiftoobig{\calcsimmenusmenutc}{\calcsimmenusheight}{#2}}}%
+					%{\tcbox[tcbox width=minimum center,casioqd,casioqditemnoir]{\vphantom{qH}\scalebox{\calcsimmenushscale}[\calcsimmenusvscale]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{itemsel}%item
+				{%
+					{\tcbox[tcbox width=minimum left,casioqd,casioqditemsel]{\makebox[\calcsimmenusitemtc]{\vphantom{()}{#2}\hfill{\calcsimmenusrsymb}}}}%
+				}%
+				{}%
+		}%
+		{}%
+	\IfEq{\calcsimmenusmodel}{math+}%
+		{%
+			%\settodepth{\calcsimmenusdepth}{\hbox{\calcsimmenusfont gH}}%
+			% \IfEq{\calcsimmenuslen}{auto}%
+				% {%
+					% \StrLen{#2}[\calcsimmenusnbchar]%
+					% \xdef\calcsimmenushscale{\fpeval{min(5/(\calcsimmenusnbchar),1)}}%
+					% \xdef\calcsimmenusvscale{\fpeval{0.95*\calcsimmenushscale}}%
+				% }%
+				% {%
+					% \xdef\calcsimmenushscale{\fpeval{min(5/(\calcsimmenuslen),1)}}%
+					% \xdef\calcsimmenusvscale{\fpeval{0.95*\calcsimmenushscale}}%
+				% }%
+			\IfEq{\calcsimmenustype}{}%black menu
+				{%
+					\settowidth{\calcsimmenusitemtc}{\hbox{\calcsimmenusfont MMMMMMMMMMMMMMMMMMMM}}%
+					{\tcbox[tcbox width=minimum left,casioqd,casioqditemnoir]{\makebox[\calcsimmenusitemtc]{\vphantom{qH}{#2}\hfill{\calcsimmenusrsymb}}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{smenu}%black menu
+				{%
+					\settowidth{\calcsimmenusitemtc}{\hbox{\calcsimmenusfont MMMMMMMMMMMMM}}%
+					{\tcbox[tcbox width=minimum left,casioqd,casioqditemnoir]{\makebox[\calcsimmenusitemtc]{\vphantom{qH}{#2}\hfill{\calcsimmenusrsymb}}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{tab}%tab
+				{%
+					\settowidth{\calcsimmenusitemtc}{\hbox{\calcsimmenusfont MMMMMMMMMMM}}%
+					{\tcbox[tcbox width=minimum center,casioqd,casiomathtab]{\vphantom{()}{#2}}}%{\makebox[\calcsimmenusitemtc]{\vphantom{qH}{#2}}}}%
+				}%
+				{}%
+		}%
+		{}%
+	\IfEq{\calcsimmenusmodel}{nwks}%
+		{%
+			\setlength{\calcsimmenusdepth}{0.375pt}%
+			\IfEq{\calcsimmenustype}{}%white menu
+				{%
+					{\tcbox[vignettemenunwks,colframe=gray,colupper=darkgray,colback=white]{\vphantom{qH}\scalebox{0.85}[0.95]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{gmenu}%gray menu
+				{%
+					{\tcbox[vignettemenunwks,colframe=lightgray!50,colupper=black,colback=lightgray!50]{\vphantom{qH}\scalebox{0.85}[0.95]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{bmenu}%dark menu
+				{%
+					\xdef\tmplengthmenunwks{}%
+					\IfEq{\calcsimmenuslen}{auto}%
+						{%
+							\foreach \i in {1,...,22}{\xdef\tmplengthmenunwks{M\tmplengthmenunwks}}%
+						}%
+						{%
+							\foreach \i in {1,...,\calcsimmenuslen}{\xdef\tmplengthmenunwks{M\tmplengthmenunwks}}%
+						}%
+					\settowidth{\calcsimmenusitemtc}{\hbox{\calcsimmenusfont\tmplengthmenunwks}}%
+					{%
+						\tcbox[width=\calcsimmenusitemtc,tcbox width=minimum left,vignettemenunwks,colframe=gray,colupper=black,colback=lightgray!75]%
+							{\makebox[\calcsimmenusitemtc]{\vphantom{qH}\scalebox{0.85}[0.95]{#2}\hfill{\calcsimmenusrsymb}}}%
+					}%
+				}%
+				{}%
+		}%
+		{}%
+	\IfEq{\calcsimmenusmodel}{ti}%
+		{%
+			\IfEq{\calcsimmenustype}{}% black menu
+				{%
+					{\tcbox[vignettemenuti,colback=black,colframe=black,colupper=white]{\vphantom{qH}\scalebox{0.9}[1]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{menu}% menu sel
+				{%
+					{\tcbox[vignettemenuti,colback=white,colframe=black,colupper=black]{\vphantom{[A]/Fiy}\scalebox{0.9}[1]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{itemsel}%item sel
+				{%
+					\StrCut{#2}{§}{\calcsimmenusnb}{\calcsimmenuslab}%
+					{%
+						\tcbox[vignettemenuti,colback=black,colframe=black,colupper=white]{\vphantom{[A]/Fiy}\scalebox{0.9}[1]{\calcsimmenusnb:}}%
+						\hspace*{-0.225pt}%
+						\tcbox[vignettemenuti,colback=white,colframe=black,colupper=black]{\vphantom{[A]/Fiy}\scalebox{0.9}[1]{\calcsimmenuslab}}}%
+				}%
+				{}%
+		}%
+		{}%
+	\IfEq{\calcsimmenusmodel}{hp}%
+		{%
+			\savebox{\calcglobitembox}{\calcsimmenusfont XXXXXX}%
+			\savebox{\calcglobitemvbox}{\calcsimmenusfont ()}%
+			\settowidth{\calcsimmenusmenutc}{\usebox{\calcglobitembox}}%on stocke la largeur
+			\settototalheight{\calcsimmenusheight}{\usebox{\calcglobitemvbox}}%on stocke la hauteur
+			%\settowidth{\calcsimmenusmenutc}{\hbox{\calcsimmenusfont MMMMM}}%
+			%\addtolength{\calcsimmenusmenutc}{2pt}%
+			\settowidth{\calcsimmenusitemtc}{\hbox{\calcsimmenusfont MMMMMMMMMMMMMMMMMMMMM}}%
+			\settodepth{\calcsimmenusdepth}{\hbox{\calcsimmenusfont gH}}%
+			% \IfEq{\calcsimmenuslen}{auto}%
+				% {%
+					% \StrLen{#2}[\calcsimmenusnbchar]%
+					% \xdef\calcsimmenushscale{\fpeval{min(5/(\calcsimmenusnbchar),1)}}%
+					% \xdef\calcsimmenusvscale{\fpeval{0.95*\calcsimmenushscale}}%
+				% }%
+				% {%
+					% \xdef\calcsimmenushscale{\fpeval{min(5/(\calcsimmenuslen),1)}}%
+					% \xdef\calcsimmenusvscale{\fpeval{0.95*\calcsimmenushscale}}%
+				% }%
+			\IfEq{\calcsimmenustype}{}%bottom rounded
+				{%
+					{\tcbox[tcbox width=minimum center,vignettemenuhp,vignettemenuhpnorth]{\vphantom{()}\calcboxiftoobig{\calcsimmenusmenutc}{\calcsimmenusheight}{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{ritem}%rounded item
+				{%
+					{\tcbox[tcbox width=minimum center,vignettemenuhp,vignettemenuhpround]{\vphantom{()}\calcboxiftoobig{\calcsimmenusmenutc}{\calcsimmenusheight}{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{item}%item
+				{%
+					\StrCut{#2}{§}{\calcsimmenusnb}{\calcsimmenuslab}%
+					{%
+						\tcbox[vignettemenuhp,vignettemenuhp,vignettemenuhpitem]%
+							{\vphantom{qH}\raisebox{0.75\calcsimmenusdepth}{\scalebox{0.66}[0.66]{\calcsimmenusnb}}\,{\calcsimmenuslab}{\calcsimmenusrsymb}}%
+					}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{itemsel}%item
+				{%
+					\StrCut{#2}{§}{\calcsimmenusnb}{\calcsimmenuslab}%
+					{%
+						\tcbox[tcbox width=minimum left,vignettemenuhp,vignettemenuhpitemsel]{%
+							\makebox[\calcsimmenusitemtc]{%
+								\vphantom{qH}\raisebox{0.75\calcsimmenusdepth}{\scalebox{0.66}[0.66]{\calcsimmenusnb}}\,{\calcsimmenuslab}\hfill{\calcsimmenusrsymb}%
+							}%
+						}%
+					}%
+				}%
+				{}%
+		}%
+		{}%
+}
+
+%TCSTYLES BUTONS & COLORS
+\definecolor{casiowhitekey}{HTML}{f5f4f4}
+\definecolor{casiobluekey}{HTML}{3f8ca6}
+\definecolor{casioblueqdkey}{HTML}{2f56c8}
+\definecolor{casiobluexe}{HTML}{2e5366}
+\definecolor{texasbluekey}{HTML}{2373c9}
+\definecolor{texasgreenkey}{HTML}{589b31}
+
+%==35+
+\tcbset{casiotckey/.style={%
+		enhanced,fontupper=\calcsimmenusfont,nobeforeafter,%
+		tcbox width=minimum center,
+		box align=base,boxsep=\calcsimmenusfsep,%
+		boxrule=0.8pt,left=0pt,right=0pt,top=0pt,%
+		bottom=\dimexpr1pt-\calcsimmenusdepth\relax,no borderline
+	}
+}
+\tcbset{casiokeytcgray/.style={%
+		width=\calcsimmenusmenutc,colframe=gray!75,colback=gray!75,%
+		colupper=\calcsimmenuscolfont,rounded corners,arc=1pt,add to width=2pt
+	}
+}
+\tcbset{casiokeytcwhite/.style={%
+		width=\calcsimmenusmenutc,colframe=casiowhitekey,colback=casiowhitekey,%
+		colupper=\calcsimmenuscolfont,rounded corners,arc=1pt,add to width=2pt
+	}
+}
+\tcbset{casiokeytcblue/.style={%
+		width=\calcsimmenusmenutc,colframe=casiobluekey,colback=casiobluekey,%
+		colupper=white,rounded corners,arc=1pt,add to width=2pt
+	}
+}
+%90+E
+\tcbset{casioqdkey/.style={%
+		enhanced,fontupper=\calcsimmenusfont,nobeforeafter,%
+		tcbox width=minimum center,
+		box align=base,boxsep=\calcsimmenusfsep,%
+		boxrule=0.8pt,left=0pt,right=0pt,top=0pt,%
+		bottom=\dimexpr1pt-\calcsimmenusdepth\relax,no borderline
+	}
+}
+\tcbset{casioqdkeygray/.style={%
+		width=\calcsimmenusmenutc,colframe=lightgray,colback=lightgray,%
+		colupper=\calcsimmenuscolfont,rounded corners,arc=1pt,add to width=2pt
+	}
+}
+\tcbset{casioqdkeywhite/.style={%
+		width=\calcsimmenusmenutc,colframe=casiowhitekey,colback=casiowhitekey,%
+		colupper=\calcsimmenuscolfont,rounded corners,arc=1pt,add to width=2pt
+	}
+}
+\tcbset{casioqdkeyblue/.style={%
+		width=\calcsimmenusmenutc,colframe=casioblueqdkey,colback=casioblueqdkey,%
+		colupper=white,rounded corners,arc=1pt,add to width=2pt
+	}
+}
+\tcbset{casioqdkeysilver/.style={%
+		width=\calcsimmenusmenutc,colframe=darkgray,colback=darkgray,%
+		colupper=lightgray,rounded corners,arc={0.25\calcsimmenusmenutc}
+	}
+}
+%83
+\tcbset{texaskey/.style={%
+		enhanced,fontupper=\calcsimmenusfont,nobeforeafter,%
+		tcbox width=minimum center,
+		box align=base,boxsep=\calcsimmenusfsep,%
+		boxrule=0.8pt,left=0pt,right=0pt,top=0pt,%
+		no borderline
+	}
+}
+\tcbset{texaskeywhite/.style={%
+		width=\calcsimmenusmenutc,colframe=casiowhitekey,colback=casiowhitekey,%
+		colupper=black,rounded corners,arc=1pt,bottom=0pt
+		%bottom=\dimexpr1pt-\calcsimmenusdepth\relax,
+	}
+}
+\tcbset{texaskeyblue/.style={%
+		width=\calcsimmenusmenutc,colframe=texasbluekey,colback=texasbluekey,%
+		colupper=white,rounded corners,arc=1pt,bottom=0pt
+		%bottom=\dimexpr1pt-\calcsimmenusdepth\relax,
+	}
+}
+\tcbset{texaskeygreen/.style={%
+		width=\calcsimmenusmenutc,colframe=texasgreenkey,colback=texasgreenkey,%
+		colupper=white,rounded corners,arc=1pt,bottom=0pt
+		%bottom=\dimexpr1pt-\calcsimmenusdepth\relax,
+	}
+}
+\tcbset{texaskeylightgray/.style={%
+		width=\calcsimmenusmenutc,colframe=lightgray!66,colback=lightgray!66,%
+		colupper=black,rounded corners,arc=1pt,bottom=0pt
+		%bottom=\dimexpr1pt-\calcsimmenusdepth\relax,
+	}
+}
+\tcbset{texaskeygray/.style={%
+		width=\calcsimmenusmenutc,colframe=gray,colback=gray,%
+		colupper=black,rounded corners,%
+		bottom=0pt,arc=1pt
+	}
+}
+
+\NewDocumentCommand\intcalckeydim{ O{1pt} m m m m }{%shortcut for compute scaling
+	\settowidth{\calcsimmenusmenutc}{\hbox{\calcsimmenusfont #2}}%
+	\addtolength{\calcsimmenusmenutc}{#1}%
+	\settodepth{\calcsimmenusdepth}{\hbox{\calcsimmenusfont #3}}%
+	\IfEq{\calcsimmenuslen}{auto}%
+		{%
+			\StrLen{#5}[\calcsimmenusnbchar]%
+			\xdef\calcsimmenushscale{\fpeval{min((#4)/(\calcsimmenusnbchar),1)}}%
+			\xdef\calcsimmenusvscale{0.95}%{\fpeval{0.975*\calcsimmenushscale}}%
+		}%
+		{%
+			\xdef\calcsimmenushscale{\fpeval{min((#4)/(\calcsimmenuslen),1)}}%
+			\xdef\calcsimmenusvscale{0.95}%{\fpeval{0.975*\calcsimmenushscale}}%
+		}%
+}
+
+\def\samplecharacterskeyx{azertyuiopqsdfghjklmwxcvbn123456789AZERTYUIOPQSDFGHJKLMWXCVBN}
+
+\NewDocumentCommand\CalcKey{ O{} m }{%
+	\restoreKV[calcsimmenus]%
+	\setKV[calcsimmenus]{#1}%
+	\IfEq{\calcsimmenusmodel}{35+}%
+		{%
+			\IfEq{\calcsimmenustype}{sgray}%small gray F1... 2 chars
+				{%
+					\intcalckeydim[2pt]{MMM}{\samplecharacterskeyx}{3}{#2}%
+					{\tcbox[casiotckey,casiokeytcgray]{\vphantom{\samplecharacterskeyx}\scalebox{\calcsimmenushscale}[\calcsimmenusvscale]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{gray}%gray bottom 3 chars
+				{%
+					\intcalckeydim[2pt]{MMM}{(\samplecharacterskeyx}{3}{#2}%
+					{\tcbox[casiotckey,casiokeytcgray]{\vphantom{(\samplecharacterskeyx}\scalebox{\calcsimmenushscale}[\calcsimmenusvscale]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{white}%white middle
+				{%
+					\intcalckeydim[2pt]{MMMM}{(\samplecharacterskeyx}{4}{#2}%
+					{\tcbox[casiotckey,casiokeytcwhite]{\vphantom{(\samplecharacterskeyx}\scalebox{\calcsimmenushscale}[\calcsimmenusvscale]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{blue}%blue DEL AC
+				{%
+					\intcalckeydim[2pt]{MMM}{(\samplecharacterskeyx}{3}{#2}%
+					{\tcbox[casiotckey,casiokeytcblue]{\vphantom{(\samplecharacterskeyx}\scalebox{\calcsimmenushscale}[\calcsimmenusvscale]{#2}}}%
+				}%
+				{}%
+		}%
+		{}%
+	\IfEq{\calcsimmenusmodel}{90+}%
+		{%
+			\IfEq{\calcsimmenustype}{gray}%gray key
+				{%
+					\intcalckeydim[2pt]{MMM}{(\samplecharacterskeyx}{3}{#2}%
+					{\tcbox[casioqdkey,casioqdkeygray]{\vphantom{(\samplecharacterskeyx}\scalebox{\calcsimmenushscale}[\calcsimmenusvscale]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{silver}%Fn key
+				{%
+					\intcalckeydim[2pt]{MM}{(\samplecharacterskeyx}{2}{#2}%
+					{\tcbox[casioqdkey,casioqdkeysilver]{\vphantom{(\samplecharacterskeyx}\scalebox{\calcsimmenushscale}[\calcsimmenusvscale]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{blue}%blue DEL AC
+				{%
+					\intcalckeydim[2pt]{MMM}{(\samplecharacterskeyx}{3}{#2}%
+					{\tcbox[casioqdkey,casioqdkeyblue]{\vphantom{(\samplecharacterskeyx}\scalebox{\calcsimmenushscale}[\calcsimmenusvscale]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{white}%white middle
+				{%
+					\intcalckeydim[2pt]{MMMM}{(\samplecharacterskeyx}{4}{#2}%
+					{\tcbox[casioqdkey,casioqdkeywhite]{\vphantom{(\samplecharacterskeyx}\scalebox{\calcsimmenushscale}[\calcsimmenusvscale]{#2}}}%
+				}%
+				{}%
+		}%
+		{}%
+	\IfEq{\calcsimmenusmodel}{83}%
+		{%
+			\IfEq{\calcsimmenustype}{swhite}%black menu
+				{%
+					\intcalckeydim[0pt]{MM}{(\samplecharacterskeyx}{2}{#2}%
+					{\tcbox[texaskey,texaskeywhite]{\vphantom{(\samplecharacterskeyx}\scalebox{\calcsimmenushscale}[\calcsimmenusvscale]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{white}%black menu
+				{%
+					\intcalckeydim[0pt]{MMMMM}{(\samplecharacterskeyx}{5}{#2}%
+					{\tcbox[texaskey,texaskeywhite]{\vphantom{(\samplecharacterskeyx}\scalebox{\calcsimmenushscale}[\calcsimmenusvscale]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{blue}%item sel
+				{%
+					\intcalckeydim{MMMM}{(\samplecharacterskeyx}{4}{#2}%
+					{\tcbox[texaskey,texaskeyblue]{\vphantom{(\samplecharacterskeyx}\scalebox{\calcsimmenushscale}[\calcsimmenusvscale]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{green}%item sel
+				{%
+					\intcalckeydim{MMMM}{(\samplecharacterskeyx}{4}{#2}%
+					{\tcbox[texaskey,texaskeygreen]{\vphantom{(\samplecharacterskeyx}\scalebox{\calcsimmenushscale}[\calcsimmenusvscale]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{lightgray}%item sel
+				{%
+					\intcalckeydim[1pt]{MMMM}{(\samplecharacterskeyx}{4}{#2}%
+					{\tcbox[texaskey,texaskeylightgray]{\vphantom{(\samplecharacterskeyx}\scalebox{\calcsimmenushscale}[\calcsimmenusvscale]{#2}}}%
+				}%
+				{}%
+			\IfEq{\calcsimmenustype}{gray}%item sel
+				{%
+					\intcalckeydim{MM}{(\samplecharacterskeyx)}{2}{#2}%
+					{\tcbox[texaskey,texaskeygray]{\vphantom{(\samplecharacterskeyx}\scalebox{\calcsimmenushscale}[\calcsimmenusvscale]{#2}}}%
+				}%
+				{}%
+		}%
+		{}%
+}
+
+%CALC KEYS, WITH LUA
+\if@xelua
+
+\NewDocumentCommand\CalcKeyNwks{ s m }{%
+	\IfBooleanT{#1}{\bgroup\bfseries}%
+	\setsepchar{+}%
+	\readlist*\listkeysnwks{#2}%
+	\foreachitem\lettre\in\listkeysnwks{%
+		\IfStrEqCase{\lettre}{%
+			{left}{{\fontkeyNWKS L}}%
+			{right}{{\fontkeyNWKS R}}%
+			{up}{{\fontkeyNWKS U}}%
+			{down}{{\fontkeyNWKS D}}%
+			{home}{{\fontkeyNWKS H}}%
+			{power}{{\fontkeyNWKS P}}%
+			{ok}{{\fontkeyNWKS O}}%
+			{back}{{\fontkeyNWKS B}}%
+			{shift}{{\fontkeyNWKS S}}%
+			{alpha}{{\fontkeyNWKS A}}%
+			{xnt}{{\fontkeyNWKS x}}%
+			{var}{{\fontkeyNWKS V}}%
+			{tools}{{\fontkeyNWKS T}}%
+			{clear}{{\fontkeyNWKS d}}%
+			{exp}{{\fontkeyNWKS e}}%
+			{ln}{{\fontkeyNWKS l}}%
+			{log}{{\fontkeyNWKS g}}%
+			{i}{{\fontkeyNWKS i}}%
+			{virg}{{\fontkeyNWKS ,}}%
+			{comma}{{\fontkeyNWKS ,}}%
+			{pow}{{\fontkeyNWKS p}}%
+			{sin}{{\fontkeyNWKS s}}%
+			{cos}{{\fontkeyNWKS c}}%
+			{tan}{{\fontkeyNWKS t}}%
+			{pi}{{\fontkeyNWKS n}}%
+			{sqrt}{{\fontkeyNWKS r}}%
+			{sqr}{{\fontkeyNWKS q}}%
+			{0}{{\fontkeyNWKS 0}}%
+			{1}{{\fontkeyNWKS 1}}%
+			{2}{{\fontkeyNWKS 2}}%
+			{3}{{\fontkeyNWKS 3}}%
+			{4}{{\fontkeyNWKS 4}}%
+			{5}{{\fontkeyNWKS 5}}%
+			{6}{{\fontkeyNWKS 6}}%
+			{7}{{\fontkeyNWKS 7}}%
+			{8}{{\fontkeyNWKS 8}}%
+			{9}{{\fontkeyNWKS 9}}%
+			{dot}{{\fontkeyNWKS .}}%
+			{plus}{{\fontkeyNWKS +}}%
+			{x10p}{{\fontkeyNWKS E}}%
+			{minus}{{\fontkeyNWKS -}}%
+			{lp}{{\fontkeyNWKS (}}%
+			{rp}{{\fontkeyNWKS )}}%
+			{ans}{{\fontkeyNWKS a}}%
+			{div}{{\fontkeyNWKS /}}%
+			{exe}{{\fontkeyNWKS X}}%
+			{times}{{\fontkeyNWKS *}}%
+		}%
+	}%
+	\IfBooleanT{#1}{\egroup}%
+}%
+
+\NewDocumentCommand\CalcKeyCasioCW{ m }{%
+	\setsepchar{+}%
+	\readlist*\listkeyscasiocw{#1}%
+	\foreachitem\lettre\in\listkeyscasiocw{%
+		\IfStrEqCase{\lettre}{%
+			{on}{{\fontkeyCASIOcw W}}%
+			{home}{{\fontkeyCASIOcw w}}%
+			{ok}{{\fontkeyCASIOcw |}}%
+			{up}{{\fontkeyCASIOcw E}}%
+			{down}{{\fontkeyCASIOcw R}}%
+			{left}{{\fontkeyCASIOcw !}}%
+			{right}{{\fontkeyCASIOcw \$}}%
+			{pgup}{{\fontkeyCASIOcw \%}}%
+			{pgdown}{{\fontkeyCASIOcw \&}}%
+			{config}{{\fontkeyCASIOcw L}}%
+			{back}{{\fontkeyCASIOcw `}}%
+			%next
+			{shift}{{\fontkeyCASIOcw q}}%
+			{var}{{\fontkeyCASIOcw '}}%
+			{fx}{{\fontkeyCASIOcw Q}}%
+			{ctlg}{{\fontkeyCASIOcw T}}%
+			{tools}{{\fontkeyCASIOcw I}}%
+			%next
+			{x}{{\fontkeyCASIOcw [}}%
+			{frac}{{\fontkeyCASIOcw a}}%
+			{sqrt}{{\fontkeyCASIOcw s}}%
+			{pow}{{\fontkeyCASIOcw \char"005E}}%
+			{sqr}{{\fontkeyCASIOcw d}}%
+			{exp}{{\fontkeyCASIOcw H}}%
+			{comma}{{\fontkeyCASIOcw \#}}%
+			{virg}{{\fontkeyCASIOcw \#}}%
+			{sin}{{\fontkeyCASIOcw j}}%
+			{cos}{{\fontkeyCASIOcw k}}%
+			{tan}{{\fontkeyCASIOcw l}}%
+			{lp}{{\fontkeyCASIOcw (}}%
+			{rp}{{\fontkeyCASIOcw )}}%
+			%next
+			{7}{{\fontkeyCASIOcw 7}}%
+			{8}{{\fontkeyCASIOcw 8}}%
+			{9}{{\fontkeyCASIOcw 9}}%
+			{del}{{\fontkeyCASIOcw o}}%
+			{ac}{{\fontkeyCASIOcw C}}%
+			{4}{{\fontkeyCASIOcw 4}}%
+			{5}{{\fontkeyCASIOcw 5}}%
+			{6}{{\fontkeyCASIOcw 6}}%
+			{times}{{\fontkeyCASIOcw O}}%
+			{div}{{\fontkeyCASIOcw P}}%
+			{1}{{\fontkeyCASIOcw 1}}%
+			{2}{{\fontkeyCASIOcw 2}}%
+			{3}{{\fontkeyCASIOcw 3}}%
+			{plus}{{\fontkeyCASIOcw +}}%
+			{minus}{{\fontkeyCASIOcw p}}%
+			{0}{{\fontkeyCASIOcw 0}}%
+			{dot}{{\fontkeyCASIOcw .}}%
+			{x10p}{{\fontkeyCASIOcw K}}%
+			{fmt}{{\fontkeyCASIOcw n}}%
+			{exe}{{\fontkeyCASIOcw B}}%
+			%next
+			{semicol}{{\fontkeyCASIOcw f}}%
+			{ptvirg}{{\fontkeyCASIOcw f}}%
+			{ans}{{\fontkeyCASIOcw M}}%
+			{rep}{{\fontkeyCASIOcw u}}%
+		}%
+	}%
+}%
+
+\NewDocumentCommand\CalcKeyCasioFX{ m }{%
+	\setsepchar{+}%
+	\readlist*\listkeyscasiofx{#1}%
+	\foreachitem\lettre\in\listkeyscasiofx{%
+		\IfStrEqCase{\lettre}{%
+			{F1}{{\fontkeyCASIOfx q}}%
+			{F2}{{\fontkeyCASIOfx w}}%
+			{F3}{{\fontkeyCASIOfx e}}%
+			{F4}{{\fontkeyCASIOfx r}}%
+			{F5}{{\fontkeyCASIOfx y}}%
+			{F6}{{\fontkeyCASIOfx u}}%
+			{up}{{\fontkeyCASIOfx B}}%
+			{down}{{\fontkeyCASIOfx N}}%
+			{left}{{\fontkeyCASIOfx !}}%
+			{right}{{\fontkeyCASIOfx \$}}%
+			{shift}{{\fontkeyCASIOfx L}}%
+			{optn}{{\fontkeyCASIOfx i}}%
+			{vars}{{\fontkeyCASIOfx o}}%
+			{menu}{{\fontkeyCASIOfx p}}%
+			{alpha}{{\fontkeyCASIOfx a}}%
+			{sqr}{{\fontkeyCASIOfx s}}%
+			{pow}{{\fontkeyCASIOfx \char"005E}}%
+			{exit}{{\fontkeyCASIOfx d}}%
+			{xtt}{{\fontkeyCASIOfx f}}%
+			{log}{{\fontkeyCASIOfx g}}%
+			{ln}{{\fontkeyCASIOfx G}}%
+			{sin}{{\fontkeyCASIOfx h}}%
+			{cos}{{\fontkeyCASIOfx j}}%
+			{tan}{{\fontkeyCASIOfx k}}%
+			{frac}{{\fontkeyCASIOfx ;}}%
+			{sd}{{\fontkeyCASIOfx v}}%
+			{lp}{{\fontkeyCASIOfx (}}%
+			{rp}{{\fontkeyCASIOfx )}}%
+			{comma}{{\fontkeyCASIOfx ,}}%
+			{virg}{{\fontkeyCASIOfx ,}}%
+			{sto}{{\fontkeyCASIOfx b}}%
+			{7}{{\fontkeyCASIOfx 7}}%
+			{8}{{\fontkeyCASIOfx 8}}%
+			{9}{{\fontkeyCASIOfx 9}}%
+			{del}{{\fontkeyCASIOfx P}}%
+			{acon}{{\fontkeyCASIOfx O}}%
+			{4}{{\fontkeyCASIOfx 4}}%
+			{5}{{\fontkeyCASIOfx 5}}%
+			{6}{{\fontkeyCASIOfx 6}}%
+			{times}{{\fontkeyCASIOfx m}}%
+			{div}{{\fontkeyCASIOfx M}}%
+			{1}{{\fontkeyCASIOfx 1}}%
+			{2}{{\fontkeyCASIOfx 2}}%
+			{3}{{\fontkeyCASIOfx 3}}%
+			{plus}{{\fontkeyCASIOfx +}}%
+			{minus}{{\fontkeyCASIOfx -}}%
+			{0}{{\fontkeyCASIOfx 0}}%
+			{dot}{{\fontkeyCASIOfx .}}%
+			{x10p}{{\fontkeyCASIOfx :}}%
+			{sminus}{{\fontkeyCASIOfx n}}%
+			{exe}{{\fontkeyCASIOfx l}}%
+		}%
+	}%
+}%
+
+\NewDocumentCommand\CalcKeyTIfr{ m }{%
+	\setsepchar{+}%
+	\readlist*\listkeystiqt{#1}%
+	\foreachitem\lettre\in\listkeystiqt{%
+		\IfStrEqCase{\lettre}{%
+			{fx}{{\fontkeyTIfr o}}%
+			{fenetre}{{\fontkeyTIfr p}}%
+			{zoom}{{\fontkeyTIfr q}}%
+			{trace}{{\fontkeyTIfr r}}%
+			{graphe}{{\fontkeyTIfr s}}%
+			{2nde}{{\fontkeyTIfr y}}%
+			{mode}{{\fontkeyTIfr z}}%
+			{suppr}{{\fontkeyTIfr \char"007B}}%
+			{up}{{\fontkeyTIfr \char"007D}}%
+			{down}{{\fontkeyTIfr \char"2020}}%
+			{left}{{\fontkeyTIfr \char"007C}}%
+			{right}{{\fontkeyTIfr \char"007E}}%
+			{alpha}{{\fontkeyTIfr \char"0192}}%
+			{xttn}{{\fontkeyTIfr \char"201E}}%
+			{stats}{{\fontkeyTIfr \char"2026}}%
+			{math}{{\fontkeyTIfr \char"00BB}}%
+			{matrice}{{\fontkeyTIfr \char"00BE}}%
+			{prgm}{{\fontkeyTIfr \char"00BC}}%
+			{var}{{\fontkeyTIfr \char"00BD}}%
+			{annul}{{\fontkeyTIfr \char"2018}}%
+			{fmt}{{\fontkeyTIfr \char"2014}}%
+			{trig}{{\fontkeyTIfr \char"02DC}}%
+			{resol}{{\fontkeyTIfr \char"2122}}%
+			{frac}{{\fontkeyTIfr \char"0161}}%
+			{pow}{{\fontkeyTIfr \char"203A}}%
+			{sqr}{{\fontkeyTIfr \char"00A1}}%
+			{virg}{{\fontkeyTIfr \char"00A2}}%
+			{lp}{{\fontkeyTIfr \char"00A3}}%
+			{rp}{{\fontkeyTIfr \char"00A4}}%
+			{div}{{\fontkeyTIfr \char"00A5}}%
+			{log}{{\fontkeyTIfr \char"00AB}}%
+			{7}{{\fontkeyTIfr \char"00AC}}%
+			{8}{{\fontkeyTIfr \char"00AA}}%
+			{9}{{\fontkeyTIfr \char"00AE}}%
+			{times}{{\fontkeyTIfr \char"00AF}}%
+			{ln}{{\fontkeyTIfr \char"00B5}}%
+			{4}{{\fontkeyTIfr \char"00B6}}%
+			{5}{{\fontkeyTIfr \char"00B7}}%
+			{6}{{\fontkeyTIfr \char"00B8}}%
+			{minus}{{\fontkeyTIfr \char"00B9}}%
+			{sto}{{\fontkeyTIfr \char"00BF}}%
+			{1}{{\fontkeyTIfr \char"00C0}}%
+			{2}{{\fontkeyTIfr \char"00C1}}%
+			{3}{{\fontkeyTIfr \char"00C2}}%
+			{plus}{{\fontkeyTIfr \char"00C3}}%
+			{on}{{\fontkeyTIfr \char"00C9}}%
+			{0}{{\fontkeyTIfr \char"00CA}}%
+			{dot}{{\fontkeyTIfr \char"00CB}}%
+			{sminus}{{\fontkeyTIfr \char"00CC}}%
+			{entrer}{{\fontkeyTIfr \char"00CD}}%
+			%next
+			{apps}{{\fontkeyTI \char"0152}}%
+			{inv}{{\fontkeyTI \char"2014}}%
+			{sin}{{\fontkeyTI \char"02DC}}%
+			{cos}{{\fontkeyTI \char"2122}}%
+			{tan}{{\fontkeyTI \char"0161}}%
+		}%
+	}%
+}%
+
+\NewDocumentCommand\CalcKeyTI{ m }{%
+	\setsepchar{+}%
+	\readlist*\listkeystien{#1}%
+	\foreachitem\lettre\in\listkeystien{%
+		\IfStrEqCase{\lettre}{%
+			{y}{{\fontkeyTI o}}%
+			{window}{{\fontkeyTI p}}%
+			{zoom}{{\fontkeyTI q}}%
+			{trace}{{\fontkeyTI r}}%
+			{graph}{{\fontkeyTI s}}%
+			{2nd}{{\fontkeyTI y}}%
+			{mode}{{\fontkeyTI z}}%
+			{del}{{\fontkeyTI \char"007B}}%
+			{up}{{\fontkeyTI \char"007D}}%
+			{down}{{\fontkeyTI \char"2020}}%
+			{left}{{\fontkeyTI \char"007C}}%
+			{right}{{\fontkeyTI \char"007E}}%
+			{alpha}{{\fontkeyTI \char"0192}}%
+			{xttn}{{\fontkeyTI \char"201E}}%
+			{stat}{{\fontkeyTI \char"2026}}%
+			{math}{{\fontkeyTI \char"00BB}}%
+			{apps}{{\fontkeyTI \char"0152}}%
+			{prgm}{{\fontkeyTI \char"00BC}}%
+			{vars}{{\fontkeyTI \char"00BD}}%
+			{clear}{{\fontkeyTI \char"2018}}%
+			{inv}{{\fontkeyTI \char"2014}}%
+			{sin}{{\fontkeyTI \char"02DC}}%
+			{cos}{{\fontkeyTI \char"2122}}%
+			{tan}{{\fontkeyTI \char"0161}}%
+			{pow}{{\fontkeyTI \char"203A}}%
+			{sqr}{{\fontkeyTI \char"00A1}}%
+			{comma}{{\fontkeyTI \char"00A2}}%
+			{lp}{{\fontkeyTI \char"00A3}}%
+			{rp}{{\fontkeyTI \char"00A4}}%
+			{div}{{\fontkeyTI \char"00A5}}%
+			{log}{{\fontkeyTI \char"00AB}}%
+			{7}{{\fontkeyTI \char"00AC}}%
+			{8}{{\fontkeyTI \char"00AA}}%
+			{9}{{\fontkeyTI \char"00AE}}%
+			{times}{{\fontkeyTI \char"00AF}}%
+			{ln}{{\fontkeyTI \char"00B5}}%
+			{4}{{\fontkeyTI \char"00B6}}%
+			{5}{{\fontkeyTI \char"00B7}}%
+			{6}{{\fontkeyTI \char"00B8}}%
+			{minus}{{\fontkeyTI \char"00B9}}%
+			{sto}{{\fontkeyTI \char"00BF}}%
+			{1}{{\fontkeyTI \char"00C0}}%
+			{2}{{\fontkeyTI \char"00C1}}%
+			{3}{{\fontkeyTI \char"00C2}}%
+			{plus}{{\fontkeyTI \char"00C3}}%
+			{on}{{\fontkeyTI \char"00C9}}%
+			{0}{{\fontkeyTI \char"00CA}}%
+			{dot}{{\fontkeyTI \char"00CB}}%
+			{sminus}{{\fontkeyTI \char"00CC}}%
+			{enter}{{\fontkeyTI \char"00CD}}%
+		}%
+	}%
+}%
+
+%=====SHORTCUTS FOR TI OS (ti-83-plus-large.ttf)
+\newcommand\osfontTIsto{\char"2192}
+\newcommand\osfontTItri{\char"25B6}
+\newcommand\osfontTIiit{\char"2139}
+\newcommand\osfontTIint{\char"222B}
+\newcommand\osfontTIeit{\char"212F}
+\newcommand\osfontTIpi{\char"03C0}
+\newcommand\osfontTIsum{\char"03A3}
+\newcommand\osfontTIsqrt{\char"221A}
+\newcommand\osfontTIdelta{\char"0394}
+
+%=====SHORTCUTS FOR TICE OS (TICELargeSmooth.otf)
+\newcommand\osfontTICEnit{\char"F00E}
+\newcommand\osfontTICEuseq{\char"0155}
+\newcommand\osfontTICEvseq{\char"0156}
+\newcommand\osfontTICEwseq{\char"0157}
+\newcommand\osfontTICEtri{\char"F014}
+\newcommand\osfontTICEint{\char"222B}
+\newcommand\osfontTICEleq{\char"2264}
+\newcommand\osfontTICEneq{\char"2260}
+\newcommand\osfontTICEgeq{\char"2265}
+\newcommand\osfontTICEsto{\char"2192}
+\newcommand\osfontTICEiit{\char"2148}
+\newcommand\osfontTICEeit{\char"212F}
+\newcommand\osfontTICEpi{\char"03C0}
+\newcommand\osfontTICEdelta{\char"0394}
+\newcommand\osfontTICEsum{\char"03A3}
+\newcommand\osfontTICEsqrt{\char"221A}
+
+%=====SHORTCUTS FOR CASIO FX (casio-fx-9860gii.ttf)
+\newcommand\osfontCASIOFXsto{\char"2192}
+\newcommand\osfontCASIOFXpi{\char"03C0}
+\newcommand\osfontCASIOFXtri{\char"25B8}
+\newcommand\osfontCASIOFXsqrt{\char"221A}
+\newcommand\osfontCASIOFXsum{\char"2211}
+\newcommand\osfontCASIOFXint{\char"222B}
+\newcommand\osfontCASIOFXibd{\char"2139}
+\newcommand\osfontCASIOFXebd{\char"212F}
+
+%=====SHORTCUTS FOR CASIO CG (casio-fx-cg50-sizea.otf)
+\newcommand\osfontCASIOCGpi{\char"03C0}
+\newcommand\osfontCASIOCGsto{\char"2192}
+\newcommand\osfontCASIOCGsqrt{\char"221A}
+\newcommand\osfontCASIOCGsum{\char"2211}
+\newcommand\osfontCASIOCGleq{\char"2264}
+\newcommand\osfontCASIOCGgeq{\char"2265}
+
+%=====SHORTCUTS FOR CASIO CW (ClassWizMathCW-Regular.otf)
+\newcommand\osfontCASIOCWpi{\char"01D70B}
+\newcommand\osfontCASIOCWsum{\char"2211}
+\newcommand\osfontCASIOCWint{\char"222B}
+\newcommand\osfontCASIOCWtri{\char"25B8}
+\newcommand\osfontCASIOCWxit{\char"01D465}
+\newcommand\osfontCASIOCWyit{\char"01D466}
+\newcommand\osfontCASIOCWzit{\char"01D467}
+\newcommand\osfontCASIOCWiit{\char"01D486}
+\newcommand\osfontCASIOCWeit{\char"01D48A}
+\newcommand\osfontCASIOCWsto{\char"2192}
+\newcommand\osfontCASIOCWsqrt{\char"221A}
+
+%=====SHORTCUTS FOR NUMWORKS (CartographCF-Light.otf)
+\newcommand\osfontNWKSpi{\char"03C0}
+\newcommand\osfontNWKSsqrt{\char"221A}
+\newcommand\osfontNWKSsto{\char"2192}
+\newcommand\osfontNWKSsum{\char"2211}
+\newcommand\osfontNWKSleq{\char"2264}
+\newcommand\osfontNWKSneq{\char"2260}
+\newcommand\osfontNWKSgeq{\char"2265}
+\newcommand\osfontNWKStri{\char"25BA}
+
+\fi
+
+%SHORTCUTS (with pdf files, not included)
+\@ifpackageloaded{inlinegraphicx}{}{\RequirePackage{inlinegraphicx}}
+\NewDocumentCommand\inckeycalc{ s O{} m m O{pdf} }{%
+	\IfFileExists{calcitems_#3_#4.#5}%
+		{%
+			\IfBooleanTF{#1}{\includegraphics[#2]{calcitems_#3_#4.#5}}{\inlinegraphics[#2]{calcitems_#3_#4.#5}}%
+		}%
+		{%
+			\IfBooleanTF{#1}{\includegraphics[#2]{example-image.pdf}}{\inlinegraphics[#2]{example-image.pdf}}%
+		}%
+}
+
+\endinput

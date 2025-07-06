@@ -1,0 +1,343 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: lualatex: {shell: no, synctex: no, interaction: batchmode}
+
+\documentclass{article}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{cascadiamono-otf}
+\usepackage{listings}
+\usepackage{xcolor}
+\setlength{\parindent}{0pt}
+
+\newcommand\demotext{For \textsterling 45, almost anything can be found floating in fields.\\
+	!`THE DAZED BROWN FOX QUICKLY GAVE 12345--67890 JUMPS!\\
+	--- ?`But aren't Kafka's Schlo\ss{} and \AE sop's \OE uvres often na\"\i ve vis-\`a-vis the d\ae monic ph\oe nix's official r\^ole in fluffy souffl\'es?
+}
+
+\newcommand\samplettxt{oO08 iIlL1 g9qCGQ <=>}
+\newcommand\samplett[1][]{#1\samplettxt}
+\newcommand\samplettit[1][]{\textit{#1\samplettxt}}
+\newcommand\samplettbf[1][]{\textbf{#1\samplettxt}}
+\newcommand\samplettbfit[1][]{\textbf{\textit{#1\samplettxt}}}
+\newcommand\sampletttbl[1][]{& \samplett[#1] &  \samplettit[#1] & \samplettbf[#1] & \samplettbfit[#1]}
+
+\begin{document}
+
+\part*{cascadiamono-otf (v 0.3)}
+
+\section{Usages}
+
+With \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|\usepackage{fontspec}| (so with \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|XeTeX| or \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|LuaLaTeX| compilation), you can use \texttt{CascadiaCode} fonts, and \textit{remove} ligature's features, in order to use (in fact) \texttt{CascadiaMono} fonts.
+
+\smallskip
+
+Following OpenType fonts are supported (it's based on \texttt{CascadiaCode} without the ligatures) :
+
+\begin{lstlisting}[language={[latex]TeX},basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\color{magenta},tabsize=4,frame=single]
+CascadiaCode-Bold.otf                      CascadiaCode-BoldItalic.otf
+CascadiaCode-ExtraLight.otf                CascadiaCode-ExtraLightItalic.otf
+CascadiaCode-Italic.otf                    CascadiaCode-Light.otf
+CascadiaCode-LightItalic.otf               CascadiaCode-Regular.otf
+CascadiaCode-SemiBold.otf                  CascadiaCode-SemiBoldItalic.otf
+CascadiaCode-SemiLight.otf                 CascadiaCode-SemiLightItalic.otf
+\end{lstlisting}
+
+\section{The default settings}
+
+The \texttt{fontspec} config for the \textit{normal} version :
+
+\begin{lstlisting}[language={[latex]TeX},basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\color{magenta},tabsize=4,frame=single]
+\defaultfontfeatures[CascadiaMono]
+    {Extension=.otf,
+    UprightFont=CascadiaCode-Regular,
+    ItalicFont=CascadiaCode-Italic,
+    BoldFont=CascadiaCode-Bold,
+    BoldItalicFont=CascadiaCode-BoldItalic,
+    Contextuals=AlternateOff}
+\end{lstlisting}
+
+The \texttt{fontspec} config for the other versions are :
+
+\begin{lstlisting}[language={[latex]TeX},basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\color{magenta},tabsize=4,frame=single]
+\defaultfontfeatures[CascadiaMono-Light]
+    {Extension=.otf,
+    UprightFont=CascadiaCode-Light,
+    ItalicFont=CascadiaCode-LightItalic,
+    BoldFont=CascadiaCode-Regular,
+    BoldItalicFont=CascadiaCode-Italic,
+    Contextuals=AlternateOff}
+\end{lstlisting}
+
+\begin{lstlisting}[language={[latex]TeX},basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\color{magenta},tabsize=4,frame=single]
+\defaultfontfeatures[CascadiaMono-SemiLight]
+    {Extension=.otf,
+    UprightFont=CascadiaCode-SemiLight,
+    ItalicFont=CascadiaCode-SemiLightItalic,
+    BoldFont=CascadiaCode-SemiBold,
+    BoldItalicFont=CascadiaCode-SemiBoldItalic,
+    Contextuals=AlternateOff}
+\end{lstlisting}
+
+\begin{lstlisting}[language={[latex]TeX},basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\color{magenta},tabsize=4,frame=single]
+\defaultfontfeatures[CascadiaMono-ExtraLight]
+    {Extension=.otf,
+    UprightFont=CascadiaCode-ExtraLight,
+    ItalicFont=CascadiaCode-ExtraLightItalic,
+    BoldFont=CascadiaCode-SemiLight,
+    BoldItalicFont=CascadiaCode-SemiLightItalic,
+    Contextuals=AlternateOff}
+\end{lstlisting}
+
+It's possible to use ligatures with \texttt{Code} alias, instead of \texttt{Mono}.
+
+\pagebreak
+
+\subsection{With config files}
+
+The idea is to propose \texttt{fontspec} config files to load correctly \texttt{CascadiaMono} features.
+
+\begin{lstlisting}[language={[latex]TeX},basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\color{magenta},tabsize=4,frame=single]
+\usepackage{fontspec}
+%w/o ligatures
+\setmonofont{CascadiaMono}[options]                %version regular
+\setmonofont{CascadiaMono-SemiLight}[options]      %version semilight
+\setmonofont{CascadiaMono-Light}[options]          %version light
+\setmonofont{CascadiaMono-ExtraLight}[options]     %version extralight
+%w ligatures
+\setmonofont{cascadiacode}[options]                %version regular
+\setmonofont{cascadiacode-semilight}[options]      %version semilight
+\setmonofont{cascadiacode-light}[options]          %version light
+\setmonofont{cascadiacode-extralight}[options]     %version extralight
+\end{lstlisting}
+
+\subsection{With the package loading}
+
+With \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|\usepackage[scale=...]{cascadiamono-otf}|, \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|fontspec| is loaded, and \lstinline[language={[latex]TeX},basicstyle=\ttfamily]|fontfamily| are defined :
+
+\begin{lstlisting}[language={[latex]TeX},basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\color{magenta},tabsize=4,frame=single]
+%w/o ligatures
+\newfontfamily\cascadiamono{CascadiaMono}
+\newfontfamily\cascadiamonosemilight{CascadiaMono-SemiLight}
+\newfontfamily\cascadiamonolight{CascadiaMono-Light}
+\newfontfamily\cascadiamonoextralight{CascadiaMono-ExtraLight}
+%w ligatures
+\newfontfamily\cascadiacode{cascadiacode}
+\newfontfamily\cascadiacodesemilight{cascadiacode-semilight}
+\newfontfamily\cascadiacodelight{cascadiacode-light}
+\newfontfamily\cascadiacodeextralight{cascadiacode-extralight}
+\end{lstlisting}
+
+\section{Font Samples}
+
+\subsection{Normal version (Regular - Italic - Bold - BoldItalic)}
+
+\setmonofont{CascadiaMono}[Scale=MatchLowercase]
+
+\texttt{\demotext}\par\bigskip
+
+\texttt{\textit{\demotext}}\par\bigskip
+
+\texttt{\textbf{\demotext}}\par\bigskip
+
+\texttt{\textbf{\textit{\demotext}}}\par
+
+\subsection{SemiLight version (SemiLight - SemiLightItalic - SemiBold - SemiBoldItalic)}
+
+\setmonofont{CascadiaMono-SemiLight}[Scale=MatchLowercase]
+
+\texttt{\demotext}\par\bigskip
+
+\texttt{\itshape\demotext}\par\bigskip
+
+\texttt{\bfseries\demotext}\par\bigskip
+
+\texttt{\bfseries\itshape\demotext}\par
+
+\subsection{Light version (Light - LightItalic - Regular - Italic)}
+
+\setmonofont{CascadiaMono-Light}[Scale=MatchLowercase]
+
+\texttt{\demotext}\par\bigskip
+
+\texttt{\itshape\demotext}\par\bigskip
+
+\texttt{\bfseries\demotext}\par\bigskip
+
+\texttt{\bfseries\itshape\demotext}\par
+
+\subsection{ExtraLight version (ExtraLight - ExtraLightItalic - SemiLightItalic - SemiLightItalic)}
+
+\setmonofont{CascadiaMono-ExtraLight}[Scale=MatchLowercase]
+
+\texttt{\demotext}\par\bigskip
+
+\texttt{\itshape\demotext}\par\bigskip
+
+\texttt{\bfseries\demotext}\par\bigskip
+
+\texttt{\bfseries\itshape\demotext}\par
+
+\pagebreak
+
+\section{Simple code samples}
+
+\setmonofont{CMU Typewriter Text}[Scale=MatchLowercase]
+
+\noindent{\small \begin{tabular}{lllll}
+	\hline
+	Type & Normal & Italic & Bold & BoldItalic \\ \hline
+	ttdefault \sampletttbl[\ttfamily] \\ \hline
+	Cmonoregular \sampletttbl[\cascadiamono]\\ \hline
+	Cmonosemilight \sampletttbl[\cascadiamonosemilight] \\ \hline
+	Cmonolight \sampletttbl[\cascadiamonolight] \\ \hline
+	Cmonoextralight \sampletttbl[\cascadiamonoextralight]\\ \hline
+	Ccoderegular \sampletttbl[\cascadiacode]\\ \hline
+	Ccodesemilight \sampletttbl[\cascadiacodesemilight] \\ \hline
+	Ccodelight \sampletttbl[\cascadiacodelight] \\ \hline
+	Ccodeextralight \sampletttbl[\cascadiacodeextralight]\\ \hline
+\end{tabular}}
+
+\section{Algorithm samples, without ligatures}
+
+\subsection{Normal version}
+
+\setmonofont{CascadiaMono}[Scale=MatchLowercase]
+
+\begin{lstlisting}[language=python,basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single]
+def Fibonacci(n) :
+  # Check if input is 0 then it will print incorrect input
+  if n < 0 :
+    print("Incorrect input")
+  elif n == 0 :
+    return 0
+  elif n == 1 or n == 2 :
+    return 1
+  else :
+    return Fibonacci(n-1) + Fibonacci(n-2)
+\end{lstlisting}
+
+\subsection{SemiLight version}
+
+\setmonofont{CascadiaMono-SemiLight}[Scale=MatchLowercase]
+
+\begin{lstlisting}[language=python,basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single]
+def Fibonacci(n) :
+  # Check if input is 0 then it will print incorrect input
+  if n < 0 :
+    print("Incorrect input")
+  elif n == 0 :
+    return 0
+  elif n == 1 or n == 2 :
+    return 1
+  else :
+    return Fibonacci(n-1) + Fibonacci(n-2)
+\end{lstlisting}
+
+\subsection{Light version}
+
+\setmonofont{CascadiaMono-Light}[Scale=MatchLowercase]
+
+\begin{lstlisting}[language=python,basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single]
+def Fibonacci(n) :
+  # Check if input is 0 then it will print incorrect input
+  if n < 0 :
+    print("Incorrect input")
+  elif n == 0 :
+    return 0
+  elif n == 1 or n == 2 :
+    return 1
+  else :
+    return Fibonacci(n-1) + Fibonacci(n-2)
+\end{lstlisting}
+
+\subsection{ExtraLight version}
+
+\setmonofont{CascadiaMono-ExtraLight}[Scale=MatchLowercase]
+
+\begin{lstlisting}[language=python,basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single]
+def Fibonacci(n) :
+  # Check if input is 0 then it will print incorrect input
+  if n < 0 :
+    print("Incorrect input")
+  elif n == 0 :
+    return 0
+  elif n == 1 or n == 2 :
+    return 1
+  else :
+    return Fibonacci(n-1) + Fibonacci(n-2)
+\end{lstlisting}
+
+\pagebreak
+
+\section{Algorithm code, with ligatures}
+
+\setmonofont{CMU Typewriter Text}[Scale=MatchLowercase]
+
+Regular version of the fonts, with ligatures enable, can be uses with \texttt{code} alias (\lstinline[language={[latex]TeX},basicstyle=\ttfamily]|\cascadiacode|).
+
+\makeatletter
+\renewcommand*\verbatim@nolig@list{}
+\makeatother
+
+\begin{lstlisting}[language=python,basicstyle=\footnotesize\cascadiacode,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single,columns=flexible,showstringspaces=false]
+\lstset{
+  language=python,
+  basicstyle=\footnotesize\cascadiacode,
+  commentstyle=\itshape\color{gray},
+  keywordstyle=\bfseries\color{magenta},
+  tabsize=4,
+  frame=single,
+  columns=flexible,
+  showstringspaces=false
+}
+\end{lstlisting}
+\begin{lstlisting}[language=python,basicstyle=\footnotesize\cascadiacode,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single,columns=flexible,showstringspaces=false]
+const similar = "oO08 iIlL1 g9qCGQ"
+const diacritics_etc = "â é ù ï ø ç Ã Ē Æ œ"
+
+window.toggleFavorite = (alias) => {
+  try {
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || []
+    if (favorites.indexOf(alias) > -1) {
+      favorites = favorites.filter((v) => {
+        return v !== alias
+      })
+    } else {
+      favorites.push(alias)
+    }
+    localStorage.setItem('favorites', JSON.stringify(Array.from(new Set(favorites))))
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('could not save favorite', err)
+  }
+  renderSelectList()
+  return false
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=python,basicstyle=\footnotesize\cascadiacode,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single,columns=flexible,showstringspaces=false]
+def Fibonacci(n) :
+  # Check if input is 0 then it will print incorrect input
+  if n < 0 :
+    print("Incorrect input")
+  elif n == 0 :
+    return 0
+  elif 1 <= n <= 2 :
+    return 1
+  else :
+    return Fibonacci(n-1) + Fibonacci(n-2)
+\end{lstlisting}
+
+\pagebreak
+
+
+\section{History}
+
+\setmonofont{CMU Typewriter Text}[Scale=MatchLowercase]
+
+\begin{verbatim}
+v0.3 Package loading with fontfamily + 'code' version
+v0.2 New weight options
+v0.1 Initial version
+\end{verbatim}
+
+\end{document}

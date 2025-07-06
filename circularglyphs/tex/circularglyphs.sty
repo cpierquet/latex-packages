@@ -1,0 +1,386 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{circularglyphs}[2023/10/06 0.1.1 Circular glyphs Alphabet]
+
+%====HISTORIQUE
+% v 0.1.1	Compatibilité accrue avec le moteur pdflatex ^^ + clé [Color]
+% v 0.1.0	Version initiale
+
+%====BASE
+\RequirePackage{tikz}
+\RequirePackage{xstring}
+\RequirePackage{calc}
+\RequirePackage{simplekv}
+
+%====LONGUEURS
+\newlength{\tmp@circglyph@hauteur@totale}
+\newlength{\tmp@circglyph@profondeur}
+\def\tmp@circglyph@nivext{0.4}
+\def\tmp@circglyph@nivint{0.225}
+\def\tmp@circglyph@nivpt{0.25}
+
+%====CLÉS
+\defKV[circularglyph]{%
+	Color=\def\circularglyphcolor{#1}
+}
+\setKVdefault[circularglyph]{%
+	Ext=false,%
+	Inline=false,%
+	Color=black
+}
+
+%====STYLES
+\tikzset{
+	CircGlyphA/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (-\tmp@circglyph@nivext,0) to[out=90,in=180]++ (\tmp@circglyph@nivext,\tmp@circglyph@nivext) ;
+	},
+	CircGlyphB/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,\tmp@circglyph@nivext) to[out=0,in=90]++ (\tmp@circglyph@nivext,-\tmp@circglyph@nivext) ;
+	},
+	CircGlyphC/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (\tmp@circglyph@nivext,0) to[out=-90,in=0]++ (-\tmp@circglyph@nivext,-\tmp@circglyph@nivext) ;
+	},
+	CircGlyphD/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,-\tmp@circglyph@nivext) to[out=180,in=-90]++ (-\tmp@circglyph@nivext,\tmp@circglyph@nivext) ;
+	},
+	CircGlyphE/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (-\tmp@circglyph@nivext,0) arc (180:0:\tmp@circglyph@nivext) ;
+	},
+	CircGlyphF/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,\tmp@circglyph@nivext) arc (90:-90:\tmp@circglyph@nivext) ;
+	},
+	CircGlyphG/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (\tmp@circglyph@nivext,0) arc (0:-180:\tmp@circglyph@nivext) ;
+	},
+	CircGlyphH/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,\tmp@circglyph@nivext) arc (90:270:\tmp@circglyph@nivext) ;
+	},
+	CircGlyphI/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (-\tmp@circglyph@nivext,0) arc (180:-90:\tmp@circglyph@nivext) ;
+	},
+	CircGlyphJ/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (-\tmp@circglyph@nivext,0) arc (-180:90:\tmp@circglyph@nivext) ;
+	},
+	CircGlyphK/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,\tmp@circglyph@nivext) arc (90:360:\tmp@circglyph@nivext) ;
+	},
+	CircGlyphL/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (\tmp@circglyph@nivext,0) arc (0:270:\tmp@circglyph@nivext) ;
+	},
+	CircGlyphM/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,0) circle[radius=\tmp@circglyph@nivext] ;
+	},
+	CircGlyphN/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,0) circle[radius=\tmp@circglyph@nivext] ; \draw (0,\tmp@circglyph@nivint) arc (90:180:\tmp@circglyph@nivint) ;
+	},
+	CircGlyphO/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,0) circle[radius=\tmp@circglyph@nivext] ; \draw (\tmp@circglyph@nivint,0) arc (0:90:\tmp@circglyph@nivint) ;
+	},
+	CircGlyphP/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,0) circle[radius=\tmp@circglyph@nivext] ; \draw (\tmp@circglyph@nivint,0) arc (0:-90:\tmp@circglyph@nivint) ;
+	},
+	CircGlyphQ/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,0) circle[radius=\tmp@circglyph@nivext] ; \draw (-\tmp@circglyph@nivint,0) arc (180:270:\tmp@circglyph@nivint) ;
+	},
+	CircGlyphR/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,0) circle[radius=\tmp@circglyph@nivext] ; \draw (\tmp@circglyph@nivint,0) arc (0:180:\tmp@circglyph@nivint) ;
+	},
+	CircGlyphS/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,0) circle[radius=\tmp@circglyph@nivext] ; \draw (0,-\tmp@circglyph@nivint) arc (-90:90:\tmp@circglyph@nivint) ;
+	},
+	CircGlyphT/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,0) circle[radius=\tmp@circglyph@nivext] ; \draw (-\tmp@circglyph@nivint,0) arc (-180:0:\tmp@circglyph@nivint) ;
+	},
+	CircGlyphU/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,0) circle[radius=\tmp@circglyph@nivext] ; \draw (0,\tmp@circglyph@nivint) arc (90:270:\tmp@circglyph@nivint) ;
+	},
+	CircGlyphV/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,0) circle[radius=\tmp@circglyph@nivext] ; \draw (0,-\tmp@circglyph@nivint) arc (-90:180:\tmp@circglyph@nivint) ;
+	},
+	CircGlyphW/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,0) circle[radius=\tmp@circglyph@nivext] ; \draw (-\tmp@circglyph@nivint,0) arc (-180:90:\tmp@circglyph@nivint) ;
+	},
+	CircGlyphX/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,0) circle[radius=\tmp@circglyph@nivext] ; \draw (0,\tmp@circglyph@nivint) arc (90:360:\tmp@circglyph@nivint) ;
+	},
+	CircGlyphY/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,0) circle[radius=\tmp@circglyph@nivext] ; \draw (\tmp@circglyph@nivint,0) arc (0:270:\tmp@circglyph@nivint) ;
+	},
+	CircGlyphZ/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,0) circle[radius=\tmp@circglyph@nivext] ; \draw (0,0) circle[radius=\tmp@circglyph@nivint] ;
+	},
+	CircGlyphNull/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ;
+	},
+	CircGlyphZero/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \filldraw (\tmp@circglyph@nivpt,\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] (-\tmp@circglyph@nivpt,-\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] ;
+	},
+	CircGlyphUn/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \filldraw (\tmp@circglyph@nivpt,\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] ;
+	},
+	CircGlyphDeux/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \filldraw (\tmp@circglyph@nivpt,-\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] ;
+	},
+	CircGlyphTrois/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \filldraw (-\tmp@circglyph@nivpt,-\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] ;
+	},
+	CircGlyphQuatre/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \filldraw (-\tmp@circglyph@nivpt,\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] ;
+	},
+	CircGlyphCinq/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \filldraw (-\tmp@circglyph@nivpt,\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] (\tmp@circglyph@nivpt,\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] ;
+	},
+	CircGlyphSix/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \filldraw (-\tmp@circglyph@nivpt,-\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] (\tmp@circglyph@nivpt,-\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] ;
+	},
+	CircGlyphSept/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \filldraw (-\tmp@circglyph@nivpt,\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] (-\tmp@circglyph@nivpt,-\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] ;
+	},
+	CircGlyphHuit/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \filldraw (\tmp@circglyph@nivpt,\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] (\tmp@circglyph@nivpt,-\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] ;
+	},
+	CircGlyphNeuf/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \filldraw (\tmp@circglyph@nivpt,\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] (\tmp@circglyph@nivpt,-\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] (-\tmp@circglyph@nivpt,\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] (-\tmp@circglyph@nivpt,-\tmp@circglyph@nivpt) circle[radius={0.05\tmp@circglyph@hauteur@totale}] ;
+	},
+	CircGlyphVirg/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (-\tmp@circglyph@nivext,0)--(0,\tmp@circglyph@nivext) ;
+	},
+	CircGlyphPtVirg/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,\tmp@circglyph@nivext)--(\tmp@circglyph@nivext,0) ;
+	},
+	CircGlyphPt/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (\tmp@circglyph@nivext,0)--(0,-\tmp@circglyph@nivext) ;
+	},
+	CircGlyphPtInterr/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,-\tmp@circglyph@nivext)--(-\tmp@circglyph@nivext,0) ;
+	},
+	CircGlyphPtExcl/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (-\tmp@circglyph@nivext,0)--(0,\tmp@circglyph@nivext)--(\tmp@circglyph@nivext,0) ;
+	},
+	CircGlyphDeuxPts/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,\tmp@circglyph@nivext)--(\tmp@circglyph@nivext,0)--(0,-\tmp@circglyph@nivext) ;
+	},
+	CircGlyphMoins/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (\tmp@circglyph@nivext,0)--(0,-\tmp@circglyph@nivext)--(-\tmp@circglyph@nivext,0) ;
+	},
+	CircGlyphApos/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,-\tmp@circglyph@nivext)--(-\tmp@circglyph@nivext,0)--(0,\tmp@circglyph@nivext) ;
+	},
+	CircGlyphPlus/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (-\tmp@circglyph@nivext,0)--(0,\tmp@circglyph@nivext)--(\tmp@circglyph@nivext,0)--(0,-\tmp@circglyph@nivext) ;
+	},
+	CircGlyphStar/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,\tmp@circglyph@nivext)--(\tmp@circglyph@nivext,0)--(0,-\tmp@circglyph@nivext)--(-\tmp@circglyph@nivext,0) ;
+	},
+	CircGlyphParG/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (\tmp@circglyph@nivext,0)--(0,-\tmp@circglyph@nivext)--(-\tmp@circglyph@nivext,0)--(0,\tmp@circglyph@nivext) ;
+	},
+	CircGlyphParD/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,-\tmp@circglyph@nivext)--(-\tmp@circglyph@nivext,0)--(0,\tmp@circglyph@nivext)--(\tmp@circglyph@nivext,0) ;
+	},
+	CircGlyphEgal/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,-\tmp@circglyph@nivext)--(-\tmp@circglyph@nivext,0)--(0,\tmp@circglyph@nivext)--(\tmp@circglyph@nivext,0)--cycle ;
+	},
+	CircGlyphSlash/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,-\tmp@circglyph@nivext)--(-\tmp@circglyph@nivext,0)--(0,\tmp@circglyph@nivext)--(\tmp@circglyph@nivext,0)--cycle ; \draw (-\tmp@circglyph@nivint,0)--(0,\tmp@circglyph@nivint) ;
+	},
+	CircGlyphInf/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,-\tmp@circglyph@nivext)--(-\tmp@circglyph@nivext,0)--(0,\tmp@circglyph@nivext)--(\tmp@circglyph@nivext,0)--cycle ; \draw (0,\tmp@circglyph@nivint)--(\tmp@circglyph@nivint,0) ;
+	},
+	CircGlyphSup/.pic = {
+		\draw (0,-0.5)--++(0,1) ; \draw (-0.5,0)--++(1,0) ; \draw (0,-\tmp@circglyph@nivext)--(-\tmp@circglyph@nivext,0)--(0,\tmp@circglyph@nivext)--(\tmp@circglyph@nivext,0)--cycle ; \draw (\tmp@circglyph@nivint,0)--(0,-\tmp@circglyph@nivint) ;
+	},
+	CircGlyph/.style={x=\tmp@circglyph@hauteur@totale,y=\tmp@circglyph@hauteur@totale,line width={0.066\tmp@circglyph@hauteur@totale}
+	}
+}
+
+%====MACROCRÉATION
+%\ifpdftex
+%gestion des caractères actifs
+\NewDocumentCommand\GenereCircGlyp{ }{%
+	\begingroup
+	\catcode`\;=12
+	\catcode`\:=12
+	\catcode`\!=12
+	\catcode`\?=12
+	\GenereCircGlypAux
+}
+\NewDocumentCommand\GenereCircGlypAux{ m m }{%1=lettre,2=pictikz
+	\endgroup
+	\IfEq{\TmpCaract}{#1}%
+		{%
+			\raisebox{-\tmp@circglyph@profondeur}{%
+				\begin{tikzpicture}[CircGlyph,\circularglyphcolor]\clip (-0.5,-0.5) rectangle (0.5,0.5) ; \pic at (0,0) {#2} ;\end{tikzpicture}%
+			}%
+		}{}%
+}
+
+\NewDocumentCommand\CircGlyphChar{ }{%
+	\begingroup
+	\catcode`\;=12
+	\catcode`\:=12
+	\catcode`\!=12
+	\catcode`\?=12
+	\CircGlyphCharAux
+}
+\NewDocumentCommand\CircGlyphCharAux{ m }{%1=lettre avec taille gérée par une macro supérieure
+	\endgroup
+	%les caractères min/MAJ
+	\GenereCircGlyp{a}{CircGlyphA}%
+	\GenereCircGlyp{b}{CircGlyphB}%
+	\GenereCircGlyp{c}{CircGlyphC}%
+	\GenereCircGlyp{d}{CircGlyphD}%
+	\GenereCircGlyp{e}{CircGlyphE}%
+	\GenereCircGlyp{f}{CircGlyphF}%
+	\GenereCircGlyp{g}{CircGlyphG}%
+	\GenereCircGlyp{h}{CircGlyphH}%
+	\GenereCircGlyp{i}{CircGlyphI}%
+	\GenereCircGlyp{j}{CircGlyphJ}%
+	\GenereCircGlyp{k}{CircGlyphK}%
+	\GenereCircGlyp{l}{CircGlyphL}%
+	\GenereCircGlyp{m}{CircGlyphM}%
+	\GenereCircGlyp{n}{CircGlyphN}%
+	\GenereCircGlyp{o}{CircGlyphO}%
+	\GenereCircGlyp{p}{CircGlyphP}%
+	\GenereCircGlyp{q}{CircGlyphQ}%
+	\GenereCircGlyp{r}{CircGlyphR}%
+	\GenereCircGlyp{s}{CircGlyphS}%
+	\GenereCircGlyp{t}{CircGlyphT}%
+	\GenereCircGlyp{u}{CircGlyphU}%
+	\GenereCircGlyp{v}{CircGlyphV}%
+	\GenereCircGlyp{w}{CircGlyphW}%
+	\GenereCircGlyp{x}{CircGlyphX}%
+	\GenereCircGlyp{y}{CircGlyphY}%
+	\GenereCircGlyp{z}{CircGlyphZ}%
+	\GenereCircGlyp{A}{CircGlyphA}%
+	\GenereCircGlyp{B}{CircGlyphB}%
+	\GenereCircGlyp{C}{CircGlyphC}%
+	\GenereCircGlyp{D}{CircGlyphD}%
+	\GenereCircGlyp{E}{CircGlyphE}%
+	\GenereCircGlyp{F}{CircGlyphF}%
+	\GenereCircGlyp{G}{CircGlyphG}%
+	\GenereCircGlyp{H}{CircGlyphH}%
+	\GenereCircGlyp{I}{CircGlyphI}%
+	\GenereCircGlyp{J}{CircGlyphJ}%
+	\GenereCircGlyp{K}{CircGlyphK}%
+	\GenereCircGlyp{L}{CircGlyphL}%
+	\GenereCircGlyp{M}{CircGlyphM}%
+	\GenereCircGlyp{N}{CircGlyphN}%
+	\GenereCircGlyp{O}{CircGlyphO}%
+	\GenereCircGlyp{P}{CircGlyphP}%
+	\GenereCircGlyp{Q}{CircGlyphQ}%
+	\GenereCircGlyp{R}{CircGlyphR}%
+	\GenereCircGlyp{S}{CircGlyphS}%
+	\GenereCircGlyp{T}{CircGlyphT}%
+	\GenereCircGlyp{U}{CircGlyphU}%
+	\GenereCircGlyp{V}{CircGlyphV}%
+	\GenereCircGlyp{W}{CircGlyphW}%
+	\GenereCircGlyp{X}{CircGlyphX}%
+	\GenereCircGlyp{Y}{CircGlyphY}%
+	\GenereCircGlyp{Z}{CircGlyphZ}%
+	%les chiffres
+	\GenereCircGlyp{0}{CircGlyphZero}%
+	\GenereCircGlyp{1}{CircGlyphUn}%
+	\GenereCircGlyp{2}{CircGlyphDeux}%
+	\GenereCircGlyp{3}{CircGlyphTrois}%
+	\GenereCircGlyp{4}{CircGlyphQuatre}%
+	\GenereCircGlyp{5}{CircGlyphCinq}%
+	\GenereCircGlyp{6}{CircGlyphSix}%
+	\GenereCircGlyp{7}{CircGlyphSept}%
+	\GenereCircGlyp{8}{CircGlyphHuit}%
+	\GenereCircGlyp{9}{CircGlyphNeuf}%
+	\GenereCircGlyp{ }{CircGlyphNull}%
+	%la ponctuation en fonction de [Ext]
+	\ifboolKV[circularglyph]{Ext}%
+		{%
+			\GenereCircGlyp{,}{CircGlyphVirg}%
+			\GenereCircGlyp{;}{CircGlyphPtVirg}%
+			\GenereCircGlyp{.}{CircGlyphPt}%
+			\GenereCircGlyp{?}{CircGlyphPtInterr}%
+			\GenereCircGlyp{!}{CircGlyphPtExcl}%
+			\GenereCircGlyp{:}{CircGlyphDeuxPts}%
+			\GenereCircGlyp{-}{CircGlyphMoins}%
+			\GenereCircGlyp{'}{CircGlyphApos}%
+			\GenereCircGlyp{+}{CircGlyphPlus}%
+			\GenereCircGlyp{*}{CircGlyphStar}%
+			\GenereCircGlyp{(}{CircGlyphParG}%
+			\GenereCircGlyp{)}{CircGlyphParD}%
+			\GenereCircGlyp{=}{CircGlyphEgal}%
+			\GenereCircGlyp{/}{CircGlyphSlash}%
+			\GenereCircGlyp{<}{CircGlyphInf}%
+			\GenereCircGlyp{>}{CircGlyphSup}%
+		}%
+		{%
+			\GenereCircGlyp{'}{CircGlyphNull}%
+			\GenereCircGlyp{-}{CircGlyphNull}%
+		}%
+}
+
+\NewDocumentCommand\CircGlyph{ }{%
+	\begingroup
+	\catcode`\;=12
+	\catcode`\:=12
+	\catcode`\!=12
+	\catcode`\?=12
+	\CircGlyphAux
+}
+\NewDocumentCommand\CircGlyphAux{ O{} m }{%
+	\endgroup
+	\useKVdefault[circularglyph]%
+	\setKV[circularglyph]{#1}%
+	%gestion des caractères spéciaux
+	\def\tmpphrase{#2}%
+	\StrSubstitute{\tmpphrase}{À}{A}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{à}{a}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{Â}{A}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{â}{a}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{Ä}{A}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{ä}{a}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{é}{e}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{É}{E}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{è}{e}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{Ê}{E}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{ê}{e}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{Ê}{E}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{ë}{e}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{Ë}{E}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{ï}{i}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{Ï}{I}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{î}{i}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{Î}{I}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{ô}{o}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{Ô}{O}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{ö}{o}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{Ö}{O}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{ù}{u}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{Ù}{U}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{û}{u}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{Û}{U}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{ü}{u}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{Ü}{U}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{ÿ}{y}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{Ÿ}{Y}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{ç}{c}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{Ç}{C}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{œ}{oe}[\tmpphrase]%
+	\StrSubstitute{\tmpphrase}{Œ}{OE}[\tmpphrase]%
+	%dimensions
+	\settototalheight{\tmp@circglyph@hauteur@totale}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+	\settodepth{\tmp@circglyph@profondeur}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+	%créationdesglyphes
+	\StrLen{\tmpphrase}[\NbCaract]%
+	\ifboolKV[circularglyph]{Inline}%
+		{%
+			{\foreach \poslet in {1,...,\NbCaract}{{\StrChar{\tmpphrase}{\poslet}[\TmpCaract]\CircGlyphChar{\TmpCaract}}\hspace{0pt}}}%
+		}%
+		{%
+			{%
+				\offinterlineskip{\foreach \poslet in {1,...,\NbCaract}{{\StrChar{\tmpphrase}{\poslet}[\TmpCaract]\CircGlyphChar{\TmpCaract}}\hspace{0pt}}}\par%
+			}%
+		}%
+	%{\IfBooleanF{#1}{\offinterlineskip}\StrLen{\tmpphrase}[\NbCaract]{\foreach \poslet in {1,...,\NbCaract}{{\StrChar{\tmpphrase}{\poslet}[\TmpCaract]\CircGlyphChar{\TmpCaract}}\hspace{0pt}}}\IfBooleanF{#1}{\par}}%
+}
+
+\endinput

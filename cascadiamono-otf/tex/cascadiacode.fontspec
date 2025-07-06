@@ -1,0 +1,8 @@
+\defaultfontfeatures[cascadiacode]
+   {Extension=.otf,
+    UprightFont=CascadiaCode-Regular,
+    ItalicFont=CascadiaCode-Italic,
+    BoldFont=CascadiaCode-Bold,
+    BoldItalicFont=CascadiaCode-BoldItalic,
+    Contextuals=Alternate
+}

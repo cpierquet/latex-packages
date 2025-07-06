@@ -1,0 +1,490 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+
+\documentclass[11pt,a4paper]{ltxdoc}
+\usepackage{bera}
+\usepackage{inconsolata}
+\usepackage[T1]{fontenc}
+\usepackage[scale=0.875]{cabin}
+\usepackage{commalists-tools}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\usepackage{tabularray}
+\usepackage{fontawesome5}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{\sffamily\small [commalists-tools]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\let\TikZ\tikzlogo
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+\def\TPversion{0.1.5}
+\def\TPdate{05/05/2025}
+\usepackage{tcolorbox}
+\usepackage{pgffor}
+\tcbuselibrary{breakable,skins,hooks,listingsutf8}
+%\usepackage{soul}
+%\sethlcolor{lightgray!25}
+
+\lstset{
+	language=[LaTeX]TeX,%
+	basicstyle=\ttfamily,%
+	keywordstyle={\color{blue}},%
+	classoffset=0,%
+	keywords={},%
+	alsoletter={-},%
+	keywordstyle={\color{blue}},%
+	classoffset=1,%
+	alsoletter={-},%
+	morekeywords={commalists-tools},%
+	keywordstyle={\color{violet}},%
+	classoffset=2,%
+	alsoletter={-},%
+	morekeywords={\sortasclist,\sortdeslist,\addvalinlist,\removevalinlist,\boolvalinlist,\testifvalinlist,\countvalinlist,\minoflist,\maxoflist,\meanoflist,\sumoflist,\prodoflist,\reverselist,\getvaluefromlist,\lenoflist,\getvaluefromlist,\definemylist,\countvalindeflist,\lenofdeflist,\meanofdeflist,\sumofdeflist,\prodofdeflist,\getvaluefromdeflist},%
+	keywordstyle={\color{green!50!black}},%
+	classoffset=3,%
+	morekeywords={},%
+	keywordstyle={\color{orange}}
+}
+
+\newtcblisting{DemoCode}[1]{%
+	enhanced,width=\linewidth,%
+	bicolor,size=title,%
+	colback=cyan!10!white,%
+	colbacklower=cyan!5!white,%
+	colframe=cyan!75!black,%
+	listing options={%
+		breaklines=true,%
+		breakatwhitespace=true,%
+		style=tcblatex,basicstyle=\small\ttfamily,%
+		tabsize=4,%
+		commentstyle={\itshape\color{gray}},
+		keywordstyle={\color{blue}},%
+		classoffset=0,%
+		keywords={\usepackage,\includegraphics,xstring,listofitems,\readlist,\showitems,\xintFor,\xintSeq},%
+		alsoletter={-},%
+		keywordstyle={\color{blue}},%
+		classoffset=1,%
+		alsoletter={-},%
+		morekeywords={euromoney},%
+		keywordstyle={\color{violet}},%
+		classoffset=2,%
+		alsoletter={-},%
+		morekeywords={\sortasclist,\sortdeslist,\addvalinlist,\removevalinlist,\boolvalinlist,\testifvalinlist,\countvalinlist,\minoflist,\maxoflist,\meanoflist,\sumoflist,\prodoflist,\reverselist,\getvaluefromlist,\lenoflist,\getvaluefromlist,\definemylist,\countvalindeflist,\lenofdeflist,\meanofdeflist,\sumofdeflist,\prodofdeflist,\getvaluefromdeflist},%
+		keywordstyle={\color{green!50!black}},%
+		classoffset=3,%
+		morekeywords={},%
+		keywordstyle={\color{orange}}
+	},%
+	#1
+}
+
+\newtcbinputlisting\DemoCodeFile[1]{%
+	enhanced,width=\linewidth,%
+	bicolor,size=title,%
+	colback=lightgray!10!white,%
+	colbacklower=lightgray!5!white,%
+	colframe=lightgray!75!black,%
+	listing options={%
+		breaklines=true,%
+		breakatwhitespace=true,%
+		style=tcblatex,
+		basicstyle=\scriptsize\ttfamily,%
+		tabsize=4,%
+		commentstyle={\itshape\color{gray}},%
+		%lastline=148
+	},%
+	breakable,
+	listing only,%
+	listing file={#1}
+}
+
+\NewDocumentCommand\ShowCode{ m }{%
+	\lstinline{#1}%
+}
+
+\begin{document}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+		\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+			\begin{center}
+				\renewcommand{\arraystretch}{1.25}%
+				\begin{tabular}{c}
+					{\Huge \texttt{commalists-tools}}\\
+					\\
+					{\LARGE Macros for manipulating numeral} \\
+					{\LARGE comma separated lists:} \\
+					{\LARGE sorting, adding, removing, etc} \\
+					\\
+					{\small \texttt{Version \TPversion{} -- \TPdate}}
+				\end{tabular}
+			\end{center}
+		\end{tcolorbox}
+	\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+		\texttt{Cédric Pierquet}\\
+		{\ttfamily c pierquet -- at -- outlook . fr}\\
+		\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}} \\
+	\end{tabular}
+\end{center}
+
+\hrule
+
+\vfill
+
+\begin{tcblisting}{colframe=lightgray,colback=lightgray!5,listing only}
+\def\mytestlist{14,10,15,11,9,10}
+\lenoflist*{\mytestlist}
+\minoflist*{\mytestlist}
+\maxoflist*{14,10,15,11,9,10}
+\sortasclist*{\mytestlist}
+\meanoflist*{\mytestlist}
+\removevalinlist*{10}{\mytestlist}
+\testifvalinlist{15}{\mytestlist}{true}{false}
+\getvaluefromlist*{\mytestlist}{3}
+\end{tcblisting}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\def\mytestlist{14,10,15,11,9,10}
+We consider the list: \mytestlist\par\smallskip
+There's \lenoflist*{\mytestlist} values in the list\par\smallskip
+The minimum value is \minoflist*{\mytestlist} and the maximum is \maxoflist*{14,10,15,11,9,10}\par\smallskip
+Ascending sorted list is \sortasclist*{\mytestlist}\par\smallskip
+Meaning value of the list is \meanoflist*{\mytestlist}\par\smallskip
+If we remove the value 10, then the list is \removevalinlist*{10}{\mytestlist}\par\smallskip
+We test if 15 is in the list: \testifvalinlist{15}{\mytestlist}{true}{false}\par\smallskip
+The third value of the list is \getvaluefromlist*{\mytestlist}{3}
+
+\end{tcolorbox}
+
+\vfill~
+
+%\hrule
+%
+%\medskip
+
+%\emph{%
+%	The \textsf{luarandom} package do the same things, but with the obligation to compile with \hologo{LuaLaTeX}.
+%}
+%
+%\medskip
+
+\hrule
+
+\vspace*{5mm}
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+%\hrule
+
+\pagebreak
+
+\section{Loading, useful packages}
+
+In order to load \texttt{randintlist}, simply use:
+
+\begin{DemoCode}{listing only}
+\usepackage{commalists-tools}
+\end{DemoCode}
+
+Loaded packages are \texttt{listofitems}, \texttt{xintexpr} and \texttt{xstring}.
+
+\smallskip
+
+The idea is to propose "reusage" of lists with \texttt{listofitems} or other commands, for example.
+
+\section{The individual macros}
+
+\subsection{Global usage}
+
+Package \texttt{commalists-tools} supports (basic) manipulations on numeral comma separated lists:
+
+\begin{itemize}
+	\item sorting;
+	\item adding values;
+	\item removing values;
+	\item counting values;
+	\item mean, sum, product;
+	\item get value, get length;
+	\item etc.
+\end{itemize}
+
+Starred versions only print the result, whereas non starred versions store the result into a macro.
+
+\medskip
+
+\hfill\textbf{All engines \TeX\ are compatible with this package.}\hfill~
+
+\subsection{The macros for calculating}
+
+\begin{DemoCode}{listing only}
+%getting length of list, only printing
+\lenoflist*{list}
+%storing length of list into macro (\resmylen by default)
+\lenoflist{list}
+%getting min of list, only printing
+\minoflist*{list}
+%storing min of list into \macro (\resmin by default)
+\minoflist{list}[\macro]
+%getting max of list, only printing
+\maxoflist*{list}
+%storing max of list into \macro (\resmax by default)
+\maxoflist{list}[\macro]
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%only printing
+\lenoflist*{14,10,15,11,9,10}\\
+%only printing
+\minoflist*{14,10,15,11,9,10} and \maxoflist*{14,10,15,11,9,10}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%storing len/min/max of list
+\def\mytestlist{10,14.5,20,12,8.5}
+\lenoflist{\mytestlist}[\mylen]Length of list is \mylen\ \&
+\minoflist{\mytestlist}[\mymin]Min of list is \mymin\ \&
+\maxoflist{\mytestlist}[\mymax]Max of list is \mymax
+\end{DemoCode}
+
+\begin{DemoCode}{listing only}
+%getting mean of list, only printing
+\meanoflist*{list}
+%storing mean of list into \macro (\resmean by default)
+\meanoflist{list}[\macro]
+%getting sum of list, only printing
+\sumoflist*{list}
+%storing max of list into \macro (\ressum by default)
+\sumoflist{list}[\macro]
+%getting prod of list, only printing
+\prodoflist*{list}
+%storing max of list into \macro (\resprod by default)
+\prodoflist{list}[\macro]
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%only printing
+\meanoflist*{14,10,15,11,9,10} \\
+%storing
+\meanoflist{14,10,15,11,9,10}[\mymean]\mymean \\
+%only printing
+\sumoflist*{14,10,15,11,9,10} and \prodoflist*{14,10,15,11,9,10} \\
+%storing
+\sumoflist{14,10,15,11,9,10}[\mysum]\prodoflist{14,10,15,11,9,10}[\myprod]
+The sum is \mysum\ and the prod is \myprod
+\end{DemoCode}
+
+\subsection{Macros for manipulating}
+
+\begin{DemoCode}{listing only}
+%sorting (asc), only printing
+\sortasclist*{list}
+%sorting (asc) and storing (overwrite)
+\sortasclist{list}
+%sorting (des), only printing
+\sortdeslist*{list}
+%sorting (des) and storing (overwrite)
+\sortdeslist{list}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%sorting (asc), only printing
+\sortasclist*{14,10,15,11.5,9,10}\\
+%sorting (asc) and storing (overwrite)
+\def\tmpsortlist{14,10,15,11.5,9,10}
+\sortasclist{\tmpsortlist}\tmpsortlist\\
+%analysing
+\readlist*\tmpSORTlist{\tmpsortlist}
+\showitems{\tmpSORTlist}
+\end{DemoCode}
+
+\begin{DemoCode}{listing only}
+%extract value, only printing
+\getvaluefromlist*{list}{index}
+%extract value and storing into macro (\myelt by default)
+\getvaluefromlist{list}{index}[\macro]
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%extract value, only printing
+\def\listtmp{1,2,3,6,3,1,5,7,3}%
+\getvaluefromlist*{\listtmp}{4}\par\smallskip
+%storing
+\getvaluefromlist{\listtmp}{-1}[\mylastelt]The last element is \mylastelt
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%sorting (des), only printing
+\sortdeslist*{14,10,15,11.5,9,10}\\
+%sorting (asc) and storing (overwrite)
+\def\tmpsortlist{14,10,15,11.5,9,10}
+\sortdeslist{\tmpsortlist}\tmpsortlist\\
+%analysing
+\readlist*\tmpSORTlist{\tmpsortlist}
+\showitems{\tmpSORTlist}
+\end{DemoCode}
+
+\begin{DemoCode}{listing only}
+%adding, only printing
+\addvalinlist*{values}{list}
+%adding and storing (overwrite)
+\addvalinlist{values}{list}
+%removing, only printing
+\removevalinlist*{value}{list}
+%removing and storing (overwrite)
+\removevalinlist{value}{list}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%only printing
+\addvalinlist*{3}{1,2,5,6}\\
+%defining and adding
+\def\tmpaddlist{1,2,4,5,6}
+\addvalinlist{3}{\tmpaddlist}\tmpaddlist\\
+%analysing
+\readlist*\tmpADDlist{\tmpaddlist}
+\showitems{\tmpADDlist}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%only printing
+\removevalinlist*{3}{1,2,3,6,3,1,5,7,3}\\
+%defining and removing
+\def\tmpremlist{1,2,3,6,3,1,5,7,3}
+\removevalinlist{3}{\tmpremlist}\tmpremlist\\
+%analysing
+\readlist*\tmpREMlist{\tmpremlist}
+\showitems{\tmpREMlist}
+\end{DemoCode}
+
+\begin{DemoCode}{listing only}
+%reversing, only printing
+\reverselist*{list}
+%reversing and storing (overwrite)
+\reverselist{list}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%only printing
+\reverselist*{14,10,15,11,9,10}\\
+%reversing and storing
+%storing
+\reverselist{14,10,15,11,9,10}[\myreverse]\myreverse\\
+%analysing
+\readlist*\tmpREVERSElist{\myreverse}
+\showitems{\tmpREVERSElist}
+\end{DemoCode}
+
+\subsection{Macros with testing}
+
+\begin{DemoCode}{listing only}
+%testing if value is in list, with boolean result in \macro (\resisinlist by default)
+\boolvalinlist{value}{list}[\macro]
+%conditionnal test if value is in list, according to xint syntax
+\testifvalinlist{3}{0,1,2,3}{true}{false}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%test with xint syntax
+\testifvalinlist{-1}{0,1,2,3}{true}{false}\\
+%test with xint syntax
+\testifvalinlist{3}{0,1,2,3}{true}{false}\\
+%boolean macro
+\def\myteslist{0,5,10,5,6,9,7,8}
+\boolvalinlist{5}{\myteslist}[\resisinlist]\resisinlist
+\end{DemoCode}
+
+\begin{DemoCode}{listing only}
+%counting value, only printing
+\countvalinlist*{value}{list}
+%counting value, with result in \macro (\rescount by default)
+\countvalinlist{value}{list}[\macro]
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%only printing
+\countvalinlist*{8}{1,2,3,4,5,6,6,7,8,8,8,9}\\
+%storing
+\def\tmpcountlist{1,2,3,4,5,6,6,7,8,8,8,9}
+\countvalinlist{6}{\tmpcountlist}[\rescountsix]\rescountsix\\
+\countvalinlist{10}{\tmpcountlist}[\rescountten]\rescountten
+\end{DemoCode}
+
+\pagebreak
+
+\section{Macros for already processed lists}
+
+In order to speed up the process, it's possible to "define" a list (processed with \texttt{listofitems}) and the to call specific macros.
+
+\begin{DemoCode}{listing only}
+%define a list, to be processed by listofitems
+\definemylist{rawlist}{processed list}
+
+%Specific macros (same specs as above)
+\lenofdeflist(*){processed list, without \ !}[\macro]
+\countvalindeflist(*){val}{processed list, without \ !}[\macro]
+\meanofdeflist(*){processed list, without \ !}[\macro]
+\sumofdeflist(*){processed list, without \ !}[\macro]
+\prodofdeflist(*){processed list, without \ !}[\macro]
+\getvaluefromdeflist(*){processed list, without \ !}{index}[\macro]
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%define a list, to be processed by listofitems
+\definemylist{1,4,5,6,7,8,9,19,9,9,10}{\mydeflist}\showitems{\mydeflist}
+
+%Specific macros
+\lenofdeflist*{mydeflist}\\
+\getvaluefromdeflist*{mydeflist}{5}\\
+\countvalindeflist*{9}{mydeflist}\\
+\meanofdeflist*{mydeflist}\\
+\sumofdeflist*{mydeflist}\\
+\prodofdeflist*{mydeflist}
+\end{DemoCode}
+
+If the list needs to be "modified" (add, remove, reverse) the best is to use individual macros, and after use \textit{define} and specific macros :-)
+
+\pagebreak
+
+\section{History}
+
+\texttt{0.1.5: Bugfix}
+
+\texttt{0.1.4: Changing name of macro}
+
+\texttt{0.1.3: Duplicate macro with ProfMaquette (so new name)}
+
+\texttt{0.1.2: Alternative macros for already treated lists}
+
+\texttt{0.1.1: Compatibility with decimals, len of list, get value}
+
+\texttt{0.1.0: Initial version}
+
+\section{The code}
+
+\DemoCodeFile{commalists-tools.sty}
+
+\end{document}

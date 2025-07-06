@@ -1,0 +1,246 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[english,11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+%\usepackage{DejaVuSerif}
+%\usepackage[scale=1.125]{inconsolata}
+\usepackage{pgffor}
+\usepackage{coloredbelts}
+\usepackage{enumitem}
+\usepackage{soul}
+\usepackage{codehigh}
+\usepackage{multicol}
+\usepackage{tabularray}
+\usepackage{fontawesome5}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+%\rhead{\sffamily\small\affloetalab[Legende]}
+\lfoot{\sffamily\small [coloredbelts]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\usepackage{xspace}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+
+\def\TPversion{0.1.4}
+\def\TPdate{25/06/2025}
+\def\HtRet{0.45}\def\LgRect{1.5}
+\usepackage{tcolorbox}
+
+\def\ListeTailleTexte{tiny,scriptsize,footnotesize,small,normalsize,large,large,LARGE,huge,Huge}
+
+\sethlcolor{lightgray!25}
+\NewDocumentCommand\MontreCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+
+\usepackage{babel}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{coloredbelts}}\\
+				\\
+				{\LARGE Colored belt, in vectorial format,} \\
+				\\
+				{\LARGE to present skills, for example.} \\
+				\\
+				{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{tabular}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+	\texttt{Cédric Pierquet}\\
+	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
+\end{tabular}
+\end{center}
+
+\hrule
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+\hrule
+
+\vspace*{5mm}
+
+\vfill
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!10]
+\hfill
+{\Huge\ColorBelt[Height=2cm]{red}~\ColorBelt[Height=2cm]{yellow-orange}}
+\hfill~
+
+\bigskip
+
+\hfill\foreach \couleur in {white,yellow,orange,red,pink,green,blue,brown,purple,gray,black}{{\LARGE\sffamily\ColorBelt{\couleur}\,}}\hfill~
+
+\bigskip
+
+\hfill{\Huge\rotatebox[origin=c]{45}{\ColorBelt{green}}\:\rotatebox[origin=c]{-45}{\ColorBelt{blue}}\:\rotatebox[origin=c]{45}{\ColorBelt{purple-brown}}}\hfill~
+\end{tcolorbox}
+
+\vfill~
+
+\pagebreak
+
+\section{The package coloredbelts}
+
+\subsection{Ideas}
+
+The idea is to display a pictogram like "colored judo's belt" to present skills, for example.
+
+\medskip
+
+The pictograms are \textit{vectorial} \MontreCode{pdf}, adapted from \MontreCode{svg}, diffused in CC BY-SA 3.0 (\url{https://commons.wikimedia.org/wiki/File:Judo_yellow_belt.svg}).
+
+\medskip
+
+I want to thank Sascha Christmann for his help with bi-color belts (both versions are equal sized).
+
+\subsection{Loading}
+
+The package loads within the preamble, with \MontreCode{\textbackslash usepackage\{coloredbelts\}}.
+
+The only loaded packages are \MontreCode{graphicx}, \MontreCode{calc}, \MontreCode{simplekv} and \MontreCode{xstring}.
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\usepackage{coloredbelts}
+\end{codehigh}
+
+\section{The command}
+
+\subsection{Naming of the files}
+
+Each pictogram is named like \MontreCode{judobelt-<color>.pdf}, so that they can be embedded with a "simple" \MontreCode{\textbackslash includegraphics} \textit{classic}.
+
+\begin{demohigh}[language=latex/latex3,style/main=cyan!10,style/code=cyan!10,style/demo=cyan!10]
+\includegraphics[height=5cm]{judobelt-yellow.pdf}\par
+\includegraphics[width=4cm]{judobelt-pink.pdf}\par
+\includegraphics[width=3cm]{judobelt-orange-green.pdf}
+\end{demohigh}
+
+\subsection{Usage}
+
+The command is \MontreCode{\textbackslash ColorBelt}.
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\ColorBelt(*)[options]{color}
+\end{codehigh}
+
+The starred version is an "alias" for a \MontreCode{\textbackslash includegraphics}, with optionals parameters in \MontreCode{[...]}.
+
+\medskip
+
+The options for the non starred version are
+
+\begin{itemize}[leftmargin=*]
+	\item the key \MontreCode{Height}:
+	\begin{itemize}
+		\item can use an automatic height, with \MontreCode{auto} (95\,\% og the global height of current font, customizable with \MontreCode{Strut} key, + small vertical offset);
+		\item can specify a global height;
+	\end{itemize}
+	\item the key \MontreCode{OffsetV} (without \MontreCode{auto} for \MontreCode{Height}) can offset vertically the pictogram.
+\end{itemize}
+
+Available colors are:
+
+\begin{itemize}
+	\item \ColorBelt{white}: \texttt{white};
+	\item \ColorBelt{yellow}: \texttt{yellow};
+	\item \ColorBelt{orange}: \texttt{orange};
+	\item \ColorBelt{red}: \texttt{red};
+	\item \ColorBelt{pink}: \texttt{pink};
+	\item \ColorBelt{green}: \texttt{green};
+	\item \ColorBelt{blue}: \texttt{blue};
+	\item \ColorBelt{brown}: \texttt{brown};
+	\item \ColorBelt{purple}: \texttt{purple};
+	\item \ColorBelt{gray}: \texttt{gray};
+	\item \ColorBelt{black}: \texttt{black};
+	\item \ColorBelt{white-yellow}: \texttt{white-yellow};
+	\item \ColorBelt{yellow-orange}: \texttt{yellow-orange};
+	\item \ColorBelt{orange-green}: \texttt{orange-green};
+	\item \ColorBelt{green-blue}: \texttt{green-blue};
+	\item \ColorBelt{purple-brown}: \texttt{purple-brown};
+	\item \ColorBelt{blue-brown}: \texttt{blue-brown};
+	\item \ColorBelt{blue-purple}: \texttt{blue-purple};
+	\item \ColorBelt{brown-black}: \texttt{brown-black}.
+\end{itemize}
+
+\medskip
+
+\begin{tblr}{hlines,width=\linewidth,colspec={Q[l,m]X[l,m]},row{1}={magenta!10},row{2-Z}={cyan!10}}
+	\SetCell[r=1,c=2]{c,m} \fakeverb{\ColorBelt} & \\
+	{\tiny\fakeverb{\tiny}} & {\tiny Inline \ColorBelt{red} pictogram} \\
+	{\scriptsize\fakeverb{\scriptsize}} & {\scriptsize Inline \ColorBelt{red} pictogram} \\
+	{\footnotesize\fakeverb{\footnotesize}} & {\footnotesize Inline \ColorBelt{red} pictogram} \\
+	{\small\fakeverb{\small}} & {\small Inline \ColorBelt{red} pictogram} \\
+	{\normalsize\fakeverb{\normalsize}} & {\normalsize Inline \ColorBelt{red} pictogram} \\
+	{\large\fakeverb{\large}} & {\large Inline \ColorBelt{red} pictogram} \\
+	{\Large\fakeverb{\Large}} & {\Large Inline \ColorBelt{red} pictogram} \\
+	{\LARGE\fakeverb{\LARGE}} & {\LARGE Inline \ColorBelt{red} pictogram} \\
+	{\huge\fakeverb{\huge}} & {\huge Inline \ColorBelt{red} pictogram} \\
+	{\Huge\fakeverb{\Huge}} & {\Huge Inline \ColorBelt{red} pictogram} \\
+\end{tblr}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+{\Huge\rotatebox[origin=c]{30}{\ColorBelt{brown}}\:
+\rotatebox[origin=c]{-45}{\ColorBelt{blue}}}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\ColorBelt*[scale=0.25]{orange}\par
+\ColorBelt*[scale=0.15]{yellow}\par
+\ColorBelt*[scale=0.3]{green-blue}
+\end{demohigh}
+
+\vfill
+
+\section{History}
+
+\verb|v0.1.4|:~~~~Key \textsf{Strut} for automatic height
+
+\verb|v0.1.3|:~~~~Better management of files
+
+\verb|v0.1.2|:~~~~Better management of lengths
+
+\verb|v0.1.1|:~~~~Bi-color belts
+
+\verb|v0.1.0|:~~~~Initial version
+
+\vspace*{15mm}
+
+\end{document}

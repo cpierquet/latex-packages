@@ -1,0 +1,160 @@
+% Author        : C. Pierquet
+% licence       : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+% licence svg   : CC BY-SA 3.0 https://commons.wikimedia.org/wiki/File:Judo_yellow_belt.svg
+%               : Tks to Sascha Christmann for "in betweeen" colors
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{coloredbelts}[2025/06/25 0.1.4 Colored Judo's belts]
+
+%====HISTORIQUE
+% v 0.1.4	Option strut
+% v 0.1.3	Uniformisation des fichiers
+% v 0.1.2	Amélioration de la gestion des longueurs
+% v 0.1.1	Couleurs duo
+% v 0.1.0	Version initiale
+
+%====BASE
+\RequirePackage{graphicx}
+%\RequirePackage{tikz}
+\RequirePackage{xstring}
+\RequirePackage{calc}
+\RequirePackage{simplekv}
+
+%====DIMENSIONS
+\newlength{\tmp@ceinture@hauteur@totale}
+\newlength{\tmp@ceinture@profondeur}
+\newlength{\judobeltraise}
+
+%====CLÉS
+\defKV[ceinturejudo]{Hauteur=\def\judobeltheight{#1},DecalV=\setlength\judobeltraise{#1},Strut=\def\judobeltstrut{#1}}
+\setKVdefault[ceinturejudo]{Hauteur=auto,DecalV=0pt,Strut=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ}
+
+%====COMMANDE
+\NewDocumentCommand\CeintureCouleur{ s O{} m }{%
+	%gestion des couleurs
+	\def\tmp@ceinture@couleur{yellow}%
+	\IfStrEq{#3}{white}{\def\tmp@ceinture@couleur{white}}{}%
+	\IfStrEq{#3}{blanc}{\def\tmp@ceinture@couleur{white}}{}%
+	\IfStrEq{#3}{jaune}{\def\tmp@ceinture@couleur{yellow}}{}%
+	\IfStrEq{#3}{yellow}{\def\tmp@ceinture@couleur{yellow}}{}%
+	\IfStrEq{#3}{orange}{\def\tmp@ceinture@couleur{orange}}{}%
+	\IfStrEq{#3}{red}{\def\tmp@ceinture@couleur{red}}{}%
+	\IfStrEq{#3}{rouge}{\def\tmp@ceinture@couleur{red}}{}%
+	\IfStrEq{#3}{bleu}{\def\tmp@ceinture@couleur{blue}}{}%
+	\IfStrEq{#3}{blue}{\def\tmp@ceinture@couleur{blue}}{}%
+	\IfStrEq{#3}{purple}{\def\tmp@ceinture@couleur{purple}}{}%
+	\IfStrEq{#3}{violet}{\def\tmp@ceinture@couleur{purple}}{}%
+	\IfStrEq{#3}{marron}{\def\tmp@ceinture@couleur{brown}}{}%
+	\IfStrEq{#3}{brown}{\def\tmp@ceinture@couleur{brown}}{}%
+	\IfStrEq{#3}{green}{\def\tmp@ceinture@couleur{green}}{}%
+	\IfStrEq{#3}{vert}{\def\tmp@ceinture@couleur{green}}{}%
+	\IfStrEq{#3}{rose}{\def\tmp@ceinture@couleur{pink}}{}%
+	\IfStrEq{#3}{pink}{\def\tmp@ceinture@couleur{pink}}{}%
+	\IfStrEq{#3}{gris}{\def\tmp@ceinture@couleur{gray}}{}%
+	\IfStrEq{#3}{gray}{\def\tmp@ceinture@couleur{gray}}{}%
+	\IfStrEq{#3}{noir}{\def\tmp@ceinture@couleur{black}}{}%
+	\IfStrEq{#3}{black}{\def\tmp@ceinture@couleur{black}}{}%
+	\IfStrEq{#3}{white-yellow}{\def\tmp@ceinture@couleur{white-yellow}}{}%
+	\IfStrEq{#3}{blanc-jaune}{\def\tmp@ceinture@couleur{white-yellow}}{}%
+	\IfStrEq{#3}{yellow-orange}{\def\tmp@ceinture@couleur{yellow-orange}}{}%
+	\IfStrEq{#3}{jaune-orange}{\def\tmp@ceinture@couleur{yellow-orange}}{}%
+	\IfStrEq{#3}{orange-green}{\def\tmp@ceinture@couleur{orange-green}}{}%
+	\IfStrEq{#3}{orange-vert}{\def\tmp@ceinture@couleur{orange-green}}{}%
+	\IfStrEq{#3}{green-blue}{\def\tmp@ceinture@couleur{green-blue}}{}%
+	\IfStrEq{#3}{vert-bleu}{\def\tmp@ceinture@couleur{green-blue}}{}%
+	\IfStrEq{#3}{purple-brown}{\def\tmp@ceinture@couleur{purple-brown}}{}%
+	\IfStrEq{#3}{violet-marron}{\def\tmp@ceinture@couleur{purple-brown}}{}%
+	\IfStrEq{#3}{blue-brown}{\def\tmp@ceinture@couleur{blue-brown}}{}%
+	\IfStrEq{#3}{bleu-marron}{\def\tmp@ceinture@couleur{blue-brown}}{}%
+	\IfStrEq{#3}{blue-purple}{\def\tmp@ceinture@couleur{blue-purple}}{}%
+	\IfStrEq{#3}{bleu-violet}{\def\tmp@ceinture@couleur{blue-purple}}{}%
+	\IfStrEq{#3}{brown-black}{\def\tmp@ceinture@couleur{brown-black}}{}%
+	\IfStrEq{#3}{marron-noir}{\def\tmp@ceinture@couleur{brown-black}}{}%
+	%étoilée := includegraphics simple
+	\IfBooleanTF{#1}%
+		{%
+			\includegraphics[#2]{judobelt-\tmp@ceinture@couleur.pdf}
+		}%
+		{%
+			\useKVdefault[ceinturejudo]%
+			\setKV[ceinturejudo]{#2}%
+			\IfStrEq{\judobeltheight}{auto}%
+				{%
+					%hauteur auto
+					\settototalheight{\tmp@ceinture@hauteur@totale}{\hbox{\judobeltstrut}}%
+					\settodepth{\tmp@ceinture@profondeur}{\hbox{\judobeltstrut}}%
+					\raisebox{-\tmp@ceinture@profondeur+0.025\tmp@ceinture@hauteur@totale}{\includegraphics[height=0.95\tmp@ceinture@hauteur@totale]{judobelt-\tmp@ceinture@couleur.pdf}}%
+				}%
+				{%
+					\raisebox{\judobeltraise}{\includegraphics[height=\judobeltheight]{judobelt-\tmp@ceinture@couleur.pdf}}%
+				}%
+		}%
+}
+
+%====CLÉS
+\defKV[judobelt]{Height=\def\judobeltheight{#1},OffsetV=\setlength\judobeltraise{#1},Strut=\def\judobeltstrut{#1}}
+\setKVdefault[judobelt]{Height=auto,OffsetV=0pt,Strut=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ}
+
+%====COMMANDE
+\NewDocumentCommand\ColorBelt{ s O{} m }{%
+	%gestion des couleurs
+	\def\tmp@ceinture@couleur{yellow}%
+	\IfStrEq{#3}{white}{\def\tmp@ceinture@couleur{white}}{}%
+	\IfStrEq{#3}{blanc}{\def\tmp@ceinture@couleur{white}}{}%
+	\IfStrEq{#3}{jaune}{\def\tmp@ceinture@couleur{yellow}}{}%
+	\IfStrEq{#3}{yellow}{\def\tmp@ceinture@couleur{yellow}}{}%
+	\IfStrEq{#3}{orange}{\def\tmp@ceinture@couleur{orange}}{}%
+	\IfStrEq{#3}{red}{\def\tmp@ceinture@couleur{red}}{}%
+	\IfStrEq{#3}{rouge}{\def\tmp@ceinture@couleur{red}}{}%
+	\IfStrEq{#3}{bleu}{\def\tmp@ceinture@couleur{blue}}{}%
+	\IfStrEq{#3}{blue}{\def\tmp@ceinture@couleur{blue}}{}%
+	\IfStrEq{#3}{purple}{\def\tmp@ceinture@couleur{purple}}{}%
+	\IfStrEq{#3}{violet}{\def\tmp@ceinture@couleur{purple}}{}%
+	\IfStrEq{#3}{marron}{\def\tmp@ceinture@couleur{brown}}{}%
+	\IfStrEq{#3}{brown}{\def\tmp@ceinture@couleur{brown}}{}%
+	\IfStrEq{#3}{green}{\def\tmp@ceinture@couleur{green}}{}%
+	\IfStrEq{#3}{vert}{\def\tmp@ceinture@couleur{green}}{}%
+	\IfStrEq{#3}{rose}{\def\tmp@ceinture@couleur{pink}}{}%
+	\IfStrEq{#3}{pink}{\def\tmp@ceinture@couleur{pink}}{}%
+	\IfStrEq{#3}{gris}{\def\tmp@ceinture@couleur{gray}}{}%
+	\IfStrEq{#3}{gray}{\def\tmp@ceinture@couleur{gray}}{}%
+	\IfStrEq{#3}{noir}{\def\tmp@ceinture@couleur{black}}{}%
+	\IfStrEq{#3}{black}{\def\tmp@ceinture@couleur{black}}{}%
+	\IfStrEq{#3}{white-yellow}{\def\tmp@ceinture@couleur{white-yellow}}{}%
+	\IfStrEq{#3}{blanc-jaune}{\def\tmp@ceinture@couleur{white-yellow}}{}%
+	\IfStrEq{#3}{yellow-orange}{\def\tmp@ceinture@couleur{yellow-orange}}{}%
+	\IfStrEq{#3}{jaune-orange}{\def\tmp@ceinture@couleur{yellow-orange}}{}%
+	\IfStrEq{#3}{orange-green}{\def\tmp@ceinture@couleur{orange-green}}{}%
+	\IfStrEq{#3}{orange-vert}{\def\tmp@ceinture@couleur{orange-green}}{}%
+	\IfStrEq{#3}{green-blue}{\def\tmp@ceinture@couleur{green-blue}}{}%
+	\IfStrEq{#3}{vert-bleu}{\def\tmp@ceinture@couleur{green-blue}}{}%
+	\IfStrEq{#3}{purple-brown}{\def\tmp@ceinture@couleur{purple-brown}}{}%
+	\IfStrEq{#3}{violet-marron}{\def\tmp@ceinture@couleur{purple-brown}}{}%
+	\IfStrEq{#3}{blue-brown}{\def\tmp@ceinture@couleur{blue-brown}}{}%
+	\IfStrEq{#3}{bleu-marron}{\def\tmp@ceinture@couleur{blue-brown}}{}%
+	\IfStrEq{#3}{blue-purple}{\def\tmp@ceinture@couleur{blue-purple}}{}%
+	\IfStrEq{#3}{bleu-violet}{\def\tmp@ceinture@couleur{blue-purple}}{}%
+	\IfStrEq{#3}{brown-black}{\def\tmp@ceinture@couleur{brown-black}}{}%
+	\IfStrEq{#3}{marron-noir}{\def\tmp@ceinture@couleur{brown-black}}{}%
+	%étoilée := includegraphics simple
+	\IfBooleanTF{#1}%
+		{%
+			\includegraphics[#2]{judobelt-\tmp@ceinture@couleur.pdf}
+		}%
+		{%
+			\useKVdefault[judobelt]%
+			\setKV[judobelt]{#2}%
+			\IfStrEq{\judobeltheight}{auto}%
+				{%
+					%hauteur auto
+					\settototalheight{\tmp@ceinture@hauteur@totale}{\hbox{\judobeltstrut}}%
+					\settodepth{\tmp@ceinture@profondeur}{\hbox{\judobeltstrut}}%
+					\raisebox{-\tmp@ceinture@profondeur+0.025\tmp@ceinture@hauteur@totale}{\includegraphics[height=0.95\tmp@ceinture@hauteur@totale]{judobelt-\tmp@ceinture@couleur.pdf}}%
+				}%
+				{%
+					\raisebox{\judobeltraise}{\includegraphics[height=\judobeltheight]{judobelt-\tmp@ceinture@couleur.pdf}}%
+				}%
+		}%
+}
+
+\endinput

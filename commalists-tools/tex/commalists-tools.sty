@@ -1,0 +1,280 @@
+% Author     : C. Pierquet
+% licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{commalists-tools}[2025/05/05 0.1.5 Basic operations for numeral comma separated lists]
+
+%------History
+% 0.1.5	Bugfix
+% 0.1.4	Change name of macro + bugfix
+% 0.1.3	Duplicate macro with ProfMaquette (so new name)
+% 0.1.2	New versions with already traited lists
+% 0.1.1	Sorting with decimals (!)
+% 0.1.0	Initial version
+
+%------Packages
+\RequirePackage{listofitems}
+\RequirePackage{xintexpr}
+\RequirePackage{xstring}
+
+%-----Macros (LaTeX3...) for sorting
+\ExplSyntaxOn
+\NewDocumentCommand\sortasclist{ s m }
+{
+	\clist_set:Nx \l_foo_clist {#2}
+	\clist_sort:Nn \l_foo_clist{
+		\fp_compare:nNnTF { ##1 } > { ##2 }
+			{ \sort_return_swapped: }
+			{ \sort_return_same: }
+	}
+	\IfBooleanTF{#1}%if star := just printing // if not, storing
+		{%
+			{\l_foo_clist}%
+		}%
+		{%
+			\xdef#2{\l_foo_clist}%
+		}%
+}
+
+\NewDocumentCommand\sortdeslist{ s m }
+{
+	\clist_set:Nx \l_foo_clist {#2}
+	\clist_sort:Nn \l_foo_clist{
+		\fp_compare:nNnTF { ##1 } < { ##2 }
+			{ \sort_return_swapped: }
+			{ \sort_return_same: }
+	}
+	\IfBooleanTF{#1}%if star := just printing // if not, storing
+		{%
+			{\l_foo_clist}%
+		}%
+		{%
+			\xdef#2{\l_foo_clist}%
+		}%
+} 
+\ExplSyntaxOff
+
+%----Macros (LaTeX2)
+\NewDocumentCommand\addvalinlist{ s m m }{%
+	\IfBooleanTF{#1}%if star := just printing // if not, storing
+		{%
+			#3,#2%
+		}%
+		{%
+			\xdef#3{#3,#2}%
+		}%
+}
+
+\NewDocumentCommand\definemylist{ m m }{%
+	%1 = raw list
+	%2 = traited list with listofitems
+	\setsepchar{,}%
+	\readlist*#2{#1}%
+}
+
+\NewDocumentCommand\removevalinlist{ s m m }{%
+	\setsepchar{,}%
+	\readlist*\tmplistread{#3}%
+	\xdef\tmpresremovelist{}%
+	\xintFor* ##1 in {\xintSeq{1}{\tmplistreadlen}}\do{%
+		\xintifboolexpr{ \tmplistread[##1] == #2}%
+			{}%
+			{%
+				\xintifboolexpr{ ##1 == 1 }%
+					{%
+						\xdef\tmpresremovelist{\tmplistread[##1]}%
+					}%
+					{%
+						\xdef\tmpresremovelist{\tmpresremovelist,\tmplistread[##1]}%
+					}%
+			}%
+	}%
+	\IfBooleanTF{#1}%if star := just printing // if not, storing
+		{%
+			\tmpresremovelist%
+		}%
+		{%
+			\xdef#3{\tmpresremovelist}%
+		}%
+}
+
+\NewDocumentCommand\boolvalinlist{ m m O{\resisinlist} }{%
+	\IfSubStr{,#2,}{,#1,}{\def#3{1}}{\def#3{0}}%
+}
+
+\NewDocumentCommand\testifvalinlist{ m m m m }{%
+	\IfSubStr{,#2,}{,#1,}{\xdef\RESTMPVALUE{1}}{\xdef\RESTMPVALUE{0}}%
+	\xintifboolexpr{ \RESTMPVALUE == 1}{#3}{#4}%
+}
+
+\NewDocumentCommand\countvalinlist{ s m m O{\rescount} }{%
+	\setsepchar{,}%
+	\readlist*\tmplistread{#3}%
+	\xdef#4{0}%
+	\xintFor* ##1 in {\xintSeq{1}{\tmplistreadlen}}\do{%
+		\xintifboolexpr{ \tmplistread[##1] == #2}%
+		{%
+			\xdef#4{\fpeval{#4+1}}%
+		}%
+		{}%
+	}%
+	\IfBooleanT{#1}%if star := just printing // if not, storing
+		{%
+			#4%
+		}%
+}
+
+\NewDocumentCommand\countvalindeflist{ s m m O{\rescount} }{%
+	%\readlist*\tmplistread{#3}%
+	\xdef#4{0}%
+	\xintFor* ##1 in {\xintSeq{1}{\csname#3len\endcsname}}\do{%
+		\xintifboolexpr{ \csname#3\endcsname[##1] == #2}%
+		{%
+			\xdef#4{\fpeval{#4+1}}%
+		}%
+		{}%
+	}%
+	\IfBooleanT{#1}%if star := just printing // if not, storing
+		{%
+			#4%
+		}%
+}
+
+\NewDocumentCommand\minoflist{ s m O{\resmin} }{%
+	\IfBooleanTF{#1}%
+		{%
+			\fpeval{min(#2)}%
+		}%
+		{%
+			\xdef#3{\fpeval{min(#2)}}%
+		}%
+}
+
+\NewDocumentCommand\maxoflist{ s m O{\resmax} }{%
+	\IfBooleanTF{#1}%
+		{%
+			\fpeval{max(#2)}%
+		}%
+		{%
+			\xdef#3{\fpeval{max(#2)}}%
+		}%
+}
+
+\NewDocumentCommand\meanoflist{ s m O{\resmean} }{%
+	\xdef#3{0}%
+	\setsepchar{,}%
+	\readlist*\tmpmeanlist{#2}%
+	\xintFor* ##1 in {\xintSeq{1}{\tmpmeanlistlen}}\do{%
+		\xdef#3{\fpeval{#3+\tmpmeanlist[##1]}}%
+	}%
+	\xdef#3{\fpeval{(#3)/\tmpmeanlistlen}}%
+	\IfBooleanT{#1}%if star := just printing // if not, storing
+		{%
+			#3%
+		}%
+}
+
+\NewDocumentCommand\meanofdeflist{ s m O{\resmean} }{%
+	\xdef#3{0}%
+	%\readlist*\tmpmeanlist{#2}%
+	\xintFor* ##1 in {\xintSeq{1}{\csname#2len\endcsname}}\do{%
+		\xdef#3{\fpeval{#3+\csname#2\endcsname[##1]}}%
+	}%
+	\xdef#3{\fpeval{(#3)/\csname#2len\endcsname}}%
+	\IfBooleanT{#1}%if star := just printing // if not, storing
+		{%
+			#3%
+		}%
+}
+
+\NewDocumentCommand\sumoflist{ s m O{\ressum} }{%
+	\xdef#3{0}%
+	\setsepchar{,}%
+	\readlist*\tmpsumlist{#2}%
+	\xintFor* ##1 in {\xintSeq{1}{\tmpsumlistlen}}\do{%
+		\xdef#3{\fpeval{#3+\tmpsumlist[##1]}}%
+	}%
+	\IfBooleanT{#1}%if star := just printing // if not, storing
+		{%
+			#3%
+		}%
+}
+
+\NewDocumentCommand\sumofdeflist{ s m O{\ressum} }{%
+	\xdef#3{0}%
+	%\readlist*\tmpsumlist{#2}%
+	\xintFor* ##1 in {\xintSeq{1}{\csname#2len\endcsname}}\do{%
+		\xdef#3{\fpeval{#3+\csname#2\endcsname[##1]}}%
+	}%
+	\IfBooleanT{#1}%if star := just printing // if not, storing
+		{%
+			#3%
+		}%
+}
+
+\NewDocumentCommand\prodoflist{ s m O{\resprod} }{%
+	\xdef#3{1}%
+	\setsepchar{,}%
+	\readlist*\tmpprodlist{#2}%
+	\xintFor* ##1 in {\xintSeq{1}{\tmpprodlistlen}}\do{%
+		\xdef#3{\fpeval{(#3)*(\tmpprodlist[##1])}}%
+	}%
+	\IfBooleanT{#1}%if star := just printing // if not, storing
+		{%
+			#3%
+		}%
+}
+
+\NewDocumentCommand\prodofdeflist{ s m O{\resprod} }{%
+	\xdef#3{1}%
+	\setsepchar{,}%
+	\readlist*\tmpprodlist{#2}%
+	\xintFor* ##1 in {\xintSeq{1}{\csname#2len\endcsname}}\do{%
+		\xdef#3{\fpeval{(#3)*(\csname#2\endcsname[##1])}}%
+	}%
+	\IfBooleanT{#1}%if star := just printing // if not, storing
+		{%
+			#3%
+		}%
+}
+
+\NewDocumentCommand\reverselist{ s m O{\resrevlist} }{%
+	\setsepchar{,}%
+	\readlist*\tmpreverselist{#2}%
+	\xdef#3{\tmpreverselist[-1]}%
+	\xintFor* ##1 in {\xintSeq{2}{\tmpreverselistlen}}\do{%
+		\xdef#3{#3,\tmpreverselist[-##1]}%
+	}%
+	\IfBooleanT{#1}%if star := just printing // if not, storing
+		{%
+			#3%
+		}%
+}
+
+\NewDocumentCommand\getvaluefromlist{ s m m O{\resmyelt} }{%
+	\setsepchar{,}%
+	\readlist*\tmpreadlist{#2}%
+	\xdef#4{\tmpreadlist[#3]}%
+	\IfBooleanT{#1}{#4}%
+}
+
+\NewDocumentCommand\getvaluefromdeflist{ s m m O{\resmyelt} }{%
+	%\readlist*\tmpreadlist{#2}%
+	\xdef#4{\csname#2\endcsname[#3]}%
+	\IfBooleanT{#1}{#4}%
+}
+
+\NewDocumentCommand\lenoflist{ s m O{\resmylen} }{%
+	\setsepchar{,}%
+	\readlist*\tmpreadlist{#2}%
+	\xdef#3{\tmpreadlistlen}%
+	\IfBooleanT{#1}{#3}%
+}
+
+\NewDocumentCommand\lenofdeflist{ s m O{\resmylen} }{%
+	%\readlist*\tmpreadlist{#2}%
+	\xdef#3{\csname#2len\endcsname}%
+	\IfBooleanT{#1}{#3}%
+}
+
+\endinput

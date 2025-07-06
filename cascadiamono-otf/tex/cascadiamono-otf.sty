@@ -1,0 +1,29 @@
+% cascadiamono-otf.sty
+% C. Pierquet 2025
+% This file is distributed under the terms of the LaTeX Project Public
+% License from CTAN archives in directory  macros/latex/base/lppl.txt.
+% Either version 1.3 or, at your option, any later version.
+
+\ProvidesPackage{cascadiamono-otf}[2025/01/10 v0.3 Supports cascadiamono fonts for lualatex and xelatex.] 
+
+\RequirePackage{xkeyval}
+
+\newcommand*{\CascadiaMono@scale}{MatchLowercase}
+\DeclareOptionX{scale}{\renewcommand*{\CascadiaMono@scale}{#1}}
+\ProcessOptionsX\relax
+
+\RequirePackage{fontspec}
+\defaultfontfeatures{
+  HyphenChar = None,
+  Scale      = \CascadiaMono@scale}
+\newfontfamily\cascadiamono{CascadiaMono}
+\newfontfamily\cascadiamonosemilight{CascadiaMono-SemiLight}
+\newfontfamily\cascadiamonolight{CascadiaMono-Light}
+\newfontfamily\cascadiamonoextralight{CascadiaMono-ExtraLight}
+\newfontfamily\cascadiacode{cascadiacode}
+\newfontfamily\cascadiacodesemilight{cascadiacode-semilight}
+\newfontfamily\cascadiacodelight{cascadiacode-light}
+\newfontfamily\cascadiacodeextralight{cascadiacode-extralight}
+\defaultfontfeatures{}
+
+\endinput
