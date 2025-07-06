@@ -34,8 +34,8 @@
 \usepackage[margin=1.5cm]{geometry}
 \setlength{\parindent}{0pt}
 
-\def\TPversion{0.40c}
-\def\TPdate{23/06/2025}
+\def\TPversion{0.40d}
+\def\TPdate{06/07/2025}
 \usepackage{tcolorbox}
 \sethlcolor{lightgray!25}
 \NewDocumentCommand\MontreCode{ m }{%
@@ -72,14 +72,16 @@
 \end{minipage}
 \end{center}
 
-\vspace*{1mm}
-
 \begin{center}
-	\begin{tabular}{c}
-	\texttt{Cédric Pierquet}\\
-	{\ttfamily c pierquet -- at -- outlook . fr}\\
-	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
-\end{tabular}
+\begin{minipage}{0.85\linewidth}
+	\begin{tcolorbox}[colframe=teal,colback=teal!10,halign=center,fontupper=\footnotesize]
+		\texttt{\url{https://github.com/cpierquet/latex-packages/tree/main/customenvs}}
+		
+		~
+		
+		\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
+	\end{tcolorbox}
+\end{minipage}
 \end{center}
 
 \vspace*{5mm}
@@ -100,7 +102,7 @@
 
 \phantomsection
 
-\hypertarget{matoc}{}
+%\hypertarget{matoc}{}
 
 \tableofcontents
 
@@ -111,6 +113,10 @@
 \vfill
 
 \section{History}
+
+\verb|v0.40d|~:~~~Code enhancements (compatibility  with twemojis) + \textsf{customenvs-tikzpictos} \texttt{v0.1.4}
+
+\verb|v0.40c|~:~~~PictoClippy (\textsf{customenvs-tikzpictos} \texttt{v0.1.3}) + Lengths macros
 
 \verb|v0.40b|~:~~~PictoCalendar (\textsf{customenvs-tikzpictos} \texttt{v0.1.2}) + enhancements
 
@@ -223,7 +229,7 @@ Due to limitations, \MontreCode{enumitem}/\MontreCode{multicol}/\MontreCode{tabu
 
 \pagebreak
 
-\subsection{Subpackage customenvs-tikzpictos (v0.1.2)}
+\subsection{Subpackage customenvs-tikzpictos (v0.1.4)}
 
 The package \MontreCode{customenvs-tikzpictos}, loaded within \MontreCode{customenvs} (but can be loaded independently), proposes small pictograms.
 
@@ -253,6 +259,8 @@ The package \MontreCode{customenvs-tikzpictos}, loaded within \MontreCode{custom
 	Pill & \pictopill[colors=blue/red]{}|\pictopill[colors=blue/red]{1}|\pictopill[colors=blue/red]{3}\\
 	TrafficLight & \pictotraffic{}|\pictotraffic{1}|\pictotraffic{2}|\pictotraffic{3}|\pictotraffic{123}|\pictotraffic{13}\\
 	MiniCalendar & \pictocalendar{15/aug.}|\pictocalendar[color=red]{30/dec.}|\pictocalendar[color=blue]{14/feb.}\\
+	Clippy & \pictoclippy|\pictoclippy[style=angry]|\pictoclippy[style=happangry]|\pictoclippy[style=confused]\\
+	Dball & \pictodball{}|\pictodball{1}|\pictodball{2}|\pictodball{6}|\pictodball{7}\\
 \end{tblr}\hfill\null
 
 \newpage
@@ -1024,77 +1032,31 @@ Test n°3 (4 points)
 \end{tikzpicture}
 \end{center}
 
+\begin{codehigh}[language=latex/latex2]
+%starred version with box (tikz)
+\fittexttobox(*){text}{width}{height}
+\end{codehigh}
 
-%\subsection{Pictoskill}
-%
-%\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
-%\pictoskills[%
-%  colors=...,      %main color
-%  height=...,      %height (unit) or auto or dauto (with depth)
-%  hoffset=...,     %horizontal sep for bars
-%  opacity=...,     %opacty of light parts
-%  ]%
-%  {nb}
-%\end{codehigh}
-%
-%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
-%%with fixed height
-%\pictoskills[height=1cm]{1}
-%\end{demohigh}
-%
-%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
-%%with fixed height and color
-%\pictoskills[colors=teal,height=2em]{2}
-%\end{demohigh}
-%
-%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
-%%automatic height, without depth
-%\begin{LARGE}
-%Inline, without depth, we get \pictoskills[colors=skillorange,height=auto]{2}
-%and \pictoskills[colors=skillred,hoffset=0.1]{1}
-%\end{LARGE}
-%\end{demohigh}
-%
-%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
-%%automatic height, with depth
-%\begin{Huge}
-%\sffamily
-%Inline, with depth, we get \pictoskills[colors=skillorange]{2}
-%and \pictoskills[colors=skillred,hoffset=0.025]{1}
-%\end{Huge}
-%\end{demohigh}
-%
-%\subsection{PictoBullsEye}
-%
-%\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
-%\pictobullseye[%
-%  maincolor=...,       %main color
-%  height=...,          %height (unit) or auto (with depth, or not with *)
-%  colors=...,          %boolean for coloring areas
-%  listcolors=...,      %list of three colors for aeras
-%  ]%
-%  <tikz options>
-%\end{codehigh}
-%
-%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
-%%with fixed height
-%{\tikz\draw (0,0) grid (1,2);}%
-%\pictobullseye[height=2cm,maincolor=red]%
-%\pictobullseye[height=1cm,maincolor=blue]<rotate=90>%
-%\pictobullseye[height=0.75cm,maincolor=gray]<rotate=-90>%
-%{\tikz\draw (0,0) grid (1,2);}
-%\end{demohigh}
-%
-%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
-%%inline with and without depth, based on (q)H characters of current font
-%A try q\pictobullseye\pictobullseye[height=auto,maincolor=red]H inline.
-%\end{demohigh}
-%
-%\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
-%\scalebox{4}[4]{%
-%Inline tests\,\pictobullseye[height=auto,colors,listcolors={green!50,orange!50,red!50}]\,%
-%and\,\pictobullseye[colors,listcolors={red!50,yellow!50,teal!50}]<rotate=90>!%
-%}
-%\end{demohigh}
+\begin{demohigh}[language=latex/latex2]
+%with box
+\fittexttobox*{PHONE}{2cm}{1cm}\\
+\fittexttobox*{\bfseries\sffamily PHONE}{7cm}{1cm}\\
+\fittexttobox*{PHONE}{3cm}{1cm}\\
+\fittexttobox*{\ttfamily PHONE}{3cm}{1cm}\\
+\fittexttobox*{PHONE}{2cm}{2cm}\\
+\fittexttobox*{CONGRATULATIONS}{10cm}{3.5cm}\\
+\fittexttobox*{CONGRATULATIONS}{14cm}{1.25cm}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+%w/o box
+\fittexttobox{PHONE}{2cm}{1cm}\\
+\fittexttobox{\bfseries\sffamily PHONE}{7cm}{1cm}\\
+\fittexttobox{PHONE}{3cm}{1cm}\\
+\fittexttobox{\ttfamily PHONE}{3cm}{1cm}\\
+\fittexttobox{PHONE}{2cm}{2cm}\\
+\fittexttobox{CONGRATULATIONS}{10cm}{3.5cm}\\
+\fittexttobox{CONGRATULATIONS}{14cm}{1.25cm}
+\end{demohigh}
 
 \end{document}

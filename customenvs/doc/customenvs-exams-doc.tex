@@ -1,0 +1,390 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[french,11pt,a4paper]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{kpfonts}
+\usepackage{inconsolata}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[scale=0.875]{cabin}
+\usepackage{customenvs-exams}
+\usepackage{soul}
+\usepackage{lipsum}
+\usepackage{codehigh}
+\usepackage{fontawesome5}
+\usepackage{twemojis}
+\usepackage{fancyvrb}
+\usepackage{fancyhdr}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+%\rhead{\sffamily\small\affloetalab[Legende]}
+\lfoot{\sffamily\small [customenvs-exams]}
+\cfoot{\sffamily\small - \thepage{} -}
+\rfoot{\hyperlink{matoc}{\small\faArrowAltCircleUp[regular]}}
+\usepackage{hologo}
+\usepackage{xspace}
+\providecommand\tikzlogo{Ti\textit{k}Z}
+\providecommand\TeXLive{\TeX{}Live\xspace}
+\providecommand\PSTricks{\textsf{PSTricks}\xspace}
+\let\pstricks\PSTricks
+\let\TikZ\tikzlogo
+
+\usepackage{hyperref}
+\urlstyle{same}
+\hypersetup{pdfborder=0 0 0}
+\usepackage[margin=2cm]{geometry}
+\setlength{\parindent}{0pt}
+
+\def\TPversion{0.1.0}
+\def\TPdate{06/07/2025}
+\usepackage{tcolorbox}
+
+\sethlcolor{lightgray!25}
+\NewDocumentCommand\MontreCode{ m }{%
+	\hl{\vphantom{\texttt{pf}}\texttt{#1}}%
+}
+
+\usepackage{scontents}
+\begin{scontents}[overwrite,write-out={automat-specif-pourcent-1.tex}]
+\def\AutomatEnonce{%
+L'opération qui permet de calculer $25\,\%$ de 480 est :
+}
+
+\def\AutomatReponses{%
+	{$\dfrac{480}{25 \times 100}$} ,
+	{$25 \times 480 \times 0,1$} ,
+	{$\dfrac{480 \times 100}{25}$} ,
+	{$\dfrac{1}{4} \times 480$}
+}
+\end{scontents}
+
+\usepackage{babel}
+
+\begin{document}
+
+\pagestyle{fancy}
+
+\thispagestyle{empty}
+
+\begin{center}
+	\begin{minipage}{0.88\linewidth}
+	\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+		\begin{center}
+			\begin{tabular}{c}
+				{\Huge \texttt{customenvs-exams}} \\
+				\\
+				{\LARGE (sous-package de \texttt{customenvs})}\\
+				\\
+				{\LARGE Commandes spéciales, type 'examens'.} \\
+				\\
+				{\small \texttt{Version \TPversion{} -- \TPdate}}
+		\end{tabular}
+		\end{center}
+	\end{tcolorbox}
+\end{minipage}
+\end{center}
+
+\begin{center}
+	\begin{tabular}{c}
+		\texttt{Cédric Pierquet}\\
+		{\ttfamily cpierquet -- at -- outlook . fr}
+	\end{tabular}
+\end{center}
+
+\begin{center}
+	\begin{minipage}{0.85\linewidth}
+		\begin{tcolorbox}[colframe=teal,colback=teal!10,halign=center,fontupper=\footnotesize]
+			\texttt{\url{https://github.com/cpierquet/latex-packages/tree/main/customenvs}}
+			
+			~
+			
+			\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
+		\end{tcolorbox}
+	\end{minipage}
+\end{center}
+
+\vspace*{1.25cm}
+
+\hrule
+
+\medskip
+
+\hfill\MontreCode{customenvs-exams} est inclus avec \MontreCode{customenvs}, mais peut être chargé indépendamment !\hfill\null
+
+\medskip
+
+\hrule
+
+\vfill
+
+\begin{tcolorbox}[colback=lightgray!2,boxrule=0.1mm]
+\begin{TitreSujet}{SUJET}
+Sujet d'examen, \today
+\end{TitreSujet}
+
+\SousTitreSujetEpreuve{$\leftrightsquigarrow$ Épreuve E2 $\leftrightsquigarrow$}
+
+\begin{ExamExercice}{1}{4}
+\begin{ExamAutomatQuest}{1}
+L'opération qui permet de calculer $25\,\%$ de 480 est :
+
+\smallskip
+
+\ExamReponsesQCM%
+{%
+	{$\dfrac{480}{25 \times 100}$} ,
+	{$25 \times 480 \times 0,1$} ,
+	{$\dfrac{480 \times 100}{25}$} ,
+	{$\dfrac{1}{4} \times 480$}
+}
+\end{ExamAutomatQuest}
+
+\begin{ExamAutomatQuest}{2}
+L'opération qui permet de calculer $25\,\%$ de 480 est :
+
+\smallskip
+
+\ExamReponsesQCM[Filets,Largeur=0.5\linewidth,HtAuto,NbCols=2,Labels={1)}]%
+{%
+	{$\dfrac{480}{25 \times 100}$} ,
+	{$25 \times 480 \times 0,1$} ,
+	{$\dfrac{480 \times 100}{25}$} ,
+	{$\dfrac{1}{4} \times 480$}
+}
+\end{ExamAutomatQuest}
+\end{ExamExercice}
+\end{tcolorbox}
+
+\vfill~
+
+\pagebreak
+
+\phantomsection
+
+\hypertarget{matoc}{}
+
+\tableofcontents
+
+\vspace*{5mm}
+
+\hrule
+
+\vspace*{5mm}
+
+\section{Le sous-package customenvs-exams}
+
+\subsection{Idées}
+
+L'idée est de proposer, de manière indépendante à \MontreCode{customenvs}, des commandes/environnements pour travailler sur une présentation type \textit{examen}.
+
+\subsection{Commande de titre(s)}
+
+\begin{codehigh}[language=latex/latex2]
+\begin{TitreSujet}[Couleur=...,AlignH=...]<options tcbox>{titre onglet}
+...
+\end{TitreSujet}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2]
+\begin{TitreSujet}[Couleur=red!50!black]{SUJET}
+Métropole, SIO, 16 Mai 2024
+\end{TitreSujet}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\begin{TitreSujet}[Couleur=teal,AlignH=center]{CORRIGÉ}
+Baccalauréat Centres étrangers Groupe 1\\
+14 mars 2023
+\end{TitreSujet}
+\end{demohigh}
+
+\begin{codehigh}[language=latex/latex2]
+\SujetTitreExo[couleur]{titre}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2]
+\SujetTitreExo{Exercice 4 (5 points)}
+
+\SujetTitreExo[olive]{Exercice 1 [Matrices]\dotfill(5 points)}
+\end{demohigh}
+
+\subsection{Environnement (boîte) d'exercice(s)}
+
+\begin{codehigh}[language=latex/latex2]
+\begin{ExamExercice}{numéro}{nb points}
+...
+\end{ExamExercice}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2]
+%commande pour le formattage du titre (\renewcommand si besoin)
+\newcommand\ExamTitreExo[2]{%1=numéro,%2=nb points
+  \textbf{\large\examdecoexo\underline{Exercice #1}~(#2 points)}%
+}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2]
+\begin{ExamExercice}{4}{5{,}5}
+\lipsum[1]
+\end{ExamExercice}
+\end{demohigh}
+
+\subsection{Réponses à un QCM}
+
+\begin{codehigh}[language=latex/latex2]
+\ExamReponsesQCM%
+  [%
+    EspacesCL={6pt/2pt},%               espaces H/V des cellules
+    NbCols=1/2/4,%                      nombre de colonnes
+    Filets=TF,%                         bordures
+    PoliceLabels={\bfseries},%
+    Labels={a.},%                       formattage des labels (box possible)
+    EspaceLabels=\kern5pt,%
+    Swap=false,%                        échange b<->c
+    Largeur=0.99\linewidth,%
+    Melange=false,%
+    HtAuto=true,%                       hauteur automatique
+  ]%
+  {réponseA,réponseB,réponseC,réponseD}%
+  <options tblr>
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2]
+\ExamReponsesQCM%
+{%
+  {$\dfrac{480}{25 \times 100}$} ,
+  {$25 \times 480 \times 0,1$} ,
+  {$\dfrac{480 \times 100}{25}$} ,
+  {$\dfrac{1}{4} \times 480$}
+}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\ExamReponsesQCM[Filets,Largeur=0.8\linewidth]%
+{%
+  {$\dfrac{480}{25 \times 100}$} ,
+  {$25 \times 480 \times 0,1$} ,
+  {$\dfrac{480 \times 100}{25}$} ,
+  {$\dfrac{1}{4} \times 480$}
+}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\ExamReponsesQCM[Filets,NbCols=2]%
+{%
+  {$\dfrac{480}{25 \times 100}$} ,
+  {$25 \times 480 \times 0,1$} ,
+  {$\dfrac{480 \times 100}{25}$} ,
+  {$\dfrac{1}{4} \times 480$}
+}
+
+\ExamReponsesQCM[Filets,NbCols=2,Swap]%
+{%
+  {$\dfrac{480}{25 \times 100}$} ,
+  {$25 \times 480 \times 0,1$} ,
+  {$\dfrac{480 \times 100}{25}$} ,
+  {$\dfrac{1}{4} \times 480$}
+}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\ExamReponsesQCM[Filets,NbCols=2,HtAuto]%
+{%
+  {$\dfrac{480}{25 \times 100}$} ,
+  {$25 \times 480 \times 0,1$} ,
+  {$\dfrac{480 \times 100}{25}$} ,
+  {$\frac{1}{4} \times 480$}
+}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\ExamReponsesQCM[Filets,Melange,Largeur=0.8\linewidth]%
+{%
+  {$\dfrac{480}{25 \times 100}$} ,
+  {$25 \times 480 \times 0,1$} ,
+  {$\dfrac{480 \times 100}{25}$} ,
+  {$\dfrac{1}{4} \times 480$}
+}
+\end{demohigh}
+
+\subsection{Environnement complet 'Automatismes'}
+
+\begin{codehigh}[language=latex/latex2]
+%environnement 'Automatismes'
+\begin{ExamAutomatQuest}[options tcbox]{numéro}
+...
+\end{ExamAutomatQuest}
+\end{codehigh}
+
+\begin{codehigh}[language=latex/latex2]
+%présentation complète 'Automatismes'
+\QuestionAutomatismes%
+  {numéro}%
+  [options tcbox]%
+  {Énoncé}%
+  [clés QCM]%
+  <options tblr QCM>%
+  {liste réponses}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2]
+\begin{ExamAutomatQuest}{1}
+L'opération qui permet de calculer $25\,\%$ de 480 est :\\
+
+\medskip
+
+\ExamReponsesQCM%
+{%
+  {$\dfrac{480}{25 \times 100}$} ,
+  {$25 \times 480 \times 0,1$} ,
+  {$\dfrac{480 \times 100}{25}$} ,
+  {$\dfrac{1}{4} \times 480$}
+}
+\end{ExamAutomatQuest}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2]
+\QuestionAutomatismes{4}
+{L'opération qui permet de calculer $25\,\%$ de 480 est :}
+  [Melange,Largeur=15cm,Filets,NbCols=2,HtAuto,Labels={1)}]
+  {%
+    {$\dfrac{480}{25 \times 100}$} ,
+    {$25 \times 480 \times 0,1$} ,
+    {$\dfrac{480 \times 100}{25}$} ,
+    {$\dfrac{1}{4} \times 480$}
+}
+\end{demohigh}
+
+\pagebreak
+
+\subsection{Environnement complet 'Automatismes' via fichier externe}
+
+\begin{codehigh}[language=latex/latex2]
+%====automat-specif-pourcent-1.tex
+\def\AutomatEnonce{%macro pour l'énoncé (nom fixé)
+  L'opération qui permet de calculer $25\,\%$ de 480 est :
+}
+\def\AutomatReponses{%macro pour les réponses (nom fixé)
+  {$\dfrac{480}{25 \times 100}$} ,
+  {$25 \times 480 \times 0,1$} ,
+  {$\dfrac{480 \times 100}{25}$} ,
+  {$\dfrac{1}{4} \times 480$}
+}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2]
+\QuestionAutomatismesFichier{11}
+  []                              %param de l'env
+  [Melange]                       %param du QCM
+  {automat-specif-pourcent-1}     %fichier
+\end{demohigh}
+
+\pagebreak
+
+\section{Historique}
+
+\verb|v0.1.0|~:~Version initiale
+
+\end{document}

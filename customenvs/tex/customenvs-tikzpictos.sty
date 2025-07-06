@@ -2,9 +2,10 @@
 % licence.........: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{customenvs-tikzpictos}[2025/06/23 0.1.3 Small pictograms, made with tikz]
+\ProvidesPackage{customenvs-tikzpictos}[2025/07/06 0.1.4 Small pictograms, made with tikz]
 
 %====HISTORY
+% v 0.1.4	Strut option for sample characters + difficultylevels + dballs + stamp
 % v 0.1.3	Clippy
 % v 0.1.2	Mini-calendar
 % v 0.1.1	PictoTraffic
@@ -20,6 +21,10 @@
 \RequirePackage{tikz}
 \usetikzlibrary{shapes.geometric,bbox}
 
+%====strutletters
+\def\samplestrutletters{AZERTYUIOPSDFGHKLMWXCVBN}
+\def\sampledstrutletters{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}
+
 %====pictostars
 \newlength{\pictotmphauteuretoiles}
 \newlength{\pictotmpprofondeuretoiles}
@@ -29,13 +34,17 @@
 \defKV[pictostars]{%
 	colors=\def\tkzLevelStarsColors{#1},%
 	offset=\setlength{\pictotmpoffsetetoiles}{#1},%
-	height=\def\pictotmpheightetetoiles{#1}
+	height=\def\pictotmpheightetetoiles{#1},%
+	strut=\def\pictotmpstrutetetoiles{#1},%
+	dstrut=\def\pictotmpdstrutetetoiles{#1}
 }
 
 \setKVdefault[pictostars]{%
 	colors={black/lightgray},%
 	offset={0.01em},%
-	height=dauto
+	height=dauto,%
+	strut={\samplestrutletters},%
+	dstrut={\sampledstrutletters}
 }
 
 \NewDocumentCommand{\pictostars}{O{}D<>{}m}{%(OK) modif avec hauteur
@@ -67,16 +76,16 @@
 		{%
 			\IfStrEq{\pictotmpheightetetoiles}{auto}%
 				{%
-					\settototalheight{\pictotmphauteuretoiles}{\hbox{HLM}}%
+					\settototalheight{\pictotmphauteuretoiles}{\hbox{\pictotmpstrutetetoiles}}%
 					\setlength{\pictotmphauteuretoiles}{0.975\pictotmphauteuretoiles}%
 					%classic tikzpicture
 					\begin{tikzpicture}[bezier bounding box,fill=\tkzLevelStarsColorBg,draw=\tkzLevelStarsColor,rounded corners={0.05\pictotmphauteuretoiles},line width={0.05\pictotmphauteuretoiles},#2]
 				}{}%
 			\IfStrEq{\pictotmpheightetetoiles}{dauto}%
 				{%
-					\settototalheight{\pictotmphauteuretoiles}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+					\settototalheight{\pictotmphauteuretoiles}{\hbox{\pictotmpdstrutetetoiles}}%
 					\setlength{\pictotmphauteuretoiles}{0.975\pictotmphauteuretoiles}%
-					\settodepth{\pictotmpprofondeuretoiles}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+					\settodepth{\pictotmpprofondeuretoiles}{\hbox{\pictotmpdstrutetetoiles}}%
 					%raised tikzpicture
 					\begin{tikzpicture}[bezier bounding box,baseline={-\pictotmpprofondeuretoiles},fill=\tkzLevelStarsColorBg,draw=\tkzLevelStarsColor,rounded corners={0.05\pictotmphauteuretoiles},line width={0.05\pictotmphauteuretoiles},#2]
 				}{}%
@@ -98,11 +107,15 @@
 
 \defKV[pictoskillswheel]{%
 	colors=\def\miniskillswheelcol{#1},%
-	height=\def\miniskillswheelheight{#1}
+	height=\def\miniskillswheelheight{#1},%
+	strut=\def\miniskillswheelstrut{#1},%
+	dstrut=\def\miniskillswheeldstrut{#1}
 }
 \setKVdefault[pictoskillswheel]{%
 	colors=black,%
-	height=dauto
+	height=dauto,%
+	strut=\samplestrutletters,%
+	dstrut=\sampledstrutletters
 }
 
 \NewDocumentCommand\pictospeedometer{O{}D<>{}m}{%(OK) à voir avec hauteur auto...
@@ -116,12 +129,12 @@
 		{%
 			\IfStrEq{\miniskillswheelheight}{auto}%
 				{%
-					\settototalheight{\pictotmphauteurgradniv}{\hbox{AZERTYUIOPHL}}%
+					\settototalheight{\pictotmphauteurgradniv}{\hbox{\miniskillswheelstrut}}%
 					\setlength{\pictotmphauteurgradniv}{0.95\pictotmphauteurgradniv}%
 				}{}%
 			\IfStrEq{\miniskillswheelheight}{dauto}%
 				{%
-					\settototalheight{\pictotmphauteurgradniv}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+					\settototalheight{\pictotmphauteurgradniv}{\hbox{\miniskillswheeldstrut}}%
 					\setlength{\pictotmphauteurgradniv}{0.95\pictotmphauteurgradniv}%
 				}{}%
 		}%
@@ -174,7 +187,7 @@
 		\draw[\miniskillswheelcolp] (-15:{0.7588\pictotmphauteurgradniv}) arc(-15:195:{0.7588\pictotmphauteurgradniv}) --cycle ;
 		\foreach \i in {0,...,\pictospeednb}{%
 			\draw[\miniskillswheelcolp,line cap=round] ({180-180*(\i)/\pictospeednb}:{0.55\pictotmphauteurgradniv})--({180-180*(\i)/\pictospeednb}:{0.65\pictotmphauteurgradniv}) ;
-		}
+		}%
 		\IfEq{\miniskillswheelmark}{}%
 			{}%
 			{%
@@ -188,14 +201,18 @@
 \defKV[tkzArrowBullsEye]{%
 	height=\def\heightarrowbullseye{#1},%
 	maincolor=\def\colorarrowbullseye{#1},%
-	listcolors=\def\colorslistarrowbullseye{#1}
+	listcolors=\def\colorslistarrowbullseye{#1},%
+	strut=\def\strutarrowbullseye{#1},%
+	dstrut=\def\dstrutarrowbullseye{#1}
 }
 \setKVdefault[tkzArrowBullsEye]{%
 	height=dauto,%
 	maincolor={},%
 	color=false,%
 	colors=false,%
-	listcolors={yellow,red,blue!50!cyan}
+	listcolors={yellow,red,blue!50!cyan},%
+	strut=\samplestrutletters,%
+	dstrut=\sampledstrutletters
 }
 
 \newcommand\inttkzArrowBullsEye{
@@ -209,10 +226,6 @@
 	\filldraw[black,fill=\colbullseyeA] (0,0) circle[radius=0.6] ;
 	\draw[black,fill=white,line cap=round,line join=round] (0,0)--(45:1.7) -- (55:2.5) -- (52:3.5) -- (45:3.1) -- (38:3.5) -- (35:2.5) -- (45:1.7) -- cycle;
 }
-
-\def\calcheightofchars{H}
-\def\calctotheightofchars{qH}
-\def\calcdepthofchars{qH}
 
 \newlength\totheightarrowbullseye
 \newlength\depthbullseye
@@ -238,11 +251,11 @@
 		{%
 			\IfStrEq{\heightarrowbullseye}{dauto}%
 				{%dauto with depth
-					\settototalheight\totheightarrowbullseye{\hbox{\calctotheightofchars}}%
-					\settodepth\depthbullseye{\hbox{\calcdepthofchars}}%
+					\settototalheight\totheightarrowbullseye{\hbox{\dstrutarrowbullseye}}%
+					\settodepth\depthbullseye{\hbox{\dstrutarrowbullseye}}%
 				}%
 				{%auto without depth
-					\settototalheight\totheightarrowbullseye{\hbox{\calcheightofchars}}%
+					\settototalheight\totheightarrowbullseye{\hbox{\strutarrowbullseye}}%
 				}%
 		}%
 		{%
@@ -308,7 +321,9 @@
 	barcolor=\def\pictobatteryfillcolor{#1},%
 	height=\def\pictobatteryheight{#1},%
 	scale=\def\pictobatteryscale{#1},%
-	innermargin=\def\pictobatterystretch{#1}
+	innermargin=\def\pictobatterystretch{#1},%
+	strut=\def\pictobatterystrut{#1},%
+	dstrut=\def\pictobatterydstrut{#1}
 }
 \setKVdefault[pictobattery]{%
 	maincolor={},%
@@ -317,7 +332,9 @@
 	flip=false,%
 	scale=1,%
 	innermargin=0.03,%
-	shaded=false
+	shaded=false,%
+	strut=\samplestrutletters,%
+	dstrut=\sampledstrutletters
 }
 
 \NewDocumentCommand\pictobattery{O{}D<>{}m}{%(OK)
@@ -336,8 +353,8 @@
 			\xdef\pictobatterynblevels{3}%
 		}%
 	\IfStrEqCase{\pictobatteryheight}{%
-		{dauto}{\settototalheight\tmpheightofcharstkzbattery{qH}\settodepth\tmpdepthofcharstkzbattery{qH}}%
-		{auto}{\settototalheight\tmpheightofcharstkzbattery{H}\settodepth\tmpdepthofcharstkzbattery{H}}%
+		{dauto}{\settototalheight\tmpheightofcharstkzbattery{\pictobatterydstrut}\settodepth\tmpdepthofcharstkzbattery{\pictobatterydstrut}}%
+		{auto}{\settototalheight\tmpheightofcharstkzbattery{\pictobatterystrut}\settodepth\tmpdepthofcharstkzbattery{\pictobatterystrut}}%
 	}[%
 		\setlength\tmpheightofcharstkzbattery{\pictobatteryheight}%
 	]%
@@ -482,12 +499,16 @@
 \defKV[pictowifi]{%
 	height=\def\pictowifiheight{#1},%
 	colors=\def\pictowificolors{#1},%
-	style=\def\pictowifistyle{#1}
+	style=\def\pictowifistyle{#1},%
+	strut=\def\pictowifistrut{#1},%
+	dstrut=\def\pictowifidstrut{#1}
 }
 \setKVdefault[pictowifi]{%
 	height=dauto,%
 	colors={black/lightgray},%
-	style=full
+	style=full,%
+	strut=\samplestrutletters,%
+	dstrut=\sampledstrutletters
 }
 
 \NewDocumentCommand\intpictonetwork{}{%
@@ -591,15 +612,15 @@
 		{%
 			\IfStrEq{\pictowifiheight}{dauto}%
 				{%
-					\settototalheight\pictowifitotheight{\hbox{qH}}%
+					\settototalheight\pictowifitotheight{\hbox{\pictowifidstrut}}%
 					\setlength\pictowifitotheight{0.95\pictowifitotheight}%
-					\settodepth\pictowifidepth{\hbox{qH}}%
+					\settodepth\pictowifidepth{\hbox{\pictowifidstrut}}%
 				}{}%
 			\IfStrEq{\pictowifiheight}{auto}%
 				{%
-					\settototalheight\pictowifitotheight{\hbox{H}}%
+					\settototalheight\pictowifitotheight{\hbox{\pictowifistrut}}%
 					\setlength\pictowifitotheight{0.95\pictowifitotheight}%
-					\settodepth\pictowifidepth{\hbox{H}}%
+					\settodepth\pictowifidepth{\hbox{\pictowifistrut}}%
 				}{}%
 		}%
 		{%
@@ -648,13 +669,13 @@
 		{%
 			\IfStrEq{\pictowifiheight}{dauto}%
 				{%
-					\settototalheight\pictowifitotheight{\hbox{qH}}%
-					\settodepth\pictowifidepth{\hbox{qH}}%
+					\settototalheight\pictowifitotheight{\hbox{\pictowifidstrut}}%
+					\settodepth\pictowifidepth{\hbox{\pictowifidstrut}}%
 				}{}%
 			\IfStrEq{\pictowifiheight}{auto}%
 				{%
-					\settototalheight\pictowifitotheight{\hbox{H}}%
-					\settodepth\pictowifidepth{\hbox{H}}%
+					\settototalheight\pictowifitotheight{\hbox{\pictowifistrut}}%
+					\settodepth\pictowifidepth{\hbox{\pictowifistrut}}%
 				}{}%
 		}%
 		{%
@@ -678,8 +699,8 @@
 }
 
 %====PICTO SKILLS
-\def\samplecapletters{AZERTYUIOSDFHKLMWXCVBN}
-\def\sampledptletters{qypqg}
+% \def\samplecapletters{AZERTYUIOSDFHKLMWXCVBN}
+% \def\sampledptletters{qypqg}
 
 \definecolor{skillgreen}{RGB}{118, 201, 39}
 \definecolor{skillorange}{RGB}{255, 153, 0}
@@ -693,14 +714,18 @@
 	height=\def\pictoskillh{#1},%
 	hoffset=\def\pictoskilloffset{#1},%
 	voffset=\def\pictoskillvoffset{#1},%
-	opacity=\def\pictoskillopacity{#1}
+	opacity=\def\pictoskillopacity{#1},%
+	strut=\def\pictoskillstrut{#1},%
+	dstrut=\def\pictoskilldstrut{#1}
 }
 \setKVdefault[pictoskill]{%
 	colors=gray/lightgray,%
 	height=dauto,%
 	hoffset=0.175,%
 	voffset=0.6,%
-	opacity=0.5
+	opacity=0.5,%
+	strut=\samplestrutletters,%
+	dstrut=\sampledstrutletters
 }
 
 \NewDocumentCommand\pictoskills{O{}D<>{}m}{%(OK)
@@ -726,15 +751,15 @@
 	\IfStrEqCase{\pictoskillh}{%
 		{auto}%
 		{%
-			\settototalheight{\pictoskillheight}{\hbox{\samplecapletters}}%
-			\settodepth{\pictoskilldepth}{\hbox{\samplecapletters}}%
+			\settototalheight{\pictoskillheight}{\hbox{\pictoskillstrut}}%
+			\settodepth{\pictoskilldepth}{\hbox{\pictoskillstrut}}%
 			%classic tikzpicture
 			\begin{tikzpicture}[x=1.125\pictoskillheight,y=0.975\pictoskillheight,#2]
 		}%
 		{dauto}%
 		{%
-			\settototalheight{\pictoskillheight}{\hbox{\sampledptletters\samplecapletters}}%
-			\settodepth{\pictoskilldepth}{\hbox{\sampledptletters}}%
+			\settototalheight{\pictoskillheight}{\hbox{\pictoskilldstrut}}%
+			\settodepth{\pictoskilldepth}{\hbox{\pictoskilldstrut}}%
 			%raised tikzpicture
 			\begin{tikzpicture}[x=1.125\pictoskillheight,y=0.975\pictoskillheight,baseline=0.975\pictoskilldepth,#2]
 		}%
@@ -775,14 +800,18 @@
 	colors=\def\pictopillcolors{#1},%
 	offset=\def\pictopilloffset{#1},%
 	height=\def\pictopilltypeheight{#1},%
-	scale=\def\pictopillscale{#1}
+	scale=\def\pictopillscale{#1},%
+	strut=\def\pictopillstrut{#1},%
+	dstrut=\def\pictopilldstrut{#1}
 }
 
 \setKVdefault[pictopill]{%
 	colors={black/lightgray},%
 	offset=0.1,%
 	height=dauto,%
-	scale=0.9
+	scale=0.9,%
+	strut=\samplestrutletters,%
+	dstrut=\sampledstrutletters
 }
 
 \NewDocumentCommand\pictopillint{}{%
@@ -847,12 +876,12 @@
 		{%
 			\IfStrEq{\pictopilltypeheight}{auto}%
 				{%
-					\settototalheight{\pictopillheight}{\hbox{HLM}}%
+					\settototalheight{\pictopillheight}{\hbox{\pictopillstrut}}%
 				}{}%
 			\IfStrEq{\pictopilltypeheight}{dauto}%
 				{%
-					\settototalheight{\pictopillheight}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
-					\settodepth{\pictopilldepth}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+					\settototalheight{\pictopillheight}{\hbox{\pictopilldstrut}}%
+					\settodepth{\pictopilldepth}{\hbox{\pictopilldstrut}}%
 				}{}%
 		}%
 		{%
@@ -879,7 +908,9 @@
 	maincolor=\def\pictotrafficcolor{#1},%
 	listcolors=\def\pictotrafficcolors{#1},%
 	height=\def\pictotraffictypeheight{#1},%
-	scale=\def\pictotrafficscale{#1}
+	scale=\def\pictotrafficscale{#1},%
+	strut=\def\pictotrafficstrut{#1},%
+	dstrut=\def\pictotrafficdstrut{#1}
 }
 
 \setKVdefault[pictotraffic]{%
@@ -887,7 +918,9 @@
 	listcolors={red,yellow!75!orange,green!50!black},%
 	height=dauto,%
 	scale=1,%
-	borders=false
+	borders=false,%
+	strut=\samplestrutletters,%
+	dstrut=\sampledstrutletters
 }
 %rayon = 0.76/6 = 0,125
 
@@ -961,12 +994,12 @@
 		{%
 			\IfStrEq{\pictotraffictypeheight}{auto}%
 				{%
-					\settototalheight{\pictotrafficheight}{\hbox{H}}%
+					\settototalheight{\pictotrafficheight}{\hbox{\pictotrafficstrut}}%
 				}{}%
 			\IfStrEq{\pictotraffictypeheight}{dauto}%
 				{%
-					\settototalheight{\pictotrafficheight}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
-					\settodepth{\pictotrafficdepth}{\hbox{azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN}}%
+					\settototalheight{\pictotrafficheight}{\hbox{\pictotrafficdstrut}}%
+					\settodepth{\pictotrafficdepth}{\hbox{\pictotrafficdstrut}}%
 				}{}%
 		}%
 		{%
@@ -993,13 +1026,17 @@
 	color=\def\minictikzcalendarcol{#1},%
 	height=\def\minictikzcalendarheight{#1},%
 	monthcolor=\def\minictikzcalendarcolmois{#1},%
-	daycolor=\def\minictikzcalendarcoljour{#1}
+	daycolor=\def\minictikzcalendarcoljour{#1},%
+	strut=\def\minictikzcalendarstrut{#1},%
+	dstrut=\def\minictikzcalendardstrut{#1}
 }
 \setKVdefault[minictikzcalendar]{%
 	color=black,%
 	height=dauto,%
 	monthcolor=white,%
-	daycolor=black
+	daycolor=black,%
+	strut=\samplestrutletters,%
+	dstrut=\sampledstrutletters
 }
 
 \tikzset{minicalmonth/.style={font=\sffamily\bfseries,\minictikzcalendarcolmois}}
@@ -1012,13 +1049,13 @@
 	\IfStrEqCase{\minictikzcalendarheight}{%
 		{auto}%
 		{%
-			\settototalheight\tmptotalheightcurrenttext{\hbox{M}}%
+			\settototalheight\tmptotalheightcurrenttext{\hbox{\minictikzcalendarstrut}}%
 			\tikzset{minicaldepth/.style={x=0.975\tmptotalheightcurrenttext,y=0.975\tmptotalheightcurrenttext}}%
 		}%
 		{dauto}%
 		{%
-			\settototalheight\tmptotalheightcurrenttext{\hbox{qM}}%
-			\settodepth\tmpdepthcurrenttext{\hbox{qM}}%
+			\settototalheight\tmptotalheightcurrenttext{\hbox{\minictikzcalendardstrut}}%
+			\settodepth\tmpdepthcurrenttext{\hbox{\minictikzcalendardstrut}}%
 			\tikzset{minicaldepth/.style={x=0.925\tmptotalheightcurrenttext,y=0.925\tmptotalheightcurrenttext,baseline=0.8125\tmpdepthcurrenttext}}%
 		}%
 	}[%
@@ -1041,7 +1078,9 @@
 	eyecolor=\def\tkzclippyeyecolor{#1},%
 	style=\def\tkzclippyeyestyle{#1},%
 	rotate=\def\tkzclippyerotate{#1},%
-	ratio=\def\tkzclippyeratio{#1}
+	ratio=\def\tkzclippyeratio{#1},%
+	strut=\def\tkzclippystrut{#1},%
+	dstrut=\def\tkzclippydstrut{#1}
 }
 \setKVdefault[tkzclippy]{%
 	height=dauto,
@@ -1049,7 +1088,9 @@
 	eyecolor=black,%
 	style=normal,%
 	rotate=0,%
-	ratio=0.225
+	ratio=0.225,%
+	strut=\samplestrutletters,%
+	dstrut=\sampledstrutletters
 }
 
 \newlength\clippyunit
@@ -1081,12 +1122,12 @@
 		{%
 			\IfStrEq{\tkzclippyunit}{auto}%
 				{%
-					\settototalheight\clippyunit{\hbox{B}}%
+					\settototalheight\clippyunit{\hbox{\tkzclippystrut}}%
 					\setlength\clippydepthunit{-0.015\clippyunit}%
 				}%
 				{%
-					\settototalheight\clippyunit{\hbox{qB}}%
-					\settodepth\clippydepthunit{\hbox{qB}}%
+					\settototalheight\clippyunit{\hbox{\tkzclippydstrut}}%
+					\settodepth\clippydepthunit{\hbox{\tkzclippydstrut}}%
 				}%
 		}%
 		{%
@@ -1105,6 +1146,168 @@
 			{surprised}{\intclippyeyebrow{0.875}{0.875}{0.875}{0.875}{bend right=45}{bend left=45}}%
 			{confused}{\intclippyeyebrow{0.875}{0.875}{0.875}{0.875}{bend right=45}{bend right=22.5}}%
 		}%
+	\end{tikzpicture}%
+}
+
+%====DBALLS
+\defKV[pictodball]{height=\def\pictodballheight{#1},strut=\def\pictodballstrut{#1},dstrut=\def\pictodballdstrut{#1},maincolor=\colorlet{maindball}{#1},starcolor=\colorlet{stardball}{#1}}
+\setKVdefault[pictodball]{height=dauto,dstrut=\sampledstrutletters,strut=\samplestrutletters,bw=false,maincolor=orange,starcolor=purple!75!red}
+
+\newlength\dragonb@total@height
+\newlength\dragonb@depth
+\def\dballbigradius{0.12}
+\def\dballsmallradius{0.05}
+\tikzstyle{scorestars}=[star,star points=5,star point ratio=2.25]%
+\colorlet{maindball}{orange}
+\colorlet{stardball}{purple!50!red}
+
+\newcommand\intdballstar[2][18]{%1 = rotate, %2=pos
+	\begin{scope}[shift={#2},rotate=#1]
+	\draw[dball stars] 
+		(0:\dballbigradius\dragonb@total@height) -- 
+		(36:\dballsmallradius\dragonb@total@height) -- 
+		(72:\dballbigradius\dragonb@total@height) -- 
+		(108:\dballsmallradius\dragonb@total@height) -- 
+		(144:\dballbigradius\dragonb@total@height) -- 
+		(180:\dballsmallradius\dragonb@total@height) -- 
+		(216:\dballbigradius\dragonb@total@height) -- 
+		(252:\dballsmallradius\dragonb@total@height) -- 
+		(288:\dballbigradius\dragonb@total@height) -- 
+		(324:\dballsmallradius\dragonb@total@height) -- 
+		cycle;
+	\end{scope}
+}
+
+\NewDocumentCommand\pictodball{ O{} D<>{} m }{%
+	\restoreKV[pictodball]%
+	\setKV[pictodball]{#1}%
+	\if\relax\detokenize{#3}\relax%
+		\def\dballnbstars{0}%
+	\else%
+		\def\dballnbstars{#3}%
+	\fi%
+	\IfStrEqCase{\pictodballheight}{%
+		{dauto}%
+			{%
+				\settototalheight\dragonb@total@height{\hbox{\pictodballdstrut}}%
+				\settodepth\dragonb@depth{\hbox{\pictodballdstrut}}%
+				\begin{tikzpicture}[baseline=-0.5\dragonb@total@height+\dragonb@depth,x=\dragonb@total@height,y=\dragonb@total@height,line width=0.03\dragonb@total@height,#2]
+			}%
+		{auto}%
+			{%
+				\settototalheight\dragonb@total@height{\hbox{\pictodballstrut}}%
+				\settodepth\dragonb@depth{\hbox{\pictodballstrut}}%
+				\begin{tikzpicture}[baseline=-0.5\dragonb@total@height+\dragonb@depth,x=\dragonb@total@height,y=\dragonb@total@height,line width=0.03\dragonb@total@height,#2]
+			}%
+	}[%
+		\setlength\dragonb@total@height{\pictodballheight}%
+		\begin{tikzpicture}[x=\dragonb@total@height,y=\dragonb@total@height,line width=0.03\dragonb@total@height,#2]
+	]%
+		%styles
+		\ifboolKV[pictodball]{bw}%
+			{%
+				\tikzset{dball background/.style={lightgray!15}}
+				\tikzset{dball dark background/.style={gray!50}}
+				%\tikzset{dball stars/.style={line width=0.005\dragonb@total@height,fill=darkgray!50!black,draw=darkgray!25!black,rounded corners=0.01\dragonb@total@height}}
+				\tikzset{dball stars/.style={fill=darkgray!50!black,draw=none,rounded corners=0.02\dragonb@total@height}}
+				\tikzset{dball shadow/.style={lightgray!37!white}}
+				\tikzset{dball border/.style={black}}
+			}%
+			{%
+				\tikzset{dball background/.style={maindball!75}}
+				\tikzset{dball dark background/.style={maindball!75!gray}}
+				\tikzset{dball stars/.style={fill=stardball!88,draw=none,rounded corners=0.02\dragonb@total@height}}
+				%\tikzset{dball stars/.style={line width=0.005\dragonb@total@height,fill=stardball!88,draw=stardball,rounded corners=0.01\dragonb@total@height}}
+				\tikzset{dball shadow/.style={lightgray!37!white}}
+				\tikzset{dball border/.style={maindball!10!black}}
+			}%
+		%beginball
+		\fill[dball dark background] (0,0) circle[radius=0.5\dragonb@total@height] ;
+		\begin{scope}
+			\clip (0,0) circle[radius=0.5\dragonb@total@height] ;
+			\fill[dball background] (-0.2\dragonb@total@height,0.125\dragonb@total@height) circle[radius=0.55\dragonb@total@height] ;
+		\end{scope}
+		\fill[dball shadow,rotate=20] (0,0.375\dragonb@total@height) circle[x radius=0.15\dragonb@total@height,y radius=0.075\dragonb@total@height] ;
+		\fill[dball shadow,rotate=105] (0,0.425\dragonb@total@height) circle[x radius=0.10\dragonb@total@height,y radius=0.025\dragonb@total@height] ;
+		\draw[dball border] (0,0) circle[radius=0.485\dragonb@total@height] ;
+		%endball
+		%beginstars
+		\ifnum\dballnbstars=1
+			\intdballstar{(0,0)}
+		\fi
+		\ifnum\dballnbstars=2
+			\intdballstar{(135:0.15\dragonb@total@height)}
+			\intdballstar{(-45:0.15\dragonb@total@height)}
+		\fi
+		\ifnum\dballnbstars=3
+			\intdballstar{(90:0.175\dragonb@total@height)}
+			\intdballstar{(-30:0.175\dragonb@total@height)}
+			\intdballstar{(-150:0.175\dragonb@total@height)}
+		\fi
+		\ifnum\dballnbstars=4
+			\intdballstar{(45:0.175\dragonb@total@height)}
+			\intdballstar{(-45:0.2\dragonb@total@height)}
+			\intdballstar{(-135:0.175\dragonb@total@height)}
+			\intdballstar{(135:0.2\dragonb@total@height)}
+		\fi
+		\ifnum\dballnbstars=5
+			\intdballstar{(10:0.25\dragonb@total@height)}
+			\intdballstar{(82:0.25\dragonb@total@height)}
+			\intdballstar{(154:0.25\dragonb@total@height)}
+			\intdballstar{(226:0.25\dragonb@total@height)}
+			\intdballstar{(298:0.25\dragonb@total@height)}
+		\fi
+		\ifnum\dballnbstars=6
+			\intdballstar{(0,0)}
+			\intdballstar{(10:0.25\dragonb@total@height)}
+			\intdballstar{(82:0.25\dragonb@total@height)}
+			\intdballstar{(154:0.25\dragonb@total@height)}
+			\intdballstar{(226:0.25\dragonb@total@height)}
+			\intdballstar{(298:0.25\dragonb@total@height)}
+		\fi
+		\ifnum\dballnbstars=7
+			\intdballstar{(0,0)}
+			\intdballstar{(0:0.25\dragonb@total@height)}
+			\intdballstar{(60:0.25\dragonb@total@height)}
+			\intdballstar{(120:0.25\dragonb@total@height)}
+			\intdballstar{(180:0.25\dragonb@total@height)}
+			\intdballstar{(240:0.25\dragonb@total@height)}
+			\intdballstar{(300:0.25\dragonb@total@height)}
+		\fi
+		\ifnum\dballnbstars=8
+			\intdballstar{(0,0)}
+			\intdballstar{({0*360/7}:0.275\dragonb@total@height)}
+			\intdballstar{({1*360/7}:0.275\dragonb@total@height)}
+			\intdballstar{({2*360/7}:0.275\dragonb@total@height)}
+			\intdballstar{({3*360/7}:0.275\dragonb@total@height)}
+			\intdballstar{({4*360/7}:0.275\dragonb@total@height)}
+			\intdballstar{({5*360/7}:0.275\dragonb@total@height)}
+			\intdballstar{({6*360/7}:0.275\dragonb@total@height)}
+		\fi
+		\ifnum\dballnbstars=9
+			\intdballstar{(0,0)}
+			\intdballstar{({0*360/8}:0.29\dragonb@total@height)}
+			\intdballstar{({1*360/8}:0.29\dragonb@total@height)}
+			\intdballstar{({2*360/8}:0.29\dragonb@total@height)}
+			\intdballstar{({3*360/8}:0.29\dragonb@total@height)}
+			\intdballstar{({4*360/8}:0.29\dragonb@total@height)}
+			\intdballstar{({5*360/8}:0.29\dragonb@total@height)}
+			\intdballstar{({6*360/8}:0.29\dragonb@total@height)}
+			\intdballstar{({7*360/8}:0.29\dragonb@total@height)}
+		\fi
+		\ifnum\dballnbstars=10
+			\intdballstar{(0,0)}
+			\intdballstar{({0*360/9}:0.31\dragonb@total@height)}
+			\intdballstar{({1*360/9}:0.31\dragonb@total@height)}
+			\intdballstar{({2*360/9}:0.31\dragonb@total@height)}
+			\intdballstar{({3*360/9}:0.31\dragonb@total@height)}
+			\intdballstar{({4*360/9}:0.31\dragonb@total@height)}
+			\intdballstar{({5*360/9}:0.31\dragonb@total@height)}
+			\intdballstar{({6*360/9}:0.31\dragonb@total@height)}
+			\intdballstar{({7*360/9}:0.31\dragonb@total@height)}
+			\intdballstar{({8*360/9}:0.31\dragonb@total@height)}
+		\fi
+		%endstars
 	\end{tikzpicture}%
 }
 
@@ -1157,6 +1360,270 @@
 		\StrBehind{#3}{=}[\tmpargggggclippy]%
 		\pictoclippy[#1,style=\tmpargggggclippy]<#2>%
 	}{}%
+	\IfSubStr{#3}{dball}{%
+		\StrBehind{#3}{=}[\tmpargggggdball]%
+		\pictodball[#1]<#2>{\tmpargggggdball}%
+	}{}%
+}
+
+%====DIFFICULTY LEVELS
+\newlength\difficultylevelsoffset
+
+\setKVdefault[difficultylevels]{opacity=0.4,hoffset=0.05em,swap=false,size={}}
+\defKV[difficultylevels]{hoffset=\setlength\difficultylevelsoffset{#1},opacity=\def\difficultylevelsopacity{#1},size=\def\difficultylevelssize{#1}}
+
+\NewDocumentCommand\difficultylevels{ O{} m m }{%normal version
+	%#1 = keys
+	%#2 = symbol
+	%#3 = levels
+	\restoreKV[difficultylevels]%
+	\setKV[difficultylevels]{#1}%
+	\IfSubStr{#3}{/}{\StrCut{#3}{/}{\tmpdifflevelsnb}{\tmpdifflevelstot}}{\def\tmpdifflevelsnb{#3}\def\tmpdifflevelstot{4}}%
+	{\difficultylevelssize%
+	\ifboolKV[difficultylevels]{swap}%
+		{%
+			\xintifboolexpr{\tmpdifflevelsnb != \tmpdifflevelstot}%
+			{%mix of
+				\xintFor* ##1 in {\xintSeq{1}{\tmpdifflevelstot-\tmpdifflevelsnb}}\do{%
+					#2\hspace*{\difficultylevelsoffset}%
+				}%
+			}{}%
+			\xintFor* ##1 in {\xintSeq{1}{\tmpdifflevelsnb}}\do{%
+				\xintifForLast{{\tikz[baseline=(ZZZ.base)] \node[opacity=\difficultylevelsopacity,inner sep=0pt] (ZZZ) {#2} ;}\relax}{{\tikz[baseline=(ZZZ.base)] \node[opacity=\difficultylevelsopacity,inner sep=0pt] (ZZZ) {#2} ;}\hspace*{\difficultylevelsoffset}}%
+			}%
+		}%
+		{%
+			\xintifboolexpr{\tmpdifflevelsnb != \tmpdifflevelstot}%
+			{%mix of
+				\xintFor* ##1 in {\xintSeq{1}{\tmpdifflevelstot-\tmpdifflevelsnb}}\do{%
+					{\tikz[baseline=(ZZZ.base)] \node[opacity=\difficultylevelsopacity,inner sep=0pt] (ZZZ) {#2} ;}%
+					\hspace*{\difficultylevelsoffset}%
+				}%
+			}{}%
+			\xintFor* ##1 in {\xintSeq{1}{\tmpdifflevelsnb}}\do{%
+				\xintifForLast{#2\relax}{#2\hspace*{\difficultylevelsoffset}}%
+			}%
+		}%
+	}%
+}
+
+\NewDocumentCommand\twdifficultylevels{ O{} m m }{%special version with twemoji
+	\difficultylevels[#1]{\texttwemoji{#2}}{#3}%
+}
+
+%====RADARDBALLS
+\defKV[pictoradardball]{height=\def\pictoradardballheight{#1},strut=\def\pictoradardballstrut{#1},dstrut=\def\pictoradardballdstrut{#1},bgcolor=\colorlet{mainradardball}{#1},markcolor=\colorlet{mainradardballmark}{#1},ballcolor=\colorlet{mainradardballmarkball}{#1}}
+\setKVdefault[pictoradardball]{height=dauto,dstrut=\sampledstrutletters,strut=\samplestrutletters,bw=false}
+
+\colorlet{mainradardball}{green!75!black}
+\colorlet{mainradardballmark}{red!90!black}
+\colorlet{mainradardballmarkball}{yellow!75!orange}
+
+\newlength\dragonbradar@total@height
+\newlength\dragonbradar@depth
+
+\NewDocumentCommand\pictoradardball{ O{} D<>{} m }{%
+	%3=list of balls
+	\restoreKV[pictoradardball]%
+	\setKV[pictoradardball]{#1}%
+	\ifboolKV[pictoradardball]{bw}%
+		{%
+			\colorlet{mainradardball}{white}%
+			\colorlet{mainradardballmark}{darkgray}%
+			\colorlet{mainradardballmarkball}{gray}%
+		}{}%
+	\IfStrEqCase{\pictoradardballheight}{%
+		{dauto}%
+		{%
+			\settototalheight\dragonbradar@total@height{\hbox{\pictoradardballdstrut}}%
+			\settodepth\dragonbradar@depth{\hbox{\pictoradardballdstrut}}%
+			\begin{tikzpicture}[baseline=-0.4\dragonbradar@total@height+\dragonbradar@depth,x=\dragonbradar@total@height,y=\dragonbradar@total@height,line join=round,scale=0.9852,#2]
+		}%
+		{auto}%
+		{%
+			\settototalheight\dragonbradar@total@height{\hbox{\pictoradardballstrut}}%
+			\settodepth\dragonbradar@depth{\hbox{\pictoradardballstrut}}%
+			\begin{tikzpicture}[baseline=-0.4\dragonbradar@total@height+\dragonbradar@depth,x=\dragonbradar@total@height,y=\dragonbradar@total@height,line join=round,scale=0.9852,#2]
+			}%
+		}[%
+			\setlength\dragonbradar@total@height{\pictoradardballheight}%
+			\begin{tikzpicture}[x=\dragonbradar@total@height,y=\dragonbradar@total@height,line join=round,scale=0.9852,#2]
+		]%
+		\draw[line width=0.015\dragonbradar@total@height,fill=lightgray!75] (70:0.4\dragonbradar@total@height)--(0.12\dragonbradar@total@height,0.45\dragonbradar@total@height) -- (-0.12\dragonbradar@total@height,0.45\dragonbradar@total@height)--(110:0.4\dragonbradar@total@height)--cycle;
+		\draw[line width=0.015\dragonbradar@total@height,fill=darkgray!66] (0,0) circle[radius=0.4\dragonbradar@total@height] ;
+		\begin{scope}
+			\clip (0,0) circle[radius=0.4\dragonbradar@total@height] ;
+			\fill[fill=lightgray!75] (-0.175\dragonbradar@total@height,0.125\dragonbradar@total@height) circle[radius=0.45\dragonbradar@total@height] ;
+		\end{scope}
+		\draw[line width=0.015\dragonbradar@total@height,fill=mainradardball!50!black] (0,0) circle[radius=0.3\dragonbradar@total@height] ;
+		\begin{scope}%bg normal
+			\clip (0,0) circle[radius=0.3\dragonbradar@total@height] ;
+			\fill[fill=mainradardball] (-0.175\dragonbradar@total@height,0.125\dragonbradar@total@height) circle[radius=0.45\dragonbradar@total@height] ;
+		\end{scope}
+		\draw[line width=0.015\dragonbradar@total@height] (0,0) circle[radius=0.3\dragonbradar@total@height] ;
+		\draw[line width=0.015\dragonbradar@total@height] (0,0) circle[radius=0.4\dragonbradar@total@height] ;
+		\draw[line width=0.0075\dragonbradar@total@height] (0,0) circle[radius=0.33\dragonbradar@total@height] ;
+		\begin{scope}
+			\clip (0,0) circle[radius=0.3\dragonbradar@total@height] ;
+			\draw[line width=0.005\dragonbradar@total@height,xstep=0.075\dragonbradar@total@height,ystep=0.075\dragonbradar@total@height] (-0.5\dragonbradar@total@height,-0.5\dragonbradar@total@height) grid (0.5\dragonbradar@total@height,0.5\dragonbradar@total@height) ;
+		\end{scope}
+		\draw[line width=0.015\dragonbradar@total@height,fill=lightgray!75] (0.1\dragonbradar@total@height,0.45\dragonbradar@total@height) rectangle (-0.1\dragonbradar@total@height,0.48\dragonbradar@total@height) ;
+		\draw[line width=0.015\dragonbradar@total@height,fill=lightgray!75] (0,0.48\dragonbradar@total@height)--(0.12\dragonbradar@total@height,0.48\dragonbradar@total@height) arc (0:180:0.12\dragonbradar@total@height) --cycle;
+		\begin{scope}[shift={(-0.033\dragonbradar@total@height,-0.0125\dragonbradar@total@height)}]
+			\fill[mainradardballmark] (0,0)--(60:0.066\dragonbradar@total@height)--(0:0.066\dragonbradar@total@height)--cycle ;
+		\end{scope} ;
+		%shadows
+		\fill[white,rotate=20] (0,0.3625\dragonbradar@total@height) circle[x radius=0.075\dragonbradar@total@height,y radius=0.0225\dragonbradar@total@height] ;
+		\fill[white,rotate=105] (0,0.3625\dragonbradar@total@height) circle[x radius=0.05\dragonbradar@total@height,y radius=0.02\dragonbradar@total@height] ;
+		\fill[white,rotate=8] (0,0.52\dragonbradar@total@height) circle[x radius=0.0175\dragonbradar@total@height,y radius=0.015\dragonbradar@total@height] ;
+		\fill[white,rotate=13] (0,0.43\dragonbradar@total@height) circle[x radius=0.0125\dragonbradar@total@height,y radius=0.0075\dragonbradar@total@height] ;
+		%mark(s)
+		\if\relax\detokenize{#3}\relax%
+		\else%
+			\begin{scope}
+				\clip (0,0) circle[radius=0.3\dragonbradar@total@height] ;
+				\foreach \x/\y in {#3} {%
+					\xdef\xx{\fpeval{0.075*(\x)}}%
+					\xdef\yy{\fpeval{0.075*(\y)}}%
+					\xintifboolexpr{ ((\xx)+0.175)^2 + ((\yy)-0.125)^2 > 0.43^2 }%
+						{%
+							%zone ombrée
+							\fill[mainradardballmarkball!50!mainradardball!50!black] ({\xx\dragonbradar@total@height},{\yy\dragonbradar@total@height}) circle[radius=0.02\dragonbradar@total@height] ;
+							\begin{scope}
+								\clip (-0.175\dragonbradar@total@height,0.125\dragonbradar@total@height) circle[radius=0.45\dragonbradar@total@height] ;
+								\fill[mainradardballmarkball] ({\xx\dragonbradar@total@height},{\yy\dragonbradar@total@height}) circle[radius=0.02\dragonbradar@total@height] ;
+							\end{scope}
+						}%
+						{%
+							%zone non ombrée
+							\fill[mainradardballmarkball] ({\xx\dragonbradar@total@height},{\yy\dragonbradar@total@height}) circle[radius=0.02\dragonbradar@total@height] ;
+						}%
+				}
+			\end{scope}
+		\fi%
+	\end{tikzpicture}%
+}
+
+%==STAMP
+\def\samplesstrutstamp{qÉ}
+
+\newsavebox\tmpmystampbox
+\newlength\radius@stamp@approved
+\newlength\width@text@vstretch@stamp@approved
+\setlength\radius@stamp@approved{2cm}
+\colorlet{stampcolor}{black}
+
+\defKV[pictostamp]{%
+	radius=\setlength\radius@stamp@approved{#1},%
+	color=\colorlet{stampcolor}{#1},%
+	rotate=\def\rotation@stamp@approved{#1},%
+	font=\def\font@stamp@approved{#1},%
+	strut=\def\strut@stamp@approved{#1}
+}
+\setKVdefault[pictostamp]{%
+	radius=2cm,%
+	color=black,%
+	rotate=20,%
+	font=\bfseries\sffamily,%
+	starsfilled=false,%
+	strut=\samplesstrutstamp,%
+	alt=false
+}
+
+\tikzstyle{stampstars}=[star,star points=5,star point ratio=2.25]%
+
+\newcommand\intstampstar[4][0]{%1 = rotate, %2=pos, %3 = big radius, %4 = small radius
+	\begin{scope}[shift={#2},rotate=#1]
+		\draw[stamp stars] 
+		(0:#3\radius@stamp@approved) -- 
+		(36:#4\radius@stamp@approved) -- 
+		(72:#3\radius@stamp@approved) -- 
+		(108:#4\radius@stamp@approved) -- 
+		(144:#3\radius@stamp@approved) -- 
+		(180:#4\radius@stamp@approved) -- 
+		(216:#3\radius@stamp@approved) -- 
+		(252:#4\radius@stamp@approved) -- 
+		(288:#3\radius@stamp@approved) -- 
+		(324:#4\radius@stamp@approved) -- 
+		cycle;
+	\end{scope}
+}
+
+\newcommand\inttamponapprouve{%
+	\tikzset{stamp line thick/.style={line width=0.05\radius@stamp@approved}}
+	\tikzset{stamp rounded thick/.style={rounded corners=0.15\radius@stamp@approved}}
+	\tikzset{stamp line thin/.style={line width=0.02\radius@stamp@approved}}
+	\tikzset{stamp rounded thin/.style={rounded corners=0.1\radius@stamp@approved}}
+	\ifboolKV[pictostamp]{starsfilled}%
+		{%
+			\tikzset{stamp stars/.style={stampstars,rounded corners=0.02\radius@stamp@approved,line width=0.02\radius@stamp@approved,fill,fill opacity=0.667}}
+		}%
+		{%
+			\tikzset{stamp stars/.style={stampstars,rounded corners=0.02\radius@stamp@approved,line width=0.02\radius@stamp@approved}}
+		}%
+	%big border
+	\draw[stamp line thick] (25:0.975\radius@stamp@approved) arc(25:155:0.975\radius@stamp@approved) ;
+	\draw[stamp line thick] (-25:0.975\radius@stamp@approved) arc(-25:-155:0.975\radius@stamp@approved) ;
+	%small border
+	\draw[stamp line thin] (27:0.875\radius@stamp@approved) arc(27:153:0.875\radius@stamp@approved) ;
+	\draw[stamp line thin] (-27:0.875\radius@stamp@approved) arc(-27:-153:0.875\radius@stamp@approved) ;
+	%big rectangle
+	\draw[stamp line thick,stamp rounded thick] (0.95\radius@stamp@approved,-0.3\radius@stamp@approved) -| (1.2\radius@stamp@approved,0.3\radius@stamp@approved) -| (-1.2\radius@stamp@approved,-0.3\radius@stamp@approved) -- (0.66\radius@stamp@approved,-0.3\radius@stamp@approved);
+	\draw[stamp line thick] (0.75\radius@stamp@approved,-0.3\radius@stamp@approved)--++(0.075\radius@stamp@approved,0) ;
+	%small rectangle
+	\ifboolKV[pictostamp]{alt}%
+		{%
+			\draw[stamp line thin,stamp rounded thin,fill,fill opacity=0.9] (1.125\radius@stamp@approved,0.225\radius@stamp@approved) rectangle (-1.125\radius@stamp@approved,-0.225\radius@stamp@approved) ;
+			\tikzset{stamp txt/.style={text=white}}%
+		}%
+		{%
+			\draw[stamp line thin,stamp rounded thin] (1.125\radius@stamp@approved,0.225\radius@stamp@approved) rectangle (-1.125\radius@stamp@approved,-0.225\radius@stamp@approved) ;
+			\tikzset{stamp txt/.style={}}%
+		}%
+	%up stars
+	\intstampstar[18]{(0,0.6\radius@stamp@approved)}{0.15}{0.06}
+	\intstampstar[18]{(0.2\radius@stamp@approved,0.575\radius@stamp@approved)}{0.12}{0.05}
+	\intstampstar[18]{(-0.2\radius@stamp@approved,0.575\radius@stamp@approved)}{0.12}{0.05}
+	%down stars
+	\intstampstar[54]{(0,-0.6\radius@stamp@approved)}{0.15}{0.06}
+	\intstampstar[54]{(0.2\radius@stamp@approved,-0.575\radius@stamp@approved)}{0.12}{0.05}
+	\intstampstar[54]{(-0.2\radius@stamp@approved,-0.575\radius@stamp@approved)}{0.12}{0.05}
+	%text, max width =  1.95\radius@stamp@approved / max height = 0.375\radius@stamp@approved
+	\begin{scope}
+		\clip (1.125\radius@stamp@approved,0.225\radius@stamp@approved) rectangle (-1.125\radius@stamp@approved,-0.225\radius@stamp@approved) ;
+		\ifthenelse{\width@text@vstretch@stamp@approved < \dimexpr2.05\radius@stamp@approved\relax}%
+		{%
+			\draw (0,0) node[inner sep=0pt,stamp txt] {\resizebox*{!}{0.375\radius@stamp@approved}{\font@stamp@approved\vphantom{\strut@stamp@approved}\texte@stamp@approved}} ;
+		}%
+		{%
+			\draw (0,0) node[inner sep=0pt,stamp txt] {\resizebox*{2.05\radius@stamp@approved}{!}{\font@stamp@approved\vphantom{\strut@stamp@approved}\texte@stamp@approved}} ;
+		}%
+	\end{scope}
+}
+
+\NewDocumentCommand\pictostamp{ s O{} D<>{} m }{%
+	\restoreKV[pictostamp]%
+	\setKV[pictostamp]{#2}%
+	\if\relax\detokenize{#4}\relax%
+		\def\texte@stamp@approved{APPROVED}%
+	\else%
+		\def\texte@stamp@approved{#4}%
+	\fi%
+	%scaling work
+	\savebox{\tmpmystampbox}{\resizebox*{!}{0.375\radius@stamp@approved}{\font@stamp@approved\vphantom{\strut@stamp@approved}\texte@stamp@approved}}%
+	\settowidth\width@text@vstretch@stamp@approved{\usebox{\tmpmystampbox}}%
+	%normal or absolute position
+	\IfBooleanTF{#1}%
+		{%
+			\begin{tikzpicture}[line cap=round,overlay,remember picture,shift={#3},stampcolor,rotate=\rotation@stamp@approved,transform shape]%
+				\inttamponapprouve
+			\end{tikzpicture}%
+		}%
+		{%
+			\begin{tikzpicture}[line cap=round,#3,stampcolor,rotate=\rotation@stamp@approved,transform shape]%
+				\inttamponapprouve
+			\end{tikzpicture}%
+		}%
 }
 
 \endinput

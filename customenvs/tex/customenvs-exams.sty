@@ -1,0 +1,464 @@
+% Author..........: C. Pierquet
+% licence.........: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{customenvs-exams}[2025/07/06 0.1.0 customenvs for exam documents]
+
+%====HISTORY
+% v 0.1.0	Initial version subpackage (exam) of customenvs
+
+%====PACKAGES
+\RequirePackage{tcolorbox}
+\RequirePackage{varwidth}
+\RequirePackage{xintexpr}
+\RequirePackage{tabularray}
+\RequirePackage{calc}
+\RequirePackage{pgf}
+\RequirePackage{simplekv}
+\RequirePackage{xstring}
+\RequirePackage{listofitems}
+\RequirePackage{randomlist}
+\tcbuselibrary{skins,breakable}
+
+%====INT MACRO
+\newlength\cetmpheigheststring
+\newlength\cetmpheigheststringelt
+\newsavebox{\my@cetmp@height@box}
+
+\NewDocumentCommand\cegetheigheststring{ s O{\cetmpheigheststring} m }{%
+	\ifdeflength{#2}{}{\newlength#2}%
+	\setlength#2{0pt}%
+	\IfBooleanTF{#1}%
+		{%
+			\xintFor* ##1 in {\xintCSVtoList{#3}}\do{%
+				\savebox{\my@cetmp@height@box}{##1}%
+				\settoheight{\cetmpheigheststringelt}{\usebox{\my@cetmp@height@box}}%
+				\pgfmathsetlength{\global#2}{max(#2,\cetmpheigheststringelt)}%
+			}%
+		}%
+		{%
+			\xintFor* ##1 in {\xintCSVtoList{#3}}\do{%
+				\savebox{\my@cetmp@height@box}{##1}%
+				\settototalheight{\cetmpheigheststringelt}{\usebox{\my@cetmp@height@box}}%
+				\pgfmathsetlength{\global#2}{max(#2,\cetmpheigheststringelt)}%
+			}%
+		}%
+}
+
+%====EXAM QCM
+\NewList{TmpListereponsesexamqcm}
+\def\ReponsesExamQCMbox{\raisebox{-0.2ex}{\faSquare[regular]}}
+
+\defKV[reponsesexamqcm]{%
+	NbCols=\def\RepExamQCMNbCol{#1},%
+	PoliceLabels=\def\RepExamQCMFonte{#1},%
+	EspacesCL=\def\RepExamQCMOffset{#1},%
+	Labels=\def\RepExamQCMTypeLabel{#1},%
+	EspaceLabels=\def\RepExamQCMSpace{#1},%
+	Largeur=\def\RepExamQCMLarg{#1}
+}
+
+\setKVdefault[reponsesexamqcm]{%
+	EspacesCL={6pt/2pt},%
+	NbCols=4,%
+	Filets=false,%
+	PoliceLabels={\bfseries},%
+	Labels={a.},%
+	EspaceLabels=\kern5pt,%
+	Swap=false,%
+	Largeur=0.99\linewidth,%
+	Melange=false,%
+	HtAuto=false
+}
+
+\NewDocumentCommand\QCMExamFormatteLabel{ m m }{%1=typelabel,%3=caractère
+	\IfSubStr{#1}{a}%
+		{%
+			{\RepExamQCMFonte\StrSubstitute{#1}{a}{#2}}%
+		}%
+		{}%
+	\IfSubStr{#1}{A}%
+		{%
+			{\RepExamQCMFonte\StrSubstitute{#1}{A}{#2}}%
+		}%
+		{}%
+	\IfSubStr{#1}{1}%
+		{%
+			{\RepExamQCMFonte\StrSubstitute{#1}{1}{#2}}%
+		}%
+		{}%
+}
+
+\NewDocumentCommand\ExamReponsesQCM{ O{} m D<>{} }{%1=nbcol,2=listeréponses,3=options tblr
+	\restoreKV[reponsesexamqcm]%
+	\setKV[reponsesexamqcm]{#1}%
+	\IfSubStr{\RepExamQCMOffset}{/}%
+		{\StrCut{\RepExamQCMOffset}{/}{\RepExamQCMOffsetCol}{\RepExamQCMOffsetLgn}}%
+		{\def\RepExamQCMOffsetCol{\RepExamQCMOffset}\def\RepExamQCMOffsetLgn{\RepExamQCMOffset}}%
+	\setsepchar{,}%
+	\readlist*\ExamQCMListereponses{#2}%
+	\def\ExamQCMNbRep{\ExamQCMListereponseslen}%
+	%les items créés
+	\IfStrEq{\RepExamQCMTypeLabel}{box}%
+		{%
+			\def\RepExamQCMLabelA{\ReponsesExamQCMbox\RepExamQCMSpace}%
+			\def\RepExamQCMLabelB{\ReponsesExamQCMbox\RepExamQCMSpace}%
+			\def\RepExamQCMLabelC{\ReponsesExamQCMbox\RepExamQCMSpace}%
+			\def\RepExamQCMLabelD{\ReponsesExamQCMbox\RepExamQCMSpace}%
+		}%
+		{%
+			\IfSubStr{\RepExamQCMTypeLabel}{a}%
+				{%
+					\def\RepExamQCMLabelA{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{a}\RepExamQCMSpace}%
+					\def\RepExamQCMLabelB{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{b}\RepExamQCMSpace}%
+					\def\RepExamQCMLabelC{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{c}\RepExamQCMSpace}%
+					\def\RepExamQCMLabelD{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{d}\RepExamQCMSpace}%
+				}{}%
+			\IfSubStr{\RepExamQCMTypeLabel}{A}%
+				{%
+					\def\RepExamQCMLabelA{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{A}\RepExamQCMSpace}%
+					\def\RepExamQCMLabelB{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{B}\RepExamQCMSpace}%
+					\def\RepExamQCMLabelC{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{C}\RepExamQCMSpace}%
+					\def\RepExamQCMLabelD{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{D}\RepExamQCMSpace}%
+				}{}%
+			\IfSubStr{\RepExamQCMTypeLabel}{1}%
+				{%
+					\def\RepExamQCMLabelA{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{1}\RepExamQCMSpace}%
+					\def\RepExamQCMLabelB{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{2}\RepExamQCMSpace}%
+					\def\RepExamQCMLabelC{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{3}\RepExamQCMSpace}%
+					\def\RepExamQCMLabelD{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{4}\RepExamQCMSpace}%
+				}{}%
+			\IfStrEq{\RepExamQCMTypeLabel}{null}%
+				{%
+					\def\RepExamQCMLabelA{}%
+					\def\RepExamQCMLabelB{}%
+					\def\RepExamQCMLabelC{}%
+					\def\RepExamQCMLabelD{}%
+				}%
+				{}%
+		}%
+	%en fonction du nb de colonnes et du shuffle
+	\ifboolKV[reponsesexamqcm]{Melange}%
+		{%
+			\ClearList{TmpListereponsesexamqcm}%
+			\IfEq{\ExamQCMNbRep}{2}%2réponses
+				{%
+					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[1]}%
+					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[2]}%
+					\ifboolKV[reponsesexamqcm]{Filets}%
+						{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+						{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+						\RepExamQCMLabelA\TmpListereponsesexamqcm[0] & \RepExamQCMLabelB\TmpListereponsesexamqcm[1] \\
+					\end{tblr}%
+				}%
+				{}%
+			\IfEq{\ExamQCMNbRep}{3}%3réponses
+				{%
+					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[1]}%
+					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[2]}%
+					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[3]}%
+					\ifboolKV[reponsesexamqcm]{Filets}%
+						{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
+						{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
+						\RepExamQCMLabelA\TmpListereponsesexamqcm[0] & \RepExamQCMLabelB\TmpListereponsesexamqcm[1] & \RepExamQCMLabelC\TmpListereponsesexamqcm[2] \\
+					\end{tblr}%
+				}%
+				{}%
+			\IfEq{\ExamQCMNbRep}{4}%4réponses
+				{%
+					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[1]}%
+					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[2]}%
+					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[3]}%
+					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[4]}%
+					\IfEq{\RepExamQCMNbCol}{4}%4colonnes
+						{%
+							\ifboolKV[reponsesexamqcm]{Filets}%
+								{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
+								{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
+									\RepExamQCMLabelA\TmpListereponsesexamqcm[0] & \RepExamQCMLabelB\TmpListereponsesexamqcm[1] & \RepExamQCMLabelC\TmpListereponsesexamqcm[2] & \RepExamQCMLabelD\TmpListereponsesexamqcm[3] \\
+							\end{tblr}%
+						}%
+						{}
+					\IfEq{\RepExamQCMNbCol}{2}%2colonnes%
+						{%
+							\ifboolKV[reponsesexamqcm]{HtAuto}%
+								{%
+									\cegetheigheststring{#2}%
+									\ifboolKV[reponsesexamqcm]{Filets}%
+										{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
+										{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
+											\RepExamQCMLabelA\TmpListereponsesexamqcm[0] & \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\TmpListereponsesexamqcm[1]}{\RepExamQCMLabelC\TmpListereponsesexamqcm[1]} \\
+											\ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\TmpListereponsesexamqcm[2]}{\RepExamQCMLabelB\TmpListereponsesexamqcm[2]} & \RepExamQCMLabelD\TmpListereponsesexamqcm[3] \\
+									\end{tblr}%
+								}%
+								{%
+									\ifboolKV[reponsesexamqcm]{Filets}%
+										{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+										{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+											\RepExamQCMLabelA\TmpListereponsesexamqcm[0] & \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\TmpListereponsesexamqcm[1]}{\RepExamQCMLabelC\TmpListereponsesexamqcm[1]} \\
+											\ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\TmpListereponsesexamqcm[2]}{\RepExamQCMLabelB\TmpListereponsesexamqcm[2]} & \RepExamQCMLabelD\TmpListereponsesexamqcm[3] \\
+									\end{tblr}%
+								}%
+						}%
+						{}%
+					\IfEq{\RepExamQCMNbCol}{1}%1colonne%
+						{%
+							%test hauteur
+							\ifboolKV[reponsesexamqcm]{HtAuto}%
+								{%
+									\cegetheigheststring{#2}%
+									\ifboolKV[reponsesexamqcm]{Filets}%
+									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
+									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
+										\RepExamQCMLabelA\TmpListereponsesexamqcm[0] \\ \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\TmpListereponsesexamqcm[1]}{\RepExamQCMLabelC\TmpListereponsesexamqcm[1]} \\
+										\ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\TmpListereponsesexamqcm[2]}{\RepExamQCMLabelB\TmpListereponsesexamqcm[2]} \\ \RepExamQCMLabelD\TmpListereponsesexamqcm[3] \\
+									\end{tblr}%
+								}%
+								{%
+									\ifboolKV[reponsesexamqcm]{Filets}%
+									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},#3}}%
+									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},#3}}%
+										\RepExamQCMLabelA\TmpListereponsesexamqcm[0] \\ \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\TmpListereponsesexamqcm[1]}{\RepExamQCMLabelC\TmpListereponsesexamqcm[1]} \\
+										\ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\TmpListereponsesexamqcm[2]}{\RepExamQCMLabelB\TmpListereponsesexamqcm[2]} \\ \RepExamQCMLabelD\TmpListereponsesexamqcm[3] \\
+									\end{tblr}%
+								}%
+							%fin test hauteur
+						}%
+						{}%
+				}%
+				{}%
+		}%
+		{%
+			\IfEq{\ExamQCMNbRep}{2}%2réponses
+				{%
+					\ifboolKV[reponsesexamqcm]{Filets}%
+						{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+						{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+							\RepExamQCMLabelA\ExamQCMListereponses[1] & \RepExamQCMLabelB\ExamQCMListereponses[2] \\
+					\end{tblr}%
+				}%
+				{}%
+			\IfEq{\ExamQCMNbRep}{3}%3réponses
+				{%
+					\ifboolKV[reponsesexamqcm]{Filets}%
+						{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
+						{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
+							\RepExamQCMLabelA\ExamQCMListereponses[1] & \RepExamQCMLabelB\ExamQCMListereponses[2] & \RepExamQCMLabelC\ExamQCMListereponses[3] \\
+					\end{tblr}%
+				}%
+				{}%
+			\IfEq{\ExamQCMNbRep}{4}%4réponses
+				{%
+					\IfEq{\RepExamQCMNbCol}{4}%4colonnes
+						{%
+							\ifboolKV[reponsesexamqcm]{Filets}%
+								{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
+								{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
+									\RepExamQCMLabelA\ExamQCMListereponses[1] & \RepExamQCMLabelB\ExamQCMListereponses[2] & \RepExamQCMLabelC\ExamQCMListereponses[3] & \RepExamQCMLabelD\ExamQCMListereponses[4] \\
+							\end{tblr}%
+						}%
+						{}%
+					\IfEq{\RepExamQCMNbCol}{2}%2colonnes
+						{%
+							\ifboolKV[reponsesexamqcm]{HtAuto}%
+								{%
+									\cegetheigheststring{#2}%
+									\ifboolKV[reponsesexamqcm]{Filets}%
+										{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
+										{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
+											\RepExamQCMLabelA\ExamQCMListereponses[1] & \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\ExamQCMListereponses[2]}{\RepExamQCMLabelC\ExamQCMListereponses[3]} \\
+											\ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\ExamQCMListereponses[3]}{\RepExamQCMLabelB\ExamQCMListereponses[2]} & \RepExamQCMLabelD\ExamQCMListereponses[4] \\
+									\end{tblr}%
+								}%
+								{%
+									\ifboolKV[reponsesexamqcm]{Filets}%
+										{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+										{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+											\RepExamQCMLabelA\ExamQCMListereponses[1] & \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\ExamQCMListereponses[2]}{\RepExamQCMLabelC\ExamQCMListereponses[3]} \\
+											\ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\ExamQCMListereponses[3]}{\RepExamQCMLabelB\ExamQCMListereponses[2]} & \RepExamQCMLabelD\ExamQCMListereponses[4] \\
+									\end{tblr}%
+								}%
+						}%
+						{}%
+					\IfEq{\RepExamQCMNbCol}{1}%1colonne
+						{%
+							%test hauteur
+							\ifboolKV[reponsesexamqcm]{HtAuto}%
+								{%
+									\cegetheigheststring{#2}%
+									\ifboolKV[reponsesexamqcm]{Filets}%
+									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
+									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
+										\RepExamQCMLabelA\ExamQCMListereponses[1] \\ \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\ExamQCMListereponses[2]}{\RepExamQCMLabelC\ExamQCMListereponses[3]} \\
+										\ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\ExamQCMListereponses[3]}{\RepExamQCMLabelB\ExamQCMListereponses[2]} \\ \RepExamQCMLabelD\ExamQCMListereponses[4] \\
+									\end{tblr}%
+								}%
+								{%
+									\ifboolKV[reponsesexamqcm]{Filets}%
+									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},#3}}%
+									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},#3}}%
+										\RepExamQCMLabelA\ExamQCMListereponses[1] \\ \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\ExamQCMListereponses[2]}{\RepExamQCMLabelC\ExamQCMListereponses[3]} \\
+										\ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\ExamQCMListereponses[3]}{\RepExamQCMLabelB\ExamQCMListereponses[2]} \\ \RepExamQCMLabelD\ExamQCMListereponses[4] \\
+									\end{tblr}%
+								}%
+							%fin test hauteur
+						}%
+						{}%
+				}%
+				{}%
+		}%
+}
+
+%====EXAM CONFIG
+\@ifpackageloaded{amssymb}%
+	{%
+		\newcommand\examdecoexo{\scalebox{0.66}[1]{$\blacktriangleright$}~}%
+		\newcommand\examdecoquest{\scalebox{0.66}[1]{$\blacktriangleright$}~}%
+	}%
+	{%
+		\newcommand\examdecoexo{\textbullet~}%
+		\newcommand\examdecoquest{\textbullet~}%
+	}%
+\newcommand\ExamTitreExo[2]{%
+	\textbf{\large\examdecoexo\underline{Exercice #1}~(#2 points)}%
+}
+\newcommand\ExamLabelAutomat[1]{%
+	\textbf{\examdecoquest\underline{Question #1}}%
+}
+
+%====EXAM EXO
+\NewDocumentEnvironment{ExamAutomatQuest}{ O{} m }%
+{%
+	\tcolorbox[boxrule=1pt,left=2.5mm,right=2.5mm,colframe=darkgray,colback=white,sharp corners=downhill,#1]
+	\ExamLabelAutomat{#2}
+	
+	\smallskip
+}%
+{%
+	\endtcolorbox%
+}
+
+\NewDocumentEnvironment{ExamExercice}{ O{} m m }%
+{%
+	\tcolorbox[boxrule=1pt,left=2.5mm,right=2.5mm,colframe=darkgray,colback=white,sharp corners=downhill,#1]
+	\ExamTitreExo{#2}{#3}
+	
+	\medskip
+}%
+{%
+	\endtcolorbox%
+}
+
+%====EAM
+\NewDocumentCommand\QuestionAutomatismesFichier{ m O{} O{} m D<>{} }{%
+	\input{#4.tex}
+	%1=nb
+	%2=options env
+	%3=options réponses
+	%4=fichier
+	\begin{ExamAutomatQuest}[#2]{#1}
+		\AutomatEnonce
+		
+		\ExamReponsesQCM[#3]%
+		{%
+			\AutomatReponses
+		}%
+		<#5>%
+	\end{ExamAutomatQuest}%
+}
+
+\NewDocumentCommand\QuestionAutomatismes{ m O{} m O{} m D<>{}}{%
+	%1=nb
+	%2=options env
+	%3=énoncé
+	%4=clés réponses
+	%5=options tblr réponses
+	%6=réponses
+	\begin{ExamAutomatQuest}[#2]{#1}
+	#3
+	
+	\medskip
+	
+	\ExamReponsesQCM[#4]
+	{%
+		#5
+	}%
+	<#6>%
+	\end{ExamAutomatQuest}%
+}
+
+%====EXAM BOX TITLE(s)
+\NewDocumentCommand\LetPhantomBox{}{%
+	\vphantom{(ÉAZERTYUIOPQSDFGHJKLMWXCVBN,éàço)}%
+}
+
+\tcbset{StyleTitreSujet/.style={%
+	enhanced,size=small,
+	colback=white!5,boxrule=1.25pt,
+	attach boxed title to top left={xshift=0.5cm,yshift=1mm-\tcboxedtitleheight},
+	varwidth boxed title*=-3cm,
+	boxed title style={frame code={
+			\path[fill=tcbcolframe!50!black]
+			([yshift=-1mm,xshift=-1mm]frame.north west)
+			arc[start angle=0,end angle=180,radius=1mm]
+			([yshift=-1mm,xshift=1mm]frame.north east)
+			arc[start angle=180,end angle=0,radius=1mm];
+			\path[fill=tcbcolframe] ([xshift=-2mm]frame.north west) -- ([xshift=2mm]frame.north east) [rounded corners=1mm]-- ([xshift=1mm,yshift=-1mm]frame.north east) -- (frame.south east) -- (frame.south west) -- ([xshift=-1mm,yshift=-1mm]frame.north west) [sharp corners]-- cycle;
+		},interior engine=empty,size=fbox,
+	},
+	fonttitle=\bfseries\sffamily,
+	fontupper=\huge\bfseries\sffamily,
+	}
+}
+
+\defKV[tcbtitresujet]{%
+	AlignH=\def\tcbtitresujethalign{#1}
+}
+
+\setKVdefault[tcbtitresujet]{%
+	Couleur=black,
+	AlignH=center
+}
+
+\NewDocumentEnvironment{TitreSujet}{ O{} D<>{} m }%
+{%
+	\restoreKV[tcbtitresujet]%
+	\setKV[tcbtitresujet]{#1}%
+	\IfStrEqCase{\tcbtitresujethalign}{%
+		{right}{\tcbset{StyleTitreSujetAlign/.style={halign=flush right}}}%
+		{left}{\tcbset{StyleTitreSujetAlign/.style={halign=flush left}}}%
+	}[\tcbset{StyleTitreSujetAlign/.style={halign=flush center}}]%
+	\tcolorbox[colupper={\useKV[tcbtitresujet]{Couleur}},colframe={\useKV[tcbtitresujet]{Couleur}},StyleTitreSujet,StyleTitreSujetAlign,title={\vphantom{QJ}#3},before upper=\LetPhantomBox,after upper=\LetPhantomBox,#2]%
+}%
+{%
+	\endtcolorbox%
+}
+
+\tcbset{StyleTitreSujetSousEpreuve/.style={%
+		center,after skip=1pt,size=small,boxsep=3pt,boxrule=1pt,colback=white,left=2pt,right=2pt,%
+		sharp corners,rounded corners=downhill,arc=8pt,
+		fontupper={\sffamily\bfseries\large}
+	}
+}
+
+\NewDocumentCommand\SousTitreSujetEpreuve{ O{black} m }{%
+	\tcbset{StyleTitreSujetSousEpreuveCouleur/.style={colframe=#1,colupper=#1}}
+	\IfStrEqCase{#2}{%
+		{U21}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\:\:,after upper=\:\:\faProjDiag]{Épreuve E2 - Mathématiques pour l'Informatique}}%
+		{U2}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\:\:,after upper=\:\:\faProjDiag]{Épreuve E2 - Mathématiques pour l'Informatique}}%
+		{U2CG}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\:\:,after upper=\:\:\faProjDiag]{Épreuve E2 - Mathématiques appliquées}}%
+		{U3}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\:\:,after upper=\:\:\faProjDiag]{Épreuve E3 - Mathématiques pour l'Informatique}}%
+		{UF2}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faDice\:\:,after upper=\:\:\faChartLine]{Épreuve EF2 - Mathématiques Approfondies}}%
+		{U41OL}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faDice\:\:,after upper=\:\:\faBezierCurve]{Épreuve U41 - Mathématiques}}}%
+		[{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur]{#2}}]%
+}
+
+\NewDocumentCommand\SujetTitreExo{ O{black} m }{%
+	\begingroup%
+	\tcolorbox[enhanced,width=\linewidth,size=small,colback=white,colframe=#1,boxrule=0.75pt,fontupper={\color{#1}\Large\sffamily\bfseries},sharp corners,rounded corners=south,arc=4pt,before upper=\LetPhantomBox]
+	#2
+	\endtcolorbox%
+	\endgroup%
+}
+
+\endinput

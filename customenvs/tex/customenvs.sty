@@ -3,9 +3,10 @@
 % source pencil...: CC-BY-SA 4.0 https://tex.stackexchange.com/questions/504092/replicating-a-fancy-bordered-text-style-in-latex/504145#504145
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{customenvs}[2025/06/23 0.40c Custom classic environments]
+\ProvidesPackage{customenvs}[2025/07/06 0.40d Custom classic environments]
 
 %====HISTORIQUE
+% v 0.40d	Sous-package customenvs-exams + picto 'dballs' + Amélioration de code (compatibilité twemojis) + Alt version Exercice + Strut for pictos
 % v 0.40c	Widest string of list
 % v 0.40b	Bugfix + pictocalendar
 % v 0.40a	Bugfix + pictotraffic
@@ -42,6 +43,9 @@
 \newif\if@enum\@enumtrue%
 \DeclareOption{nonenum}{\@enumfalse}%
 \DeclareOption{noenum}{\@enumfalse}%
+\newif\if@twemojis\@twemojistrue%
+\DeclareOption{nontwemojis}{\@twemojisfalse}%
+\DeclareOption{notwemojis}{\@twemojisfalse}%
 \newif\if@beamer\@beamerfalse%
 \DeclareOption{beamer}{\@beamertrue\@enumfalse}%
 \newif\if@tblr\@tblrtrue%
@@ -69,7 +73,8 @@
 \ProcessOptions\relax
 
 %====PACKAGES UTILES À CHARGER
-\RequirePackage{customenvs-tikzpictos}             %test
+\RequirePackage{customenvs-tikzpictos}             %test souspackage
+\RequirePackage{customenvs-exams}                  %test souspackage
 \if@xcolor
 	\RequirePackage{xcolor}
 \fi
@@ -109,6 +114,9 @@
 \if@enum
 	\RequirePackage{enumitem}
 \fi
+\if@twemojis
+	\RequirePackage{twemojis}
+\fi
 \if@tblr
 	\RequirePackage{tabularray}
 \fi
@@ -124,6 +132,7 @@
 \if@adjustbox
 	\RequirePackage{adjustbox}
 \fi
+\RequirePackage{inlinegraphicx}
 \RequirePackage{ifthen}
 \RequirePackage{calc}
 \RequirePackage{tikz}
@@ -132,6 +141,11 @@
 \RequirePackage{tcolorbox}
 \RequirePackage{varwidth}
 \tcbuselibrary{skins}
+
+%====MACRO TESTEMPTY expl3
+\ExplSyntaxOn
+\DeclareExpandableDocumentCommand\CustEnvsIfNoValueOrEmptyTF{mmm}{\IfNoValueTF{#1}{#2}{\tl_if_empty:nTF {#1} {#2} {#3}}}
+\ExplSyntaxOff
 
 %%----COMMANDES FR
 
@@ -149,7 +163,7 @@
 	PoliceLabels=\def\RepQCMFonte{#1},%
 	EspacesCL=\def\RepQCMOffset{#1},%
 	Labels=\def\RepQCMTypeLabel{#1},%
-	EspaceLabels=\xdef\RepQCMSpace{#1},%
+	EspaceLabels=\def\RepQCMSpace{#1},%
 	Largeur=\def\RepQCMLarg{#1}
 }
 
@@ -1017,7 +1031,8 @@
 	CouleurFondDeco=\colorlet{macouleurexodecofond}{#1},%
 	Police=\renewcommand\tmpstyleexo{#1},%
 	EpTrait=\setlength{\eptraitexo}{#1},%
-	EchelleEtoiles=\def\tmpscalestarsexos{#1}
+	EchelleEtoiles=\def\tmpscalestarsexos{#1},%
+	OptionsNiveaux=\setKVdefault[difficultylevels]{#1},%
 }
 
 \setKVdefault[globalstyleexo]{%
@@ -1027,7 +1042,8 @@
 	CouleurFondDeco={macouleurexodeco!50},%
 	Police={\bfseries\LARGE\sffamily},%
 	EpTrait={1.1pt},%
-	EchelleEtoiles=0.85
+	EchelleEtoiles=0.85,%
+	OptionsNiveaux={}
 }
 
 \NewDocumentCommand\StyleEnvtExo{ O{} }{%
@@ -1047,7 +1063,7 @@
 	Trait=\def\EnvtExoTrait{#1},%
 	Etoiles=\def\EnvtExoEtoiles{#1}
 }
-\setKVdefault[EnvtExercice]{
+\setKVdefault[EnvtExercice]{%
 	Type=Classique,%
 	ComplementTitre={},%
 	CodeDebut={},%
@@ -1058,7 +1074,240 @@
 	Etoiles={}
 }
 
-\NewDocumentEnvironment{EnvtExo}{ !O{} }%
+\tcbset{monstylexo/.style={%
+		enhanced,%
+		opacityfill=0,%
+		size=small,%
+		boxrule=0.35mm,%
+		titlerule=0.25mm,%
+		arc=2mm,%
+		sharp corners=uphill,%
+		nobeforeafter,%
+		before skip=0.5\baselineskip,%
+		after skip=0.5\baselineskip,%
+		colback=white,%
+		colbacktitle=white,%
+		coltitle=macouleurexo,%
+		colframe=macouleurexo,%
+		left=1.5mm,%
+		right=1.5mm,%
+		top=1mm,%
+		bottom=1mm,%
+		fonttitle=\tmpstyleexo
+	}%
+}
+
+\newlength\tmptitreexohauteurtotale
+\newlength\tmptitreexoprofondeur
+\newcounter{numeroexoalt}
+\setcounter{numeroexoalt}{0}
+
+\defKV[EnvtExerciceAlt]{%
+	Type=\def\EnvtExoAltType{#1},%
+	ComplementTitre=\def\EnvtExoAltCpltTitre{#1},%
+	CodeDebut=\def\EnvtExoAltCodeAvant{#1},%
+	EchelleImage=\def\EnvtExoAltScaleImg{#1},%
+	Decoration=\def\EnvtExoAltDeco{#1},%
+	Etoiles=\def\EnvtExoAltEtoiles{#1},%
+	Trait=\def\EnvtExoAltTrait{#1},%
+	Bordures=\def\EnvtExoAltBordures{#1}
+}
+\setKVdefault[EnvtExerciceAlt]{
+	Type=Classique,%
+	ComplementTitre={},%
+	CodeDebut={},%
+	EchelleImage=1.15,%
+	Compteur=true,%
+	Decoration={},%
+	Etoiles={},%
+	Breakable=false,%
+	Trait=non,%
+	Bordures=alt
+}
+
+\tcbuselibrary{breakable}%à voir...
+
+\NewDocumentEnvironment{EnvtExoAlt}{ !O{} }%
+{%
+	\useKVdefault[EnvtExerciceAlt]%
+	\setKV[EnvtExerciceAlt]{#1}%
+	\addtocounter{numeroexoalt}{1}%
+	\ifboolKV[EnvtExerciceAlt]{Compteur}{}{\addtocounter{numeroexoalt}{-1}}%
+	%hauteur du titre (pour les décos)
+	\settototalheight\tmptitreexohauteurtotale{\hbox{\tmpstyleexo()}}%
+	\settodepth\tmptitreexoprofondeur{\hbox{\tmpstyleexo(É)}}%
+	%styles
+	\tcbset{reset}%
+	\ifboolKV[EnvtExerciceAlt]{Breakable}%
+		{%
+			\tcbset{monstylebreakable/.style={breakable}}%
+		}%
+		{%
+			\tcbset{monstylebreakable/.style={}}%
+		}%
+	\IfStrEqCase{\EnvtExoAltBordures}{%
+		{normal}{\tcbset{monstylebordures/.style={}}}%
+		{aucune}{\tcbset{monstylebordures/.style={frame empty,left=0mm,right=0mm,boxsep=0mm,boxrule=0mm,top=2mm,before upper={\EnvtExoAltCodeAvant}}}}%
+		{alt}{\tcbset{monstylebordures/.style={frame empty,top=0mm,finish={\draw[line width=0.4mm,macouleurexo,|-|] ([xshift=0.5em-0.1mm]title.west) --++ (-0.5em-0.1mm,0) {[rounded corners=2mm]|- (frame.south east)} |- ([xshift=-0.5em+0.1mm]title.east) ;}}}}%
+		{fleche}{\tcbset{monstylebordures/.style={frame empty,top=0mm,righttitle=0mm,finish={\draw[line width=0.4mm,macouleurexo,->,>=latex] ([xshift=0.5em-0.1mm]title.west) --++ (-0.5em-0.1mm,0) {[rounded corners=2mm]|- (frame.south east)}  -- ($(frame.south east)!0.5!(frame.north east)$) ;}}}}%
+	}%
+	\tcbset{monstylexotitre/.style={
+			title={%
+				\vphantom{()}%
+				\IfStrEq{\EnvtExoAltType}{Classique}%
+					{%
+						\tmplabelexo%
+					}%
+					{%
+						\StrBehind{\EnvtExoAltType}{/}[\EnvtExoLabel]%
+						\EnvtExoLabel%
+					}%
+				\ifboolKV[EnvtExerciceAlt]{Compteur}{\thenumeroexoalt}{}\EnvtExoAltCpltTitre%
+				\IfStrEq{\EnvtExoAltEtoiles}{}{}%les étoiles au début...
+					{%
+						~(%
+						\IfSubStr{\EnvtExoAltEtoiles}{§}%
+							{%
+								\StrCut{\EnvtExoAltEtoiles}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+								\pictostars[colors=macouleurexodeco/macouleurexodecofond]{\EnvtExoStarNb/\EnvtExoStarTot}%
+							}%
+							{%
+								\pictostars[colors=macouleurexodeco/macouleurexodecofond]{\EnvtExoStarNb}%
+							}%
+						)%
+					}%
+				%trait éventuel
+				\IfStrEqCase{\EnvtExoAltTrait}{%
+					{plein}{\,\hrulefill\,}%
+					{pointilles}{\,\dotfill\,}%
+					{dashilles}{\,\hdashrule{\fill}{\eptraitexo}{\eptraitexospace}\,}%
+					{non}{\hfill\,}%
+					{aucun}{}%
+				}%
+				\IfSubStr{\EnvtExoAltDeco}{Icone}%icone fa
+					{%
+						\StrBehind{\EnvtExoAltDeco}{/}[\EnvtExoIcon]%
+						\scalebox{0.85}[0.85]{\EnvtExoIcon}%
+					}{}%
+				\IfSubStr{\EnvtExoAltDeco}{Emoji}%emojo twemojis
+					{%
+						\StrBehind{\EnvtExoAltDeco}{/}[\EnvtExoEmoji]%
+						\raisebox{-\tmptitreexoprofondeur}{\twemoji[height=\tmptitreexohauteurtotale]{\EnvtExoEmoji}}%
+					}{}%
+				\IfSubStr{\EnvtExoAltDeco}{Ceinture}%
+					{%
+						\StrBehind{\EnvtExoAltDeco}{/}[\EnvtExoCouleur]%
+						\CeintureCouleur[Strut=()]{\EnvtExoCouleur}%
+					}{}%
+				\IfSubStr{\EnvtExoAltDeco}{Points}%
+					{%
+						\StrBehind{\EnvtExoAltDeco}{/}[\EnvtExoPts]%
+						\xintifboolexpr{ \EnvtExoPts <= 1 }{\def\pts{point}}{\def\pts{points}}%
+						(\StrSubstitute{\EnvtExoPts}{.}{{{,}}}\ \pts)%
+					}{}%
+				\IfSubStr{\EnvtExoAltDeco}{Image}%
+					{%
+						\StrBehind{\EnvtExoAltDeco}{/}[\EnvtExoImg]%
+						{\inlinegraphics[strut={()},scale=1.1]{\EnvtExoImg}}%
+					}{}%
+				\IfSubStr{\EnvtExoAltDeco}{faNiveaux}%à voir avec les options...
+					{%
+						\StrBehind{\EnvtExoAltDeco}{/}[\EnvtExoFaNiv]%
+						\StrCut{\EnvtExoFaNiv}{§}{\EnvtExoLevelIcon}{\EnvtExoLevelLvl}%
+						%\EnvtExoLevelIcon%
+						{\difficultylevels[\EnvtExoOptNiv]{\csname\EnvtExoLevelIcon\endcsname}{\EnvtExoLevelLvl}}%
+					}{}%
+				\IfSubStr{\EnvtExoAltDeco}{twNiveaux}%à voir avec les options
+					{%
+						\StrBehind[1]{\EnvtExoAltDeco}{/}[\EnvtExoTwNiv]%
+						\StrCut{\EnvtExoTwNiv}{§}{\EnvtExoLevelIcon}{\EnvtExoLevelLvl}%
+						{\twdifficultylevels[\EnvtExoOptNiv]{\EnvtExoLevelIcon}{\EnvtExoLevelLvl}}%
+					}{}%
+				\IfSubStr{\EnvtExoAltDeco}{Cible}%
+					{%
+						\IfSubStr{\EnvtExoAltDeco}{*}%
+							{%
+								\pictobullseye[dstrut=(),colors]%
+							}%
+							{%
+								\pictobullseye[dstrut=()]%
+							}%
+					}{}%
+				\IfSubStr{\EnvtExoAltDeco}{Chrono}%
+					{%
+						\StrBehind{\EnvtExoAltDeco}{/}[\EnvtExoChrono]%
+						\pictochrono[Color=macouleurexodeco,ColTime=macouleurexodecofond,Strut=()]{\EnvtExoChrono}%
+					}{}%
+				\IfSubStr{\EnvtExoAltDeco}{Speedo}%
+					{%
+						\StrBehind{\EnvtExoAltDeco}{/}[\EnvtExoLevel]%
+						\StrCut{\EnvtExoLevel}{§}{\EnvtExoLevelSk}{\EnvtExoLevelTo}%
+						\pictospeedometer[colors=macouleurexodeco,dstrut=qB]{\EnvtExoLevelSk/\EnvtExoLevelTo}%
+					}{}%
+				\IfSubStr{\EnvtExoAltDeco}{Perso}%
+					{%
+						\StrBehind{\EnvtExoAltDeco}{/}[\EnvtExoPerso]%
+						\EnvtExoPerso%
+					}{}%
+				\IfSubStr{\EnvtExoAltDeco}{Barres}%
+				{%
+					\StrBehind{\EnvtExoAltDeco}{/}[\EnvtExoIcon]%
+					\IfSubStr{\EnvtExoAltDeco}{*}%
+					{%
+						\IfStrEqCase{\EnvtExoIcon}{%
+							{V0}{\pictoskills[height=dauto,colors=skillgreen,dstrut=()]{0}}%
+							{V1}{\pictoskills[height=dauto,colors=skillgreen,dstrut=()]{1}}%
+							{V2}{\pictoskills[height=dauto,colors=skillgreen,dstrut=()]{2}}%
+							{V3}{\pictoskills[height=dauto,colors=skillgreen,dstrut=()]{3}}%
+							{O0}{\pictoskills[height=dauto,colors=skillorange,dstrut=()]{0}}%
+							{O1}{\pictoskills[height=dauto,colors=skillorange,dstrut=()]{1}}%
+							{O2}{\pictoskills[height=dauto,colors=skillorange,dstrut=()]{2}}%
+							{O3}{\pictoskills[height=dauto,colors=skillorange,dstrut=()]{3}}%
+							{R0}{\pictoskills[height=dauto,colors=skillred,dstrut=()]{0}}%
+							{R1}{\pictoskills[height=dauto,colors=skillred,dstrut=()]{1}}%
+							{R2}{\pictoskills[height=dauto,colors=skillred,dstrut=()]{2}}%
+							{R3}{\pictoskills[height=dauto,colors=skillred,dstrut=()]{3}}%
+						}%
+					}%
+					{%
+						\IfStrEqCase{\EnvtExoIcon}{%
+							{V0}{\pictoskills[height=auto,colors=skillgreen]{0}}%
+							{V1}{\pictoskills[height=auto,colors=skillgreen]{1}}%
+							{V2}{\pictoskills[height=auto,colors=skillgreen]{2}}%
+							{V3}{\pictoskills[height=auto,colors=skillgreen]{3}}%
+							{O0}{\pictoskills[height=auto,colors=skillorange]{0}}%
+							{O1}{\pictoskills[height=auto,colors=skillorange]{1}}%
+							{O2}{\pictoskills[height=auto,colors=skillorange]{2}}%
+							{O3}{\pictoskills[height=auto,colors=skillorange]{3}}%
+							{R0}{\pictoskills[height=auto,colors=skillred]{0}}%
+							{R1}{\pictoskills[height=auto,colors=skillred]{1}}%
+							{R2}{\pictoskills[height=auto,colors=skillred]{2}}%
+							{R3}{\pictoskills[height=auto,colors=skillred]{3}}%
+						}%
+					}%
+				}{}%
+				\IfSubStr{\EnvtExoAltDeco}{Etoiles}%
+				{%
+					\StrBehind{\EnvtExoAltDeco}{/}[\EnvtExoStars]%
+					\IfSubStr{\EnvtExoStars}{§}%
+					{%
+						\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+						\pictostars[colors=macouleurexodeco/macouleurexodecofond]{\EnvtExoStarNb/\EnvtExoStarTot}%
+					}%
+					{%
+						\pictostars[colors=macouleurexodeco/macouleurexodecofond]{\EnvtExoStars}%
+					}%
+				}{}%
+			}
+		}
+	}%
+	\noindent\tcolorbox[monstylexo,monstylexotitre,monstylebreakable,monstylebordures]
+}%
+{%
+	\endtcolorbox%
+}
+
+\NewDocumentEnvironment{EnvtExo}{ !O{} }%v2 simplifiée
 {%
 	\useKVdefault[EnvtExercice]%
 	\setKV[EnvtExercice]{#1}%
@@ -1066,273 +1315,154 @@
 	\ifboolKV[EnvtExercice]{Compteur}{}{\addtocounter{numeroexo}{-1}}%
 	\def\hrulefill{\leavevmode\leaders\hrule height \eptraitexo\hfill\kern\z@}%épaisseur
 	\noindent\begingroup\color{macouleurexo}%
-	\IfStrEq{\EnvtExoType}{Classique}%OK exo°____vide
+	%classique Exercice n°...
+	\IfStrEq{\EnvtExoType}{Classique}%OK
 		{%
-			%label avec numéro et complément
-			\tmpstyleexo\tmplabelexo\ifboolKV[EnvtExercice]{Compteur}{\thenumeroexo}{}\EnvtExoCpltTitre%
-			%étoiles eventuelles
-			\IfStrEq{\EnvtExoEtoiles}{}{}%
-				{%
-					\,(\IfSubStr{\EnvtExoEtoiles}{§}%
-						{%
-							\StrCut{\EnvtExoEtoiles}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
-							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
-						}%
-						{%
-							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoEtoiles}%
-						}%
-					)%
-				}%
-			%trait éventuel
-			\IfStrEqCase{\EnvtExoTrait}{%
-				{plein}{\,\hrulefill}%
-				{pointilles}{\,\dotfill}%
-				{dashilles}{\,\hdashrule{\fill}{\eptraitexo}{\eptraitexospace}}%
-				{non}{\hfill}%
-				{aucun}{~}%
-			}%
-			%décoration éventuelle
-			\IfSubStr{\EnvtExoDeco}{Icone}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
-					\,\textcolor{macouleurexodeco}{\scalebox{0.85}[0.85]{\EnvtExoIcon}}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Barres}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
-					\,%
-					\IfSubStr{\EnvtExoDeco}{*}%
-						{%
-							\IfStrEqCase{\EnvtExoIcon}{%
-								{V0}{\pictoskills[height=dauto,colors=skillgreen]{0}}%
-								{V1}{\pictoskills[height=dauto,colors=skillgreen]{1}}%
-								{V2}{\pictoskills[height=dauto,colors=skillgreen]{2}}%
-								{V3}{\pictoskills[height=dauto,colors=skillgreen]{3}}%
-								{O0}{\pictoskills[height=dauto,colors=skillorange]{0}}%
-								{O1}{\pictoskills[height=dauto,colors=skillorange]{1}}%
-								{O2}{\pictoskills[height=dauto,colors=skillorange]{2}}%
-								{O3}{\pictoskills[height=dauto,colors=skillorange]{3}}%
-								{R0}{\pictoskills[height=dauto,colors=skillred]{0}}%
-								{R1}{\pictoskills[height=dauto,colors=skillred]{1}}%
-								{R2}{\pictoskills[height=dauto,colors=skillred]{2}}%
-								{R3}{\pictoskills[height=dauto,colors=skillred]{3}}%
-							}%
-						}%
-						{%
-							\IfStrEqCase{\EnvtExoIcon}{%
-								{V0}{\pictoskills[height=auto,colors=skillgreen]{0}}%
-								{V1}{\pictoskills[height=auto,colors=skillgreen]{1}}%
-								{V2}{\pictoskills[height=auto,colors=skillgreen]{2}}%
-								{V3}{\pictoskills[height=auto,colors=skillgreen]{3}}%
-								{O0}{\pictoskills[height=auto,colors=skillorange]{0}}%
-								{O1}{\pictoskills[height=auto,colors=skillorange]{1}}%
-								{O2}{\pictoskills[height=auto,colors=skillorange]{2}}%
-								{O3}{\pictoskills[height=auto,colors=skillorange]{3}}%
-								{R0}{\pictoskills[height=auto,colors=skillred]{0}}%
-								{R1}{\pictoskills[height=auto,colors=skillred]{1}}%
-								{R2}{\pictoskills[height=auto,colors=skillred]{2}}%
-								{R3}{\pictoskills[height=auto,colors=skillred]{3}}%
-							}%
-						}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Ceinture}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoCouleur]%
-					\,\CeintureCouleur{\EnvtExoCouleur}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Cible}%
-				{%
-					\IfSubStr{\EnvtExoDeco}{*}%
-						{%
-							\,\tkzBullsEyeArrow[colors]%
-						}%
-						{%
-							\,\tkzBullsEyeArrow%
-						}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Chrono}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoChrono]%
-					\,\pictochrono[ColTime=macouleurexodeco!50]{\EnvtExoChrono}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Perso}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPerso]%
-					\,\EnvtExoPerso%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Points}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPts]%
-					\xintifboolexpr{ \EnvtExoPts <= 1 }{\def\pts{point}}{\def\pts{points}}%
-					\,\textcolor{macouleurexodeco}{(\StrSubstitute{\EnvtExoPts}{.}{{{,}}}\ \pts)}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Image}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoImg]%
-					\settototalheight{\tmp@image@hauteur@totale}{\hbox{\tmpstyleexo qB}}%
-					\,$\vcenter{\hbox{\includegraphics[height=\EnvtExoScaleImg\tmp@image@hauteur@totale]{\EnvtExoImg}}}$%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Speedo}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoLevel]%
-					\StrCut{\EnvtExoLevel}{§}{\EnvtExoLevelSk}{\EnvtExoLevelTo}%
-					\,\MiniCompteurNiveaux[Couleurs=macouleurexodeco,Marqueur=\EnvtExoLevelSk]{\EnvtExoLevelTo}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{faEtoiles}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
-					\IfSubStr{\EnvtExoStars}{§}%
-						{%
-							\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
-							\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos[\EnvtExoStarTot]{\EnvtExoStarNb}}}%
-						}%
-						{%
-							\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos{\EnvtExoStars}}}%
-						}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{tkzEtoiles}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
-					\IfSubStr{\EnvtExoStars}{§}%
-						{%
-							\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
-							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
-						}%
-						{%
-							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoStars}%
-						}%
-				}{}%
+			\tmpstyleexo\tmplabelexo%
 		}{}%
 	\IfSubStr{\EnvtExoType}{Perso}%OK perso____déco
 		{%
 			\StrBehind{\EnvtExoType}{/}[\EnvtExoLabel]%
-			%label avec numéro et complément
-			\tmpstyleexo\EnvtExoLabel\ifboolKV[EnvtExercice]{Compteur}{\thenumeroexo}{}\EnvtExoCpltTitre%
-			%étoiles eventuelles
-			\IfStrEq{\EnvtExoEtoiles}{}{}%
+			\tmpstyleexo\EnvtExoLabel%
+		}{}%
+	%numéro
+	\ifboolKV[EnvtExercice]{Compteur}{\thenumeroexo}{}\EnvtExoCpltTitre%
+	%étoiles au début
+	\IfStrEq{\EnvtExoEtoiles}{}{}%
+		{%
+			\,(\IfSubStr{\EnvtExoEtoiles}{§}%
 				{%
-					\,(\IfSubStr{\EnvtExoEtoiles}{§}%
-						{%
-							\StrCut{\EnvtExoEtoiles}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
-							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
-						}%
-						{%
-							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoEtoiles}%
-						}%
-					)%
+					\StrCut{\EnvtExoEtoiles}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+					\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
 				}%
-			%trait éventuel
-			\IfStrEqCase{\EnvtExoTrait}{%
-				{plein}{\,\hrulefill}%
-				{pointilles}{\,\dotfill}%
-				{dashilles}{\,\hdashrule{\fill}{\eptraitexo}{\eptraitexospace}}%
-				{non}{\hfill}%
-			}%
-			%décoration éventuelle
-			\IfSubStr{\EnvtExoDeco}{Icone}%
 				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
-					\,\textcolor{macouleurexodeco}{\scalebox{0.85}[0.85]{\EnvtExoIcon}}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Barres}%
+					\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoEtoiles}%
+				}%
+			)%
+		}%
+	%trait éventuel
+	\IfStrEqCase{\EnvtExoTrait}{%
+		{plein}{\,\hrulefill}%
+		{pointilles}{\,\dotfill}%
+		{dashilles}{\,\hdashrule{\fill}{\eptraitexo}{\eptraitexospace}}%
+		{non}{\hfill}%
+		{aucun}{~}%
+		}%
+	%décorations éventuelles
+	\IfSubStr{\EnvtExoDeco}{Icone}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
+			\,\textcolor{macouleurexodeco}{\scalebox{0.85}[0.85]{\EnvtExoIcon}}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Emoji}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoEmoji]%
+			\,\texttwemoji{\EnvtExoEmoji}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Barres}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
+			\,%
+			\IfSubStr{\EnvtExoDeco}{*}%
 				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
-					\,%
-					\IfSubStr{\EnvtExoDeco}{*}%
-						{%
-							\IfStrEqCase{\EnvtExoIcon}{%
-								{V0}{\pictoskills[height=dauto,colors=skillgreen]{0}}%
-								{V1}{\pictoskills[height=dauto,colors=skillgreen]{1}}%
-								{V2}{\pictoskills[height=dauto,colors=skillgreen]{2}}%
-								{V3}{\pictoskills[height=dauto,colors=skillgreen]{3}}%
-								{O0}{\pictoskills[height=dauto,colors=skillorange]{0}}%
-								{O1}{\pictoskills[height=dauto,colors=skillorange]{1}}%
-								{O2}{\pictoskills[height=dauto,colors=skillorange]{2}}%
-								{O3}{\pictoskills[height=dauto,colors=skillorange]{3}}%
-								{R0}{\pictoskills[height=dauto,colors=skillred]{0}}%
-								{R1}{\pictoskills[height=dauto,colors=skillred]{1}}%
-								{R2}{\pictoskills[height=dauto,colors=skillred]{2}}%
-								{R3}{\pictoskills[height=dauto,colors=skillred]{3}}%
-							}%
-						}%
-						{%
-							\IfStrEqCase{\EnvtExoIcon}{%
-								{V0}{\pictoskills[height=auto,colors=skillgreen]{0}}%
-								{V1}{\pictoskills[height=auto,colors=skillgreen]{1}}%
-								{V2}{\pictoskills[height=auto,colors=skillgreen]{2}}%
-								{V3}{\pictoskills[height=auto,colors=skillgreen]{3}}%
-								{O0}{\pictoskills[height=auto,colors=skillorange]{0}}%
-								{O1}{\pictoskills[height=auto,colors=skillorange]{1}}%
-								{O2}{\pictoskills[height=auto,colors=skillorange]{2}}%
-								{O3}{\pictoskills[height=auto,colors=skillorange]{3}}%
-								{R0}{\pictoskills[height=auto,colors=skillred]{0}}%
-								{R1}{\pictoskills[height=auto,colors=skillred]{1}}%
-								{R2}{\pictoskills[height=auto,colors=skillred]{2}}%
-								{R3}{\pictoskills[height=auto,colors=skillred]{3}}%
-							}%
-						}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Ceinture}%
+					\IfStrEqCase{\EnvtExoIcon}{%
+						{V0}{\pictoskills[height=dauto,colors=skillgreen]{0}}%
+						{V1}{\pictoskills[height=dauto,colors=skillgreen]{1}}%
+						{V2}{\pictoskills[height=dauto,colors=skillgreen]{2}}%
+						{V3}{\pictoskills[height=dauto,colors=skillgreen]{3}}%
+						{O0}{\pictoskills[height=dauto,colors=skillorange]{0}}%
+						{O1}{\pictoskills[height=dauto,colors=skillorange]{1}}%
+						{O2}{\pictoskills[height=dauto,colors=skillorange]{2}}%
+						{O3}{\pictoskills[height=dauto,colors=skillorange]{3}}%
+						{R0}{\pictoskills[height=dauto,colors=skillred]{0}}%
+						{R1}{\pictoskills[height=dauto,colors=skillred]{1}}%
+						{R2}{\pictoskills[height=dauto,colors=skillred]{2}}%
+						{R3}{\pictoskills[height=dauto,colors=skillred]{3}}%
+					}%
+				}%
 				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoCouleur]%
-					\,\CeintureCouleur{\EnvtExoCouleur}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Cible}%
+					\IfStrEqCase{\EnvtExoIcon}{%
+						{V0}{\pictoskills[height=auto,colors=skillgreen]{0}}%
+						{V1}{\pictoskills[height=auto,colors=skillgreen]{1}}%
+						{V2}{\pictoskills[height=auto,colors=skillgreen]{2}}%
+						{V3}{\pictoskills[height=auto,colors=skillgreen]{3}}%
+						{O0}{\pictoskills[height=auto,colors=skillorange]{0}}%
+						{O1}{\pictoskills[height=auto,colors=skillorange]{1}}%
+						{O2}{\pictoskills[height=auto,colors=skillorange]{2}}%
+						{O3}{\pictoskills[height=auto,colors=skillorange]{3}}%
+						{R0}{\pictoskills[height=auto,colors=skillred]{0}}%
+						{R1}{\pictoskills[height=auto,colors=skillred]{1}}%
+						{R2}{\pictoskills[height=auto,colors=skillred]{2}}%
+						{R3}{\pictoskills[height=auto,colors=skillred]{3}}%
+					}%
+				}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Ceinture}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoCouleur]%
+			\,\CeintureCouleur{\EnvtExoCouleur}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Cible}%
+		{%
+			\IfSubStr{\EnvtExoDeco}{*}%
 				{%
-					\IfSubStr{\EnvtExoDeco}{*}%
-						{%
-							\,\tkzBullsEyeArrow[colors]%
-						}%
-						{%
-							\,\tkzBullsEyeArrow%
-						}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Chrono}%
+					\,\tkzBullsEyeArrow[colors]%
+				}%
 				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoChrono]%
-					\,\pictochrono[ColTime=macouleurexodeco!50]{\EnvtExoChrono}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Perso}%
+					\,\tkzBullsEyeArrow%
+				}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Chrono}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoChrono]%
+			\,\pictochrono[ColTime=macouleurexodeco!50]{\EnvtExoChrono}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Perso}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPerso]%
+			\,\EnvtExoPerso%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Points}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPts]%
+			\xintifboolexpr{ \EnvtExoPts <= 1 }{\def\pts{point}}{\def\pts{points}}%
+			\,\textcolor{macouleurexodeco}{(\StrSubstitute{\EnvtExoPts}{.}{{{,}}}\ \pts)}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Image}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoImg]%
+			\settototalheight{\tmp@image@hauteur@totale}{\hbox{\tmpstyleexo qB}}%
+			\,$\vcenter{\hbox{\includegraphics[height=\EnvtExoScaleImg\tmp@image@hauteur@totale]{\EnvtExoImg}}}$%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Speedo}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoLevel]%
+			\StrCut{\EnvtExoLevel}{§}{\EnvtExoLevelSk}{\EnvtExoLevelTo}%
+			\,\MiniCompteurNiveaux[Couleurs=macouleurexodeco,Marqueur=\EnvtExoLevelSk]{\EnvtExoLevelTo}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{faEtoiles}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
+			\IfSubStr{\EnvtExoStars}{§}%
 				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPerso]%
-					\,\EnvtExoPerso%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Points}%
+					\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+					\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos[\EnvtExoStarTot]{\EnvtExoStarNb}}}%
+				}%
 				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPts]%
-					\xintifboolexpr{ \EnvtExoPts <= 1 }{\def\pts{point}}{\def\pts{points}}%
-					\,\textcolor{macouleurexodeco}{(\StrSubstitute{\EnvtExoPts}{.}{{{,}}}\ \pts)}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Image}%
+					\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos{\EnvtExoStars}}}%
+				}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{tkzEtoiles}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
+			\IfSubStr{\EnvtExoStars}{§}%
 				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoImg]%
-					\settototalheight{\tmp@image@hauteur@totale}{\hbox{\tmpstyleexo qB}}%
-					\,$\vcenter{\hbox{\includegraphics[height=\EnvtExoScaleImg\tmp@image@hauteur@totale]{\EnvtExoImg}}}$%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{faEtoiles}%
+					\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+					\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
+				}%
 				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
-					\IfSuStr{\EnvtExoStars}{§}%
-						{%
-							\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
-							\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos[\EnvtExoStarTot]{\EnvtExoStarNb}}}%
-						}%
-						{%
-							\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos{\EnvtExoStars}}}%
-						}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{tkzEtoiles}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
-					\IfSubStr{\EnvtExoStars}{§}%
-						{%
-							\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
-							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
-						}%
-						{%
-							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoStars}%
-						}%
-				}{}%
+					\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoStars}%
+				}%
 		}{}%
 	\endgroup%
 	\def\hrulefill{\leavevmode\leaders\hrule height 0.4pt\hfill\kern\z@}%
@@ -1341,262 +1471,161 @@
 }%
 {}%
 
-\NewDocumentCommand\TitreExo{ !O{} }{%
+\NewDocumentCommand\TitreExo{ !O{} }{%v2 simplifiée
 	\useKVdefault[EnvtExercice]%
 	\setKV[EnvtExercice]{#1}%
 	\addtocounter{numeroexo}{1}%
 	\ifboolKV[EnvtExercice]{Compteur}{}{\addtocounter{numeroexo}{-1}}%
 	\def\hrulefill{\leavevmode\leaders\hrule height \eptraitexo\hfill\kern\z@}%épaisseur
 	\noindent\begingroup\color{macouleurexo}%
-	\IfStrEq{\EnvtExoType}{Classique}%OK exo°____vide
+	%classique Exercice n°...
+	\IfStrEq{\EnvtExoType}{Classique}%OK
 		{%
-			%label avec numéro et complément
-			\tmpstyleexo\tmplabelexo\ifboolKV[EnvtExercice]{Compteur}{\thenumeroexo}{}\EnvtExoCpltTitre%
-			%étoiles eventuelles
-			\IfStrEq{\EnvtExoEtoiles}{}{}%
-				{%
-					\,(\IfSubStr{\EnvtExoEtoiles}{§}%
-						{%
-							\StrCut{\EnvtExoEtoiles}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
-							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
-						}%
-						{%
-							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoEtoiles}%
-						}%
-					)%
-				}%
-			%trait éventuel
-			\IfStrEqCase{\EnvtExoTrait}{%
-				{plein}{\,\hrulefill}%
-				{pointilles}{\,\dotfill}%
-				{dashilles}{\,\hdashrule{\fill}{\eptraitexo}{\eptraitexospace}}%
-				{non}{\hfill}%
-			}%
-			%décoration éventuelle
-			\IfSubStr{\EnvtExoDeco}{Icone}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
-					\,\scalebox{0.85}[0.85]{\EnvtExoIcon}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Barres}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
-					\,%
-					\IfSubStr{\EnvtExoDeco}{*}%
-						{%
-							\IfStrEqCase{\EnvtExoIcon}{%
-								{V0}{\pictoskills[height=dauto,colors=skillgreen]{0}}%
-								{V1}{\pictoskills[height=dauto,colors=skillgreen]{1}}%
-								{V2}{\pictoskills[height=dauto,colors=skillgreen]{2}}%
-								{V3}{\pictoskills[height=dauto,colors=skillgreen]{3}}%
-								{O0}{\pictoskills[height=dauto,colors=skillorange]{0}}%
-								{O1}{\pictoskills[height=dauto,colors=skillorange]{1}}%
-								{O2}{\pictoskills[height=dauto,colors=skillorange]{2}}%
-								{O3}{\pictoskills[height=dauto,colors=skillorange]{3}}%
-								{R0}{\pictoskills[height=dauto,colors=skillred]{0}}%
-								{R1}{\pictoskills[height=dauto,colors=skillred]{1}}%
-								{R2}{\pictoskills[height=dauto,colors=skillred]{2}}%
-								{R3}{\pictoskills[height=dauto,colors=skillred]{3}}%
-							}%
-						}%
-						{%
-							\IfStrEqCase{\EnvtExoIcon}{%
-								{V0}{\pictoskills[height=auto,colors=skillgreen]{0}}%
-								{V1}{\pictoskills[height=auto,colors=skillgreen]{1}}%
-								{V2}{\pictoskills[height=auto,colors=skillgreen]{2}}%
-								{V3}{\pictoskills[height=auto,colors=skillgreen]{3}}%
-								{O0}{\pictoskills[height=auto,colors=skillorange]{0}}%
-								{O1}{\pictoskills[height=auto,colors=skillorange]{1}}%
-								{O2}{\pictoskills[height=auto,colors=skillorange]{2}}%
-								{O3}{\pictoskills[height=auto,colors=skillorange]{3}}%
-								{R0}{\pictoskills[height=auto,colors=skillred]{0}}%
-								{R1}{\pictoskills[height=auto,colors=skillred]{1}}%
-								{R2}{\pictoskills[height=auto,colors=skillred]{2}}%
-								{R3}{\pictoskills[height=auto,colors=skillred]{3}}%
-							}%
-						}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Ceinture}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoCouleur]%
-					\,\CeintureCouleur{\EnvtExoCouleur}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Cible}%
-				{%
-					\IfSubStr{\EnvtExoDeco}{*}%
-						{%
-							\,\tkzBullsEyeArrow[colors]%
-						}%
-						{%
-							\,\tkzBullsEyeArrow%
-						}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Chrono}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoChrono]%
-					\,\pictochrono[ColTime=macouleurexo!50]{\EnvtExoChrono}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Perso}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPerso]%
-					\,\EnvtExoPerso%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Points}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPts]%
-					\xintifboolexpr{ \EnvtExoPts <= 1 }{\def\pts{point}}{\def\pts{points}}%
-					\,\textcolor{macouleurexodeco}{(\StrSubstitute{\EnvtExoPts}{.}{{{,}}}\ \pts)}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Image}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoImg]%
-					\settototalheight{\tmp@image@hauteur@totale}{\hbox{\tmpstyleexo qB}}%
-					\,$\vcenter{\hbox{\includegraphics[height=\EnvtExoScaleImg\tmp@image@hauteur@totale]{\EnvtExoImg}}}$%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{faEtoiles}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
-					\IfSuStr{\EnvtExoStars}{§}%
-						{%
-							\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
-							\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos[\EnvtExoStarTot]{\EnvtExoStarNb}}}%
-						}%
-						{%
-							\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos{\EnvtExoStars}}}%
-						}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{tkzEtoiles}%
-				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
-					\IfSubStr{\EnvtExoStars}{§}%
-						{%
-							\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
-							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
-						}%
-						{%
-							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoStars}%
-						}%
-				}{}%
+			\tmpstyleexo\tmplabelexo%
 		}{}%
 	\IfSubStr{\EnvtExoType}{Perso}%OK perso____déco
 		{%
 			\StrBehind{\EnvtExoType}{/}[\EnvtExoLabel]%
-			%label avec numéro et complément
-			\tmpstyleexo\EnvtExoLabel\ifboolKV[EnvtExercice]{Compteur}{\thenumeroexo}{}\EnvtExoCpltTitre%
-			%étoiles eventuelles
-			\IfStrEq{\EnvtExoEtoiles}{}{}%
+			\tmpstyleexo\EnvtExoLabel%
+		}{}%
+	%numéro
+	\ifboolKV[EnvtExercice]{Compteur}{\thenumeroexo}{}\EnvtExoCpltTitre%
+	%étoiles au début
+	\IfStrEq{\EnvtExoEtoiles}{}{}%
+		{%
+			\,(\IfSubStr{\EnvtExoEtoiles}{§}%
 				{%
-					\,(\IfSubStr{\EnvtExoEtoiles}{§}%
-						{%
-							\StrCut{\EnvtExoEtoiles}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
-							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
-						}%
-						{%
-							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoEtoiles}%
-						}%
-					)%
+					\StrCut{\EnvtExoEtoiles}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+					\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
 				}%
-			%trait éventuel
-			\IfStrEqCase{\EnvtExoTrait}{%
-				{plein}{\,\hrulefill}%
-				{pointilles}{\,\dotfill}%
-				{dashilles}{\,\hdashrule{\fill}{\eptraitexo}{\eptraitexospace}}%
-				{non}{\hfill}%
-			}%
-			%décoration éventuelle
-			\IfSubStr{\EnvtExoDeco}{Icone}%
 				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
-					\,\scalebox{0.85}[0.85]{\EnvtExoIcon}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Barres}%
+					\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoEtoiles}%
+				}%
+			)%
+		}%
+	%trait éventuel
+	\IfStrEqCase{\EnvtExoTrait}{%
+		{plein}{\,\hrulefill}%
+		{pointilles}{\,\dotfill}%
+		{dashilles}{\,\hdashrule{\fill}{\eptraitexo}{\eptraitexospace}}%
+		{non}{\hfill}%
+		{aucun}{~}%
+		}%
+	%décorations éventuelles
+	\IfSubStr{\EnvtExoDeco}{Icone}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
+			\,\textcolor{macouleurexodeco}{\scalebox{0.85}[0.85]{\EnvtExoIcon}}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Emoji}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoEmoji]%
+			\,\texttwemoji{\EnvtExoEmoji}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Barres}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
+			\,%
+			\IfSubStr{\EnvtExoDeco}{*}%
 				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoIcon]%
-					\,%
-					\IfSubStr{\EnvtExoDeco}{*}%
-						{%
-							\IfStrEqCase{\EnvtExoIcon}{%
-								{V0}{\pictoskill[height=dauto,col=skillgreen]{0}}%
-								{V1}{\pictoskill[height=dauto,col=skillgreen]{1}}%
-								{V2}{\pictoskill[height=dauto,col=skillgreen]{2}}%
-								{V3}{\pictoskill[height=dauto,col=skillgreen]{3}}%
-								{O0}{\pictoskill[height=dauto,col=skillorange]{0}}%
-								{O1}{\pictoskill[height=dauto,col=skillorange]{1}}%
-								{O2}{\pictoskill[height=dauto,col=skillorange]{2}}%
-								{O3}{\pictoskill[height=dauto,col=skillorange]{3}}%
-								{R0}{\pictoskill[height=dauto,col=skillred]{0}}%
-								{R1}{\pictoskill[height=dauto,col=skillred]{1}}%
-								{R2}{\pictoskill[height=dauto,col=skillred]{2}}%
-								{R3}{\pictoskill[height=dauto,col=skillred]{3}}%
-							}%
-						}%
-						{%
-							\IfStrEqCase{\EnvtExoIcon}{%
-								{V0}{\pictoskill[height=auto,col=skillgreen]{0}}%
-								{V1}{\pictoskill[height=auto,col=skillgreen]{1}}%
-								{V2}{\pictoskill[height=auto,col=skillgreen]{2}}%
-								{V3}{\pictoskill[height=auto,col=skillgreen]{3}}%
-								{O0}{\pictoskill[height=auto,col=skillorange]{0}}%
-								{O1}{\pictoskill[height=auto,col=skillorange]{1}}%
-								{O2}{\pictoskill[height=auto,col=skillorange]{2}}%
-								{O3}{\pictoskill[height=auto,col=skillorange]{3}}%
-								{R0}{\pictoskill[height=auto,col=skillred]{0}}%
-								{R1}{\pictoskill[height=auto,col=skillred]{1}}%
-								{R2}{\pictoskill[height=auto,col=skillred]{2}}%
-								{R3}{\pictoskill[height=auto,col=skillred]{3}}%
-							}%
-						}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Ceinture}%
+					\IfStrEqCase{\EnvtExoIcon}{%
+						{V0}{\pictoskills[height=dauto,colors=skillgreen]{0}}%
+						{V1}{\pictoskills[height=dauto,colors=skillgreen]{1}}%
+						{V2}{\pictoskills[height=dauto,colors=skillgreen]{2}}%
+						{V3}{\pictoskills[height=dauto,colors=skillgreen]{3}}%
+						{O0}{\pictoskills[height=dauto,colors=skillorange]{0}}%
+						{O1}{\pictoskills[height=dauto,colors=skillorange]{1}}%
+						{O2}{\pictoskills[height=dauto,colors=skillorange]{2}}%
+						{O3}{\pictoskills[height=dauto,colors=skillorange]{3}}%
+						{R0}{\pictoskills[height=dauto,colors=skillred]{0}}%
+						{R1}{\pictoskills[height=dauto,colors=skillred]{1}}%
+						{R2}{\pictoskills[height=dauto,colors=skillred]{2}}%
+						{R3}{\pictoskills[height=dauto,colors=skillred]{3}}%
+					}%
+				}%
 				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoCouleur]%
-					\,\CeintureCouleur{\EnvtExoCouleur}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Cible}%
+					\IfStrEqCase{\EnvtExoIcon}{%
+						{V0}{\pictoskills[height=auto,colors=skillgreen]{0}}%
+						{V1}{\pictoskills[height=auto,colors=skillgreen]{1}}%
+						{V2}{\pictoskills[height=auto,colors=skillgreen]{2}}%
+						{V3}{\pictoskills[height=auto,colors=skillgreen]{3}}%
+						{O0}{\pictoskills[height=auto,colors=skillorange]{0}}%
+						{O1}{\pictoskills[height=auto,colors=skillorange]{1}}%
+						{O2}{\pictoskills[height=auto,colors=skillorange]{2}}%
+						{O3}{\pictoskills[height=auto,colors=skillorange]{3}}%
+						{R0}{\pictoskills[height=auto,colors=skillred]{0}}%
+						{R1}{\pictoskills[height=auto,colors=skillred]{1}}%
+						{R2}{\pictoskills[height=auto,colors=skillred]{2}}%
+						{R3}{\pictoskills[height=auto,colors=skillred]{3}}%
+					}%
+				}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Ceinture}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoCouleur]%
+			\,\CeintureCouleur{\EnvtExoCouleur}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Cible}%
+		{%
+			\IfSubStr{\EnvtExoDeco}{*}%
 				{%
-					\,\tkzBullsEyeArrow{}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Chrono}%
+					\,\tkzBullsEyeArrow[colors]%
+				}%
 				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoChrono]%
-					\,\pictochrono[ColTime=macouleurexo!50]{\EnvtExoChrono}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Points}%
+					\,\tkzBullsEyeArrow%
+				}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Chrono}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoChrono]%
+			\,\pictochrono[ColTime=macouleurexodeco!50]{\EnvtExoChrono}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Perso}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPerso]%
+			\,\EnvtExoPerso%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Points}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPts]%
+			\xintifboolexpr{ \EnvtExoPts <= 1 }{\def\pts{point}}{\def\pts{points}}%
+			\,\textcolor{macouleurexodeco}{(\StrSubstitute{\EnvtExoPts}{.}{{{,}}}\ \pts)}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Image}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoImg]%
+			\settototalheight{\tmp@image@hauteur@totale}{\hbox{\tmpstyleexo qB}}%
+			\,$\vcenter{\hbox{\includegraphics[height=\EnvtExoScaleImg\tmp@image@hauteur@totale]{\EnvtExoImg}}}$%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{Speedo}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoLevel]%
+			\StrCut{\EnvtExoLevel}{§}{\EnvtExoLevelSk}{\EnvtExoLevelTo}%
+			\,\MiniCompteurNiveaux[Couleurs=macouleurexodeco,Marqueur=\EnvtExoLevelSk]{\EnvtExoLevelTo}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{faEtoiles}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
+			\IfSubStr{\EnvtExoStars}{§}%
 				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoPts]%
-					\xintifboolexpr{ \EnvtExoPts <= 1 }{\def\pts{point}}{\def\pts{points}}%
-					\,\textcolor{macouleurexodeco}{(\StrSubstitute{\EnvtExoPts}{.}{{{,}}}\ \pts)}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{Image}%
+					\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+					\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos[\EnvtExoStarTot]{\EnvtExoStarNb}}}%
+				}%
 				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoImg]%
-					\settototalheight{\tmp@image@hauteur@totale}{\hbox{\tmpstyleexo qB}}%
-					\,$\vcenter{\hbox{\includegraphics[height=\EnvtExoScaleImg\tmp@image@hauteur@totale]{\EnvtExoImg}}}$%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{faEtoiles}%
+					\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos{\EnvtExoStars}}}%
+				}%
+		}{}%
+	\IfSubStr{\EnvtExoDeco}{tkzEtoiles}%
+		{%
+			\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
+			\IfSubStr{\EnvtExoStars}{§}%
 				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
-					\IfSuStr{\EnvtExoStars}{§}%
-						{%
-							\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
-							\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos[\EnvtExoStarTot]{\EnvtExoStarNb}}}%
-						}%
-						{%
-							\textcolor{macouleurexodeco}{\scalebox{\tmpscalestarsexos}[\tmpscalestarsexos]{\NiveauDiffExos{\EnvtExoStars}}}%
-						}%
-				}{}%
-			\IfSubStr{\EnvtExoDeco}{tkzEtoiles}%
+					\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+					\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
+				}%
 				{%
-					\StrBehind{\EnvtExoDeco}{/}[\EnvtExoStars]%
-					\IfSubStr{\EnvtExoStars}{§}%
-						{%
-							\StrCut{\EnvtExoStars}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
-							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond,NiveauMax=\EnvtExoStarTot]{\EnvtExoStarNb}%
-						}%
-						{%
-							\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoStars}%
-						}%
-				}{}%
+					\tkzEtoiles[Couleur=macouleurexodeco,CouleurFond=macouleurexodecofond]{\EnvtExoStars}%
+				}%
 		}{}%
 	\endgroup%
 	\def\hrulefill{\leavevmode\leaders\hrule height 0.4pt\hfill\kern\z@}%
@@ -2370,77 +2399,77 @@
 		}%
 }
 
-%====EXAM BOX TITLE(s)
-\NewDocumentCommand\LetPhantomBox{}{%
-	\vphantom{(ÉAZERTYUIOPQSDFGHJKLMWXCVBN,éàço)}%
-}
+% %====EXAM BOX TITLE(s)
+% \NewDocumentCommand\LetPhantomBox{}{%
+	% \vphantom{(ÉAZERTYUIOPQSDFGHJKLMWXCVBN,éàço)}%
+% }
 
-\tcbset{StyleTitreSujet/.style={%
-	enhanced,size=small,
-	colback=white!5,boxrule=1.25pt,
-	attach boxed title to top left={xshift=0.5cm,yshift=1mm-\tcboxedtitleheight},
-	varwidth boxed title*=-3cm,
-	boxed title style={frame code={
-			\path[fill=tcbcolframe!50!black]
-			([yshift=-1mm,xshift=-1mm]frame.north west)
-			arc[start angle=0,end angle=180,radius=1mm]
-			([yshift=-1mm,xshift=1mm]frame.north east)
-			arc[start angle=180,end angle=0,radius=1mm];
-			\path[fill=tcbcolframe] ([xshift=-2mm]frame.north west) -- ([xshift=2mm]frame.north east) [rounded corners=1mm]-- ([xshift=1mm,yshift=-1mm]frame.north east) -- (frame.south east) -- (frame.south west) -- ([xshift=-1mm,yshift=-1mm]frame.north west) [sharp corners]-- cycle;
-		},interior engine=empty,size=fbox,
-	},
-	fonttitle=\bfseries\sffamily,
-	fontupper=\huge\bfseries\sffamily,
-	}
-}
+% \tcbset{StyleTitreSujet/.style={%
+	% enhanced,size=small,
+	% colback=white!5,boxrule=1.25pt,
+	% attach boxed title to top left={xshift=0.5cm,yshift=1mm-\tcboxedtitleheight},
+	% varwidth boxed title*=-3cm,
+	% boxed title style={frame code={
+			% \path[fill=tcbcolframe!50!black]
+			% ([yshift=-1mm,xshift=-1mm]frame.north west)
+			% arc[start angle=0,end angle=180,radius=1mm]
+			% ([yshift=-1mm,xshift=1mm]frame.north east)
+			% arc[start angle=180,end angle=0,radius=1mm];
+			% \path[fill=tcbcolframe] ([xshift=-2mm]frame.north west) -- ([xshift=2mm]frame.north east) [rounded corners=1mm]-- ([xshift=1mm,yshift=-1mm]frame.north east) -- (frame.south east) -- (frame.south west) -- ([xshift=-1mm,yshift=-1mm]frame.north west) [sharp corners]-- cycle;
+		% },interior engine=empty,size=fbox,
+	% },
+	% fonttitle=\bfseries\sffamily,
+	% fontupper=\huge\bfseries\sffamily,
+	% }
+% }
 
-\defKV[tcbtitresujet]{%
-	AlignH=\def\tcbtitresujethalign{#1}
-}
+% \defKV[tcbtitresujet]{%
+	% AlignH=\def\tcbtitresujethalign{#1}
+% }
 
-\setKVdefault[tcbtitresujet]{%
-	Couleur=black,
-	AlignH=center
-}
+% \setKVdefault[tcbtitresujet]{%
+	% Couleur=black,
+	% AlignH=center
+% }
 
-\NewDocumentEnvironment{TitreSujet}{ O{} D<>{} m }%
-{%
-	\restoreKV[tcbtitresujet]%
-	\setKV[tcbtitresujet]{#1}%
-	\IfStrEqCase{\tcbtitresujethalign}{%
-		{right}{\tcbset{StyleTitreSujetAlign/.style={halign=flush right}}}%
-		{left}{\tcbset{StyleTitreSujetAlign/.style={halign=flush left}}}%
-	}[\tcbset{StyleTitreSujetAlign/.style={halign=flush center}}]%
-	\tcolorbox[colupper={\useKV[tcbtitresujet]{Couleur}},colframe={\useKV[tcbtitresujet]{Couleur}},StyleTitreSujet,StyleTitreSujetAlign,title={\vphantom{QJ}#3},before upper=\LetPhantomBox,after upper=\LetPhantomBox,#2]%
-}%
-{%
-	\endtcolorbox%
-}
+% \NewDocumentEnvironment{TitreSujet}{ O{} D<>{} m }%
+% {%
+	% \restoreKV[tcbtitresujet]%
+	% \setKV[tcbtitresujet]{#1}%
+	% \IfStrEqCase{\tcbtitresujethalign}{%
+		% {right}{\tcbset{StyleTitreSujetAlign/.style={halign=flush right}}}%
+		% {left}{\tcbset{StyleTitreSujetAlign/.style={halign=flush left}}}%
+	% }[\tcbset{StyleTitreSujetAlign/.style={halign=flush center}}]%
+	% \tcolorbox[colupper={\useKV[tcbtitresujet]{Couleur}},colframe={\useKV[tcbtitresujet]{Couleur}},StyleTitreSujet,StyleTitreSujetAlign,title={\vphantom{QJ}#3},before upper=\LetPhantomBox,after upper=\LetPhantomBox,#2]%
+% }%
+% {%
+	% \endtcolorbox%
+% }
 
-\tcbset{StyleTitreSujetSousEpreuve/.style={%
-		center,after skip=1pt,size=small,boxsep=3pt,boxrule=1pt,colback=white,left=2pt,right=2pt,%
-		sharp corners,rounded corners=downhill,arc=8pt,
-		fontupper={\sffamily\bfseries\large}
-	}
-}
+% \tcbset{StyleTitreSujetSousEpreuve/.style={%
+		% center,after skip=1pt,size=small,boxsep=3pt,boxrule=1pt,colback=white,left=2pt,right=2pt,%
+		% sharp corners,rounded corners=downhill,arc=8pt,
+		% fontupper={\sffamily\bfseries\large}
+	% }
+% }
 
-\NewDocumentCommand\SousTitreSujetEpreuve{ O{black} m }{%
-	\tcbset{StyleTitreSujetSousEpreuveCouleur/.style={colframe=#1,colupper=#1}}
-	\IfStrEqCase{#2}{%
-		{U21}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\:\:,after upper=\:\:\faProjDiag]{Épreuve E2 - Mathématiques pour l'Informatique}}%
-		{U2}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\:\:,after upper=\:\:\faProjDiag]{Épreuve E2 - Mathématiques pour l'Informatique}}%
-		{U2CG}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\:\:,after upper=\:\:\faProjDiag]{Épreuve E2 - Mathématiques appliquées}}%
-		{U3}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\:\:,after upper=\:\:\faProjDiag]{Épreuve E3 - Mathématiques pour l'Informatique}}%
-		{UF2}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faDice\:\:,after upper=\:\:\faChartLine]{Épreuve EF2 - Mathématiques Approfondies}}%
-		{U41OL}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faDice\:\:,after upper=\:\:\faBezierCurve]{Épreuve U41 - Mathématiques}}}%
-		[{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur]{#2}}]%
-}
+% \NewDocumentCommand\SousTitreSujetEpreuve{ O{black} m }{%
+	% \tcbset{StyleTitreSujetSousEpreuveCouleur/.style={colframe=#1,colupper=#1}}
+	% \IfStrEqCase{#2}{%
+		% {U21}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\:\:,after upper=\:\:\faProjDiag]{Épreuve E2 - Mathématiques pour l'Informatique}}%
+		% {U2}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\:\:,after upper=\:\:\faProjDiag]{Épreuve E2 - Mathématiques pour l'Informatique}}%
+		% {U2CG}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\:\:,after upper=\:\:\faProjDiag]{Épreuve E2 - Mathématiques appliquées}}%
+		% {U3}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\:\:,after upper=\:\:\faProjDiag]{Épreuve E3 - Mathématiques pour l'Informatique}}%
+		% {UF2}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faDice\:\:,after upper=\:\:\faChartLine]{Épreuve EF2 - Mathématiques Approfondies}}%
+		% {U41OL}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faDice\:\:,after upper=\:\:\faBezierCurve]{Épreuve U41 - Mathématiques}}}%
+		% [{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur]{#2}}]%
+% }
 
-\NewDocumentCommand\SujetTitreExo{ O{black} m }{%
-	\tcolorbox[enhanced,width=\linewidth,size=small,colback=white,colframe=#1,boxrule=0.75pt,fontupper=\color{#1}\Large\sffamily\bfseries,sharp corners,rounded corners=south,arc=4pt,before upper=\LetPhantomBox]
-	#2
-	\endtcolorbox%
-}
+% \NewDocumentCommand\SujetTitreExo{ O{black} m }{%
+	% \tcolorbox[enhanced,width=\linewidth,size=small,colback=white,colframe=#1,boxrule=0.75pt,fontupper=\color{#1}\Large\sffamily\bfseries,sharp corners,rounded corners=south,arc=4pt,before upper=\LetPhantomBox]
+	% #2
+	% \endtcolorbox%
+% }
 
 %====vignettes
 \NewDocumentCommand\LetPhantomVignette{}{%
@@ -4033,6 +4062,7 @@
 	height=\setlength\tmp@tkzbanneralt@height{#1},%
 	maincolor=\def\tkzBannermaintricol{#1},%
 	logo=\def\tkzBannermaintrilogo{#1},%
+	logotwemoji=\def\tkzBannermaintrilogotwemoji{#1},%
 	type=\def\tkzBannermaintritype{#1},%
 	blockwidth=\setlength\tmp@tkzbanneralt@autowidth{#1},%
 	customtype=\def\tkzBannermaintritypelibre{#1},%
@@ -4051,6 +4081,7 @@
 	swap=false,%
 	maincolor={},%
 	logo={},%
+	logotwemoji={},%
 	type={},%
 	num=true,
 	customtype={},%
@@ -4136,6 +4167,11 @@
 						{%
 							\node[inner sep=1.25pt,left=2pt,text=\tkzBannermaintricol,font={\useKV[tkzBannerpartAltKeys]{fonttxt}},rotate={atan(\tkzBannertriangle)}] at ({\useKV[tkzBannerpartAltKeys]{width}},{0.55*(\useKV[tkzBannerpartAltKeys]{height})}) {\resizebox*{!}{0.9\tmp@tkzbanneralt@txtheight}{\vphantom{qÉ}\tkzBannermaintrilogo}};
 						}%
+					\IfEq{\tkzBannermaintrilogotwemoji}{}%OK
+						{}%
+						{%
+							\node[inner sep=1.25pt,left=2pt,text=\tkzBannermaintricol,font={\useKV[tkzBannerpartAltKeys]{fonttxt}},rotate={atan(\tkzBannertriangle)}] at ({\useKV[tkzBannerpartAltKeys]{width}},{0.55*(\useKV[tkzBannerpartAltKeys]{height})}) {\vphantom{qÉ}\twemoji[height={0.5\tmp@tkzbanneralt@height}]{\tkzBannermaintrilogotwemoji}\:};
+						}%
 				}%
 				{%
 					\node[inner sep=1.25pt,right,text={\useKV[tkzBannerpartAltKeys]{coltxt}},font={\useKV[tkzBannerpartAltKeys]{fonttxt}},rotate={atan(\tkzBannertriangle)}] at ({\tmp@tkzbanneralt@autowidth+2*\tmp@tkzbanneralt@marginoffsetbanner+4mm},{0.52*(\useKV[tkzBannerpartAltKeys]{height})}) {\resizeiflarger*{\tkzBannermainfonttype\vphantom{qÉ}#3}{\tmp@tkzbanneralt@txtheight}{\tmp@tkzbanneralt@titlewidth}};%
@@ -4145,6 +4181,11 @@
 						{}%
 						{%
 							\node[inner sep=1.25pt,left=2pt,text={\useKV[tkzBannerpartAltKeys]{coltxt}},font={\useKV[tkzBannerpartAltKeys]{fonttxt}},rotate={atan(\tkzBannertriangle)}] at ({\useKV[tkzBannerpartAltKeys]{width}},{0.55*(\useKV[tkzBannerpartAltKeys]{height})}) {\resizebox*{!}{0.9\tmp@tkzbanneralt@txtheight}{\vphantom{qÉ}\tkzBannermaintrilogo}};
+						}%
+					\IfEq{\tkzBannermaintrilogotwemoji}{}%OK
+						{}%
+						{%
+							\node[inner sep=1.25pt,left=2pt,text=\tkzBannermaintricol,font={\useKV[tkzBannerpartAltKeys]{fonttxt}},rotate={atan(\tkzBannertriangle)}] at ({\useKV[tkzBannerpartAltKeys]{width}},{0.55*(\useKV[tkzBannerpartAltKeys]{height})}) {\vphantom{qÉ}\twemoji[height={0.5\tmp@tkzbanneralt@height}]{\tkzBannermaintrilogotwemoji}\:};
 						}%
 				}%
 		\end{scope}
@@ -4329,7 +4370,7 @@
 		}%
 }
 
-%====store to length
+%====LENGHTS
 \NewDocumentCommand\storewidthtolength{omm}{%
 	\ifdeflength{#3}{\settowidth#3{\hbox{#2}}}{\newlength{#3}\settowidth#3{\hbox{#2}}}%
 	\IfNoValueF{#1}{\addtolength#3{#1}}%
@@ -4350,16 +4391,83 @@
 	\IfNoValueF{#1}{\addtolength#3{#1}}%
 }
 
-%====halign several numbers properly ?
 \newlength\tmpwideststring
 \newlength\tmpwideststringelt
+\newsavebox{\my@tmp@width@box}
 
 \NewDocumentCommand\getwideststring{ O{\tmpwideststring} m }{%
+	\ifdeflength{#1}{}{\newlength#1}%
 	\setlength\tmpwideststring{0pt}%
 	\xintFor* ##1 in {\xintCSVtoList{#2}}\do{%
-		\settowidth{\tmpwideststringelt}{\hbox{##1}}%
+		\savebox{\my@tmp@width@box}{##1}%
+		\settowidth{\tmpwideststringelt}{\usebox{\my@tmp@width@box}}%
 		\pgfmathsetlength{\global#1}{max(#1,\tmpwideststringelt)}%
 	}%
+}
+
+\newlength\tmpheigheststring
+\newlength\tmpheigheststringelt
+\newsavebox{\my@tmp@height@box}
+
+\NewDocumentCommand\getheigheststring{ s O{\tmpheigheststring} m }{%
+	\ifdeflength{#2}{}{\newlength#2}%
+	\setlength#2{0pt}%
+	\IfBooleanTF{#1}%
+		{%
+			\xintFor* ##1 in {\xintCSVtoList{#3}}\do{%
+				\savebox{\my@tmp@height@box}{##1}%
+				\settoheight{\tmpheigheststringelt}{\usebox{\my@tmp@height@box}}%
+				\pgfmathsetlength{\global#2}{max(#2,\tmpheigheststringelt)}%
+			}%
+		}%
+		{%
+			\xintFor* ##1 in {\xintCSVtoList{#3}}\do{%
+				\savebox{\my@tmp@height@box}{##1}%
+				\settototalheight{\tmpheigheststringelt}{\usebox{\my@tmp@height@box}}%
+				\pgfmathsetlength{\global#2}{max(#2,\tmpheigheststringelt)}%
+			}%
+		}%
+}
+
+\newlength\my@var@height@of
+\newlength\my@var@width@of
+\newlength\my@fixed@height@of
+\newlength\my@fixed@width@of
+\newsavebox\tmp@box@to@fit@h
+\newsavebox\tmp@box@to@fit@v
+
+\NewDocumentCommand\fittexttobox{smmm}{%
+	%*=box with tikz
+	%#1=text
+	%#2=width
+	%#3=height
+	\setlength\my@fixed@width@of{#3}%
+	\setlength\my@fixed@height@of{#4}%
+	\savebox{\tmp@box@to@fit@v}{\resizebox*{!}{\my@fixed@height@of}{#2}}%v-stretch
+	\savebox{\tmp@box@to@fit@h}{\resizebox*{\my@fixed@width@of}{!}{#2}}%h-stretch
+	\settowidth\my@var@width@of{\usebox{\tmp@box@to@fit@v}}%
+	\IfBooleanTF{#1}%
+		{%
+			\begin{tikzpicture}
+				\draw (0,0) rectangle (\my@fixed@width@of,\my@fixed@height@of) ;
+				\ifthenelse{\my@var@width@of < \my@fixed@width@of}%
+					{%width ok
+						\node[inner sep=0pt] at (0.5\my@fixed@width@of,0.5\my@fixed@height@of) {\usebox{\tmp@box@to@fit@v}} ;
+					}%
+					{%width ko => h-stretch
+						\node[inner sep=0pt] at (0.5\my@fixed@width@of,0.5\my@fixed@height@of) {\usebox{\tmp@box@to@fit@h}} ;
+					}%
+			\end{tikzpicture}%
+		}%
+		{%
+			\ifthenelse{\my@var@width@of < \my@fixed@width@of}%
+				{%width ok
+					{\usebox{\tmp@box@to@fit@v}}%
+				}%
+				{%width ko => h-stretch
+					{\usebox{\tmp@box@to@fit@h}}%
+				}%
+		}%
 }
 
 \NewDocumentCommand\halignnb{ O{0,1,2,3,4,5,6,7,8,9} D<>{c} m }{%
