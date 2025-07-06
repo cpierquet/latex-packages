@@ -1,7 +1,0 @@
-\defaultfontfeatures[AtkinsonMono]
-   {UprightFont=AtkinsonHyperlegibleMono-Regular.otf,
-    ItalicFont=AtkinsonHyperlegibleMono-RegularItalic.otf,
-    BoldFont=AtkinsonHyperlegibleMono-Bold.otf,
-    BoldItalicFont=AtkinsonHyperlegibleMono-BoldItalic.otf,
-    Contextuals=Alternate
-}
