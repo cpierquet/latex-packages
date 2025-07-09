@@ -1,0 +1,152 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{tablericons}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{shortvrb}
+\MakeShortVerb{\|}
+\setlength{\parindent}{0pt}
+
+\newenvironment{tablericonscase}
+{%
+	\begin{longtable}{cllr}%icon + name + macro + page
+		\cmidrule[\heavyrulewidth]{1-4}% \toprule
+		\bfseries Icon & \bfseries Name & \bfseries Direct command & \bfseries PDF page \\
+		\cmidrule{1-4}
+		\endhead
+}%
+{%
+		\cmidrule[\heavyrulewidth]{1-4}
+	\end{longtable}%
+}
+
+\NewDocumentCommand{\showcasetablericonoutline}{mm}{%name + macro + page
+	\Large\tablericon{#1} & \itshape #1 & \ttfamily \textbackslash tablericon\{#1\} & \sffamily #2 \\
+}
+
+\NewDocumentCommand{\showcasetablericonfilled}{mm}{%name + macro + page
+	\Large\tablericon[filled]{#1} & \itshape #1 & \ttfamily \textbackslash tablericon[filled]\{#1\} & \sffamily #2 \\
+}
+
+\begin{document}
+
+\title{The \textsf{tablericons} package (0.1.0) -- \today}
+\author{%
+	Cédric Pierquet\\%
+	\url{https://tabler.io/icons} (Source version 3.34.0)\\%
+	\url{https://github.com/cpierquet/latex-packages/tablericons} (\LaTeX{} package)
+}
+\date{cpierquet -- at -- outlook . fr}\maketitle
+
+This package provides \LaTeX{} support for the tabler Icons project (\url{https://github.com/tabler/tabler-icons}).
+
+\medskip
+
+\hspace*{5mm}\fbox{\begin{minipage}{0.75\linewidth}{\emph{A set of 5944 free MIT-licensed high-quality SVG/PDF icons for you to use in your web projects. Each icon is designed on a 24x24 grid and a 2px stroke.}}\end{minipage}}
+
+\medskip
+
+To use \textsf{tablericons} in your document, include the package with |\usepackage{tablerIcons}|.
+
+An icon can be accessed using the icon name. A list of all included icons with their respective \textit{page} can be found at the end of this document.
+
+\section{Example}
+
+\begin{Verbatim}[frame=single]
+...
+\usepackage{tablericons}
+...
+\begin{document}
+...
+Inline\tablericon{alarm-snooze}version
+...
+\end{document}
+\end{Verbatim}
+
+Result: Inline\tablericon{alarm-snooze}version
+
+\section{Usage}
+
+\subsection{Generic macro}
+
+\begin{Verbatim}[frame=single]
+\tablericon[filled=TF,height=...,(d)strut=...]<includegraphics options>{name}
+\end{Verbatim}
+
+The boolean \texttt{[filled]} activate \textsf{filled} version of icon (if available). And key \texttt{[height=...]} can be:
+
+\begin{itemize}
+	\item \texttt{dauto} (by default): inline insertion with height/depth;
+	\item \texttt{auto}: inline insertion with height/nodepth;
+	\item \texttt{a length}: normal insertion with fixed height.
+\end{itemize}
+
+The keys \texttt{[(d)strut=...]} can be used to set the \textit{reference} box for dimension calculations.
+
+\medskip
+
+By default, icons are given with a small border, so the given height is the height of the \textit{full} box, not the hight of the icons.
+
+\medskip
+
+Example: Inline{\setlength\fboxsep{0pt}\fbox{\tablericon{alarm-snooze}}}version or inline {\setlength\fboxsep{0pt}\fbox{\tablericon{alarm-snooze}}} version
+
+\pagebreak
+
+\subsection{Examples}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height/depth (from qX characters)
+\tablericon[height=dauto]{alarm-snooze} %or \tablericon{alarm-snooze}
+\end{Verbatim}
+
+{\Huge q\tablericon{alarm-snooze}X}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height/depth (from specified characters)
+(q\tablericon[height=dauto,dstrut=(qB)]{alarm-snooze}B)
+\end{Verbatim}
+
+{\Huge (q\tablericon[height=dauto,dstrut=(qB)]{alarm-snooze}B)}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height (from X character) default version
+\tablericon[height=auto]{alarm-snooze}
+\end{Verbatim}
+
+{\Huge X\tablericon[height=auto]{alarm-snooze}X}
+
+\begin{Verbatim}[frame=single]
+%fixed height
+\tablericon[height=2in]{alarm-snooze}
+\end{Verbatim}
+
+\tablericon[height=1.5in]{alarm-snooze}
+
+\subsection{Bugs}
+
+For bug reports and feature requests, report on the GitHub repository \url{https://github.com/cpierquet/latex-packages/tablericons}.
+
+\newpage
+
+\section{List of icons}
+
+\subsection{Outline version (4963 icons)}
+
+The \textsf{PDF} file is \texttt{tablericons-outline-all.pdf}
+
+\input{tablericonsoutlinebindings}
+
+\subsection{Filled version (981 icons)}
+
+The \textsf{PDF} file is \texttt{tablericons-filled-all.pdf}
+
+\input{tablericonsfilledbindings}
+
+\end{document}
