@@ -34,6 +34,7 @@ https://ctan.org/author/pierquet
 * Scrabble
 * sim-os-menus
 * SympyCalc
+* tablericons
 * TangramTikZ
 * thematicpuzzle
 * tikz2d-fr
