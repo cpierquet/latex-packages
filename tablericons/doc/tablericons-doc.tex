@@ -36,11 +36,11 @@
 
 \begin{document}
 
-\title{The \textsf{tablericons} package (0.1.0) -- \today}
+\title{The \textsf{tablericons} package (0.1.1) -- \today}
 \author{%
 	Cédric Pierquet\\%
 	\url{https://tabler.io/icons} (Source version 3.34.0)\\%
-	\url{https://github.com/cpierquet/latex-packages/tablericons} (\LaTeX{} package)
+	\url{https://github.com/cpierquet/latex-packages/tree/main/tablericons} (\LaTeX{} package)
 }
 \date{cpierquet -- at -- outlook . fr}\maketitle
 
@@ -52,7 +52,7 @@ This package provides \LaTeX{} support for the tabler Icons project (\url{https:
 
 \medskip
 
-To use \textsf{tablericons} in your document, include the package with |\usepackage{tablerIcons}|.
+To use \textsf{tablericons} in your document, include the package with |\usepackage{tablericons}|.
 
 An icon can be accessed using the icon name. A list of all included icons with their respective \textit{page} can be found at the end of this document.
 
@@ -84,7 +84,8 @@ The boolean \texttt{[filled]} activate \textsf{filled} version of icon (if avail
 \begin{itemize}
 	\item \texttt{dauto} (by default): inline insertion with height/depth;
 	\item \texttt{auto}: inline insertion with height/nodepth;
-	\item \texttt{a length}: normal insertion with fixed height.
+	\item \texttt{a length}: normal insertion with fixed height;
+	\item \texttt{manuel height/depth}: normal insertion with fixed height/depth.
 \end{itemize}
 
 The keys \texttt{[(d)strut=...]} can be used to set the \textit{reference} box for dimension calculations.
@@ -123,15 +124,26 @@ Example: Inline{\setlength\fboxsep{0pt}\fbox{\tablericon{alarm-snooze}}}version 
 {\Huge X\tablericon[height=auto]{alarm-snooze}X}
 
 \begin{Verbatim}[frame=single]
+%normal version: inline with manual height/depth
+\tablericon[height={0.8em/-0.4em}]{alarm-snooze}
+\end{Verbatim}
+
+{\Huge qb\tablericon[height={0.8em/-0.4em}]{alarm-snooze}Xz}
+
+\begin{Verbatim}[frame=single]
 %fixed height
 \tablericon[height=2in]{alarm-snooze}
 \end{Verbatim}
 
 \tablericon[height=1.5in]{alarm-snooze}
 
+\subsection{Used packages}
+
+\texttt{ifthen}, \texttt{calc}, \texttt{graphicx}, \texttt{xstring} and \texttt{simplekv} are loaded and used by the package.
+
 \subsection{Bugs}
 
-For bug reports and feature requests, report on the GitHub repository \url{https://github.com/cpierquet/latex-packages/tablericons}.
+For bug reports and feature requests, report on the GitHub repository \url{https://github.com/cpierquet/latex-packages/issues}.
 
 \newpage
 

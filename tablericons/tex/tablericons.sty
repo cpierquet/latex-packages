@@ -3,12 +3,17 @@
 % licence icons : MIT License, see https://github.com/tabler/tabler-icons
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{tablericons}[2025/07/08 v0.1.0 LaTeX tablericons (source v3.34.0)]
+\ProvidesPackage{tablericons}[2025/07/11 v0.1.1 LaTeX tablericons (source v3.34.0)]
+
+%====history
+% 0.1.1: add personal raise
+% 0.1.0: initial version
 
 %====packages
 \RequirePackage{ifthen}
 \RequirePackage{calc}
 \RequirePackage{graphicx}
+\RequirePackage{xstring}
 \RequirePackage{simplekv}
 
 %====lenghts
@@ -86,13 +91,32 @@
 					}%
 				}%
 				{%
-					\setlength\tablericonsNormalHeight{\tablericonheigth}%
-					\ifboolKV[tablericon]{filled}%
+					\IfSubStr{\tablericonheigth}{/}%
 						{%
-							\tablericonfilled[height=\tablericonsNormalHeight,#2]{#3}%
+							\StrCut*{\tablericonheigth}{/}{\tablericonmanualheight}{\tablericonmanualdepth}%
+							\setlength\tablericonsNormalHeight{\tablericonmanualheight}%
+							\setlength\tablericonsDefaultDepth{\tablericonmanualdepth}%
+							\ifboolKV[tablericon]{filled}%
+								{%
+									\raisebox{\tablericonsDefaultDepth}{%
+										\tablericonfilled[height=\tablericonsNormalHeight,#2]{#3}%
+									}%
+								}%
+								{%
+									\raisebox{\tablericonsDefaultDepth}{%
+										\tablericonoutline[height=\tablericonsNormalHeight,#2]{#3}%
+									}%
+								}%
 						}%
 						{%
-							\tablericonoutline[height=\tablericonsNormalHeight,#2]{#3}%
+							\setlength\tablericonsNormalHeight{\tablericonheigth}%
+							\ifboolKV[tablericon]{filled}%
+								{%
+									\tablericonfilled[height=\tablericonsNormalHeight,#2]{#3}%
+								}%
+								{%
+									\tablericonoutline[height=\tablericonsNormalHeight,#2]{#3}%
+								}%
 						}%
 				}%
 		}%
