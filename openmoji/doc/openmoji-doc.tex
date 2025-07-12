@@ -1,0 +1,173 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{openmoji}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{shortvrb}
+\MakeShortVerb{\|}
+\setlength{\parindent}{0pt}
+
+\newenvironment{openmojicase}
+{%
+	\begin{longtable}{cll}%icon + name  + page
+		\cmidrule[\heavyrulewidth]{1-3}% \toprule
+		\bfseries Icon  & \bfseries PDF page & \bfseries Name\\
+		\cmidrule{1-3}
+		\endhead
+}%
+{%
+		\cmidrule[\heavyrulewidth]{1-3}
+	\end{longtable}%
+}
+
+\NewDocumentCommand{\showcaseopenmojicolor}{mm}{%name + macro + page
+	\Large\openmoji{#1} & \sffamily #2 & \itshape #1 \\
+}
+
+\NewDocumentCommand{\showcaseopenmojiblack}{mm}{%name + macro + page
+	\Large\openmoji[black]{#1} & \sffamily #2 & \itshape #1 \\
+}
+
+\begin{document}
+
+\title{The \textsf{openmoji} package (0.1.0) -- \today}
+\author{%
+	Cédric Pierquet\\%
+	\url{https://openmoji.org} (Source version 15.1.0)\\%
+	\url{https://github.com/cpierquet/latex-packages/tree/main/openmoji} (\LaTeX{} package)
+}
+\date{cpierquet -- at -- outlook . fr}\maketitle
+
+This package provides \LaTeX{} support for the openmoji project (\url{https://openmoji.org}).
+
+\medskip
+
+\hspace*{5mm}\fbox{\begin{minipage}{0.75\linewidth}{\emph{A set of thousands CC-BY-SA-4.0 licensed high-quality SVG/PDF icons for you to use in your web projects.}}\end{minipage}}
+
+\medskip
+
+To use \textsf{openmoji} in your document, include the package with |\usepackage{openmoji}|.
+
+An icon can be accessed using the icon name. A list of all included icons with their respective \textit{page} can be found at the end of this document.
+
+\section{Example}
+
+\begin{Verbatim}[frame=single]
+...
+\usepackage{openmoji}
+...
+\begin{document}
+...
+Inline\openmoji{adhesive bandage}version
+...
+\end{document}
+\end{Verbatim}
+
+Result: Inline\openmoji{adhesive bandage}version
+
+\section{Usage}
+
+\subsection{Generic macro}
+
+\begin{Verbatim}[frame=single]
+\openmoji[black=TF,height=...,(d)strut=...]<includegraphics options>{name}
+\end{Verbatim}
+
+The boolean \texttt{[black]} activate \textsf{black} version of icon (if available). And key \texttt{[height=...]} can be:
+
+\begin{itemize}
+	\item \texttt{dauto} (by default): inline insertion with height/depth;
+	\item \texttt{auto}: inline insertion with height/nodepth;
+	\item \texttt{a length}: normal insertion with fixed height;
+	\item \texttt{manuel height/depth}: normal insertion with fixed height/depth.
+\end{itemize}
+
+The keys \texttt{[(d)strut=...]} can be used to set the \textit{reference} box for dimension calculations.
+
+\medskip
+
+By default, icons are given with a small border, so the given height is the height of the \textit{full} box, not the hight of the icons.
+
+\medskip
+
+Example: Inline{\setlength\fboxsep{0pt}\fbox{\openmoji{adhesive bandage}}}version or inline {\setlength\fboxsep{0pt}\fbox{\openmoji{adhesive bandage}}} version
+
+\pagebreak
+
+\subsection{Examples}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height/depth (from qX characters)
+\openmoji[height=dauto]{adhesive bandage} %or \openmoji{adhesive bandage}
+\end{Verbatim}
+
+{\Huge q\openmoji{adhesive bandage}X}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height/depth (from specified characters)
+(q\openmoji[height=dauto,dstrut=(qB)]{adhesive bandage}B)
+\end{Verbatim}
+
+{\Huge (q\openmoji[height=dauto,dstrut=(qB)]{adhesive bandage}B)}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height (from X character) default version
+\openmoji[height=auto]{adhesive bandage}
+\end{Verbatim}
+
+{\Huge X\openmoji[height=auto]{adhesive bandage}X}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with manual height/depth
+\openmoji[height={0.8em/-0.4em}]{adhesive bandage}
+\end{Verbatim}
+
+{\Huge qb\openmoji[height={0.8em/-0.4em}]{adhesive bandage}Xz}
+
+\begin{Verbatim}[frame=single]
+%fixed height
+\openmoji[height=1.5in]{adhesive bandage}
+\openmoji[black,height=1.5in]{adhesive bandage}
+\end{Verbatim}
+
+\openmoji[height=1.5in]{adhesive bandage}\openmoji[black,height=1.5in]{adhesive bandage}
+
+\subsection{Used packages}
+
+\texttt{ifthen}, \texttt{calc}, \texttt{graphicx}, \texttt{xstring} and \texttt{simplekv} are loaded and used by the package.
+
+\subsection{Bugs}
+
+For bug reports and feature requests, report on the GitHub repository \url{https://github.com/cpierquet/latex-packages/issues}.
+
+\newpage
+
+\section{List of icons}
+
+\subsection{Color version (4171 icons)}
+
+The \textsf{PDF} file is \texttt{openmoji-color-all.pdf}
+
+Direct command is: {\ttfamily\textbackslash openmoji\{<Name>\}}.
+
+\input{openmojicolorbindings}
+
+\pagebreak
+
+\subsection{Black version (4171 icons)}
+
+The \textsf{PDF} file is \texttt{openmoji-black-all.pdf}
+
+Direct command is: {\ttfamily\textbackslash openmoji[black]\{<Name>\}}.
+
+\textit{Some are duplicates, due to the tints of the colored versions, or due to flags, it's not a bug\ldots}
+
+\input{openmojiblackbindings}
+
+\end{document}
