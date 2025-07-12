@@ -1,5 +1,5 @@
-%individuals pdf must be renamed 0001-name.pdf (because more than 1000 files)
-%so, the merged file will be with 'correct' order
+#individuals pdf must be renamed 0001-name.pdf (because more than 1000 files)
+#so, the merged file will be with 'correct' order
 
 import glob
 f = open("aaaa.txt","w")     #file for generated macro
