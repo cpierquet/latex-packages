@@ -4,7 +4,8 @@
 % Inspiration                    : Mark Wibrow in https://tex.stackexchange.com/questions/194780/tikz-drawing-a-rectangle-with-spikes-on-borders
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{Scrabble}[2025/05/05 0.1.8 Scrabble]
+\ProvidesPackage{Scrabble}[2025/07/17 0.1.9 Scrabble]
+% 0.1.9		Oubli de cases (merci Patrick Jenty) :-) + couleurs
 % 0.1.8		Bugfix
 % 0.1.7		Clé pour mélanger les mots en ligne
 % 0.1.6		Correction d'un bug avec le jeton joker + améliorations dans la doc et dans la version [DE]
@@ -13,16 +14,12 @@
 % 0.1.3		Refonte des commandes fr/en + gestion mot
 % 0.1.2		Clé <EchelleLabels> pour les labels des cases
 % 0.1.1		Commandes en/fr
-% 0.1		Version initiale
+% 0.1			Version initiale
 
 %------Packages utiles
 \RequirePackage{tikz}
 \RequirePackage{pgf,pgffor}
-%\RequirePackage{xstring}
-%\RequirePackage{xparse}
 \RequirePackage{randintlist}
-%\RequirePackage{simplekv}
-%\RequirePackage{listofitems}
 \RequirePackage{calc}
 %librairies tikz
 \usetikzlibrary{calc,shapes.geometric}
@@ -95,6 +92,16 @@
 	\IfStrEq{#1}{ES}{DOBLE\\TANTO\\DE\\LETRA}{}%
 }
 
+%colors en
+\colorlet{triplewordscore}{red!75}             %mot compte triple
+\colorlet{doublewordscore}{red!25}             %mot compte double
+\colorlet{tripleletterscore}{blue!50!cyan!75}  %lettre compte triple
+\colorlet{doubleletterscore}{blue!50!cyan!50}  %lettre compte double
+\colorlet{scrabblebgtile}{yellow!40}           %fond tuile
+\colorlet{scrabblebloard}{gray!25}             %fond plateau
+
+%voo
+
 %styles case + jetons
 %idées de https://tex.stackexchange.com/questions/194780/tikz-drawing-a-rectangle-with-spikes-on-borders
 \tikzset{%fr
@@ -110,54 +117,54 @@
 	},
 	casecentrale/.style={
 		code={
-			\path pic {pointes={2}{0.15}{red!25}};
+			\path pic {pointes={2}{0.15}{doublewordscore}};
 			\node [scale=\fpeval{\PLSCRBBLEechelleLabel*0.9},star,fill,star point ratio=2.35] {};%
 		}
 	},
 	jeton/.style={
 		code={
-			\IfStrEq{#1}{*}{\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {};}%
+			\IfStrEq{#1}{*}{\node[fill=scrabblebgtile,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {};}%
 				{%
 					\IfInteger{#1}%
 						{%
 							\IfEq{#1}{1}%c'est Ä
 								{%
-									\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\"A};%
+									\node[fill=scrabblebgtile,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\"A};%
 									\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangue]{#1} };%
 								}{}%
 							\IfEq{#1}{0}%c'est Ö
 								{%
-									\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\"O};%
+									\node[fill=scrabblebgtile,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\"O};%
 									\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangue]{#1} };%
 								}{}%
 							\IfEq{#1}{4}%c'est Ü
 								{%
-									\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\"U};%
+									\node[fill=scrabblebgtile,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\"U};%
 									\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangue]{#1} };%
 								}{}%
 							\IfEq{#1}{6}%c'est CH
 								{%
-									\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\scalebox{0.5}[1]{CH}};%
+									\node[fill=scrabblebgtile,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\scalebox{0.5}[1]{CH}};%
 									\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangue]{#1} };%
 								}{}%
 							\IfEq{#1}{7}%c'est Ñ
 								{%
-									\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\~{N}};%
+									\node[fill=scrabblebgtile,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\~{N}};%
 									\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangue]{#1} };%
 								}{}%
 							\IfEq{#1}{8}%c'est RR
 								{%
-									\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\scalebox{0.5}[1]{RR}};%
+									\node[fill=scrabblebgtile,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\scalebox{0.5}[1]{RR}};%
 									\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangue]{#1} };%
 								}{}%
 							\IfEq{#1}{9}%c'est LL
 								{%
-									\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\scalebox{0.5}[1]{LL}};%
+									\node[fill=scrabblebgtile,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\scalebox{0.5}[1]{LL}};%
 									\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangue]{#1} };%
 								}{}%
 						}%
 						{%
-							\node[fill=yellow!40,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\expandafter\MakeUppercase\expandafter{#1}};%
+							\node[fill=scrabblebgtile,minimum size=0.9 cm,rounded corners=\fpeval{\PLSCRBBLEechelle*0.15} cm,font=\Large\sffamily\bfseries] (JETON) {\expandafter\MakeUppercase\expandafter{#1}};%
 							\node[inner sep=2pt,font=\sffamily\scriptsize,anchor=south east] at (JETON.south east) { \scrabblescorelettre[\PLSCRBBLElangue]{#1} };%
 						}%
 				}%
@@ -177,14 +184,14 @@
 	},
 	motcomptetriplefr/.style={
 		code={
-			\path pic {pointes={3}{0.15}{red!75}};%
+			\path pic {pointes={3}{0.15}{triplewordscore}};%
 			\ifboolKV[PLSCRABBLETIKZFR]{Labels}%
 				{\IfStrEq{\PLSCRBBLElangue}{DE}{\def\tmpscalecaseMCT{0.8}}{\def\tmpscalecaseMCT{1}}\node [scorelettre,xscale=\fpeval{\PLSCRBBLEechelleLabel*0.8*\tmpscalecaseMCT},yscale=\fpeval{\PLSCRBBLEechelleLabel*0.8}] { \SCRBMCT{\PLSCRBBLElangue} };}{}
 		}
 	},
 	motcomptedoublefr/.style={
 		code={
-			\path pic {pointes={2}{0.15}{red!25}};%
+			\path pic {pointes={2}{0.15}{doublewordscore}};%
 			\ifboolKV[PLSCRABBLETIKZFR]{Labels}%
 				{\IfStrEq{\PLSCRBBLElangue}{DE}{\def\tmpscalecaseMCD{0.75}}{\def\tmpscalecaseMCD{1}}\node [scorelettre,xscale=\fpeval{\PLSCRBBLEechelleLabel*0.8*\tmpscalecaseMCD},yscale=\fpeval{\PLSCRBBLEechelleLabel*0.8}] { \SCRBMCD{\PLSCRBBLElangue} };}
 				{}%
@@ -192,28 +199,28 @@
 	},
 	lettrecomptetriplefr/.style={
 		code={
-			\path pic {pointes={3}{0.15}{blue!50!cyan!75}};%
+			\path pic {pointes={3}{0.15}{tripleletterscore}};%
 			\ifboolKV[PLSCRABBLETIKZFR]{Labels}%
 				{\IfStrEq{\PLSCRBBLElangue}{DE}{\def\tmpscalecaseLCT{0.7}}{\def\tmpscalecaseLCT{1}}\node [scorelettre,xscale=\fpeval{\PLSCRBBLEechelleLabel*0.8*\tmpscalecaseLCT},yscale=\fpeval{\PLSCRBBLEechelleLabel*0.8}] { \SCRBLCT{\PLSCRBBLElangue} };}{}
 		}
 	},
 	lettrecomptedoublefr/.style={
 		code={
-			\path pic {pointes={2}{0.15}{blue!50!cyan!50}};%
+			\path pic {pointes={2}{0.15}{doubleletterscore}};%
 			\ifboolKV[PLSCRABBLETIKZFR]{Labels}%
 				{\IfStrEq{\PLSCRBBLElangue}{DE}{\def\tmpscalecaseLCD{0.7}}{\def\tmpscalecaseLCD{1}}\node [scorelettre,xscale=\fpeval{\PLSCRBBLEechelleLabel*0.8*\tmpscalecaseLCD},yscale=\fpeval{\PLSCRBBLEechelleLabel*0.8}] { \SCRBLCD{\PLSCRBBLElangue} };}{}
 		}
 	},
 	motcomptetripleen/.style={
 		code={
-			\path pic {pointes={3}{0.15}{red!75}};%
+			\path pic {pointes={3}{0.15}{triplewordscore}};%
 			\ifboolKV[PLSCRABBLETIKZEN]{Labels}%
 				{\IfStrEq{\PLSCRBBLElangue}{DE}{\def\tmpscalecaseMCT{0.8}}{\def\tmpscalecaseMCT{1}}\node [scorelettre,xscale=\fpeval{\PLSCRBBLEechelleLabel*0.8*\tmpscalecaseMCT},yscale=\fpeval{\PLSCRBBLEechelleLabel*0.8}] { \SCRBMCT{\PLSCRBBLElangue} };}{}
 		}
 	},
 	motcomptedoubleen/.style={
 		code={
-			\path pic {pointes={2}{0.15}{red!25}};%
+			\path pic {pointes={2}{0.15}{doublewordscore}};%
 			\ifboolKV[PLSCRABBLETIKZEN]{Labels}%
 				{\IfStrEq{\PLSCRBBLElangue}{DE}{\def\tmpscalecaseMCD{0.75}}{\def\tmpscalecaseMCD{1}}\node [scorelettre,xscale=\fpeval{\PLSCRBBLEechelleLabel*0.8*\tmpscalecaseMCD},yscale=\fpeval{\PLSCRBBLEechelleLabel*0.8}] { \SCRBMCD{\PLSCRBBLElangue} };}
 				{}%
@@ -221,14 +228,14 @@
 	},
 	lettrecomptetripleen/.style={
 		code={
-			\path pic {pointes={3}{0.15}{blue!50!cyan!75}};%
+			\path pic {pointes={3}{0.15}{tripleletterscore}};%
 			\ifboolKV[PLSCRABBLETIKZEN]{Labels}%
 				{\IfStrEq{\PLSCRBBLElangue}{DE}{\def\tmpscalecaseLCT{0.7}}{\def\tmpscalecaseLCT{1}}\node [scorelettre,xscale=\fpeval{\PLSCRBBLEechelleLabel*0.8*\tmpscalecaseLCT},yscale=\fpeval{\PLSCRBBLEechelleLabel*0.8}] { \SCRBLCT{\PLSCRBBLElangue} };}{}
 		}
 	},
 	lettrecomptedoubleen/.style={
 		code={
-			\path pic {pointes={2}{0.15}{blue!50!cyan!50}};%
+			\path pic {pointes={2}{0.15}{doubleletterscore}};%
 			\ifboolKV[PLSCRABBLETIKZEN]{Labels}%
 				{\IfStrEq{\PLSCRBBLElangue}{DE}{\def\tmpscalecaseLCD{0.7}}{\def\tmpscalecaseLCD{1}}\node [scorelettre,xscale=\fpeval{\PLSCRBBLEechelleLabel*0.8*\tmpscalecaseLCD},yscale=\fpeval{\PLSCRBBLEechelleLabel*0.8}] { \SCRBLCD{\PLSCRBBLElangue} };}{}
 		}
@@ -278,7 +285,7 @@
 	\setKV[PLSCRABBLETIKZFR]{#2}%
 	\begin{tikzpicture}[scale=\PLSCRBBLEechelle,every node/.style={scale=\PLSCRBBLEechelle}]%
 		%plateau
-		\fill[gray!25] (-.5,-.5) rectangle ++(15,15);%
+		\fill[scrabblebloard] (-.5,-.5) rectangle ++(15,15);%
 		\draw[white,line width=\fpeval{\PLSCRBBLEechelle*0.1} cm, shift={(-.5,-.5)}] grid (15,15);%
 		\foreach \scrcase in{(\x,\y),(\y,14-\x),(14-\x,14-\y),(14-\y,\x)}{%
 			\foreach \x/\y in {0/0,7/0}{\path \scrcase pic {motcomptetriplefr};}
@@ -286,6 +293,11 @@
 			\foreach \x/\y in {1/5,5/1,5/5}{\path \scrcase pic {lettrecomptetriplefr};}
 			\foreach \x/\y in {3/0,0/3,2/6,6/2,6/6}{\path \scrcase pic {lettrecomptedoublefr};}
 		}%
+		%oubli de certaines MCD !
+		\path (7,3) pic {lettrecomptedoublefr};
+		\path (7,11) pic {lettrecomptedoublefr};
+		\path (3,7) pic {lettrecomptedoublefr};
+		\path (11,7) pic {lettrecomptedoublefr};
 		\path (7,7) pic {casecentrale};%
 		\ifboolKV[PLSCRABBLETIKZFR]{Cadre}{\draw[line width=\fpeval{\PLSCRBBLEechelle*0.075} cm] (-0.6,-0.6) rectangle (14.6,14.6) ;}{}
 	\end{tikzpicture}%
@@ -296,7 +308,7 @@
 	\setKV[PLSCRABBLETIKZEN]{#2}%
 	\begin{tikzpicture}[scale=\PLSCRBBLEechelle,every node/.style={scale=\PLSCRBBLEechelle}]%
 		%plateau
-		\fill[gray!25] (-.5,-.5) rectangle ++(15,15);%
+		\fill[scrabblebloard] (-.5,-.5) rectangle ++(15,15);%
 		\draw[white,line width=\fpeval{\PLSCRBBLEechelle*0.1} cm, shift={(-.5,-.5)}] grid (15,15);%
 		\foreach \scrcase in{(\x,\y),(\y,14-\x),(14-\x,14-\y),(14-\y,\x)}{%
 			\foreach \x/\y in {0/0,7/0}{\path \scrcase pic {motcomptetripleen};}
@@ -304,6 +316,11 @@
 			\foreach \x/\y in {1/5,5/1,5/5}{\path \scrcase pic {lettrecomptetripleen};}
 			\foreach \x/\y in {3/0,0/3,2/6,6/2,6/6}{\path \scrcase pic {lettrecomptedoubleen};}
 		}%
+		%oubli de certaines MCD !
+		\path (7,3) pic {lettrecomptedoubleen};
+		\path (7,11) pic {lettrecomptedoubleen};
+		\path (3,7) pic {lettrecomptedoubleen};
+		\path (11,7) pic {lettrecomptedoubleen};
 		\path (7,7) pic {casecentrale};%
 		\ifboolKV[PLSCRABBLETIKZEN]{Border}{\draw[line width=\fpeval{\PLSCRBBLEechelle*0.075} cm] (-0.6,-0.6) rectangle (14.6,14.6) ;}{}%
 	\end{tikzpicture}%
@@ -317,7 +334,7 @@
 	\setKV[PLSCRABBLETIKZFR]{#2}%
 	\begin{tikzpicture}[scale=\PLSCRBBLEechelle,every node/.style={scale=\PLSCRBBLEechelle}]%
 		%plateau
-		\fill[gray!25] (-.5,-.5) rectangle ++(15,15);%
+		\fill[scrabblebloard] (-.5,-.5) rectangle ++(15,15);%
 		\draw[white,line width=\fpeval{\PLSCRBBLEechelle*0.1} cm, shift={(-.5,-.5)}] grid (15,15);%
 		\foreach \scrcase in{(\x,\y),(\y,14-\x),(14-\x,14-\y),(14-\y,\x)}{%cases spéciales
 			\foreach \x/\y in {0/0,7/0} {\path \scrcase pic {motcomptetriplefr};}
@@ -325,6 +342,11 @@
 			\foreach \x/\y in {1/5,5/1,5/5} {\path \scrcase pic {lettrecomptetriplefr};}
 			\foreach \x/\y in {3/0,0/3,2/6,6/2,6/6} {\path \scrcase pic {lettrecomptedoublefr};}
 		}%
+		%oubli de certaines MCD !
+		\path (7,3) pic {lettrecomptedoublefr};
+		\path (7,11) pic {lettrecomptedoublefr};
+		\path (3,7) pic {lettrecomptedoublefr};
+		\path (11,7) pic {lettrecomptedoublefr};
 		\path (7,7) pic {casecentrale};%
 		\ifboolKV[PLSCRABBLETIKZFR]{Cadre}%
 			{\draw[line width=\fpeval{\PLSCRBBLEechelle*0.075} cm] (-0.6,-0.6) rectangle (14.6,14.6) ;}%
@@ -348,7 +370,7 @@
 	\setKV[PLSCRABBLETIKZEN]{#2}%
 	\begin{tikzpicture}[scale=\PLSCRBBLEechelle,every node/.style={scale=\PLSCRBBLEechelle}]%
 		%plateau
-		\fill[gray!25] (-.5,-.5) rectangle ++(15,15);%
+		\fill[scrabblebloard] (-.5,-.5) rectangle ++(15,15);%
 		\draw[white,line width=\fpeval{\PLSCRBBLEechelle*0.1} cm, shift={(-.5,-.5)}] grid (15,15);%
 		\foreach \scrcase in{(\x,\y),(\y,14-\x),(14-\x,14-\y),(14-\y,\x)}{%cases spéciales
 			\foreach \x/\y in {0/0,7/0} {\path \scrcase pic {motcomptetripleen};}
@@ -356,6 +378,11 @@
 			\foreach \x/\y in {1/5,5/1,5/5} {\path \scrcase pic {lettrecomptetripleen};}
 			\foreach \x/\y in {3/0,0/3,2/6,6/2,6/6} {\path \scrcase pic {lettrecomptedoubleen};}
 		}%
+		%oubli de certaines MCD !
+		\path (7,3) pic {lettrecomptedoubleen};
+		\path (7,11) pic {lettrecomptedoubleen};
+		\path (3,7) pic {lettrecomptedoubleen};
+		\path (11,7) pic {lettrecomptedoubleen};
 		\path (7,7) pic {casecentrale};%
 		\ifboolKV[PLSCRABBLETIKZEN]{Border}%
 			{\draw[line width=\fpeval{\PLSCRBBLEechelle*0.075} cm] (-0.6,-0.6) rectangle (14.6,14.6) ;}%
@@ -385,7 +412,7 @@
 }
 
 \setKVdefault[SCRABBLEWORDINLINEFR]{%
-	CouleurFond=yellow!40,%
+	CouleurFond=scrabblebgtile,%
 	Police=\bfseries\sffamily,%
 	CouleurPolice=black,%
 	Langue=FR,%
@@ -529,7 +556,7 @@
 }
 
 \setKVdefault[SCRABBLEWORDINLINEEN]{%
-	Colback=yellow!40,%
+	Colback=scrabblebgtile,%
 	Font=\bfseries\sffamily,%
 	Colfonte=black,%
 	Lang=EN,%

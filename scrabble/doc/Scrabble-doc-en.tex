@@ -46,8 +46,8 @@
 \setlength{\parindent}{0pt}
 \definecolor{LightGray}{gray}{0.9}
 
-\def\TPversion{0.1.8}
-\def\TPdate{05/05/2025}
+\def\TPversion{0.1.9}
+\def\TPdate{17/07/2025}
 
 \usepackage[most]{tcolorbox}
 \usepackage{minted2}
@@ -104,6 +104,7 @@
 	\begin{tabular}{c}
 	\texttt{Cédric Pierquet}\\
 	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://github.com/cpierquet/latex-packages/tree/main/scrabble}}\\
 	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
 \end{tabular}
 \end{center}
@@ -141,7 +142,7 @@
 
 \vspace{0.5cm}
 
-\hfill{}\textit{Thanks to Denis Bitouzé, Patrick Bideault, quark67 and jmbeckers for help and ideas !}
+\hfill{}\textit{Thanks to \textsf{Denis Bitouzé}, \textsf{Patrick Bideault}, \textsf{quark67}, \textsf{Patrick Jenty} and \textsf{jmbeckers} for help and ideas !}
 
 \vfill
 
@@ -376,9 +377,24 @@ It is possible to use special characters, for the languages \textsf{<DE>} and \t
 {\Huge \ScrabbleWord[Lang=ES,Font=\sffamily,Scale=0.75]{RO7OSO689}}
 \end{PresentationCode}
 
+\subsection{Colors}
+
+The colors used can be redefined using the aliases given below.
+
+\begin{PresentationCode}{listing only}
+\colorlet{triplewordscore}{red!75}
+\colorlet{doublewordscore}{red!25}
+\colorlet{tripleletterscore}{blue!50!cyan!75}
+\colorlet{doubleletterscore}{blue!50!cyan!50}
+\colorlet{scrabblebgtile}{yellow!40}
+\colorlet{scrabblebloard}{gray!25}
+\end{PresentationCode}
+
 \newpage
 
 \part*{History}
+
+\verb|v0.1.9|~:~~~~Bugfix (forgotten 'cells') + colors
 
 \verb|v0.1.8|~:~~~~Bugfix
 

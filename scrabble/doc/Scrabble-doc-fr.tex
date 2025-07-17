@@ -48,8 +48,8 @@
 \setlength{\parindent}{0pt}
 \definecolor{LightGray}{gray}{0.9}
 
-\def\TPversion{0.1.8}
-\def\TPdate{5 mai 2025}
+\def\TPversion{0.1.9}
+\def\TPdate{17 juillet 2025}
 
 \usepackage[most]{tcolorbox}
 \usepackage{minted2}
@@ -106,6 +106,7 @@
 	\begin{tabular}{c}
 	\texttt{Cédric Pierquet}\\
 	{\ttfamily c pierquet -- at -- outlook . fr}\\
+	\texttt{\url{https://github.com/cpierquet/latex-packages/tree/main/scrabble}}\\
 	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
 \end{tabular}
 \end{center}
@@ -151,7 +152,7 @@
 
 %\hfill{}\textit{Merci aux membres du groupe \faFacebook{} du \og Coin \LaTeX{} \fg{} pour leur aide et leurs idées !}
 
-\hfill{}\textit{Merci à Denis Bitouzé, à Patrick Bideault, à quark67 et à jmbeckers pour leurs retours et idées !}
+\hfill{}\textit{Merci à \textsf{Denis Bitouzé}, à \textsf{Patrick Bideault}, à \textsf{quark67}, à \textsf{Patrick Jenty} et à \textsf{jmbeckers} pour leurs retours et idées !}
 
 \vfill
 
@@ -408,9 +409,24 @@ Il est possible d'utiliser des jetons spéciaux, pour les langues \textsf{<DE>} 
 {\Huge \MotScrabble[Langue=ES,Police=\sffamily,Echelle=0.75]{RO7OSO689}}
 \end{PresentationCode}
 
+\subsection{Couleurs}
+
+Les couleurs utilisées peuvent être redéfinies, via les alias donnés ci-dessous.
+
+\begin{PresentationCode}{listing only}
+\colorlet{triplewordscore}{red!75}             %mot compte triple
+\colorlet{doublewordscore}{red!25}             %mot compte double
+\colorlet{tripleletterscore}{blue!50!cyan!75}  %lettre compte triple
+\colorlet{doubleletterscore}{blue!50!cyan!50}  %lettre compte double
+\colorlet{scrabblebgtile}{yellow!40}           %fond tuile
+\colorlet{scrabblebloard}{gray!25}             %fond plateau
+\end{PresentationCode}
+
 \newpage
 
 \part*{Historique}
+
+\verb|v0.1.9|~:~~~~Correction d'un bug (cases oubliées !) + gestion des couleurs
 
 \verb|v0.1.8|~:~~~~Correction de bugs
 
