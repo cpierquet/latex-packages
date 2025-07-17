@@ -1,0 +1,201 @@
+% Author        : C. Pierquet
+% licence       : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txtf
+% licence icons : https://www.svgrepo.com/collection/education-vectors/ CC-BY
+%               : https://www.svgrepo.com/collection/design-8/ CC0
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{customenvs-icons}[2025/07/13 v0.1.0 Subpackage customenvs-icons]
+
+%====history
+% 0.1.0: initial version
+
+%====packages
+\RequirePackage{ifthen}
+\RequirePackage{calc}
+\RequirePackage{graphicx}
+\RequirePackage{xstring}
+\RequirePackage{simplekv}
+
+%====lenghts
+\newlength{\customenvsIconsDefaultTotalHeight}
+\newlength{\customenvsIconsDefaultHeight}
+\newlength{\customenvsIconsNormalHeight}
+\newlength{\customenvsIconsDefaultDepth}
+\AtBeginDocument{%
+	\setlength{\customenvsIconsDefaultHeight}{\fontcharht\font`X}%
+	\setlength{\customenvsIconsNormalHeight}{\fontcharht\font`X}%
+}
+
+%====suppress warnings
+\begingroup\expandafter\expandafter\expandafter\endgroup
+\expandafter\ifx\csname pdfsuppresswarningpagegroup\endcsname\relax
+\else
+	\pdfsuppresswarningpagegroup=1\relax
+\fi
+
+%====macro for generating educ version
+\newcommand{\defineceiconseduc}[2]{%
+	\expandafter\newcommand\csname ceiconeduc #2\endcsname[1]{%
+		\includegraphics[page=#1, ##1]{ce-educationvectors-all.pdf}}%
+}%
+
+%====macro for generating design version
+\newcommand{\defineceiconsdesign}[2]{%
+	\expandafter\newcommand\csname ceicondesign #2\endcsname[1]{%
+		\includegraphics[page=#1, ##1]{ce-designvectors-all.pdf}}%
+}%
+
+%====int macros
+\newcommand{\ceiconeduc}[2][height=\customenvsIconsDefaultHeight]{%
+	\csname ceiconeduc #2\endcsname{#1}%
+}%
+\newcommand{\ceicondesign}[2][height=\customenvsIconsDefaultHeight]{%
+	\csname ceicondesign #2\endcsname{#1}%
+}%
+
+%====main macro
+\defKV[customenvsicons]{height=\def\customenvsiconsheigth{#1},style=\def\customenvsiconsstyle{#1},strut=\def\customenvsiconsstrut{#1},dstrut=\def\customenvsiconsdstrut{#1}}
+\setKVdefault[customenvsicons]{height=dauto,educ=true,design=false,strut={X},dstrut={qX}}
+
+\NewDocumentCommand\ceicon{O{}D<>{}m}{%
+	\restoreKV[customenvsicons]%
+	\setKV[customenvsicons]{#1}%
+	\ifboolKV[customenvsicons]{design}{\setKV[customenvsicons]{educ=false}}{}%
+	%lengths
+	\ifthenelse{\equal{\customenvsiconsheigth}{auto}}%
+	{%
+		\settoheight\customenvsIconsDefaultHeight{\hbox{\customenvsiconsstrut}}%height of \customenvsiconsstrut
+		\ifboolKV[customenvsicons]{educ}{\ceiconeduc[height=\customenvsIconsDefaultHeight,#2]{#3}}{}%
+		\ifboolKV[customenvsicons]{design}{\ceicondesign[height=\customenvsIconsDefaultHeight,#2]{#3}}{}%
+	}%
+	{%
+		\ifthenelse{\equal{\customenvsiconsheigth}{dauto}}%
+			{%
+				\settototalheight\customenvsIconsDefaultTotalHeight{\hbox{\customenvsiconsdstrut}}%height of \customenvsiconsdstrut
+				\settodepth\customenvsIconsDefaultDepth{\hbox{\customenvsiconsdstrut}}%depth of \customenvsiconsdstrut
+				\ifboolKV[customenvsicons]{educ}{\raisebox{-\customenvsIconsDefaultDepth}{\ceiconeduc[height=\customenvsIconsDefaultTotalHeight,#2]{#3}}}{}%
+				\ifboolKV[customenvsicons]{design}{\raisebox{-\customenvsIconsDefaultDepth}{\ceicondesign[height=\customenvsIconsDefaultTotalHeight,#2]{#3}}}{}%
+			}%
+			{%
+				\IfSubStr{\customenvsiconsheigth}{/}%
+					{%
+						\StrCut{\customenvsiconsheigth}{/}{\ceiconsmanualheight}{\ceiconsmanualdepth}%
+						\setlength\customenvsIconsNormalHeight{\ceiconsmanualheight}%
+						\setlength\customenvsIconsDefaultDepth{\ceiconsmanualdepth}%
+						\ifboolKV[customenvsicons]{educ}{\raisebox{\customenvsIconsDefaultDepth}{\ceiconeduc[height=\customenvsIconsNormalHeight,#2]{#3}}}{}%
+						\ifboolKV[customenvsicons]{design}{\raisebox{\customenvsIconsDefaultDepth}{\ceicondesign[height=\customenvsIconsNormalHeight,#2]{#3}}}{}%
+					}%
+					{%
+						\setlength\customenvsIconsNormalHeight{\customenvsiconsheigth}%
+						\ifboolKV[customenvsicons]{educ}{\ceiconeduc[height=\customenvsIconsNormalHeight,#2]{#3}}{}%
+						\ifboolKV[customenvsicons]{design}{\ceicondesign[height=\customenvsIconsNormalHeight,#2]{#3}}{}%
+					}%
+			}%
+	}%
+}
+
+%====EDUC GEN
+\defineceiconseduc{1}{abacus}
+\defineceiconseduc{2}{trophy}
+\defineceiconseduc{3}{atomic}
+\defineceiconseduc{4}{seoweb}
+\defineceiconseduc{5}{backbag}
+\defineceiconseduc{6}{balls}
+\defineceiconseduc{7}{blackboard}
+\defineceiconseduc{8}{bookcourses}
+\defineceiconseduc{9}{compass}
+\defineceiconseduc{10}{genetic}
+\defineceiconseduc{11}{idea}
+\defineceiconseduc{12}{microscop}
+\defineceiconseduc{13}{pencilcase}
+\defineceiconseduc{14}{puzzle}
+\defineceiconseduc{15}{ruler}
+\defineceiconseduc{16}{shoes}
+\defineceiconseduc{17}{studyy}
+\defineceiconseduc{18}{studyscience}
+\defineceiconseduc{19}{smartphone}
+\defineceiconseduc{20}{books}
+\defineceiconseduc{21}{onlinegraduation}
+\defineceiconseduc{22}{university}
+\defineceiconseduc{23}{calendar}
+\defineceiconseduc{24}{champion}
+\defineceiconseduc{25}{certifmedal}
+\defineceiconseduc{26}{schoolmedal}
+\defineceiconseduc{27}{chemistry}
+\defineceiconseduc{28}{chemistryliquid}
+\defineceiconseduc{29}{diarypencil}
+\defineceiconseduc{30}{filefolder}
+\defineceiconseduc{31}{document}
+\defineceiconseduc{32}{brush}
+\defineceiconseduc{33}{pencilruler}
+\defineceiconseduc{34}{globe}
+\defineceiconseduc{35}{graduatestudy}
+\defineceiconseduc{36}{seomathlearning}
+\defineceiconseduc{37}{mathlearning}
+\defineceiconseduc{38}{signature}
+\defineceiconseduc{39}{quill}
+\defineceiconseduc{40}{telescope}
+
+%====DESIGN GEN
+\defineceiconsdesign{1}{book}
+\defineceiconsdesign{2}{browser-html}
+\defineceiconsdesign{3}{canvas-easel}
+\defineceiconsdesign{4}{canvas-paint}
+\defineceiconsdesign{5}{compass-draw}
+\defineceiconsdesign{6}{crop}
+\defineceiconsdesign{7}{cube-atom}
+\defineceiconsdesign{8}{designer-draw}
+\defineceiconsdesign{9}{edit-draw}
+\defineceiconsdesign{10}{edit-pencil}
+\defineceiconsdesign{11}{edit-pencil-b}
+\defineceiconsdesign{12}{fountain-pen-tools-and-utensils}
+\defineceiconsdesign{13}{glue}
+\defineceiconsdesign{14}{grid-pixel}
+\defineceiconsdesign{15}{hierarchical-structure-diagram}
+\defineceiconsdesign{16}{laptop}
+\defineceiconsdesign{17}{magic-wand}
+\defineceiconsdesign{18}{marker}
+\defineceiconsdesign{19}{monitor-tv}
+\defineceiconsdesign{20}{mouse}
+\defineceiconsdesign{21}{paint-brush-brush}
+\defineceiconsdesign{22}{paint-bucket-bucket}
+\defineceiconsdesign{23}{paint-palette-art}
+\defineceiconsdesign{24}{paint-roller}
+\defineceiconsdesign{25}{paint-tube-art}
+\defineceiconsdesign{26}{pantone-paint}
+\defineceiconsdesign{27}{pencil-box}
+\defineceiconsdesign{28}{pencil-case}
+\defineceiconsdesign{29}{pencil-draw}
+\defineceiconsdesign{30}{pencil-ruler}
+\defineceiconsdesign{31}{pencil}
+\defineceiconsdesign{32}{picture-image}
+\defineceiconsdesign{33}{protractor-rule}
+\defineceiconsdesign{34}{rgb-document}
+\defineceiconsdesign{35}{ruler-pencil}
+\defineceiconsdesign{36}{ruler}
+\defineceiconsdesign{37}{scissors-cut}
+\defineceiconsdesign{38}{set-square-geometry}
+\defineceiconsdesign{39}{set-square-measure}
+\defineceiconsdesign{40}{set-square-measure-b}
+\defineceiconsdesign{41}{settings-gear}
+\defineceiconsdesign{42}{sharpener-tools-and-utensils}
+\defineceiconsdesign{43}{smartphone-edit-tools}
+\defineceiconsdesign{44}{spray-paint-graffiti}
+\defineceiconsdesign{45}{tablet-touchscreen}
+\defineceiconsdesign{46}{tablet-touchscreen-b}
+\defineceiconsdesign{47}{vector-design}
+\defineceiconsdesign{48}{vector-design-b}
+\defineceiconsdesign{49}{vector-design-c}
+\defineceiconsdesign{50}{vector-edit-tools}
+\defineceiconsdesign{51}{vector-eye}
+\defineceiconsdesign{52}{vector-heart}
+\defineceiconsdesign{53}{vector-illustration}
+\defineceiconsdesign{54}{vector-illustration-b}
+\defineceiconsdesign{55}{vector-illustration-c}
+\defineceiconsdesign{56}{vector}
+\defineceiconsdesign{57}{vector-b}
+\defineceiconsdesign{58}{vector-tablet}
+\defineceiconsdesign{59}{vector-tablet-b}
+\defineceiconsdesign{60}{web-design}
+
+\endinput

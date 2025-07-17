@@ -3,9 +3,11 @@
 % source pencil...: CC-BY-SA 4.0 https://tex.stackexchange.com/questions/504092/replicating-a-fancy-bordered-text-style-in-latex/504145#504145
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{customenvs}[2025/07/06 0.40d Custom classic environments]
+\ProvidesPackage{customenvs}[2025/07/17 0.40f Custom classic environments]
 
 %====HISTORIQUE
+% v 0.40f	WhatsApp like Chat
+% v 0.40e	Sous-package customenvs-icons
 % v 0.40d	Sous-package customenvs-exams + picto 'dballs' + Amélioration de code (compatibilité twemojis) + Alt version Exercice + Strut for pictos
 % v 0.40c	Widest string of list
 % v 0.40b	Bugfix + pictocalendar
@@ -75,6 +77,8 @@
 %====PACKAGES UTILES À CHARGER
 \RequirePackage{customenvs-tikzpictos}             %test souspackage
 \RequirePackage{customenvs-exams}                  %test souspackage
+\RequirePackage{customenvs-icons}                  %test souspackage
+
 \if@xcolor
 	\RequirePackage{xcolor}
 \fi
@@ -4483,6 +4487,125 @@
 	%#3 = ref strings
 	\getwideststring{#3}%
 	\makebox[\tmpwideststring][#1]{#2}%
+}
+
+%====CHAT WHATSAPP
+\newlength{\WidthofWa}
+\newlength{\HeightofWa}
+\newlength{\HeightMarginDate}
+\definecolor{greenwa}{HTML}{25D366}
+%\colorlet{bluewa}{blue}
+%\colorlet{wacolp}{greenwa!50}
+\colorlet{wacoltitle}{darkgray!50!black}
+
+\defKV[ProjetWA]{%
+	height=\def\ProjectWaHeight{#1},%
+	width=\setlength{\WidthofWa}{#1},%
+	color=\colorlet{wacolp}{#1},%
+	bgcolor=\def\ProjectWaColback{#1},%
+	receivecolor=\def\ProjectWaColIn{#1},%
+	sendcolor=\def\ProjectWaColOut{#1},%
+	fonttxt=\def\ProjectWaFonte{#1},%
+	txtwrite=\def\ProjectWaWrite{#1},%
+	avatar=\def\ProjectWaAvatar{#1},%
+	txtwidth=\def\ProjectWaWidthTxt{#1}
+}
+\setKVdefault[ProjetWA]{%
+	height=auto,%
+	width=5cm,%
+	bgcolor={lightgray!50},%
+	receivecolor=greenwa!66!white,%
+	sendcolor=white,%
+	txtwrite={Message\ldots},%
+	fonttxt=\sffamily,%
+	avatar=\faAddressCard,%
+	showavatar=false,%
+	bw=false,%
+	txtwidth=0.55
+}
+
+\tcbset{WaGlobal/.style={
+		enhanced,arc=1.25pt,colback=\ProjectWaColback,toptitle=0.3cm,bottomtitle=0.3cm,title={\null},
+		overlay={
+			%la barre de titre
+			\node[anchor=east,wacoltitle,text=wacoltitle] at ([xshift=-1mm]title.east) {\faVideo~\faFlipPhone~\faThreeDotsV};
+			\node[draw=none,anchor=west,inner sep=1pt,text=wacoltitle] at ([xshift=1mm]title.west) (arrowleft) {\faArrowLeft};
+			\node[draw=none,anchor=west,inner sep=1pt,text=wacoltitle] at ([xshift=1mm]title.west) (picture) {\phantom{\faArrowLeft}~\ProjectWaAvat};
+			\node[draw=none,anchor=west,text=wacoltitle,text depth=0pt,inner sep=1pt] at (picture.east) {~\sffamily\vphantom{pB}\NameofWa} ;
+			%le bas
+			\node[draw=white,fill=white,line width=1pt,rounded corners=8pt,text width={\WidthofWa-2.5mm-1cm},minimum height=0.75cm,font=\ProjectWaFonte,text=darkgray,inner xsep=3pt,anchor=west] at ([shift={(1.25mm,0.5cm)}]frame.south west) {\faIcon{smile}~\rule[-0.1cm]{1pt}{0.5cm}\,\ProjectWaWrite\hfill\faPaperclip~~\faVideo~};
+			\node[draw=wacolmicro,fill=wacolmicro,line width=1pt,rounded corners=8pt,text width={0.35cm},minimum height=0.75cm,font=\ProjectWaFonte,text=white,anchor=east,align=center] at ([shift={(-1.25mm,0.5cm)}]frame.south east) {\faMicrophone};
+		},
+		boxrule=0.8pt,colframe=wacolmicro!50!gray,title style={color=white},
+		bottom=1.15cm,top=1.5mm,left=1.5mm,right=1.5mm,titlerule=0mm
+	}
+}
+
+\NewDocumentEnvironment{EnvChatWA}{ O{} m }
+{
+	\restoreKV[ProjetWA]%
+	\setKV[ProjetWA]{#1}%
+	\settoheight\HeightMarginDate{\hbox{\ProjectWaFonte\scalebox{0.4}[0.4]{\textcolor{darkgray}{33:33}}\,\scalebox{0.33}[0.33]{\textcolor{blue}{{\faCheck\!\!\!\faCheck}}}}}%
+	\def\NameofWa{#2}%
+	\IfSubStr{\ProjectWaAvatar}{Image}%
+		{%
+			\StrBehind{\ProjectWaAvatar}{/}[\tmpimgavatar]%
+			\def\ProjectWaAvat{\includegraphics[height=0.5cm]{\tmpimgavatar}}%
+		}%
+		{%
+			\def\ProjectWaAvat{\ProjectWaAvatar}%
+		}%
+	\IfStrEq{\ProjectWaHeight}{auto}%
+		{%
+			\tcbset{WaSize/.style={width=\WidthofWa}}%
+		}%
+		{%
+			\setlength{\HeightofWa}{\ProjectWaHeight}%
+			\tcbset{WaSize/.style={width=\WidthofWa,height=\HeightofWa,valign=bottom}}%
+		}%
+	\ifboolKV[ProjetWA]{bw}%
+	{%
+		\colorlet{bluewa}{black}%
+		\colorlet{wacolp}{lightgray!25}%
+		\def\ProjectWaColback{lightgray!5}%
+		\def\ProjectWaColIn{lightgray!35}%
+		\def\ProjectWaColOut{lightgray!35}%
+		\colorlet{wacoltitle}{darkgray}%
+		\colorlet{wacolmicro}{darkgray}%
+	}%
+	{%
+		\colorlet{bluewa}{blue}%
+		\colorlet{wacolmicro}{greenwa}%
+	}%
+	\tcolorbox[WaSize,WaGlobal]%
+}%
+{%
+	\endtcolorbox%
+}
+
+\NewDocumentCommand\WaSend{ s m m }{%
+	\tcbox[enhanced,interior code={},before skip=1.5mm,after skip=1.5mm,halign=left,left=0mm,right=0mm,
+	frame code={
+		\filldraw[\ProjectWaColIn,rounded corners=1pt] (frame.north west) |- (frame.south east) -- ([yshift=-1.5mm]frame.north east) -- ([xshift=1.5mm]frame.north east) -- cycle ;
+		\node[inner sep=1pt,anchor=south east,font=\ProjectWaFonte] at (frame.south east) {\scalebox{0.4}[0.4]{\textcolor{darkgray}{#2}}\,\scalebox{0.33}[0.33]{\textcolor{bluewa}{{\faCheck\!\!\!\faCheck}}}} ;
+	},
+	text width={\ProjectWaWidthTxt\WidthofWa},capture=minipage,top=0mm,flush right,bottom=\HeightMarginDate,
+	fontupper=\ProjectWaFonte\small,boxsep=0.5mm]{#3}%
+}
+
+\NewDocumentCommand\WaRec{ s m m }{%
+	\tcbox[enhanced,interior code={},before skip=1.5mm,after skip=1.5mm,halign=left,left=0mm,right=0mm,
+	frame code={
+		\filldraw[\ProjectWaColOut,rounded corners=1pt] (frame.north east) |- (frame.south west) -- ([yshift=-1.5mm]frame.north west) -- ([xshift=-1.5mm]frame.north west) -- cycle ;
+		\node[inner sep=1pt,anchor=south east,font=\ProjectWaFonte] at (frame.south east) {\scalebox{0.4}[0.4]{\textcolor{darkgray}{#2}}} ;
+	},
+	text width={\ProjectWaWidthTxt\WidthofWa},capture=minipage,top=0mm,flush left,bottom=\HeightMarginDate,
+	fontupper=\ProjectWaFonte\small,boxsep=0.5mm]{#3}%
+}
+
+\NewDocumentCommand\WaDate{ m }{%
+	\tcbox[enhanced,before skip=1mm,after skip=1mm,leftright skip=1.5mm,halign=center,left=1mm,right=1mm,top=0.5mm,bottom=0.5mm,center,
+	fontupper=\ProjectWaFonte,boxsep=0mm,boxrule=0pt,colframe=white]{\scalebox{0.4}[0.4]{#1}}%
 }
 
 \endinput

@@ -1,0 +1,265 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{customenvs-icons}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{shortvrb}
+\MakeShortVerb{\|}
+\setlength{\parindent}{0pt}
+
+\newenvironment{ceiconscase}
+{%
+	\begin{longtable}{cllr}%icon + name + macro + page
+		\cmidrule[\heavyrulewidth]{1-4}% \toprule
+		\bfseries Icon & \bfseries Name & \bfseries Direct command & \bfseries PDF page \\
+		\cmidrule{1-4}
+		\endhead
+}%
+{%
+		\cmidrule[\heavyrulewidth]{1-4}
+	\end{longtable}%
+}
+
+\NewDocumentCommand{\showcaseceiconeduc}{mm}{%name + macro + page
+	\LARGE\ceicon{#2} & \itshape #2 & \ttfamily \textbackslash ceicon\{#2\} & \sffamily #1 \\
+}
+
+\NewDocumentCommand{\showcaseceicondesign}{mm}{%name + macro + page
+	\LARGE\ceicon[design]{#2} & \itshape #2 & \ttfamily \textbackslash ceicon[design]\{#2\} & \sffamily #1 \\
+}
+
+\begin{document}
+
+\title{The \textsf{customenvs-icons} package (0.1.0) -- \today}
+\author{%
+	Cédric Pierquet\\%
+	\url{https://github.com/cpierquet/latex-packages/tree/main/customenvs} (LATEX package)
+}
+\date{cpierquet -- at -- outlook . fr}\maketitle
+
+This package provides \LaTeX{} support for various icons:
+\begin{itemize}
+	\item \url{https://www.svgrepo.com/collection/education-vectors/};
+	\item \url{https://www.svgrepo.com/collection/design-8/}).
+\end{itemize}
+
+\medskip
+
+To use \textsf{customenvs-icons} in your document, include the package with |\usepackage{customenvs-icons}| or |\usepackage{customenvs}| for whole \textsf{customenvs} package.
+
+\smallskip
+
+An icon can be accessed using the icon name. A list of all included icons with their respective \textit{page} can be found at the end of this document.
+
+\section{Example}
+
+\begin{Verbatim}[frame=single]
+...
+\usepackage{customenvs-icons}
+...
+\begin{document}
+...
+Inline \ceicon{brush} version
+...
+\end{document}
+\end{Verbatim}
+
+Result: Inline \ceicon{brush} version
+
+\section{Usage}
+
+\subsection{Generic macro}
+
+\begin{Verbatim}[frame=single]
+\ceicon[educ=TF,design=TF,height=...,(d)strut=...]<includegraphics options>{name}
+\end{Verbatim}
+
+The boolean \texttt{[educ]} (\texttt{true} by default) activate \textsf{educ} version of icon, and the boolean \texttt{[design]} (\texttt{false} by default) activate \textsf{educ} version of icon. And key \texttt{[height=...]} can be:
+
+\begin{itemize}
+	\item \texttt{dauto} (by default): inline insertion with height/depth;
+	\item \texttt{auto}: inline insertion with height/nodepth;
+	\item \texttt{a length}: normal insertion with fixed height;
+	\item \texttt{manuel height/depth}: normal insertion with fixed height/depth.
+\end{itemize}
+
+The keys \texttt{[(d)strut=...]} can be used to set the \textit{reference} box for dimension calculations.
+
+\medskip
+
+By default, some icons are given with a small border, so the given height is the height of the \textit{full} box, not the hight of the icons.
+
+\medskip
+
+Example: Inline {\setlength\fboxsep{0pt}\fbox{\ceicon{brush}}} version or inline  {\setlength\fboxsep{0pt}\fbox{\ceicon[design]{pencil}}} version.
+
+\subsection{Examples}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height/depth (from qX characters)
+\ceicon[height=dauto]{brush} %or \ceicon{brush}
+\end{Verbatim}
+
+{\Huge q\ceicon{brush}X}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height/depth (from specified characters)
+(q\ceicon[height=dauto,dstrut=(qB)]{brush}B)
+\end{Verbatim}
+
+{\Huge (q\ceicon[height=dauto,dstrut=(qB)]{brush}B)}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height (from X character) default version
+\ceicon[height=auto]{brush}
+\end{Verbatim}
+
+{\Huge X\ceicon[height=auto]{brush}X}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with manual height/depth
+\ceicon[height={0.8em/-0.4em}]{brush}
+\end{Verbatim}
+
+{\Huge qb\ceicon[height={0.8em/-0.4em}]{brush}Xz}
+
+\begin{Verbatim}[frame=single]
+%fixed height
+\ceicon[height=2in]{brush}
+\end{Verbatim}
+
+\ceicon[height=1.5in]{brush}
+
+\subsection{Used packages}
+
+\texttt{ifthen}, \texttt{calc}, \texttt{graphicx}, \texttt{xstring} and \texttt{simplekv} are loaded and used by the package.
+
+\subsection{Bugs}
+
+For bug reports and feature requests, report on the GitHub repository \url{https://github.com/cpierquet/latex-packages/issues}.
+
+\newpage
+
+\section{List of icons}
+
+\subsection{Educ version (40 icons)}
+
+The \textsf{PDF} file is \texttt{ce-educationvectors-all.pdf}
+
+\begin{ceiconscase}
+	\showcaseceiconeduc{1}{abacus}
+	\showcaseceiconeduc{2}{trophy}
+	\showcaseceiconeduc{3}{atomic}
+	\showcaseceiconeduc{4}{seoweb}
+	\showcaseceiconeduc{5}{backbag}
+	\showcaseceiconeduc{6}{balls}
+	\showcaseceiconeduc{7}{blackboard}
+	\showcaseceiconeduc{8}{bookcourses}
+	\showcaseceiconeduc{9}{compass}
+	\showcaseceiconeduc{10}{genetic}
+	\showcaseceiconeduc{11}{idea}
+	\showcaseceiconeduc{12}{microscop}
+	\showcaseceiconeduc{13}{pencilcase}
+	\showcaseceiconeduc{14}{puzzle}
+	\showcaseceiconeduc{15}{ruler}
+	\showcaseceiconeduc{16}{shoes}
+	\showcaseceiconeduc{17}{studyy}
+	\showcaseceiconeduc{18}{studyscience}
+	\showcaseceiconeduc{19}{smartphone}
+	\showcaseceiconeduc{20}{books}
+	\showcaseceiconeduc{21}{onlinegraduation}
+	\showcaseceiconeduc{22}{university}
+	\showcaseceiconeduc{23}{calendar}
+	\showcaseceiconeduc{24}{champion}
+	\showcaseceiconeduc{25}{certifmedal}
+	\showcaseceiconeduc{26}{schoolmedal}
+	\showcaseceiconeduc{27}{chemistry}
+	\showcaseceiconeduc{28}{chemistryliquid}
+	\showcaseceiconeduc{29}{diarypencil}
+	\showcaseceiconeduc{30}{filefolder}
+	\showcaseceiconeduc{31}{document}
+	\showcaseceiconeduc{32}{brush}
+	\showcaseceiconeduc{33}{pencilruler}
+	\showcaseceiconeduc{34}{globe}
+	\showcaseceiconeduc{35}{graduatestudy}
+	\showcaseceiconeduc{36}{seomathlearning}
+	\showcaseceiconeduc{37}{mathlearning}
+	\showcaseceiconeduc{38}{signature}
+	\showcaseceiconeduc{39}{quill}
+	\showcaseceiconeduc{40}{telescope}
+\end{ceiconscase}
+
+\subsection{Design version (60 icons)}
+
+The \textsf{PDF} file is \texttt{ce-designvectors-all.pdf}
+
+\begin{ceiconscase}
+	\showcaseceicondesign{1}{book}
+	\showcaseceicondesign{2}{browser-html}
+	\showcaseceicondesign{3}{canvas-easel}
+	\showcaseceicondesign{4}{canvas-paint}
+	\showcaseceicondesign{5}{compass-draw}
+	\showcaseceicondesign{6}{crop}
+	\showcaseceicondesign{7}{cube-atom}
+	\showcaseceicondesign{8}{designer-draw}
+	\showcaseceicondesign{9}{edit-draw}
+	\showcaseceicondesign{10}{edit-pencil}
+	\showcaseceicondesign{11}{edit-pencil-b}
+	\showcaseceicondesign{12}{fountain-pen-tools-and-utensils}
+	\showcaseceicondesign{13}{glue}
+	\showcaseceicondesign{14}{grid-pixel}
+	\showcaseceicondesign{15}{hierarchical-structure-diagram}
+	\showcaseceicondesign{16}{laptop}
+	\showcaseceicondesign{17}{magic-wand}
+	\showcaseceicondesign{18}{marker}
+	\showcaseceicondesign{19}{monitor-tv}
+	\showcaseceicondesign{20}{mouse}
+	\showcaseceicondesign{21}{paint-brush-brush}
+	\showcaseceicondesign{22}{paint-bucket-bucket}
+	\showcaseceicondesign{23}{paint-palette-art}
+	\showcaseceicondesign{24}{paint-roller}
+	\showcaseceicondesign{25}{paint-tube-art}
+	\showcaseceicondesign{26}{pantone-paint}
+	\showcaseceicondesign{27}{pencil-box}
+	\showcaseceicondesign{28}{pencil-case}
+	\showcaseceicondesign{29}{pencil-draw}
+	\showcaseceicondesign{30}{pencil-ruler}
+	\showcaseceicondesign{31}{pencil}
+	\showcaseceicondesign{32}{picture-image}
+	\showcaseceicondesign{33}{protractor-rule}
+	\showcaseceicondesign{34}{rgb-document}
+	\showcaseceicondesign{35}{ruler-pencil}
+	\showcaseceicondesign{36}{ruler}
+	\showcaseceicondesign{37}{scissors-cut}
+	\showcaseceicondesign{38}{set-square-geometry}
+	\showcaseceicondesign{39}{set-square-measure}
+	\showcaseceicondesign{40}{set-square-measure-b}
+	\showcaseceicondesign{41}{settings-gear}
+	\showcaseceicondesign{42}{sharpener-tools-and-utensils}
+	\showcaseceicondesign{43}{smartphone-edit-tools}
+	\showcaseceicondesign{44}{spray-paint-graffiti}
+	\showcaseceicondesign{45}{tablet-touchscreen}
+	\showcaseceicondesign{46}{tablet-touchscreen-b}
+	\showcaseceicondesign{47}{vector-design}
+	\showcaseceicondesign{48}{vector-design-b}
+	\showcaseceicondesign{49}{vector-design-c}
+	\showcaseceicondesign{50}{vector-edit-tools}
+	\showcaseceicondesign{51}{vector-eye}
+	\showcaseceicondesign{52}{vector-heart}
+	\showcaseceicondesign{53}{vector-illustration}
+	\showcaseceicondesign{54}{vector-illustration-b}
+	\showcaseceicondesign{55}{vector-illustration-c}
+	\showcaseceicondesign{56}{vector}
+	\showcaseceicondesign{57}{vector-b}
+	\showcaseceicondesign{58}{vector-tablet}
+	\showcaseceicondesign{59}{vector-tablet-b}
+	\showcaseceicondesign{60}{web-design}
+\end{ceiconscase}
+
+\end{document}

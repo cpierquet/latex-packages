@@ -34,8 +34,8 @@
 \usepackage[margin=1.5cm]{geometry}
 \setlength{\parindent}{0pt}
 
-\def\TPversion{0.40d}
-\def\TPdate{06/07/2025}
+\def\TPversion{0.40f}
+\def\TPdate{17/07/2025}
 \usepackage{tcolorbox}
 \sethlcolor{lightgray!25}
 \NewDocumentCommand\MontreCode{ m }{%
@@ -113,6 +113,10 @@
 \vfill
 
 \section{History}
+
+\verb|v0.40f|~:~~~\textsf{WhatsApp} style for 'Chat'
+
+\verb|v0.40e|~:~~~\textsf{customenvs-icons} \texttt{v0.1.0}
 
 \verb|v0.40d|~:~~~Code enhancements (compatibility  with twemojis) + \textsf{customenvs-tikzpictos} \texttt{v0.1.4}
 
@@ -262,6 +266,36 @@ The package \MontreCode{customenvs-tikzpictos}, loaded within \MontreCode{custom
 	Clippy & \pictoclippy|\pictoclippy[style=angry]|\pictoclippy[style=happangry]|\pictoclippy[style=confused]\\
 	Dball & \pictodball{}|\pictodball{1}|\pictodball{2}|\pictodball{6}|\pictodball{7}\\
 \end{tblr}\hfill\null
+
+\pagebreak
+
+\subsection{Subpackage customenvs-icons (v0.1.0)}
+
+\MontreCode{customenvs} loads, for \textit{small} icons, \MontreCode{customenvs-icons} package.
+
+The idea is to propose small icons, independently of \MontreCode{customenvs}.
+
+\begin{codehigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\usepackage{customenvs-icons}       %only if for standalon
+
+\ceicon%
+  [%
+    educ=TF,                        %boolean style 'educ'
+    design=TF                       %boolean style 'design'
+    height=...,                     %(d)auto / height / height+depth
+    (d)strut=...                    %box choices (for dim calc)
+  ]%
+  <includegraphics options>%
+  {nom}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+{\Huge X\ceicon{brush}\ceicon[height=auto]{brush}X}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\ceicon[height=2cm,design]{browser-html}
+\end{demohigh}
 
 \newpage
 
@@ -645,6 +679,52 @@ Regarding the bubble creation commands, \MontreCode{\textbackslash InSMS} and \M
   \InSMS{19:28}{Yes, I need to compute $\mathsf{\int_{0}^{1} x^2e^{-x}\,dx}$\ldots}
   \OutSMS*{19:30}{Take care !!}
 \end{ChatSMS}
+\end{demohigh}
+
+\subsection{Style WhatsApp}
+
+Un style type \textit{WhatsApp} est également disponible, avec un fonctionnement similaire à celui présenté précédemment.
+
+Les clés disponibles sont :
+
+\begin{itemize}
+	\item \MontreCode{height}: \MontreCode{auto} by default
+	\item \MontreCode{width}: \MontreCode{5cm} by default
+	\item \MontreCode{bgcolor}: \MontreCode{lightgray!50} by default
+	\item \MontreCode{receivecolor}: \MontreCode{greenwa!66!white} by default
+	\item \MontreCode{sendcolor}: \MontreCode{white} by default
+	\item \MontreCode{txtwrite}: \MontreCode{Message...} by default
+	\item \MontreCode{fonttxt}: \MontreCode{sffamily} by default
+	\item \MontreCode{avatar}: \MontreCode{\textbackslash faAddressCard} by default
+	\item \MontreCode{showavatar}: \MontreCode{false} by default
+	\item \MontreCode{bw}: \MontreCode{false} by default
+	\item \MontreCode{txtwidth}: \MontreCode{0.55} by default.
+\end{itemize}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\begin{EnvChatWA}{C. Pierquet}
+	\WaDate{monday}
+	\WaRec{19:23}{Hi!}
+	\WaDate{today}
+	\WaSend*{08:33}{Hi!!}
+	\WaSend*{08:35}{You're using WhApp so :-)}
+	\WaRec{10:15}{Yep!!}
+	\WaRec{10:18}{Could you help me?}
+	\WaRec{10:18}{I've got pb with tables in \LaTeX\ldots}
+\end{EnvChatWA}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex3,style/main=teal!25,style/code=teal!25]
+\begin{EnvChatWA}[bw,showavatar,avatar=Image/avatar]{C. Pierquet}
+	\WaDate{monday}
+	\WaRec{19:23}{Hi!}
+	\WaDate{today}
+	\WaSend*{08:33}{Hi!!}
+	\WaSend*{08:35}{You're using WhApp so :-)}
+	\WaRec{10:15}{Yep!!}
+	\WaRec{10:18}{Could you help me?}
+	\WaRec{10:18}{I've got pb with tables in \LaTeX\ldots}
+\end{EnvChatWA}
 \end{demohigh}
 
 \pagebreak
