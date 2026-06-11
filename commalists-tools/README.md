@@ -49,10 +49,11 @@ If you want the latest version directly from this repository:
 
 ---
 
-## Author & License
+## Author & License & 
 
 | | |
 |---|---|
 | **Author** | Cédric Pierquet |
+| **Credits** | Valentin Dao, aka ankaa3908 |
 | **Email** | cpierquet@outlook.fr |
 | **License** | Released under the [LaTeX Project Public License v1.3c](http://www.latex-project.org/lppl.txt) or later |
