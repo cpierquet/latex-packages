@@ -1,10 +1,12 @@
 % Author     : C. Pierquet
+% Credits    : V. Dao, aka ankaa3908, for improvements with latex3 code
 % licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesExplPackage{commalists-tools-l3}{2026-06-04}{0.20c}{Basic operations for numeral comma separated lists}
+\ProvidesExplPackage{commalists-tools-l3}{2026-06-11}{0.20d}{Basic operations for numeral comma separated lists}
 
 %------History
+% 0.20d  Improvements with latex3 (tks to ankaa3908, again !)
 % 0.20c  Shuffle list
 % 0.20b  Extract element with cyclic version of list
 % 0.20a  New commands (sublist / transform / slice / merge / intersection / ...)
@@ -210,7 +212,13 @@
     \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #2 }
     \fp_zero:N \l__commalists_tmpa_fp
     \fp_set:Nn \l__commalists_tmpa_fp 
-      { \exp_args:Ne \fp_eval:n { (\seq_use:Nn \l__commalists_tmpa_seq { + }) / \seq_count:N \l__commalists_tmpa_seq } }
+      { \exp_args:Ne \fp_eval:n 
+        { 
+          ( \seq_use:Nn \l__commalists_tmpa_seq { + } )
+          /
+          \seq_count:N \l__commalists_tmpa_seq
+        } 
+      }
     \IfBooleanTF{ #1 }
       { \fp_use:N \l__commalists_tmpa_fp }
       { \tl_gset:Ne #3 { \fp_use:N \l__commalists_tmpa_fp } }
@@ -225,7 +233,7 @@
     \group_begin:
     \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #2 }
     \IfBooleanTF { #1 }
-      { \seq_count:N \l__commalists_tmpa_seq}
+      { \seq_count:N \l__commalists_tmpa_seq }
       { \tl_gset:Ne #3 { \seq_count:N \l__commalists_tmpa_seq } }
     \group_end:
   }
@@ -271,8 +279,15 @@
           }
       }
     \IfBooleanTF{ #1 }
-      { \exp_args:NNV \seq_item:Nn \l__commalists_tmpa_seq \l__commalists_tmpa_int }
-      { \tl_gset:Ne #4 { \exp_args:NNV \seq_item:Nn \l__commalists_tmpa_seq \l__commalists_tmpa_int } }
+      {
+        \exp_args:NNV 
+          \seq_item:Nn \l__commalists_tmpa_seq \l__commalists_tmpa_int 
+      }
+      { 
+        \tl_gset:Ne #4 {
+          \exp_args:NNV 
+            \seq_item:Nn \l__commalists_tmpa_seq \l__commalists_tmpa_int } 
+      }
     \group_end:
   }
 
@@ -362,14 +377,17 @@
       {
         \tl_set:Nn \l__commalists_slice_formula_tl { #3 }
         \tl_replace_all:Nnn \l__commalists_slice_formula_tl { x } { ##1 }
-        \int_set:Nn \l__commalists_tmpa_int { \fp_eval:n { \l__commalists_slice_formula_tl } }
+        \int_set:Nn \l__commalists_tmpa_int 
+          { \fp_eval:n { \l__commalists_slice_formula_tl } }
         \int_compare:nNnTF
           { \l__commalists_tmpa_int }
           <
           { \seq_count:N \l__commalists_tmpa_seq +1 }
           {
             \seq_put_right:Ne \l__commalists_slice_seq
-              { \seq_item:Nn \l__commalists_tmpa_seq { \l__commalists_tmpa_int } }
+              { \seq_item:Nn \l__commalists_tmpa_seq 
+                { \l__commalists_tmpa_int } 
+              }
           }
           { \seq_map_break: }
       }
@@ -408,7 +426,11 @@
           }
           {
             \seq_put_right:Ne \l__commalists_transform_seq
-              { \fp_eval:n { round(\l__commalists_transform_formula_tl, #2 ) } }
+              { 
+                \fp_eval:n {
+                  round( \l__commalists_transform_formula_tl, #2 ) 
+                } 
+              }
           }
       }
 
@@ -571,7 +593,9 @@
     \keys_set:nn { commalists / merge } { #2 }
     \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #3 }
     \seq_set_split:Nne \l__commalists_tmpb_seq { , } { #4 }
-    \seq_concat:NNN \l__commalists_merge_seq \l__commalists_tmpa_seq \l__commalists_tmpb_seq
+    \seq_concat:NNN \l__commalists_merge_seq 
+      \l__commalists_tmpa_seq 
+      \l__commalists_tmpb_seq
     \seq_remove_duplicates:N \l__commalists_merge_seq
     % --- sort if requested
     \bool_case:n {
