@@ -3,7 +3,7 @@ pennstander-otf fonts
 
 ## Description
 
-`pennstander-otf` is a font family (based on v0.4 version) with math support  
+`pennstander-otf` is a font family (based on v0.4.1 version) with math support  
 Official site is https://github.com/juliusross1/Pennstander  
 Inigial version of font is from https://etceteratype.co/pages/grandstander, by Tyler Finck  
 Pennstander and PennstanderMath typeface are available under the SIL Open Font License 1.1 license
@@ -41,6 +41,7 @@ Either version 1.3 or, at your option, any later version.
 Pennstander and PennstanderMath typeface are available under the SIL Open Font License 1.1 license.
 
 ## Changes
+* v0.4.1 (based on 0.4.1 version)
 * v0.4   (based on 0.4 version)
 * v0.3a  (bugfixes)
 * v0.3   (new version of otf + new fontfaces + variable ttf version)

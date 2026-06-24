@@ -3,7 +3,8 @@
 % arara: lualatex: {shell: no, synctex: yes, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
 
 \documentclass[a4paper]{scrartcl}
-\usepackage{mathtools, array, varioref}
+%\usepackage{mathtools, array, varioref}
+\usepackage{mathtools, array}
 \usepackage[british]{babel}
 \usepackage{pennstander-otf}
 \usepackage{framed}
@@ -47,8 +48,8 @@
 }
 \newcommand*{\hlabel}[1]{\phantomsection\label{#1}}
 
-\date{04/05/2026}
-\newcommand*{\version}{0.4}
+\date{22/06/2026}
+\newcommand*{\version}{0.4.1}
 
 \title{Pennstander fonts (\textit{experimental}) \\User’s Guide for LaTeX (v\version)}
 \author{Julius Ross \&\ Cédric Pierquet \\ \texttt{cpierquet@outlook.fr}}
