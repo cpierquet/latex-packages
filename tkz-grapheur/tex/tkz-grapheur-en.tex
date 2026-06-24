@@ -40,10 +40,10 @@
 %====PATCH NUM
 \@ifundefined{RoundNb}%
   {%
-    \NewDocumentCommand\RoundNb{ O{2} m}{\num{\xintfloateval{round(#2,#1)}}\relax}%
+    \NewDocumentCommand\RoundNb{ O{2} D<>{} m}{\num[#2]{\xintfloateval{round(#3,#1)}}\relax}%
   }%
   {%
-    \RenewDocumentCommand\RoundNb{ O{2} m}{\num{\xintfloateval{round(#2,#1)}}\relax}%
+    \RenewDocumentCommand\RoundNb{ O{2} D<>{} m}{\num[#2]{\xintfloateval{round(#3,#1)}}\relax}%
   }%
 
 %===COMMANDE INTERNE POUR FORMATER EN FRACTIONS

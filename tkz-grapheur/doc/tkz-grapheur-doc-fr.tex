@@ -1635,7 +1635,7 @@ Les \MontreCode{[clés]}, optionnelles, disponibles sont :
 \smallskip
 
 \begin{itemize}
-  \item \MontreCode{Methode} : méthode, parmi \MontreCode{fonction/interpo/spline} pour les calculs (\MontreCode{fonction} par défaut) ;
+  \item \MontreCode{Methode} : méthode, parmi \MontreCode{fonction/interpo/spline/path} pour les calculs (\MontreCode{fonction} par défaut) ;
   \item \MontreCode{Debut} : début du tracé (\MontreCode{\textbackslash pflxmin} par défaut) ;
   \item \MontreCode{Fin} : fin du tracé (\MontreCode{\textbackslash pflxmax} par défaut) ;
   \item \MontreCode{Pas} : pas du tracé si \MontreCode{fonction} (il est déterminé \textit{automatiquement} au départ mais peut être modifié) ;
@@ -1684,7 +1684,9 @@ Le minimum est $M\approx\ArrondirNum[3]{\MinInterpoY}$, atteint en $x\approx\Arr
 
 \pagebreak
 
-\subsection{Intégrales (version améliorée)}\label{integr}
+\subsection{Intégrales (version améliorée)}
+
+\subsubsection{Version n°1}\label{integr}
 
 On peut également travailler avec des intégrales.
 
@@ -1795,6 +1797,122 @@ Il sera sans doute intéressant de travailler avec les \textit{intersections} da
 
 \pagebreak
 
+\subsubsection{Version n°2}\label{integrnew}
+
+Une version alternative, basée sur les \MontreCode{name path} créés par \MontreCode{\textbackslash DefinirCourbe[Nom=...]}, \MontreCode{\textbackslash DefinirCourbeSpline[Nom=...]} ou \MontreCode{\textbackslash DefinirCourbeInterpo[Nom=...]}, permet de s'affranchir de la distinction entre les types de courbes.
+
+\smallskip
+
+Il est possible de :
+
+\begin{itemize}
+  \item représenter une intégrale \textbf{sous} une courbe nommée ;
+  \item représenter une intégrale \textbf{entre} deux courbes nommées.
+\end{itemize}
+
+\smallskip
+
+{\small\faBomb} Cette commande nécessite la librairie \MontreCode{spath3} (\MontreCode{\textbackslash usetikzlibrary\{spath3\}}) chargée par le package.
+
+\smallskip
+
+{\small\faBomb} Les bornes sont données en \textbf{abscisses réelles} ou en \textbf{nœuds TikZ}.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%dans l'environnement GraphiqueTikz
+%sous une courbe
+\RepresenterIntegrale[clés]{path1}{a}{b}
+%entre deux courbes
+\RepresenterIntegrale[clés]{path1}[path2]{a}{b}
+\end{tcblisting}
+
+Les \MontreCode{[clés]} disponibles sont :
+
+\begin{itemize}
+  \item \MontreCode{Couleurs} : couleurs du remplissage, sous la forme \MontreCode{Couleur} ou \MontreCode{CouleurBord/CouleurFond} (\MontreCode{gray} par défaut) ;
+  \item \MontreCode{Style} : type de remplissage, parmi \MontreCode{remplissage}/\MontreCode{hachures} (\MontreCode{remplissage} par défaut) ;
+  \item \MontreCode{Opacite} : opacité (\MontreCode{0.5} par défaut) du remplissage ;
+  \item \MontreCode{Hachures} : style (\MontreCode{north west lines} par défaut) du remplissage hachures ;
+  \item \MontreCode{Bornes} : type des bornes parmi :
+  \begin{itemize}
+    \item \MontreCode{abs} pour les bornes données par les abscisses ;
+    \item \MontreCode{noeuds} pour les bornes données par les nœuds ;
+    \item \MontreCode{abs/noeud} pour les bornes données par abscisse et nœud ;
+    \item \MontreCode{noeud/abs} pour les bornes données par nœud et abscisse ;
+  \end{itemize}
+  \item \MontreCode{Bord} : booléen (\MontreCode{true} par défaut) pour afficher les traits latéraux.
+\end{itemize}
+
+\smallskip
+
+Le premier argument obligatoire est le \textbf{nom} du \MontreCode{name path} de la courbe principale (supérieure dans le cas de deux courbes).
+
+\smallskip
+
+L'argument optionnel suivant est le \textbf{nom} du \MontreCode{name path} de la courbe secondaire (inférieure).
+
+\smallskip
+
+Les deux derniers arguments obligatoires sont les \textbf{bornes} de l'intégrale en abscisses réelles ou en nœuds TikZ.
+
+\smallskip
+
+Dans le cas de deux courbes, le remplissage est géré automatiquement quel que soit l'ordre des courbes sur l'intervalle — pas besoin de préciser laquelle est au-dessus.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+  [x=1.2cm,y=1cm,Xmin=-5,Xmax=5,Ymin=-2,Ymax=5]
+  \TracerAxesGrilles[Grads=false,Elargir=2.5mm]{}{}
+  \DefinirCourbe[Nom=cf,Trace=false]<f>%
+    {-0.2*(x+4)*(x-4)*(x-1)+1}
+  % sous la courbe
+  \RepresenterIntegrale[Couleurs=blue/cyan!40]{cf}{-3}{0}
+  % hachures
+  \RepresenterIntegrale[Couleurs=purple,Style=hachures]{cf}{1}{4}
+  \TracerCourbe[Couleur=red]{f(x)}
+  \TracerAxesGrilles[Grille=false,Elargir=2.5mm]%
+    {-5,-4,...,5}{-2,-1,...,5}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+  [x=1.2cm,y=1cm,Xmin=-5,Xmax=5,Ymin=-2,Ymax=5]
+  \TracerAxesGrilles[Grads=false,Elargir=2.5mm]{}{}
+  \DefinirCourbe[Nom=cf,Trace=false]<f>{-0.2*(x+4)*(x-4)*(x-1)+1}
+  \DefinirCourbe[Nom=cg,Trace=false]<g>{0.4*x+1}
+  % trouver les intersections
+  \TrouverIntersections[Nom=ITSC,Aff=false]{cf}{cg}
+  % entre deux courbes avec nœuds comme bornes
+  \RepresenterIntegrale[Couleurs=olive/yellow!50,Bornes=noeuds,Bord=false]%
+    {cf}[cg]{(ITSC-1)}{(ITSC-2)}
+  \TracerCourbe[Couleur=red]{f(x)}
+  \TracerCourbe[Couleur=blue]{g(x)}
+  \TracerAxesGrilles[Grille=false,Elargir=2.5mm]%
+    {-5,-4,...,5}{-2,-1,...,5}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+  [x=1.2cm,y=1cm,Xmin=-5,Xmax=5,Ymin=-2,Ymax=5]
+  \TracerAxesGrilles[Grads=false,Elargir=2.5mm]{}{}
+  \def\LISTEST{-5/3/1§-2/4/0§0/2/-1§2/-1/0§4/1/1}
+  \DefinirCourbeSpline[Nom=maspline,Trace=false]{\LISTEST}
+  \DefinirCourbe[Nom=cg,Trace=false]<g>{0.4*x+1}
+  \TrouverIntersections[Nom=ITT,Aff=false]{maspline}{cg}
+  % entre spline et courbe
+  \RepresenterIntegrale[Couleurs=teal/teal!30,Bornes=abs/noeud,Bord=false]%
+    {maspline}[cg]{-4}{(ITT-1)}
+  \TracerCourbeSpline[Couleur=red]{\LISTEST}
+  \TracerCourbe[Couleur=blue]{g(x)}
+  \TracerAxesGrilles[Grille=false,Elargir=2.5mm]%
+    {-5,-4,...,5}{-2,-1,...,5}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\pagebreak
+
 \subsection{Tangentes}\label{tgte}
 
 L'idée de cette commande est de tracer la tangente à une courbe précédemment définie, en spécifiant :
@@ -1869,7 +1987,18 @@ Le dernier argument obligatoire est le point de travail (version abscisse ou nœ
 Il est possible de représenter les premiers termes d'une suite sous forme de nuage de points.
 
 \begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+% u(n+1) = f(n)
 \TracerNuageSuite(*)[clés]{formule xint en n}
+
+% u(n+1) = f(u(n)) avec f -> f(x)
+\TracerNuageSuiteF(*)[clés,Debut=...]{u0}{formule xint en x}
+
+% u(n+1) = f(u(n), n) avec f -> f(x, n)
+\TracerNuageSuiteFn(*)[clés,Debut=...]{u0}{formule xint en (x, n)}
+
+% mode automatique (expérimental)
+% [Type = Recurrent / RecurrentN / Explicite]
+\TracerNuageSuiteAuto(*)[Type=...,clés]{formule xint}
 \end{tcblisting}
 
 La version étoilée n'affiche pas le label des termes, sous la forme $u_{i}$ en dessous (expérimental).
@@ -1892,6 +2021,19 @@ Les clés disponibles sont :
   \TracerAxesGrilles[Elargir=2.5mm]{auto}{auto}
   \TracerNuageSuite[CouleurNuage=blue,Fin=10]{sqrt(n)+1}
   \TracerNuageSuite*[CouleurNuage=red,Style=x,Fin=10]{0.8^n*2}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+  [%
+    x=0.5cm,y=0.25cm,Xmin=0,Xmax=30,Xgrille=2,Xgrilles=0.5,%
+    Ymin=0,Ymax=20,Ygrille=2,Ygrilles=1%
+  ]
+  \TracerAxesGrilles{auto}{auto}
+  \TracerNuageSuiteAuto*%
+  [Type=RecurrentN,Debut=0,Fin=30,CouleurNuage=teal]%
+  {20}{0.965*x+0.35+0.07*exp(-0.1*n)}
 \end{GraphiqueTikz}
 \end{tcblisting}
 
@@ -2085,6 +2227,70 @@ Les clés disponibles sont les mêmes que pour la définition des courbes, avec 
     [Couleur=red,Spline,Debut=-6,Fin=3,StyleTrace=dotted,h=0.05]%
     {interpotest}
 \end{GraphiqueTikz}
+\end{tcblisting}
+
+\pagebreak
+
+\subsection{Points d'intérêt}\label{pointsinteret}
+
+La commande \MontreCode{\textbackslash TrouverPointsInteret} est un \textit{wrapper} qui combine en une seule commande la recherche des \textbf{racines}, du \textbf{maximum global} et du \textbf{minimum global} d'une courbe définie via un \MontreCode{name path}.
+
+\smallskip
+
+Elle est compatible avec les trois types de courbes du package (\MontreCode{\textbackslash DefinirCourbe}, \MontreCode{\textbackslash DefinirCourbeSpline}, \MontreCode{\textbackslash DefinirCourbeInterpo}), à condition d'avoir utilisé la clé \MontreCode{Nom=...} lors de la définition et la clé \MontreCode{Methode=path} pour \MontreCode{\textbackslash TrouverMaximum}/\MontreCode{\textbackslash TrouverMinimum}.
+
+\smallskip
+
+{\small\faBomb} Les \textit{limitations} sont les mêmes que pour \MontreCode{\textbackslash TrouverMaximum}/\MontreCode{\textbackslash TrouverMinimum} :
+
+\begin{itemize}
+  \item pas de gestion d'extremums multiples (seul le global sera traité) ;
+  \item pas de gestion d'extremums aux bornes du tracé ;
+  \item le temps de compilation peut être plus long.
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%dans l'environnement GraphiqueTikz
+\TrouverPointsInteret[clés]{nom path}
+\end{tcblisting}
+
+Les \MontreCode{[clés]}, optionnelles, disponibles sont :
+
+\begin{itemize}
+  \item \MontreCode{Couleur} : couleur globale des points (\MontreCode{black} par défaut) ;
+  \item \MontreCode{CouleurRacines} : couleur des racines (défaut → \MontreCode{Couleur}) ;
+  \item \MontreCode{CouleurMax} : couleur du maximum (défaut → \MontreCode{Couleur}) ;
+  \item \MontreCode{CouleurMin} : couleur du minimum (défaut → \MontreCode{Couleur}) ;
+  \item \MontreCode{Style} : style global des points (\MontreCode{o} par défaut) ;
+  \item \MontreCode{StyleRacines} : style des racines (défaut → \MontreCode{Style}) ;
+  \item \MontreCode{StyleMax} : style du maximum (défaut → \MontreCode{Style}) ;
+  \item \MontreCode{StyleMin} : style du minimum (défaut → \MontreCode{Style}) ;
+  \item \MontreCode{Racines} : booléen (\MontreCode{true} par défaut) pour afficher les racines ;
+  \item \MontreCode{Maximum} : booléen (\MontreCode{true} par défaut) pour afficher le maximum ;
+  \item \MontreCode{Minimum} : booléen (\MontreCode{true} par défaut) pour afficher le minimum ;
+  \item \MontreCode{NomMax} : nom du nœud créé pour le maximum (\MontreCode{c-max} par défaut) ;
+  \item \MontreCode{NomMin} : nom du nœud créé pour le minimum (\MontreCode{c-min} par défaut) ;
+  \item \MontreCode{NomRacines} : préfixe des nœuds créés pour les racines (\MontreCode{c-rac} par défaut) ;
+  \item \MontreCode{Debut} : début de la recherche (\MontreCode{\textbackslash pflxmin} par défaut) ;
+  \item \MontreCode{Fin} : fin de la recherche (\MontreCode{\textbackslash pflxmax} par défaut).
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}[Xmin=-5,Xmax=5,Ymin=-2,Ymax=5]
+  \TracerAxesGrilles[Elargir=2.5mm,Police=\small]{auto}{auto}
+  \GenererPolynomeLagrange{-4,-3,0,2,4}{-1,3.5,2,1,0}
+  \TracerCourbe[Couleur=red,Nom=cf]{polylagrange(x)}
+  \TrouverPointsInteret%
+    [%
+      Racines=true,Maximum=true,Minimum=false,%
+      CouleurMax=blue!70!black,CouleurMin=red,CouleurRacines=orange%
+    ]%
+    {cf}
+  %récupération des coordonnées
+  \RecupererCoordonnees{(c-max)}[\MonMaxX][\MonMaxY]
+\end{GraphiqueTikz}
+
+Le maximum est $M\approx\ArrondirNum[2]{\MonMaxY}$, atteint en $x\approx\ArrondirNum[2]{\MonMaxX}$
 \end{tcblisting}
 
 \pagebreak
@@ -4930,6 +5136,8 @@ Cette commande nécessite le chargement préalable de
   \lstcmd{asymptote vert~}{\TracerAsymptote}{tracdroite}
   \lstcmd{tangente~~~~~~~}{\TracerTangente}{tgte}
   \lstcmd{nuage suite~~~~}{\TracerNuageSuite}{nuagesuite}
+  \lstcmd{~~~~~~~~~~~~~~~}{\TracerNuageSuiteF}{nuagesuite}
+  \lstcmd{~~~~~~~~~~~~~~~}{\TracerNuageSuiteFn}{nuagesuite}
   \lstcmd{toile récurr~~~}{\TracerToileRecurrence}{toilerecurr}
   \lstcmd{déf fam cbes~~~}{\DefinirFamilleCourbes}{famcourbes}
   \lstcmd{trace famille~~}{\TracerFamilleCourbes}{famcourbes}
@@ -4952,6 +5160,7 @@ Cette commande nécessite le chargement préalable de
   \lstcmd{intersection~~~}{\TrouverIntersections}{intersect}
   \lstcmd{maximum~~~~~~~~}{\TrouverMaximum}{maximum}
   \lstcmd{minimum~~~~~~~~}{\TrouverMinimum}{minimum}
+  \lstcmd{points intérêt~}{\TrouverPointsInteret}{pointsinteret}
   \lstcmd{dérivée~~~~~~~~}{\TracerDerivee}{derivprimit}
   \lstcmd{inég. linéaire~}{\InegaliteLineaire}{ineglin}
   \lstcmd{primitive~~~~~~}{\TracerPrimitive}{derivprimit}
@@ -4963,6 +5172,7 @@ Cette commande nécessite le chargement préalable de
 
 \begin{description}[noitemsep]
   \lstcmd{intégrale~~~~~~}{\TracerIntegrale}{integr}
+  \lstcmd{~~~~~~~~~~~~~~~}{\RepresenterIntegrale}{integrnew}
   \lstcmd{méthodes int~~~}{\RepresenterMethodeIntegrale}{methodesintergrales}
   \lstcmd{Monte-Carlo~~~~}{\SimulerMonteCarlo}{montecarlo}
   \lstcmd{loi normale~~~~}{\DefinirLoiNormale}{loinormale}
@@ -5151,6 +5361,8 @@ Les solutions de $f(x)=66$ sont d'environ \ArrondirNum*[0]{\xMonItscA} \&\ \Arro
 
 {\footnotesize \begin{quote}
 \begin{verbatim}
+0.31c : Améliorations dans les codes (suites notamment)
+0.31b : Améliorations dans les codes
 0.31a : Environnement alt pour des valeurs non normalisées + bugfixes InegaliteLin + Labels pour axes
 0.30f : Ajouts en statistiques (barres/bâtons/histogrammes/moustaches/camembert)
 0.30e : Meilleure gestion de la taille du graphique

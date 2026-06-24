@@ -2,12 +2,14 @@
 % licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{tkz-grapheur}[2026/04/29 0.31a Des outils en TikZ pour travailler comme avec un grapheur]
-\def\tkzgrapheurversion{0.31a}
-\def\tkzgrapheurdateversion{29/04/2026}
-\def\tkzgrapheurdatefrversion{29 avril 2026}
+\ProvidesPackage{tkz-grapheur}[2026/06/20 0.31c Des outils en TikZ pour travailler comme avec un grapheur]
+\def\tkzgrapheurversion{0.31c}
+\def\tkzgrapheurdateversion{20/06/2026}
+\def\tkzgrapheurdatefrversion{20 juin 2026}
 
 %====HISTORIQUE
+% v.0.31c  Correction d'un bug mineur sur le pas avec DefinirCourbe / TracerCourbe + Nuage/calcul suite un+1=f(un,n) 
+% v 0.31b  Correction d'un bug + commandes expérimentales d'analyse de Points d'Intérêts
 % v 0.31a  Environnement alternatif pour des valeurs non normalisées + bugfixes InegaliteLin + Labels pour axes
 % v 0.30f  Correction d'un bug avec les courbes implicites + représentations stats
 % v 0.30e  Possibilité de paramétrer la fenêtre via Hauteur ou Largeur + XYratio
@@ -90,6 +92,7 @@
   \fi
 \fi
 \usetikzlibrary{calc,intersections,patterns,patterns.meta,bbox}
+\usetikzlibrary{spath3}
 \RequirePackage{simplekv}
 \RequirePackage{xintexpr}
 \RequirePackage{xstring}

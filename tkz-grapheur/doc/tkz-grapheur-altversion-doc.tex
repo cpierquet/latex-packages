@@ -65,6 +65,12 @@
 \end{tabular}
 \end{center}
 
+\vfill
+
+\hfill\includegraphics[height=3cm]{tkz-grapheur-logo}\hfill\null
+
+\vfill
+
 \hrule\vfill
 
 \begin{tcolorbox}[colframe=lightgray,colback=lightgray!5,halign=center]
@@ -156,6 +162,8 @@ L'environnement \MontreCode{tkzGrph} accepte les mêmes noms de clés que \Montr
 	\item \MontreCode{Ymin}/\MontreCode{Ymax} : bornes de l'axe $Oy$, \MontreCode{0}/\MontreCode{10} par défaut ;
 	\item \MontreCode{Largeur=...} / \MontreCode{width=...} : largeur (dimension pure), \MontreCode{8cm} par défaut ;
 	\item \MontreCode{Hauteur=...} / \MontreCode{height=...} : hauteur (dimension pure), \MontreCode{6cm} par défaut ;
+  \item \MontreCode{x=...} : unité x éventuelle (dimension pure), \MontreCode{vide} par défaut ;
+  \item \MontreCode{y=...} : unité y éventuelle (dimension pure), \MontreCode{vide} par défaut ;
 	\item \MontreCode{Origx=...} / \MontreCode{Origy=...} : position de l'origine, \MontreCode{\{0\}} par défaut ;
 	\item \MontreCode{Xgrille=...} / \MontreCode{xgrid=...} : pas de grille principale en $x$, \MontreCode{1} par défaut ;
 	\item \MontreCode{Xgrilles=...} / \MontreCode{xgrids=...} : pas de grille secondaire en $x$, \MontreCode{0.5} par défaut ;
@@ -169,6 +177,10 @@ L'environnement \MontreCode{tkzGrph} accepte les mêmes noms de clés que \Montr
 \end{itemize}
 
 {\footnotesize\faBomb}~\MontreCode{Largeur} et \MontreCode{Hauteur} attendent des \textbf{dimensions pures} (\MontreCode{8cm}, \MontreCode{120mm}\ldots).
+
+\smallskip
+
+{\footnotesize\faBomb}~Les clés \MontreCode{x} et/ou \MontreCode{y} permettent de déterminer automatiquement la largeur et/ou la hauteur du graphique, et écrasent donc les clés \MontreCode{Largeur} et/ou \MontreCode{Hauteur}.
 
 \subsection{Nœuds créés}
 
@@ -215,7 +227,7 @@ Les \MontreCode{[clés]} disponibles sont :
   colframe=lightgray,colback=lightgray!5}
 \begin{tkzGrph}%
     <Xmin=1990,Xmax=2020,Ymin=0,Ymax=5000000,
-    Largeur=10cm,hauteur=5cm,Xgrille=5,Xgrilles=1,
+    Largeur=10cm,Hauteur=5cm,Xgrille=5,Xgrilles=1,
     Ygrille=1000000,Ygrilles=500000,Origx=1990>
   \tkzGrphTracerAxesGrille[Elargir=2.5mm,Police=\small,Format=annee/num]%
     {1990,1995,2000,2005,2010,2015,2020}%
@@ -294,7 +306,7 @@ Remarques :
   colframe=lightgray,colback=lightgray!5}
 \begin{tkzGrph}%
     <Xmin=2990,Xmax=3020,Ymin=0,Ymax=5000000,
-    Largeur=10cm,hauteur=5cm,Xgrille=5,Xgrilles=1,
+    Largeur=10cm,Hauteur=5cm,Xgrille=5,Xgrilles=1,
     Ygrille=1000000,Ygrilles=500000,Origx=2990,%
     TailleGrad=0pt/3pt>
   \tkzGrphTracerAxesGrille[Elargir=2.5mm]%
@@ -574,6 +586,118 @@ Antécédents : \ANTS
   \draw[teal] (grph-max) node[right,rotate=90,scale=0.75] {(\ArrondirNum[0]{\mylocalxmax};\ArrondirNum[0]<exponent-mode=fixed>{\mylocalymax})} ;
 \end{tkzGrph}
 \end{tcblisting}
+
+%==================================================================
+\subsection{Points d'intérêt : \texttt{\textbackslash tkzGrphInterestPoints}}
+%==================================================================
+
+La commande \MontreCode{\textbackslash tkzGrphInterestPoints} est un \textit{wrapper} qui combine en une seule commande la recherche des \textbf{racines}, du \textbf{maximum global} et du \textbf{minimum global} d'une courbe définie via un \MontreCode{name path}.
+
+\smallskip
+
+Elle est compatible avec les trois types de courbes (\MontreCode{\textbackslash tkzGrphDefineCurve}, \MontreCode{\textbackslash tkzGrphDefineSpline}, \MontreCode{\textbackslash tkzGrphDefineInterpoCurve}).
+
+\smallskip
+
+{\small\faBomb} Les \textit{limitations} sont les mêmes que pour \MontreCode{\textbackslash tkzGrphFindMin}/\MontreCode{Max} :
+
+\begin{itemize}
+  \item pas de gestion d'extremums multiples (seul le global sera traité) ;
+  \item pour des courbes sans minimum visible, utiliser \MontreCode{Minimum=false} ;
+  \item le temps de compilation peut être plus long.
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,
+    colframe=lightgray,colback=lightgray!5,listing only}
+%dans l'environnement tkzGrph
+\tkzGrphInterestPoints[clés]{nom path}
+% alias FR :
+\tkzGrphPointsInteret[clés]{nom path}
+\end{tcblisting}
+
+Les \MontreCode{[clés]}, optionnelles, disponibles sont :
+
+\begin{itemize}
+  \item \MontreCode{Couleur} / \MontreCode{color} : couleur globale (\MontreCode{black} par défaut) ;
+  \item \MontreCode{CouleurRacines} / \MontreCode{colorroots} : couleur des racines (défaut → \MontreCode{Couleur}) ;
+  \item \MontreCode{CouleurMax} / \MontreCode{colormax} : couleur du maximum (défaut → \MontreCode{Couleur}) ;
+  \item \MontreCode{CouleurMin} / \MontreCode{colormin} : couleur du minimum (défaut → \MontreCode{Couleur}) ;
+  \item \MontreCode{Style} / \MontreCode{style} : style global des points (\MontreCode{o} par défaut) ;
+  \item \MontreCode{StyleRacines} / \MontreCode{styleroots} : style des racines (défaut → \MontreCode{Style}) ;
+  \item \MontreCode{StyleMax} / \MontreCode{stylemax} : style du maximum (défaut → \MontreCode{Style}) ;
+  \item \MontreCode{StyleMin} / \MontreCode{stylemin} : style du minimum (défaut → \MontreCode{Style}) ;
+  \item \MontreCode{Local} / \MontreCode{local} : booléen pour les extrema locaux, en \textit{test} (\MontreCode{false} par défaut) ;
+  \item \MontreCode{Racines} / \MontreCode{roots} : booléen (\MontreCode{true} par défaut) ;
+  \item \MontreCode{Maximum} / \MontreCode{maximum} : booléen (\MontreCode{true} par défaut) ;
+  \item \MontreCode{Minimum} / \MontreCode{minimum} : booléen (\MontreCode{true} par défaut) ;
+  \item \MontreCode{NomMax} / \MontreCode{namemax} : nom du nœud du maximum (\MontreCode{grph-max} par défaut) ;
+  \item \MontreCode{NomMin} / \MontreCode{namemin} : nom du nœud du minimum (\MontreCode{grph-min} par défaut) ;
+  \item \MontreCode{NomRacines} / \MontreCode{nameroots} : préfixe des nœuds des racines (\MontreCode{grph-rac} par défaut) ;
+  \item \MontreCode{Debut} / \MontreCode{start} : début de la recherche (fenêtre complète par défaut) ;
+  \item \MontreCode{Fin} / \MontreCode{end} : fin de la recherche (fenêtre complète par défaut).
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,
+    colframe=lightgray,colback=lightgray!5}
+\begin{tkzGrph}%
+  <Xmin=2990,Xmax=3020,Xgrille=5,Xgrilles=1,%
+  Ymin=0,Ymax=5000000,Ygrille=1000000,Ygrilles=100000,Origx=2990,%
+  Largeur=10cm,Hauteur=70mm,Theme=seyes,TailleGrad=0pt/1mm>
+  \tkzGrphDrawGridAxis[enlarge=2.5mm,font=\small]%
+    {2990,2995,3000,3005,3010,3015,3020}%
+    {0,1000000,2000000,3000000,4000000,5000000}
+  \tkzGrphDefineSpline[alt,name=spline]%
+    { 2990/300000/0.5 § 3000/2000000/0 § 3010/250000/0 § 3020/4500000/0.8 }
+  \tkzGrphDrawExistingCurves{spline/blue}
+  % points d'intérêt de la spline
+  \tkzGrphInterestPoints[%
+    Debut=2995,Fin=3012,%
+    CouleurMax=red!70!black,StyleMax=+,
+    CouleurMin=yellow!70!black,StyleMin=x,
+    NomMax=monmax,NomMin=monmin%
+    ]{spline}
+  % récupération des coordonnées du maximum
+  \tkzGrphGetXY{(monmax)}[\xmax][\ymax]
+  \node[above right,font=\small,red!70!black] at (monmax)
+    {$(\ArrondirNum[0]{\xmax};%
+      \ArrondirNum[0]<exponent-mode=fixed>{\ymax})$} ;
+\end{tkzGrph}
+\end{tcblisting}
+
+\pagebreak
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,
+    colframe=lightgray,colback=lightgray!5}
+\begin{tkzGrph}%
+  <Xmin=-4,Xmax=10,Xgrille=1,Xgrilles=0.5,%
+  Ymin=-4,Ymax=3,Ygrille=1,Ygrilles=0.5,%
+  Largeur=14cm,Hauteur=7cm,Theme=seyes>
+  \tkzGrphDrawGridAxis[enlarge=2.5mm,font=\small]{-4,-3,...,10}{-4,-3,...,3}
+  \tkzGrphDefineSpline[alt,name=spline,Couleur=red]%
+    { -3/-1.25/0 § -1/2/0 § 1/1/0 § 3.5/2.5/0 § 7/-2.5/0 § 9/1/0}
+  \tkzGrphDrawExistingCurves{spline/blue}  % points d'intérêt de la spline
+  %\tkzGrphFindMax[Aff=true]{spline}[\pflpinommax]%
+  \tkzGrphPointsInteret[Local,CouleurMax=gray,CouleurMin=red,CouleurRacines=orange]{spline}
+  %tests
+  \foreach \i in {1,...,\pflstlocalmaxn}{%
+    \tkzGrphGetXY{(grph-max-\i)}[\tmpx][\tmpy]%
+    \node[draw=gray,fill=white,above=2pt,font=\small] at (grph-max-\i)
+    {$(\ArrondirNum[1]{\tmpx};\ArrondirNum[1]{\tmpy})$} ;%
+  }%
+  \foreach \i in {1,...,\pflstlocalminn}{%
+    \tkzGrphGetXY{(grph-min-\i)}[\tmpx][\tmpy]%
+    \node[draw=red,fill=white,below=2pt,font=\small] at (grph-min-\i)
+    {$(\ArrondirNum[1]{\tmpx};\ArrondirNum[1]{\tmpy})$} ;%
+  }%
+  \foreach \i in {1,...,\myantec}{%
+    \tkzGrphGetXY{(grph-rac-\i)}[\tmpx][\tmpy]%
+    \node[draw=orange,fill=white,below=2pt,font=\small] at (grph-rac-\i)
+    {$(\ArrondirNum[1]{\tmpx};\ArrondirNum[1]{\tmpy})$} ;%
+  }
+\end{tkzGrph}
+\end{tcblisting}
+
+\pagebreak
 
 %=============================================================
 \section{Nuage et régression : statistiques}

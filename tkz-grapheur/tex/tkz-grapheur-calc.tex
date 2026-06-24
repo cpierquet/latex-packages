@@ -303,17 +303,39 @@
 \NewCommandCopy\tkzgBinomialQuantile\tkzgQuantileBinom
 \NewCommandCopy\tkzgBinomialQuantileSup\tkzgQuantileBinomSup
 
-%====calcul terme récurrence
+%====calcul terme récurrence — version simple u_{n+1}=f(u_n)
+% (correction du décalage : u_n0 n'est plus itéré à tort)
 \NewDocumentCommand\tkzgCalcTermeRecurrence{ s m m m m O{\mycalcres} }{%
   % #2=f(x)  #3=n0  #4=un0  #5=n  #6=macro
   \xintdeffloatfunc tkzgvarfct(x) := #2 ;%
   \xdef\tkzgvartmp{\fpeval{#4}}%
-  \foreach \i in {#3,...,#5}%
-    {\xdef\tkzgvartmp{\xintfloateval{tkzgvarfct(\tkzgvartmp)}}}%
+  \foreach \i in {#3,...,#5}{%
+    \xintifboolexpr{ \i > #3 }%
+      {\xdef\tkzgvartmp{\xintfloateval{tkzgvarfct(\tkzgvartmp)}}}%
+      {}%
+  }%
   \xdef#6{\xintFloatToDecimal{\xintfloateval{\tkzgvartmp}}}%
   \IfBooleanF{#1}{#6}%
 }
 \NewCommandCopy\tkzgCalcRecurr\tkzgCalcTermeRecurrence
+ 
+ 
+%====calcul terme récurrence — version générale u_{n+1}=f(u_n,n)
+% (même correction : u_n0 n'est plus itéré à tort)
+\NewDocumentCommand\tkzgCalcTermeRecurrenceAlt{ s m m m m O{\mycalcres} }{%
+  % #2=f(x,n)  #3=n0  #4=un0  #5=n  #6=macro
+  \xintdeffloatfunc tkzgvarfctn(x,n) := #2 ;%
+  \xdef\tkzgvartmp{\fpeval{#4}}%
+  \foreach \i in {#3,...,#5}{%
+    \xintifboolexpr{ \i > #3 }%
+      {\xdef\tkzgvartmp{\xintfloateval{tkzgvarfctn(\tkzgvartmp,\i-1)}}}%
+      {}%
+  }%
+  \xdef#6{\xintFloatToDecimal{\xintfloateval{\tkzgvartmp}}}%
+  \IfBooleanF{#1}{#6}%
+}
+\NewCommandCopy\tkzgCalcRecurrN\tkzgCalcTermeRecurrenceAlt
+ 
 
 %====calcul seuil
 \NewDocumentCommand\tkzgCalcSeuilSuite{ s m m m m m O{\mycalcres} }{%

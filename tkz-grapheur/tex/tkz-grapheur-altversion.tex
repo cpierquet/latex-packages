@@ -4,14 +4,14 @@
 % Principe : normalisation interne, TikZ travaille dans [0,Largeur]x[0,Hauteur]
 % En phase(s) de test(s)
 
-%====LIB
-\usetikzlibrary{spath3}
-
 %====LENGTHS
 \newlength\tmptkzgstwidth
 \newlength\tmptkzgstheight
 
 \defKV[GraphiqueTikzStats]{%
+  %unités ?
+  x=\def\pflstxunit{#1},%
+  y=\def\pflstyunit{#1},%
   % axes
   Xmin=\def\pflstxmintmp{#1},%
   xmin=\def\pflstxmintmp{#1},%
@@ -55,6 +55,8 @@
   gradsize=\def\pfltmpthickgrad{#1}%\setlength\pflthickgrad{#1}%
 }
 \setKVdefault[GraphiqueTikzStats]{%
+  x={},%
+  y={},%
   AffCadre=false,%
   showframe=false,%
   TailleGrad=3pt,%
@@ -128,8 +130,20 @@
   \xdef\pflstampx{\xintfloateval{\pflstxmax-\pflstxmin}}%
   \xdef\pflstampy{\xintfloateval{\pflstymax-\pflstymin}}%
   %---- dimensions en cm (Largeur et Hauteur sont des dimensions pures : 8cm, 120mm...)
-  \xdef\pflstlargeur{\xintfloateval{\fpeval{\the\tmptkzgstwidth/1cm}}}%
-  \xdef\pflsthauteur{\xintfloateval{\fpeval{\the\tmptkzgstheight/1cm}}}%
+  \IfStrEq{\pflstxunit}{}%
+    {%
+      \xdef\pflstlargeur{\xintfloateval{\fpeval{\the\tmptkzgstwidth/1cm}}}%%
+    }%
+    {%
+      \xdef\pflstlargeur{\xintfloateval{\fpeval{(\pflstxmax-\pflstxmin)*(\pflstxunit)/(1cm)}}}%
+    }%
+  \IfStrEq{\pflstyunit}{}%
+    {%
+      \xdef\pflsthauteur{\xintfloateval{\fpeval{\the\tmptkzgstheight/1cm}}}%%
+    }%
+    {%
+      \xdef\pflsthauteur{\xintfloateval{\fpeval{(\pflstymax-\pflstymin)*(\pflstyunit)/(1cm)}}}%
+    }%
   %---- pas de grille normalisés (en cm dans [0,Largeur]x[0,Hauteur])
   \xdef\pflstngrillex{\xintfloateval{\pflstgrillex/\pflstampx*\pflstlargeur}}%
   \xdef\pflstngrillexs{\xintfloateval{\pflstgrillexs/\pflstampx*\pflstlargeur}}%
@@ -1484,7 +1498,6 @@
 \NewCommandCopy\tkzGrphRegLin\tkzGrphDrawRegLin
 \NewCommandCopy\tkzgreglin\tkzGrphDrawRegLin
 
-%====TROUVER MAXIMUM / MINIMUM LOCAL OU GLOBAL
 %====TROUVER MAXIMUM / MINIMUM via échantillonnage spath
 \defKV[GraphiqueTikzStatsMinMax]{%
   Debut=\def\pflstminmaxdebut{#1},start=\def\pflstminmaxdebut{#1},%
@@ -1587,5 +1600,247 @@
     {}%
 }
 \NewCommandCopy\tkzGrphTrouverMax\tkzGrphFindMax
+
+%====EXTREMUMS LOCAUX via échantillonnage spath (version alt tkzGrph)
+% Principe : détection changement de monotonie dans la boucle
+
+\defKV[tkzGrphLocalExtrema]{%
+  Debut=\def\pflstlocaldebut{#1},start=\def\pflstlocaldebut{#1},%
+  Fin=\def\pflstlocalfin{#1},end=\def\pflstlocalfin{#1},%
+  Pas=\def\pflstlocalpas{#1},step=\def\pflstlocalpas{#1},%
+  DistMin=\def\pflstlocaldistmin{#1},mindist=\def\pflstlocaldistmin{#1},%
+  CouleurMax=\def\pflstlocalcolmax{#1},colormax=\def\pflstlocalcolmax{#1},%
+  CouleurMin=\def\pflstlocalcolmin{#1},colormin=\def\pflstlocalcolmin{#1},%
+  StyleMax=\def\pflstlocalstylemax{#1},stylemax=\def\pflstlocalstylemax{#1},%
+  StyleMin=\def\pflstlocalstylemin{#1},stylemin=\def\pflstlocalstylemin{#1},%
+  NomMax=\def\pflstlocalnommax{#1},namemax=\def\pflstlocalnommax{#1},%
+  NomMin=\def\pflstlocalnommin{#1},namemin=\def\pflstlocalnommin{#1}%
+}
+\setKVdefault[tkzGrphLocalExtrema]{%
+  Debut={},start={},%
+  Fin={},end={},%
+  Pas=200,step=200,%
+  DistMin=0.3,mindist=0.3,% distance minimale en cm entre deux extrema
+  CouleurMax=blue,colormax=blue,%
+  CouleurMin=red,colormin=red,%
+  StyleMax=o,stylemax=o,%
+  StyleMin=o,stylemin=o,%
+  AffMax=true,showmax=true,%
+  AffMin=true,showmin=true,%
+  NomMax=grph-lmax,namemax=grph-lmax,%
+  NomMin=grph-lmin,namemin=grph-lmin%
+}
+
+\NewDocumentCommand\tkzGrphFindLocalExtrema{ O{} m }{%
+  % #1=clés  #2=nom path
+  \restoreKV[tkzGrphLocalExtrema]%
+  \setKV[tkzGrphLocalExtrema]{#1}%
+  \tkzgrphSetKVboolTrue[tkzGrphLocalExtrema]{showmax}{AffMax}%
+  \tkzgrphSetKVboolTrue[tkzGrphLocalExtrema]{showmin}{AffMin}%
+  % bornes normalisées
+  \IfStrEq{\pflstlocaldebut}{}%
+    {\xdef\tmpstnxa{0}}%
+    {\xdef\tmpstnxa{\xintfloateval{(\pflstlocaldebut-\pflstxmin)/\pflstampx*\pflstlargeur}}}%
+  \IfStrEq{\pflstlocalfin}{}%
+    {\xdef\tmpstnxb{\pflstlargeur}}%
+    {\xdef\tmpstnxb{\xintfloateval{(\pflstlocalfin-\pflstxmin)/\pflstampx*\pflstlargeur}}}%
+  \xdef\pflstlocaldt{\xintfloateval{1/\pflstlocalpas}}%
+  % listes des extrema trouvés
+  \xdef\pflstlistmax{}%
+  \xdef\pflstlistmin{}%
+  % compteurs pour les nœuds
+  \xdef\pflstcntmax{0}%
+  \xdef\pflstcntmin{0}%
+  % dernier extremum trouvé (pour filtre distance)
+  \xdef\pflstlastmaxx{-99}%
+  \xdef\pflstlastminx{-99}%
+  % échantillonnage — on a besoin de y[i-1], y[i], y[i+1]
+  % premier point
+  \path (spath cs:#2 0) ;%
+  \pgfgetlastxy{\tmpspx}{\tmpspy}%
+  \xdef\pflstprevy{\xintfloateval{\ConvertirPtToCm{\tmpspy}}}%
+  \xdef\pflstprevx{\xintfloateval{\ConvertirPtToCm{\tmpspx}}}%
+  % boucle de 1 à pas-1
+  \foreach \ii in {1,...,\inteval{\pflstlocalpas-1}}{%
+    \xdef\tmpt{\xintfloateval{\ii*\pflstlocaldt}}%
+    \xdef\tmptsuiv{\xintfloateval{(\ii+1)*\pflstlocaldt}}%
+    % point courant
+    \path (spath cs:#2 \tmpt) ;%
+    \pgfgetlastxy{\tmpspx}{\tmpspy}%
+    \xdef\tmpcurx{\xintfloateval{\ConvertirPtToCm{\tmpspx}}}%
+    \xdef\tmpcury{\xintfloateval{\ConvertirPtToCm{\tmpspy}}}%
+    % point suivant
+    \path (spath cs:#2 \tmptsuiv) ;%
+    \pgfgetlastxy{\tmpspxs}{\tmpspys}%
+    \xdef\tmpcurys{\xintfloateval{\ConvertirPtToCm{\tmpspys}}}%
+    % filtrer selon bornes x
+    \xintifboolexpr{%
+      \tmpcurx >= \tmpstnxa 'and'
+      \tmpcurx <= \tmpstnxb 'and'
+      \tmpcury >= 0 'and'
+      \tmpcury <= \pflsthauteur}%
+    {%
+      % test maximum local : y[i-1] < y[i] > y[i+1]
+      \xintifboolexpr{%
+        \tmpcury > \pflstprevy 'and'
+        \tmpcury > \tmpcurys 'and'
+        \xintfloateval{\tmpcurx-\pflstlastmaxx} > \pflstlocaldistmin}%
+      {%
+        \xdef\pflstcntmax{\inteval{\pflstcntmax+1}}%
+        \xdef\pflstlastmaxx{\tmpcurx}%
+        % stocker le nœud
+        \expandafter\xdef\csname\pflstlocalnommax-\pflstcntmax\endcsname{(\tmpcurx,\tmpcury)}%
+        \coordinate (\pflstlocalnommax-\pflstcntmax) at (\tmpcurx,\tmpcury) ;%
+      }{}%
+      % test minimum local : y[i-1] > y[i] < y[i+1]
+      \xintifboolexpr{%
+        \tmpcury < \pflstprevy 'and'
+        \tmpcury < \tmpcurys 'and'
+        \xintfloateval{\tmpcurx-\pflstlastminx} > \pflstlocaldistmin}%
+      {%
+        \xdef\pflstcntmin{\inteval{\pflstcntmin+1}}%
+        \xdef\pflstlastminx{\tmpcurx}%
+        \expandafter\xdef\csname\pflstlocalnommin-\pflstcntmin\endcsname{(\tmpcurx,\tmpcury)}%
+        \coordinate (\pflstlocalnommin-\pflstcntmin) at (\tmpcurx,\tmpcury) ;%
+      }{}%
+    }{}%
+    \xdef\pflstprevy{\tmpcury}%
+    \xdef\pflstprevx{\tmpcurx}%
+  }%
+  % stocker les totaux
+  \xdef\pflstlocalmaxn{\pflstcntmax}%
+  \xdef\pflstlocalminn{\pflstcntmin}%
+  % affichage des maxima
+  \ifboolKV[tkzGrphLocalExtrema]{AffMax}%
+  {%
+    \xintifboolexpr{\pflstcntmax == 0}{}%
+    {%
+      \foreach \i in {1,...,\pflstcntmax}{%
+        \begin{pgfinterruptboundingbox}%
+          \begin{scope}%
+            \clip (0,0) rectangle (\pflstlargeur,\pflsthauteur) ;%
+            \tkzGrphMarkPts*[Style=\pflstlocalstylemax,Couleur=\pflstlocalcolmax] {(\pflstlocalnommax-\i)}%
+          \end{scope}%
+        \end{pgfinterruptboundingbox}%
+      }%
+    }%
+  }{}%
+  % affichage des minima
+  \ifboolKV[tkzGrphLocalExtrema]{AffMin}%
+  {%
+    \xintifboolexpr{\pflstcntmin == 0}{}%
+    {%
+      \foreach \i in {1,...,\pflstcntmin}{%
+        \begin{pgfinterruptboundingbox}%
+          \begin{scope}%
+            \clip (0,0) rectangle (\pflstlargeur,\pflsthauteur) ;%
+            \tkzGrphMarkPts*[Style=\pflstlocalstylemin,Couleur=\pflstlocalcolmin] {(\pflstlocalnommin-\i)}%
+          \end{scope}%
+        \end{pgfinterruptboundingbox}%
+      }%
+    }%
+  }{}%
+}
+\NewCommandCopy\tkzGrphTrouverExtremasLocaux\tkzGrphFindLocalExtrema
+
+%====POINTS D'INTÉRÊT version normalisée tkzGrph (FR+EN, path-based)
+\defKV[tkzGrphInterestPointsKV]{%
+  Couleur=\def\pflpicoul{#1},%
+  color=\def\pflpicoul{#1},%
+  CouleurRacines=\def\pflpicoulrac{#1},%
+  colorroots=\def\pflpicoulrac{#1},%
+  CouleurMax=\def\pflpicoulmax{#1},%
+  colormax=\def\pflpicoulmax{#1},%
+  CouleurMin=\def\pflpicoulmin{#1},%
+  colormin=\def\pflpicoulmin{#1},%
+  Style=\def\pflpistyle{#1},%
+  style=\def\pflpistyle{#1},%
+  StyleRacines=\def\pflpistyler{#1},%
+  styleroots=\def\pflpistyler{#1},%
+  StyleMax=\def\pflpistylema{#1},%
+  stylemax=\def\pflpistylema{#1},%
+  StyleMin=\def\pflpistylemi{#1},%
+  stylemin=\def\pflpistylemi{#1},%
+  NomMax=\def\pflpinommax{#1},%
+  namemax=\def\pflpinommax{#1},%
+  NomMin=\def\pflpinommin{#1},%
+  namemin=\def\pflpinommin{#1},%
+  NomRacines=\def\pflpinomrac{#1},%
+  nameroots=\def\pflpinomrac{#1},%
+  Debut=\def\pflpidebut{#1},%
+  start=\def\pflpidebut{#1},%
+  Fin=\def\pflpifin{#1},%
+  end=\def\pflpifin{#1}%
+}
+\setKVdefault[tkzGrphInterestPointsKV]{%
+  Couleur=black,%
+  CouleurRacines={},%
+  CouleurMax={},%
+  CouleurMin={},%
+  Style=o,%
+  StyleRacines={},%
+  StyleMax={},%
+  StyleMin={},%
+  % booléens FR
+  Racines=true,%
+  Maximum=true,%
+  Minimum=true,%
+  % booléens EN (même défaut)
+  roots=true,%
+  maximum=true,%
+  minimum=true,%
+  NomMax=grph-max,%
+  NomMin=grph-min,%
+  NomRacines=grph-rac,%
+  Debut={},%
+  Fin={},%
+  Local=false,%
+  local=false%
+}
+
+\NewDocumentCommand\tkzGrphInterestPoints{ O{} m }{%
+  % #1=clés  #2=nom path
+  \restoreKV[tkzGrphInterestPointsKV]%
+  \setKV[tkzGrphInterestPointsKV]{#1}%
+  % sync booléens EN→FR
+  \tkzgrphSetKVboolTrue[tkzGrphInterestPointsKV]{roots}{Racines}%
+  \tkzgrphSetKVboolTrue[tkzGrphInterestPointsKV]{maximum}{Maximum}%
+  \tkzgrphSetKVboolTrue[tkzGrphInterestPointsKV]{minimum}{Minimum}%
+  \tkzgrphSetKVboolFalse[tkzGrphInterestPointsKV]{local}{Local}%
+  % résolution couleurs (défaut → Couleur globale)
+  \IfStrEq{\pflpicoulrac}{}{\xdef\pflpicoulrac{\pflpicoul}}{}%
+  \IfStrEq{\pflpicoulmax}{}{\xdef\pflpicoulmax{\pflpicoul}}{}%
+  \IfStrEq{\pflpicoulmin}{}{\xdef\pflpicoulmin{\pflpicoul}}{}%
+  % résolution styles (défaut → Style global)
+  \IfStrEq{\pflpistyler}{}{\xdef\pflpistyler{\pflpistyle}}{}%
+  \IfStrEq{\pflpistylema}{}{\xdef\pflpistylema{\pflpistyle}}{}%
+  \IfStrEq{\pflpistylemi}{}{\xdef\pflpistylemi{\pflpistyle}}{}%
+  %---- racines
+  \ifboolKV[tkzGrphInterestPointsKV]{Racines}%
+    {%
+      \tkzGrphFindX[Couleur=\pflpicoulrac,Style=\pflpistyler,Aff,Nom=\pflpinomrac]{#2}{0}%
+    }%
+    {}%
+  %---- maximum/minimum
+  \ifboolKV[tkzGrphInterestPointsKV]{Local}%
+    {%
+      \tkzGrphFindLocalExtrema[Debut=\pflpidebut,Fin=\pflpifin,CouleurMax=\pflpicoulmax,StyleMax=\pflpistylema,CouleurMin=\pflpicoulmin,StyleMin=\pflpistylemi,NomMax=\pflpinommax,NomMin=\pflpinommin]{#2}%
+    }%
+    {%
+      \ifboolKV[tkzGrphInterestPointsKV]{Maximum}%
+        {%
+          \tkzGrphFindMax[Aff=false,Debut=\pflpidebut,Fin=\pflpifin]{#2}[\pflpinommax]%
+          \tkzGrphMarquerPts*[Style=\pflpistylema,Couleur=\pflpicoulmax]{(\pflpinommax)}%
+        }%
+        {}%
+      \ifboolKV[tkzGrphInterestPointsKV]{Minimum}%
+        {%
+          \tkzGrphFindMin[Aff=false,Debut=\pflpidebut,Fin=\pflpifin]{#2}[\pflpinommin]%
+          \tkzGrphMarquerPts*[Style=\pflpistylemi,Couleur=\pflpicoulmin]{(\pflpinommin)}%
+        }%
+        {}%
+    }%
+}
+\NewCommandCopy\tkzGrphPointsInteret\tkzGrphInterestPoints
 
 \endinput

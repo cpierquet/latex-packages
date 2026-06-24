@@ -13,7 +13,11 @@
   Couleur=\def\pflcouleurbimpl{#1},color=\def\pflcouleurbimpl{#1},%
   Epaisseur=\setlength\pflthickimpl{#1},thick=\setlength\pflthickimpl{#1},%
   Precision=\def\pflprecisiimpl{#1},prec=\def\pflprecisiimpl{#1},%
-  Tolerance=\def\pfltoleranceimplic{#1},tolerance=\def\pfltoleranceimplic{#1}
+  Tolerance=\def\pfltoleranceimplic{#1},tolerance=\def\pfltoleranceimplic{#1},%
+  xa=\def\pflimplxa{#1},%
+  xb=\def\pflimplxb{#1},%
+  ya=\def\pflimplya{#1},%
+  yb=\def\pflimplyb{#1}%
 }
 \setKVdefault[GraphiqueTikzImplicite]{%
   CoeffPasAuto=1,step stretch=1,%
@@ -22,7 +26,8 @@
   Epaisseur=0.2875pt,thick=0.2875pt,%
   Precision=8,precision=8,%
   Tolerance=1e-10,tolerance=1e-10,%
-  lua=true
+  lua=true,%
+  xa={},xb={},ya={},yb={}%
 }
 
 \NewDocumentCommand\TracerCourbeImplicite{ O{} m }{%with jfbu part of code for xint version !
@@ -30,6 +35,11 @@
   % #2 = expression f(x,y) (= 0 implicite)
   \restoreKV[GraphiqueTikzImplicite]%
   \setKV[GraphiqueTikzImplicite]{#1}%
+  % résolution des bornes (défaut = fenêtre)
+  \IfStrEq{\pflimplxa}{}{\xdef\pflimplxa{\pflxmin}}{}%
+  \IfStrEq{\pflimplxb}{}{\xdef\pflimplxb{\pflxmax}}{}%
+  \IfStrEq{\pflimplya}{}{\xdef\pflimplya{\pflymin}}{}%
+  \IfStrEq{\pflimplyb}{}{\xdef\pflimplyb{\pflymax}}{}%
   \ifboolKV[GraphiqueTikzImplicite]{lua}%
   {%
     \ifluatex
@@ -42,7 +52,7 @@
       \def\pfl@pasx{\pflpasimpl}%
       \def\pfl@pasy{\pflpasimpl}%
     }%
-    \edef\tmplistepts{\directlua{tex.sprint(pfl.marching_squares("\luaescapestring{#2}",\pflxmin,\pflxmax,\pflymin,\pflymax,\pfl@pasx,\pfl@pasy,\pfltoleranceimplic))}}%
+    \edef\tmplistepts{\directlua{tex.sprint(pfl.marching_squares("\luaescapestring{#2}",\pflimplxa,\pflimplxb,\pflimplya,\pflimplyb,\pfl@pasx,\pfl@pasy,\pfltoleranceimplic))}}%
     \begin{scope}
         \clip (\pflxmin,\pflymin) rectangle (\pflxmax,\pflymax);
         \draw[\pflcouleurbimpl] plot[mark size=\pflthickimpl,pflcourbeimplicit] coordinates {\tmplistepts};
@@ -331,6 +341,7 @@ function pfl.expr_to_func(expr_str)
     e = e:gsub("exp%(", "math.exp(")
     e = e:gsub("sqrt%(","math.sqrt(")
     e = e:gsub("log%(", "math.log(")
+    e = e:gsub("ln%(", "math.log(")
     e = e:gsub("abs%(", "math.abs(")
     e = e:gsub("pi",    tostring(math.pi))
     e = e:gsub("%*%*",  "^")
