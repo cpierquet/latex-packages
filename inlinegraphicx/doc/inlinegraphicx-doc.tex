@@ -27,8 +27,8 @@
 \hypersetup{pdfborder=0 0 0}
 \usepackage[margin=2cm]{geometry}
 \setlength{\parindent}{0pt}
-\def\TPversion{0.20a}
-\def\TPdate{20/02/2026}
+\def\TPversion{0.20b}
+\def\TPdate{27/06/2026}
 \usepackage{tcolorbox}
 \usepackage{pgffor}
 \tcbuselibrary{breakable,skins,hooks,listingsutf8}
@@ -45,14 +45,14 @@
 	keywordstyle={\color{blue}},%
 	classoffset=1,%
 	alsoletter={-},%
-	morekeywords={inlinegraphicx,calc,simplekv,graphicx},%
+	morekeywords={inlinegraphicx,calc,mwe,simplekv,graphicx},%
 	keywordstyle={\color{violet}},%
 	classoffset=2,%
 	alsoletter={-},%
-	morekeywords={\inlinegraphics,\includegraphics},%
+	morekeywords={\inlinegraphics,\includegraphics,\safeincludegraphics},%
 	keywordstyle={\color{green!50!black}},%
 	classoffset=3,%
-	morekeywords={scale,strut},%
+	morekeywords={scale,strut,width,angle},%
 	keywordstyle={\color{orange!75!black}}
 }
 
@@ -70,7 +70,7 @@
 		commentstyle={\itshape\color{gray}},
 		keywordstyle={\color{blue}},%
 		classoffset=0,%
-		keywords={\usepackage,\includegraphics,xstring,listofitems,tikz,calc,simplekv,graphicx,\readlist,\showitems,\xintFor,\xintSeq,\draw,\node},%
+		keywords={\usepackage,\includegraphics,\safeincludegraphics,xstring,listofitems,mwe,tikz,calc,simplekv,graphicx,\readlist,\showitems,\xintFor,\xintSeq,\draw,\node},%
 		alsoletter={-},%
 		keywordstyle={\color{blue}},%
 		classoffset=1,%
@@ -82,7 +82,7 @@
 		morekeywords={\inlinegraphics,\includegraphics},%
 		keywordstyle={\color{green!50!black}},%
 		classoffset=3,%
-		morekeywords={scale,strut},%
+		morekeywords={scale,strut,width,angle},%
 		keywordstyle={\color{orange!75!black}}
 	},%
 	#1
@@ -155,6 +155,10 @@
 \end{tcolorbox}
 
 \begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+\sffamily{\LARGE Inline insertion, \inlinegraphics{montest} with \textit{dummybox} if not found.}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
 {Inline insertion, \inlinegraphics*{example-image-16x10} with automatic adjustments but without depth.}
 \end{tcolorbox}
 
@@ -184,7 +188,9 @@
 
 \pagebreak
 
-\section{Loading, useful packages}
+\section{Introduction}
+
+\subsection{Loading, useful packages}
 
 In order to load \ShowCode{inlinegraphicx}, simply use:
 
@@ -194,9 +200,13 @@ In order to load \ShowCode{inlinegraphicx}, simply use:
 
 The only loaded package is \ShowCode{graphicx}, the rest of the code is in \hologo{LaTeX3}.
 
-\section{Usage}
+\subsection{Usage}
 
 The purpose of this package is to provide command, based on \ShowCode{\\includegraphics}, to insert graphic elements \textit{inline}, with automatic positioning and scaling.
+
+\smallskip
+
+Before giving up, the package also tries appending several common extensions to the file name (\texttt{.pdf}, \texttt{.png}, \texttt{.jpg}, \texttt{.jpeg}, \texttt{.eps}). If the file is still not found, a placeholder image is inserted instead, a small generic icon drawn automatically.
 
 \smallskip
 
@@ -213,7 +223,7 @@ In order to adjust manually size/positioning, \ShowCode{[keys]} are available.
 \includegraphics[scale=3]{test_inlinegraphicx}
 \end{DemoCode}
 
-\section{The macro}
+\section{The main macro}
 
 \subsection{Arguments}
 
@@ -251,7 +261,7 @@ Inline insertion, \inlinegraphics*{example-image-16x10} with automatic adjustmen
 \end{DemoCode}
 
 \begin{DemoCode}{}
-\ttfamily{\LARGE Inline (\inlinegraphics[strut={(É)}]{example-image-16x10}É) q\inlinegraphics{example-image-16x10}H insertion}.
+\ttfamily{\LARGE Inline (\inlinegraphics[strut={(É)}]{example-image-16x10}É) q\inlinegraphics{example-image-16x10}H and q\inlinegraphics{notfoundfile}H insertion}.
 \end{DemoCode}
 
 \begin{DemoCode}{}
@@ -260,7 +270,33 @@ Inline insertion, \inlinegraphics*{example-image-16x10} with automatic adjustmen
 
 \pagebreak
 
+\section{The safeincludegraphics wrapper}
+
+\subsection{Purpose}
+
+\ShowCode{\\safeincludegraphics} is a lightweight, fail-safe wrapper around \ShowCode{\\includegraphics}. Unlike \ShowCode{\\inlinegraphics}, it performs no inline vertical alignment and parses no key of its own: whatever is given as \ShowCode{[options]} is passed verbatim to \ShowCode{\\includegraphics}.
+
+\begin{DemoCode}{listing only}
+\safeincludegraphics[options]{file}
+\end{DemoCode}
+
+Before inserting the image, the same existence test as \ShowCode{\\inlinegraphics} is performed. If the file is still not found, a warning is issued and the \ShowCode{example-image.pdf} placeholder is inserted instead (shipped with the \ShowCode{mwe} package, and available on virtually any \LaTeX\ installation, without the need to load \ShowCode{mwe} itself). The placeholder is scaled exactly like a regular image, with the same \ShowCode{[options]}.
+
+\subsection{Examples}
+
+\begin{DemoCode}{}
+\safeincludegraphics[width=2cm]{example-image-a}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\safeincludegraphics[width=2cm,angle=15]{thisfiledoesnotexist}
+\end{DemoCode}
+
+\pagebreak
+
 \section{History}
+
+\texttt{0.20b: Dummy graphic if file not found}
 
 \texttt{0.20a: Bugfix with gset (tks to D. Bitouze)}
 

@@ -2,62 +2,212 @@
 % licence       : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesExplPackage{inlinegraphicx}{2026-02-20}{0.20a}{Insert inline graphicx with LaTeX3}
+\ProvidesExplPackage{inlinegraphicx}{2026-06-27}{0.20b}{Insert inline graphicx with LaTeX3}
 
 %====HISTORY
+% v 0.20b  Placeholder if file not found
 % v 0.20a  Bugfix with gset + l3 improvements
 % v 0.2.0  LaTeX3 conversion
 % v 0.1.1  Alt options for includegraphics
 % v 0.1.0  Initial version
-
+ 
 %====PACKAGE
 \RequirePackage { graphicx }
-
+ 
+%====MESSAGES
+\msg_new:nnn { inlinegraphicx } { file-not-found }
+  {
+    Image~'#1'~not~found~;~inserting~a~dummy~image~instead.
+  }
+ 
 %====VARIABLES  (toutes \l_ = locales au groupe de la macro)
 \dim_new:N \l_totheight_inlinegraphicx_dim
 \dim_new:N \l_depth_inlinegraphicx_dim
 \dim_new:N \l_raisebox_inlinegraphicx_dim
+\dim_new:N \l_height_inlinegraphicx_dim
+\dim_new:N \l_dummyinner_inlinegraphicx_dim
+\dim_new:N \l_dummydiag_inlinegraphicx_dim
+\dim_new:N \l_dummyht_inlinegraphicx_dim
+\dim_new:N \l_dummydp_inlinegraphicx_dim
+\dim_new:N \l_dummyraise_inlinegraphicx_dim
 \fp_new:N  \l_scale_inlinegraphicx_fp
 \fp_new:N  \l_invscale_inlinegraphicx_fp
 \tl_new:N  \l_strut_inlinegraphicx_tl
-
+\tl_new:N  \l_dummy_inlinegraphicx_tl
+\clist_new:N \l_extensions_inlinegraphicx_clist
+\clist_new:N \l_searchpath_inlinegraphicx_clist
+\bool_new:N \l_inlinegraphicx_exists_bool
+ 
 %====KEYS
 \keys_define:nn { inlinegraphics }
   {
-    scale .fp_set:N  = \l_scale_inlinegraphicx_fp,
-    scale .initial:n = { 1.0 },
-    scale .default:n = { 1.0 },
-    strut .tl_set:N  = \l_strut_inlinegraphicx_tl,
-    strut .initial:n = { qH },
-    strut .default:n = { qH },
+    scale .fp_set:N          = \l_scale_inlinegraphicx_fp,
+    scale .initial:n         = { 1.0 },
+    scale .default:n         = { 1.0 },
+    strut .tl_set:N          = \l_strut_inlinegraphicx_tl,
+    strut .initial:n         = { qH },
+    strut .default:n         = { qH },
+    dummy .tl_set:N          = \l_dummy_inlinegraphicx_tl,
+    dummy .initial:n         = { },
+    extensions .clist_set:N  = \l_extensions_inlinegraphicx_clist,
+    extensions .initial:n    = { .pdf, .png, .jpg, .jpeg, .eps },
+    searchpath .clist_set:N  = \l_searchpath_inlinegraphicx_clist,
+    searchpath .initial:n    = { },
   }
-
+ 
+%====FONCTIONS INTERNES
+\cs_new_protected:Npn \inlinegraphicx_check_exist:n #1
+  {
+    \bool_set_false:N \l_inlinegraphicx_exists_bool
+    
+    \file_if_exist:nT { #1 } { \bool_set_true:N \l_inlinegraphicx_exists_bool }
+    
+    \bool_if:NF \l_inlinegraphicx_exists_bool
+      {
+        \clist_map_inline:Nn \l_extensions_inlinegraphicx_clist
+          {
+            \file_if_exist:nT { #1 ##1 }
+              { \bool_set_true:N 
+                  \l_inlinegraphicx_exists_bool
+                  \clist_map_break:
+              }
+          }
+      }
+    
+    \bool_if:NF \l_inlinegraphicx_exists_bool
+      {
+        \clist_map_inline:Nn \l_searchpath_inlinegraphicx_clist
+          {
+            \file_if_exist:nT { ##1 #1 }
+              { \bool_set_true:N 
+                  \l_inlinegraphicx_exists_bool 
+                  \clist_map_break:
+              }
+            \clist_map_inline:Nn \l_extensions_inlinegraphicx_clist
+              {
+                \file_if_exist:nT { ##1 #1 ####1 }
+                  { \bool_set_true:N
+                      \l_inlinegraphicx_exists_bool
+                      \clist_map_break:
+                  }
+              }
+            \bool_if:NT \l_inlinegraphicx_exists_bool { \clist_map_break: }
+          }
+      }
+    \bool_if:NF \l_inlinegraphicx_exists_bool
+      { \msg_warning:nnn { inlinegraphicx } { file-not-found } { #1 } }
+  }
+ 
+\cs_new_protected:Npn \inlinegraphicx_dummybox:
+  {
+    \dim_set:Nn \l_dummyinner_inlinegraphicx_dim
+      { \l_height_inlinegraphicx_dim - 1.2pt }
+    \dim_set:Nn \l_dummydiag_inlinegraphicx_dim
+      { \fp_eval:n { 1.41421356 * \l_dummyinner_inlinegraphicx_dim } pt }
+    \fboxsep 0pt \fboxrule 0.6pt
+    \hbox_set:Nn \l_tmpb_box
+      {
+        \fbox
+          {
+            \makebox [ \dim_use:N \l_dummyinner_inlinegraphicx_dim ] [ c ]
+              {
+                \makebox [ 0pt ] [ c ]
+                  { \rotatebox 
+                      [ origin = c ]
+                      { 45  }
+                      { 
+                        \rule 
+                          { \dim_use:N \l_dummydiag_inlinegraphicx_dim }
+                          { 0.5pt } 
+                      } 
+                  }
+                \makebox [ 0pt ] [ c ]
+                  { \rotatebox
+                      [ origin = c ]
+                      { -45 }
+                      { 
+                        \rule 
+                          { \dim_use:N \l_dummydiag_inlinegraphicx_dim }
+                          { 0.5pt }
+                      } 
+                  }
+              }
+          }
+      }
+    % --- on mesure la boîte obtenue puis on la recentre verticalement
+    %     sur la hauteur cible, et on force ses dimensions finales.
+    \dim_set:Nn \l_dummyht_inlinegraphicx_dim { \box_ht:N \l_tmpb_box }
+    \dim_set:Nn \l_dummydp_inlinegraphicx_dim { \box_dp:N \l_tmpb_box }
+    \dim_set:Nn \l_dummyraise_inlinegraphicx_dim
+      {
+        0.5 \l_height_inlinegraphicx_dim
+        -
+        0.5 \l_dummyht_inlinegraphicx_dim
+        +
+        0.5 \l_dummydp_inlinegraphicx_dim
+      }
+    \hbox_set:Nn \l_tmpb_box
+      {
+        \raisebox 
+          { \dim_use:N \l_dummyraise_inlinegraphicx_dim } 
+          { \box_use:N \l_tmpb_box } 
+      }
+    \box_set_ht:Nn \l_tmpb_box { \l_height_inlinegraphicx_dim }
+    \box_set_dp:Nn \l_tmpb_box { 0pt }
+    \box_use:N \l_tmpb_box
+  }
+ 
+\cs_new_protected:Npn \inlinegraphicx_insert:nn #1 #2
+  {
+    \bool_if:NTF \l_inlinegraphicx_exists_bool
+      {
+        \includegraphics
+          [ height = { \dim_use:N \l_height_inlinegraphicx_dim } , #1 ]
+          { #2 }
+      }
+      {
+        \tl_if_empty:NTF \l_dummy_inlinegraphicx_tl
+          { \inlinegraphicx_dummybox: }
+          {
+            \includegraphics
+              [ height = { \dim_use:N \l_height_inlinegraphicx_dim } , #1 ]
+              { \l_dummy_inlinegraphicx_tl }
+          }
+      }
+  }
+ 
 %====MAIN MACRO
 \NewDocumentCommand \inlinegraphics { s O { } D < > { } m }
 {
   \group_begin:
-  
-  \keys_set:nn { inlinegraphics } { scale = { 1.0 } , strut = { qH } }
+ 
+  \keys_set:nn { inlinegraphics }
+    {
+      scale = { 1.0 } , 
+      strut = { qH } ,
+      dummy = { } , 
+      extensions = { .pdf, .png, .jpg, .jpeg, .eps } , 
+      searchpath = { } ,
+    }
   \keys_set:nn { inlinegraphics } { #2 }
+ 
+  \inlinegraphicx_check_exist:n { #4 }
+ 
   % ---
   \bool_if:NTF #1
   {
     % --- Mode étoilé : hauteur = hauteur de la capitale du strut
     \hbox_set:Nn \l_tmpa_box { \tl_use:N \l_strut_inlinegraphicx_tl }
     \dim_set:Nn \l_totheight_inlinegraphicx_dim { \box_ht:N \l_tmpa_box }
-    \includegraphics
-      [
-        height =
+    \dim_set:Nn \l_height_inlinegraphicx_dim
+      {
+        \fp_eval:n
         {
-          \fp_eval:n
-          {
-            \l_scale_inlinegraphicx_fp * \l_totheight_inlinegraphicx_dim
-          } 
-        pt 
-        },
-        #3
-      ]
-      { #4 }
+          \l_scale_inlinegraphicx_fp * \l_totheight_inlinegraphicx_dim
+        }
+        pt
+      }
+    \inlinegraphicx_insert:nn { #3 } { #4 }
   }
   {
     % --- Mode normal : hauteur totale (ht+dp) du strut avec alignement vertical
@@ -66,36 +216,43 @@
       { \box_dp:N \l_tmpa_box + \box_ht:N \l_tmpa_box }
     \dim_set:Nn \l_depth_inlinegraphicx_dim
       { \box_dp:N \l_tmpa_box }
+    \dim_set:Nn \l_height_inlinegraphicx_dim
+      {
+        \fp_eval:n
+        {
+          \l_scale_inlinegraphicx_fp * \l_totheight_inlinegraphicx_dim
+        }
+        pt
+      }
     \fp_set:Nn \l_invscale_inlinegraphicx_fp
       { 0.5 * ( 1.0 - \l_scale_inlinegraphicx_fp ) }
     \dim_set:Nn \l_raisebox_inlinegraphicx_dim
       {
         \l_depth_inlinegraphicx_dim
         -
-        \fp_eval:n 
+        \fp_eval:n
         {
           \l_invscale_inlinegraphicx_fp * \l_totheight_inlinegraphicx_dim
-        } 
+        }
         pt
       }
-    
+ 
     \raisebox { - \dim_use:N \l_raisebox_inlinegraphicx_dim }
-      {
-        \includegraphics
-          [
-            height = 
-            {
-              \fp_eval:n 
-              {
-                \l_scale_inlinegraphicx_fp * \l_totheight_inlinegraphicx_dim
-              }
-              pt
-            },
-            #3
-          ]
-          { #4 }
-      }
+      { \inlinegraphicx_insert:nn { #3 } { #4 } }
   }
+  \group_end:
+}
+
+%====SIMPLE WRAPPER
+\NewDocumentCommand \safeincludegraphics { O { } m }
+{
+  \group_begin:
+  \inlinegraphicx_check_exist:n { #2 }
+  \bool_if:NTF \l_inlinegraphicx_exists_bool
+    { \includegraphics [ #1 ] { #2 } }
+    {
+      \includegraphics [ #1 ] { example-image.pdf }
+    }
   \group_end:
 }
 
