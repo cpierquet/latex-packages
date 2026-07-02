@@ -2,13 +2,15 @@
 % licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{CreationBoites}[2026/05/23 0.20c Macros pour creer des boites tcbox simples, avec personnalisation(s)]
+
+\ProvidesPackage{CreationBoites}[2026/07/02 0.20d Macros pour creer des boites tcbox simples, avec personnalisation(s)]
 
 %====VARIABLES
-\def\cbpackagedate{2026/05/23}
-\def\cbpackageversion{0.20c}
+\def\cbpackagedate{2026/07/02}
+\def\cbpackageversion{0.20d}
 
 %====HISTORIQUE
+% v 0.20d  Boîte alternative exo 'expérimental'
 % v 0.20c  Possibilité d'utiliser un compteur personnalisé pour les boîtes
 % v 0.20b  Ajouts de 3 nouveaux styles + macro unique de génération, avec bifurcation(s)
 % v 0.20a  Ajout d'un mode de sauvegarde des couleurs à l'intérieur des boîtes
@@ -63,6 +65,8 @@
   \RequirePackage[normalem]{ulem}
 \fi
 \RequirePackage{simplekv}
+\RequirePackage{lucide-icons}  %pour le bloc exo
+\RequirePackage{pifont}        %mieux pour de la compatibilité :-/
 \RequirePackage{varwidth}
 
 %====INT MACRO L3
@@ -124,8 +128,8 @@
 \newcommand\margeinttitreboite{3pt}
 
 %====STYLE GÉNÉRAL DES TCBOX
+\tcbuselibrary{breakable}
 \if@breakable
-  \tcbuselibrary{breakable}
   \tcbset{baseboite/.style={
     enhanced,sharp corners=uphill,boxrule=\eptraitboite,%
     breakable,%
@@ -901,6 +905,152 @@
   }%
 }
 
+%====STYLE BICOLORE (style externe tcbset)
+\tcbset{daltbaseboite/.style={%
+  enhanced,
+  sharp corners,
+  boxrule=0.4mm,
+  colframe=#1,
+  colback=#1!5!white,       % corps légèrement teinté
+  colbacktitle=#1,          % titre fond plein
+  coltitle=white,           % texte titre blanc
+  before skip=0.5em, after skip=0.5em,
+  boxsep=1mm,
+  top=1mm, bottom=1mm, left=1.5mm, right=1.5mm,
+  }
+}
+
+%====GÉNÉRATEUR DE TITRE BICOLORE (sans sous-titre, géré par after title)
+\newcommand\cbgendalttitre[6]{%
+  % #1=couleur #2=nom #3=compteur #4=sing #5=plur #6=before
+  \ifboolKV[cpaltboites]{SouligneLabel}%
+    {\renewcommand\ULthickness{\cbulinethick}\settodepth\ULdepth{\hbox{pqyj}}}%
+    {}%
+  \ifboolKV[cpaltboites]{Compteur}%
+  {%
+    \ifboolKV[cpaltboites]{SouligneLabel}%
+    {%
+      \textcolor{white}{\policetitreboite{#6}%
+        \intcbteststreq{\cbpersonalcpt}{}%
+          {{\uline{\stepcounter{#3}{\vphantom{(qPÉ)}\tmplabelboite\cpaltboitescplttitre~\arabic{#3}}}}}%
+          {{\uline{\stepcounter{\cbpersonalcpt}{\vphantom{(qPÉ)}\tmplabelboite\cpaltboitescplttitre~\arabic{\cbpersonalcpt}}}}}}%
+    }%
+    {%
+      \textcolor{white}{\policetitreboite%
+        \intcbteststreq{\cbpersonalcpt}{}%
+          {\stepcounter{#3}\vphantom{(qPÉ)}{#6}\tmplabelboite\cpaltboitescplttitre~\arabic{#3}}%
+          {\stepcounter{\cbpersonalcpt}\vphantom{(qPÉ)}{#6}\tmplabelboite\cpaltboitescplttitre~\arabic{\cbpersonalcpt}}}%
+    }%
+  }%
+  {%
+    \textcolor{white}{\policetitreboite\vphantom{(qPÉ)}{#6}\tmplabelboite\cpaltboitescplttitre}%
+  }%
+}
+
+%====MACRO \CreationBoiteDAlt
+\NewDocumentCommand\CreationBoiteDAlt{ O{} m m m m m !O{} }{%
+  %1 = couleur
+  %2 = nom
+  %3 = compteur
+  %4 = label singulier
+  %5 = label pluriel
+  %6 = before label
+  %7 = options persos tcbox
+  \newcounter{#3}%
+  \setcounter{#3}{0}%
+  \colorlet{cbcoulbord#2}{#1}%
+  \colorlet{cbcoulfond#2}{#1!5!white}%
+  \NewDocumentEnvironment{#2}{ O{} D<>{} }%
+  {%
+    \restoreKV[cpaltboites]%
+    \setKV[cpaltboites]{##1}%
+    \ifboolKV[cpaltboites]{Pluriel}%
+      {\def\tmplabelboite{#5}}%
+      {\def\tmplabelboite{#4}}%
+    \tcbset{reset}%
+    \colorlet{cbcoulbord}{cbcoulbord#2}%
+    \colorlet{cbcoulfond}{cbcoulfond#2}%
+    \tcolorbox[%
+      daltbaseboite={#1},%
+      #7,##2,%
+      title={\cbgendalttitre{#1}{#2}{#3}{#4}{#5}{#6}},%
+      after title={%
+        \ifx\cpaltboitessoustitre\empty\else
+          \hfill{\policetitreboite\small\cpaltboitessoustitre}%
+        \fi
+      }%
+    ]%
+  }%
+  {\endtcolorbox}%
+}
+
+%====VARIANTE RESET SECTION
+\NewDocumentCommand\CreationBoiteDAltResetSection{ O{} m m m m m !O{} }{%
+  \newcounter{#3}%
+  \setcounter{#3}{0}%
+  \counterwithin{#3}{section}%    % ← seule différence
+  \colorlet{cbcoulbord#2}{#1}%
+  \colorlet{cbcoulfond#2}{#1!5!white}%
+  \NewDocumentEnvironment{#2}{ O{} D<>{} }%
+  {%
+    \restoreKV[cpaltboites]%
+    \setKV[cpaltboites]{##1}%
+    \ifboolKV[cpaltboites]{Pluriel}%
+      {\def\tmplabelboite{#5}}%
+      {\def\tmplabelboite{#4}}%
+    \tcbset{reset}%
+    \colorlet{cbcoulbord}{cbcoulbord#2}%
+    \colorlet{cbcoulfond}{cbcoulfond#2}%
+    \tcolorbox[%
+      daltbaseboite={#1},%
+      #7,##2,%
+      title={\cbgendalttitre{#1}{#2}{#3}{#4}{#5}{#6}},%
+      after title={%
+        \ifx\cpaltboitessoustitre\empty\else
+          \hfill{\policetitreboite\small\cpaltboitessoustitre}%
+        \fi
+      }%
+    ]%
+  }%
+  {\endtcolorbox}%
+}
+
+%====STYLE PFB
+\tcbuselibrary{theorems}
+\tcbset{
+  SousTitre/.store in=\BoxSubTitle,
+  SousTitre={}
+}
+\NewDocumentCommand\CreationBoiteTcbTheorem{ O{black} m m m D<>{} }{%
+  % #1 = couleur (opt, défaut black)
+  % #2 = nom environnement
+  % #3 = libellé
+  % #4 = préfixe label
+  % #5 = options \newtcbtheorem (entre < >)
+  \tcbset{%
+    #2ThStyle/.style={%
+      enhanced, sharp corners,
+      boxrule=0.8pt,
+      colframe=#1, colback=white,
+      colbacktitle=white,
+      coltitle=black,
+      fonttitle=\bfseries\sffamily\vphantom{(qÉ\textsuperscript{*})},
+      titlerule=0.4pt,
+      titlerule style=#1!60,
+      left=1.5mm, right=1.5mm,
+      separator sign={~:},
+      SousTitre={},%
+      after title={%
+        \ifx\BoxSubTitle\empty\else
+        \hfill
+        {\bfseries\sffamily\color{red!75!black}\BoxSubTitle}%
+        \fi
+      }%
+    }%
+  }%
+  \newtcbtheorem[#5]{#2}{#3}{#2ThStyle}{#4}%
+}
+
 %====MACRO UNIQUE
 \defKV[cbgenereboite]{%
   style=\def\cbgenboitestyle{#1}
@@ -913,7 +1063,7 @@
 \NewDocumentCommand\GenereBoite{ D<>{} O{} m m m m m !O{} }{%
   \restoreKV[cbgenereboite]%
   \setKV[cbgenereboite]{#1}%
-  \intcbtestsubstr{,ab,cp,ha,tx,default,}{,\cbgenboitestyle,}%
+  \intcbtestsubstr{,ab,cp,ha,tx,default,pfb,dc,}{,\cbgenboitestyle,}%
     {}% valeur connue, on continue
     {\def\cbgenboitestyle{default}}% valeur inconnue, on remet default par défaut
   \intcbteststreq{\cbgenboitestyle}{cp}%
@@ -965,6 +1115,263 @@
       \CreationBoite[#2]{#3}{#4}{#7}{#5/#6}[#8]%
     }%
     {}%
+  \intcbteststreq{\cbgenboitestyle}{dc}%
+    {%
+      \ifboolKV[cbgenereboite]{reset section}%
+        {\CreationBoiteDAltResetSection[#2]{#3}{#4}{#5}{#6}{#7}[#8]}%
+        {\CreationBoiteDAlt[#2]{#3}{#4}{#5}{#6}{#7}[#8]}%
+    }%
+    {}%
+  \intcbteststreq{\cbgenboitestyle}{pfb}%
+    {%
+      \CreationBoiteTcbTheorem[#2]{#3}{#5}{#4}<#8>%
+    }%
+    {}%
+}
+
+%====STYLE 'BOITE' EXERCICES
+\def\cbhlbstrut{(qÉ/B)}%pour avoir toujours une hauteur homogène
+\@ifundefined{c@cbhlb}%
+  {\newcounter{cbhlb}}%
+  {}%
+\setcounter{cbhlb}{0}
+\newlength\lhbrtwidthrule
+\def\cbhlbnivA{%
+  \raisebox{\depth}{\ding{109}\ding{109}\ding{109}\ding{109}}%
+}
+\def\cbhlbnivB{%
+  \raisebox{\depth}{\ding{108}\ding{109}\ding{109}\ding{109}}%
+}
+\def\cbhlbnivC{%
+  \raisebox{\depth}{\ding{108}\ding{108}\ding{109}\ding{109}}%
+}
+\def\cbhlbnivD{%
+  \raisebox{\depth}{\ding{108}\ding{108}\ding{108}\ding{109}}%
+}
+\def\cbhlbnivE{%
+  \raisebox{\depth}{\ding{108}\ding{108}\ding{108}\ding{108}}%
+}
+\def\cbhlblabelnivA{}
+\def\cbhlblabelnivB{FACILE}
+\def\cbhlblabelnivC{MOYEN}
+\def\cbhlblabelnivD{DIFFICILE}
+\def\cbhlblabelnivE{EXPERT}
+
+\defKV[paramcbhlb]{%
+  eptrait        = \setlength\lhbrtwidthrule{#1},%
+  police num     = \def\cbhlbpolicetitre{#1},%
+  police sstitre = \def\cbhlbpolicesoustitre{#1},%
+  police niveau  = \def\cbhlbpoliceniveau{#1},%
+  label exo      = \def\cbhlblabelexo{#1},%
+  apres num      = \def\cbhlbsuitelabelexo{#1},%
+  compteur       = \def\cbhlbcount{#1}%
+}
+\setKVdefault[paramcbhlb]{%
+  eptrait        = 0.375mm,%
+  police num     = \Large\bfseries\sffamily,%
+  police sstitre = \footnotesize\bfseries\sffamily,%
+  police niveau  = \scriptsize\bfseries\sffamily,%
+  label exo      = {},%
+  apres num      = {},%
+  compteur       = cbhlb,%
+  couleurs       = true,%
+  couleur auto   = true
+}
+
+%--les couleurs de niveau
+\definecolor{cbhlbcoulcours}{HTML}{6fb8cb}
+\definecolor{cbhlbcoulfacile}{HTML}{61ab68}
+\definecolor{cbhlbcoulmoyen}{HTML}{df9f3d}
+\definecolor{cbhlbcouldifficile}{HTML}{cc5745}
+\definecolor{cbhlbcoulexpert}{HTML}{824aa7}
+\colorlet{cbhlbsoustitre}{gray}
+%--les couleurs de sous-titres
+\definecolor{cbhlbcoulqcm}{HTML}{bb5c25}
+\definecolor{cbhlbcoulvraifaux}{HTML}{bb5c25}
+\definecolor{cbhlbcoulpython}{HTML}{507fb4}
+\definecolor{cbhlbcoulimportant}{HTML}{bf0000}
+\definecolor{cbhlbcoultableur}{HTML}{61ab68}
+\definecolor{cbhlbcoulgeogebra}{HTML}{bf2f64}
+%--les macros de sous-titres
+\def\cbhlbsstitrecours{%
+  {\lucideicon[height=auto]{heart}\,COURS}%
+}
+\def\cbhlbsstitreqcm{%
+  {\lucideicon[height=auto]{scale}\,QCM}%
+}
+\def\cbhlbsstitrevraifaux{%
+  {\lucideicon[height=auto]{square-check-big}\,VRAI/FAUX}%
+}
+\def\cbhlbsstitrepython{%
+  {\lucideicon[height=auto]{code-xml}\,PYTHON}%
+}
+\def\cbhlbsstitreimportant{%
+  {\lucideicon[height=auto]{biceps-flexed}\,IMPORTANT}%
+}
+\def\cbhlbsstitretableur{%
+  {\lucideicon[height=auto]{sheet}\,TABLEUR}%
+}
+\def\cbhlbsstitregeogebra{%
+  {\lucideicon[height=auto]{tangent}\,GEOGEBRA}%
+}
+%--macro automatique de création
+\NewDocumentCommand\gencbhlbsoustitre{ m m m }{%
+  % #1 = suffixe (ex: oral)
+  % #2 = couleur (ex: violet)
+  % #3 = contenu (ex: \lucideicon[height=auto]{mic}\,ORAL)
+  \colorlet{cbhlbcoul#1}{#2}%
+  \expandafter\def\csname cbhlbsstitre#1\endcsname{#3}%
+}
+
+\tcbset{basecbhlb/.style={
+    enhanced,empty,%
+    breakable,%
+    size=small,boxsep=0mm,boxrule=0mm,left=0mm,right=0mm,
+    before skip=0.75\baselineskip,after skip=0.75\baselineskip
+  }%
+}
+
+\newcommand\cbhlbtextcoul[2]{%
+  \ifboolKV[paramcbhlb]{couleur auto}%
+    {\textcolor{cbhlbcoulcurrent}{#2}}%      % ← remettre l'affichage avec la couleur du niveau
+    {%
+      \@ifundefinedcolor{cbhlbcoul#1}%
+        {\textcolor{cbhlbcoulcurrent}{#2}}%
+        {\textcolor{cbhlbcoul#1}{#2}}%
+    }%
+}
+
+\newcommand\cbhlbgensoustitre[1]{%
+  \intcbtestsubstr{#1}{§}%
+    {%
+      \intcbafterchar{#1}{§}[\cbhlbsstmp]%
+      {~~\cbhlbpolicesoustitre\vphantom{\cbhlbstrut}\cbhlbsstmp}%
+    }%
+    {%
+      \@ifundefined{cbhlbsstitre#1}%
+        {~~{\cbhlbpolicesoustitre\vphantom{\cbhlbstrut}\cbhlbtextcoul{#1}{#1}}}%
+        {~~{\cbhlbpolicesoustitre\vphantom{\cbhlbstrut}%
+            \cbhlbtextcoul{#1}{\csname cbhlbsstitre#1\endcsname}}}%
+    }%
+}
+
+\newcommand\paramsexocbhlb[1]{%
+  \ifthenelse{\equal{#1}{}}%
+    {%valeurs par défaut
+      \setKVdefault[paramcbhlb]{%
+        eptrait        = 0.375mm,%
+        police num     = \Large\bfseries\sffamily,%
+        police sstitre = \footnotesize\bfseries\sffamily,%
+        police niveau  = \scriptsize\bfseries\sffamily,%
+        label exo      = {},%
+        apres num      = {},%
+        compteur       = cbhlb,%
+        couleurs       = true,%
+        couleur auto   = false
+      }
+    }%
+    {%nouvelles valeurs par défaut
+      \setKVdefault[paramcbhlb]{#1}%
+    }%
+  \restoreKV[paramcbhlb]%
+}
+
+\newcommand\cbhlbinttitre[4]{%
+  {\cbhlbpolicetitre\vphantom{\cbhlbstrut}\textcolor{#1}{\cbhlblabelexo\arabic{\cbhlbcount}\cbhlbsuitelabelexo}}%label + numéro
+  {\cbhlbgensoustitre{#4}}%sous-titre/thème
+  \hfill{}%
+  {\cbhlbpoliceniveau\vphantom{\cbhlbstrut}\textcolor{cbhlbsoustitre}{#2}\enspace\textcolor{#1}{#3}}%niveau
+}
+\newcommand\cbhlbgentitre[2][1]{%
+  %#1 = niveau
+  %#2 = sous-titre
+  \stepcounter{\cbhlbcount}%
+  \ifnum#1=0\relax\cbhlbinttitre{cbhlbcoulcours}{\cbhlblabelnivA}{\cbhlbnivA}{#2}\fi%
+  \ifnum#1=1\relax\cbhlbinttitre{cbhlbcoulfacile}{\cbhlblabelnivB}{\cbhlbnivB}{#2}\fi%
+  \ifnum#1=2\relax\cbhlbinttitre{cbhlbcoulmoyen}{\cbhlblabelnivC}{\cbhlbnivC}{#2}\fi%
+  \ifnum#1=3\relax\cbhlbinttitre{cbhlbcouldifficile}{\cbhlblabelnivD}{\cbhlbnivD}{#2}\fi%
+  \ifnum#1=4\relax\cbhlbinttitre{cbhlbcoulexpert}{\cbhlblabelnivE}{\cbhlbnivE}{#2}\fi%
+  %
+  \ifnum#1=0\relax\textcolor{cbhlbcoulcours}{\hrule height \lhbrtwidthrule}\fi%
+  \ifnum#1=1\relax\textcolor{cbhlbcoulfacile}{\hrule height \lhbrtwidthrule}\fi%
+  \ifnum#1=2\relax\textcolor{cbhlbcoulmoyen}{\hrule height \lhbrtwidthrule}\fi%
+  \ifnum#1=3\relax\textcolor{cbhlbcouldifficile}{\hrule height \lhbrtwidthrule}\fi%
+  \ifnum#1=4\relax\textcolor{cbhlbcoulexpert}{\hrule height \lhbrtwidthrule}\fi%
+  %
+  \medskip
+}
+
+\defKV[basecbhlb]{niveau=\def\cbhlbniveau{#1},type=\def\cbhlbtype{#1}}
+\setKVdefault[basecbhlb]{niveau=1,type={}}
+
+\NewDocumentEnvironment{exocbhlb}{ O{} D<>{} }%
+{%
+  \restoreKV[basecbhlb]%
+  \setKV[basecbhlb]{#1}%
+  \ifboolKV[paramcbhlb]{couleurs}%
+    {}%
+    {%
+      \colorlet{cbhlbcoulcours}{black}%
+      \colorlet{cbhlbcoulfacile}{black}%
+      \colorlet{cbhlbcoulmoyen}{black}%
+      \colorlet{cbhlbcouldifficile}{black}%
+      \colorlet{cbhlbcoulexpert}{black}%
+      \colorlet{cbhlbsoustitre}{darkgray!85}%
+      \colorlet{cbhlbcoulqcm}{darkgray!85}%
+      \colorlet{cbhlbcoulvraifaux}{darkgray!85}%
+      \colorlet{cbhlbcoulpython}{darkgray!85}%
+      \colorlet{cbhlbcoulimportant}{darkgray!85}%
+      \colorlet{cbhlbcoultableur}{darkgray!85}%
+      \colorlet{cbhlbcoultableur}{cbhlbcoulgeogebra!85}%
+    }%
+  \ifnum\cbhlbniveau=0\relax\colorlet{cbhlbcoulcurrent}{cbhlbcoulcours}\fi%
+  \ifnum\cbhlbniveau=1\relax\colorlet{cbhlbcoulcurrent}{cbhlbcoulfacile}\fi%
+  \ifnum\cbhlbniveau=2\relax\colorlet{cbhlbcoulcurrent}{cbhlbcoulmoyen}\fi%
+  \ifnum\cbhlbniveau=3\relax\colorlet{cbhlbcoulcurrent}{cbhlbcouldifficile}\fi%
+  \ifnum\cbhlbniveau=4\relax\colorlet{cbhlbcoulcurrent}{cbhlbcoulexpert}\fi%
+  \tcbset{reset}%
+  \tcolorbox[basecbhlb,#2]%
+  \cbhlbgentitre[\cbhlbniveau]{\cbhlbtype}%
+}%
+{%
+  \endtcolorbox%
+}%
+
+\NewDocumentCommand\CreationExoStyleH{ m m }{%
+  \@ifundefined{c@#2}%
+    {\newcounter{#2}}%
+    {}%
+  \setcounter{#2}{0}%
+  \NewDocumentEnvironment{#1}{ O{} D<>{} }%
+  {%
+    \def\cbhlbcount{#2}%
+    \restoreKV[basecbhlb]%
+    \setKV[basecbhlb]{##1}%
+    \ifboolKV[paramcbhlb]{couleurs}%
+      {}%
+      {%
+        \colorlet{cbhlbcoulcours}{black}%
+        \colorlet{cbhlbcoulfacile}{black}%
+        \colorlet{cbhlbcoulmoyen}{black}%
+        \colorlet{cbhlbcouldifficile}{black}%
+        \colorlet{cbhlbcoulexpert}{black}%
+        \colorlet{cbhlbsoustitre}{darkgray!85}%
+        \colorlet{cbhlbcoulqcmvraifaux}{darkgray!85}%
+        \colorlet{cbhlbcoulpython}{darkgray!85}%
+        \colorlet{cbhlbcoulimportant}{darkgray!85}%
+      }%
+    \ifnum\cbhlbniveau=0\relax\colorlet{cbhlbcoulcurrent}{cbhlbcoulcours}\fi%
+    \ifnum\cbhlbniveau=1\relax\colorlet{cbhlbcoulcurrent}{cbhlbcoulfacile}\fi%
+    \ifnum\cbhlbniveau=2\relax\colorlet{cbhlbcoulcurrent}{cbhlbcoulmoyen}\fi%
+    \ifnum\cbhlbniveau=3\relax\colorlet{cbhlbcoulcurrent}{cbhlbcouldifficile}\fi%
+    \ifnum\cbhlbniveau=4\relax\colorlet{cbhlbcoulcurrent}{cbhlbcoulexpert}\fi%
+    \tcbset{reset}%
+    \tcolorbox[basecbhlb,##2]%
+    \cbhlbgentitre[\cbhlbniveau]{\cbhlbtype}%
+  }%
+  {%
+    \endtcolorbox%
+  }%
 }
 
 \endinput

@@ -1101,7 +1101,221 @@ Le trousseau de clés pour les boîtes \textit{classiques} est \MontreCode{[Boit
 
 \pagebreak
 
+\section{Boîtes exercices avec niveaux de difficulté (expérimental)}
+
+\subsection{Présentation}
+
+L'environnement \MontreCode{exocbhlb} propose un environnement léger (sans cadre, un simple filet coloré) destiné à la mise en forme d'\textbf{exercices ou activités} avec~:
+
+\begin{itemize}
+  \item un \textbf{numéro} automatique (compteur \MontreCode{cbhlb} par défaut) ;
+  \item un \textbf{niveau de difficulté} (0 à 4) matérialisé par des pastilles
+  \raisebox{\depth}{\ding{108}\ding{108}\ding{109}\ding{109}}
+  et une couleur dédiée ;
+  \item un \textbf{type} optionnel (cours, qcm, python\ldots) affiché en sous-titre avec une icône \MontreCode{lucide-icons}, \textbf{librement extensible} par l'utilisateur.
+\end{itemize}
+
+\medskip
+
+Les dépendances supplémentaires chargées par ce module sont \MontreCode{pifont} (pastilles) et \MontreCode{lucide-icons} (icônes de sous-titres) — déjà incluses dans \MontreCode{CreationBoites}.
+
+\subsection{Paramétrage global}
+
+Les réglages globaux (polices, épaisseur du filet, label, compteur, couleurs) s'appliquent via~:
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\paramsexocbhlb{clés}       %nouvelles valeurs globales
+\paramsexocbhlb{}           %retour aux valeurs par défaut du package
+\end{codehigh}
+
+\medskip
+
+{\small
+\begin{center}
+  \begin{tblr}{
+      colspec={|Q[l,m]|Q[l,m]|Q[l,m]|},
+      hlines, vlines,
+      row{1}={font=\bfseries},
+    }
+    Clé & Effet & Défaut \\
+    \MontreCode{eptrait} & épaisseur du filet sous le titre & \MontreCode{0.375mm} \\
+    \MontreCode{police num} & police du numéro & \MontreCode{\textbackslash Large\textbackslash bfseries\textbackslash sffamily} \\
+    \MontreCode{police sstitre} & police du sous-titre & \MontreCode{\textbackslash footnotesize\textbackslash bfseries\textbackslash sffamily} \\
+    \MontreCode{police niveau} & police du libellé + pastilles & \MontreCode{\textbackslash scriptsize\textbackslash bfseries\textbackslash sffamily} \\
+    \MontreCode{label exo} & texte avant le numéro & \MontreCode{\{\}} (vide) \\
+    \MontreCode{apres num} & texte après le numéro & \MontreCode{\{\}} (vide) \\
+    \MontreCode{compteur} & nom du compteur \LaTeX{} & \MontreCode{cbhlb} \\
+    \MontreCode{couleurs} & booléen — active/désactive les couleurs & \MontreCode{true} \\
+    \MontreCode{couleur auto} & booléen — voir~\S suivant & \MontreCode{true} \\
+  \end{tblr}
+\end{center}
+}
+
+\subsection{La clé \texttt{couleur auto}}
+
+Chaque sous-titre dispose d'une couleur dédiée \MontreCode{cbhlbcoul<type>} (ex.
+\MontreCode{cbhlbcoulpython}). La clé \MontreCode{couleur auto} contrôle si cette couleur est utilisée ou non~:
+
+\begin{itemize}
+  \item \MontreCode{couleur auto=true} (par défaut) : \textbf{tous} les sous-titres
+  s'affichent dans la couleur \textbf{du niveau} courant, quelles que soient les
+  couleurs dédiées définies ;
+  \item \MontreCode{couleur auto=false} : chaque sous-titre utilise sa couleur dédiée
+  \MontreCode{cbhlbcoul<type>} si elle existe, sinon retombe sur la couleur du niveau.
+\end{itemize}
+
+\subsection{Syntaxe de l'environnement}
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\begin{exocbhlb}[niveau=N,type=xxx]<options tcbox>
+%corps de l'exercice
+\end{exocbhlb}
+\end{codehigh}
+
+\medskip
+
+{\small
+\begin{center}
+  \begin{tblr}{
+      colspec={|Q[l,m]|Q[l,m]|Q[l,m]|},
+      hlines, vlines,
+      row{1}={font=\bfseries},
+    }
+    Niveau & Couleur & Libellé + pastilles \\
+    \MontreCode{0} & \textcolor{cbhlbcoulcours}{\rule{8pt}{8pt}}~\MontreCode{cbhlbcoulcours} & (aucun)~~\raisebox{\depth}{\ding{109}\ding{109}\ding{109}\ding{109}} \\
+    \MontreCode{1} & \textcolor{cbhlbcoulfacile}{\rule{8pt}{8pt}}~\MontreCode{cbhlbcoulfacile} & FACILE~~\raisebox{\depth}{\ding{108}\ding{109}\ding{109}\ding{109}} \\
+    \MontreCode{2} & \textcolor{cbhlbcoulmoyen}{\rule{8pt}{8pt}}~\MontreCode{cbhlbcoulmoyen} & MOYEN~~\raisebox{\depth}{\ding{108}\ding{108}\ding{109}\ding{109}} \\
+    \MontreCode{3} & \textcolor{cbhlbcouldifficile}{\rule{8pt}{8pt}}~\MontreCode{cbhlbcouldifficile} & DIFFICILE~~\raisebox{\depth}{\ding{108}\ding{108}\ding{108}\ding{109}} \\
+    \MontreCode{4} & \textcolor{cbhlbcoulexpert}{\rule{8pt}{8pt}}~\MontreCode{cbhlbcoulexpert} & EXPERT~~\raisebox{\depth}{\ding{108}\ding{108}\ding{108}\ding{108}} \\
+  \end{tblr}
+\end{center}
+}
+
+\medskip
+
+Les types prédéfinis (clé \MontreCode{type=...}) sont~:
+\MontreCode{cours}, \MontreCode{qcm}, \MontreCode{vraifaux}, \MontreCode{python},
+\MontreCode{important}, \MontreCode{tableur}, \MontreCode{geogebra}.
+
+\subsection{Exemples}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\setcounter{cbhlb}{0}
+\begin{exocbhlb}[niveau=1]
+\lipsum[1][1-2]
+\end{exocbhlb}
+
+\begin{exocbhlb}[niveau=3,type=python]
+\lipsum[1][1-2]
+\end{exocbhlb}
+
+\begin{exocbhlb}[niveau=4,type=vraifaux]
+\lipsum[1][1-2]
+\end{exocbhlb}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%type texte brut (aucune macro cbhlbsstitreATTENTION définie)
+\begin{exocbhlb}[niveau=2,type=ATTENTION]
+\lipsum[1][1-2]
+\end{exocbhlb}
+
+%type brut avec contenu LaTeX direct via §
+\begin{exocbhlb}[niveau=2,type=§{\textcolor{red}{ATTENTION}}]
+\lipsum[1][1-2]
+\end{exocbhlb}
+\end{demohigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%couleurs désactivées + label personnalisé
+\paramsexocbhlb{couleurs=false,label exo={Exercice\enspace},apres num={\,$\cdot$}}
+\begin{exocbhlb}[niveau=2]<width=0.5\linewidth>
+\lipsum[1][1-2]
+\end{exocbhlb}
+\paramsexocbhlb{}
+\end{demohigh}
+
+\subsection{Ajouter un nouveau type}
+
+Trois niveaux d'extension, \textbf{sans toucher au \texttt{.sty}}~:
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%-- a) couleur dédiée seule (texte brut coloré, couleur auto=false nécessaire)
+\colorlet{cbhlbcouloral}{violet}
+
+%-- b) icône seule (suit la couleur du niveau)
+\def\cbhlbsstitreoral{{\lucideicon[height=auto]{mic}\,ORAL}}
+
+%-- c) icône + couleur dédiée (solution complète)
+\def\cbhlbsstitreoral{{\lucideicon[height=auto]{mic}\,ORAL}}
+\colorlet{cbhlbcouloral}{violet}
+\end{codehigh}
+
+\medskip
+
+Une macro de création \textbf{tout-en-un} est également disponible~:
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+%\gencbhlbsoustitre{suffixe}{couleur}{contenu}
+\gencbhlbsoustitre{oral}{violet}{\lucideicon[height=auto]{mic}\,ORAL}
+\gencbhlbsoustitre{scratch}{teal}{\lucideicon[height=auto]{blocks}\,SCRATCH}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\gencbhlbsoustitre{oral}{violet}{\lucideicon[height=auto]{mic}\,ORAL}
+\paramsexocbhlb{couleur auto=false}
+
+\begin{exocbhlb}[niveau=3,type=oral]
+\lipsum[1][1-2]
+\end{exocbhlb}
+
+\gencbhlbsoustitre{scratch}{teal}{\lucideicon[height=auto]{blocks}\,SCRATCH}
+\begin{exocbhlb}[niveau=1,type=scratch]
+\lipsum[1][1-2]
+\end{exocbhlb}
+\paramsexocbhlb{}
+\end{demohigh}
+
+\begin{tcolorbox}[enhanced,colframe=lightgray,colback=lightgray!10,before skip=8pt,after skip=8pt]
+\small
+Le nom passé à \MontreCode{type=...} doit correspondre \textbf{exactement} (casse comprise) à la fin du nom de macro \MontreCode{cbhlbsstitre<nom>} et de couleur
+\MontreCode{cbhlbcoul<nom>}. Ainsi \MontreCode{type=Oral} (majuscule) ne déclenchera ni \MontreCode{\textbackslash cbhlbsstitreoral} ni \MontreCode{cbhlbcouloral}.
+\end{tcolorbox}
+
+\subsection{Environnement avec compteur dédié}
+
+\MontreCode{\textbackslash CreationExoStyleH} génère un \textbf{nouvel environnement} avec son propre compteur indépendant (créé automatiquement si besoin)~:
+
+\begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\CreationExoStyleH{NomEnvironnement}{NomCompteur}
+\end{codehigh}
+
+\begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
+\CreationExoStyleH{exoTD}{cptTD}
+\CreationExoStyleH{exoAppro}{cptAppro}
+
+\begin{exoTD}[niveau=1]
+\lipsum[1][1-2]
+\end{exoTD}
+
+\begin{exoAppro}[niveau=4,type=python]
+\lipsum[1][1-2]
+\end{exoAppro}
+
+\begin{exoTD}[niveau=2,type=qcm]
+\lipsum[1][1-2]
+\end{exoTD}
+\end{demohigh}
+
+Les deux compteurs \MontreCode{cptTD} et \MontreCode{cptAppro} évoluent
+\textbf{indépendamment}. Les réglages globaux (\MontreCode{\textbackslash paramsexocbhlb})
+s'appliquent à tous les environnements créés via \MontreCode{\textbackslash CreationExoStyleH}.
+
+\pagebreak
+
 \section{Historique}
+
+\verb|v0.20d|~:~~~~ajout d'un bloc 'exercice' (expérimental)
 
 \verb|v0.20c|~:~~~~Possibilité d'utiliser un compteur personnalisé
 
