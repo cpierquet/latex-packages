@@ -2,15 +2,51 @@
 % licence.........: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{customenvs-pastableur}[2026/05/23 0.1.0 Small macros, patchs for pas-tableur]
+\ProvidesPackage{customenvs-pastableur}[2026/07/02 0.1.1 Small macros, patchs for pas-tableur]
 
 %====HISTORY
-% v 0.1.0	Initial version subpackage of customenvs
+% v 0.1.1  Patch pour lualatex/pdflatex
+% v 0.1.0  Initial version subpackage of customenvs
 
 %====PACKAGES
 \RequirePackage{pas-tableur}
 \RequirePackage{lucide-icons}
 
+%====PATCH \hlvbox multimoteur
+\@ifundefined{helvbx}%
+  {%
+    \newcommand{\helvbx}{%
+      \@ifundefined{setmainfont}%
+        {\fontfamily{phv}\selectfont}%  % pdfLaTeX → comportement original
+        {\sffamily}%            % LuaLaTeX/fontspec → sans-serif bold courant
+    }%
+  }%
+  {%
+    \renewcommand{\helvbx}{%
+      \@ifundefined{setmainfont}%
+        {\fontfamily{phv}\selectfont}%  % pdfLaTeX → comportement original
+        {\sffamily}%            % LuaLaTeX/fontspec → sans-serif bold courant
+    }%
+  }%
+
+%====PATCH baselineskip pour le multilignes
+\def\pastableur@baselineskip{1.2em}
+\newcommand*{\tabcellskip}[1]{\def\pastableur@baselineskip{#1}}
+
+\renewcommand*\celtxt@iii[4]
+  {%
+     \ifPAS@celtxt@ajust
+      \IfStrEq{\cmdPAS@celtxt@align}{right}{\def\postab@align{r}}{}
+      \IfStrEq{\cmdPAS@celtxt@align}{left}{\def\postab@align{l}}{}
+      \IfStrEq{\cmdPAS@celtxt@align}{center}{\def\postab@align{c}}{}
+      \node[text width=\dimexpr\cmdPAS@celtxt@width-4pt, align=\cmdPAS@celtxt@align, color=\cmdPAS@celtxt@color, font=\cmdPAS@celtxt@font, execute at begin node=\setlength{\baselineskip}{\pastableur@baselineskip}] at (cell#2-#3) {\begin{tabular}{@{}\postab@align @{}}#4\end{tabular}};% 
+     \else
+      \celtxt@catcoderegime@end
+      \IfBeginWith{#4}{=}{\let\pastab@style\texttt}{\let\pastab@style\@empty}
+      \node[text width=\dimexpr\cmdPAS@celtxt@width-4pt,align=\cmdPAS@celtxt@align, color=\cmdPAS@celtxt@color, font=\cmdPAS@celtxt@font, execute at begin node=\setlength{\baselineskip}{\pastableur@baselineskip}] at (cell#2-#3) {\pastab@style{#4}};%
+    \fi
+  }
+  
 %====PATCH GRILLE
 \renewcommand{\pastableur@grid}[4] % #1 : width, #2 : name, #3 : numline, #4 : coord.
 {%
