@@ -54,4 +54,4 @@ If you want the latest version directly from this repository:
 | **Author** | Cédric Pierquet |
 | **Email** | cpierquet@outlook.fr |
 | **License** | Released under the [LaTeX Project Public License v1.3c](http://www.latex-project.org/lppl.txt) or later |
-| **Source** | https://tabler.io/icons (v3.36.0) MIT License |
+| **Source** | https://tabler.io/icons (v3.44) MIT License |
