@@ -1,0 +1,212 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+
+\documentclass{article}
+\usepackage[margin=0.625in]{geometry}
+\usepackage{materialdesign-icons}
+\usepackage{xcolor}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{shortvrb}
+\MakeShortVerb{\|}
+\setlength{\parindent}{0pt}
+
+\newenvironment{materialdesigncase}
+{%
+  \scriptsize%
+	\begin{longtable}{cllr}%icon + name + macro + page
+		\cmidrule[\heavyrulewidth]{1-4}% \toprule
+		\bfseries Icon & \bfseries Name & \bfseries Direct command & \bfseries PDF page \\
+		\cmidrule{1-4}
+		\endhead
+}%
+{%
+		\cmidrule[\heavyrulewidth]{1-4}
+	\end{longtable}%
+}
+
+\NewDocumentCommand{\showcasematerialdesignoutlined}{mm}{%name + macro + page
+	\textcolor{violet}{\Large\materialdesignicon[outlined]{#1}} & \itshape #1 & \ttfamily \textbackslash materialdesignicon[outlined]\{#1\} & \sffamily #2 \\
+}
+
+\NewDocumentCommand{\showcasematerialdesignfilled}{mm}{%name + macro + page
+	\textcolor{violet}{\Large\materialdesignicon[filled]{#1}} & \itshape #1 & \ttfamily \textbackslash materialdesignicon[filled]\{#1\} & \sffamily #2 \\
+}
+
+\NewDocumentCommand{\showcasematerialdesignround}{mm}{%name + macro + page
+  \textcolor{violet}{\Large\materialdesignicon[round]{#1}} & \itshape #1 & \ttfamily \textbackslash materialdesignicon[round]\{#1\} & \sffamily #2 \\
+}
+
+\NewDocumentCommand{\showcasematerialdesigntwotone}{mm}{%name + macro + page
+  \textcolor{violet}{\Large\materialdesignicon[twotone]{#1}} & \itshape #1 & \ttfamily \textbackslash materialdesignicon[twotone]\{#1\} & \sffamily #2 \\
+}
+
+\NewDocumentCommand{\showcasematerialdesignsharp}{mm}{%name + macro + page
+  \textcolor{violet}{\Large\materialdesignicon[sharp]{#1}} & \itshape #1 & \ttfamily \textbackslash materialdesignicon[sharp]\{#1\} & \sffamily #2 \\
+}
+
+\begin{document}
+
+\title{The \textsf{materialdesign-icons} package (0.14.15) -- 07/07/2026}
+\author{%
+	Cédric Pierquet\\%
+	\url{https://github.com/marella/material-design-icons} (Source version 0.14.15)\\%
+	\url{https://github.com/cpierquet/latex-packages/tree/main/materialdesign} (\LaTeX{} package)
+}
+\date{cpierquet -- at -- outlook . fr}\maketitle
+
+This package provides \LaTeX{} support for the Material Design Icons project :
+
+\url{https://github.com/marella/material-design-icons}.
+
+\medskip
+
+\hspace*{5mm}\fbox{\begin{minipage}{0.75\linewidth}{\emph{A set of 2122 free Apache-2.0 licensed high-quality SVG/PDF icons for you to use in your web projects.}}\end{minipage}}
+
+\medskip
+
+To use \textsf{materialdesign-icons} in your document, include the package with |\usepackage{materialdesign-icons}|.
+
+An icon can be accessed using the icon name. A list of all included icons with their respective \textit{page} can be found at the end of this document.
+
+\medskip
+
+The individual icons are provided as pages of a PDF and are ultimately loaded using the |\includegraphics| command from the |graphicx| package.
+
+\section{Example}
+
+\begin{Verbatim}[frame=single]
+...
+\usepackage{materialdesign}
+...
+\begin{document}
+...
+Inline\materialdesign{24mp}version,
+and colored\textcolor{red}{\materialdesign{24mp}}
+...
+\end{document}
+\end{Verbatim}
+
+Result: Inline\materialdesignicon{24mp}version, and colored\textcolor{red}{\materialdesignicon{24mp}}
+
+\pagebreak
+
+\section{Usage}
+
+\subsection{Generic macro}
+
+\begin{Verbatim}[frame=single]
+\materialdesignicon%
+  [%
+    filled=TF,outlined=TF,round=TF,sharp=TF,twotone=TF,%
+    height=...,(d)strut=...%
+  ]%
+  <includegraphics options>{name}
+\end{Verbatim}
+
+The boolean \texttt{[filled/outlined/round/sharp/twotone]} activate different version of icon. And key \texttt{[height=...]} can be:
+
+\begin{itemize}
+	\item \texttt{dauto} (by default): inline insertion with height/depth;
+	\item \texttt{auto}: inline insertion with height/nodepth;
+	\item \texttt{a length}: normal insertion with fixed height;
+	\item \texttt{manuel height/depth}: normal insertion with fixed height/depth.
+\end{itemize}
+
+The keys \texttt{[(d)strut=...]} can be used to set the \textit{reference} box for dimension calculations.
+
+\medskip
+
+By default, icons are given with a small border, so the given height is the height of the \textit{full} box, not the hight of the icons.
+
+\medskip
+
+Example: Inline{\setlength\fboxsep{0pt}\fbox{\materialdesignicon{24mp}}}version or inline {\setlength\fboxsep{0pt}\fbox{\materialdesignicon{24mp}}} version
+
+\pagebreak
+
+\subsection{Examples}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height/depth (from qX characters)
+\materialdesignicon[height=dauto]{24mp} %or \materialdesignicon{24mp}
+\end{Verbatim}
+
+{\Huge q\materialdesignicon{24mp}X}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height/depth (from specified characters)
+(q\materialdesignicon[height=dauto,dstrut=(qB)]{24mp}B)
+\end{Verbatim}
+
+{\Huge (q\materialdesignicon[height=dauto,dstrut=(qB)]{24mp}B)}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height (from X character) default version
+\materialdesignicon[height=auto]{24mp}
+\end{Verbatim}
+
+{\Huge X\materialdesignicon[height=auto]{24mp}X}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with manual height/depth
+\materialdesignicon[height={0.8em/-0.4em}]{24mp}
+\end{Verbatim}
+
+{\Huge qb\materialdesignicon[height={0.8em/-0.4em}]{24mp}Xz}
+
+\begin{Verbatim}[frame=single]
+%fixed height
+\materialdesignicon[height=2in]{24mp}
+\end{Verbatim}
+
+\materialdesignicon[height=1.5in]{24mp}
+
+\subsection{Used packages}
+
+\texttt{ifthen}, \texttt{calc}, \texttt{graphicx}, \texttt{xstring} and \texttt{simplekv} are loaded and used by the package.
+
+\subsection{Bugs}
+
+For bug reports and feature requests, report on the GitHub repository \url{https://github.com/cpierquet/latex-packages/issues}.
+
+\newpage
+
+\section{List of icons}
+
+Icons are colored in \textcolor{violet}{violet}.
+
+\subsection{Outlined version (2122 icons)}
+
+The \textsf{PDF} file is \texttt{materialdesign-outlined-all.pdf}
+
+\input{materialdesignoutlinedbindings}
+
+\subsection{Filled version (2122 icons)}
+
+The \textsf{PDF} file is \texttt{materialdesign-filled-all.pdf}
+
+\input{materialdesignfilledbindings}
+
+\subsection{Round version (2122 icons)}
+
+The \textsf{PDF} file is \texttt{materialdesign-round-all.pdf}
+
+\input{materialdesignroundbindings}
+
+\subsection{Sharp version (2122 icons)}
+
+The \textsf{PDF} file is \texttt{materialdesign-sharp-all.pdf}
+
+\input{materialdesignsharpbindings}
+
+\subsection{Two-Tone version (2122 icons)}
+
+The \textsf{PDF} file is \texttt{materialdesign-twotone-all.pdf}
+
+\input{materialdesigntwotonebindings}
+
+\end{document}
