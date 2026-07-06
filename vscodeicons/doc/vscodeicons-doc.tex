@@ -5,6 +5,8 @@
 \documentclass{article}
 \usepackage[margin=1in]{geometry}
 \usepackage{vscodeicons}
+\usepackage{xcolor}
+\pagecolor{yellow!2.5}
 \usepackage{longtable}
 \usepackage{booktabs}
 \usepackage{hyperref}
@@ -40,10 +42,10 @@
 
 \begin{document}
 
-\title{The \textsf{vscodeicons} package (0.1.0) -- \today}
+\title{The \textsf{vscodeicons} package (12.19.0) -- 2026/07/06}
 \author{%
 	Cédric Pierquet\\%
-	\url{https://github.com/vscode-icons/vscode-icons} (Source version v12.15.0)\\%
+	\url{https://github.com/vscode-icons/vscode-icons} (Source version v12.19)\\%
 	\url{https://github.com/cpierquet/latex-packages/tree/main/vscodeicons} (\LaTeX{} package)
 }
 \date{cpierquet -- at -- outlook . fr}\maketitle
@@ -101,13 +103,11 @@ The keys \texttt{[(d)strut=...]} can be used to set the \textit{reference} box f
 
 \medskip
 
-By default, icons are given with a small border, so the given height is the height of the \textit{full} box, not the hight of the icons.
+By default, icons are given with a small border, so the given height is the height of the \textit{full} box, not the height of the icons.
 
 \medskip
 
 Example: Inline{\setlength\fboxsep{0pt}\fbox{\vscodeicon{root-folder}}}version or inline {\setlength\fboxsep{0pt}\fbox{\vscodeicon{root-folder}}} version.
-
-\pagebreak
 
 \subsection{Examples}
 
@@ -134,21 +134,21 @@ Example: Inline{\setlength\fboxsep{0pt}\fbox{\vscodeicon{root-folder}}}version o
 
 \begin{Verbatim}[frame=single]
 %normal version: inline with manual height/depth
-\vscodeicon[foldertype,height={0.8em/-0.4em}]{story}
+\vscodeicon[foldertype,height={1.2em/-0.4em}]{story}
 \end{Verbatim}
 
-{\Huge qb\vscodeicon[foldertype,height={0.8em/-0.4em}]{story}Xz}
+{\Huge qb\vscodeicon[foldertype,height={1.2em/-0.4em}]{story}Xz}
 
 \begin{Verbatim}[frame=single]
 %fixed height
-\vscodeicon[height=2in]{folder-opened}
+\vscodeicon[height=1in]{folder-opened}
 \end{Verbatim}
 
-\vscodeicon[height=2in]{folder-opened}
+\vscodeicon[height=1in]{folder-opened}
 
 \subsection{Used packages}
 
-\texttt{ifthen}, \texttt{calc}, \texttt{graphicx}, \texttt{xstring} and \texttt{simplekv} are loaded and used by the package.
+\texttt{ifthen}, \texttt{calc}, \texttt{graphicx} and \texttt{simplekv} are loaded and used by the package.%, \texttt{xstring}
 
 \subsection{Bugs}
 
