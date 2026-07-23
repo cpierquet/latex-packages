@@ -712,6 +712,54 @@ Dans le cas où les graduations sont \textit{naturellement} définies par les do
 \end{GraphiqueTikz}
 \end{tcblisting}
 
+\subsubsection{Graduations automatiques (\og nice numbers \fg{})}\label{gradsauto}
+
+Plutôt que d'indiquer manuellement le pas des grilles (\MontreCode{Xgrille}/\MontreCode{Ygrille}), il est possible de laisser le package calculer un pas \og propre \fg{} (1, 2, 5 ou 10 fois une puissance de 10) à partir d'un nombre de graduations visé, sur le principe des algorithmes dits \textit{nice numbers}.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+\begin{GraphiqueTikz}%
+  [clés globales]%
+  <Xmin=...,Xmax=...,Ymin=...,Ymax=...,GradsAuto,NbgradsX=...,NbgradsY=...>
+  ...
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+Les clés concernées sont :
+
+\begin{itemize}
+  \item \MontreCode{GradsAuto} : booléen (\MontreCode{false} par défaut) qui active le calcul automatique du pas ;
+  \item \MontreCode{NbgradsX} : nombre de graduations \textit{visé} en abscisses (\MontreCode{8} par défaut) ;
+  \item \MontreCode{NbgradsY} : nombre de graduations \textit{visé} en ordonnées (\MontreCode{6} par défaut).
+\end{itemize}
+
+Lorsque \MontreCode{GradsAuto} est actif, les clés \MontreCode{Xgrille}/\MontreCode{Ygrille} (grille principale) sont recalculées à partir de \MontreCode{Xmin}/\MontreCode{Xmax} et \MontreCode{Ymin}/\MontreCode{Ymax}, et les bornes elles-mêmes sont \textit{ajustées} (arrondies au pas le plus proche, vers l'extérieur) afin que la fenêtre reste cohérente avec la grille obtenue. La grille secondaire (\MontreCode{Xgrilles}/\MontreCode{Ygrilles}) est alors fixée automatiquement à la moitié du pas principal.
+
+\smallskip
+
+Ce calcul reste \textit{indicatif} : le nombre de graduations obtenu au final est proche de \MontreCode{NbgradsX}/\MontreCode{NbgradsY} mais pas nécessairement exact, l'objectif étant d'obtenir un pas \og lisible \fg{} plutôt qu'un nombre de graduations exact.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+  <Xmin=-7,Xmax=138,Ymin=-12,Ymax=57,%
+  GradsAuto,NbgradsX=10,NbgradsY=8,%
+  Hauteur=7cm,Largeur=10cm>
+  \TracerAxesGrilles[Elargir=2.5mm,Police=\small]{auto}{auto}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+  <Xmin=0,Xmax=1,Ymin=0,Ymax=0.0325,%
+  GradsAuto,NbgradsX=5,NbgradsY=10,%
+  Largeur=12cm,Hauteur=6cm>
+  \TracerAxesGrilles%
+    [Dernier,Elargir=2.5mm,Police=\small,Format=num]%
+    {auto}{auto}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+À noter que \MontreCode{GradsAuto} prend le pas sur toute valeur de \MontreCode{Xgrille}/\MontreCode{Ygrille} indiquée par ailleurs : les deux réglages ne sont pas destinés à être combinés.
+
 \pagebreak
 
 \subsubsection{Thème de couleurs de la grille}
@@ -1996,9 +2044,19 @@ Il est possible de représenter les premiers termes d'une suite sous forme de nu
 % u(n+1) = f(u(n), n) avec f -> f(x, n)
 \TracerNuageSuiteFn(*)[clés,Debut=...]{u0}{formule xint en (x, n)}
 
+% u(n+2) = f(u(n+1), u(n)) avec f -> f(x, y)
+\TracerNuageSuiteDouble(*)[clés,Debut=...]{u0}[u1]{formule xint en (x, y)}
+
+% u(n+2) = f(u(n+1), u(n), n) avec f -> f(x, y, n)
+\TracerNuageSuiteDoubleN(*)[clés,Debut=...]{u0}[u1]{formule xint en (x, y, n)}
+
 % mode automatique (expérimental)
-% [Type = Recurrent / RecurrentN / Explicite]
-\TracerNuageSuiteAuto(*)[Type=...,clés]{formule xint}
+% [Type = Recurrent
+%         RecurrentN
+%         Explicite
+%         RecurrentDouble
+%         RecurrentDoubleN ]
+\TracerNuageSuiteAuto(*)[Type=...,clés]{u0}[u1]{formule xint}
 \end{tcblisting}
 
 La version étoilée n'affiche pas le label des termes, sous la forme $u_{i}$ en dessous (expérimental).
@@ -2034,6 +2092,44 @@ Les clés disponibles sont :
   \TracerNuageSuiteAuto*%
   [Type=RecurrentN,Debut=0,Fin=30,CouleurNuage=teal]%
   {20}{0.965*x+0.35+0.07*exp(-0.1*n)}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+  [%
+    x=0.5cm, y=0.05cm,
+    Xmin=0, Xmax=11, Xgrille=1, Xgrilles=1,
+    Ymin=0, Ymax=95, Ygrille=10, Ygrilles=5%
+  ]
+  \TracerAxesGrilles[Elargir=2.5mm, Police=\small]%
+    {auto}%
+    {auto}%
+  \TracerNuageSuiteAuto*%
+    [%
+      Type=RecurrentDouble,Debut=0,Fin=10,%
+      CouleurNuage=red,Style=o,TaillePts=2pt%
+    ]%
+    {1}[1]{x+y}
+\end{GraphiqueTikz}
+\end{tcblisting}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\begin{GraphiqueTikz}%
+  [%
+    x=0.35cm, y=0.0045cm,
+    Xmin=0, Xmax=32, Xgrille=5, Xgrilles=1,
+    Origy=900, Ymin=900, Ymax=1900, Ygrille=200, Ygrilles=100%
+  ]
+  \TracerAxesGrilles[Elargir=2.5mm, Police=\small]%
+    {0,5,...,30}%
+    {1000,1200,...,1800}%
+  \TracerNuageSuiteAuto*%
+    [%
+      Type=RecurrentDoubleN,Debut=0,%
+      Fin=30,CouleurNuage=teal,Style=x,TaillePts=2pt%
+    ]%
+    {1000}[1000]{1.02*y-0.01*x+100/(n+1)}
 \end{GraphiqueTikz}
 \end{tcblisting}
 
@@ -3925,17 +4021,16 @@ Ces commandes nécessitent le chargement préalable de \MontreCode{csvsimple}, u
 
 \begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
 %usepackage{csvsimple}
-\TracerNuageDepuisCSV[Clés]<Clés points>{fichier.csv}{colX}{colY}
+\TracerNuageDepuisCSV[Clés](Séparateur)<Clés points>{fichier.csv}{colX}{colY}
 \end{tcblisting}
 
 \begin{itemize}
   \item \MontreCode{ModeTransfo} : même modes que \MontreCode{\textbackslash TracerNuagePoints} (\MontreCode{lin} par défaut) ;
-  \item \MontreCode{Separateur} : séparateur CSV (\MontreCode{semicolon} par défaut) ;
   \item \MontreCode{MaxLignes} : nombre maximum de lignes traitées (\MontreCode{100000} par défaut) — utile pour limiter le temps de compilation ;
   \item \MontreCode{<Clés points>} : clés passées à \MontreCode{\textbackslash MarquerPts}.
 \end{itemize}
 
-\begin{filecontents*}{datatestgrapheur.csv}
+\begin{filecontents*}[overwrite]{datatestgrapheur.csv}
 n;x;y
 1;10;245
 2;20;189
@@ -3991,12 +4086,12 @@ n;x;y
 Si l'on préfère stocker les données dans des macros avant de les utiliser~:
 
 \begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
-\CreerListesDepuisCSV[clés]{fichier.csv}{colX}{colY}{nomMacroX}{nomMacroY}
+\CreerListesDepuisCSV[clés](Séparateur){fichier.csv}{colX}{colY}{nomMacroX}{nomMacroY}
 \end{tcblisting}
 
 \begin{itemize}
   \item \MontreCode{\{nomMacroX\}/\{nomMacroY\}} : noms des macros de sortie (sans \textbackslash), qui créent \MontreCode{\textbackslash nomMacroX} et \MontreCode{\textbackslash nomMacroY} ;
-  \item mêmes clés \MontreCode{ModeTransfo}, \MontreCode{Separateur}, \MontreCode{MaxLignes} que \MontreCode{\textbackslash TracerNuageDepuisCSV}.
+  \item mêmes clés \MontreCode{ModeTransfo}, \MontreCode{MaxLignes} que \MontreCode{\textbackslash TracerNuageDepuisCSV}.
 \end{itemize}
 
 \pagebreak
@@ -5098,6 +5193,61 @@ Cette commande nécessite le chargement préalable de
   {f}{0,0.5,...,2}
 \end{tcblisting}
 
+\pagebreak
+
+\subsection{Mini graphique \og clé en main \fg{}}\label{minigraphique}
+
+Pour illustrer rapidement une ou plusieurs fonctions (typiquement pour un tableau de variations, une correction, ou une vignette), une commande dédiée permet d'obtenir un petit graphique \textit{sans passer par l'environnement} \MontreCode{GraphiqueTikz} : pas besoin de définir la fenêtre, les axes ou la grille séparément.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+  \MiniGraphiqueTkz[clés tikz]<clés>{fct1§fct2§...}[VI1§VI2§...]
+\end{tcblisting}
+
+Le premier argument (optionnel) contient des options \TikZ{} classiques, le second (entre \MontreCode{<...>}) les \MontreCode{clés} ci-dessous. Le troisième argument, obligatoire, contient une (ou plusieurs, séparées par \MontreCode{§}) formule(s) \MontreCode{xint} en \MontreCode{x}. Le quatrième argument, optionnel, contient les valeurs interdites associées à chaque fonction (même syntaxe, séparées par \MontreCode{§}).
+
+\smallskip
+
+Les \MontreCode{clés} disponibles sont :
+
+\begin{itemize}
+  \item \MontreCode{Largeur}, \MontreCode{Hauteur} : dimensions du mini graphique (\MontreCode{4cm}/\MontreCode{3cm} par défaut) ;
+  \item \MontreCode{Xmin}, \MontreCode{Xmax}, \MontreCode{Ymin}, \MontreCode{Ymax} : fenêtre (\MontreCode{-3}/\MontreCode{3}/\MontreCode{-2}/\MontreCode{2} par défaut) ;
+  \item \MontreCode{Couleur} : couleur(s) des courbes (\MontreCode{black} par défaut) ; en cas de plusieurs fonctions, une liste séparée par des \texttt{§} est \textit{cyclée} automatiquement ;
+  \item \MontreCode{Domaine} : domaine(s) de tracé sous la forme \MontreCode{a:b} (un par fonction, séparés par \MontreCode{§}) ; par défaut, c'est toute la fenêtre \MontreCode{[Xmin;Xmax]} qui est utilisée ;
+  \item \MontreCode{DeltaVI} : pas utilisé autour des valeurs interdites (\MontreCode{auto} par défaut, calculé à partir de la largeur de la fenêtre) ;
+  \item \MontreCode{Echelle} : sert à ajuster proportionnellement les épaisseurs de traits (\MontreCode{auto}, basé sur \MontreCode{Hauteur}, ou une valeur numérique) ;
+  \item \MontreCode{Cadre} : booléen (\MontreCode{true} par défaut) pour afficher un cadre autour du mini graphique ;
+  \item \MontreCode{ProfLycee} : booléen (\MontreCode{false} par défaut) pour un style de traits plus \textit{fin}, cohérent avec les figures du package \textsf{ProfLycee} ;
+  \item \MontreCode{MainLevee} : booléen (\MontreCode{false} par défaut, expérimental) pour un rendu \og à main levée \fg{} (axes, cadre et courbes légèrement irréguliers/bruités).
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\MiniGraphiqueTkz<Xmin=-3,Xmax=3,Ymin=-2,Ymax=6,Couleur=blue>{x^2-1}
+\qquad
+\MiniGraphiqueTkz<Xmin=-4,Xmax=4,Ymin=-2,Ymax=2,Couleur=red,MainLevee>{sin(x)}
+\end{tcblisting}
+
+Plusieurs courbes peuvent être tracées dans le même mini graphique, avec un domaine et une valeur interdite propres à chacune :
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5}
+\MiniGraphiqueTkz%
+  <Largeur=5cm,Hauteur=4cm,Xmin=-1,Xmax=6,Ymin=-1,Ymax=7,%
+  Couleur={blue§red},Domaine={0:6§0.2:6}>%
+  {sqrt(x)§1/x+1}[{}§0]
+\end{tcblisting}
+
+Enfin, une variante \MontreCode{\textbackslash MiniGraphiqueTkzTab} permet d'insérer directement un mini graphique dans une ligne d'un tableau de variations \textsf{tkz-tab} :
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,colframe=lightgray,colback=lightgray!5,listing only}
+%dans un environnement tkzTabInit
+\MiniGraphiqueTkzTab%
+  [clés minigraphique tikz]<clés minigraphique>%
+  {fct}[VI]{numéro de ligne}%
+  [échelle (0.85)][Décalage (1.5)]
+\end{tcblisting}
+
+Les deux derniers arguments optionnels ajustent respectivement la taille (\MontreCode{0.85} par défaut) et le décalage horizontal (\MontreCode{1.5} par défaut) du mini graphique par rapport au tableau.
+
 \newpage
 
 \section{Liste des commandes}
@@ -5111,12 +5261,15 @@ Cette commande nécessite le chargement préalable de
 \begin{description}[noitemsep]
   \lstcmd{environnement~~}{\begin{GraphiqueTikz}...\end{GraphiqueTikz}}{creaenvt}
   \lstcmd{axes et grilles}{\TracerAxesGrille}{creaaxesgr}
+  \lstcmd{grads auto~~~~~}{[GradsAuto=...]}{gradsauto}
   \lstcmd{ax/gril pol~~~~}{\TracerAxesGrillePol}{courbespolaires}
   \lstcmd{aj val axe X~~~}{\RajouterValeursAxeX}{ajoutvals}
   \lstcmd{aj val axe Y~~~}{\RajouterValeursAxeY}{ajoutvals}
   \lstcmd{aj labels axe X}{\RajouterLabelsAxeX}{ajoutlabels}
   \lstcmd{aj labels axe Y}{\RajouterLabelsAxeY}{ajoutlabels}
   \lstcmd{semilog loglog~}{}{loglog}
+  \lstcmd{mini graphique~}{\MiniGraphiqueTkz}{minigraphique}
+  \lstcmd{~~~~~~~~~~~~~~~}{\MiniGraphiqueTkzTab}{minigraphique}
 \end{description}
 
 \subsection{Courbes, suites}
@@ -5138,6 +5291,7 @@ Cette commande nécessite le chargement préalable de
   \lstcmd{nuage suite~~~~}{\TracerNuageSuite}{nuagesuite}
   \lstcmd{~~~~~~~~~~~~~~~}{\TracerNuageSuiteF}{nuagesuite}
   \lstcmd{~~~~~~~~~~~~~~~}{\TracerNuageSuiteFn}{nuagesuite}
+  \lstcmd{~~~~~~~~~~~~~~~}{\TracerNuageSuiteAuto}{nuagesuite}
   \lstcmd{toile récurr~~~}{\TracerToileRecurrence}{toilerecurr}
   \lstcmd{déf fam cbes~~~}{\DefinirFamilleCourbes}{famcourbes}
   \lstcmd{trace famille~~}{\TracerFamilleCourbes}{famcourbes}
@@ -5224,7 +5378,7 @@ Cette commande nécessite le chargement préalable de
 \subsection{Commandes diverses}
 
 \begin{description}[noitemsep]
-  \lstcmd{vals interd~~~~}{ValeursInterdites=...}{valinterdites}
+  \lstcmd{vals interd~~~~}{[ValeursInterdites=...]}{valinterdites}
   \lstcmd{voisinages~~~~~}{\AfficherVoisinage}{voisinages}
   \lstcmd{diag camembert~}{\TracerDiagrammeCirculaire}{diagcirculaire}
   \lstcmd{diaganneau~~~~~}{\TracerDiagrammeAnneau}{diagannulaire}
@@ -5361,6 +5515,9 @@ Les solutions de $f(x)=66$ sont d'environ \ArrondirNum*[0]{\xMonItscA} \&\ \Arro
 
 {\footnotesize \begin{quote}
 \begin{verbatim}
+0.31d : Wrapper complet pour les suites récurrentes (\TracerNuageSuiteAuto)
+-----   Graduations automatiques 'nice numbers' (GradsAuto)
+-----   Mini graphique 'clé en main' (\MiniGraphiqueTkz)
 0.31c : Améliorations dans les codes (suites notamment)
 0.31b : Améliorations dans les codes
 0.31a : Environnement alt pour des valeurs non normalisées + bugfixes InegaliteLin + Labels pour axes

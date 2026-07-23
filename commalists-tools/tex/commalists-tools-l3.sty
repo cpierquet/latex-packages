@@ -3,9 +3,12 @@
 % licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesExplPackage{commalists-tools-l3}{2026-06-11}{0.20d}{Basic operations for numeral comma separated lists}
+\def\ctfiledate{2026/07/23}%
+\def\ctfileversion{0.20e}%
+\ProvidesExplPackage{commalists-tools-l3}{\ctfiledate}{\ctfileversion}{Basic operations for numeral comma separated lists}
 
 %------History
+% 0.20e  Bugfix with cycl + separator improvements
 % 0.20d  Improvements with latex3 (tks to ankaa3908, again !)
 % 0.20c  Shuffle list
 % 0.20b  Extract element with cyclic version of list
@@ -18,135 +21,152 @@
 %------Variables
 \seq_new:N \l__commalists_tmpa_seq
 \seq_new:N \l__commalists_tmpb_seq
-\int_new:N   \l__commalists_tmpa_int
-\int_new:N   \l__commalists_tmpb_int
-\fp_new:N    \l__commalists_tmpa_fp
+\int_new:N \l__commalists_tmpa_int
+\int_new:N \l__commalists_tmpb_int
+\fp_new:N  \l__commalists_tmpa_fp
 
 %------Show list
 \NewDocumentCommand\ctshowlist{ O { , } m }
   {
-    % #1 = sep
+    % #1 = sep (entrée ET sortie)
     % #2 = list
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #2 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #1 } { #2 }
     \seq_use:Nn \l__commalists_tmpa_seq { #1 }
   }
 
+\NewDocumentCommand\ctshowlistwithsep{ O { , } m m }
+  {
+    % #1 = sep (entrée)
+    % #2 = list
+    % #3 = sep (sortie)
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #1 } { #2 }
+    \seq_use:Nn \l__commalists_tmpa_seq { #3 }
+  }
+
 %------Sort list, reverse list
-\NewDocumentCommand\ctsortasclist{ s m O { \mysortedlist } }
+\NewDocumentCommand\ctsortasclist{ s O { , } m O { \mysortedlist } }
   {
     % #1 = star (just printing)
-    % #2 = list
-    % #3 = output macro (non-starred, default \mysortedlist)
+    % #2 = sep (défaut virgule)
+    % #3 = list
+    % #4 = output macro (non-starred, default \mysortedlist)
     \group_begin:
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #2 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #3 }
     \seq_sort:Nn \l__commalists_tmpa_seq {
       \fp_compare:nNnTF { ##1 } > { ##2 }
         { \sort_return_swapped: }
         { \sort_return_same: }
       }
-    \IfBooleanTF { #1 } %if star := just printing // if not, storing
-      { \seq_use:Nn \l__commalists_tmpa_seq { , } }
-      { \tl_gset:Ne #3 { \seq_use:Nn \l__commalists_tmpa_seq { , } } }
+    \IfBooleanTF { #1 }
+      { \seq_use:Nn \l__commalists_tmpa_seq { #2 } }
+      { \tl_gset:Ne #4 { \seq_use:Nn \l__commalists_tmpa_seq { #2 } } }
     \group_end:
   }
 
-\NewDocumentCommand\ctsortdeslist{ s m O { \mysortedlist } }
+\NewDocumentCommand\ctsortdeslist{ s O { , } m O { \mysortedlist } }
   {
     % #1 = star (just printing)
-    % #2 = list
-    % #3 = output macro (non-starred, default \mysortedlist)
+    % #2 = sep (défaut virgule)
+    % #3 = list
+    % #4 = output macro (non-starred, default \mysortedlist)
     \group_begin:
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #2 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #3 }
     \seq_sort:Nn \l__commalists_tmpa_seq {
       \fp_compare:nNnTF { ##1 } < { ##2 }
         { \sort_return_swapped: }
         { \sort_return_same: }
       }
-    \IfBooleanTF { #1 } %if star := just printing // if not, storing
-      { \seq_use:Nn \l__commalists_tmpa_seq { , } }
-      { \tl_gset:Ne #3 { \seq_use:Nn \l__commalists_tmpa_seq { , } } }
+    \IfBooleanTF { #1 }
+      { \seq_use:Nn \l__commalists_tmpa_seq { #2 } }
+      { \tl_gset:Ne #4 { \seq_use:Nn \l__commalists_tmpa_seq { #2 } } }
     \group_end:
   }
 
-\NewDocumentCommand\ctreverselist{ s m O { \reverselist } }
+\NewDocumentCommand\ctreverselist{ s O { , } m O { \reverselist } }
   {
     % #1 = star (just printing)
-    % #2 = list
-    % #3 = output macro (non-starred, default \reverselist)
+    % #2 = sep (défaut virgule)
+    % #3 = list
+    % #4 = output macro (non-starred, default \reverselist)
     \group_begin:
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #2 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #3 }
     \seq_reverse:N \l__commalists_tmpa_seq
-    \IfBooleanTF { #1 } %if star := just printing // if not, storing
-      { \seq_use:Nn \l__commalists_tmpa_seq { , } }
-      { \tl_gset:Ne #3 { \seq_use:Nn \l__commalists_tmpa_seq { , } } }
+    \IfBooleanTF { #1 }
+      { \seq_use:Nn \l__commalists_tmpa_seq { #2 } }
+      { \tl_gset:Ne #4 { \seq_use:Nn \l__commalists_tmpa_seq { #2 } } }
     \group_end:
   }
 
 %------Test in list
-\NewDocumentCommand\ctboolvalinlist{ m m O { \resisinlist } }
+\NewDocumentCommand\ctboolvalinlist{ O { , } m m O { \resisinlist } }
   {
-    % #1 = element to test
-    % #2 = list
-    % #3 = output macro (non-starred, default \resisinlist)
+    % #1 = sep (défaut virgule)
+    % #2 = element to test
+    % #3 = list
+    % #4 = output macro (non-starred, default \resisinlist)
     \group_begin:
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #2 }
-    \seq_if_in:NnTF \l__commalists_tmpa_seq { #1 }
-      { \tl_gset:Nn #3 { 1 } }
-      { \tl_gset:Nn #3 { 0 } }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #1 } { #3 }
+    \seq_if_in:NnTF \l__commalists_tmpa_seq { #2 }
+      { \tl_gset:Nn #4 { 1 } }
+      { \tl_gset:Nn #4 { 0 } }
     \group_end:
   }
 
-\NewDocumentCommand\cttestifvalinlist{ m m }
+\NewDocumentCommand\cttestifvalinlist{ O { , } m m }
   {
-    % #1 = element to test
-    % #2 = list
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #2 }
-    \seq_if_in:NnTF \l__commalists_tmpa_seq { #1 }
+    % #1 = sep (défaut virgule)
+    % #2 = element to test
+    % #3 = list
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #1 } { #3 }
+    \seq_if_in:NnTF \l__commalists_tmpa_seq { #2 }
       { \use_i:nn }
       { \use_ii:nn }
   }
 
 %------Add, remove
-\NewDocumentCommand\ctaddvalinlist{ s m m }
+\NewDocumentCommand\ctaddvalinlist{ s O { , } m m }
   {
     % #1 = star (just printing)
-    % #2 = value to add
-    % #3 = list
+    % #2 = sep (défaut virgule)
+    % #3 = value to add
+    % #4 = list
     \IfBooleanTF { #1 }
-      { #3, #2 }
-      { \tl_set:Ne #3 { \tl_use:N #3 , #2 } }
+      { #4 #2 #3 }
+      { \tl_set:Ne #4 { \tl_use:N #4 #2 #3 } }
   }
 
-\NewDocumentCommand\ctremovevalinlist{ s m m O { \mytmplist } }
+\NewDocumentCommand\ctremovevalinlist{ s O { , } m m O { \mytmplist } }
   {
     % #1 = star (just printing)
-    % #2 = value to remove
-    % #3 = list
-    % #4 = output macro (non-starred, default \mytmplist)
+    % #2 = sep (défaut virgule)
+    % #3 = value to remove
+    % #4 = list
+    % #5 = output macro (non-starred, default \mytmplist)
     \group_begin:
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #3 }
-    \seq_remove_all:Nn \l__commalists_tmpa_seq { #2 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #4 }
+    \seq_remove_all:Nn \l__commalists_tmpa_seq { #3 }
     \IfBooleanTF { #1 }
-      { \seq_use:Nn \l__commalists_tmpa_seq { , } }
-      { \tl_gset:Ne #4 { \seq_use:Nn \l__commalists_tmpa_seq { , } } }
+      { \seq_use:Nn \l__commalists_tmpa_seq { #2 } }
+      { \tl_gset:Ne #5 { \seq_use:Nn \l__commalists_tmpa_seq { #2 } } }
     \group_end:
   }
 
 %------Count
-\NewDocumentCommand\ctcountvalinlist{ s m m O { \rescount } }
+\NewDocumentCommand\ctcountvalinlist{ s O { , } m m O { \rescount } }
   {
     % #1 = star (just printing)
-    % #2 = value to count
-    % #3 = list
-    % #4 = output macro (non-starred, default \rescount)
+    % #2 = sep (défaut virgule)
+    % #3 = value to count
+    % #4 = list
+    % #5 = output macro (non-starred, default \rescount)
     \group_begin:
     \int_zero:N \l__commalists_tmpa_int
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #3 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #4 }
     \seq_map_inline:Nn \l__commalists_tmpa_seq
-      { \str_if_eq:nnT { ##1 } { #2 } { \int_incr:N \l__commalists_tmpa_int } }
+      { \str_if_eq:nnT { ##1 } { #3 } { \int_incr:N \l__commalists_tmpa_int } }
     \IfBooleanTF{ #1 }
       { \int_use:N \l__commalists_tmpa_int }
-      { \tl_gset:Ne #4 { \int_use:N \l__commalists_tmpa_int } }
+      { \tl_gset:Ne #5 { \int_use:N \l__commalists_tmpa_int } }
     \group_end:
   }
 
@@ -154,7 +174,7 @@
 \NewDocumentCommand\ctminoflist{ s m O { \resmin } }
   {
     % #1 = star (just printing)
-    % #2 = list
+    % #2 = list (séparateur virgule obligatoire pour fp_eval min)
     % #3 = output macro (non-starred, default \resmin)
     \IfBooleanTF { #1 } 
       { \fp_eval:n { min(#2) } }
@@ -164,52 +184,55 @@
 \NewDocumentCommand\ctmaxoflist{ s m O { \resmax } }
   {
     % #1 = star (just printing)
-    % #2 = list
+    % #2 = list (séparateur virgule obligatoire pour fp_eval max)
     % #3 = output macro (non-starred, default \resmax)
     \IfBooleanTF { #1 }
       { \fp_eval:n { max(#2) } }
       { \tl_set:Ne #3 { \fp_eval:n { max(#2) } } }
   }
 
-\NewDocumentCommand\ctsumoflist{ s m O { \ressum } }
+\NewDocumentCommand\ctsumoflist{ s O { , } m O { \ressum } }
   {
     % #1 = star (just printing)
-    % #2 = list
-    % #3 = output macro (non-starred, default \ressum)
+    % #2 = sep (défaut virgule)
+    % #3 = list
+    % #4 = output macro (non-starred, default \ressum)
     \group_begin:
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #2 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #3 }
     \fp_zero:N \l__commalists_tmpa_fp
     \fp_set:Nn \l__commalists_tmpa_fp 
       { \exp_args:Ne \fp_eval:n { \seq_use:Nn \l__commalists_tmpa_seq { + } } }
     \IfBooleanTF{ #1 }
       { \fp_use:N \l__commalists_tmpa_fp }
-      { \tl_gset:Ne #3 { \fp_use:N \l__commalists_tmpa_fp } }
+      { \tl_gset:Ne #4 { \fp_use:N \l__commalists_tmpa_fp } }
     \group_end:
   }
 
-\NewDocumentCommand\ctprodoflist{ s m O { \resprod } }
+\NewDocumentCommand\ctprodoflist{ s O { , } m O { \resprod } }
   {
     % #1 = star (just printing)
-    % #2 = list
-    % #3 = output macro (non-starred, default \resprod)
+    % #2 = sep (défaut virgule)
+    % #3 = list
+    % #4 = output macro (non-starred, default \resprod)
     \group_begin:
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #2 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #3 }
     \fp_zero:N \l__commalists_tmpa_fp
     \fp_set:Nn \l__commalists_tmpa_fp 
       { \exp_args:Ne \fp_eval:n { \seq_use:Nn \l__commalists_tmpa_seq { * } } }
     \IfBooleanTF{ #1 }
       { \fp_use:N \l__commalists_tmpa_fp }
-      { \tl_gset:Ne #3 { \fp_use:N \l__commalists_tmpa_fp } }
+      { \tl_gset:Ne #4 { \fp_use:N \l__commalists_tmpa_fp } }
     \group_end:
   }
 
-\NewDocumentCommand\ctmeanoflist{ s m O { \resmean } }
+\NewDocumentCommand\ctmeanoflist{ s O { , } m O { \resmean } }
   {
     % #1 = star (just printing)
-    % #2 = list
-    % #3 = output macro (non-starred, default \resmean)
+    % #2 = sep (défaut virgule)
+    % #3 = list
+    % #4 = output macro (non-starred, default \resmean)
     \group_begin:
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #2 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #3 }
     \fp_zero:N \l__commalists_tmpa_fp
     \fp_set:Nn \l__commalists_tmpa_fp 
       { \exp_args:Ne \fp_eval:n 
@@ -221,35 +244,37 @@
       }
     \IfBooleanTF{ #1 }
       { \fp_use:N \l__commalists_tmpa_fp }
-      { \tl_gset:Ne #3 { \fp_use:N \l__commalists_tmpa_fp } }
+      { \tl_gset:Ne #4 { \fp_use:N \l__commalists_tmpa_fp } }
     \group_end:
   }
 
-\NewDocumentCommand\ctlenoflist{ s m O { \resmylen } }
+\NewDocumentCommand\ctlenoflist{ s O { , } m O { \resmylen } }
   {
     % #1 = star (just printing)
-    % #2 = list
-    % #3 = output macro (non-starred, default \myreslen)
+    % #2 = sep (défaut virgule)
+    % #3 = list
+    % #4 = output macro (non-starred, default \myreslen)
     \group_begin:
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #2 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #3 }
     \IfBooleanTF { #1 }
       { \seq_count:N \l__commalists_tmpa_seq }
-      { \tl_gset:Ne #3 { \seq_count:N \l__commalists_tmpa_seq } }
+      { \tl_gset:Ne #4 { \seq_count:N \l__commalists_tmpa_seq } }
     \group_end:
   }
 
 %------Get, index
-\NewDocumentCommand\ctgetvaluefromlist{ s m m O { \resmyelt } }
+\NewDocumentCommand\ctgetvaluefromlist{ s O { , } m m O { \resmyelt } }
   {
     % #1 = star (just printing)
-    % #2 = list
-    % #3 = index
-    % #4 = output macro (non-starred, default \resmyelt)
+    % #2 = sep (défaut virgule)
+    % #3 = list
+    % #4 = index
+    % #5 = output macro (non-starred, default \resmyelt)
     \group_begin:
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #2 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #3 }
     \IfBooleanTF { #1 }
-      { \seq_item:Nn \l__commalists_tmpa_seq { #3 } }
-      { \tl_gset:Ne #4 { \seq_item:Nn \l__commalists_tmpa_seq { #3 } } }
+      { \seq_item:Nn \l__commalists_tmpa_seq { #4 } }
+      { \tl_gset:Ne #5 { \seq_item:Nn \l__commalists_tmpa_seq { #4 } } }
     \group_end:
   }
 
@@ -257,61 +282,69 @@
 \msg_new:nnn { commalist-tools } { index-zero }
   { ctgetvaluefromcycllist:~index~0~not~available }
 
-\NewDocumentCommand\ctgetvaluefromcycllist{ s m m O { \resmyelt } }
+\NewDocumentCommand\ctgetvaluefromcycllist{ s O { , } m m O { \resmyelt } }
   {
     % #1 = star (just printing)
-    % #2 = list
-    % #3 = index
-    % #4 = output macro (default \resmyelt)
+    % #2 = sep (défaut virgule)
+    % #3 = list
+    % #4 = index
+    % #5 = output macro (default \resmyelt)
     \group_begin:
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #2 }
-    \int_compare:nNnTF { #3 } = { 0 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #3 }
+    \int_compare:nNnTF { #4 } = { 0 }
       {
         \msg_warning:nn { commalist-tools } { index-zero }
-        \tl_set_eq:Nn #4 \c_empty_tl
+        \tl_set_eq:Nn #5 \c_empty_tl
       }
       {
         \int_set:Nn \l__commalists_tmpa_int
           {
             \int_mod:nn
-              { #3 }
+              { #4 }
               { \seq_count:N \l__commalists_tmpa_seq }
           }
-      }
-    \IfBooleanTF{ #1 }
-      {
-        \exp_args:NNV 
-          \seq_item:Nn \l__commalists_tmpa_seq \l__commalists_tmpa_int 
-      }
-      { 
-        \tl_gset:Ne #4 {
-          \exp_args:NNV 
-            \seq_item:Nn \l__commalists_tmpa_seq \l__commalists_tmpa_int } 
+        % si mod = 0 (index multiple de la longueur) → dernier élément
+        \int_compare:nNnT { \l__commalists_tmpa_int } = { 0 }
+          {
+            \int_set:Nn \l__commalists_tmpa_int
+              { \seq_count:N \l__commalists_tmpa_seq }
+          }
+        \IfBooleanTF{ #1 }
+          {
+            \exp_args:NNV
+              \seq_item:Nn \l__commalists_tmpa_seq \l__commalists_tmpa_int
+          }
+          {
+            \tl_gset:Ne #5 {
+              \exp_args:NNV
+                \seq_item:Nn \l__commalists_tmpa_seq \l__commalists_tmpa_int }
+          }
       }
     \group_end:
   }
 
-\NewDocumentCommand\ctgetindexfromlist{ s m m O { \resmyindex } }
+\NewDocumentCommand\ctgetindexfromlist{ s O { , } m m O { \resmyindex } }
   {
     % #1 = star (just printing)
-    % #2 = element
-    % #3 = list
-    % #4 = output macro (non-starred, default \resmyindex)
+    % #2 = sep (défaut virgule)
+    % #3 = element
+    % #4 = list
+    % #5 = output macro (non-starred, default \resmyindex)
     \group_begin:
     \int_zero:N \l__commalists_tmpa_int
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #3 }
-    \seq_if_in:NnT \l__commalists_tmpa_seq { #2 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #4 }
+    \seq_if_in:NnT \l__commalists_tmpa_seq { #3 }
       {
         \seq_map_inline:Nn \l__commalists_tmpa_seq
           {
             \int_incr:N \l__commalists_tmpa_int
-            \str_if_eq:nnT { ##1 } { #2 }
+            \str_if_eq:nnT { ##1 } { #3 }
               { \seq_map_break: }
           }
       }
     \IfBooleanTF { #1 }
       { \int_use:N \l__commalists_tmpa_int }
-      { \tl_gset:Ne #4 { \int_use:N \l__commalists_tmpa_int } }
+      { \tl_gset:Ne #5 { \int_use:N \l__commalists_tmpa_int } }
     \group_end:
   }
 
@@ -320,29 +353,30 @@
 \int_new:N \l__commalists_begin_int
 \int_new:N \l__commalists_end_int
 
-\NewDocumentCommand\ctsublist{ s m m m O { \mysublist } }
+\NewDocumentCommand\ctsublist{ s O { , } m m m O { \mysublist } }
   {
     % #1 = star (display only)
-    % #2 = list
-    % #3 = begin index (* = start from first)
-    % #4 = end   index (* = go to last)
-    % #5 = output macro (non-starred only, default \mysublist)
+    % #2 = sep (défaut virgule)
+    % #3 = list
+    % #4 = begin index (* = start from first)
+    % #5 = end   index (* = go to last)
+    % #6 = output macro (non-starred only, default \mysublist)
     \group_begin:
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #2 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #3 }
     % --- resolve begin index
     \int_set:Nn \l__commalists_begin_int
       {
-        \str_if_eq:nnTF { * } { #3 }
+        \str_if_eq:nnTF { * } { #4 }
           { 1 }
-          { #3 }
+          { #4 }
       }
 
     % --- resolve end index
     \int_set:Nn \l__commalists_end_int
       {
-        \str_if_eq:nnTF { * } { #4 }
+        \str_if_eq:nnTF { * } { #5 }
           { \seq_count:N \l__commalists_tmpa_seq }
-          { #4 }
+          { #5 }
       }
       
     % --- iterate and collect items in [begin, end]
@@ -356,8 +390,8 @@
     
     % --- output
     \IfBooleanTF { #1 }
-      { \seq_use:Nn \l__commalists_sub_seq { , } }
-      { \tl_gset:Ne #5 { \seq_use:Nn \l__commalists_sub_seq { , } } }
+      { \seq_use:Nn \l__commalists_sub_seq { #2 } }
+      { \tl_gset:Ne #6 { \seq_use:Nn \l__commalists_sub_seq { #2 } } }
     \group_end:
   }
 
@@ -365,17 +399,18 @@
 \seq_new:N \l__commalists_slice_seq
 \tl_new:N \l__commalists_slice_formula_tl
 
-\NewDocumentCommand\ctslicelist{ s m m O { \myslicelist } }
+\NewDocumentCommand\ctslicelist{ s O { , } m m O { \myslicelist } }
   {
     % #1 = star (display only)
-    % #2 = list
-    % #3 = formula in x (e.g. 2*x, 3*x+1, x^2)
-    % #4 = output macro (non-starred only, default \myslicelist)
+    % #2 = sep (défaut virgule)
+    % #3 = list
+    % #4 = formula in x (e.g. 2*x, 3*x+1, x^2)
+    % #5 = output macro (non-starred only, default \myslicelist)
     \group_begin:
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #2 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #3 }
     \seq_map_indexed_inline:Nn \l__commalists_tmpa_seq
       {
-        \tl_set:Nn \l__commalists_slice_formula_tl { #3 }
+        \tl_set:Nn \l__commalists_slice_formula_tl { #4 }
         \tl_replace_all:Nnn \l__commalists_slice_formula_tl { x } { ##1 }
         \int_set:Nn \l__commalists_tmpa_int 
           { \fp_eval:n { \l__commalists_slice_formula_tl } }
@@ -393,8 +428,8 @@
       }
     % --- output
     \IfBooleanTF { #1 }
-      { \seq_use:Nn \l__commalists_slice_seq { , } }
-      { \tl_gset:Ne #4 { \seq_use:Nn \l__commalists_slice_seq { , } } }
+      { \seq_use:Nn \l__commalists_slice_seq { #2 } }
+      { \tl_gset:Ne #5 { \seq_use:Nn \l__commalists_slice_seq { #2 } } }
     \group_end:
   }
 
@@ -402,24 +437,28 @@
 \seq_new:N \l__commalists_transform_seq
 \tl_new:N \l__commalists_transform_formula_tl
 
-\NewDocumentCommand\cttransformlist{ s o m m O { \mytransformlist } }
+\NewDocumentCommand\cttransformlist{ s O { , } d < > m m O { \mytransformlist } }
   {
     % #1 = star (display only)
-    % #2 = round
-    % #3 = list
-    % #4 = formula in x (e.g. 2*x+1, x^2, sqrt(x))
-    % #5 = output macro (non-starred only, default \mytransformlist)
+    % #2 = sep (défaut virgule)
+    % #3 = round (optionnel, entre < >, nombre de décimales)
+    % #4 = list
+    % #5 = formula in x (e.g. 2*x+1, x^2, sqrt(x))
+    % #6 = output macro (non-starred only, default \mytransformlist)
     \seq_clear:N \l__commalists_transform_seq
     \group_begin:
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #3 }
+    % --- sécurité : [] explicite ne redonne pas le défaut O{,} en xparse
+    \tl_if_empty:nTF { #2 }
+      { \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #4 } }
+      { \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #4 } }
     % --- iterate over each element, apply formula
     \seq_map_inline:Nn \l__commalists_tmpa_seq
       {
         % --- substitute x by current element value in formula
-        \tl_set:Nn \l__commalists_transform_formula_tl { #4 }
+        \tl_set:Nn \l__commalists_transform_formula_tl { #5 }
         \tl_replace_all:Nnn \l__commalists_transform_formula_tl { x } { ##1 }
         % --- evaluate and collect result
-        \IfNoValueTF{ #2 }
+        \IfNoValueTF{ #3 }
           {
             \seq_put_right:Ne \l__commalists_transform_seq
               { \fp_eval:n { \l__commalists_transform_formula_tl } }
@@ -428,16 +467,24 @@
             \seq_put_right:Ne \l__commalists_transform_seq
               { 
                 \fp_eval:n {
-                  round( \l__commalists_transform_formula_tl, #2 ) 
+                  round( \l__commalists_transform_formula_tl, #3 ) 
                 } 
               }
           }
       }
 
     % --- output
-    \IfBooleanTF { #1 }
-      { \seq_use:Nn \l__commalists_transform_seq { , } }
-      { \tl_gset:Ne #5 { \seq_use:Nn \l__commalists_transform_seq { , } } }
+    \tl_if_empty:nTF { #2 }
+      {
+        \IfBooleanTF { #1 }
+          { \seq_use:Nn \l__commalists_transform_seq { , } }
+          { \tl_gset:Ne #6 { \seq_use:Nn \l__commalists_transform_seq { , } } }
+      }
+      {
+        \IfBooleanTF { #1 }
+          { \seq_use:Nn \l__commalists_transform_seq { #2 } }
+          { \tl_gset:Ne #6 { \seq_use:Nn \l__commalists_transform_seq { #2 } } }
+      }
     \group_end:
   }
 
@@ -453,17 +500,18 @@
     des .default:n    = true,
   }
 
-\NewDocumentCommand\ctuniqlist{ s O { } m O { \myuniqlist } }
+\NewDocumentCommand\ctuniqlist{ s O { , } d < > m O { \myuniqlist } }
   {
     % #1 = star (display only)
-    % #2 = options (asc, des)
-    % #3 = list
-    % #4 = output macro (non-starred only, default \myuniqlist)
+    % #2 = sep (défaut virgule)
+    % #3 = options (asc, des), entre < >
+    % #4 = list
+    % #5 = output macro (non-starred only, default \myuniqlist)
     \group_begin:
     % parse keys
-    \keys_set:nn { commalists / uniq } { #2 }
+    \IfNoValueF { #3 } { \keys_set:nn { commalists / uniq } { #3 } }
 
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #3 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #4 }
     \seq_remove_duplicates:N \l__commalists_tmpa_seq
 
     % --- sort if requested
@@ -490,8 +538,8 @@
 
     % --- output
     \IfBooleanTF { #1 }
-      { \seq_use:Nn \l__commalists_tmpa_seq { , } }
-      { \tl_gset:Ne #4 { \seq_use:Nn \l__commalists_tmpa_seq { , } } }
+      { \seq_use:Nn \l__commalists_tmpa_seq { #2 } }
+      { \tl_gset:Ne #5 { \seq_use:Nn \l__commalists_tmpa_seq { #2 } } }
     \group_end:
   }
 
@@ -510,18 +558,22 @@
     des .default:n    = true,
   }
 
-\NewDocumentCommand\ctintersectlists{ s O { } m m O { \myintersectlist } }
+\NewDocumentCommand\ctintersectlists
+  { 
+      s O { , } d < > m m O { \myintersectlist } 
+  }
   {
     % #1 = star (just printing)
-    % #2 = options (asc, des)
-    % #3 = list 1
-    % #4 = list 2
-    % #5 = output macro (non-starred, default \myintersectlist)
+    % #2 = sep (défaut virgule)
+    % #3 = options (asc, des), entre < >
+    % #4 = list 1
+    % #5 = list 2
+    % #6 = output macro (non-starred, default \myintersectlist)
     \group_begin:
     % parse keys
-    \keys_set:nn { commalists / intersect } { #2 }
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #3 }
-    \seq_set_split:Nne \l__commalists_tmpb_seq { , } { #4 }
+    \IfNoValueF { #3 } { \keys_set:nn { commalists / intersect } { #3 } }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #4 }
+    \seq_set_split:Nne \l__commalists_tmpb_seq { #2 } { #5 }
     % --- keep the shortest list for iteration
     \int_set:Nn \l__commalists_tmpa_int { \seq_count:N \l__commalists_tmpa_seq }
     \int_set:Nn \l__commalists_tmpb_int { \seq_count:N \l__commalists_tmpb_seq }
@@ -563,8 +615,8 @@
     }
     % --- output
     \IfBooleanTF { #1 }
-      { \seq_use:Nn \l__commalists_intersect_seq { , } }
-      { \tl_gset:Ne #5 { \seq_use:Nn \l__commalists_intersect_seq { , } } }
+      { \seq_use:Nn \l__commalists_intersect_seq { #2 } }
+      { \tl_gset:Ne #6 { \seq_use:Nn \l__commalists_intersect_seq { #2 } } }
     \group_end:
   }
 
@@ -581,18 +633,19 @@
     des .default:n    = true,
   }
 
-\NewDocumentCommand\ctmergelists{ s O { } m m O { \mymergelist } }
+\NewDocumentCommand\ctmergelists{ s O { , } d < > m m O { \mymergelist } }
   {
     % #1 = star (just printing)
-    % #2 = options (asc, des)
-    % #3 = list 1
-    % #4 = list 2
-    % #5 = output macro (non-starred, default \mymergelist)
+    % #2 = sep (défaut virgule)
+    % #3 = options (asc, des), entre < >
+    % #4 = list 1
+    % #5 = list 2
+    % #6 = output macro (non-starred, default \mymergelist)
     \group_begin:
     % keys reading
-    \keys_set:nn { commalists / merge } { #2 }
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #3 }
-    \seq_set_split:Nne \l__commalists_tmpb_seq { , } { #4 }
+    \IfNoValueF { #3 } { \keys_set:nn { commalists / merge } { #3 } }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #4 }
+    \seq_set_split:Nne \l__commalists_tmpb_seq { #2 } { #5 }
     \seq_concat:NNN \l__commalists_merge_seq 
       \l__commalists_tmpa_seq 
       \l__commalists_tmpb_seq
@@ -620,8 +673,8 @@
     }
     % --- output
     \IfBooleanTF { #1 }
-      { \seq_use:Nn \l__commalists_merge_seq { , } }
-      { \tl_gset:Ne #5 { \seq_use:Nn \l__commalists_merge_seq { , } } }
+      { \seq_use:Nn \l__commalists_merge_seq { #2 } }
+      { \tl_gset:Ne #6 { \seq_use:Nn \l__commalists_merge_seq { #2 } } }
     \group_end:
   }
 
@@ -639,19 +692,20 @@
     des .default:n    = true,
   }
 
-\NewDocumentCommand\ctdifflist{ s O { } m m O { \mydifflist } }
+\NewDocumentCommand\ctdifflist{ s O { , } d < > m m O { \mydifflist } }
   {
     % #1 = star (display only)
-    % #2 = options (asc, des)
-    % #3 = list A
-    % #4 = list B
-    % #5 = output macro (non-starred, default \mydifflist)
+    % #2 = sep (défaut virgule)
+    % #3 = options (asc, des), entre < >
+    % #4 = list A
+    % #5 = list B
+    % #6 = output macro (non-starred, default \mydifflist)
     \group_begin:
     % parse keys
-    \keys_set:nn { commalists / diff } { #2 }
+    \IfNoValueF { #3 } { \keys_set:nn { commalists / diff } { #3 } }
     % --- iterate A, keep elements absent from B
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #3 }
-    \seq_set_split:Nne \l__commalists_tmpb_seq { , } { #4 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #4 }
+    \seq_set_split:Nne \l__commalists_tmpb_seq { #2 } { #5 }
     \seq_map_inline:Nn \l__commalists_tmpa_seq
       {
         \seq_if_in:NnF \l__commalists_tmpb_seq { ##1 }
@@ -681,8 +735,8 @@
     }
     % --- output
     \IfBooleanTF { #1 }
-      { \seq_use:Nn \l__commalists_diff_seq { , } }
-      { \tl_gset:Ne #5 { \seq_use:Nn \l__commalists_diff_seq { , } } }
+      { \seq_use:Nn \l__commalists_diff_seq { #2 } }
+      { \tl_gset:Ne #6 { \seq_use:Nn \l__commalists_diff_seq { #2 } } }
     \group_end:
   }
 
@@ -699,18 +753,19 @@
   des .default:n    = true,
 }
 
-\NewDocumentCommand\ctsymdifflist{ s O { } m m O { \mysymdifflist } }
+\NewDocumentCommand\ctsymdifflist{ s O { , } d < > m m O { \mysymdifflist } }
   {
     % #1 = star (display only)
-    % #2 = options (asc, des)
-    % #3 = list A
-    % #4 = list B
-    % #5 = output macro (non-starred, default \mysymdifflist)
+    % #2 = sep (défaut virgule)
+    % #3 = options (asc, des), entre < >
+    % #4 = list A
+    % #5 = list B
+    % #6 = output macro (non-starred, default \mysymdifflist)
     \group_begin:
     % parse keys
-    \keys_set:nn { commalists / symdiff } { #2 }
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #3 }
-    \seq_set_split:Nne \l__commalists_tmpb_seq { , } { #4 }
+    \IfNoValueF { #3 } { \keys_set:nn { commalists / symdiff } { #3 } }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #4 }
+    \seq_set_split:Nne \l__commalists_tmpb_seq { #2 } { #5 }
     % --- elements in A absent from B
     \seq_map_inline:Nn \l__commalists_tmpa_seq
       {
@@ -752,24 +807,25 @@
     }
     % --- output
     \IfBooleanTF { #1 }
-      { \seq_use:Nn \l__commalists_symdiff_seq { , } }
-      { \tl_gset:Ne #5 { \seq_use:Nn \l__commalists_symdiff_seq { , } } }
+      { \seq_use:Nn \l__commalists_symdiff_seq { #2 } }
+      { \tl_gset:Ne #6 { \seq_use:Nn \l__commalists_symdiff_seq { #2 } } }
     \group_end:
   }
 
 %------Shuffle list
-\NewDocumentCommand\ctshufflelist{ s m O { \myshuffledlist } }
+\NewDocumentCommand\ctshufflelist{ s O { , } m O { \myshuffledlist } }
   {
     % #1 = star (just printing)
-    % #2 = list (content)
-    % #3 = output macro (non-starred, default \myshuffledlist)
+    % #2 = sep (défaut virgule)
+    % #3 = list (content)
+    % #4 = output macro (non-starred, default \myshuffledlist)
     \group_begin:
-    \seq_set_split:Nne \l__commalists_tmpa_seq { , } { #2 }
+    \seq_set_split:Nne \l__commalists_tmpa_seq { #2 } { #3 }
     \seq_shuffle:N \l__commalists_tmpa_seq
     % --- output
     \IfBooleanTF{ #1 }
-      { \seq_use:Nn \l__commalists_tmpa_seq { , } }
-      { \tl_gset:Ne #3 { \seq_use:Nn \l__commalists_tmpa_seq { , } } }
+      { \seq_use:Nn \l__commalists_tmpa_seq { #2 } }
+      { \tl_gset:Ne #4 { \seq_use:Nn \l__commalists_tmpa_seq { #2 } } }
     \group_end:
   }
 

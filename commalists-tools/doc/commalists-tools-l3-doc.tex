@@ -28,8 +28,8 @@
 \hypersetup{pdfborder=0 0 0}
 \usepackage[margin=2cm]{geometry}
 \setlength{\parindent}{0pt}
-\def\TPversion{0.20d}
-\def\TPdate{11/06/2026}
+\def\TPversion{\ctfileversion}
+\def\TPdate{\ctfiledate}
 \usepackage{tcolorbox}
 \usepackage{pgffor}
 \tcbuselibrary{breakable,skins,hooks,listingsutf8}
@@ -50,7 +50,7 @@
 	keywordstyle={\color{violet}},%
 	classoffset=2,%
 	alsoletter={-},%
-	morekeywords={\ctshowlist,\ctsortasclist,\ctsortdeslist,\ctaddvalinlist,\ctremovevalinlist,\ctboolvalinlist,\cttestifvalinlist,\ctcountvalinlist,\ctminoflist,\ctmaxoflist,\ctmeanoflist,\ctsumoflist,\ctprodoflist,\ctreverselist,\ctgetvaluefromlist,\ctlenoflist,\ctgetindexfromlist,\ctsublist,\ctslicelist,\cttransformlist,\ctuniqlist,\ctintersectlists,\ctmergelists,\ctdifflist,\ctsymdifflist,\ctshufflelist},%
+	morekeywords={\ctshowlist,\ctsortasclist,\ctsortdeslist,\ctaddvalinlist,\ctremovevalinlist,\ctboolvalinlist,\cttestifvalinlist,\ctcountvalinlist,\ctminoflist,\ctmaxoflist,\ctmeanoflist,\ctsumoflist,\ctprodoflist,\ctreverselist,\ctgetvaluefromlist,\ctlenoflist,\ctgetindexfromlist,\ctsublist,\ctslicelist,\cttransformlist,\ctuniqlist,\ctintersectlists,\ctmergelists,\ctdifflist,\ctsymdifflist,\ctshufflelist,\ctshowlistwithsep,\ctgetvaluefromcycllist},%
 	keywordstyle={\color{green!50!black}},%
 	classoffset=3,%
 	morekeywords={asc,des},%
@@ -80,7 +80,7 @@
 		keywordstyle={\color{violet}},%
 		classoffset=2,%
 		alsoletter={-},%
-		morekeywords={\ctshowlist,\ctsortasclist,\ctsortdeslist,\ctaddvalinlist,\ctremovevalinlist,\ctboolvalinlist,\cttestifvalinlist,\ctcountvalinlist,\ctminoflist,\ctmaxoflist,\ctmeanoflist,\ctsumoflist,\ctprodoflist,\ctreverselist,\ctgetvaluefromlist,\ctlenoflist,\ctgetindexfromlist,\ctsublist,\ctslicelist,\cttransformlist,\ctuniqlist,\ctintersectlists,\ctmergelists,\ctdifflist,\ctsymdifflist,\ctgetvaluefromcycllist,\ctshufflelist},%
+		morekeywords={\ctshowlist,\ctsortasclist,\ctsortdeslist,\ctaddvalinlist,\ctremovevalinlist,\ctboolvalinlist,\cttestifvalinlist,\ctcountvalinlist,\ctminoflist,\ctmaxoflist,\ctmeanoflist,\ctsumoflist,\ctprodoflist,\ctreverselist,\ctgetvaluefromlist,\ctlenoflist,\ctgetindexfromlist,\ctsublist,\ctslicelist,\cttransformlist,\ctuniqlist,\ctintersectlists,\ctmergelists,\ctdifflist,\ctsymdifflist,\ctgetvaluefromcycllist,\ctshufflelist,\ctshowlistwithsep,\ctgetvaluefromcycllist},%
 		keywordstyle={\color{green!50!black}},%
 		classoffset=3,%
 		morekeywords={asc,des},%
@@ -212,6 +212,16 @@ All code is written in \hologo{LaTeX3}, so no extra packages are needed.
 
 {\footnotesize\faLightbulb} See also the \href{https://ctan.org/pkg/tuple}{\texttt{tuple}} package on CTAN, which provides a more complete and fully expandable approach to numeral list operations, with an elegant \texttt{object.method} chaining syntax!
 
+\smallskip
+
+{\footnotesize\faBomb} Since version \texttt{0.20e}, the syntax is different for optional arguments that are \emph{not} the separator: rounding precision
+(\ShowCode{\\cttransformlist}) and sorting keys \texttt{asc}/\texttt{des}
+(\ShowCode{\\ctuniqlist}, \ShowCode{\\ctintersectlists}, \ShowCode{\\ctmergelists},
+\ShowCode{\\ctdifflist}, \ShowCode{\\ctsymdifflist}) are no longer given between
+square brackets \texttt{[...]}, but between angle brackets \texttt{<...>}. The
+list separator itself stays between square brackets \texttt{[...]}, always in
+first position (right after the star, if any).
+
 \section{Global usage}
 
 \subsection{Tools}
@@ -237,7 +247,7 @@ Starred versions only print the result, whereas non starred versions store the r
 \subsection{The macro for printing}
 
 \begin{DemoCode}{listing only}
-%just printing, with optional separator
+%just printing, with optional separator (in & out)
 \ctshowlist[sep]{list}
 \end{DemoCode}
 
@@ -247,7 +257,17 @@ Starred versions only print the result, whereas non starred versions store the r
 
 \begin{DemoCode}{}
 \def\mytmplist{12, -4,   5,7 ,8, 9, 0}
-\ctshowlist[\,/\,]{\mytmplist}
+\ctshowlist{\mytmplist}
+\end{DemoCode}
+
+\begin{DemoCode}{listing only}
+%just printing, with optional separator in & out
+\ctshowlistwithsep[in sep]{list}{out sep}
+\end{DemoCode}
+
+\begin{DemoCode}{}
+\def\mytmplist{12 § -4§   5§7 §8§ 9§ 0}
+\ctshowlistwithsep[§]{\mytmplist}{\,+++\,}
 \end{DemoCode}
 
 \section{The macros for calculating}
@@ -497,9 +517,9 @@ The sum is \mysum\ and the prod is \myprod
 
 \begin{DemoCode}{listing only}
 %transforming a list through formula, only printing
-\cttransformlist*[round]{list}{formula}
+\cttransformlist*<round>{list}{formula}
 %transforming a list through formula and storing into \macro (\mytransformlist by default)
-\cttransformlist*[round]{list}{formula}[\macro]
+\cttransformlist<round>{list}{formula}[\macro]
 \end{DemoCode}
 
 \begin{DemoCode}{}
@@ -511,7 +531,7 @@ The sum is \mysum\ and the prod is \myprod
 %formula sqrt(x), only printing
 \cttransformlist*{10,20,30}{sqrt(x)}\\
 %formula round(sqrt(x),3), only printing
-\cttransformlist*[3]{\mylist}{sqrt(x)}\\
+\cttransformlist*<3>{\mylist}{sqrt(x)}\\
 \end{DemoCode}
 
 \begin{DemoCode}{}
@@ -520,7 +540,7 @@ The sum is \mysum\ and the prod is \myprod
 \cttransformlist{\mylist}{2*x}[\myresult]Transform formula 2*x:\\
 \myresult\\
 %storing transform with x^2-sqrt(x) into \myresultb
-\cttransformlist[1]{\mylist}{x^2-sqrt(x)}[\myresultb]Transform formula x\^{}2-sqrt(x):\\
+\cttransformlist<1>{\mylist}{x^2-sqrt(x)}[\myresultb]Transform formula x\^{}2-sqrt(x):\\
 \myresultb
 \end{DemoCode}
 
@@ -529,13 +549,13 @@ The sum is \mysum\ and the prod is \myprod
 \begin{DemoCode}{listing only}
 %removing duplicates, only printing
 \ctuniqlist*{list}
-%removing duplicates with optional sorting [asc] or [des]
-\ctuniqlist*[asc]{list}
-\ctuniqlist*[des]{list}
+%removing duplicates with optional sorting <asc> or <des>
+\ctuniqlist*<asc>{list}
+\ctuniqlist*<des>{list}
 %removing duplicates and storing into \macro (\myuniqlist by default)
 \ctuniqlist{list}[\macro]
-\ctuniqlist[asc]{list}[\macro]
-\ctuniqlist[des]{list}[\macro]
+\ctuniqlist<asc>{list}[\macro]
+\ctuniqlist<des>{list}[\macro]
 \end{DemoCode}
 
 \begin{DemoCode}{}
@@ -543,19 +563,19 @@ The sum is \mysum\ and the prod is \myprod
 %without sorting, only printing
 \ctuniqlist*{\mylist}\\
 %with ascending sort, only printing
-\ctuniqlist*[asc]{\mylist}\\
+\ctuniqlist*<asc>{\mylist}\\
 %with descending sort, only printing
-\ctuniqlist*[des]{\mylist}
+\ctuniqlist*<des>{\mylist}
 \end{DemoCode}
 
 \begin{DemoCode}{}
 \def\mylist{5,2,9,2,1,5,7,3,1}
 %storing without sort into \myuniq
 \ctuniqlist{\mylist}[\myuniq]No sort: \myuniq\\
-%storing with [asc] into \myuniqasc
-\ctuniqlist[asc]{\mylist}[\myuniqasc]With [asc]: \myuniqasc\\
-%storing with [des] into \myuniqdes
-\ctuniqlist[des]{\mylist}[\myuniqdes]With [des]: \myuniqdes
+%storing with <asc> into \myuniqasc
+\ctuniqlist<asc>{\mylist}[\myuniqasc]With <asc>: \myuniqasc\\
+%storing with <des> into \myuniqdes
+\ctuniqlist<des>{\mylist}[\myuniqdes]With <des>: \myuniqdes
 \end{DemoCode}
 
 \subsection{Shuffle}
@@ -586,13 +606,13 @@ The sum is \mysum\ and the prod is \myprod
 \begin{DemoCode}{listing only}
 %intersection of two lists, only printing
 \ctintersectlists*{list1}{list2}
-%intersection with optional sorting [asc] or [des], only printing
-\ctintersectlists*[asc]{list1}{list2}
-\ctintersectlists*[des]{list1}{list2}
+%intersection with optional sorting <asc> or <des>, only printing
+\ctintersectlists*<asc>{list1}{list2}
+\ctintersectlists*<des>{list1}{list2}
 %intersection and storing into \macro (\myintersectlist by default)
 \ctintersectlists{list1}{list2}[\macro]
-\ctintersectlists[asc]{list1}{list2}[\macro]
-\ctintersectlists[des]{list1}{list2}[\macro]
+\ctintersectlists<asc>{list1}{list2}[\macro]
+\ctintersectlists<des>{list1}{list2}[\macro]
 \end{DemoCode}
 
 \begin{DemoCode}{}
@@ -601,9 +621,9 @@ The sum is \mysum\ and the prod is \myprod
 %without sorting, only printing
 \ctintersectlists*{\mylistA}{\mylistB}\\
 %with ascending sort, only printing
-\ctintersectlists*[asc]{\mylistA}{\mylistB}\\
+\ctintersectlists*<asc>{\mylistA}{\mylistB}\\
 %with descending sort, only printing
-\ctintersectlists*[des]{\mylistA}{\mylistB}
+\ctintersectlists*<des>{\mylistA}{\mylistB}
 \end{DemoCode}
 
 \begin{DemoCode}{}
@@ -611,10 +631,10 @@ The sum is \mysum\ and the prod is \myprod
 \def\mylistB{2,5,8,11,6,3}
 %storing without sort into \myinter
 \ctintersectlists{\mylistA}{\mylistB}[\myinter]No sort: \myinter\\
-%storing with [asc] into \myinterasc
-\ctintersectlists[asc]{\mylistA}{\mylistB}[\myinterasc]With [asc]: \myinterasc\\
-%storing with [des] into \myinterdes
-\ctintersectlists[des]{\mylistA}{\mylistB}[\myinterdes]With [des]: \myinterdes
+%storing with <asc> into \myinterasc
+\ctintersectlists<asc>{\mylistA}{\mylistB}[\myinterasc]With <asc>: \myinterasc\\
+%storing with <des> into \myinterdes
+\ctintersectlists<des>{\mylistA}{\mylistB}[\myinterdes]With <des>: \myinterdes
 \end{DemoCode}
 
 \subsection{Union (merge)}
@@ -622,13 +642,13 @@ The sum is \mysum\ and the prod is \myprod
 \begin{DemoCode}{listing only}
 %union of two lists (no duplicates), only printing
 \ctmergelists*{list1}{list2}
-%union with optional sorting [asc] or [des], only printing
-\ctmergelists*[asc]{list1}{list2}
-\ctmergelists*[des]{list1}{list2}
+%union with optional sorting <asc> or <des>, only printing
+\ctmergelists*<asc>{list1}{list2}
+\ctmergelists*<des>{list1}{list2}
 %union and storing into \macro (\mymergelist by default)
 \ctmergelists{list1}{list2}[\macro]
-\ctmergelists[asc]{list1}{list2}[\macro]
-\ctmergelists[des]{list1}{list2}[\macro]
+\ctmergelists<asc>{list1}{list2}[\macro]
+\ctmergelists<des>{list1}{list2}[\macro]
 \end{DemoCode}
 
 \begin{DemoCode}{}
@@ -637,9 +657,9 @@ The sum is \mysum\ and the prod is \myprod
 %without sorting, only printing
 \ctmergelists*{\mylistA}{\mylistB}\\
 %with ascending sort, only printing
-\ctmergelists*[asc]{\mylistA}{\mylistB}\\
+\ctmergelists*<asc>{\mylistA}{\mylistB}\\
 %with descending sort, only printing
-\ctmergelists*[des]{\mylistA}{\mylistB}
+\ctmergelists*<des>{\mylistA}{\mylistB}
 \end{DemoCode}
 
 \begin{DemoCode}{}
@@ -647,10 +667,10 @@ The sum is \mysum\ and the prod is \myprod
 \def\mylistB{2,5,8,11,6}
 %storing without sort into \mymerge
 \ctmergelists{\mylistA}{\mylistB}[\mymerge]No sort: \mymerge\\
-%storing with [asc] into \mymergeasc
-\ctmergelists[asc]{\mylistA}{\mylistB}[\mymergeasc]With [asc]: \mymergeasc\\
-%storing with [des] into \mymergedes
-\ctmergelists[des]{\mylistA}{\mylistB}[\mymergedes]With [des]: \mymergedes
+%storing with <asc> into \mymergeasc
+\ctmergelists<asc>{\mylistA}{\mylistB}[\mymergeasc]With <asc>: \mymergeasc\\
+%storing with <des> into \mymergedes
+\ctmergelists<des>{\mylistA}{\mylistB}[\mymergedes]With <des>: \mymergedes
 \end{DemoCode}
 
 \subsection{Difference}
@@ -658,13 +678,13 @@ The sum is \mysum\ and the prod is \myprod
 \begin{DemoCode}{listing only}
 %difference A\B (elements in A absent from B), only printing
 \ctdifflist*{listA}{listB}
-%difference with optional sorting [asc] or [des], only printing
-\ctdifflist*[asc]{listA}{listB}
-\ctdifflist*[des]{listA}{listB}
+%difference with optional sorting <asc> or <des>, only printing
+\ctdifflist*<asc>{listA}{listB}
+\ctdifflist*<des>{listA}{listB}
 %difference and storing into \macro (\mydifflist by default)
 \ctdifflist{listA}{listB}[\macro]
-\ctdifflist[asc]{listA}{listB}[\macro]
-\ctdifflist[des]{listA}{listB}[\macro]
+\ctdifflist<asc>{listA}{listB}[\macro]
+\ctdifflist<des>{listA}{listB}[\macro]
 \end{DemoCode}
 
 \begin{DemoCode}{}
@@ -673,9 +693,9 @@ The sum is \mysum\ and the prod is \myprod
 %without sorting, only printing
 \ctdifflist*{\mylistA}{\mylistB}\\
 %with ascending sort, only printing
-\ctdifflist*[asc]{\mylistA}{\mylistB}\\
+\ctdifflist*<asc>{\mylistA}{\mylistB}\\
 %with descending sort, only printing
-\ctdifflist*[des]{\mylistA}{\mylistB}
+\ctdifflist*<des>{\mylistA}{\mylistB}
 \end{DemoCode}
 
 \begin{DemoCode}{}
@@ -683,10 +703,10 @@ The sum is \mysum\ and the prod is \myprod
 \def\mylistB{2,5,8,11,6,3}
 %storing without sort into \mydiff
 \ctdifflist{\mylistA}{\mylistB}[\mydiff]No sort: \mydiff\\
-%storing with [asc] into \mydiffasc
-\ctdifflist[asc]{\mylistA}{\mylistB}[\mydiffasc]With [asc]: \mydiffasc\\
-%storing with [des] into \mydiffdes
-\ctdifflist[des]{\mylistA}{\mylistB}[\mydiffdes]With [des]: \mydiffdes
+%storing with <asc> into \mydiffasc
+\ctdifflist<asc>{\mylistA}{\mylistB}[\mydiffasc]With <asc>: \mydiffasc\\
+%storing with <des> into \mydiffdes
+\ctdifflist<des>{\mylistA}{\mylistB}[\mydiffdes]With <des>: \mydiffdes
 \end{DemoCode}
 
 \subsection{Symmetric difference}
@@ -694,13 +714,13 @@ The sum is \mysum\ and the prod is \myprod
 \begin{DemoCode}{listing only}
 %symmetric difference (elements in A or B but not both), only printing
 \ctsymdifflist*{listA}{listB}
-%symmetric difference with optional sorting [asc] or [des], only printing
-\ctsymdifflist*[asc]{listA}{listB}
-\ctsymdifflist*[des]{listA}{listB}
+%symmetric difference with optional sorting <asc> or <des>, only printing
+\ctsymdifflist*<asc>{listA}{listB}
+\ctsymdifflist*<des>{listA}{listB}
 %symmetric difference and storing into \macro (\mysymdifflist by default)
 \ctsymdifflist{listA}{listB}[\macro]
-\ctsymdifflist[asc]{listA}{listB}[\macro]
-\ctsymdifflist[des]{listA}{listB}[\macro]
+\ctsymdifflist<asc>{listA}{listB}[\macro]
+\ctsymdifflist<des>{listA}{listB}[\macro]
 \end{DemoCode}
 
 \begin{DemoCode}{}
@@ -709,9 +729,9 @@ The sum is \mysum\ and the prod is \myprod
 %without sorting, only printing
 \ctsymdifflist*{\mylistA}{\mylistB}\\
 %with ascending sort, only printing
-\ctsymdifflist*[asc]{\mylistA}{\mylistB}\\
+\ctsymdifflist*<asc>{\mylistA}{\mylistB}\\
 %with descending sort, only printing
-\ctsymdifflist*[des]{\mylistA}{\mylistB}
+\ctsymdifflist*<des>{\mylistA}{\mylistB}
 \end{DemoCode}
 
 \begin{DemoCode}{}
@@ -719,10 +739,10 @@ The sum is \mysum\ and the prod is \myprod
 \def\mylistB{2,5,8,11,6,3}
 %storing without sort into \mysymdiff
 \ctsymdifflist{\mylistA}{\mylistB}[\mysymdiff]No sort: \mysymdiff\\
-%storing with [asc] into \mysymdiffasc
-\ctsymdifflist[asc]{\mylistA}{\mylistB}[\mysymdiffasc]With [asc]: \mysymdiffasc\\
-%storing with [des] into \mysymdiffdes
-\ctsymdifflist[des]{\mylistA}{\mylistB}[\mysymdiffdes]With [des]: \mysymdiffdes
+%storing with <asc> into \mysymdiffasc
+\ctsymdifflist<asc>{\mylistA}{\mylistB}[\mysymdiffasc]With <asc>: \mysymdiffasc\\
+%storing with <des> into \mysymdiffdes
+\ctsymdifflist<des>{\mylistA}{\mylistB}[\mysymdiffdes]With <des>: \mysymdiffdes
 \end{DemoCode}
 
 \section{Macros with testing}
@@ -785,6 +805,8 @@ The sum is \mysum\ and the prod is \myprod
 \pagebreak
 
 \section{History}
+
+\texttt{0.20e: Improvements with \textit{cyclic version}}
 
 \texttt{0.20d: Improvements with \hologo{LaTeX3}, tks to \textit{ankaa3908} again !}
 

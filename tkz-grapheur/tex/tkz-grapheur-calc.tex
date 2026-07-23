@@ -308,7 +308,7 @@
 \NewDocumentCommand\tkzgCalcTermeRecurrence{ s m m m m O{\mycalcres} }{%
   % #2=f(x)  #3=n0  #4=un0  #5=n  #6=macro
   \xintdeffloatfunc tkzgvarfct(x) := #2 ;%
-  \xdef\tkzgvartmp{\fpeval{#4}}%
+  \xdef\tkzgvartmp{\xintfloateval{#4}}%
   \foreach \i in {#3,...,#5}{%
     \xintifboolexpr{ \i > #3 }%
       {\xdef\tkzgvartmp{\xintfloateval{tkzgvarfct(\tkzgvartmp)}}}%
@@ -325,7 +325,7 @@
 \NewDocumentCommand\tkzgCalcTermeRecurrenceAlt{ s m m m m O{\mycalcres} }{%
   % #2=f(x,n)  #3=n0  #4=un0  #5=n  #6=macro
   \xintdeffloatfunc tkzgvarfctn(x,n) := #2 ;%
-  \xdef\tkzgvartmp{\fpeval{#4}}%
+  \xdef\tkzgvartmp{\xintfloateval{#4}}%
   \foreach \i in {#3,...,#5}{%
     \xintifboolexpr{ \i > #3 }%
       {\xdef\tkzgvartmp{\xintfloateval{tkzgvarfctn(\tkzgvartmp,\i-1)}}}%
@@ -335,7 +335,58 @@
   \IfBooleanF{#1}{#6}%
 }
 \NewCommandCopy\tkzgCalcRecurrN\tkzgCalcTermeRecurrenceAlt
+
+%====calcul terme récurrence — ordre 2, u_{n+2}=f(u_n,u_{n+1})
+\NewDocumentCommand\tkzgCalcTermeRecurrenceDouble{ s m m m m m O{\mycalcres} }{%
+  % #2=f(x,y)  #3=n0  #4=un0  #5=u(n0+1)  #6=n  #7=macro
+  \xintdeffloatfunc tkzgvarfct2(x,y) := #2 ;%
+  \xdef\tkzgvartmpA{\xintfloateval{#4}}%        % u_n0
+  \xdef\tkzgvartmpB{\xintfloateval{#5}}%        % u_{n0+1}
+  \xintifboolexpr{ #6 == #3 }%
+    {\xdef\tkzgvarres{\tkzgvartmpA}}%
+    {%
+      \xintifboolexpr{ #6 == #3+1 }%
+        {\xdef\tkzgvarres{\tkzgvartmpB}}%
+        {%
+          \foreach \i in {\inteval{#3+2},...,#6}{%
+            \xdef\tkzgvartmpC{\xintfloateval{tkzgvarfct2(\tkzgvartmpA,\tkzgvartmpB)}}%
+            \xdef\tkzgvartmpA{\tkzgvartmpB}%
+            \xdef\tkzgvartmpB{\tkzgvartmpC}%
+          }%
+          \xdef\tkzgvarres{\tkzgvartmpB}%
+        }%
+    }%
+  \xdef#7{\xintFloatToDecimal{\xintfloateval{\tkzgvarres}}}%
+  \IfBooleanF{#1}{#7}%
+}
+\NewCommandCopy\tkzgCalcRecurrOrdreDeux\tkzgCalcTermeRecurrenceDouble
  
+%====calcul terme récurrence — ordre 2 avec n, u_{n+2}=f(u_n,u_{n+1},n)
+\NewDocumentCommand\tkzgCalcTermeRecurrenceDoubleN{ s m m m m m O{\mycalcres} }{%
+  % #2=f(x,y,n)  #3=n0  #4=un0  #5=u(n0+1)  #6=n  #7=macro
+  % convention : f(x,y,n) calcule u_{n+2} à partir de u_n=x, u_{n+1}=y
+  \xintdeffloatfunc tkzgvarfct2n(x,y,n) := #2 ;%
+  \xdef\tkzgvartmpA{\xintfloateval{#4}}%        % u_n0
+  \xdef\tkzgvartmpB{\xintfloateval{#5}}%        % u_{n0+1}
+  \xintifboolexpr{ #6 == #3 }%
+    {\xdef\tkzgvarres{\tkzgvartmpA}}%
+    {%
+      \xintifboolexpr{ #6 == #3+1 }%
+        {\xdef\tkzgvarres{\tkzgvartmpB}}%
+        {%
+          % à l'itération \i (de n0+2 à n), on calcule u_i = f(u_{i-2},u_{i-1},i-2)
+          \foreach \i in {\inteval{#3+2},...,#6}{%
+            \xdef\tkzgvartmpC{\xintfloateval{tkzgvarfct2n(\tkzgvartmpA,\tkzgvartmpB,\i-2)}}%
+            \xdef\tkzgvartmpA{\tkzgvartmpB}%
+            \xdef\tkzgvartmpB{\tkzgvartmpC}%
+          }%
+          \xdef\tkzgvarres{\tkzgvartmpB}%
+        }%
+    }%
+  \xdef#7{\xintFloatToDecimal{\xintfloateval{\tkzgvarres}}}%
+  \IfBooleanF{#1}{#7}%
+}
+\NewCommandCopy\tkzgCalcRecurrOrdreDeuxN\tkzgCalcTermeRecurrenceDoubleN
 
 %====calcul seuil
 \NewDocumentCommand\tkzgCalcSeuilSuite{ s m m m m m O{\mycalcres} }{%

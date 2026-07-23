@@ -267,7 +267,7 @@
     \itemtomacro\pflstnuagey[##1]\tmpsty%
     \xdef\tmpstnx{\xintfloateval{(\tmpstx-\pflstxmin)/\pflstampx*\pflstlargeur}}%
     \xdef\tmpstny{\xintfloateval{(\tmpsty-\pflstymin)/\pflstampy*\pflsthauteur}}%
-    \filldraw[\pflstnuagecoul] (\tmpstnx,\tmpstny) circle[radius=\pflstnuagetaille] ;%
+    \filldraw[color=\pflstnuagecoul] (\tmpstnx,\tmpstny) circle[radius=\pflstnuagetaille] ;%
   }%
 }
 
@@ -286,14 +286,14 @@
     \xdef\tmpstnx{\xintfloateval{(\tmpstx-\pflstxmin)/\pflstampx*\pflstlargeur}}%
     \xdef\tmpstny{\xintfloateval{(\tmpsty-\pflstymin)/\pflstampy*\pflsthauteur}}%
     \IfStrEq{\tkzDiagBatStyle}{batons}%
-      {\draw[pflbarresprobas,\tkzDiagBatCoulCour] (\tmpstnx,\pflstoy) -- (\tmpstnx,\tmpstny) ;}%
+      {\draw[pflbarresprobas,color=\tkzDiagBatCoulCour] (\tmpstnx,\pflstoy) -- (\tmpstnx,\tmpstny) ;}%
       {%
         \xdef\tmpstdemi{\xintfloateval{\tkzDiagBatLargeur/2*\pflstlargeur/\pflstampx}}%
-        \draw[pfltrait,\tkzDiagBatCoulCour,fill=\tkzDiagBatCoulCour,fill opacity=0.5]
+        \draw[pfltrait,color=\tkzDiagBatCoulCour,fill=\tkzDiagBatCoulCour,fill opacity=0.5]
           ({\tmpstnx-\tmpstdemi},\pflstoy) rectangle++ ({2*\tmpstdemi},{\tmpstny-\pflstoy}) ;%
       }%
     \ifboolKV[tkzDiagBatons]{AffValeurs}%
-      {\node[above,\tkzDiagBatColVal,font=\tkzDiagBatPolice] at (\tmpstnx,\tmpstny)
+      {\node[above,text=\tkzDiagBatColVal,font=\tkzDiagBatPolice] at (\tmpstnx,\tmpstny)
         {\ArrondirNum[\tkzDiagBatArrondi]{\tmpsty}} ;}%
       {}%
   }%
@@ -394,21 +394,21 @@
       \xdef\pflstyqt{\xintfloateval{(0.75*\DonneesEffMax-\pflstymin)/\pflstampy*\pflsthauteur}}%
       \ifboolKV[tkzgECC]{TraitsComplets}%
         {%
-          \draw[pfltraitsparamecc,\tkzecc@coul@med] (0,\pflstymed) -- (\pflstlargeur,\pflstymed) ;%
-          \draw[pfltraitsparamecc,\tkzecc@coul@quart] (0,\pflstyqu) -- (\pflstlargeur,\pflstyqu) ;%
-          \draw[pfltraitsparamecc,\tkzecc@coul@quart] (0,\pflstyqt) -- (\pflstlargeur,\pflstyqt) ;%
+          \draw[pfltraitsparamecc,color=\tkzecc@coul@med] (0,\pflstymed) -- (\pflstlargeur,\pflstymed) ;%
+          \draw[pfltraitsparamecc,color=\tkzecc@coul@quart] (0,\pflstyqu) -- (\pflstlargeur,\pflstyqu) ;%
+          \draw[pfltraitsparamecc,color=\tkzecc@coul@quart] (0,\pflstyqt) -- (\pflstlargeur,\pflstyqt) ;%
         }%
         {%
-          \draw[pfltraitsparamecc,\tkzecc@coul@med] (0,\pflstymed) -- (\pflstxmed,\pflstymed) ;%
-          \draw[pfltraitsparamecc,\tkzecc@coul@quart] (0,\pflstyqu) -- (\pflstxqu,\pflstyqu) ;%
-          \draw[pfltraitsparamecc,\tkzecc@coul@quart] (0,\pflstyqt) -- (\pflstxqt,\pflstyqt) ;%
+          \draw[pfltraitsparamecc,color=\tkzecc@coul@med] (0,\pflstymed) -- (\pflstxmed,\pflstymed) ;%
+          \draw[pfltraitsparamecc,color=\tkzecc@coul@quart] (0,\pflstyqu) -- (\pflstxqu,\pflstyqu) ;%
+          \draw[pfltraitsparamecc,color=\tkzecc@coul@quart] (0,\pflstyqt) -- (\pflstxqt,\pflstyqt) ;%
         }%
-      \draw[pfltraitsparamecc,\tkzecc@coul@med] (\pflstxmed,\pflstymed) -- (\pflstxmed,\pflstoy) ;%
-      \draw[\tkzecc@coul@med,thick,fill=white] (\pflstxmed,\pflstymed) circle[pflpointnuage] ;%
-      \draw[pfltraitsparamecc,\tkzecc@coul@quart] (\pflstxqu,\pflstyqu) -- (\pflstxqu,\pflstoy) ;%
-      \draw[\tkzecc@coul@quart,thick,fill=white] (\pflstxqu,\pflstyqu) circle[pflpointnuage] ;%
-      \draw[pfltraitsparamecc,\tkzecc@coul@quart] (\pflstxqt,\pflstyqt) -- (\pflstxqt,\pflstoy) ;%
-      \draw[\tkzecc@coul@quart,thick,fill=white] (\pflstxqt,\pflstyqt) circle[pflpointnuage] ;%
+      \draw[pfltraitsparamecc,color=\tkzecc@coul@med] (\pflstxmed,\pflstymed) -- (\pflstxmed,\pflstoy) ;%
+      \draw[color=\tkzecc@coul@med,thick,fill=white] (\pflstxmed,\pflstymed) circle[pflpointnuage] ;%
+      \draw[pfltraitsparamecc,color=\tkzecc@coul@quart] (\pflstxqu,\pflstyqu) -- (\pflstxqu,\pflstoy) ;%
+      \draw[color=\tkzecc@coul@quart,thick,fill=white] (\pflstxqu,\pflstyqu) circle[pflpointnuage] ;%
+      \draw[pfltraitsparamecc,color=\tkzecc@coul@quart] (\pflstxqt,\pflstyqt) -- (\pflstxqt,\pflstoy) ;%
+      \draw[color=\tkzecc@coul@quart,thick,fill=white] (\pflstxqt,\pflstyqt) circle[pflpointnuage] ;%
     }{}%
 }
 
@@ -443,12 +443,12 @@
   \xdef\pflbamnxe{\xintfloateval{(#5-\pflstxmin)/\pflstampx*\pflstlargeur}}%
   \xdef\tkzBaMbas{\xintfloateval{\tkzBaMElevation-\tkzBaMHauteur/2}}%
   \xdef\tkzBaMhaut{\xintfloateval{\tkzBaMElevation+\tkzBaMHauteur/2}}%
-  \draw[pfltrait,\tkzBaMCouleur,fill=\tkzBaMRemplissage]%
+  \draw[pfltrait,color=\tkzBaMCouleur,fill=\tkzBaMRemplissage]%
     (\pflbamnxb,\tkzBaMbas) rectangle (\pflbamnxd,\tkzBaMhaut) ;%
-  \draw[pfltrait,\tkzBaMCouleur]%
+  \draw[pfltrait,color=\tkzBaMCouleur]%
     (\pflbamnxa,\tkzBaMElevation) -- (\pflbamnxb,\tkzBaMElevation)%
     (\pflbamnxd,\tkzBaMElevation) -- (\pflbamnxe,\tkzBaMElevation) ;%
-  \draw[pfltrait,\tkzBaMCouleur]%
+  \draw[pfltrait,color=\tkzBaMCouleur]%
     (\pflbamnxa,\tkzBaMbas) -- (\pflbamnxa,\tkzBaMhaut)%
     (\pflbamnxe,\tkzBaMbas) -- (\pflbamnxe,\tkzBaMhaut)%
     (\pflbamnxc,\tkzBaMbas) -- (\pflbamnxc,\tkzBaMhaut) ;%
@@ -459,7 +459,7 @@
     }{}%
   \ifboolKV[tkzBoiteMoustaches]{Pointilles}%
     {%
-      \draw[pfltraitantec,\tkzBaMCouleur]%
+      \draw[pfltraitantec,color=\tkzBaMCouleur]%
         (\pflbamnxa,\tkzBaMbas)--(\pflbamnxa,\pflstoy)%
         (\pflbamnxb,\tkzBaMbas)--(\pflbamnxb,\pflstoy)%
         (\pflbamnxc,\tkzBaMbas)--(\pflbamnxc,\pflstoy)%

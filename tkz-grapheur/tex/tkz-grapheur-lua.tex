@@ -55,7 +55,7 @@
     \edef\tmplistepts{\directlua{tex.sprint(pfl.marching_squares("\luaescapestring{#2}",\pflimplxa,\pflimplxb,\pflimplya,\pflimplyb,\pfl@pasx,\pfl@pasy,\pfltoleranceimplic))}}%
     \begin{scope}
         \clip (\pflxmin,\pflymin) rectangle (\pflxmax,\pflymax);
-        \draw[\pflcouleurbimpl] plot[mark size=\pflthickimpl,pflcourbeimplicit] coordinates {\tmplistepts};
+        \draw[color=\pflcouleurbimpl] plot[mark size=\pflthickimpl,pflcourbeimplicit] coordinates {\tmplistepts};
     \end{scope}%
     \else
       \PackageWarning{tkz-grapheur}{.: LuaLaTeX not detected, \TracerCourbeImplicite\space with [lua=false] key only available :.}
@@ -131,15 +131,15 @@
     \clip (\pflxmin,\pflymin) rectangle (\pflxmax,\pflymax) ;
     \IfEq{\tmplisteptsp}{}{}%
       {%
-        \draw[\pflcouleurbimpl] plot[pflcourbeimplicit] coordinates {\tmplisteptsp} ;%
+        \draw[color=\pflcouleurbimpl] plot[pflcourbeimplicit] coordinates {\tmplisteptsp} ;%
       }%
     \IfEq{\tmplisteptsh}{}{}%
       {%
-        \draw[\pflcouleurbimpl] plot[pflcourbeimplicit] coordinates {\tmplisteptsh} ;%
+        \draw[color=\pflcouleurbimpl] plot[pflcourbeimplicit] coordinates {\tmplisteptsh} ;%
       }%
     \IfEq{\tmplisteptsv}{}{}%
       {%
-        \draw[\pflcouleurbimpl] plot[pflcourbeimplicit] coordinates {\tmplisteptsv} ;%
+        \draw[color=\pflcouleurbimpl] plot[pflcourbeimplicit] coordinates {\tmplisteptsv} ;%
       }%
   \end{scope}%
   \endgroup%
@@ -220,7 +220,7 @@
     \edef\pflkpts{\directlua{tex.sprint(pfl._niveau_pts[\i] or "")}}%
     \begin{scope}
       \clip (\pflxmin,\pflymin) rectangle (\pflxmax,\pflymax);
-      \draw[\pflcoulcourante]
+      \draw[color=\pflcoulcourante]
         plot[mark size=\pflthickimpl,pflcourbeimplicit]
         coordinates {\pflkpts};
     \end{scope}%
