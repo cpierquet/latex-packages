@@ -4,11 +4,12 @@
 %                 :              (https://tex.stackexchange.com/questions/460836/custom-line-cap-to-simulate-inked-line-in-tikz/460842#460842 from user121799)
 
 \NeedsTeXFormat{LaTeX2e}
-\def\tkzdfversion{0.20a}
-\def\tkzdfdate{2026/06/02}
+\def\tkzdfversion{0.20b}
+\def\tkzdfdate{2026/08/17}
 \ProvidesPackage{tikz-decofonts}[\tkzdfdate\space \tkzdfversion\space Custom fonts or effects, made with TikZ]
 
 %------History
+% 0.20b  Bugfix with AtBeginDocument
 % 0.20a  Calligraphy macro (like pencircle in MP)
 % 0.1.8  Pen-underline
 % 0.1.7  AlphabetCubes (experimental)
@@ -1578,37 +1579,41 @@
 }
 \NewCommandCopy\tkzpencircle\calligraphypencircle
 
+\newbox\decofontspenbox%prevent empty page !
+
 \AtBeginDocument{%
-  % nib / plume
-  \calligraphypencircle*[name=nib,angle=60,line width=3bp,ratio=0.125]
-  \calligraphypencircle*[name=plume,angle=60,line width=3bp,ratio=0.125]
-  % italic
-  \calligraphypencircle*[name=italic,angle=45,line width=3bp,ratio=0.167]
-  \calligraphypencircle*[name=italique,angle=45,line width=3bp,ratio=0.167]
-  % copper / cuivre
-  \calligraphypencircle*[name=copper,angle=30,line width=2bp,ratio=0.1]
-  \calligraphypencircle*[name=cuivre,angle=30,line width=2bp,ratio=0.1]
-  % brush / pinceau
-  \calligraphypencircle*[name=brush,angle=70,line width=5bp,ratio=0.25]
-  \calligraphypencircle*[name=pinceau,angle=70,line width=5bp,ratio=0.25]
-  % marker / marqueur
-  \calligraphypencircle*[name=marker,angle=0,line width=6bp,ratio=0.333]
-  \calligraphypencircle*[name=marqueur,angle=0,line width=6bp,ratio=0.333]
-  % chisel / ciseau
-  \calligraphypencircle*[name=chisel,angle=45,line width=4bp,ratio=0.2]
-  \calligraphypencircle*[name=ciseau,angle=45,line width=4bp,ratio=0.2]
-  % pencil / crayon
-  \calligraphypencircle*[name=pencil,angle=60,line width=2bp,ratio=0.083]
-  \calligraphypencircle*[name=crayon,angle=60,line width=2bp,ratio=0.083]
-  % chalk / craie
-  \calligraphypencircle*[name=chalk,angle=80,line width=6bp,ratio=0.333]
-  \calligraphypencircle*[name=craie,angle=80,line width=6bp,ratio=0.333]
-  % reed / roseau
-  \calligraphypencircle*[name=reed,angle=45,line width=4bp,ratio=0.167]
-  \calligraphypencircle*[name=roseau,angle=45,line width=4bp,ratio=0.167]
-  % fude / japonais
-  \calligraphypencircle*[name=fude,angle=85,line width=6bp,double=false]
-  \calligraphypencircle*[name=japonais,angle=85,line width=6bp,double=false]
+  \setbox\decofontspenbox=\hbox{%
+    % nib / plume
+    \calligraphypencircle*[name=nib,angle=60,line width=3bp,ratio=0.125]
+    \calligraphypencircle*[name=plume,angle=60,line width=3bp,ratio=0.125]
+    % italic
+    \calligraphypencircle*[name=italic,angle=45,line width=3bp,ratio=0.167]
+    \calligraphypencircle*[name=italique,angle=45,line width=3bp,ratio=0.167]
+    % copper / cuivre
+    \calligraphypencircle*[name=copper,angle=30,line width=2bp,ratio=0.1]
+    \calligraphypencircle*[name=cuivre,angle=30,line width=2bp,ratio=0.1]
+    % brush / pinceau
+    \calligraphypencircle*[name=brush,angle=70,line width=5bp,ratio=0.25]
+    \calligraphypencircle*[name=pinceau,angle=70,line width=5bp,ratio=0.25]
+    % marker / marqueur
+    \calligraphypencircle*[name=marker,angle=0,line width=6bp,ratio=0.333]
+    \calligraphypencircle*[name=marqueur,angle=0,line width=6bp,ratio=0.333]
+    % chisel / ciseau
+    \calligraphypencircle*[name=chisel,angle=45,line width=4bp,ratio=0.2]
+    \calligraphypencircle*[name=ciseau,angle=45,line width=4bp,ratio=0.2]
+    % pencil / crayon
+    \calligraphypencircle*[name=pencil,angle=60,line width=2bp,ratio=0.083]
+    \calligraphypencircle*[name=crayon,angle=60,line width=2bp,ratio=0.083]
+    % chalk / craie
+    \calligraphypencircle*[name=chalk,angle=80,line width=6bp,ratio=0.333]
+    \calligraphypencircle*[name=craie,angle=80,line width=6bp,ratio=0.333]
+    % reed / roseau
+    \calligraphypencircle*[name=reed,angle=45,line width=4bp,ratio=0.167]
+    \calligraphypencircle*[name=roseau,angle=45,line width=4bp,ratio=0.167]
+    % fude / japonais
+    \calligraphypencircle*[name=fude,angle=85,line width=6bp,double=false]
+    \calligraphypencircle*[name=japonais,angle=85,line width=6bp,double=false]
+  }%
 }
 
 \endinput
