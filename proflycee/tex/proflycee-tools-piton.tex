@@ -3,7 +3,8 @@
 % Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
 
 %===trad fr/en ok (environnements aussi, dupliqués...)
-%XXXXX Bugfix sur les clés booléennes ;
+%XXXXX  Propagation des clés pour insertion code piton
+%XXXXX  Bugfix sur les clés booléennes
 %4.00f  Couleurs fond piton 
 %3.12f  Légères modif piton [bottom + bg-color]
 %3.12e  Oubli d'une clé pitonconsole...
@@ -45,7 +46,9 @@
   Gobble=\def\CODPITgobble{#1},gobble=\def\CODPITgobble{#1},%
   Couleur=\def\CODPITcolor{#1},color=\def\CODPITcolor{#1},%
   IconesCarbon=\def\CODPITicocarbon{#1},carbon icons=\def\CODPITicocarbon{#1},%
-  CouleurFond=\colorlet{CODPITcoulfond}{#1},colback=\colorlet{CODPITcoulfond}{#1}
+  CouleurFond=\colorlet{CODPITcoulfond}{#1},colback=\colorlet{CODPITcoulfond}{#1},%
+  PremLigne=\def\CODPITpremligne{#1},firstline=\def\CODPITpremligne{#1},%
+  DerLigne=\def\CODPITderligne{#1},lastline=\def\CODPITderligne{#1}
 }
 
 \setKVdefault[envpiton]{%
@@ -63,7 +66,9 @@
   CouleurNombres={orange!75!black},num color={orange!75!black},%
   Couleur=red,color=red,%
   IconesCarbon={\textcolor{red}{\pflfaclone}\;\textcolor{orange}{\pflfaclone}\;\textcolor{greensilicon}{\pflfaclone}},carbon icons={\textcolor{red}{\pflfaclone}\;\textcolor{orange}{\pflfaclone}\;\textcolor{greensilicon}{\pflfaclone}},%
-  CouleurFond=white,colback=white
+  CouleurFond=white,colback=white,%
+  PremLigne={},firstline={},%
+  DerLigne={},lastline={}
 }
 
 %==Style Moderne
@@ -170,7 +175,9 @@
   Titre=\def\CODPITPCtitre{#1},title=\def\CODPITPCtitre{#1},%
   EspacementV=\def\CODPITPCespV{#1},vsep=\def\CODPITPCespV{#1},%
   Gobble=\def\CODPITPCgobble{#1},gobble=\def\CODPITPCgobble{#1},%
-  CouleurFond=\colorlet{CODPITcoulfond}{#1},colback=\colorlet{CODPITcoulfond}{#1}
+  CouleurFond=\colorlet{CODPITcoulfond}{#1},colback=\colorlet{CODPITcoulfond}{#1},%
+  PremLigne=\def\CODPITPCpremligne{#1},firstline=\def\CODPITPCpremligne{#1},%
+  DerLigne=\def\CODPITPCderligne{#1},lastline=\def\CODPITPCderligne{#1}
 }
 
 \setKVdefault[envpcpiton]{%
@@ -186,7 +193,9 @@
   Titre={{\scriptsize\pflfapseudocode}\enspace \labelpseudocode},title={{\scriptsize\pflfapseudocode}\enspace \labelpseudocode},%
   EspacementV=0.5\baselineskip,vsep=0.5\baselineskip,%
   Couleurs=true,color=true,%
-  CouleurFond=white,colback=white
+  CouleurFond=white,colback=white,%
+  PremLigne={},firstline={},%
+  DerLigne={},lastline={}
 }
 
 %==Style Moderne
@@ -522,7 +531,7 @@
 }
 
 %inputfile
-\NewDocumentCommand\CodePitonFichier{ O{} m D<>{} }{%
+\NewDocumentCommand\CodePitonFichier{ O{} m D<>{} O{} }{%nouvel argument #4 optionnel global à InputPitonFile
   {\tcbset{reset}%
   \useKVdefault[envpiton]%
   \setKV[envpiton]{#1}% on paramètres les nouvelles clés et on les simplifie
@@ -643,7 +652,26 @@
     {}%
   %on crée la boîte
   \tcolorbox[stylebase,filigrane,cadre,titre]
-  \PitonInputFile{#2}
+  \IfEq{\CODPITpremligne}{}%
+    {%pas de 1ère ligne
+      \IfEq{\CODPITderligne}{}%
+        {%pas de dernière ligne
+          \PitonInputFile[#4]{#2}
+        }%
+        {%
+          \PitonInputFile[last-line=\CODPITderligne,#4]{#2}
+        }%
+    }%
+    {%1ère ligne
+      \IfEq{\CODPITderligne}{}%
+        {%pas de dernière
+          \PitonInputFile[first-line=\CODPITpremligne,#4]{#2}
+        }%
+        {%dernière
+          \PitonInputFile[first-line=\CODPITpremligne,last-line=\CODPITderligne,#4]{#2}
+        }%
+    }%
+  %\PitonInputFile{#2}
   \endtcolorbox}%
 }
 \NewCommandCopy\pflpitoncodefile\CodePitonFichier
@@ -887,7 +915,7 @@
 }
 
 %--inputfile
-\NewDocumentCommand\PseudoCodePitonFichier{ O{} m D<>{} }{%
+\NewDocumentCommand\PseudoCodePitonFichier{ O{} m D<>{} O{} }{%
   {\tcbset{reset}%
   \useKVdefault[envpcpiton]%
   \setKV[envpcpiton]{#1}% on paramètres les nouvelles clés et on les simplifie
@@ -900,7 +928,7 @@
   %next
   %------les styles piton
   \ifboolKV[envpcpiton]{Lignes}%si lignes=true
-    {\PitonOptions{left-margin=0.75em,all-line-numbers}}%left-margin=auto,
+    {\PitonOptions{left-margin=0.75em,all-line-numbers,line-numbers={#3}}}%left-margin=auto,
     {\PitonOptions{}}%
   \PitonOptions{break-lines,indent-broken-lines,language=minimal,continuation-symbol={\;}}%,numbers-sep=0.65em}%
   \PitonOptions{background-color=none,prompt-background-color=none}%
@@ -985,7 +1013,26 @@
     {}%
   %on crée la boîte
   \tcolorbox[stylebase,filigrane,cadre,titre]
-  \PitonInputFile{#2}%
+  \IfEq{\CODPITPCpremligne}{}%
+    {%pas de 1ère ligne
+      \IfEq{\CODPITPCderligne}{}%
+        {%pas de dernière ligne
+          \PitonInputFile[#4]{#2}
+        }%
+        {%
+          \PitonInputFile[last-line=\CODPITPCderligne,#4]{#2}
+        }%
+    }%
+    {%1ère ligne
+      \IfEq{\CODPITPCderligne}{}%
+        {%pas de dernière
+          \PitonInputFile[first-line=\CODPITPCpremligne,#4]{#2}
+        }%
+        {%dernière
+          \PitonInputFile[first-line=\CODPITPCpremligne,last-line=\CODPITPCderligne,#4]{#2}
+        }%
+    }%
+  %\PitonInputFile{#2}%
   \endtcolorbox}%
 }
 \NewCommandCopy\pflpitonpseudocodefile\PseudoCodePitonFichier
