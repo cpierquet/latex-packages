@@ -6,6 +6,8 @@
 \usepackage[french]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
+\usepackage[nott]{kpfonts}
+\usepackage{inconsolata}
 \usepackage{WriteOnGrid}
 \usetikzlibrary{decorations.pathreplacing}
 \usepackage{amsmath,amssymb}
@@ -48,8 +50,8 @@
 \setlength{\parindent}{0pt}
 \definecolor{LightGray}{gray}{0.9}
 
-\def\TPversion{0.1.9}
-\def\TPdate{13 janvier 2026}
+\def\TPversion{0.20a}
+\def\TPdate{21 août 2026}
 \usepackage{minted2}
 \usepackage[most]{tcolorbox}
 \tcbuselibrary{minted}
@@ -87,9 +89,9 @@
 				{\LARGE Pour écrire sur les} \\
 				{\LARGE lignes d'une grille.}
 			\end{tabular}
-			
+
 			\medskip
-			
+
 			{\small \texttt{Version \TPversion{} -- \TPdate}}
 		\end{center}
 	\end{tcolorbox}
@@ -102,7 +104,7 @@
 	\begin{tabular}{c}
 	\texttt{Cédric Pierquet}\\
 	{\ttfamily c pierquet -- at -- outlook . fr}\\
-	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}
+	\texttt{\url{https://github.com/cpierquet/latex-packages/tree/main/writeongrid}}
 \end{tabular}
 \end{center}
 
@@ -116,7 +118,7 @@
 
 \smallskip
 
-{$\blacktriangleright$~~Possibilité de créer une page complète Seyes}
+{$\blacktriangleright$~~Possibilité de créer une page complète (Seyes, 5x5, Ruled, Milli)}
 
 \vspace{1cm}
 
@@ -668,7 +670,7 @@ Un exemple \textit{détaillé}, avec le rendu en page suivante, avec quelques co
 		}
 	%une ligne avec des maths
 	\LignePapierSeyes[Ligne=25]<center>{${\displaystyle\sum_{i=1}^{n} i=\displaystyle\frac{n(n+1)}{2}}$.}
-	
+
 	%un environnement, avec ajustement manuel via (x,y)...
 	%pas fonctionnel à 100%
 	\LignePapierSeyes[Echelle=1.1,Ligne=27](-1.4,0.95){
@@ -708,7 +710,7 @@ Un exemple \textit{détaillé}, avec le rendu en page suivante, avec quelques co
 	}
 	%une ligne avec des maths
 	\LignePapierSeyes[Ligne=25]<center>{${\displaystyle\sum_{i=1}^{n} i=\displaystyle\frac{n(n+1)}{2}}$.}
-	
+
 	%un environnement, avec ajustement manuel via (x,y)...
 	%pas fonctionnel à 100%
 	\LignePapierSeyes[Echelle=1.1,Ligne=27](-1.4,0.95)
@@ -882,7 +884,32 @@ Les exemples des pages suivantes ont été obtenus de la même manière que celu
 
 \pagebreak
 
+\section{Wrapper autonome}
+
+\subsection{Introduction}
+
+Dans le but d'insérer uniquement une pleine page sans rajouts ultérieurs, il est possible d'utiliser un \textit{wrapper} simple.
+
+\subsection{Commandes}
+
+\begin{PresentationCode}{listing only}
+\WoGPage[clés page 5x5]{5x5}
+\end{PresentationCode}
+
+\hfill\fbox{%
+  \includegraphics[page=2,scale=0.875]{WriteOnGrid-5x5-A5.pdf}
+}\hfill\null
+
+\begin{PresentationCode}{listing only}
+\WoGPage[clés page Seyes]{Seyes}
+\WoGPage[clés page Milli]{Milli}
+\end{PresentationCode}
+
+\pagebreak
+
 \section{Historique}
+
+\verb|v0.20a|~:~~~~Nouvelle page \textsf{5x5 Marge} + wrapper autonome \textsf{pleine page}
 
 \verb|v0.1.9|~:~~~~Ajout des grilles \textsf{Milli}
 
@@ -892,9 +919,9 @@ Les exemples des pages suivantes ont été obtenus de la même manière que celu
 
 \verb|v0.1.6|~:~~~~Possibilité de déterminer automatiquement L\&C en fonction de la place restante.
 
-\verb|v0.1.5|~:~~~~Possibilité de spécifier la réglure pour les quadrillages de type \textsf{Seyes} + meilleure gestion des paragraphes.
+\verb|v0.1.5|~:~~~~Possibilité de spécifier la réglure pour les quadrillages de type \textsf{Seyes} + meilleure gestion des paragraphes
 
-\phantom{\texttt{v0.1.5}}~:~~~~Amélioration de la gestion des paragraphes en mode \textsf{pleine page}.
+\phantom{\texttt{v0.1.5}}~:~~~~Amélioration de la gestion des paragraphes en mode \textsf{pleine page}
 
 \verb|v0.1.4|~:~~~~Modification de la gestion des couleurs (\texttt{xcolor} n'est plus chargé avec \textsf{[table,svgnames]})
 
