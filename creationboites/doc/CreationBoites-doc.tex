@@ -717,7 +717,7 @@ Pour le moment, deux modèles d'utilisation du compteur sont disponibles :
 La boîte ainsi créée a la syntaxe suivante.
 
 \begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
-\begin{monenvt}[clés]
+\begin{monenvt}[clés]<options tcbox>
 ...
 \end{monenvt}
 
@@ -820,7 +820,7 @@ Pour le moment, deux modèles d'utilisation du compteur sont disponibles :
 La boîte ainsi créée a la syntaxe suivante.
 
 \begin{codehigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
-\begin{monenvt}[clés]
+\begin{monenvt}[clés]<options tcbox>
   ...
 \end{monenvt}
 
@@ -959,6 +959,11 @@ Une macro \textit{unique} existe, afin de créer la boîte en fonction :
 % ===== <clés> :
 % style         = parmi cp/default/ab/ha/tx  (cp)
 % reset section = booléen pour le compteur   (false)
+
+% ==== utilisation :
+\begin{Nom}[clés]<options tcbox>
+...
+\end{Nom}
 \end{codehigh}
 
 \setKVdefault[cpaltboites]{SouligneLabel=true,Fond,Ombre} %souligné par défaut
@@ -980,15 +985,11 @@ Une macro \textit{unique} existe, afin de créer la boîte en fonction :
 \end{codehigh}
 
 \begin{demohigh}[language=latex/latex2,style/main=cyan!10,style/code=cyan!10]
-\begin{genintro}
-\lipsum[1][1]
-\end{genintro}
+\begin{genintro}\lipsum[1][1]\end{genintro}
 
-\begin{gencadre}
-\lipsum[2][1]
-\end{gencadre}
+\begin{gencadre}\lipsum[2][1]\end{gencadre}
 
-\begin{genprop}
+\begin{genprop}<width=0.5\linewidth,flush right>
 \lipsum[3][1]
 \end{genprop}
 \end{demohigh}
@@ -1314,6 +1315,8 @@ s'appliquent à tous les environnements créés via \MontreCode{\textbackslash C
 \pagebreak
 
 \section{Historique}
+
+\verb|v0.20e|~:~~~~correction d'un oubli avec les arguments optionnels des boîtes créées
 
 \verb|v0.20d|~:~~~~ajout d'un bloc 'exercice' (expérimental)
 

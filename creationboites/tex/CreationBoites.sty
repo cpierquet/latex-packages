@@ -3,13 +3,14 @@
 
 \NeedsTeXFormat{LaTeX2e}
 
-\ProvidesPackage{CreationBoites}[2026/07/02 0.20d Macros pour creer des boites tcbox simples, avec personnalisation(s)]
+\ProvidesPackage{CreationBoites}[2026/08/21 0.20e Macros pour creer des boites tcbox simples, avec personnalisation(s)]
 
 %====VARIABLES
-\def\cbpackagedate{2026/07/02}
-\def\cbpackageversion{0.20d}
+\def\cbpackagedate{2026/08/21}
+\def\cbpackageversion{0.20e}
 
 %====HISTORIQUE
+% v 0.20e  Bugfix mineurs sur les arguments optionnels
 % v 0.20d  Boîte alternative exo 'expérimental'
 % v 0.20c  Possibilité d'utiliser un compteur personnalisé pour les boîtes
 % v 0.20b  Ajouts de 3 nouveaux styles + macro unique de génération, avec bifurcation(s)
@@ -330,23 +331,6 @@
   Fond=false,%
   Ombre=false%
 }
-
-% \defKV[abaltboites]{%
-  % ComplementTitre=\def\cpaltboitescplttitre{#1},%
-  % SousTitre=\def\cpaltboitessoustitre{#1},%
-  % EpaisseurSouligne=\def\cbulinethick{#1}%
-% }
-
-% \setKVdefault[abaltboites]{%
-  % ComplementTitre={},%
-  % SousTitre={},%
-  % Compteur=true,%
-  % Pluriel=false,%
-  % SouligneLabel=false,%
-  % EpaisseurSouligne=1pt,%
-  % Fond=false,%
-  % Ombre=false
-% }
 
 \NewDocumentCommand\CreationBoiteAlt{ O{} m m m m m !O{} }{%
   %1 = couleur
@@ -767,6 +751,7 @@
     \tcolorbox%
       [%
       hatbaseboite={#1},%
+      #7,##2,%
       title={\cbgenabtitre{#1!75!black}{#2}{#3}{#4}{#5}{#6}},
       ]
   }%
@@ -804,6 +789,7 @@
     \tcolorbox%
       [%
       hatbaseboite={#1},%
+      #7,##2,%
       title={\cbgenabtitre{#1!75!black}{#2}{#3}{#4}{#5}{#6}},
       ]
   }%
@@ -862,6 +848,7 @@
     \tcolorbox%
       [%
       altaltbaseboite={#1},%
+      #7,##2,%
       title={\cbgenabtitre{white}{#2}{#3}{#4}{#5}{#6}},
       ]
   }%
@@ -897,6 +884,7 @@
     \tcolorbox%
       [%
       altaltbaseboite={#1},%
+      #7,##2,%
       title={\cbgenabtitre{#1}{#2}{#3}{#4}{#5}{#6}},
       ]
   }%
@@ -1021,12 +1009,13 @@
   SousTitre/.store in=\BoxSubTitle,
   SousTitre={}
 }
-\NewDocumentCommand\CreationBoiteTcbTheorem{ O{black} m m m D<>{} }{%
+\NewDocumentCommand\CreationBoiteTcbTheorem{ O{black} m m m D<>{} !O{} }{%
   % #1 = couleur (opt, défaut black)
   % #2 = nom environnement
   % #3 = libellé
   % #4 = préfixe label
   % #5 = options \newtcbtheorem (entre < >)
+  % #6 = options persos tcbox (persistantes)
   \tcbset{%
     #2ThStyle/.style={%
       enhanced, sharp corners,
@@ -1040,6 +1029,7 @@
       left=1.5mm, right=1.5mm,
       separator sign={~:},
       SousTitre={},%
+      #6,%
       after title={%
         \ifx\BoxSubTitle\empty\else
         \hfill
@@ -1124,7 +1114,7 @@
     {}%
   \intcbteststreq{\cbgenboitestyle}{pfb}%
     {%
-      \CreationBoiteTcbTheorem[#2]{#3}{#5}{#4}<#8>%
+      \CreationBoiteTcbTheorem[#2]{#3}{#5}{#4}<#8>[#7]%
     }%
     {}%
 }
