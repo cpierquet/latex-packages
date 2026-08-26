@@ -2,9 +2,10 @@
 % licence.........: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{customenvs-tikzpictos}[2025/11/19 0.20c Small pictograms, made with tikz]
+\ProvidesPackage{customenvs-tikzpictos}[2026/08/25 0.20d Small pictograms, made with tikz]
 
 %====HISTORY
+% v 0.20d	LLS levels
 % v 0.20c	Excalamation + Bugfixes
 % v 0.20b	Donut + PoolBall
 % v 0.20a	3dim deco + kawaiihamster + spidercab
@@ -2972,5 +2973,118 @@
 			\end{tikzpicture}%
 		}%
 }
+
+%\tkzllslevels[hauteur=(d)auto|<dim>]<tikz keys>{niveau}
+\definecolor{llsnivbleu}{HTML}{b9d4ef}
+\definecolor{llsnivvert}{HTML}{68b652}
+\definecolor{llsnivorange}{HTML}{f29228}
+\definecolor{llsnivrouge}{HTML}{da360a}
+
+\ExplSyntaxOn
+
+\int_new:N   \l_llsniv_niveau_int
+\fp_new:N    \l_llsniv_rescale_fp
+\fp_const:Nn \c_llsniv_compensation_fp { 1 / 1.05 }
+\tl_new:N    \l_llsniv_hauteur_tl
+\tl_new:N    \l_llsniv_couleur_tl
+\tl_new:N    \l_llsniv_strut_tl
+\tl_new:N    \l_llsniv_dstrut_tl
+\dim_new:N   \l_llsniv_profondeur_dim
+\dim_new:N   \l_llsniv_baseline_dim
+\dim_new:N   \l_llsniv_height_dim
+
+\tikzset{llsnivdiff~bordure/.style={line~width=0.05\l_llsniv_height_dim}}
+\tikzset{llsnivdiff~barre/.style={line~width=0.1\l_llsniv_height_dim,llsnivbleu}}
+
+\keys_define:nn { llsniv }
+{
+  level   .int_set:N = \l_llsniv_niveau_int,
+  level   .initial:n = 1,
+  strut   .tl_set:N = \l_llsniv_strut_tl,
+  strut   .initial:n = M,
+  dstrut  .tl_set:N = \l_llsniv_dstrut_tl,
+  dstrut  .initial:n = (qM),
+  height  .tl_set:N  = \l_llsniv_hauteur_tl,
+  height  .initial:n = dauto,
+  rescale .fp_set:N  = \l_llsniv_rescale_fp,
+  rescale .initial:n = 1,
+}
+
+\cs_new_protected:Nn \llsniv_couleur:n
+{
+  \tl_set:Nx \l_llsniv_couleur_tl
+  {
+    \int_case:nn { #1 }
+    {
+      { 1 } { llsnivvert   }
+      { 2 } { llsnivorange }
+      { 3 } { llsnivrouge  }
+    }
+  }
+}
+
+\cs_new_protected:Nn \llsniv_mesures:
+{
+  \tl_if_eq:NnTF \l_llsniv_hauteur_tl { auto }
+  {
+    \hbox_set:Nn \l_tmpa_box { \l_llsniv_strut_tl }
+    \dim_set:Nn \l_llsniv_profondeur_dim { 0pt }
+    \dim_set:Nn \l_llsniv_height_dim { \box_ht:N \l_tmpa_box }
+  }
+  {
+    \tl_if_eq:NnTF \l_llsniv_hauteur_tl { dauto }
+      {
+        \hbox_set:Nn \l_tmpa_box { \l_llsniv_dstrut_tl }
+        \dim_set:Nn \l_llsniv_profondeur_dim { \box_dp:N \l_tmpa_box }
+        \dim_set:Nn \l_llsniv_height_dim
+          { \box_ht:N \l_tmpa_box + \box_dp:N \l_tmpa_box }
+      }
+      {
+        \dim_set:Nn \l_llsniv_height_dim { \l_llsniv_hauteur_tl }
+        \dim_set:Nn \l_llsniv_profondeur_dim { 0pt }
+      }
+  }
+  \dim_set:Nn \l_llsniv_baseline_dim
+    { \l_llsniv_profondeur_dim - 0.5\l_llsniv_height_dim }
+  \dim_set:Nn \l_llsniv_height_dim
+    {
+      \fp_to_decimal:n { \l_llsniv_rescale_fp * \c_llsniv_compensation_fp }
+      \l_llsniv_height_dim
+    }
+}
+
+% dessine le disque "niveau atteint" n°i (i = 1, 2, 3 -> x = 0, 2.75, 5.5)
+\cs_new_protected:Nn \llsniv_cercle:n
+{
+  \draw[llsnivdiff~bordure, draw=\l_llsniv_couleur_tl, fill=white]
+    ( { (#1-1)*2.5 } , 0 ) circle[radius=1] ;
+  \fill[\l_llsniv_couleur_tl]
+    ( { (#1-1)*2.5 } , 0 ) circle[radius=0.85] ;
+}
+
+\NewDocumentCommand \tkzllslevels { O { } D < > { } m }
+{
+  \group_begin:
+  \keys_set:nn { llsniv } { level = #3, #1 }
+  \llsniv_mesures:
+  \llsniv_couleur:n { \l_llsniv_niveau_int }
+  \begin{tikzpicture}
+    [
+      x=0.5\l_llsniv_height_dim,
+      y=0.5\l_llsniv_height_dim, 
+      baseline={(0,\dim_use:N \l_llsniv_baseline_dim)},
+      #2
+    ]
+    \useasboundingbox (-1.05,-1.05) rectangle (6.05,1.05);
+    \draw[llsnivdiff~barre] (0,0)--(5,0);
+    \fill[lightgray] (0,0)    circle[radius=0.85]
+                     (2.5,0) circle[radius=0.85]
+                     (5,0)  circle[radius=0.85] ;
+    \int_step_function:nnN { 1 } { \l_llsniv_niveau_int } \llsniv_cercle:n
+  \end{tikzpicture}
+  \group_end:
+}
+
+\ExplSyntaxOff
 
 \endinput
