@@ -3,7 +3,7 @@ monaspace-otf fonts
 
 ## Description
 
-`monaspace-otf` is a font family with mono/code support (actual version v1.300).
+`monaspace-otf` is a font family with mono/code support (actual version v1.400).
 Official site is https://monaspace.githubnext.com.
 Monaspace typeface family are available under the SIL Open Font License 1.1 license.
 
@@ -42,6 +42,7 @@ Either version 1.3 or, at your option, any later version.
 Monaspace family typeface are available under the SIL Open Font License 1.1 license.
 
 ## Changes
+* v1.400 (experimental).
 * v0.1 (experimental).
 
 ---
