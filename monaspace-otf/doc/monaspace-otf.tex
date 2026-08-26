@@ -3,10 +3,11 @@
 % arara: lualatex: {shell: no, synctex: yes, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
 
 \documentclass[a4paper]{scrartcl}
-\usepackage{mathtools, array, varioref}
+\usepackage{mathtools, array}
 \usepackage[british]{babel}
 \usepackage{libertinus-otf}
 \usepackage[Scale=MatchLowercase]{monaspace-otf}
+\usepackage{unicodefonttable}
 \usepackage{framed}
 \usepackage{listings}
 \usepackage{xcolor}
@@ -40,11 +41,11 @@
 }
 \newcommand*{\hlabel}[1]{\phantomsection\label{#1}}
 
-\title{Monaspace family fonts (\textit{experimental}) \\User’s Guide for LaTeX (v0.1)}
+\title{Monaspace family fonts (\textit{experimental}) \\User’s Guide for LaTeX (v1.400)}
 \author{Cédric Pierquet \\ \texttt{cpierquet@outlook.fr}}
 
 \date{\today}
-\newcommand*{\version}{0.1}
+\newcommand*{\version}{1.400}
 %\newif\ifCTAN   \CTANtrue  %%% décommenter pour CTAN
 
 \begin{document}
@@ -53,7 +54,7 @@
 
 \section{What is Monaspace ?}
 
-\subsection{Presentation (actual version is v1.300)}
+\subsection{Presentation (actual version is v1.400)}
 
 \textbf{One superfamily / Five fonts / Texture healing}
 
@@ -475,6 +476,12 @@ showstringspaces=false
 \lstinputlisting[language=python,basicstyle=\footnotesize\monaspacexenoncode,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single,columns=flexible,showstringspaces=false]{samplemonaspacejava.js}
 
 \lstinputlisting[language=python,basicstyle=\footnotesize\monaspacexenoncode,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single,columns=flexible,showstringspaces=false]{samplemonaspacepython.py}
+
+\pagebreak
+
+\section{List of glyphs (Argon version)}
+
+\displayfonttable{MonaspaceArgon-Regular}
 
 %\lstinputlisting[language=python,basicstyle=\footnotesize\monaspaceargon,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single]{samplemonaspacepython.py}
 %
