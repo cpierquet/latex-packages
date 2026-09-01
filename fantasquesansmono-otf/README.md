@@ -15,7 +15,7 @@ FantasqueSansMono typeface family are available under the SIL Open Font License 
 
 ## Usage
 
-lualatex/xelatex and fontspec are necessary in order to use monaspace fonts.
+lualatex/xelatex and fontspec are necessary in order to use FantasqueSansMono fonts.
 
 Mono version or Code version (with ligatures) are available.
 
@@ -37,7 +37,7 @@ Finally, you may want to make the system font database aware of the `fantasquesa
 * Files are distributed under the terms of the LaTeX Project
 Public License from CTAN archives in directory macros/latex/base/lppl.txt.  
 Either version 1.3 or, at your option, any later version.  
-Monaspace family typeface are available under the SIL Open Font License 1.1 license.
+FantasqueSansMono family typeface are available under the SIL Open Font License 1.1 license.
 
 ## Changes
 * v1.8.0 (experimental).
