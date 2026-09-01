@@ -1,0 +1,67 @@
+% fantasquesansmono-otf.sty
+% C. Pierquet 2026
+% fantasquesansmono-otf Mono typeface is available under the SIL Open Font License 1.1 license
+% Code inspired by fourier-otf.sty from D. Flipo
+% This file is distributed under the terms of the LaTeX Project Public
+% License from CTAN archives in directory  macros/latex/base/lppl.txt.
+% Either version 1.3 or, at your option, any later version.
+
+\ProvidesPackage{fantasquesansmono-otf}[2026/09/01 v1.8.0 Supports Fantasque-Sans-Mono family fonts for lualatex and xelatex (v1.8.0)] 
+
+\RequirePackage{iftex}
+\RequireTUTeX
+\RequirePackage{xkeyval}
+\RequirePackage{fontspec}
+
+\newtoks\FANTOTtoks
+\newcommand*{\StoreFANT@KV@Option}[2]{%
+  \FANTOTtoks=\expandafter{\the\FANTOTtoks #1={#2},}
+  \def\FANTOT@opt{#1}%
+  \def\FANTOT@scale{Scale}%
+  \def\FANTOT@stylset{StylisticSet}%
+  \def\FANTOT@rawfeat{RawFeature}%
+  \ifx\FANTOT@opt\FANTOT@scale%
+    \FANTOTtoks=\expandafter{\the\FANTOTtoks Scale={#2},}%
+  \fi
+  \ifx\FANTOT@opt\FANTOT@stylset%
+    \FANTOTtoks=\expandafter{\the\FANTOTtoks StylisticSet={#2},}%
+  \fi
+  }
+
+\DeclareKeys
+{
+  no-tt.if              = FANTOT@nott                                  ,%
+  code.if               = FANTOT@code                                  ,%
+  StylisticSet.code     = \StoreFANT@KV@Option{StylisticSet}{#1}       ,%
+  Scale.code            = \StoreFANT@KV@Option{Scale}{#1}
+}
+\ProcessKeyOptions
+
+\ifFANTOT@nott
+\else
+  \IfFontExistsTF{FantasqueSansMono-Regular}{%
+    \ifFANTOT@code
+      \begingroup
+      \edef\temp{%
+        \endgroup
+        \noexpand\setmonofont{FantasqueSansCode}[\unexpanded\expandafter{\the\FANTOTtoks}]%
+      }%
+    \temp
+    \else
+      \begingroup
+      \edef\temp{%
+        \endgroup
+        \noexpand\setmonofont{FantasqueSansMono}[\unexpanded\expandafter{\the\FANTOTtoks}]%
+      }%
+    \temp
+    \fi
+  }{%
+    \PackageWarning{fantasquesansmono-otf}{Font 'FantasqueSansMono-Regular' not found}%
+  }%
+\fi
+
+%====fontfamily mono
+\newfontfamily\fantasquesansmono{FantasqueSansMono}[Scale=MatchLowercase]
+\newfontfamily\fantasquesansmonocode{FantasqueSansCode}[Scale=MatchLowercase]
+
+\endinput

@@ -1,0 +1,9 @@
+\defaultfontfeatures[FantasqueSansMono]
+{
+  Extension      = .otf,
+  UprightFont    = FantasqueSansMono-Regular,
+  BoldFont       = FantasqueSansMono-Bold,
+  ItalicFont     = FantasqueSansMono-Italic,
+  BoldItalicFont = FantasqueSansMono-BoldItalic,
+  Contextuals    = AlternateOff
+}
