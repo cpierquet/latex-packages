@@ -1,0 +1,249 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: lualatex: {shell: yes, synctex: no, interaction: batchmode}
+% arara: lualatex: {shell: yes, synctex: no, interaction: batchmode} if found('log', '(undefined references|Please rerun|Rerun to get)')
+
+\documentclass[a4paper]{scrartcl}
+\usepackage{mathtools, array}
+\usepackage[british]{babel}
+\usepackage{libertinus-otf}
+\usepackage[Scale=MatchLowercase]{fantasquesansmono-otf}
+\usepackage{unicodefonttable}
+\usepackage{framed}
+\usepackage{listings}
+\usepackage{minted-code}
+\usepackage{xcolor}
+\usepackage{realscripts}
+\usepackage{graphicx}
+\usepackage{microtype}
+
+\newcommand*{\pkg}[1]{\texttt{#1}}
+\newcommand*{\file}[1]{\texttt{#1}}
+\newcommand*{\ttbold}[1]{\texttt{\textbf{#1}}}
+\newcommand*{\opt}[1]{\texttt{#1}}
+\newcommand*{\cmd}[1]{\texttt{\textbackslash #1}}\newcommand*{\showtchar}[1]{\cmd{#1}~\csname #1\endcsname}
+\newcommand*{\showmchar}[1]{\cmd{#1}~$(\csname #1\endcsname)$}
+\newcommand*{\showmchardollar}[1]{\texttt{\$\cmd{#1}\$}~$(\csname #1\endcsname)$}
+
+\newcommand{\abc}{abcdefghijklmnopqrstuvwxyz}
+\newcommand{\ABC}{ABCDEFGHIJKLMNOPQRSTUVWXYZ}
+\newcommand{\samplenumbers}{0123456789}
+
+\newcommand\samplettxt{oO08 iIlL1 g9qCGQ <=> -> != !== \string~\string~>}
+\newcommand\samplett[1][]{\cmd{#1} & \fbox{\csname#1\endcsname\samplettxt} \\}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 2pt}
+
+\usepackage{hyperref}
+\hypersetup{pdftitle={FantasqueSansMono User’s Guide for LaTeX},
+	pdfauthor={Cédric PIERQUET},
+	bookmarksopen,
+	colorlinks
+}
+\newcommand*{\hlabel}[1]{\phantomsection\label{#1}}
+
+\title{FantasqueSansMono family fonts (\textit{experimental}) \\User’s Guide for LaTeX (v1.8.0)}
+\author{Cédric Pierquet \\ \texttt{cpierquet@outlook.fr}}
+
+\date{\today}
+\newcommand*{\version}{1.8.0}
+
+\begin{document}
+
+\maketitle
+
+\section{What is FantasqueSansMono ?}
+
+\subsection{Presentation (actual version is v1.8.0)}
+
+A programming font, designed with functionality in mind, and with some wibbly-wobbly handwriting-like fuzziness that makes it unassumingly cool.
+
+\medskip
+
+For further information, \url{https://github.com/belluzj/fantasque-sans} is the best source!
+
+\subsection{License}
+
+Fonts are licensed under the SIL Open Font License, Version 1.1.
+
+They require LuaTeX or XeTeX as engine and the \pkg{fontspec} package\footnote{Please read the documentation \file{fontspec.pdf}.}.
+
+\pagebreak
+
+\section{Usage}
+
+\subsection{Loading mono/code font}
+
+Files \file{FantasqueSansCode.fontspec} and \file{FantasqueSansMono.fontspec} are provided to ensure that \texttt{Regular}, \texttt{\textit{Italic}}, \texttt{\textbf{Bold}}, \texttt{\textit{\textbf{BoldItalic}}} are properly loaded.
+
+\smallskip
+
+A basic call for FantasqueSansMono mono font could be:
+
+\begin{codeblock}[minted language=latex, title=Loading]
+\usepackage{fantasquesansmono-otf}
+\end{codeblock}
+
+It loads \opt{FantasqueSansMono} as mono font.
+
+\medskip
+
+%\begin{lstlisting}[language=python,basicstyle=\footnotesize\ttfamily,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{magenta},tabsize=4,frame=single]
+\begin{codeblock}[minted language=python3, title=Sample python code]
+def Fibonacci(n) :
+  # Check if input is 0 then it will print incorrect input
+  if n < 0 :
+    print("Incorrect input")
+  elif n == 0 :
+    return 0
+  elif n == 1 or n == 2 :
+    return 1
+  else :
+    return Fibonacci(n-1) + Fibonacci(n-2)
+\end{codeblock}
+%\end{lstlisting}
+
+\subsection{Options}
+
+Options can be given within the package:
+
+\begin{itemize}
+	\item the boolean \opt{nott} for not loading fantasquesansmono as mono font;
+  \item the boolean \opt{code} for loading ligatures;
+	\item \opt{StylisticSet=...}
+	\item \opt{RawFeature=...}
+	\item \opt{Scale=...}
+\end{itemize}
+
+\subsection{Manual loading}
+
+It's also possible to load mono font with \cmd{setmonofont}, thanks to \opt{fontspec} files for example.
+
+\begin{codeblock}[minted language=latex, title=Manual loading]
+%w/o package loaded
+\usepackage{fontspec}
+\setmonofont{FantasqueSansMono}[options]
+\setmonofont{FantasqueSansCode}[options]
+\end{codeblock}
+
+\subsection{Fontfamily}
+
+Mono/Code \opt{fontfamily} are provided:
+
+\begin{tabular}{ll}
+	\samplett[fantasquesansmono]
+	\samplett[fantasquesansmonocode]
+\end{tabular}
+
+\opt{code} version is declared with ligatures.
+
+\smallskip
+
+Only \opt{StylisticSet={1}} is avalaible, with alternate \opt{k}/\opt{\addfontfeatures{StylisticSet={1}}k} version.
+
+\section{Samples}
+
+\subsection{Mono}
+
+%\begin{lstlisting}[language=TeX,basicstyle=\footnotesize\fantasquesansmono,commentstyle=\itshape\color{gray},keywordstyle=\bfseries\color{blue},tabsize=4,frame=single,columns=flexible,showstringspaces=false]
+%\lstset{
+%  language=python,
+%  basicstyle=\footnotesize\fantasquesansmono,
+%  commentstyle=\itshape\color{gray},
+%  keywordstyle=\bfseries\color{magenta},
+%  tabsize=4,
+%  frame=single,
+%  columns=flexible,
+%  showstringspaces=false
+%}
+%\end{lstlisting}
+
+\begin{codeblock}[minted language=java, title=Sample java code]
+// a sample of java code
+
+const similar = "oO08 iIlL1 g9qCGQ <=> -> != !== ~~>"
+const diacritics_etc = "â é ù ï ø ç Ã Ē Æ œ"
+
+window.toggleFavorite = (alias) => {
+  try {
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || []
+    if (favorites.indexOf(alias) > -1) {
+      favorites = favorites.filter((v) => {
+        return v !== alias
+      })
+    } else {
+      favorites.push(alias)
+    }
+    localStorage.setItem('favorites', JSON.stringify(Array.from(new Set(favorites))))
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('could not save favorite', err)
+  }
+  renderSelectList()
+  return false
+}
+\end{codeblock}
+
+\begin{codeblock}[minted language=python3, title=Sample python code]
+#a sample of python code
+def Fibonacci(n: int) -> int :
+  # Check if input is 0 then it will print incorrect input
+  if n < 0 :
+    print("Incorrect input")
+  elif n == 0 :
+    return 0
+  elif 1 <= n <= 2 :
+    return 1
+  else :
+    return Fibonacci(n-1) + Fibonacci(n-2)
+\end{codeblock}
+
+\subsection{Code}
+
+\begin{codeblock}[minted language=java, title=Sample java code with ligatures,minted options app={formatcom=\fantasquesansmonocode}]
+// a sample of java code
+
+const similar = "oO08 iIlL1 g9qCGQ <=> -> != !== ~~>"
+const diacritics_etc = "â é ù ï ø ç Ã Ē Æ œ"
+
+window.toggleFavorite = (alias) => {
+  try {
+    let favorites = JSON.parse(localStorage.getItem('favorites')) || []
+    if (favorites.indexOf(alias) > -1) {
+      favorites = favorites.filter((v) => {
+        return v !== alias
+      })
+    } else {
+      favorites.push(alias)
+    }
+    localStorage.setItem('favorites', JSON.stringify(Array.from(new Set(favorites))))
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('could not save favorite', err)
+  }
+  renderSelectList()
+  return false
+}
+\end{codeblock}
+
+\begin{codeblock}[minted language=python3, title=Sample python code with ligatures,minted options app={formatcom=\fantasquesansmonocode}]
+#a sample of python code
+def Fibonacci(n: int) -> int :
+  # Check if input is 0 then it will print incorrect input
+  if n < 0 :
+    print("Incorrect input")
+  elif n == 0 :
+    return 0
+  elif 1 <= n <= 2 :
+    return 1
+  else :
+    return Fibonacci(n-1) + Fibonacci(n-2)
+\end{codeblock}
+
+\pagebreak
+
+\section{List of glyphs}
+
+\displayfonttable{FantasqueSansMono-Regular}
+
+\end{document}
