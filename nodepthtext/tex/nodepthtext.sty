@@ -2,41 +2,106 @@
 % licence       : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{nodepthtext}[2024/11/11 0.1.0 Raise small texts for "no depth" letters]
+\ProvidesPackage{nodepthtext}[2026/09/07 0.1.1 Raise small texts for "no depth" letters]
 
 %====HISTORIQUE
-% v 0.1.0	Initial version
+% v 0.1.1  Smash version of macros + lua version 'improved'
+% v 0.1.0  Initial version
 
 %====BASE
-\RequirePackage{xstring}
+\RequirePackage{ifthen}
+\RequirePackage{xstring} %legacy
 \RequirePackage{calc}
 \RequirePackage{graphicx}
 
 %====DIMs & Useful
 \newlength\depthletter
+\newlength\totalheightletter
 \newlength\depthsampleletter
+\newlength\heightsampleletter
 \newcount\cptraiseletter
 \def\sampleslettersnodepth{azertuiosdhklmwxcvbnAZERTYUIOPSDFGHJKLMWXCVBN}
+\def\sampleslettersminus{azeruosmwxcvn}
+\def\sampleslettersmajus{AZERTUIOSDHKLMWXCVBN}
 
-%====INT MACRO
+%====NO DEPTH MACROS
 \NewDocumentCommand\raiseletter{ O{0.8} m m }{%
-	\settodepth{\depthletter}{\hbox{#3}}%
-	\ifdim\depthletter>#2%
-		\raisebox{\dimexpr#1\depthletter-#2\relax}{\resizebox{\width}{#1\height}{#3}}%
-	\else%
-		{#3}%
-	\fi%
+  \settodepth{\depthletter}{\hbox{#3}}%
+  \ifdim\depthletter>#2%
+    \raisebox{\dimexpr#1\depthletter-#2\relax}{\resizebox{\width}{#1\height}{#3}}%
+  \else%
+    {#3}%
+  \fi%
 }
 
-%====MAIN MACRO
 \NewDocumentCommand\nodepth{ O{0.8} m }{%
-	\settodepth{\depthsampleletter}{\hbox{\sampleslettersnodepth}}%
-	\StrLen{#2}[\tmplenword]%
-	\cptraiseletter0%
-	\loop\ifnum\cptraiseletter<\tmplenword%
-		\advance\cptraiseletter by 1%
-		\raiseletter[#1]{\depthsampleletter}{\StrChar{#2}{\the\cptraiseletter}}%
-	\repeat%
+  \settodepth{\depthsampleletter}{\hbox{\sampleslettersnodepth}}%
+  \StrLen{#2}[\tmplenword]%
+  \cptraiseletter0%
+  \loop\ifnum\cptraiseletter<\tmplenword%
+    \advance\cptraiseletter by 1%
+    \raiseletter[#1]{\depthsampleletter}{\StrChar{#2}{\the\cptraiseletter}}%
+  \repeat%
 }
+
+%====L3 NODEPTH/SMASH MACROS
+\ExplSyntaxOn
+\NewDocumentCommand\nodepthlua{ O{0.8} m }{%
+  \settodepth{\depthsampleletter}{\hbox{\sampleslettersnodepth}}%
+  \settoheight{\heightsampleletter}{\hbox{\sampleslettersnodepth}}%
+  \str_map_inline:nn { #2 } { \raiseletter[#1]{\depthsampleletter}{##1} }%
+}
+
+\NewDocumentCommand\raisesmashletter{ s O{} m }{%
+  % = * -> minuscule
+  % = longueurs de reference, calculees a partir de la chaine #2
+  \ifthenelse{\equal{#2}{}}%vide = mode auto
+    {%
+      \IfBooleanTF{#1}%étoilée = minuscule
+        {%
+          \settodepth{\depthsampleletter}{\hbox{\sampleslettersminus}}%
+          \settoheight{\heightsampleletter}{\hbox{\sampleslettersminus}}%
+        }%
+        {%
+          \settodepth{\depthsampleletter}{\hbox{\sampleslettersmajus}}%
+          \settoheight{\heightsampleletter}{\hbox{\sampleslettersmajus}}%
+        }%
+    }%
+    {%
+      \settodepth{\depthsampleletter}{\hbox{#2}}%
+      \settoheight{\heightsampleletter}{\hbox{#2}}%
+    }%
+  % = longueurs du caractere a traiter
+  \settodepth{\depthletter}{\hbox{#3}}%
+  \settototalheight{\totalheightletter}{\hbox{#3}}%
+  \ifdim\depthletter>\depthsampleletter\relax%
+    \ifdim\totalheightletter>\heightsampleletter\relax%
+      % 2b/ depth excedentaire ET hauteur totale hors reference :
+      %     on resize a la reference, puis on remonte de la DEPTH APRES resize (-> nouvelle depth = 0)
+      \raisebox{\dimexpr\depthletter*\heightsampleletter/\totalheightletter\relax}%
+        {\resizebox*{\width}{\heightsampleletter}{#3}}%
+    \else%
+      % 2a/ depth excedentaire mais pas de debordement : simple remontee de la depth
+      \raisebox{\depthletter}{#3}%
+    \fi%
+  \else%
+    \ifdim\totalheightletter>\heightsampleletter\relax%
+      % 3b/ depth deja correcte mais hauteur totale hors reference (ex. lettre haute sans jambage) : resize seul
+      \resizebox*{\width}{\heightsampleletter}{#3}%
+    \else%
+      % 3a/ rien a faire
+      {#3}%
+    \fi%
+  \fi%
+}
+
+\NewDocumentCommand\raisesmashtext{ O{} m }{%
+  \str_map_inline:nn { #2 } {
+    \str_if_eq:eeTF { \tl_upper_case:n {##1} } { ##1 }
+      { \raisesmashletter[#1]{##1} }%
+      { \raisesmashletter*[#1]{##1} }%
+    }%
+}
+\ExplSyntaxOff
 
 \endinput

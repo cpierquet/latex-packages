@@ -1,10 +1,12 @@
 % !TeX TXS-program:compile = txs:///arara
-% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
-% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: lualatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: lualatex: {shell: no, synctex: no, interaction: batchmode}
 
 \documentclass[11pt,a4paper]{ltxdoc}
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
+\usepackage{unicode-math}
+\setmainfont{Fira Sans}
+\setmonofont{Fira Mono}[Scale = MatchLowercase]
+\setmathfont{Fira Math}
 \usepackage{nodepthtext}
 \usepackage{fancyvrb}
 \usepackage{fancyhdr}
@@ -27,8 +29,8 @@
 \hypersetup{pdfborder=0 0 0}
 \usepackage[margin=2cm]{geometry}
 \setlength{\parindent}{0pt}
-\def\TPversion{0.1.0}
-\def\TPdate{11/11/2024}
+\def\TPversion{0.1.1}
+\def\TPdate{07/09/2026}
 \usepackage{tcolorbox}
 \usepackage{pgffor}
 \tcbuselibrary{breakable,skins,hooks,listingsutf8}
@@ -88,7 +90,7 @@
 		keywordstyle={\color{violet}},%
 		classoffset=2,%
 		alsoletter={-},%
-		morekeywords={\nodepth},%
+		morekeywords={\nodepth,\raisesmashletter,\raisesmashtext},%
 		keywordstyle={\color{green!50!black}},%
 		classoffset=3,%
 		morekeywords={scale,strut},%
@@ -149,7 +151,7 @@
 	\begin{tabular}{c}
 		\texttt{Cédric Pierquet}\\
 		{\ttfamily c pierquet -- at -- outlook . fr}\\
-		\texttt{\url{https://github.com/cpierquet/nodepthtext}} \\
+		\texttt{\url{https://github.com/cpierquet/latex-packages/tree/main/nodepthtext}} \\
 	\end{tabular}
 \end{center}
 
@@ -175,6 +177,13 @@ A sample text to show letters with depth.\\
 {\LARGE\fontIZ A text to show letters with depth (inconsolata).}\\
 {\LARGE\fontIZ\nodepth{A text to show letters w/o depth (inconsolata).}}\\
 {\LARGE\fontIZ\nodepth[0.7]{A text w/o depth and scaling (inconsolata).}}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colframe=lightgray,colback=lightgray!5]
+%raisesmash version, with depth of letters & nodepth version, with removing depth and resizing
+
+{\LARGE\fontIZ A text to show letters with depth (inconsolata).}\\
+{\LARGE\fontIZ\raisesmashtext{A text to show letters with raisesmash (inconsolata).}}
 \end{tcolorbox}
 
 \vfill~
@@ -229,13 +238,19 @@ So, for accentuated letters (because \ShowCode{xstring} processes the characters
 
 \subsection{History}
 
+\texttt{0.1.1: Smash version of macros + lua version 'improved'}
+
 \texttt{0.1.0: Initial version}
 
 \vspace*{5mm}
 
 \pagebreak
 
-\section{The macro}
+\section{The macros}
+
+\subsection{Main macro, legacy version}
+
+\subsubsection{Main macro}
 
 The main macro is \ShowCode{\\nodepth}.
 
@@ -251,20 +266,18 @@ The mandatory argument, within \ShowCode{\{...\}}, is a small text to process (b
 
 In order to work with sizes and fonts, the macro needs to be given within the group of defined size/font!
 
-\section{Samples}
-
-\subsection{Wih custom size}
+\subsubsection{Samples with custom size}
 
 \begin{DemoCode}{}
 %normal version, with depth of letters
-{\LARGE\ttfamily A text to show letters with depth.}
+{\Large\ttfamily A text to show letters with depth.}
 
 %nodepth version, with removing depth and resizing
-{\LARGE\ttfamily\nodepth{A text to show letters without depth.}}\\
-{\LARGE\ttfamily\nodepth[0.7]{A text to show letters without depth and scaling.}}
+{\Large\ttfamily\nodepth{A text to show letters without depth.}}\\
+{\Large\ttfamily\nodepth[0.7]{A text to show letters without depth and scaling.}}
 \end{DemoCode}
 
-\subsection{With custom font, and accents}
+\subsubsection{With custom font, and accents}
 
 \begin{DemoCode}{listing only}
 %use inconsolata font (with pdfLaTeX)
@@ -272,12 +285,61 @@ In order to work with sizes and fonts, the macro needs to be given within the gr
 \end{DemoCode}
 
 \begin{DemoCode}{}
-%normal version, with depth of letters and accents (inconsolata font)
-{\large\fontIZ A text to show depth and a word with accents, météo.}\\
+{\large\sffamily A text to show depth and a word with accents, météo.}\\
 
 %nodepth version, with removing depth and resizing and accents...
-{\large\fontIZ\nodepth{Quote text w/o depth and a word with accents, m\'{e}t\'{e}o.}}\\
-{\large\fontIZ\nodepth[0.7]{Quote text w/o depth, scaling and a word with accents, m\'{e}t\'{e}o.}}
+{\large\sffamily\nodepth{Quote text w/o depth and a word with accents, météo.}}\\
+{\large\sffamily\nodepth[0.7]{Quote text w/o depth, scaling and a word with accents, météo.}}
+\end{DemoCode}
+
+\pagebreak
+
+\subsection{raisesmash macros, with \hologo{LaTeX3}, and \hologo{LuaLaTeX}}
+
+\subsubsection{Main macro}
+
+The \hologo{LaTeX3} version are \ShowCode{\\raisesmashletter} for a single letter and \ShowCode{\\raisesmashtext} for a whole word. Due to internal code, it's recommended to compile with \hologo{LuaLaTeX}.
+
+\begin{DemoCode}{listing only}
+\raisesmashletter[ref chars]{character}  %manuel version of smashing
+\raisesmashletter{character}             %auto version with UPPERCASE
+\raisesmashletter*{character}            %auto version with lowercase
+
+\def\sampleslettersminus{azeruosmwxcvn}         %default sample
+\def\sampleslettersmajus{AZERTUIOSDHKLMWXCVBN}  %default sample
+\end{DemoCode}
+
+\begin{itemize}
+  \item the starred form (\ShowCode{*}) selects \ShowCode{\\sampleslettersminus} (lowercase sample letters) as the reference; the unstarred form selects \ShowCode{\\sampleslettersmajus} (uppercase sample letters);
+  \item the optional argument, within \ShowCode{[...]}, overrides this automatic choice with an explicit reference string (e.g.\ \ShowCode{[aeiou]}); when given, the star is ignored;
+  \item the mandatory argument is the single character to process.
+\end{itemize}
+
+\begin{DemoCode}{}
+{\LARGE\ttfamily ( vs \raisesmashletter{(} vs \raisesmashletter*{(}}\\
+{\LARGE\ttfamily g vs \raisesmashletter{g} vs \raisesmashletter*{g}}\\
+{\LARGE\ttfamily J vs \raisesmashletter{J} vs \raisesmashletter*{J}}
+\end{DemoCode}
+
+\begin{DemoCode}{listing only}
+\raisesmashtext{word}            %auto version with UP/lo detection
+\raisesmashtext[ref chars]{word} %manual version
+\end{DemoCode}
+
+\subsubsection{Samples}
+
+\begin{DemoCode}{}
+%for just on letter
+{\large\ttfamily CÉDRIC vs C\raisesmashletter{É}DRIC}\\
+{\large\ttfamily Cédric vs C\raisesmashletter*{é}dric}\\
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%with word(s)
+{\large\ttfamily CÉDRIC vs \raisesmashtext{CÉDRIC}}\\
+{\large\ttfamily Bonjour vs \raisesmashtext{Bonjour}}\\
+{\large\ttfamily JOYEUX vs \raisesmashtext{JOYEUX}}\\
+{\large\ttfamily Programmation(gestion) vs \raisesmashtext{Programmation(gestion)}}
 \end{DemoCode}
 
 \pagebreak
