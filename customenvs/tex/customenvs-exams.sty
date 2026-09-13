@@ -2,9 +2,10 @@
 % licence.........: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{customenvs-exams}[2025/11/08 0.1.5 customenvs for exam documents]
+\ProvidesPackage{customenvs-exams}[2026/09/09 0.1.6 customenvs for exam documents]
 
 %====HISTORY
+% v 0.1.1	Bugfix with QCM (swap key with 1 column)
 % v 0.1.5	Enhancements with BlocExo (bulle 'bordures')
 % v 0.1.4	Enhancements with pictostars
 % v 0.1.3	Global color for BlocExo
@@ -267,16 +268,20 @@
 									\ifboolKV[reponsesexamqcm]{Filets}%
 									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
 									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
-										\RepExamQCMLabelA\TmpListereponsesexamqcm[0] \\ \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\TmpListereponsesexamqcm[1]}{\RepExamQCMLabelC\TmpListereponsesexamqcm[1]} \\
-										\ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\TmpListereponsesexamqcm[2]}{\RepExamQCMLabelB\TmpListereponsesexamqcm[2]} \\ \RepExamQCMLabelD\TmpListereponsesexamqcm[3] \\
+										\RepExamQCMLabelA\TmpListereponsesexamqcm[0] \\
+                    \RepExamQCMLabelB\TmpListereponsesexamqcm[1] \\
+										\RepExamQCMLabelC\TmpListereponsesexamqcm[2] \\
+                    \RepExamQCMLabelD\TmpListereponsesexamqcm[3] \\
 									\end{tblr}%
 								}%
 								{%
 									\ifboolKV[reponsesexamqcm]{Filets}%
 									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},#3}}%
 									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},#3}}%
-										\RepExamQCMLabelA\TmpListereponsesexamqcm[0] \\ \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\TmpListereponsesexamqcm[1]}{\RepExamQCMLabelC\TmpListereponsesexamqcm[1]} \\
-										\ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\TmpListereponsesexamqcm[2]}{\RepExamQCMLabelB\TmpListereponsesexamqcm[2]} \\ \RepExamQCMLabelD\TmpListereponsesexamqcm[3] \\
+										\RepExamQCMLabelA\TmpListereponsesexamqcm[0] \\
+                    \RepExamQCMLabelB\TmpListereponsesexamqcm[1] \\
+										\RepExamQCMLabelC\TmpListereponsesexamqcm[2] \\
+                    \RepExamQCMLabelD\TmpListereponsesexamqcm[3] \\
 									\end{tblr}%
 								}%
 							%fin test hauteur
@@ -346,16 +351,20 @@
 									\ifboolKV[reponsesexamqcm]{Filets}%
 									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
 									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
-										\RepExamQCMLabelA\ExamQCMListereponses[1] \\ \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\ExamQCMListereponses[2]}{\RepExamQCMLabelC\ExamQCMListereponses[3]} \\
-										\ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\ExamQCMListereponses[3]}{\RepExamQCMLabelB\ExamQCMListereponses[2]} \\ \RepExamQCMLabelD\ExamQCMListereponses[4] \\
+										\RepExamQCMLabelA\ExamQCMListereponses[1] \\
+                    \RepExamQCMLabelB\ExamQCMListereponses[2] \\
+										\RepExamQCMLabelC\ExamQCMListereponses[3] \\
+                    \RepExamQCMLabelD\ExamQCMListereponses[4] \\
 									\end{tblr}%
 								}%
 								{%
 									\ifboolKV[reponsesexamqcm]{Filets}%
 									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},#3}}%
 									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},#3}}%
-										\RepExamQCMLabelA\ExamQCMListereponses[1] \\ \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\ExamQCMListereponses[2]}{\RepExamQCMLabelC\ExamQCMListereponses[3]} \\
-										\ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\ExamQCMListereponses[3]}{\RepExamQCMLabelB\ExamQCMListereponses[2]} \\ \RepExamQCMLabelD\ExamQCMListereponses[4] \\
+										\RepExamQCMLabelA\ExamQCMListereponses[1] \\
+                    \RepExamQCMLabelB\ExamQCMListereponses[2] \\
+										\RepExamQCMLabelC\ExamQCMListereponses[3] \\
+                    \RepExamQCMLabelD\ExamQCMListereponses[4] \\
 									\end{tblr}%
 								}%
 							%fin test hauteur

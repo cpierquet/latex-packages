@@ -1,0 +1,141 @@
+% Author..........: C. Pierquet
+% licence.........: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{customenvs-tikzbadge}[2026/09/12 0.1a Pill-shaped badges (icon/image + text), made with tikz]
+
+%====HISTORY
+% v 0.1a  Initial version (tkzpillbadge + gentkzbadge)
+
+%====PACKAGES
+\RequirePackage{tablericons}
+\RequirePackage{customenvs-macros}
+
+%====lengths
+\newlength\tkzbadgeautoheight
+\newlength\tkzbadgeautodepth
+\newlength\tkzbadgewidthcalc
+\newlength\tkzbadgeratioheight
+\newlength\tkzbadgeimageheight
+\setlength\tkzbadgeimageheight{0.85cm}
+
+%====tkzpillbadge
+\defKV[tkzbadge]{%
+  color      = \def\tkzbadgecolor{#1},%
+  txtcolor   = \def\tkzbadgetxtcolor{#1},%
+  txtratio   = \def\tkzbadgetxtratio{#1},%
+  height     = \def\tkzbadgeheight{#1},%
+  icon       = \def\tkzbadgelogo{#1},%
+  width      = \def\tkzbadgewidth{#1},%
+  hoffset    = \def\tkzbadgehoffset{#1},%
+  strut      = \def\tkzbadgestrut{#1},%
+  dstrut     = \def\tkzbadgesdtrut{#1},%
+  image      = \def\tkzbadgeimage{#1},%
+  txtphantom = \def\tkzbadgevphant{#1}%
+}
+\setKVdefault[tkzbadge]{%
+  color      = gray,%
+  txtcolor   = white,%
+  txtratio   = 0.8,%
+  height     = dauto,%
+  icon       = check,%
+  width      = auto,%
+  hoffset    = 0.075,%
+  strut      = {M},%
+  dstrut     = {qM},%
+  autoraise  = true,%
+  image      = {},%
+  txtphantom = {qM},
+  cliplogo   = false%
+}
+\tikzset{tkzbadgetext/.style={font=\sffamily\bfseries,text depth=0pt,inner sep=0pt}}
+
+\newcommand\inttkzbadgedraw[3][]{%
+  \begin{tikzpicture}[scale=\tkzbadgescale,{\tkzbadgecolor},#2,transform shape]
+    \fill (0,0) circle[radius=0.5] ;
+    \begin{scope}%scope left circle
+      \clip (0,0) circle[radius=0.5] ;
+      \begin{scope}
+        \ifboolKV[tkzbadge]{cliplogo}%
+          {\clip (0,0) circle[radius=0.5\tkzbadgeratioheight] ;}{}%
+        \ifthenelse{\equal{\tkzbadgeimage}{}}%
+          {%
+            \node[{\tkzbadgetxtcolor},inner sep=0pt] at (0,0) {\tablericon[height=1.075\tkzbadgeratioheight]{\tkzbadgelogo}} ;
+          }%
+          {%
+            \node[{\tkzbadgetxtcolor},inner sep=0pt] at (0,0) {\tkzbadgeimage} ;
+          }%
+      \end{scope}
+    \end{scope}
+    \fill ({\xdep},0.5) --++ ({\tkzbadgelen},0) arc(90:-90:0.5) --++ (-\tkzbadgelen,0) arc(-\thetaDeg : \thetaDeg : \R) ;
+    \begin{scope}%scope right rectangle circle
+      \clip ({\xdep},0.5) --++ ({\tkzbadgelen},0) arc(90:-90:0.5) --++ (-\tkzbadgelen,0) arc(-\thetaDeg : \thetaDeg : \R) ;
+      \node[{\tkzbadgetxtcolor},tkzbadgetext] at ({\xdep+\tkzbadgelen/2+0.25},0) {\resizebox*{!}{\tkzbadgeratioheight}{\vphantom{\tkzbadgevphant}#3}};
+    \end{scope}
+  \end{tikzpicture}%
+}
+
+\NewDocumentCommand\tkzpillbadge{ O{} D<>{} m }{%
+  \restoreKV[tkzbadge]%
+  \setKV[tkzbadge]{#1}%
+  \setlength\tkzbadgeratioheight{\tkzbadgetxtratio cm}%
+  \ifthenelse{\equal{\tkzbadgeheight}{dauto}}%
+    {%
+      \settototalheight\tkzbadgeautoheight{\hbox{\tkzbadgesdtrut}}%
+      \settodepth\tkzbadgeautodepth{\hbox{\tkzbadgesdtrut}}%
+      \pgfmathsetmacro{\tkzbadgescale}{\tkzbadgeautoheight/1cm}%
+    }%
+    {%
+      \setlength\tkzbadgeautodepth{0pt}%
+      \ifthenelse{\equal{\tkzbadgeheight}{auto}}%
+        {%
+          \settototalheight\tkzbadgeautoheight{\hbox{\tkzbadgestrut}}%
+          \pgfmathsetmacro{\tkzbadgescale}{\tkzbadgeautoheight/1cm}%
+        }%
+        {%
+          \pgfmathsetmacro{\tkzbadgescale}{\tkzbadgeheight/1cm}%
+        }%
+    }%
+  \pgfmathsetmacro{\R}{0.5+\tkzbadgehoffset}%
+  \pgfmathsetmacro{\thetaDeg}{asin(0.5/\R)}%
+  \pgfmathsetmacro{\xdep}{sqrt(\R*\R - 0.25)}%
+  \ifthenelse{\equal{\tkzbadgewidth}{auto}}%
+    {%
+      \settowidth\tkzbadgewidthcalc{%
+        \hbox{\tikz\node[tkzbadgetext] {\resizebox*{!}{\tkzbadgeratioheight}{\vphantom{\tkzbadgevphant}#3}};}
+      }%
+      \pgfmathsetmacro{\tkzbadgelen}{\tkzbadgewidthcalc/1cm + \R/2 - \xdep/2}%
+    }%
+    {%
+      \setlength\tkzbadgewidthcalc{\tkzbadgewidth}%
+      \pgfmathsetmacro{\tkzbadgelen}{\tkzbadgewidthcalc/1cm/\tkzbadgescale - \xdep - 1}%
+    }%
+  \ifboolKV[tkzbadge]{autoraise}%
+    {\raisebox{-\tkzbadgeautodepth}{\inttkzbadgedraw{#2}{#3}}}%
+    {\inttkzbadgedraw{#2}{#3}}%
+}
+
+%====gentkzbadge (factory for text-fixed badges)
+
+\NewDocumentCommand\gentkzpillbadge{ m m m }{%
+  %#1 = macro name -- #2 = preset keys -- #3 = fixed text
+  \NewDocumentCommand{#1}{ O{} D<>{} }{%
+    \tkzpillbadge[#2,##1]<##2>{#3}%
+  }%
+}
+
+%====predefined badges
+\NewDocumentCommand\tkzpillbadgevrai{}{%
+  \tkzpillbadge[color=green!50!black]{\halignmakebox{VRAI}{VRAI,FAUX}}%
+}
+\NewDocumentCommand\tkzpillbadgefaux{}{%
+  \tkzpillbadge[color=red!50!black,icon=x]{\halignmakebox{FAUX}{VRAI,FAUX}}%
+}
+\NewDocumentCommand\tkzpillbadgetrue{}{%
+  \tkzpillbadge[color=green!50!black]{\halignmakebox{TRUE}{TRUE,FALSE}}%
+}
+\NewDocumentCommand\tkzpillbadgefalse{}{%
+  \tkzpillbadge[color=red!50!black,icon=x]{\halignmakebox{FALSE}{TRUE,FALSE}}%
+}
+
+\endinput

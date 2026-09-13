@@ -3,13 +3,14 @@
 % source pencil...: CC-BY-SA 4.0 https://tex.stackexchange.com/questions/504092/replicating-a-fancy-bordered-text-style-in-latex/504145#504145
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{customenvs}[2026/09/05 0.43e Custom classic environments]
+\ProvidesPackage{customenvs}[2026/09/12 0.43f Custom classic environments]
 
 %====VARIABLES
-\def\cenvspackagedate{2026/09/05}
-\def\cenvspackageversion{0.43e}
+\def\cenvspackagedate{2026/09/12}
+\def\cenvspackageversion{0.43f}
 
 %====HISTORIQUE
+% v 0.43f  Sous-package customenvs-tikzbadge
 % v 0.43e  Mis en conformité pas-tableur
 % v 0.43d  New tikzpictos
 % v 0.43b  Correction de bugs mineurs
@@ -107,6 +108,7 @@
 \RequirePackage{customenvs-icons}                  %test souspackage
 \RequirePackage{customenvs-macros}                 %test souspackage
 \RequirePackage{customenvs-mathpictos}             %test souspackage
+\RequirePackage{customenvs-tikzbadge}              %test souspackage
 
 \if@xcolor
   \RequirePackage{xcolor}
@@ -5126,7 +5128,8 @@
   \setKV[tcboxboard]{#1}%
   \setlength\tcboardbottomwidth{\tcboardwidth-3cm}%\the\tcboardbottomwidth
   \setlength\tcboardpenwidth{0.2\tcboardbottomwidth}%\the\tcboardpenwidth
-  \setlength\tcboardpenheight{0.1\tcboardpenwidth}%\the\tcboardpenheight
+  %\setlength\tcboardpenheight{0.1\tcboardpenwidth}%\the\tcboardpenheight
+  \setlength\tcboardpenheight{0.625\tcboardthick}%\the\tcboardpenheight
   %ifborder
   \ifboolKV[tcboxboard]{bottom}%
     {%
