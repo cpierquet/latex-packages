@@ -4,10 +4,13 @@
 
 \documentclass[french,a4paper,11pt]{article}
 \usepackage[margin=2cm,includefoot]{geometry}
-\def\TPversion{0.1.5}
-\def\TPdate{29 juillet 2025}
-\usepackage[utf8]{inputenc}
+\def\TPversion{0.20a}
+\def\TPdate{13 septembre 2026}
+\usepackage{bera}
+\usepackage{inconsolata}
 \usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[scale=0.875]{cabin}
 \usepackage{amsmath,amssymb}
 \usepackage{postit}
 \usepackage{awesomebox}
@@ -51,8 +54,8 @@
 \definecolor{LightGray}{gray}{0.9}
 
 \usepackage{babel}
-\AddThinSpaceBeforeFootnotes
-\FrenchFootnotes
+%\AddThinSpaceBeforeFootnotes
+%\FrenchFootnotes
 
 \usepackage{listings}
 
@@ -130,13 +133,11 @@
 			\begin{tabular}{c}
 				{\Huge \texttt{postit} [fr]}\\
 				\\
-				{\LARGE Des petits Post-It,} \\
-				\\
-				{\LARGE avec \textsf{tcolorbox} ou \textsf{Ti\textit{k}Z}.} \\
+				{\LARGE Des petits Post-It, avec \textsf{tcolorbox} ou \textsf{Ti\textit{k}Z}.} \\
 			\end{tabular}
-			
+
 			\bigskip
-			
+
 			{\small \texttt{Version \TPversion{} -- \TPdate}}
 		\end{center}
 	\end{tcolorbox}
@@ -147,7 +148,6 @@
 	\begin{tabular}{c}
 	\texttt{Cédric Pierquet}\\
 	{\ttfamily c pierquet -- at -- outlook . fr}\\
-	\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}}\\
 	\texttt{\url{https://github.com/cpierquet/latex-packages/tree/main/postit}}
 \end{tabular}
 \end{center}
@@ -210,6 +210,8 @@
 \vfill
 
 \section{Historique}
+
+\verb|v0.20a|~:~~~~Refonte du code.
 
 \verb|v0.1.5|~:~~~~Meilleure gestion des espaces.
 
@@ -336,7 +338,7 @@ La majorité des (multiples) paramètres d'une \motcletex!tcbox! et d'une figuur
 \end{DemoCode}
 
 \begin{tipblock}
-Les éventuelles couleurs choisies devront être données de manière \textit{unique}, sans utiliser les \textit{mélanges} (avec \motcletex|CouleurA!...!CouleurB|) que propose le package \packagetex!xcolor!. 
+Les éventuelles couleurs choisies devront être données de manière \textit{unique}, sans utiliser les \textit{mélanges} (avec \motcletex|CouleurA!...!CouleurB|) que propose le package \packagetex!xcolor!.
 
 Toutefois, toute couleur précédemment définie pourra être utilisée pour le Post-It.
 \end{tipblock}
@@ -361,7 +363,7 @@ Le premier argument, optionnel et entre \texttt{[...]}, propose les \Cle{clés} 
 	\item \Cle{Largeur} : largeur (en cm) du Post-It ; \hfill{}défaut : \Cle{6cm}
 	\item \Cle{Couleur} : couleur du Post-It (la bordure sera plus foncée) ; \hfill{}défaut : \Cle{yellow}
 	\item \Cle{Hauteur} : hauteur (en cm si déclarée) du Post-It (par défaut elle est \textit{automatique}) ;
-	
+
 	\hfill{}défaut : \Cle{auto}
 	\item \cmaj{0.1.1} \Cle{Rendu} : moteur du rendu parmi \Cle{tcbox / tikz / tikv2} ; \hfill{}défaut : \Cle{tcbox}
 	\item \Cle{Inclinaison} : inclinaison du Post-It ; \hfill{}défaut : \Cle{0}
@@ -369,25 +371,25 @@ Le premier argument, optionnel et entre \texttt{[...]}, propose les \Cle{clés} 
 	\item \Cle{Bordure} : booléen pour afficher une fine bordure ; \hfill{}défaut : \Cle{true}
 	\item \Cle{Coin} : booléen pour afficher un coin corné ; \hfill{}défaut : \Cle{false}
 	\item \cmaj{0.1.1} \Cle{Attache} : choix de la décoration, parmi \Cle{Trombone / Punaise / Non / Scotch} ;
-	
+
 	\hfill{}défaut : \Cle{Punaise}
 	\item \Cle{CouleurAttache} : couleur de l'attache ; \hfill{}défaut : \Cle{red}
 	\item \Cle{DecalAttache} : décalage horizontal (sans unité, mais en cm) de l'attache par rapport à sa position initiale (au centre pour la punaise, à 1~cm du bord droit pour le trombone) ;
-	
+
 	\hfill{}défaut : \Cle{0}
 	\item \cmaj{0.1.1} \Cle{Titre} : rajouter un titre (en 1ère ligne et/ou sous l'Attache) ; \hfill{}défaut : \Cle{vide}
 	\item \cmaj{0.1.1} \Cle{PoliceTitre} : police du titre ; \hfill{}défaut : \Cle{\textbackslash normalfont\textbackslash normalfont}
 	\item \cmaj{0.1.1} \Cle{ExtraMargeDroite} : rajoute (en rendu \packagetex!tikz!, et en cm) une marge à droite ;
-	
+
 	\hfill{}défaut : \Cle{0cm}
 	\item \Cle{AlignementV} : gère l'alignement vertical dans le Post-It (parmi \Cle{top/center/bottom}) ;
-	
+
 	\hfill{}défaut : \Cle{top}
 	\item \Cle{AlignementH} : gère l'alignement horizontal dans le Post-It (parmi \Cle{left/center/right/justify}) ;
-	
+
 	\hfill{}défaut : \Cle{justify}
 	\item \Cle{AlignementPostIt} : gère l'alignement vertical global du Post-It (parmi \Cle{top/center/bottom}).
-	
+
 	\hfill{}défaut : \Cle{bottom}
 \end{itemize}
 \vspace*{-\baselineskip}\leavevmode
@@ -419,7 +421,7 @@ En plus du Post-It, le package \packagetex!postit! crée huit points d'ancrage p
 \end{DemoCode}
 
 \begin{tikzpicture}[remember picture,overlay]
-	\foreach \dir/\pos in {N-O/above left,N/above,N-E/above right,E/right, S-E/below right,S/below,S-O/below left,O/left} 
+	\foreach \dir/\pos in {N-O/above left,N/above,N-E/above right,E/right, S-E/below right,S/below,S-O/below left,O/left}
 	{%
 		\draw[draw=blue,fill=red] (MaPetiteNote1-\dir) circle[radius=2pt] node[text=gray,\pos,font=\scriptsize\ttfamily] {MaPetiteNote1-\dir};%
 	}

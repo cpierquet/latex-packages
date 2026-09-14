@@ -3,14 +3,23 @@
 % or later, see http://www.latex-project.org/lppl.txt
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{postit}[2025/07/29 0.1.5 Display sticky notes in a doc]
-%0.1.5	Bugfix with spacing
-%0.1.4	Enhancements with AlignH
-%0.1.3	Nodes for tikz' link between postits
-%0.1.2	English version (keys & command)
-%0.1.1	Ajout d'un \vphantom pour les mini-post-it + moteur de rendu tikz en supplément
-%0.1.0	Version initiale
+\ProvidesPackage{postit}[2026/09/13 0.20a Display sticky notes in a doc]
+%0.20a  Refactor interne
+%0.1.5  Bugfix with spacing
+%0.1.4  Enhancements with AlignH
+%0.1.3  Nodes for tikz' link between postits
+%0.1.2  English version (keys & command)
+%0.1.1  Ajout d'un \vphantom pour les mini-post-it + moteur de rendu tikz en supplément
+%0.1.0  Version initiale
 
+%======PACKAGE OPTION
+\newif\if@piloadtikzbabel \@piloadtikzbabeltrue
+\DeclareOption{nontikzbabel}{\@piloadtikzbabelfalse}%
+\DeclareOption{notikzbabel}{\@piloadtikzbabelfalse}%
+\DeclareOption*{}
+\ProcessOptions\relax
+
+%======ÉLÉMENTS UTILES
 %------Packages utiles
 \RequirePackage{tcolorbox}
 \RequirePackage{simplekv}
@@ -20,9 +29,10 @@
 %------Librairies
 \tcbuselibrary{skins}
 \usetikzlibrary{calc,positioning,decorations,decorations.pathmorphing}
-\usetikzlibrary{babel}
-
-%------variables utiles
+\if@piloadtikzbabel
+  \usetikzlibrary{babel}
+\fi
+%------Variables utiles
 \newsavebox{\maboitepostit}
 \newlength{\HauteurEssaiTexte}
 \def\OffsetOmbreA{3pt}
@@ -35,1188 +45,449 @@
 \def\LargeurStotch{2.5}
 \def\HauteurScotch{1}
 \def\PostItBorder{0.1mm}
+%------Booleens ponts
+\newif\ifPostItShadowOn
+\newif\ifPostItBorderOn
+\newif\ifPostItCornerOn
 
 %======Décorations
-%------Gestion du coin
+%------Dessine une punaise
+\newcommand\pidrawpin{%
+  \begin{scope}[rotate=-35]
+    \draw[blue!10!gray,line cap=round,line width=2pt] (0,0) -- ++(90:0.85);
+    \fill[blue!10!gray,scale=0.5] (90:0.85) ellipse (.65cm and .3cm) ;
+    \fill[blue!10!gray,scale=0.5] (90:0.85) ++(0,0.4) ellipse (.2 and .4);
+    \fill[blue!10!gray,scale=0.5] (90:0.85) ++(0,0.8) ellipse (.4 and .3);
+  \end{scope}
+  \draw[line cap=round,line width=2pt] (0,0) -- ++(90:0.85);
+  \fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ellipse (.65cm and .3cm) ;
+  \fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ++(0,0.4) ellipse (.2 and .4);
+  \fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ++(0,0.8) ellipse (.4 and .3);
+}
+%------Dessine un trombone
+\newcommand\pidrawpaperclip{%
+  \draw[line width=0.81mm,draw=\PostItCoulClip!66] (0,0) --++ (0,0.0) arc (180:0:3.5mm) --++ (0,-1.75) arc (0:-180:3mm) --++ (0,1.25) ;
+  \draw[line width=0.27mm,draw=\PostItCoulClip!33] (0,0) --++ (0,0.0) arc (180:0:3.5mm) --++ (0,-1.75) arc (0:-180:3mm) --++ (0,1.25) ;
+}
+%------Dessine un morceau de scotch
+\newcommand\pidrawtape{%
+  \draw[thin,gray!50,fill=lightgray,fill opacity=0.75] ({-0.5*\LargeurStotch},{-0.5*\HauteurScotch}) to ({0.5*\LargeurStotch},{-0.5*\HauteurScotch}) decorate [decoration={zigzag,segment length=2pt,amplitude=0.5pt}] {to ({0.5*\LargeurStotch},{0.5*\HauteurScotch})} to ({-0.5*\LargeurStotch},{0.5*\HauteurScotch}) decorate [decoration={zigzag,segment length=2pt,amplitude=0.5pt}] {to cycle} ;
+}
+%------Gestion du coin (rendu tcbox uniquement)
 \NewDocumentCommand\CoinPostIt{ }{%
-	\path[line width=\PostItBorder,fill=\PostItCoul!66] ([yshift=3mm]interior.south east)--++(-0.4,-0.1)--++(0.1,-0.2);
-	\path[line width=\PostItBorder,draw=\PostItCoul!50!black,shorten <=-0.05mm,shorten >=-0.05mm,color=\PostItCoul!50!black] ([yshift=3mm]interior.south east)--++(-0.4,-0.1)--++(0.1,-0.2);
+  \path[line width=\PostItBorder,fill=\PostItCoul!66] ([yshift=3mm]interior.south east)--++(-0.4,-0.1)--++(0.1,-0.2);
+  \path[line width=\PostItBorder,draw=\PostItCoul!50!black,shorten <=-0.05mm,shorten >=-0.05mm,color=\PostItCoul!50!black] ([yshift=3mm]interior.south east)--++(-0.4,-0.1)--++(0.1,-0.2);
 }
-
-%------Gestion du trombone
-\NewDocumentCommand\TrombonePostIt{ }{%
-	\begin{scope}[shift={([xshift={-1cm+\PostItDeclClip cm}]frame.north east)},rotate=-15,scale={\PostItCoulScaleClip*0.55},line cap=round]
-		\draw[line width=0.81mm,draw=\PostItCoulClip!66] (0,0) --++ (0,0.0) arc (180:0:3.5mm) --++ (0,-1.75) arc (0:-180:3mm) --++ (0,1.25) ;
-		\draw[line width=0.27mm,draw=\PostItCoulClip!33] (0,0) --++ (0,0.0) arc (180:0:3.5mm) --++ (0,-1.75) arc (0:-180:3mm) --++ (0,1.25) ;
-	\end{scope}
-}
-
-%------Gestion du scotch
-\NewDocumentCommand\ScotchPostIt{ }{%
-	\begin{scope}[shift={([xshift=\PostItDeclClip cm]frame.north)},scale={\PostItCoulScaleClip*0.65},line cap=round,rotate=3]
-		\draw[thin,gray!50,fill=lightgray,fill opacity=0.75] ({-0.5*\LargeurStotch},{-0.5*\HauteurScotch}) to ({0.5*\LargeurStotch},{-0.5*\HauteurScotch}) decorate [decoration={zigzag,segment length=2pt,amplitude=0.5pt}] {to ({0.5*\LargeurStotch},{0.5*\HauteurScotch})} to ({-0.5*\LargeurStotch},{0.5*\HauteurScotch}) decorate [decoration={zigzag,segment length=2pt,amplitude=0.5pt}] {to cycle} ;
-	\end{scope}
-}
-
-%------Gestion de la punaise
+%------Décorations pour le rendu tcbox : simples habillages
 \NewDocumentCommand\EpinglePostIt{ }{%
-	\begin{scope}[shift={([xshift=\PostItDeclClip cm,yshift=-0.5cm]frame.north)},scale={\PostItCoulScaleClip*0.55},rotate=-40]
-	\begin{scope}[rotate=-35]
-			\draw[blue!10!gray,line cap=round,line width=2pt] (0,0) -- ++(90:0.85);
-			\fill[blue!10!gray,scale=0.5] (90:0.85) ellipse (.65cm and .3cm) ;
-			\fill[blue!10!gray,scale=0.5] (90:0.85) ++(0,0.4) ellipse (.2 and .4);
-			\fill[blue!10!gray,scale=0.5] (90:0.85) ++(0,0.8) ellipse (.4 and .3);
-		\end{scope}
-		\draw[line cap=round,line width=2pt] (0,0) -- ++(90:0.85);
-		\fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ellipse (.65cm and .3cm) ;
-		\fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ++(0,0.4) ellipse (.2 and .4);
-		\fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ++(0,0.8) ellipse (.4 and .3);
-	\end{scope}
+  \begin{scope}[shift={([xshift=\PostItDeclClip cm,yshift=-0.5cm]frame.north)},scale={\PostItCoulScaleClip*0.55},rotate=-40]
+    \pidrawpin
+  \end{scope}
+}
+\NewDocumentCommand\TrombonePostIt{ }{%
+  \begin{scope}[shift={([xshift={-1cm+\PostItDeclClip cm}]frame.north east)},rotate=-15,scale={\PostItCoulScaleClip*0.55},line cap=round]
+    \pidrawpaperclip
+  \end{scope}
+}
+\NewDocumentCommand\ScotchPostIt{ }{%
+  \begin{scope}[shift={([xshift=\PostItDeclClip cm]frame.north)},scale={\PostItCoulScaleClip*0.65},line cap=round,rotate=3]
+    \pidrawtape
+  \end{scope}
+}
+
+%======Moteur commun interne
+%------Style tcolorbox principal (identique pour PostIt et PostItNote)
+\tcbset{pipostitbox/.style={%
+  on line,enhanced,colframe=\PostItCoul!50!black,boxrule=\PostItBorder,width=\PostItLarg,sharp corners,halign=\PostItAlignH,valign=\PostItAlignV,%
+  finish={\CommandeDecoration},tikz={rotate=\PostItIncline,transform shape},%
+  box align=\PostItAlignPostIt,%
+  interior style={top color=\PostItCoul!50,bottom color=\PostItCoul!33},%
+  nobeforeafter
+  }%
+}
+%------Noeuds de coin pour le rendu tcbox
+\tcbset{picornernodes/.style={remember,underlay={%
+    \coordinate (\PostItRappel-N-\PostItDirW) at (frame.north west) ;
+    \coordinate (\PostItRappel-N-E) at (frame.north east) ;
+    \coordinate (\PostItRappel-S-E) at (frame.south east) ;
+    \coordinate (\PostItRappel-S-\PostItDirW) at (frame.south west) ;
+    \coordinate (\PostItRappel-N) at (frame.north) ;
+    \coordinate (\PostItRappel-S) at (frame.south) ;
+    \coordinate (\PostItRappel-E) at (frame.east) ;
+    \coordinate (\PostItRappel-\PostItDirW) at (frame.west) ;
+    }%
+  }%
+}
+%------Préparation commune du rendu tcbox
+\newcommand\pitcboxsetup{%
+  \def\CommandeDecoration{\EpinglePostIt}\def\MarginOffsetV{4mm}\def\pidecomatched{false}%
+  \IfStrEq{\PostItDeco}{Punaise}{\def\pidecomatched{true}}{}%
+  \IfStrEq{\PostItDeco}{Pushpin}{\def\pidecomatched{true}}{}%
+  \IfStrEq{\PostItDeco}{Trombone}{\def\CommandeDecoration{\TrombonePostIt}\def\MarginOffsetV{0mm}\def\pidecomatched{true}}{}%
+  \IfStrEq{\PostItDeco}{Paperclip}{\def\CommandeDecoration{\TrombonePostIt}\def\MarginOffsetV{0mm}\def\pidecomatched{true}}{}%
+  \IfStrEq{\PostItDeco}{Scotch}{\def\CommandeDecoration{\ScotchPostIt}\def\MarginOffsetV{1mm}\def\pidecomatched{true}}{}%
+  \IfStrEq{\PostItDeco}{Non}{\def\CommandeDecoration{}\def\MarginOffsetV{0mm}\def\pidecomatched{true}}{}%
+  \IfStrEq{\PostItDeco}{None}{\def\CommandeDecoration{}\def\MarginOffsetV{0mm}\def\pidecomatched{true}}{}%
+  \IfStrEq{\pidecomatched}{false}{\PackageWarning{postit}{Valeur d'attache '\PostItDeco' non reconnue ; aucune attache ne sera affichee}}{}%
+  \ifPostItBorderOn
+    \def\PostItBorder{0.1mm}\tcbset{bordure/.style={}}%
+  \else
+    \def\PostItBorder{0mm}\tcbset{bordure/.style={frame hidden}}%
+  \fi
+  \ifPostItCornerOn
+    \tcbset{coincoin/.style={rounded corners=southeast,arc is angular,arc=3mm,underlay={\CoinPostIt}}}%
+  \else
+    \tcbset{coincoin/.style={}}%
+  \fi
+}
+%------Rendu tcbox complet
+\newcommand\pitcboxrender[2]{%
+  \pitcboxsetup
+  \IfStrEq{\PostItHauteur}{auto}%
+    {%
+      \ifPostItShadowOn
+        \begin{tcolorbox}[pipostitbox,#1,bordure,coincoin,drop fuzzy shadow,top={2mm+\MarginOffsetV},picornernodes]%
+      \else
+        \begin{tcolorbox}[pipostitbox,#1,bordure,coincoin,top={2mm+\MarginOffsetV},picornernodes]%
+      \fi
+    }%
+    {%
+      \ifPostItShadowOn
+        \begin{tcolorbox}[pipostitbox,#1,bordure,coincoin,drop fuzzy shadow,height=\PostItHauteur,top={2mm+\MarginOffsetV},picornernodes]%
+      \else
+        \begin{tcolorbox}[pipostitbox,#1,bordure,coincoin,height=\PostItHauteur,top={2mm+\MarginOffsetV},picornernodes]%
+      \fi
+    }%
+  \IfStrEq{\PostItTitre}{}{}{\hfill{}{\PostItPoliceTitre\PostItTitre}\hfill\null\\}%
+  #2%
+  \end{tcolorbox}%
+}
+%------Rendu tikz
+\newcommand\pistripunits{%
+  \StrDel{\PostItLarg}{cm}[\PostItLarg]%
+  \StrDel{\PostItExtraMargin}{cm}[\PostItExtraMargin]%
+  \def\LargeurTextePostIt{\fpeval{\PostItLarg-\MarginHGPostIt-\MarginHDPostIt}}%
+}
+\newcommand\picomputehauteur{%
+  \IfStrEq{\PostItHauteur}{auto}%
+    {%
+      \IfStrEq{\PostItAlignH}{justify}{\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\TextePostIt}}}{}%
+      \IfStrEq{\PostItAlignH}{center}{\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\centering\TextePostIt}}}{}%
+      \IfStrEq{\PostItAlignH}{left}{\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\raggedright\TextePostIt}}}{}%
+      \IfStrEq{\PostItAlignH}{right}{\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\raggedleft\TextePostIt}}}{}%
+      \settoboxtotalheight{\HauteurEssaiTexte}{\maboitepostit}%
+      \addtolength\HauteurEssaiTexte{\MarginVHPostIt}\addtolength\HauteurEssaiTexte{\MarginVBPostIt}%
+      \IfStrEq{\PostItDeco}{Scotch}{\addtolength\HauteurEssaiTexte{0.4cm}}{}%
+      \IfStrEq{\PostItDeco}{Trombone}{\addtolength\HauteurEssaiTexte{0.2cm}}{}%
+      \IfStrEq{\PostItDeco}{Paperclip}{\addtolength\HauteurEssaiTexte{0.2cm}}{}%
+      \IfStrEq{\PostItDeco}{Punaise}{\addtolength\HauteurEssaiTexte{0.6cm}}{}%
+      \IfStrEq{\PostItDeco}{Pushpin}{\addtolength\HauteurEssaiTexte{0.6cm}}{}%
+      \IfStrEq{\PostItDeco}{Non}{\addtolength\HauteurEssaiTexte{0.2cm}}{}%
+      \IfStrEq{\PostItDeco}{None}{\addtolength\HauteurEssaiTexte{0.2cm}}{}%
+      \def\hauteur{\the\HauteurEssaiTexte}%
+    }%
+    {%
+      \def\hauteur{\PostItHauteur}%
+    }%
+}
+\newcommand\pisetoptiontikz{%
+  \def\OptionTikzPostIt{current bounding box.south}%
+  \IfStrEq{\PostItAlignPostIt}{center}{\def\OptionTikzPostIt{current bounding box.center}}{}%
+  \IfStrEq{\PostItAlignPostIt}{top}{\def\OptionTikzPostIt{current bounding box.north}}{}%
+}
+%------Forme "pliée" (Render=tikz)
+\newcommand\pishapefold{%
+  \ifPostItShadowOn
+    \draw[draw=none,fill=gray,semithick,fill=gray,fill opacity=0.5]
+      (0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
+      to[out=-90,in=104] ++ ($({0.15},{-\hauteur+0.15})+(\OffsetOmbreA,-\OffsetOmbreA)$)
+      to[out=182,in=-2] ++ ({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})
+      -- cycle ;
+    \draw[draw=none,fill=gray!50!black,semithick,fill=gray!50!black,fill opacity=0.5]
+      (0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
+      to[out=-90,in=104] ++ ($({0.15},{-\hauteur+0.15})+(\OffsetOmbreB,-\OffsetOmbreB)$)
+      to[out=182,in=-2] ++ ({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})
+      -- cycle ;
+    \draw[draw=none,fill=black,semithick,fill=black,fill opacity=0.5]
+      (0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
+      to[out=-90,in=104] ++ ($({0.15},{-\hauteur+0.15})+(\OffsetOmbreC,-\OffsetOmbreC)$)
+      to[out=182,in=-2] ++ ({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})
+      -- cycle ;
+  \fi
+  \coordinate (\PostItRappel-N-\PostItDirW) at (0,0) ;
+  \coordinate (\PostItRappel-N-E) at ($(\PostItRappel-N-\PostItDirW)+({\PostItLarg+\PostItExtraMargin},0)$) ;
+  \coordinate (\PostItRappel-S-E) at ($(\PostItRappel-N-E)+({0.15},{-\hauteur+0.15})$) ;
+  \coordinate (\PostItRappel-S-\PostItDirW) at ($(\PostItRappel-S-E)+({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})$) ;
+  \coordinate (\PostItRappel-N) at ($(\PostItRappel-N-\PostItDirW)!0.5!(\PostItRappel-N-E)$) ;
+  \coordinate (\PostItRappel-E) at ($(\PostItRappel-N-E)!0.5!(\PostItRappel-S-E)+(-0.08,0)$) ;
+  \coordinate (\PostItRappel-S) at ($(\PostItRappel-S-E)!0.5!(\PostItRappel-S-\PostItDirW)+(0,-0.07)$) ;
+  \coordinate (\PostItRappel-\PostItDirW) at ($(\PostItRappel-S-\PostItDirW)!0.5!(\PostItRappel-N-\PostItDirW)$) ;
+  \ifPostItBorderOn
+    \shadedraw[draw=\PostItCoul!50!black,line width=0.1mm,top color=\PostItCoul!50,bottom color=\PostItCoul!33]
+      (0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
+      to[out=-90,in=104] ++ ({0.15},{-\hauteur+0.15})
+      to[out=182,in=-2] ++ ({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})
+      -- cycle ;
+  \else
+    \shadedraw[draw=none,top color=\PostItCoul!50,bottom color=\PostItCoul!33]
+      (0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
+      to[out=-90,in=104] ++ ({0.15},{-\hauteur+0.15})
+      to[out=182,in=-2] ++ ({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})
+      -- cycle ;
+  \fi
+}
+%------Forme "coupe nette" (Render=tikzv2)
+\newcommand\pishapestraight{%
+  \ifPostItShadowOn
+    \draw[draw=none,fill=gray,semithick,fill=gray,fill opacity=0.5]
+      (0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
+      to[out=-90,in=91] ++ ($({0.05},{-\hauteur-0.05})+(2pt,-2pt)$)
+      --++ ($({-\PostItLarg-\PostItExtraMargin-0.1},{0})+(-4pt,0)$)
+      to[out=89,in=-90] (0,0) ;
+    \draw[draw=none,fill=gray!50!black,semithick,fill=gray!50!black,fill opacity=0.5]
+      (0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
+      to[out=-90,in=91] ++ ($({0.05},{-\hauteur-0.05})+(1.25pt,-1.25pt)$)
+      --++ ($({-\PostItLarg-\PostItExtraMargin-0.1},{0})+(-2.5pt,0)$)
+      to[out=89,in=-90] (0,0) ;
+    \draw[draw=none,fill=black,semithick,fill=black,fill opacity=0.5]
+      (0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
+      to[out=-90,in=91] ++ ($({0.05},{-\hauteur-0.05})+(0.5pt,-0.5pt)$)
+      --++ ($({-\PostItLarg-\PostItExtraMargin-0.1},{0})+(-1pt,0)$)
+      to[out=89,in=-90] (0,0) ;
+  \fi
+  \coordinate (\PostItRappel-N-\PostItDirW) at (0,0) ;
+  \coordinate (\PostItRappel-N-E) at ($(\PostItRappel-N-\PostItDirW)+({\PostItLarg+\PostItExtraMargin},0)$) ;
+  \coordinate (\PostItRappel-S-E) at ($(\PostItRappel-N-E)+({0.05},{-\hauteur-0.05})$) ;
+  \coordinate (\PostItRappel-S-\PostItDirW) at ($(\PostItRappel-S-E)+({-\PostItLarg-\PostItExtraMargin-0.1},{0})$) ;
+  \coordinate (\PostItRappel-N) at ($(\PostItRappel-N-\PostItDirW)!0.5!(\PostItRappel-N-E)$) ;
+  \coordinate (\PostItRappel-E) at ($(\PostItRappel-N-E)!0.5!(\PostItRappel-S-E)+(-0.025,0)$) ;
+  \coordinate (\PostItRappel-S) at ($(\PostItRappel-S-E)!0.5!(\PostItRappel-S-\PostItDirW)$) ;
+  \coordinate (\PostItRappel-\PostItDirW) at ($(\PostItRappel-S-\PostItDirW)!0.5!(\PostItRappel-N-\PostItDirW)+(0.025,0)$) ;
+  \ifPostItBorderOn
+    \shadedraw[draw=\PostItCoul!50!black,line width=0.1mm,top color=\PostItCoul!50,bottom color=\PostItCoul!33]
+      (0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
+      to[out=-90,in=91] ++ ({0.05},{-\hauteur-0.05})
+      --++ ({-\PostItLarg-\PostItExtraMargin-0.1},{0})
+      to[out=89,in=-90] (0,0) ;
+  \else
+    \shadedraw[draw=none,top color=\PostItCoul!50,bottom color=\PostItCoul!33]
+      (0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
+      to[out=-90,in=91] ++ ({0.05},{-\hauteur-0.05})
+      --++ ({-\PostItLarg-\PostItExtraMargin-0.1},{0})
+      to[out=89,in=-90] (0,0) ;
+  \fi
+}
+%------Placement du texte
+\newcommand\pitextoffsettop{%
+  \def\PostItYOffTop{0pt}%
+  \IfStrEq{\PostItDeco}{Punaise}{\def\PostItYOffTop{0.4cm}}{}%
+  \IfStrEq{\PostItDeco}{Pushpin}{\def\PostItYOffTop{0.4cm}}{}%
+  \IfStrEq{\PostItDeco}{Scotch}{\def\PostItYOffTop{0.2cm}}{}%
+}
+\newcommand\piplacetext{%
+  \pitextoffsettop
+  \def\PostItTextAnchor{below}%
+  \IfStrEq{\PostItHauteur}{auto}%
+    {\def\PostItTextY{-\MarginVHPostIt-(\PostItYOffTop)}}%
+    {%
+      \IfStrEq{\PostItAlignV}{top}{\def\PostItTextY{-\MarginVHPostIt-(\PostItYOffTop)}}{}%
+      \IfStrEq{\PostItAlignV}{center}%
+        {%
+          \def\PostItTextAnchor{center}%
+          \def\PostItYOffCenter{0pt}%
+          \IfStrEq{\PostItDeco}{Punaise}{\def\PostItYOffCenter{\MarginVHPostIt+0.2cm}}{}%
+          \IfStrEq{\PostItDeco}{Pushpin}{\def\PostItYOffCenter{\MarginVHPostIt+0.2cm}}{}%
+          \def\PostItTextY{-0.5*\hauteur-(\PostItYOffCenter)}%
+        }{}%
+      \IfStrEq{\PostItAlignV}{bottom}{\def\PostItTextAnchor{bottom}\def\PostItTextY{-\hauteur}}{}%
+    }%
+  %
+  \IfStrEq{\PostItTextAnchor}{below}%
+    {\draw ({0.5*\PostItLarg},{\PostItTextY}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;}%
+    {}%
+  \IfStrEq{\PostItTextAnchor}{center}%
+    {\draw ({0.5*\PostItLarg},{\PostItTextY}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;}%
+    {}%
+  \IfStrEq{\PostItTextAnchor}{bottom}%
+    {\draw ({0.5*\PostItLarg},{\PostItTextY}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,above=0.6cm,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;}%
+    {}%
+}
+%------Habillage (punaise/trombone/scotch) pour le rendu tikz/tikzv2
+\newcommand\pidrawdeco{%
+  \def\pidecomatched{false}%
+  \IfStrEq{\PostItDeco}{Punaise}{\def\pidecomatched{true}%
+    \begin{scope}[shift={(0.5*\PostItLarg+0.5*\PostItExtraMargin+\PostItDeclClip,-0.49)},scale={0.55},rotate=-40]\pidrawpin\end{scope}%
+  }{}%
+  \IfStrEq{\PostItDeco}{Pushpin}{\def\pidecomatched{true}%
+    \begin{scope}[shift={(0.5*\PostItLarg+0.5*\PostItExtraMargin+\PostItDeclClip,-0.49)},scale={0.55},rotate=-40]\pidrawpin\end{scope}%
+  }{}%
+  \IfStrEq{\PostItDeco}{Trombone}{\def\pidecomatched{true}%
+    \begin{scope}[shift={(\PostItLarg+\PostItExtraMargin-1+\PostItDeclClip,0)},rotate=-15,scale={\PostItCoulScaleClip*0.55},line cap=round]\pidrawpaperclip\end{scope}%
+  }{}%
+  \IfStrEq{\PostItDeco}{Paperclip}{\def\pidecomatched{true}%
+    \begin{scope}[shift={(\PostItLarg+\PostItExtraMargin-1+\PostItDeclClip,0)},rotate=-15,scale={\PostItCoulScaleClip*0.55},line cap=round]\pidrawpaperclip\end{scope}%
+  }{}%
+  \IfStrEq{\PostItDeco}{Scotch}{\def\pidecomatched{true}%
+    \begin{scope}[shift={(0.5*\PostItLarg+0.5*\PostItExtraMargin+\PostItDeclClip,0)},scale={0.65},rotate=3,line cap=round]\pidrawtape\end{scope}%
+  }{}%
+  \IfStrEq{\PostItDeco}{Non}{\def\pidecomatched{true}}{}%
+  \IfStrEq{\PostItDeco}{None}{\def\pidecomatched{true}}{}%
+  \IfStrEq{\pidecomatched}{false}{\PackageWarning{postit}{Valeur d'attache '\PostItDeco' non reconnue ; aucune attache ne sera affichee}}{}%
+}
+%------Rendu tikz/tikzv2 complet
+\newcommand\pitikzrender[1]{%
+  \pistripunits
+  \def\TextePostIt{\IfStrEq{\PostItTitre}{}{}{\hfill{}{\PostItPoliceTitre\PostItTitre}\hfill\null\\}#1}%
+  \picomputehauteur
+  \pisetoptiontikz
+  \begin{tikzpicture}[baseline=(\OptionTikzPostIt),rotate=\PostItIncline,line join=bevel,line cap=round,remember picture]
+    \IfStrEq{\PostItShapeStyle}{fold}{\pishapefold}{\pishapestraight}%
+    \piplacetext
+    \pidrawdeco
+  \end{tikzpicture}%
 }
 
 %======[FR]
 %------Clés
 \defKV[postit]{%
-	Largeur=\def\PostItLarg{#1},%
-	Couleur=\def\PostItCoul{#1},%
-	CouleurAttache=\def\PostItCoulClip{#1},%
-	EchelleAttache=\def\PostItCoulScaleClip{#1},%
-	Inclinaison=\def\PostItIncline{#1},%
-	Hauteur=\def\PostItHauteur{#1},%
-	DecalAttache=\def\PostItDeclClip{#1},%
-	Attache=\def\PostItDeco{#1},%
-	AlignementV=\def\PostItAlignV{#1},%
-	AlignementH=\def\PostItAlignH{#1},%
-	AlignementPostIt=\def\PostItAlignPostIt{#1},%
-	Rendu=\def\PostItRender{#1},%
-	ExtraMargeDroite=\def\PostItExtraMargin{#1},%
-	Titre=\def\PostItTitre{#1},%
-	PoliceTitre=\def\PostItPoliceTitre{#1},%
-	RappelPostIt=\def\PostItRappel{#1}
+  Largeur=\def\PostItLarg{#1},%
+  Couleur=\def\PostItCoul{#1},%
+  CouleurAttache=\def\PostItCoulClip{#1},%
+  EchelleAttache=\def\PostItCoulScaleClip{#1},%
+  Inclinaison=\def\PostItIncline{#1},%
+  Hauteur=\def\PostItHauteur{#1},%
+  DecalAttache=\def\PostItDeclClip{#1},%
+  Attache=\def\PostItDeco{#1},%
+  AlignementV=\def\PostItAlignV{#1},%
+  AlignementH=\def\PostItAlignH{#1},%
+  AlignementPostIt=\def\PostItAlignPostIt{#1},%
+  Rendu=\def\PostItRender{#1},%
+  ExtraMargeDroite=\def\PostItExtraMargin{#1},%
+  Titre=\def\PostItTitre{#1},%
+  PoliceTitre=\def\PostItPoliceTitre{#1},%
+  RappelPostIt=\def\PostItRappel{#1}
 }
 
 \setKVdefault[postit]{%
-	Largeur=6cm,%
-	Couleur=yellow,%
-	CouleurAttache=red,%
-	Inclinaison=0,%
-	EchelleAttache=1,%
-	Ombre=true,%
-	Hauteur=auto,%
-	DecalAttache=0,%
-	Attache=Punaise,%
-	AlignementV=top,%
-	AlignementH=justify,%
-	AlignementPostIt=bottom,%
-	Bordure=true,%
-	Coin=false,%
-	Rendu=tcbox,%
-	ExtraMargeDroite=0cm,%
-	Titre={},%
-	PoliceTitre=\normalfont\normalsize,%
-	RappelPostIt=PostIt
+  Largeur=6cm,%
+  Couleur=yellow,%
+  CouleurAttache=red,%
+  Inclinaison=0,%
+  EchelleAttache=1,%
+  Ombre=true,%
+  Hauteur=auto,%
+  DecalAttache=0,%
+  Attache=Punaise,%
+  AlignementV=top,%
+  AlignementH=justify,%
+  AlignementPostIt=bottom,%
+  Bordure=true,%
+  Coin=false,%
+  Rendu=tcbox,%
+  ExtraMargeDroite=0cm,%
+  Titre={},%
+  PoliceTitre=\normalfont\normalsize,%
+  RappelPostIt=PostIt
 }
-
-%------Style principal tcolorbox
-\tcbset{testpostit/.style={%
-	on line,enhanced,colframe=\PostItCoul!50!black,boxrule=\PostItBorder,width=\PostItLarg,sharp corners,halign=\PostItAlignH,valign=\PostItAlignV,%
-	%colback=\PostItCoul!50,%
-	finish={\CommandeDecoration},tikz={rotate=\PostItIncline,transform shape},%
-	box align=\PostItAlignPostIt,%
-	interior style={top color=\PostItCoul!50,bottom color=\PostItCoul!33},%
-	nobeforeafter
-	}%
-}
-
 %------Environnement principal
 \NewDocumentEnvironment{PostIt}{ O{} D<>{} +b }%
 {%
-	\restoreKV[postit]%
-	\setKV[postit]{#1}%
-	\IfStrEq{\PostItRender}{tcbox}%
-		{%
-			%choix de la déco et paramètrage
-			\def\CommandeDecoration{\EpinglePostIt}%
-			\def\MarginOffsetV{4mm}%
-			\IfStrEq{\PostItDeco}{Trombone}%
-				{\def\CommandeDecoration{\TrombonePostIt}\def\MarginOffsetV{0mm}}%
-				{}%
-			\IfStrEq{\PostItDeco}{Scotch}%
-				{\def\CommandeDecoration{\ScotchPostIt}\def\MarginOffsetV{1mm}}%
-				{}%
-			\IfStrEq{\PostItDeco}{Non}%
-				{\def\CommandeDecoration{}\def\MarginOffsetV{0mm}}%
-				{}%
-			%gestion des coins/noeuds
-			\tcbset{noeudscoin/.style={remember,underlay={%
-					\coordinate (\PostItRappel-N-O) at (frame.north west) ;
-					\coordinate (\PostItRappel-N-E) at (frame.north east) ;
-					\coordinate (\PostItRappel-S-E) at (frame.south east) ;
-					\coordinate (\PostItRappel-S-O) at (frame.south west) ;
-					\coordinate (\PostItRappel-N) at (frame.north) ;
-					\coordinate (\PostItRappel-S) at (frame.south) ;
-					\coordinate (\PostItRappel-E) at (frame.east) ;
-					\coordinate (\PostItRappel-O) at (frame.west) ;
-					}%
-				}%
-			}%
-			%cas de la bordure
-			\ifboolKV[postit]{Bordure}%
-				{%
-					\def\PostItBorder{0.1mm}%
-					\tcbset{bordure/.style={}}%
-				}%
-				{%
-					\def\PostItBorder{0mm}%
-					\tcbset{bordure/.style={frame hidden}}%
-				}%
-			%cas du coin
-			\ifboolKV[postit]{Coin}%
-				{%
-					\tcbset{coincoin/.style={rounded corners=southeast,arc is angular,arc=3mm,underlay={\CoinPostIt}}}%
-				}%
-				{%
-					\tcbset{coincoin/.style={}}%
-				}%
-			%en fonction de hauteur auto ou non
-			\IfStrEq{\PostItHauteur}{auto}%
-				{%
-					\ifboolKV[postit]{Ombre}%
-						{\begin{tcolorbox}[testpostit,#2,bordure,coincoin,drop fuzzy shadow,top={2mm+\MarginOffsetV},noeudscoin]}%
-						{\begin{tcolorbox}[testpostit,#2,bordure,coincoin,top={2mm+\MarginOffsetV},noeudscoin]}%
-				}%
-				{%
-					\ifboolKV[postit]{Ombre}%
-						{\begin{tcolorbox}[testpostit,#2,bordure,coincoin,drop fuzzy shadow,height=\PostItHauteur,top={2mm+\MarginOffsetV},noeudscoin]}%
-						{\begin{tcolorbox}[testpostit,#2,bordure,coincoin,height=\PostItHauteur,top={2mm+\MarginOffsetV},noeudscoin]}%
-				}%
-			\IfStrEq{\PostItTitre}{}%
-				{}%
-				{%
-					\hfill{}{\PostItPoliceTitre\PostItTitre}\hfill\null\\%
-				}%
-			#3%
-			\end{tcolorbox}%
-		}{}%
-	\IfStrEq{\PostItRender}{tikz}%
-		{%
-			\StrDel{\PostItLarg}{cm}[\PostItLarg]%
-			\StrDel{\PostItExtraMargin}{cm}[\PostItExtraMargin]%
-			\def\LargeurTextePostIt{\fpeval{\PostItLarg-\MarginHGPostIt-\MarginHDPostIt}}%
-			\def\TextePostIt{%
-				\IfStrEq{\PostItTitre}{}{}{\hfill{}{\PostItPoliceTitre\PostItTitre}\hfill\null\\}%
-				#3%
-			}%
-			\IfStrEq{\PostItHauteur}{auto}%
-				{%
-					\IfStrEq{\PostItAlignH}{justify}%
-						{%
-							\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\TextePostIt}}%
-						}%
-						{}%
-					\IfStrEq{\PostItAlignH}{center}%
-						{%
-							\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\centering\TextePostIt}}%
-						}%
-						{}%
-					\IfStrEq{\PostItAlignH}{left}%
-						{%
-							\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\raggedright\TextePostIt}}%
-						}%
-						{}%
-					\IfStrEq{\PostItAlignH}{right}%
-						{%
-							\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\raggedleft\TextePostIt}}%
-						}%
-						{}%
-					%\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\TextePostIt}}%
-					\settoboxtotalheight{\HauteurEssaiTexte}{\maboitepostit}%
-					\addtolength\HauteurEssaiTexte{\MarginVHPostIt}\addtolength\HauteurEssaiTexte{\MarginVBPostIt}%
-					\IfStrEq{\PostItDeco}{Scotch}%
-						{\addtolength\HauteurEssaiTexte{0.4cm}}%
-						{}%
-					\IfStrEq{\PostItDeco}{Trombone}%
-						{\addtolength\HauteurEssaiTexte{0.2cm}}%
-						{}%
-					\IfStrEq{\PostItDeco}{Punaise}%
-						{\addtolength\HauteurEssaiTexte{0.6cm}}%
-						{}%
-					\IfStrEq{\PostItDeco}{Non}%
-						{\addtolength\HauteurEssaiTexte{0.2cm}}%
-						{}%
-					\def\hauteur{\the\HauteurEssaiTexte}%
-				}%
-				{%
-					\def\hauteur{\PostItHauteur}%
-				}%
-			\def\OptionTikzPostIt{current bounding box.south}%
-			\IfStrEq{\PostItAlignPostIt}{center}%
-				{\def\OptionTikzPostIt{current bounding box.center}}{}%
-			\IfStrEq{\PostItAlignPostIt}{top}%
-				{\def\OptionTikzPostIt{current bounding box.north}}{}%
-			\begin{tikzpicture}[baseline=(\OptionTikzPostIt),rotate=\PostItIncline,line join=bevel,line cap=round,remember picture]
-			%tracé
-			%ombre1/2/3
-				\ifboolKV[postit]{Ombre}%
-					{%
-						\draw[draw=none,fill=gray,semithick,fill=gray,fill opacity=0.5]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=104] ++ ($({0.15},{-\hauteur+0.15})+(\OffsetOmbreA,-\OffsetOmbreA)$)
-							to[out=182,in=-2] ++ ({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})
-							-- cycle ;
-						\draw[draw=none,fill=gray!50!black,semithick,fill=gray!50!black,fill opacity=0.5]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=104] ++ ($({0.15},{-\hauteur+0.15})+(\OffsetOmbreB,-\OffsetOmbreB)$)
-							to[out=182,in=-2] ++ ({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})
-							-- cycle ;
-						\draw[draw=none,fill=black,semithick,fill=black,fill opacity=0.5]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=104] ++ ($({0.15},{-\hauteur+0.15})+(\OffsetOmbreC,-\OffsetOmbreC)$)
-							to[out=182,in=-2] ++ ({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})
-							-- cycle ;
-					}%
-					{}%
-				%postit
-				\coordinate (\PostItRappel-N-O) at (0,0) ;
-				\coordinate (\PostItRappel-N-E) at ($(\PostItRappel-N-O)+({\PostItLarg+\PostItExtraMargin},0)$) ;
-				\coordinate (\PostItRappel-S-E) at ($(\PostItRappel-N-E)+({0.15},{-\hauteur+0.15})$) ;
-				\coordinate (\PostItRappel-S-O) at ($(\PostItRappel-S-E)+({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})$) ;
-				\coordinate (\PostItRappel-N) at ($(\PostItRappel-N-O)!0.5!(\PostItRappel-N-E)$) ;
-				\coordinate (\PostItRappel-E) at ($(\PostItRappel-N-E)!0.5!(\PostItRappel-S-E)+(-0.08,0)$) ;
-				\coordinate (\PostItRappel-S) at ($(\PostItRappel-S-E)!0.5!(\PostItRappel-S-O)+(0,-0.07)$) ;
-				\coordinate (\PostItRappel-O) at ($(\PostItRappel-S-O)!0.5!(\PostItRappel-N-O)$) ;
-				%bordure
-				\ifboolKV[postit]{Bordure}
-					{%
-						\shadedraw[draw=\PostItCoul!50!black,line width=0.1mm,top color=\PostItCoul!50,bottom color=\PostItCoul!33]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=104] ++ ({0.15},{-\hauteur+0.15})
-							to[out=182,in=-2] ++ ({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})
-							-- cycle ;
-					}%
-					{%
-						\shadedraw[draw=none,top color=\PostItCoul!50,bottom color=\PostItCoul!33]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=104] ++ ({0.15},{-\hauteur+0.15})
-							to[out=182,in=-2] ++ ({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})
-							-- cycle ;
-					}%
-				\IfStrEq{\PostItHauteur}{auto}%
-					{%
-						\IfStrEq{\PostItDeco}{Punaise}%
-							{%
-								\draw ({0.5*\PostItLarg},{-\MarginVHPostIt-0.4cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-						\IfStrEq{\PostItDeco}{Non}%
-							{%
-								\draw ({0.5*\PostItLarg},{-\MarginVHPostIt}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-						\IfStrEq{\PostItDeco}{Trombone}%
-							{%
-								\draw ({0.5*\PostItLarg},{-\MarginVHPostIt}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-						\IfStrEq{\PostItDeco}{Scotch}%
-							{%
-								\draw ({0.5*\PostItLarg},{-\MarginVHPostIt-0.2cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-					}%
-					{%
-						\IfStrEq{\PostItAlignV}{top}
-							{%
-								\IfStrEq{\PostItDeco}{Punaise}%
-									{%
-										\draw ({0.5*\PostItLarg},{-\MarginVHPostIt-0.4cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Non}%
-									{%
-										\draw ({0.5*\PostItLarg},{-\MarginVHPostIt}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Trombone}%
-									{%
-										\draw ({0.5*\PostItLarg},{-\MarginVHPostIt}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Scotch}%
-									{%
-										\draw ({0.5*\PostItLarg},{-\MarginVHPostIt-0.2cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-							}%
-							{}%
-						\IfStrEq{\PostItAlignV}{center}
-							{%
-								\IfStrEq{\PostItDeco}{Punaise}%
-									{%
-										\draw ({0.5*\PostItLarg},{-0.5*\hauteur-\MarginVHPostIt-0.2cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Non}%
-									{%
-										\draw ({0.5*\PostItLarg},{-0.5*\hauteur}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Trombone}%
-									{%
-										\draw ({0.5*\PostItLarg},{-0.5*\hauteur}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Scotch}%
-									{%
-										\draw ({0.5*\PostItLarg},{-0.5*\hauteur}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-							}%
-							{}%
-						\IfStrEq{\PostItAlignV}{bottom}
-							{%
-								\draw ({0.5*\PostItLarg},{-\hauteur}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,above=0.6cm,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-					}%
-				%affichage de la punaise
-				\IfStrEq{\PostItDeco}{Punaise}%
-					{%
-						\begin{scope}[shift={(0.5*\PostItLarg+0.5*\PostItExtraMargin+\PostItDeclClip,-0.49)},scale={0.55},rotate=-40]
-							\begin{scope}[rotate=-35]
-								\draw[blue!10!gray,line cap=round,line width=2pt] (0,0) -- ++(90:0.85);
-								\fill[blue!10!gray,scale=0.5] (90:0.85) ellipse (.65cm and .3cm) ;
-								\fill[blue!10!gray,scale=0.5] (90:0.85) ++(0,0.4) ellipse (.2 and .4);
-								\fill[blue!10!gray,scale=0.5] (90:0.85) ++(0,0.8) ellipse (.4 and .3);
-							\end{scope}
-						\draw[line cap=round,line width=2pt] (0,0) -- ++(90:0.85);
-						\fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ellipse (.65cm and .3cm) ;
-						\fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ++(0,0.4) ellipse (.2 and .4);
-						\fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ++(0,0.8) ellipse (.4 and .3);
-						\end{scope}
-					}%
-					{}%
-				%affichage du trombone
-				\IfStrEq{\PostItDeco}{Trombone}%
-					{%
-						\begin{scope}[shift={(\PostItLarg+\PostItExtraMargin-1+\PostItDeclClip,0)},rotate=-15,scale={\PostItCoulScaleClip*0.55},line cap=round]
-							\draw[line width=0.81mm,draw=\PostItCoulClip!66] (0,0) --++ (0,0.0) arc (180:0:3.5mm) --++ (0,-1.75) arc (0:-180:3mm) --++ (0,1.25) ;
-							\draw[line width=0.27mm,draw=\PostItCoulClip!33] (0,0) --++ (0,0.0) arc (180:0:3.5mm) --++ (0,-1.75) arc (0:-180:3mm) --++ (0,1.25) ;
-					\end{scope}
-					}%
-					{}%
-				%affichage du scotch
-				\IfStrEq{\PostItDeco}{Scotch}%
-					{%
-						\begin{scope}[shift={(0.5*\PostItLarg+0.5*\PostItExtraMargin+\PostItDeclClip,0)},scale={0.65},rotate=3,line cap=round]
-							\draw[thin,gray!50,fill=lightgray,fill opacity=0.75] ({-0.5*\LargeurStotch},{-0.5*\HauteurScotch}) to ({0.5*\LargeurStotch},{-0.5*\HauteurScotch}) decorate [decoration={zigzag,segment length=2pt,amplitude=0.5pt}] {to ({0.5*\LargeurStotch},{0.5*\HauteurScotch})} to ({-0.5*\LargeurStotch},{0.5*\HauteurScotch}) decorate [decoration={zigzag,segment length=2pt,amplitude=0.5pt}] {to cycle} ;
-						\end{scope}
-					}%
-					{}%
-			\end{tikzpicture}%
-		}{}%
-	\IfStrEq{\PostItRender}{tikzv2}%
-		{%
-			\StrDel{\PostItLarg}{cm}[\PostItLarg]%
-			\StrDel{\PostItExtraMargin}{cm}[\PostItExtraMargin]%
-			\def\LargeurTextePostIt{\fpeval{\PostItLarg-\MarginHGPostIt-\MarginHDPostIt}}%
-			\def\TextePostIt{%
-				\IfStrEq{\PostItTitre}{}{}{\hfill{}{\PostItPoliceTitre\PostItTitre}\hfill\null\\}%
-				#3%
-			}%
-			\IfStrEq{\PostItHauteur}{auto}%
-				{%
-					\IfStrEq{\PostItAlignH}{justify}%
-						{%
-							\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\TextePostIt}}%
-						}%
-						{}%
-					\IfStrEq{\PostItAlignH}{center}%
-						{%
-							\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\centering\TextePostIt}}%
-						}%
-						{}%
-					\IfStrEq{\PostItAlignH}{left}%
-						{%
-							\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\raggedright\TextePostIt}}%
-						}%
-						{}%
-					\IfStrEq{\PostItAlignH}{right}%
-						{%
-							\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\raggedleft\TextePostIt}}%
-						}%
-						{}%
-					%\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\TextePostIt}}%
-					\settoboxtotalheight{\HauteurEssaiTexte}{\maboitepostit}%
-					\addtolength\HauteurEssaiTexte{\MarginVHPostIt}\addtolength\HauteurEssaiTexte{\MarginVBPostIt}%
-					\IfStrEq{\PostItDeco}{Scotch}%
-						{\addtolength\HauteurEssaiTexte{0.4cm}}%
-						{}%
-					\IfStrEq{\PostItDeco}{Trombone}%
-						{\addtolength\HauteurEssaiTexte{0.2cm}}%
-						{}%
-					\IfStrEq{\PostItDeco}{Punaise}%
-						{\addtolength\HauteurEssaiTexte{0.6cm}}%
-						{}%
-					\IfStrEq{\PostItDeco}{Non}%
-						{\addtolength\HauteurEssaiTexte{0.2cm}}%
-						{}%
-					\def\hauteur{\the\HauteurEssaiTexte}%
-				}%
-				{%
-					\def\hauteur{\PostItHauteur}%
-				}%
-			\def\OptionTikzPostIt{current bounding box.south}%
-			\IfStrEq{\PostItAlignPostIt}{center}%
-				{\def\OptionTikzPostIt{current bounding box.center}}{}%
-			\IfStrEq{\PostItAlignPostIt}{top}%
-				{\def\OptionTikzPostIt{current bounding box.north}}{}%
-			\begin{tikzpicture}[baseline=(\OptionTikzPostIt),rotate=\PostItIncline,line join=bevel,line cap=round,remember picture]
-			%tracé
-			%ombre1/2/3
-				\ifboolKV[postit]{Ombre}%
-					{%
-						\draw[draw=none,fill=gray,semithick,fill=gray,fill opacity=0.5]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=91] ++ ($({0.05},{-\hauteur-0.05})+(2pt,-2pt)$)
-							--++ ($({-\PostItLarg-\PostItExtraMargin-0.1},{0})+(-4pt,0)$)
-							to[out=89,in=-90] (0,0) ;
-						\draw[draw=none,fill=gray!50!black,semithick,fill=gray!50!black,fill opacity=0.5]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=91] ++ ($({0.05},{-\hauteur-0.05})+(1.25pt,-1.25pt)$)
-							--++ ($({-\PostItLarg-\PostItExtraMargin-0.1},{0})+(-2.5pt,0)$)
-							to[out=89,in=-90] (0,0) ;
-						\draw[draw=none,fill=black,semithick,fill=black,fill opacity=0.5]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=91] ++ ($({0.05},{-\hauteur-0.05})+(0.5pt,-0.5pt)$)
-							--++ ($({-\PostItLarg-\PostItExtraMargin-0.1},{0})+(-1pt,0)$)
-							to[out=89,in=-90] (0,0) ;
-					}%
-					{}%
-				%postit noeuds
-				\coordinate (\PostItRappel-N-O) at (0,0) ;
-				\coordinate (\PostItRappel-N-E) at ($(\PostItRappel-N-O)+({\PostItLarg+\PostItExtraMargin},0)$) ;
-				\coordinate (\PostItRappel-S-E) at ($(\PostItRappel-N-E)+({0.05},{-\hauteur-0.05})$) ;
-				\coordinate (\PostItRappel-S-O) at ($(\PostItRappel-S-E)+({-\PostItLarg-\PostItExtraMargin-0.1},{0})$) ;
-				\coordinate (\PostItRappel-N) at ($(\PostItRappel-N-O)!0.5!(\PostItRappel-N-E)$) ;
-				\coordinate (\PostItRappel-E) at ($(\PostItRappel-N-E)!0.5!(\PostItRappel-S-E)+(-0.025,0)$) ;
-				\coordinate (\PostItRappel-S) at ($(\PostItRappel-S-E)!0.5!(\PostItRappel-S-O)$) ;
-				\coordinate (\PostItRappel-O) at ($(\PostItRappel-S-O)!0.5!(\PostItRappel-N-O)+(0.025,0)$) ;
-				%postit
-				\ifboolKV[postit]{Bordure}
-					{%
-						\shadedraw[draw=\PostItCoul!50!black,line width=0.1mm,top color=\PostItCoul!50,bottom color=\PostItCoul!33]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=91] ++ ({0.05},{-\hauteur-0.05})
-							--++ ({-\PostItLarg-\PostItExtraMargin-0.1},{0})
-							to[out=89,in=-90] (0,0) ;
-					}%
-					{%
-						\shadedraw[draw=none,top color=\PostItCoul!50,bottom color=\PostItCoul!33]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=91] ++ ({0.05},{-\hauteur-0.05})
-							--++ ({-\PostItLarg-\PostItExtraMargin-0.1},{0})
-							to[out=89,in=-90] (0,0) ;
-					}%
-				\IfStrEq{\PostItHauteur}{auto}%
-					{%
-						\IfStrEq{\PostItDeco}{Punaise}%
-							{%
-								\draw ({0.5*\PostItLarg},{-\MarginVHPostIt-0.4cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-						\IfStrEq{\PostItDeco}{Non}%
-							{%
-								\draw ({0.5*\PostItLarg},{-\MarginVHPostIt}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-						\IfStrEq{\PostItDeco}{Trombone}%
-							{%
-								\draw ({0.5*\PostItLarg},{-\MarginVHPostIt}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-						\IfStrEq{\PostItDeco}{Scotch}%
-							{%
-								\draw ({0.5*\PostItLarg},{-\MarginVHPostIt-0.2cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-					}%
-					{%
-						\IfStrEq{\PostItAlignV}{top}
-							{%
-								\IfStrEq{\PostItDeco}{Punaise}%
-									{%
-										\draw ({0.5*\PostItLarg},{-\MarginVHPostIt-0.4cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Non}%
-									{%
-										\draw ({0.5*\PostItLarg},{-\MarginVHPostIt}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Trombone}%
-									{%
-										\draw ({0.5*\PostItLarg},{-\MarginVHPostIt}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Scotch}%
-									{%
-										\draw ({0.5*\PostItLarg},{-\MarginVHPostIt-0.2cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-							}%
-							{}%
-						\IfStrEq{\PostItAlignV}{center}
-							{%
-								\IfStrEq{\PostItDeco}{Punaise}%
-									{%
-										\draw ({0.5*\PostItLarg},{-0.5*\hauteur-\MarginVHPostIt-0.2cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Non}%
-									{%
-										\draw ({0.5*\PostItLarg},{-0.5*\hauteur}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Trombone}%
-									{%
-										\draw ({0.5*\PostItLarg},{-0.5*\hauteur}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Scotch}%
-									{%
-										\draw ({0.5*\PostItLarg},{-0.5*\hauteur}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-							}%
-							{}%
-						\IfStrEq{\PostItAlignV}{bottom}
-							{%
-								\draw ({0.5*\PostItLarg},{-\hauteur}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,above=0.6cm,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-					}%
-				%affichage de la punaise
-				\IfStrEq{\PostItDeco}{Punaise}%
-					{%
-						\begin{scope}[shift={(0.5*\PostItLarg+0.5*\PostItExtraMargin+\PostItDeclClip,-0.49)},scale={0.55},rotate=-40]
-							\begin{scope}[rotate=-35]
-								\draw[blue!10!gray,line cap=round,line width=2pt] (0,0) -- ++(90:0.85);
-								\fill[blue!10!gray,scale=0.5] (90:0.85) ellipse (.65cm and .3cm) ;
-								\fill[blue!10!gray,scale=0.5] (90:0.85) ++(0,0.4) ellipse (.2 and .4);
-								\fill[blue!10!gray,scale=0.5] (90:0.85) ++(0,0.8) ellipse (.4 and .3);
-							\end{scope}
-						\draw[line cap=round,line width=2pt] (0,0) -- ++(90:0.85);
-						\fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ellipse (.65cm and .3cm) ;
-						\fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ++(0,0.4) ellipse (.2 and .4);
-						\fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ++(0,0.8) ellipse (.4 and .3);
-						\end{scope}
-					}%
-					{}%
-				%affichage du trombone
-				\IfStrEq{\PostItDeco}{Trombone}%
-					{%
-						\begin{scope}[shift={(\PostItLarg+\PostItExtraMargin-1+\PostItDeclClip,0)},rotate=-15,scale={\PostItCoulScaleClip*0.55},line cap=round]
-							\draw[line width=0.81mm,draw=\PostItCoulClip!66] (0,0) --++ (0,0.0) arc (180:0:3.5mm) --++ (0,-1.75) arc (0:-180:3mm) --++ (0,1.25) ;
-							\draw[line width=0.27mm,draw=\PostItCoulClip!33] (0,0) --++ (0,0.0) arc (180:0:3.5mm) --++ (0,-1.75) arc (0:-180:3mm) --++ (0,1.25) ;
-					\end{scope}
-					}%
-					{}%
-				%affichage du scotch
-				\IfStrEq{\PostItDeco}{Scotch}%
-					{%
-						\begin{scope}[shift={(0.5*\PostItLarg+0.5*\PostItExtraMargin+\PostItDeclClip,0)},scale={0.65},rotate=3,line cap=round]
-							\draw[thin,gray!50,fill=lightgray,fill opacity=0.75] ({-0.5*\LargeurStotch},{-0.5*\HauteurScotch}) to ({0.5*\LargeurStotch},{-0.5*\HauteurScotch}) decorate [decoration={zigzag,segment length=2pt,amplitude=0.5pt}] {to ({0.5*\LargeurStotch},{0.5*\HauteurScotch})} to ({-0.5*\LargeurStotch},{0.5*\HauteurScotch}) decorate [decoration={zigzag,segment length=2pt,amplitude=0.5pt}] {to cycle} ;
-						\end{scope}
-					}%
-					{}%
-			\end{tikzpicture}%
-		}{}%
+  \restoreKV[postit]%
+  \setKV[postit]{#1}%
+  \def\PostItDirW{O}%
+  \ifboolKV[postit]{Ombre}{\PostItShadowOntrue}{\PostItShadowOnfalse}%
+  \ifboolKV[postit]{Bordure}{\PostItBorderOntrue}{\PostItBorderOnfalse}%
+  \ifboolKV[postit]{Coin}{\PostItCornerOntrue}{\PostItCornerOnfalse}%
+  \IfStrEq{\PostItRender}{tcbox}%
+    {\pitcboxrender{#2}{#3}}%
+    {}%
+  \def\PostItIsTikzFamily{false}\def\PostItShapeStyle{}%
+  \IfStrEq{\PostItRender}{tikz}{\def\PostItIsTikzFamily{true}\def\PostItShapeStyle{fold}}{}%
+  \IfStrEq{\PostItRender}{tikzv2}{\def\PostItIsTikzFamily{true}\def\PostItShapeStyle{straight}}{}%
+  \IfStrEq{\PostItIsTikzFamily}{true}{\pitikzrender{#3}}{}%
 }%
 {}%
 
-%------Style principal minitcbox
-\tcbset{testminipostit/.style={%
-	enhanced,size=small,boxrule=0.1mm,sharp corners,boxsep=0.5mm,%
-	left=0mm,right=2.5mm,top=0mm,bottom=0mm,nobeforeafter,box align=base
-	}%
-}
-%------Style principal minitcbox
-\tcbset{ombreminipostit/.style={%
-	fuzzy shadow={0.5mm}{-0.5mm}{0mm}{0.1mm}{black!50!white}
-	}%
-}
-
-\NewTCBox{\MiniPostIt}{ s O{yellow} }{%
-	testminipostit,colback=#2!50,colframe=#2!50!black,rounded corners=southeast,arc is angular,arc=2mm,%
-	before upper=\vphantom{pL},
-	underlay={
-		\path[line width=0.1mm,fill=#2!80!black] ([yshift=2mm]interior.south east)--++(-0.25,-0.1)--++(0.05,-0.1);
-		\path[line width=0.1mm,draw=#2!50!black,shorten <=-0.05mm,shorten >=-0.05mm,color=#2!50!black] ([yshift=2mm]interior.south east)--++(-0.25,-0.1)--++(0.05,-0.1);
-	},%
-	IfBooleanTF={#1}{ombreminipostit}{}
-}
-
 %======[EN]
-
 %------Clés
 \defKV[postitnote]{%
-	Width=\def\PostItLarg{#1},%
-	Color=\def\PostItCoul{#1},%
-	PinColor=\def\PostItCoulClip{#1},%
-	PinScale=\def\PostItCoulScaleClip{#1},%
-	Rotate=\def\PostItIncline{#1},%
-	Height=\def\PostItHauteur{#1},%
-	PinShift=\def\PostItDeclClip{#1},%
-	Pin=\def\PostItDeco{#1},%
-	AlignV=\def\PostItAlignV{#1},%
-	AlignH=\def\PostItAlignH{#1},%
-	AlignPostIt=\def\PostItAlignPostIt{#1},%
-	Render=\def\PostItRender{#1},%
-	ExtraRightMargin=\def\PostItExtraMargin{#1},%
-	Title=\def\PostItTitre{#1},%
-	FontTitle=\def\PostItPoliceTitre{#1},%
-	StorePostIt=\def\PostItRappel{#1}
+  Width=\def\PostItLarg{#1},%
+  Color=\def\PostItCoul{#1},%
+  PinColor=\def\PostItCoulClip{#1},%
+  PinScale=\def\PostItCoulScaleClip{#1},%
+  Rotate=\def\PostItIncline{#1},%
+  Height=\def\PostItHauteur{#1},%
+  PinShift=\def\PostItDeclClip{#1},%
+  Pin=\def\PostItDeco{#1},%
+  AlignV=\def\PostItAlignV{#1},%
+  AlignH=\def\PostItAlignH{#1},%
+  AlignPostIt=\def\PostItAlignPostIt{#1},%
+  Render=\def\PostItRender{#1},%
+  ExtraRightMargin=\def\PostItExtraMargin{#1},%
+  Title=\def\PostItTitre{#1},%
+  FontTitle=\def\PostItPoliceTitre{#1},%
+  StorePostIt=\def\PostItRappel{#1}
 }
-
 \setKVdefault[postitnote]{%
-	Width=6cm,%
-	Color=yellow,%
-	PinColor=red,%
-	Rotate=0,%
-	PinScale=1,%
-	Shadow=true,%
-	Height=auto,%
-	PinShift=0,%
-	Pin=Pushpin,%
-	AlignV=top,%
-	AlignH=justify,%
-	AlignPostIt=bottom,%
-	Border=true,%
-	Corner=false,%
-	Render=tcbox,%
-	ExtraRightMargin=0cm,%
-	Title={},%
-	FontTitle=\normalfont\normalsize,%
-	StorePostIt=PostIt
+  Width=6cm,%
+  Color=yellow,%
+  PinColor=red,%
+  Rotate=0,%
+  PinScale=1,%
+  Shadow=true,%
+  Height=auto,%
+  PinShift=0,%
+  Pin=Pushpin,%
+  AlignV=top,%
+  AlignH=justify,%
+  AlignPostIt=bottom,%
+  Border=true,%
+  Corner=false,%
+  Render=tcbox,%
+  ExtraRightMargin=0cm,%
+  Title={},%
+  FontTitle=\normalfont\normalsize,%
+  StorePostIt=PostIt
 }
-
-%------Style principal tcolorbox
-\tcbset{testpostitnote/.style={%
-	on line,enhanced,colframe=\PostItCoul!50!black,boxrule=\PostItBorder,width=\PostItLarg,sharp corners,halign=\PostItAlignH,valign=\PostItAlignV,%
-	%colback=\PostItCoul!50,%
-	finish={\CommandeDecoration},tikz={rotate=\PostItIncline,transform shape},%
-	box align=\PostItAlignPostIt,%
-	interior style={top color=\PostItCoul!50,bottom color=\PostItCoul!33},%
-	nobeforeafter
-	}%
-}
-
 %------Environnement principal
 \NewDocumentEnvironment{PostItNote}{ O{} D<>{} +b }%
 {%
-	\restoreKV[postitnote]%
-	\setKV[postitnote]{#1}%
-	\IfStrEq{\PostItRender}{tcbox}%
-		{%
-			%choix de la déco et paramètrage
-			\def\CommandeDecoration{\EpinglePostIt}%
-			\def\MarginOffsetV{4mm}%
-			\IfStrEq{\PostItDeco}{Paperclip}%
-				{\def\CommandeDecoration{\TrombonePostIt}\def\MarginOffsetV{0mm}}%
-				{}%
-			\IfStrEq{\PostItDeco}{Scotch}%
-				{\def\CommandeDecoration{\ScotchPostIt}\def\MarginOffsetV{1mm}}%
-				{}%
-			\IfStrEq{\PostItDeco}{None}%
-				{\def\CommandeDecoration{}\def\MarginOffsetV{0mm}}%
-				{}%
-			%gestion des coins/noeuds
-			\tcbset{noeudscoin/.style={remember,underlay={%
-					\coordinate (\PostItRappel-N-W) at (frame.north west) ;
-					\coordinate (\PostItRappel-N-E) at (frame.north east) ;
-					\coordinate (\PostItRappel-S-E) at (frame.south east) ;
-					\coordinate (\PostItRappel-S-W) at (frame.south west) ;
-					\coordinate (\PostItRappel-N) at (frame.north) ;
-					\coordinate (\PostItRappel-S) at (frame.south) ;
-					\coordinate (\PostItRappel-E) at (frame.east) ;
-					\coordinate (\PostItRappel-W) at (frame.west) ;
-					}%
-				}%
-			}%
-			%cas de la bordure
-			\ifboolKV[postitnote]{Border}%
-				{%
-					\def\PostItBorder{0.1mm}%
-					\tcbset{bordure/.style={}}%
-				}%
-				{%
-					\def\PostItBorder{0mm}%
-					\tcbset{bordure/.style={frame hidden}}%
-				}%
-			%cas du coin
-			\ifboolKV[postitnote]{Corner}%
-				{%
-					\tcbset{coincoin/.style={rounded corners=southeast,arc is angular,arc=3mm,underlay={\CoinPostIt}}}%
-				}%
-				{%
-					\tcbset{coincoin/.style={}}%
-				}%
-			%en fonction de hauteur auto ou non
-			\IfStrEq{\PostItHauteur}{auto}%
-				{%
-					\ifboolKV[postitnote]{Shadow}%
-						{\begin{tcolorbox}[testpostitnote,#2,bordure,coincoin,drop fuzzy shadow,top={2mm+\MarginOffsetV},noeudscoin]}%
-						{\begin{tcolorbox}[testpostitnote,#2,bordure,coincoin,top={2mm+\MarginOffsetV},noeudscoin]}%
-				}%
-				{%
-					\ifboolKV[postitnote]{Shadow}%
-						{\begin{tcolorbox}[testpostitnote,#2,bordure,coincoin,drop fuzzy shadow,height=\PostItHauteur,top={2mm+\MarginOffsetV},noeudscoin]}%
-						{\begin{tcolorbox}[testpostitnote,#2,bordure,coincoin,height=\PostItHauteur,top={2mm+\MarginOffsetV},noeudscoin]}%
-				}%
-			\IfStrEq{\PostItTitre}{}%
-				{}%
-				{%
-					\hfill{}{\PostItPoliceTitre\PostItTitre}\hfill\null\\%
-				}%
-			#3%
-			\end{tcolorbox}%
-		}{}%
-	\IfStrEq{\PostItRender}{tikz}%
-		{%
-			\StrDel{\PostItLarg}{cm}[\PostItLarg]%
-			\StrDel{\PostItExtraMargin}{cm}[\PostItExtraMargin]%
-			\def\LargeurTextePostIt{\fpeval{\PostItLarg-\MarginHGPostIt-\MarginHDPostIt}}%
-			\def\TextePostIt{%
-				\IfStrEq{\PostItTitre}{}{}{\hfill{}{\PostItPoliceTitre\PostItTitre}\hfill\null\\}%
-				#3%
-			}%
-			\IfStrEq{\PostItHauteur}{auto}%
-				{%
-					\IfStrEq{\PostItAlignH}{justify}%
-						{%
-							\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\TextePostIt}}%
-						}%
-						{}%
-					\IfStrEq{\PostItAlignH}{center}%
-						{%
-							\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\centering\TextePostIt}}%
-						}%
-						{}%
-					\IfStrEq{\PostItAlignH}{left}%
-						{%
-							\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\raggedright\TextePostIt}}%
-						}%
-						{}%
-					\IfStrEq{\PostItAlignH}{right}%
-						{%
-							\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\raggedleft\TextePostIt}}%
-						}%
-						{}%
-					%\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\TextePostIt}}%
-					\settoboxtotalheight{\HauteurEssaiTexte}{\maboitepostit}%
-					\addtolength\HauteurEssaiTexte{\MarginVHPostIt}\addtolength\HauteurEssaiTexte{\MarginVBPostIt}%
-					\IfStrEq{\PostItDeco}{Scotch}%
-						{\addtolength\HauteurEssaiTexte{0.4cm}}%
-						{}%
-					\IfStrEq{\PostItDeco}{Paperclip}%
-						{\addtolength\HauteurEssaiTexte{0.2cm}}%
-						{}%
-					\IfStrEq{\PostItDeco}{Pushpin}%
-						{\addtolength\HauteurEssaiTexte{0.6cm}}%
-						{}%
-					\IfStrEq{\PostItDeco}{None}%
-						{\addtolength\HauteurEssaiTexte{0.2cm}}%
-						{}%
-					\def\hauteur{\the\HauteurEssaiTexte}%
-				}%
-				{%
-					\def\hauteur{\PostItHauteur}%
-				}%
-			\def\OptionTikzPostIt{current bounding box.south}%
-			\IfStrEq{\PostItAlignPostIt}{center}%
-				{\def\OptionTikzPostIt{current bounding box.center}}{}%
-			\IfStrEq{\PostItAlignPostIt}{top}%
-				{\def\OptionTikzPostIt{current bounding box.north}}{}%
-			\begin{tikzpicture}[baseline=(\OptionTikzPostIt),rotate=\PostItIncline,line join=bevel,line cap=round,remember picture]
-			%tracé
-			%ombre1/2/3
-				\ifboolKV[postitnote]{Shadow}%
-					{%
-						\draw[draw=none,fill=gray,semithick,fill=gray,fill opacity=0.5]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=104] ++ ($({0.15},{-\hauteur+0.15})+(\OffsetOmbreA,-\OffsetOmbreA)$)
-							to[out=182,in=-2] ++ ({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})
-							-- cycle ;
-						\draw[draw=none,fill=gray!50!black,semithick,fill=gray!50!black,fill opacity=0.5]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=104] ++ ($({0.15},{-\hauteur+0.15})+(\OffsetOmbreB,-\OffsetOmbreB)$)
-							to[out=182,in=-2] ++ ({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})
-							-- cycle ;
-						\draw[draw=none,fill=black,semithick,fill=black,fill opacity=0.5]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=104] ++ ($({0.15},{-\hauteur+0.15})+(\OffsetOmbreC,-\OffsetOmbreC)$)
-							to[out=182,in=-2] ++ ({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})
-							-- cycle ;
-					}%
-					{}%
-				%postit
-				\coordinate (\PostItRappel-N-W) at (0,0) ;
-				\coordinate (\PostItRappel-N-E) at ($(\PostItRappel-N-W)+({\PostItLarg+\PostItExtraMargin},0)$) ;
-				\coordinate (\PostItRappel-S-E) at ($(\PostItRappel-N-E)+({0.15},{-\hauteur+0.15})$) ;
-				\coordinate (\PostItRappel-S-W) at ($(\PostItRappel-S-E)+({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})$) ;
-				\coordinate (\PostItRappel-N) at ($(\PostItRappel-N-W)!0.5!(\PostItRappel-N-E)$) ;
-				\coordinate (\PostItRappel-E) at ($(\PostItRappel-N-E)!0.5!(\PostItRappel-S-E)+(-0.08,0)$) ;
-				\coordinate (\PostItRappel-S) at ($(\PostItRappel-S-E)!0.5!(\PostItRappel-S-W)+(0,-0.07)$) ;
-				\coordinate (\PostItRappel-W) at ($(\PostItRappel-S-W)!0.5!(\PostItRappel-N-W)$) ;
-				%postit
-				\ifboolKV[postitnote]{Shadow}
-					{%
-						\shadedraw[draw=\PostItCoul!50!black,line width=0.1mm,top color=\PostItCoul!50,bottom color=\PostItCoul!33]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=104] ++ ({0.15},{-\hauteur+0.15})
-							to[out=182,in=-2] ++ ({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})
-							-- cycle ;
-					}%
-					{%
-						\shadedraw[draw=none,top color=\PostItCoul!50,bottom color=\PostItCoul!33]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=104] ++ ({0.15},{-\hauteur+0.15})
-							to[out=182,in=-2] ++ ({-0.15-\PostItLarg-\PostItExtraMargin},{0.13})
-							-- cycle ;
-					}%
-				\IfStrEq{\PostItHauteur}{auto}%
-					{%
-						\IfStrEq{\PostItDeco}{Pushpin}%
-							{%
-								\draw ({0.5*\PostItLarg},{-\MarginVHPostIt-0.4cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-						\IfStrEq{\PostItDeco}{None}%
-							{%
-								\draw ({0.5*\PostItLarg},{-\MarginVHPostIt}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-						\IfStrEq{\PostItDeco}{Paperclip}%
-							{%
-								\draw ({0.5*\PostItLarg},{-\MarginVHPostIt}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-						\IfStrEq{\PostItDeco}{Scotch}%
-							{%
-								\draw ({0.5*\PostItLarg},{-\MarginVHPostIt-0.2cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-					}%
-					{%
-						\IfStrEq{\PostItAlignV}{top}
-							{%
-								\IfStrEq{\PostItDeco}{Pushpin}%
-									{%
-										\draw ({0.5*\PostItLarg},{-\MarginVHPostIt-0.4cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{None}%
-									{%
-										\draw ({0.5*\PostItLarg},{-\MarginVHPostIt}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Paperclip}%
-									{%
-										\draw ({0.5*\PostItLarg},{-\MarginVHPostIt}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Scotch}%
-									{%
-										\draw ({0.5*\PostItLarg},{-\MarginVHPostIt-0.2cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-							}%
-							{}%
-						\IfStrEq{\PostItAlignV}{center}
-							{%
-								\IfStrEq{\PostItDeco}{Pushpin}%
-									{%
-										\draw ({0.5*\PostItLarg},{-0.5*\hauteur-\MarginVHPostIt-0.2cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{None}%
-									{%
-										\draw ({0.5*\PostItLarg},{-0.5*\hauteur}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Paperclip}%
-									{%
-										\draw ({0.5*\PostItLarg},{-0.5*\hauteur}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Scotch}%
-									{%
-										\draw ({0.5*\PostItLarg},{-0.5*\hauteur}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-							}%
-							{}%
-						\IfStrEq{\PostItAlignV}{bottom}
-							{%
-								\draw ({0.5*\PostItLarg},{-\hauteur}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,above=0.6cm,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-					}%
-				%affichage de la punaise
-				\IfStrEq{\PostItDeco}{Pushpin}%
-					{%
-						\begin{scope}[shift={(0.5*\PostItLarg+0.5*\PostItExtraMargin+\PostItDeclClip,-0.49)},scale={0.55},rotate=-40]
-							\begin{scope}[rotate=-35]
-								\draw[blue!10!gray,line cap=round,line width=2pt] (0,0) -- ++(90:0.85);
-								\fill[blue!10!gray,scale=0.5] (90:0.85) ellipse (.65cm and .3cm) ;
-								\fill[blue!10!gray,scale=0.5] (90:0.85) ++(0,0.4) ellipse (.2 and .4);
-								\fill[blue!10!gray,scale=0.5] (90:0.85) ++(0,0.8) ellipse (.4 and .3);
-							\end{scope}
-						\draw[line cap=round,line width=2pt] (0,0) -- ++(90:0.85);
-						\fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ellipse (.65cm and .3cm) ;
-						\fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ++(0,0.4) ellipse (.2 and .4);
-						\fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ++(0,0.8) ellipse (.4 and .3);
-						\end{scope}
-					}%
-					{}%
-				%affichage du trombone
-				\IfStrEq{\PostItDeco}{Paperclip}%
-					{%
-						\begin{scope}[shift={(\PostItLarg+\PostItExtraMargin-1+\PostItDeclClip,0)},rotate=-15,scale={\PostItCoulScaleClip*0.55},line cap=round]
-							\draw[line width=0.81mm,draw=\PostItCoulClip!66] (0,0) --++ (0,0.0) arc (180:0:3.5mm) --++ (0,-1.75) arc (0:-180:3mm) --++ (0,1.25) ;
-							\draw[line width=0.27mm,draw=\PostItCoulClip!33] (0,0) --++ (0,0.0) arc (180:0:3.5mm) --++ (0,-1.75) arc (0:-180:3mm) --++ (0,1.25) ;
-					\end{scope}
-					}%
-					{}%
-				%affichage du scotch
-				\IfStrEq{\PostItDeco}{Scotch}%
-					{%
-						\begin{scope}[shift={(0.5*\PostItLarg+0.5*\PostItExtraMargin+\PostItDeclClip,0)},scale={0.65},rotate=3,line cap=round]
-							\draw[thin,gray!50,fill=lightgray,fill opacity=0.75] ({-0.5*\LargeurStotch},{-0.5*\HauteurScotch}) to ({0.5*\LargeurStotch},{-0.5*\HauteurScotch}) decorate [decoration={zigzag,segment length=2pt,amplitude=0.5pt}] {to ({0.5*\LargeurStotch},{0.5*\HauteurScotch})} to ({-0.5*\LargeurStotch},{0.5*\HauteurScotch}) decorate [decoration={zigzag,segment length=2pt,amplitude=0.5pt}] {to cycle} ;
-						\end{scope}
-					}%
-					{}%
-			\end{tikzpicture}%
-		}{}%
-	\IfStrEq{\PostItRender}{tikzv2}%
-		{%
-			\StrDel{\PostItLarg}{cm}[\PostItLarg]%
-			\StrDel{\PostItExtraMargin}{cm}[\PostItExtraMargin]%
-			\def\LargeurTextePostIt{\fpeval{\PostItLarg-\MarginHGPostIt-\MarginHDPostIt}}%
-			\def\TextePostIt{%
-				\IfStrEq{\PostItTitre}{}{}{\hfill{}{\PostItPoliceTitre\PostItTitre}\hfill\null\\}%
-				#3%
-			}%
-			\IfStrEq{\PostItHauteur}{auto}%
-				{%
-					\IfStrEq{\PostItAlignH}{justify}%
-						{%
-							\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\TextePostIt}}%
-						}%
-						{}%
-					\IfStrEq{\PostItAlignH}{center}%
-						{%
-							\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\centering\TextePostIt}}%
-						}%
-						{}%
-					\IfStrEq{\PostItAlignH}{left}%
-						{%
-							\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\raggedright\TextePostIt}}%
-						}%
-						{}%
-					\IfStrEq{\PostItAlignH}{right}%
-						{%
-							\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\raggedleft\TextePostIt}}%
-						}%
-						{}%
-					%\sbox{\maboitepostit}{\parbox{\LargeurTextePostIt cm}{\TextePostIt}}%
-					\settoboxtotalheight{\HauteurEssaiTexte}{\maboitepostit}%
-					\addtolength\HauteurEssaiTexte{\MarginVHPostIt}\addtolength\HauteurEssaiTexte{\MarginVBPostIt}%
-					\IfStrEq{\PostItDeco}{Scotch}%
-						{\addtolength\HauteurEssaiTexte{0.4cm}}%
-						{}%
-					\IfStrEq{\PostItDeco}{Paperclip}%
-						{\addtolength\HauteurEssaiTexte{0.2cm}}%
-						{}%
-					\IfStrEq{\PostItDeco}{Pushpin}%
-						{\addtolength\HauteurEssaiTexte{0.6cm}}%
-						{}%
-					\IfStrEq{\PostItDeco}{None}%
-						{\addtolength\HauteurEssaiTexte{0.2cm}}%
-						{}%
-					\def\hauteur{\the\HauteurEssaiTexte}%
-				}%
-				{%
-					\def\hauteur{\PostItHauteur}%
-				}%
-			\def\OptionTikzPostIt{current bounding box.south}%
-			\IfStrEq{\PostItAlignPostIt}{center}%
-				{\def\OptionTikzPostIt{current bounding box.center}}{}%
-			\IfStrEq{\PostItAlignPostIt}{top}%
-				{\def\OptionTikzPostIt{current bounding box.north}}{}%
-			\begin{tikzpicture}[baseline=(\OptionTikzPostIt),rotate=\PostItIncline,line join=bevel,line cap=round,remember picture]
-			%tracé
-			%ombre1/2/3
-				\ifboolKV[postitnote]{Shadow}%
-					{%
-						\draw[draw=none,fill=gray,semithick,fill=gray,fill opacity=0.5]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=91] ++ ($({0.05},{-\hauteur-0.05})+(2pt,-2pt)$)
-							--++ ($({-\PostItLarg-\PostItExtraMargin-0.1},{0})+(-4pt,0)$)
-							to[out=89,in=-90] (0,0) ;
-						\draw[draw=none,fill=gray!50!black,semithick,fill=gray!50!black,fill opacity=0.5]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=91] ++ ($({0.05},{-\hauteur-0.05})+(1.25pt,-1.25pt)$)
-							--++ ($({-\PostItLarg-\PostItExtraMargin-0.1},{0})+(-2.5pt,0)$)
-							to[out=89,in=-90] (0,0) ;
-						\draw[draw=none,fill=black,semithick,fill=black,fill opacity=0.5]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=91] ++ ($({0.05},{-\hauteur-0.05})+(0.5pt,-0.5pt)$)
-							--++ ($({-\PostItLarg-\PostItExtraMargin-0.1},{0})+(-1pt,0)$)
-							to[out=89,in=-90] (0,0) ;
-					}%
-					{}%
-				%postit noeuds
-				\coordinate (\PostItRappel-N-W) at (0,0) ;
-				\coordinate (\PostItRappel-N-E) at ($(\PostItRappel-N-W)+({\PostItLarg+\PostItExtraMargin},0)$) ;
-				\coordinate (\PostItRappel-S-E) at ($(\PostItRappel-N-E)+({0.05},{-\hauteur-0.05})$) ;
-				\coordinate (\PostItRappel-S-W) at ($(\PostItRappel-S-E)+({-\PostItLarg-\PostItExtraMargin-0.1},{0})$) ;
-				\coordinate (\PostItRappel-N) at ($(\PostItRappel-N-W)!0.5!(\PostItRappel-N-E)$) ;
-				\coordinate (\PostItRappel-E) at ($(\PostItRappel-N-E)!0.5!(\PostItRappel-S-E)+(-0.025,0)$) ;
-				\coordinate (\PostItRappel-S) at ($(\PostItRappel-S-E)!0.5!(\PostItRappel-S-W)$) ;
-				\coordinate (\PostItRappel-W) at ($(\PostItRappel-S-W)!0.5!(\PostItRappel-N-W)+(0.025,0)$) ;
-				%postit
-				\ifboolKV[postitnote]{Border}
-					{%
-						\shadedraw[draw=\PostItCoul!50!black,line width=0.1mm,top color=\PostItCoul!50,bottom color=\PostItCoul!33]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=91] ++ ({0.05},{-\hauteur-0.05})
-							--++ ({-\PostItLarg-\PostItExtraMargin-0.1},{0})
-							to[out=89,in=-90] (0,0) ;
-					}%
-					{%
-						\shadedraw[draw=none,top color=\PostItCoul!50,bottom color=\PostItCoul!33]
-							(0,0) --++ ({\PostItLarg+\PostItExtraMargin},0)
-							to[out=-90,in=91] ++ ({0.05},{-\hauteur-0.05})
-							--++ ({-\PostItLarg-\PostItExtraMargin-0.1},{0})
-							to[out=89,in=-90] (0,0) ;
-					}%
-				\IfStrEq{\PostItHauteur}{auto}%
-					{%
-						\IfStrEq{\PostItDeco}{Pushpin}%
-							{%
-								\draw ({0.5*\PostItLarg},{-\MarginVHPostIt-0.4cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-						\IfStrEq{\PostItDeco}{None}%
-							{%
-								\draw ({0.5*\PostItLarg},{-\MarginVHPostIt}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-						\IfStrEq{\PostItDeco}{Paperclip}%
-							{%
-								\draw ({0.5*\PostItLarg},{-\MarginVHPostIt}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-						\IfStrEq{\PostItDeco}{Scotch}%
-							{%
-								\draw ({0.5*\PostItLarg},{-\MarginVHPostIt-0.2cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-					}%
-					{%
-						\IfStrEq{\PostItAlignV}{top}
-							{%
-								\IfStrEq{\PostItDeco}{Pushpin}%
-									{%
-										\draw ({0.5*\PostItLarg},{-\MarginVHPostIt-0.4cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{None}%
-									{%
-										\draw ({0.5*\PostItLarg},{-\MarginVHPostIt}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Paperclip}%
-									{%
-										\draw ({0.5*\PostItLarg},{-\MarginVHPostIt}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Scotch}%
-									{%
-										\draw ({0.5*\PostItLarg},{-\MarginVHPostIt-0.2cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,below,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-							}%
-							{}%
-						\IfStrEq{\PostItAlignV}{center}
-							{%
-								\IfStrEq{\PostItDeco}{Pushpin}%
-									{%
-										\draw ({0.5*\PostItLarg},{-0.5*\hauteur-\MarginVHPostIt-0.2cm}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{None}%
-									{%
-										\draw ({0.5*\PostItLarg},{-0.5*\hauteur}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Paperclip}%
-									{%
-										\draw ({0.5*\PostItLarg},{-0.5*\hauteur}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-								\IfStrEq{\PostItDeco}{Scotch}%
-									{%
-										\draw ({0.5*\PostItLarg},{-0.5*\hauteur}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-									}%
-									{}%
-							}%
-							{}%
-						\IfStrEq{\PostItAlignV}{bottom}
-							{%
-								\draw ({0.5*\PostItLarg},{-\hauteur}) node[text width=\LargeurTextePostIt cm,rotate=\PostItIncline,above=0.6cm,align=\PostItAlignH,inner sep=0pt] {\TextePostIt} ;
-							}%
-							{}%
-					}%
-				%affichage de la punaise
-				\IfStrEq{\PostItDeco}{Pushpin}%
-					{%
-						\begin{scope}[shift={(0.5*\PostItLarg+0.5*\PostItExtraMargin+\PostItDeclClip,-0.49)},scale={0.55},rotate=-40]
-							\begin{scope}[rotate=-35]
-								\draw[blue!10!gray,line cap=round,line width=2pt] (0,0) -- ++(90:0.85);
-								\fill[blue!10!gray,scale=0.5] (90:0.85) ellipse (.65cm and .3cm) ;
-								\fill[blue!10!gray,scale=0.5] (90:0.85) ++(0,0.4) ellipse (.2 and .4);
-								\fill[blue!10!gray,scale=0.5] (90:0.85) ++(0,0.8) ellipse (.4 and .3);
-							\end{scope}
-						\draw[line cap=round,line width=2pt] (0,0) -- ++(90:0.85);
-						\fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ellipse (.65cm and .3cm) ;
-						\fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ++(0,0.4) ellipse (.2 and .4);
-						\fill[ball color=\PostItCoulClip!66,scale=0.5] (90:0.85) ++(0,0.8) ellipse (.4 and .3);
-						\end{scope}
-					}%
-					{}%
-				%affichage du trombone
-				\IfStrEq{\PostItDeco}{Paperclip}%
-					{%
-						\begin{scope}[shift={(\PostItLarg+\PostItExtraMargin-1+\PostItDeclClip,0)},rotate=-15,scale={\PostItCoulScaleClip*0.55},line cap=round]
-							\draw[line width=0.81mm,draw=\PostItCoulClip!66] (0,0) --++ (0,0.0) arc (180:0:3.5mm) --++ (0,-1.75) arc (0:-180:3mm) --++ (0,1.25) ;
-							\draw[line width=0.27mm,draw=\PostItCoulClip!33] (0,0) --++ (0,0.0) arc (180:0:3.5mm) --++ (0,-1.75) arc (0:-180:3mm) --++ (0,1.25) ;
-					\end{scope}
-					}%
-					{}%
-				%affichage du scotch
-				\IfStrEq{\PostItDeco}{Scotch}%
-					{%
-						\begin{scope}[shift={(0.5*\PostItLarg+0.5*\PostItExtraMargin+\PostItDeclClip,0)},scale={0.65},rotate=3,line cap=round]
-							\draw[thin,gray!50,fill=lightgray,fill opacity=0.75] ({-0.5*\LargeurStotch},{-0.5*\HauteurScotch}) to ({0.5*\LargeurStotch},{-0.5*\HauteurScotch}) decorate [decoration={zigzag,segment length=2pt,amplitude=0.5pt}] {to ({0.5*\LargeurStotch},{0.5*\HauteurScotch})} to ({-0.5*\LargeurStotch},{0.5*\HauteurScotch}) decorate [decoration={zigzag,segment length=2pt,amplitude=0.5pt}] {to cycle} ;
-						\end{scope}
-					}%
-					{}%
-			\end{tikzpicture}%
-		}{}%
+  \restoreKV[postitnote]%
+  \setKV[postitnote]{#1}%
+  \def\PostItDirW{W}%
+  \ifboolKV[postitnote]{Shadow}{\PostItShadowOntrue}{\PostItShadowOnfalse}%
+  \ifboolKV[postitnote]{Border}{\PostItBorderOntrue}{\PostItBorderOnfalse}%
+  \ifboolKV[postitnote]{Corner}{\PostItCornerOntrue}{\PostItCornerOnfalse}%
+  \IfStrEq{\PostItRender}{tcbox}%
+    {\pitcboxrender{#2}{#3}}%
+    {}%
+  \def\PostItIsTikzFamily{false}\def\PostItShapeStyle{}%
+  \IfStrEq{\PostItRender}{tikz}{\def\PostItIsTikzFamily{true}\def\PostItShapeStyle{fold}}{}%
+  \IfStrEq{\PostItRender}{tikzv2}{\def\PostItIsTikzFamily{true}\def\PostItShapeStyle{straight}}{}%
+  \IfStrEq{\PostItIsTikzFamily}{true}{\pitikzrender{#3}}{}%
 }%
 {}%
+
+%======MINIPOSTIT INLINE
+%------Style principal minitcbox
+\tcbset{minipostitbase/.style={%
+  enhanced,size=small,boxrule=0.1mm,sharp corners,boxsep=0.5mm,%
+  left=0mm,right=2.5mm,top=0mm,bottom=0mm,nobeforeafter,box align=base
+  }%
+}
+%------Style d'ombre du mini post-it
+\tcbset{ombreminipostit/.style={%
+  fuzzy shadow={0.5mm}{-0.5mm}{0mm}{0.1mm}{black!50!white}
+  }%
+}
+\NewTCBox{\MiniPostIt}{ s O{yellow} }{%
+  minipostitbase,colback=#2!50,colframe=#2!50!black,rounded corners=southeast,arc is angular,arc=2mm,%
+  before upper=\vphantom{pL},
+  underlay={
+    \path[line width=0.1mm,fill=#2!80!black] ([yshift=2mm]interior.south east)--++(-0.25,-0.1)--++(0.05,-0.1);
+    \path[line width=0.1mm,draw=#2!50!black,shorten <=-0.05mm,shorten >=-0.05mm,color=#2!50!black] ([yshift=2mm]interior.south east)--++(-0.25,-0.1)--++(0.05,-0.1);
+  },%
+  IfBooleanTF={#1}{ombreminipostit}{}
+}
 
 \endinput
