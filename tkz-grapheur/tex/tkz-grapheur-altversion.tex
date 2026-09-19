@@ -2294,6 +2294,29 @@
       {\tkzGrphMarkPts [#2]<#3>{(\pflgslnx,\pflgslny)}}%
   }%
 }
+\NewCommandCopy\tkzGrphMarquerPtsReels\tkzGrphMarkPtsLagrange
+
+% \NewDocumentCommand\tkzGrphMarquerPtsReels{ s O{} D<>{\normalfont\normalsize} m }{%
+  % % #1=étoile(sans label)  #2=clés (Style,Couleur...)  #3=police  #4=liste "(x1,y1),(x2,y2),..."
+  % \xdef\pflptrlist{}%
+  % \foreach \Point in {#4} {%
+    % \StrLen{\Point}[\pflptrlen]%
+    % \edef\pflptrleninner{\the\numexpr\pflptrlen-1\relax}%
+    % \StrMid{\Point}{2}{\pflptrleninner}[\pflptrinner]%          % retire juste 1ère et dernière parenthèse
+    % \StrCut{\pflptrinner}{,}{\pflptrx}{\pflptry}%
+    % \xdef\pflptrnx{\xintfloateval{(\pflptrx-\pflstxmin)/\pflstampx*\pflstlargeur}}%
+    % \xdef\pflptrny{\xintfloateval{(\pflptry-\pflstymin)/\pflstampy*\pflsthauteur}}%
+    % \ifx\pflptrlist\empty
+      % \xdef\pflptrlist{(\pflptrnx,\pflptrny)}%
+    % \else
+      % \xdef\pflptrlist{\pflptrlist,(\pflptrnx,\pflptrny)}%
+    % \fi
+  % }%
+  % \IfBooleanTF{#1}%
+    % {\tkzGrphMarquerPts*[#2]<#3>{\pflptrlist}}%
+    % {\tkzGrphMarquerPts [#2]<#3>{\pflptrlist}}%
+% }
+% \NewCommandCopy\tkzgmarkptsreals\tkzGrphMarquerPtsReels
 
 %====SPLINE HOBBY
 \tikzset{
@@ -2390,5 +2413,150 @@
 }
 \NewCommandCopy\tkzGrphDefinirCourbeInterpol\tkzGrphDefineInterpolCurve
 \NewCommandCopy\tkzgdefinterpol\tkzGrphDefineInterpolCurve
+
+%====PLACER UN LABEL SUR UN PATH (version normalisée tkzGrph)
+\defKV[tkzGrphLabelPathKV]{%
+  Couleur=\def\pflstlabelcol{#1},color=\def\pflstlabelcol{#1},%
+  Police=\def\pflstlabelfont{#1},font=\def\pflstlabelfont{#1},%
+  Position=\def\pflstlabelpos{#1},pos=\def\pflstlabelpos{#1},%
+  Decal=\def\pflstlabeldecal{#1},shift=\def\pflstlabeldecal{#1},%
+  DecalX=\def\pflstlabeldecalx{#1},shiftx=\def\pflstlabeldecalx{#1},%
+  DecalY=\def\pflstlabeldecaly{#1},shifty=\def\pflstlabeldecaly{#1},%
+  t=\def\pflstlabelt{#1}%
+}
+\setKVdefault[tkzGrphLabelPathKV]{%
+  Couleur=black,color=black,%
+  Police={\normalfont\normalsize},font={\normalfont\normalsize},%
+  Position=above,pos=above,%
+  DecalX=0pt,shiftx=0pt,%
+  DecalY=0pt,shifty=0pt,%
+  t=0.5%
+}
+
+\NewDocumentCommand\tkzGrphLabelPath{ O{} D<>{} m m }{%
+  % #1=clés  #2=nom path  #3=label
+  \restoreKV[tkzGrphLabelPathKV]%
+  \setKV[tkzGrphLabelPathKV]{#1}%
+  \path ([xshift=\pflstlabeldecalx,yshift=\pflstlabeldecaly]spath cs:#3 \pflstlabelt)%
+    node[\pflstlabelpos,font=\pflstlabelfont,text=\pflstlabelcol,inner sep=2pt,#2] {#4} ;%
+}
+\NewCommandCopy\tkzGrphEtiquettePath\tkzGrphLabelPath
+
+%====PLACER UN POINT SUR UN PATH à une position t∈[0,1] (version normalisée tkzGrph)
+\defKV[tkzGrphMarkOnPathKV]{%
+  Couleur=\def\pflstmopcol{#1},color=\def\pflstmopcol{#1},%
+  Style=\def\pflstmopstyle{#1},style=\def\pflstmopstyle{#1},%
+  Nom=\def\pflstmopnom{#1},name=\def\pflstmopnom{#1},%
+  t=\def\pflstmopt{#1}%
+}
+\setKVdefault[tkzGrphMarkOnPathKV]{%
+  Couleur=black,color=black,%
+  Style=o,style=o,%
+  Nom=grph-mop,name=grph-mop,%
+  t=0.5,%
+  Aff=true,show=true%
+}
+
+\NewDocumentCommand\tkzGrphMarkOnPath{ O{} m }{%
+  % #1=clés  #2=nom path
+  \restoreKV[tkzGrphMarkOnPathKV]%
+  \setKV[tkzGrphMarkOnPathKV]{#1}%
+  \tkzgrphSetKVboolTrue[tkzGrphMarkOnPathKV]{show}{Aff}%
+  % récupérer le point à t sur le path
+  \path (spath cs:#2 \pflstmopt) ;%
+  \pgfgetlastxy{\tmpmoprx}{\tmpmoprry}%
+  \xdef\tmpmopx{\xintfloateval{\ConvertirPtToCm{\tmpmoprx}}}%
+  \xdef\tmpmopy{\xintfloateval{\ConvertirPtToCm{\tmpmoprry}}}%
+  % créer le nœud
+  \coordinate (\pflstmopnom) at (\tmpmopx,\tmpmopy) ;%
+  % afficher le point
+  \ifboolKV[tkzGrphMarkOnPathKV]{Aff}%
+  {%
+    \begin{pgfinterruptboundingbox}%
+      \begin{scope}%
+        \clip (0,0) rectangle (\pflstlargeur,\pflsthauteur) ;%
+        \tkzGrphMarkPts*%
+          [Style=\pflstmopstyle,Couleur=\pflstmopcol]%
+          {(\pflstmopnom)}%
+      \end{scope}%
+    \end{pgfinterruptboundingbox}%
+  }{}%
+}
+\NewCommandCopy\tkzGrphMarquerSurPath\tkzGrphMarkOnPath
+
+%====INTERVALLE SUR LES AXES (version normalisée tkzGrph)
+% styles prédéfinis pour l'épaisseur
+\tikzset{%
+  pflintervalstyle/.style={line width=2.4pt,line cap=round},%
+  pflintervalstylefin/.style={line width=1.2pt,line cap=round},%
+  pflintervalstyleepais/.style={line width=4.8pt,line cap=round}%
+}
+
+\defKV[tkzGrphIntervalKV]{%
+  Couleur=\def\pflstintcol{#1},color=\def\pflstintcol{#1},%
+  Style=\def\pflstintstyle{#1},style=\def\pflstintstyle{#1},%
+  Epaisseur=\def\pflstintepaiss{#1},thick=\def\pflstintepaiss{#1}%
+}
+\setKVdefault[tkzGrphIntervalKV]{%
+  Couleur=black,color=black,%
+  Style=segment,style=segment,%
+  Epaisseur=standard,thick=standard%
+}
+
+\NewDocumentCommand\tkzGrphIntervalX{ O{} m m }{%
+  % #1=clés  #2=borne a (réelle)  #3=borne b (réelle)
+  \restoreKV[tkzGrphIntervalKV]%
+  \setKV[tkzGrphIntervalKV]{#1}%
+  % normalisation des bornes
+  \xdef\tmsinxa{\xintfloateval{(#2-\pflstxmin)/\pflstampx*\pflstlargeur}}%
+  \xdef\tmsinxb{\xintfloateval{(#3-\pflstxmin)/\pflstampx*\pflstlargeur}}%
+  % style d'épaisseur
+  \IfSubStr{,fin,thin,}{,\pflstintepaiss,}%
+  {\tikzset{pflintervaltmp/.style={pflintervalstylefin,\pflstintcol}}}{}%
+  \IfSubStr{,standard,normal,}{,\pflstintepaiss,}%
+  {\tikzset{pflintervaltmp/.style={pflintervalstyle,\pflstintcol}}}{}%
+  \IfSubStr{,epais,thick,}{,\pflstintepaiss,}%
+  {\tikzset{pflintervaltmp/.style={pflintervalstyleepais,\pflstintcol}}}{}%
+  % tracé selon style
+  \IfSubStr{,segment,trait,}{,\pflstintstyle,}%
+  {%
+    \draw[pflintervaltmp]
+    (\tmsinxa,\pflstoy) -- (\tmsinxb,\pflstoy) ;%
+  }{}%
+  \IfSubStr{,arrow,fleche,}{,\pflstintstyle,}%
+  {%
+    \draw[pflintervaltmp,<->,>=latex]
+    (\tmsinxa,\pflstoy) -- (\tmsinxb,\pflstoy) ;%
+  }{}%
+}
+\NewCommandCopy\tkzGrphIntervalleSurOx\tkzGrphIntervalX
+
+\NewDocumentCommand\tkzGrphIntervalY{ O{} m m }{%
+  % #1=clés  #2=borne a (réelle)  #3=borne b (réelle)
+  \restoreKV[tkzGrphIntervalKV]%
+  \setKV[tkzGrphIntervalKV]{#1}%
+  % normalisation des bornes
+  \xdef\tmsinya{\xintfloateval{(#2-\pflstymin)/\pflstampy*\pflsthauteur}}%
+  \xdef\tmsinyb{\xintfloateval{(#3-\pflstymin)/\pflstampy*\pflsthauteur}}%
+  % style d'épaisseur
+  \IfSubStr{,fin,thin,}{,\pflstintepaiss,}%
+  {\tikzset{pflintervaltmp/.style={pflintervalstylefin,\pflstintcol}}}{}%
+  \IfSubStr{,standard,normal,}{,\pflstintepaiss,}%
+  {\tikzset{pflintervaltmp/.style={pflintervalstyle,\pflstintcol}}}{}%
+  \IfSubStr{,epais,thick,}{,\pflstintepaiss,}%
+  {\tikzset{pflintervaltmp/.style={pflintervalstyleepais,\pflstintcol}}}{}%
+  % tracé selon style
+  \IfSubStr{,segment,trait,}{,\pflstintstyle,}%
+  {%
+    \draw[pflintervaltmp]
+    (\pflstox,\tmsinya) -- (\pflstox,\tmsinyb) ;%
+  }{}%
+  \IfSubStr{,arrow,fleche,}{,\pflstintstyle,}%
+  {%
+    \draw[pflintervaltmp,<->,>=latex]
+    (\pflstox,\tmsinya) -- (\pflstox,\tmsinyb) ;%
+  }{}%
+}
+\NewCommandCopy\tkzGrphIntervalleSurOy\tkzGrphIntervalY
 
 \endinput

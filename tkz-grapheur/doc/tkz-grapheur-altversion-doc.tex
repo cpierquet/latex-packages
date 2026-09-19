@@ -746,4 +746,218 @@ Calcule et trace la droite de régression par la méthode des moindres carrés. 
 Droite : $y = \ArrondirNum[1]{\pflstrega} x \ArrondirNum[0]<exponent-mode=fixed>{\pflstregb}$
 \end{tcblisting}
 
+\pagebreak
+
+%=============================================================
+\section{Compléments sur les axes}
+%=============================================================
+
+\subsection{Valeurs manuelles sur les axes}
+
+Ces commandes permettent d'ajouter manuellement des valeurs ou des labels qualitatifs sur les axes, en complément de \MontreCode{\textbackslash tkzGrphDrawGridAxis}.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,
+  colframe=lightgray,colback=lightgray!5,listing only}
+% valeurs numériques formatées
+\tkzGrphAddValX[clés]{liste valeurs X réelles}{liste labels}
+\tkzGrphAddValY[clés]{liste valeurs Y réelles}{liste labels}
+% alias FR :
+\tkzGrphAjouterValeursX / \tkzGrphAjouterValeursY
+
+% labels qualitatifs (avec rotation possible)
+\tkzGrphAddLabelsX[clés]{liste valeurs X réelles}{liste labels}
+\tkzGrphAddLabelsY[clés]{liste valeurs Y réelles}{liste labels}
+% alias FR :
+\tkzGrphAjouterLabelsX / \tkzGrphAjouterLabelsY
+\end{tcblisting}
+
+Les \MontreCode{[clés]} disponibles sont :
+
+\begin{itemize}
+  \item \MontreCode{Traits} / \MontreCode{thicks} : booléen, affiche les tirets de graduation ;
+  \item \MontreCode{Rotation} / \MontreCode{angle} : angle de rotation des labels (\MontreCode{0} par défaut) ;
+  \item \MontreCode{Police} / \MontreCode{font} : police des labels.
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,
+  colframe=lightgray,colback=lightgray!5}
+\begin{tkzGrph}<Xmin=0,Xmax=6,Ymin=0,Ymax=4,
+               Largeur=10cm,Hauteur=6cm>
+  \tkzGrphDrawGridAxis[Grads=false,enlarge=2.5mm]{}{}
+  % valeurs numériques personnalisées
+  \tkzGrphAddValX[Traits]{1,2,3,4,5}{\num{10},\num{20},\num{30},\num{40},\num{50}}
+  \tkzGrphAddValY[Traits]{1,2,3}{$Q_1$,$M$,$Q_3$}
+  % labels qualitatifs avec rotation
+  \tkzGrphAddLabelsX[Rotation=45]{1,2,3,4,5}%
+    {Lundi,Mardi,Mercredi,Jeudi,Vendredi}
+\end{tkzGrph}
+\end{tcblisting}
+
+\subsection{Placer un texte : \texttt{\textbackslash tkzGrphPlaceText}}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,
+  colframe=lightgray,colback=lightgray!5,listing only}
+% coordonnées réelles
+\tkzGrphPlaceText[clés]{({x},{y})}{texte}
+% nœud TikZ existant
+\tkzGrphPlaceText[clés]{(nom-noeud)}{texte}
+% alias FR :
+\tkzGrphPlaceTexte[clés]{...}{texte}
+\end{tcblisting}
+
+Les coordonnées réelles doivent être protégées avec \MontreCode{(\{x\},\{y\})} pour éviter les conflits de parsing. Les nœuds existants (\MontreCode{grph-axox-ee}, \MontreCode{grph-axoy-nn}...) sont utilisables directement.
+
+\smallskip
+
+Les \MontreCode{[clés]} disponibles sont : \MontreCode{Couleur}/\MontreCode{color}, \MontreCode{Police}/\MontreCode{font}, \MontreCode{Position}/\MontreCode{anchor}, \MontreCode{DecalX}/\MontreCode{shiftx}, \MontreCode{DecalY}/\MontreCode{shifty}.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,
+  colframe=lightgray,colback=lightgray!5}
+\begin{tkzGrph}<Xmin=1990,Xmax=2020,Ymin=0,Ymax=3000000,
+               Largeur=10cm,Hauteur=5cm,Origx=1990>
+  \tkzGrphDrawGridAxis[enlarge=2.5mm,font=\small,Format=annee/num]%
+    {1990,1995,2000,2005,2010,2015,2020}%
+    {0,500000,1000000,1500000,2000000,2500000,3000000}
+  \tkzGrphDefineCurve[trace,name=cf,color=blue]<f>{50000*(x-1990)+200000}
+  % label sur un nœud existant
+  \tkzGrphPlaceTexte[Position=right]{(grph-axox-ee)}{Année}
+  \tkzGrphPlaceTexte[Position=above]{(grph-axoy-nn)}{C.A.}
+  % label en coordonnées réelles
+  \tkzGrphPlaceTexte[Position=above right,color=blue]%
+    {({2005},{1850000})}{$\mathcal{C}_f$}
+\end{tkzGrph}
+\end{tcblisting}
+
+\pagebreak
+
+%=============================================================
+\section{Annotations graphiques}
+%=============================================================
+
+\subsection{Label sur un path : \texttt{\textbackslash tkzGrphLabelPath}}
+
+Permet de placer un label directement sur un \MontreCode{name path} à une position donnée en \textbf{longueur d'arc} ($t \in [0,1]$).
+
+\smallskip
+
+{\small\faBomb} La position \MontreCode{t} est mesurée en longueur d'arc le long du path — \MontreCode{t=0.5} correspond au milieu \textit{géométrique} du tracé, pas au milieu des abscisses.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,
+  colframe=lightgray,colback=lightgray!5,listing only}
+\tkzGrphLabelPath[clés]<options tikz>{nom path}{label}
+% alias FR :
+\tkzGrphEtiquettePath[clés]<options tikz>{nom path}{label}
+\end{tcblisting}
+
+Les \MontreCode{[clés]} disponibles sont :
+
+\begin{itemize}
+  \item \MontreCode{t} : position en longueur d'arc (\MontreCode{0.5} par défaut) ;
+  \item \MontreCode{Couleur} / \MontreCode{color} : couleur du label (\MontreCode{black} par défaut) ;
+  \item \MontreCode{Police} / \MontreCode{font} : police du label ;
+  \item \MontreCode{Position} / \MontreCode{pos} : positionnement du label (\MontreCode{above} par défaut) ;
+  \item \MontreCode{DecalX} / \MontreCode{shiftx} et \MontreCode{DecalY} / \MontreCode{shifty} : décalages en \MontreCode{pt}.
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,
+  colframe=lightgray,colback=lightgray!5}
+\begin{tkzGrph}<Xmin=-5,Xmax=5,Ymin=-2,Ymax=5,
+               Largeur=10cm,Hauteur=6cm>
+  \tkzGrphDrawGridAxis[enlarge=2.5mm,font=\small]%
+    {-5,-4,...,5}{-2,-1,...,5}
+  \tkzGrphDefineCurve[trace,name=cf,color=red]<f>{0.3*x^2+0.5}
+  \tkzGrphDefineSpline[trace,alt,name=sp,color=blue]%
+    {-4/3/1 § -1/4/0 § 2/-1/0 § 4/2/1}
+  \tkzGrphDefineInterpoCurve[trace,name=interpo,color=teal,tension=0.8]%
+    {-4/-1 § -2/3 § 0/1 § 3/4}
+  % labels au milieu (t=0.5 par défaut)
+  \tkzGrphLabelPath[color=red,pos=above]{cf}{$\mathcal{C}_f$}
+  % à t=0.25
+  \tkzGrphLabelPath[color=blue,pos=above,t=0.25]{sp}{$\mathcal{S}$}
+  % à t=0.75
+  \tkzGrphLabelPath[color=teal,pos=below,t=0.75]{interpo}{$\mathcal{I}$}
+\end{tkzGrph}
+\end{tcblisting}
+
+\subsection{Point sur un path : \texttt{\textbackslash tkzGrphMarkOnPath}}
+
+Permet de placer et marquer un point sur un \MontreCode{name path}, à une position en longueur d'arc ou à une abscisse réelle donnée.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,
+  colframe=lightgray,colback=lightgray!5,listing only}
+\tkzGrphMarkOnPath[clés]{nom path}
+% alias FR :
+\tkzGrphMarquerSurPath[clés]{nom path}
+\end{tcblisting}
+
+Les \MontreCode{[clés]} disponibles sont :
+
+\begin{itemize}
+  \item \MontreCode{t} : position en longueur d'arc (\MontreCode{0.5} par défaut) — si \MontreCode{x} est renseigné, \MontreCode{t} est ignoré ;
+  \item \MontreCode{x} : abscisse réelle — le point est l'intersection avec la droite verticale $x = x_{\text{réel}}$ ;
+  \item \MontreCode{Couleur} / \MontreCode{color} : couleur du point ;
+  \item \MontreCode{Style} / \MontreCode{style} : style du point (\MontreCode{o}, \MontreCode{x}, \MontreCode{+}, \MontreCode{ggb}...) ;
+  \item \MontreCode{Nom} / \MontreCode{name} : nom du nœud créé (\MontreCode{grph-mop} par défaut) ;
+  \item \MontreCode{Aff} / \MontreCode{show} : booléen, \MontreCode{true} par défaut.
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,
+  colframe=lightgray,colback=lightgray!5}
+\begin{tkzGrph}<Xmin=-5,Xmax=5,Ymin=-2,Ymax=5,
+               Largeur=10cm,Hauteur=6cm>
+  \tkzGrphDrawGridAxis[enlarge=2.5mm,font=\small]%
+    {-5,-4,...,5}{-2,-1,...,5}
+  \tkzGrphDefineCurve[trace,name=cf,color=red]<f>{0.3*x^2+0.5}
+  \tkzGrphDefineSpline[trace,alt,name=sp,color=blue]%
+    {-4/3/1 § -1/4/0 § 2/-1/0 § 4/2/1}
+  % mode t : milieu du path
+  \tkzGrphMarkOnPath[t=0.5,color=red,style=+,name=ptA]{cf}
+  % mode x : abscisse réelle
+  \tkzGrphMarkOnPath[x=2,color=blue,style=ggb,name=ptB]{sp}
+  % récupérer les coordonnées réelles
+  \tkzGrphGetXY{(ptA)}[\xa][\ya]
+  \tkzGrphGetXY{(ptB)}[\xb][\yb]
+  \node[above right,font=\small,red] at (ptA)
+    {$(\ArrondirNum[1]{\xa}\,;\,\ArrondirNum[1]{\ya})$} ;
+  \node[above right,font=\small,blue] at (ptB)
+    {$(\ArrondirNum[1]{\xb}\,;\,\ArrondirNum[1]{\yb})$} ;
+\end{tkzGrph}
+\end{tcblisting}
+
+\subsection{Intervalle sur un axe : \texttt{\textbackslash tkzGrphIntervalX/Y}}
+
+Permet de mettre en évidence un intervalle sur l'axe $Ox$ ou $Oy$.
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,
+  colframe=lightgray,colback=lightgray!5,listing only}
+\tkzGrphIntervalX[clés]{borne a}{borne b}
+\tkzGrphIntervalY[clés]{borne a}{borne b}
+% alias FR :
+\tkzGrphIntervalleSurOx / \tkzGrphIntervalleSurOy
+\end{tcblisting}
+
+Les bornes sont des \textbf{valeurs réelles}. Les \MontreCode{[clés]} disponibles sont :
+
+\begin{itemize}
+  \item \MontreCode{Couleur} / \MontreCode{color} : couleur (\MontreCode{black} par défaut) ;
+  \item \MontreCode{Style} / \MontreCode{style} : \MontreCode{segment} (défaut) ou \MontreCode{arrow}/\MontreCode{fleche} ;
+  \item \MontreCode{Epaisseur} / \MontreCode{thick} : \MontreCode{fin}/\MontreCode{thin}, \MontreCode{standard}/\MontreCode{normal} (défaut), \MontreCode{epais}/\MontreCode{thick}.
+\end{itemize}
+
+\begin{tcblisting}{listing engine=minted,minted language=latex,
+  colframe=lightgray,colback=lightgray!5}
+\begin{tkzGrph}<Xmin=-5,Xmax=5,Ymin=-2,Ymax=5,
+               Largeur=10cm,Hauteur=6cm>
+  \tkzGrphDrawGridAxis[enlarge=2.5mm,font=\small]%
+    {-5,-4,...,5}{-2,-1,...,5}
+  \tkzGrphDefineCurve[trace,name=cf,color=red]<f>{0.3*x^2+0.5}
+  % intervalle sur Ox — style segment épais
+  \tkzGrphIntervalX[color=blue,thick=epais]{-2}{3}
+  % intervalle sur Ox — style flèche
+  \tkzGrphIntervalX[color=orange,style=arrow]{1}{4}
+  % intervalle sur Oy — fin
+  \tkzGrphIntervalY[color=teal,thick=fin]{1}{4}
+\end{tkzGrph}
+\end{tcblisting}
+
 \end{document}
