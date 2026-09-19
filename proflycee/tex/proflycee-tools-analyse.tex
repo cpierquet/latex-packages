@@ -387,6 +387,74 @@
 \NewCommandCopy\pflminisignplottkztab\MiniSchemaSignesTkzTab
 \NewCommandCopy\tkzTabMiniSignes\MiniSchemaSignesTkzTab
 
+\usetikzlibrary{backgrounds}
+\tikzset{tkztabvi/.style={inner sep=1pt,above,font=\tiny\sffamily}}
+\tikzset{tkztabcom/.style={inner sep=0pt,right,font=\footnotesize}}
+
+\NewDocumentCommand\tkzTabMarqueVI{ O{red} m }{%
+  \foreach \tmpval in {#2} {%
+    \draw (N\tmpval1) node[tkztabvi,#1] {D};
+  }
+}
+\makeatletter
+\NewDocumentCommand\tkzTabColoreCases{ O{red!25} m }{%
+  % #1 = couleur (opt.), #2 = liste "ligne/colonne,ligne/colonne,..."
+  \ifTAB@tbs@help
+    \pgfmathtruncatemacro{\tkz@realmaxcl}{\tkz@maxcl-1}%
+  \else
+    \edef\tkz@realmaxcl{\tkz@maxcl}%
+  \fi
+  \begin{scope}[on background layer]
+    \foreach \tmplig/\tmpcol in {#2}{%
+      \pgfmathtruncatemacro{\tkzColHaut}{\tmpcol+1}%
+      \pgfmathtruncatemacro{\tkzLigHaut}{\tmplig-1}%
+      \ifnum\tmpcol=1
+        \edef\tkzNoeudBas{T1\tmplig}%
+      \else
+        \edef\tkzNoeudBas{N\tmpcol\tmplig}%
+      \fi
+      \ifnum\tmpcol=\tkz@realmaxcl
+        \edef\tkzNoeudHaut{T2\tkzLigHaut}%
+      \else
+        \edef\tkzNoeudHaut{N\tkzColHaut\tkzLigHaut}%
+      \fi
+      \draw[line width=\cmdTAB@tbs@lw,fill=#1] (\tkzNoeudBas) rectangle (\tkzNoeudHaut);%
+    }%
+  \end{scope}
+}
+\newcommand\tkztab@back@line[2]{
+  \begin{scope}[on background layer]
+    \draw[line width=\cmdTAB@tbs@lw,fill=#1] (T0#2) rectangle (T2\the\numexpr#2+1\relax);
+  \end{scope}
+}
+
+\ExplSyntaxOn
+\NewDocumentCommand\tkzTabColoreLigne{O{gray!30}m}{
+  \clist_map_inline:nn{#2}{\tkztab@back@line{#1}{##1}}
+}
+\ExplSyntaxOff
+
+\NewDocumentCommand\tkzTabMiniSchemaSignes{ o m O{0.85} O{0.5} }{%
+  %#1 = codeaidetikz
+  %#2 = numligne
+  %#3 = échelle
+  %#4 = décalage
+  \coordinate (ZZZ) at ($(T2#2)!.5!(T2\the\numexpr#2+1\relax)$) ;
+  \node[anchor=west,inner sep=0pt] at ($(ZZZ.east)+(#4,0)$) {%
+    \tikz[baseline,scale=#3,every node/.style={scale=#3}]{%
+      \pic[]{code={\MiniSchemaSignes[#1]}};%
+    }%
+  };
+}
+\newcommand\@tkztabdeco@node@middle[1]{
+    \coordinate (M) at ($(T2#1)!.5!(T2\the\numexpr#1+1\relax)$)
+}
+\NewDocumentCommand\tkzTabComLigne{ O{blue} m m O{0.5} }{%
+    \@tkztabdeco@node@middle{#2};
+    \path (M.east) + (#4,0) node[tkztabcom,#1] {#3} ;
+}
+\makeatother
+
 %%------TVISOLUTION
 \defKV[dichoto]{%
   NomFct=\def\DHTnomfct{#1},fct name=\def\DHTnomfct{#1},%
