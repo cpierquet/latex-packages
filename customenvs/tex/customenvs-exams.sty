@@ -2,16 +2,17 @@
 % licence.........: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{customenvs-exams}[2026/09/09 0.1.6 customenvs for exam documents]
+\ProvidesPackage{customenvs-exams}[2026/09/28 0.1.7 customenvs for exam documents]
 
 %====HISTORY
-% v 0.1.1	Bugfix with QCM (swap key with 1 column)
-% v 0.1.5	Enhancements with BlocExo (bulle 'bordures')
-% v 0.1.4	Enhancements with pictostars
-% v 0.1.3	Global color for BlocExo
-% v 0.1.2	Enhancements with breakable and BlocExo :-)
-% v 0.1.1	Bugfix + BlocExo
-% v 0.1.0	Initial version subpackage (exam) of customenvs
+%v0.1.7  Enhancements with BlocExo (GenMacro)
+%v0.1.6  Bugfix with QCM (swap key with 1 column)
+%v0.1.5  Enhancements with BlocExo (bulle 'bordures')
+%v0.1.4  Enhancements with pictostars
+%v0.1.3  Global color for BlocExo
+%v0.1.2  Enhancements with breakable and BlocExo :-)
+%v0.1.1  Bugfix + BlocExo
+%v0.1.0  Initial version subpackage (exam) of customenvs
 
 %====OPTION
 \newif\if@pictos\@pictosfalse%
@@ -31,7 +32,7 @@
 \RequirePackage{listofitems}
 \RequirePackage{randomlist}
 \if@pictos
-	\RequirePackage{customenvs-tikzpictos}
+  \RequirePackage{customenvs-tikzpictos}
 \fi
 \tcbuselibrary{skins,breakable}
 
@@ -41,23 +42,23 @@
 \newsavebox{\my@cetmp@height@box}
 
 \NewDocumentCommand\cegetheigheststring{ s O{\cetmpheigheststring} m }{%
-	\ifdeflength{#2}{}{\newlength#2}%
-	\setlength#2{0pt}%
-	\IfBooleanTF{#1}%
-		{%
-			\xintFor* ##1 in {\xintCSVtoList{#3}}\do{%
-				\savebox{\my@cetmp@height@box}{##1}%
-				\settoheight{\cetmpheigheststringelt}{\usebox{\my@cetmp@height@box}}%
-				\pgfmathsetlength{\global#2}{max(#2,\cetmpheigheststringelt)}%
-			}%
-		}%
-		{%
-			\xintFor* ##1 in {\xintCSVtoList{#3}}\do{%
-				\savebox{\my@cetmp@height@box}{##1}%
-				\settototalheight{\cetmpheigheststringelt}{\usebox{\my@cetmp@height@box}}%
-				\pgfmathsetlength{\global#2}{max(#2,\cetmpheigheststringelt)}%
-			}%
-		}%
+  \ifdeflength{#2}{}{\newlength#2}%
+  \setlength#2{0pt}%
+  \IfBooleanTF{#1}%
+    {%
+      \xintFor* ##1 in {\xintCSVtoList{#3}}\do{%
+        \savebox{\my@cetmp@height@box}{##1}%
+        \settoheight{\cetmpheigheststringelt}{\usebox{\my@cetmp@height@box}}%
+        \pgfmathsetlength{\global#2}{max(#2,\cetmpheigheststringelt)}%
+      }%
+    }%
+    {%
+      \xintFor* ##1 in {\xintCSVtoList{#3}}\do{%
+        \savebox{\my@cetmp@height@box}{##1}%
+        \settototalheight{\cetmpheigheststringelt}{\usebox{\my@cetmp@height@box}}%
+        \pgfmathsetlength{\global#2}{max(#2,\cetmpheigheststringelt)}%
+      }%
+    }%
 }
 
 %====EXAM QCM
@@ -65,25 +66,25 @@
 \def\ReponsesExamQCMbox{\raisebox{-0.2ex}{\faSquare[regular]}} %avec fontawesome567, à charger...
 
 \defKV[reponsesexamqcm]{%
-	NbCols=\def\RepExamQCMNbCol{#1},%
-	PoliceLabels=\def\RepExamQCMFonte{#1},%
-	EspacesCL=\def\RepExamQCMOffset{#1},%
-	Labels=\def\RepExamQCMTypeLabel{#1},%
-	EspaceLabels=\def\RepExamQCMSpace{#1},%
-	Largeur=\def\RepExamQCMLarg{#1}
+  NbCols=\def\RepExamQCMNbCol{#1},%
+  PoliceLabels=\def\RepExamQCMFonte{#1},%
+  EspacesCL=\def\RepExamQCMOffset{#1},%
+  Labels=\def\RepExamQCMTypeLabel{#1},%
+  EspaceLabels=\def\RepExamQCMSpace{#1},%
+  Largeur=\def\RepExamQCMLarg{#1}
 }
 
 \setKVdefault[reponsesexamqcm]{%
-	EspacesCL={6pt/2pt},%
-	NbCols=4,%
-	Filets=false,%
-	PoliceLabels={\bfseries},%
-	Labels={a.},%
-	EspaceLabels=\kern5pt,%
-	Swap=false,%
-	Largeur=0.99\linewidth,%
-	Melange=false,%
-	HtAuto=false
+  EspacesCL={6pt/2pt},%
+  NbCols=4,%
+  Filets=false,%
+  PoliceLabels={\bfseries},%
+  Labels={a.},%
+  EspaceLabels=\kern5pt,%
+  Swap=false,%
+  Largeur=0.99\linewidth,%
+  Melange=false,%
+  HtAuto=false
 }
 
 \ExplSyntaxOn
@@ -105,7 +106,7 @@
           \tl_use:N \l_tmpb_tl
         \group_end:
       }
-    
+
     % Teste si 'A' est présent dans #1
     \tl_if_in:NnT { \l_tmpb_tl } { A }
       {
@@ -115,7 +116,7 @@
           \tl_use:N \l_tmpb_tl
         \group_end:
       }
-    
+
     % Teste si '1' est présent dans #1
     \tl_if_in:NnT { \l_tmpb_tl } { 1 }
       {
@@ -130,401 +131,401 @@
 \ExplSyntaxOff
 
 % \NewDocumentCommand\QCMExamFormatteLabel{ m m }{%1=typelabel,%3=caractère
-	% \IfSubStr{#1}{a}%
-		% {%
-			% {\RepExamQCMFonte\StrSubstitute{#1}{a}{#2}}%
-		% }%
-		% {}%
-	% \IfSubStr{#1}{A}%
-		% {%
-			% {\RepExamQCMFonte\StrSubstitute{#1}{A}{#2}}%
-		% }%
-		% {}%
-	% \IfSubStr{#1}{1}%
-		% {%
-			% {\RepExamQCMFonte\StrSubstitute{#1}{1}{#2}}%
-		% }%
-		% {}%
+  % \IfSubStr{#1}{a}%
+    % {%
+      % {\RepExamQCMFonte\StrSubstitute{#1}{a}{#2}}%
+    % }%
+    % {}%
+  % \IfSubStr{#1}{A}%
+    % {%
+      % {\RepExamQCMFonte\StrSubstitute{#1}{A}{#2}}%
+    % }%
+    % {}%
+  % \IfSubStr{#1}{1}%
+    % {%
+      % {\RepExamQCMFonte\StrSubstitute{#1}{1}{#2}}%
+    % }%
+    % {}%
 % }
 
 \NewDocumentCommand\ExamReponsesQCM{ O{} m D<>{} }{%1=nbcol,2=listeréponses,3=options tblr
-	\restoreKV[reponsesexamqcm]%
-	\setKV[reponsesexamqcm]{#1}%
-	\IfSubStr{\RepExamQCMOffset}{/}%
-		{\StrCut{\RepExamQCMOffset}{/}{\RepExamQCMOffsetCol}{\RepExamQCMOffsetLgn}}%
-		{\def\RepExamQCMOffsetCol{\RepExamQCMOffset}\def\RepExamQCMOffsetLgn{\RepExamQCMOffset}}%
-	\setsepchar{,}%
-	\readlist*\ExamQCMListereponses{#2}%
-	\def\ExamQCMNbRep{\ExamQCMListereponseslen}%
-	%les items créés
-	\IfStrEq{\RepExamQCMTypeLabel}{box}%
-		{%
-			\def\RepExamQCMLabelA{\ReponsesExamQCMbox\RepExamQCMSpace}%
-			\def\RepExamQCMLabelB{\ReponsesExamQCMbox\RepExamQCMSpace}%
-			\def\RepExamQCMLabelC{\ReponsesExamQCMbox\RepExamQCMSpace}%
-			\def\RepExamQCMLabelD{\ReponsesExamQCMbox\RepExamQCMSpace}%
-		}%
-		{%
-			\IfSubStr{\RepExamQCMTypeLabel}{a}%
-				{%
-					\def\RepExamQCMLabelA{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{a}\RepExamQCMSpace}%
-					\def\RepExamQCMLabelB{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{b}\RepExamQCMSpace}%
-					\def\RepExamQCMLabelC{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{c}\RepExamQCMSpace}%
-					\def\RepExamQCMLabelD{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{d}\RepExamQCMSpace}%
-				}{}%
-			\IfSubStr{\RepExamQCMTypeLabel}{A}%
-				{%
-					\def\RepExamQCMLabelA{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{A}\RepExamQCMSpace}%
-					\def\RepExamQCMLabelB{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{B}\RepExamQCMSpace}%
-					\def\RepExamQCMLabelC{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{C}\RepExamQCMSpace}%
-					\def\RepExamQCMLabelD{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{D}\RepExamQCMSpace}%
-				}{}%
-			\IfSubStr{\RepExamQCMTypeLabel}{1}%
-				{%
-					\def\RepExamQCMLabelA{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{1}\RepExamQCMSpace}%
-					\def\RepExamQCMLabelB{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{2}\RepExamQCMSpace}%
-					\def\RepExamQCMLabelC{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{3}\RepExamQCMSpace}%
-					\def\RepExamQCMLabelD{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{4}\RepExamQCMSpace}%
-				}{}%
-			\IfStrEq{\RepExamQCMTypeLabel}{null}%
-				{%
-					\def\RepExamQCMLabelA{}%
-					\def\RepExamQCMLabelB{}%
-					\def\RepExamQCMLabelC{}%
-					\def\RepExamQCMLabelD{}%
-				}%
-				{}%
-		}%
-	%en fonction du nb de colonnes et du shuffle
-	\ifboolKV[reponsesexamqcm]{Melange}%
-		{%
-			\ClearList{TmpListereponsesexamqcm}%
-			\IfEq{\ExamQCMNbRep}{2}%2réponses
-				{%
-					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[1]}%
-					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[2]}%
-					\ifboolKV[reponsesexamqcm]{Filets}%
-						{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
-						{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
-						\RepExamQCMLabelA\TmpListereponsesexamqcm[0] & \RepExamQCMLabelB\TmpListereponsesexamqcm[1] \\
-					\end{tblr}%
-				}%
-				{}%
-			\IfEq{\ExamQCMNbRep}{3}%3réponses
-				{%
-					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[1]}%
-					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[2]}%
-					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[3]}%
-					\ifboolKV[reponsesexamqcm]{Filets}%
-						{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
-						{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
-						\RepExamQCMLabelA\TmpListereponsesexamqcm[0] & \RepExamQCMLabelB\TmpListereponsesexamqcm[1] & \RepExamQCMLabelC\TmpListereponsesexamqcm[2] \\
-					\end{tblr}%
-				}%
-				{}%
-			\IfEq{\ExamQCMNbRep}{4}%4réponses
-				{%
-					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[1]}%
-					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[2]}%
-					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[3]}%
-					\InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[4]}%
-					\IfEq{\RepExamQCMNbCol}{4}%4colonnes
-						{%
-							\ifboolKV[reponsesexamqcm]{Filets}%
-								{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
-								{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
-									\RepExamQCMLabelA\TmpListereponsesexamqcm[0] & \RepExamQCMLabelB\TmpListereponsesexamqcm[1] & \RepExamQCMLabelC\TmpListereponsesexamqcm[2] & \RepExamQCMLabelD\TmpListereponsesexamqcm[3] \\
-							\end{tblr}%
-						}%
-						{}
-					\IfEq{\RepExamQCMNbCol}{2}%2colonnes%
-						{%
-							\ifboolKV[reponsesexamqcm]{HtAuto}%
-								{%
-									\cegetheigheststring{#2}%
-									\ifboolKV[reponsesexamqcm]{Filets}%
-										{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
-										{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
-											\RepExamQCMLabelA\TmpListereponsesexamqcm[0] & \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\TmpListereponsesexamqcm[1]}{\RepExamQCMLabelC\TmpListereponsesexamqcm[1]} \\
-											\ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\TmpListereponsesexamqcm[2]}{\RepExamQCMLabelB\TmpListereponsesexamqcm[2]} & \RepExamQCMLabelD\TmpListereponsesexamqcm[3] \\
-									\end{tblr}%
-								}%
-								{%
-									\ifboolKV[reponsesexamqcm]{Filets}%
-										{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
-										{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
-											\RepExamQCMLabelA\TmpListereponsesexamqcm[0] & \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\TmpListereponsesexamqcm[1]}{\RepExamQCMLabelC\TmpListereponsesexamqcm[1]} \\
-											\ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\TmpListereponsesexamqcm[2]}{\RepExamQCMLabelB\TmpListereponsesexamqcm[2]} & \RepExamQCMLabelD\TmpListereponsesexamqcm[3] \\
-									\end{tblr}%
-								}%
-						}%
-						{}%
-					\IfEq{\RepExamQCMNbCol}{1}%1colonne%
-						{%
-							%test hauteur
-							\ifboolKV[reponsesexamqcm]{HtAuto}%
-								{%
-									\cegetheigheststring{#2}%
-									\ifboolKV[reponsesexamqcm]{Filets}%
-									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
-									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
-										\RepExamQCMLabelA\TmpListereponsesexamqcm[0] \\
+  \restoreKV[reponsesexamqcm]%
+  \setKV[reponsesexamqcm]{#1}%
+  \IfSubStr{\RepExamQCMOffset}{/}%
+    {\StrCut{\RepExamQCMOffset}{/}{\RepExamQCMOffsetCol}{\RepExamQCMOffsetLgn}}%
+    {\def\RepExamQCMOffsetCol{\RepExamQCMOffset}\def\RepExamQCMOffsetLgn{\RepExamQCMOffset}}%
+  \setsepchar{,}%
+  \readlist*\ExamQCMListereponses{#2}%
+  \def\ExamQCMNbRep{\ExamQCMListereponseslen}%
+  %les items créés
+  \IfStrEq{\RepExamQCMTypeLabel}{box}%
+    {%
+      \def\RepExamQCMLabelA{\ReponsesExamQCMbox\RepExamQCMSpace}%
+      \def\RepExamQCMLabelB{\ReponsesExamQCMbox\RepExamQCMSpace}%
+      \def\RepExamQCMLabelC{\ReponsesExamQCMbox\RepExamQCMSpace}%
+      \def\RepExamQCMLabelD{\ReponsesExamQCMbox\RepExamQCMSpace}%
+    }%
+    {%
+      \IfSubStr{\RepExamQCMTypeLabel}{a}%
+        {%
+          \def\RepExamQCMLabelA{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{a}\RepExamQCMSpace}%
+          \def\RepExamQCMLabelB{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{b}\RepExamQCMSpace}%
+          \def\RepExamQCMLabelC{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{c}\RepExamQCMSpace}%
+          \def\RepExamQCMLabelD{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{d}\RepExamQCMSpace}%
+        }{}%
+      \IfSubStr{\RepExamQCMTypeLabel}{A}%
+        {%
+          \def\RepExamQCMLabelA{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{A}\RepExamQCMSpace}%
+          \def\RepExamQCMLabelB{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{B}\RepExamQCMSpace}%
+          \def\RepExamQCMLabelC{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{C}\RepExamQCMSpace}%
+          \def\RepExamQCMLabelD{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{D}\RepExamQCMSpace}%
+        }{}%
+      \IfSubStr{\RepExamQCMTypeLabel}{1}%
+        {%
+          \def\RepExamQCMLabelA{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{1}\RepExamQCMSpace}%
+          \def\RepExamQCMLabelB{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{2}\RepExamQCMSpace}%
+          \def\RepExamQCMLabelC{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{3}\RepExamQCMSpace}%
+          \def\RepExamQCMLabelD{\QCMExamFormatteLabel{\RepExamQCMTypeLabel}{4}\RepExamQCMSpace}%
+        }{}%
+      \IfStrEq{\RepExamQCMTypeLabel}{null}%
+        {%
+          \def\RepExamQCMLabelA{}%
+          \def\RepExamQCMLabelB{}%
+          \def\RepExamQCMLabelC{}%
+          \def\RepExamQCMLabelD{}%
+        }%
+        {}%
+    }%
+  %en fonction du nb de colonnes et du shuffle
+  \ifboolKV[reponsesexamqcm]{Melange}%
+    {%
+      \ClearList{TmpListereponsesexamqcm}%
+      \IfEq{\ExamQCMNbRep}{2}%2réponses
+        {%
+          \InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[1]}%
+          \InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[2]}%
+          \ifboolKV[reponsesexamqcm]{Filets}%
+            {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+            {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+            \RepExamQCMLabelA\TmpListereponsesexamqcm[0] & \RepExamQCMLabelB\TmpListereponsesexamqcm[1] \\
+          \end{tblr}%
+        }%
+        {}%
+      \IfEq{\ExamQCMNbRep}{3}%3réponses
+        {%
+          \InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[1]}%
+          \InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[2]}%
+          \InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[3]}%
+          \ifboolKV[reponsesexamqcm]{Filets}%
+            {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
+            {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
+            \RepExamQCMLabelA\TmpListereponsesexamqcm[0] & \RepExamQCMLabelB\TmpListereponsesexamqcm[1] & \RepExamQCMLabelC\TmpListereponsesexamqcm[2] \\
+          \end{tblr}%
+        }%
+        {}%
+      \IfEq{\ExamQCMNbRep}{4}%4réponses
+        {%
+          \InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[1]}%
+          \InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[2]}%
+          \InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[3]}%
+          \InsertRandomItem{TmpListereponsesexamqcm}{\ExamQCMListereponses[4]}%
+          \IfEq{\RepExamQCMNbCol}{4}%4colonnes
+            {%
+              \ifboolKV[reponsesexamqcm]{Filets}%
+                {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
+                {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
+                  \RepExamQCMLabelA\TmpListereponsesexamqcm[0] & \RepExamQCMLabelB\TmpListereponsesexamqcm[1] & \RepExamQCMLabelC\TmpListereponsesexamqcm[2] & \RepExamQCMLabelD\TmpListereponsesexamqcm[3] \\
+              \end{tblr}%
+            }%
+            {}
+          \IfEq{\RepExamQCMNbCol}{2}%2colonnes%
+            {%
+              \ifboolKV[reponsesexamqcm]{HtAuto}%
+                {%
+                  \cegetheigheststring{#2}%
+                  \ifboolKV[reponsesexamqcm]{Filets}%
+                    {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
+                    {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
+                      \RepExamQCMLabelA\TmpListereponsesexamqcm[0] & \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\TmpListereponsesexamqcm[1]}{\RepExamQCMLabelC\TmpListereponsesexamqcm[1]} \\
+                      \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\TmpListereponsesexamqcm[2]}{\RepExamQCMLabelB\TmpListereponsesexamqcm[2]} & \RepExamQCMLabelD\TmpListereponsesexamqcm[3] \\
+                  \end{tblr}%
+                }%
+                {%
+                  \ifboolKV[reponsesexamqcm]{Filets}%
+                    {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+                    {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+                      \RepExamQCMLabelA\TmpListereponsesexamqcm[0] & \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\TmpListereponsesexamqcm[1]}{\RepExamQCMLabelC\TmpListereponsesexamqcm[1]} \\
+                      \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\TmpListereponsesexamqcm[2]}{\RepExamQCMLabelB\TmpListereponsesexamqcm[2]} & \RepExamQCMLabelD\TmpListereponsesexamqcm[3] \\
+                  \end{tblr}%
+                }%
+            }%
+            {}%
+          \IfEq{\RepExamQCMNbCol}{1}%1colonne%
+            {%
+              %test hauteur
+              \ifboolKV[reponsesexamqcm]{HtAuto}%
+                {%
+                  \cegetheigheststring{#2}%
+                  \ifboolKV[reponsesexamqcm]{Filets}%
+                  {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
+                  {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
+                    \RepExamQCMLabelA\TmpListereponsesexamqcm[0] \\
                     \RepExamQCMLabelB\TmpListereponsesexamqcm[1] \\
-										\RepExamQCMLabelC\TmpListereponsesexamqcm[2] \\
+                    \RepExamQCMLabelC\TmpListereponsesexamqcm[2] \\
                     \RepExamQCMLabelD\TmpListereponsesexamqcm[3] \\
-									\end{tblr}%
-								}%
-								{%
-									\ifboolKV[reponsesexamqcm]{Filets}%
-									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},#3}}%
-									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},#3}}%
-										\RepExamQCMLabelA\TmpListereponsesexamqcm[0] \\
+                  \end{tblr}%
+                }%
+                {%
+                  \ifboolKV[reponsesexamqcm]{Filets}%
+                  {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},#3}}%
+                  {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},#3}}%
+                    \RepExamQCMLabelA\TmpListereponsesexamqcm[0] \\
                     \RepExamQCMLabelB\TmpListereponsesexamqcm[1] \\
-										\RepExamQCMLabelC\TmpListereponsesexamqcm[2] \\
+                    \RepExamQCMLabelC\TmpListereponsesexamqcm[2] \\
                     \RepExamQCMLabelD\TmpListereponsesexamqcm[3] \\
-									\end{tblr}%
-								}%
-							%fin test hauteur
-						}%
-						{}%
-				}%
-				{}%
-		}%
-		{%
-			\IfEq{\ExamQCMNbRep}{2}%2réponses
-				{%
-					\ifboolKV[reponsesexamqcm]{Filets}%
-						{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
-						{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
-							\RepExamQCMLabelA\ExamQCMListereponses[1] & \RepExamQCMLabelB\ExamQCMListereponses[2] \\
-					\end{tblr}%
-				}%
-				{}%
-			\IfEq{\ExamQCMNbRep}{3}%3réponses
-				{%
-					\ifboolKV[reponsesexamqcm]{Filets}%
-						{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
-						{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
-							\RepExamQCMLabelA\ExamQCMListereponses[1] & \RepExamQCMLabelB\ExamQCMListereponses[2] & \RepExamQCMLabelC\ExamQCMListereponses[3] \\
-					\end{tblr}%
-				}%
-				{}%
-			\IfEq{\ExamQCMNbRep}{4}%4réponses
-				{%
-					\IfEq{\RepExamQCMNbCol}{4}%4colonnes
-						{%
-							\ifboolKV[reponsesexamqcm]{Filets}%
-								{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
-								{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
-									\RepExamQCMLabelA\ExamQCMListereponses[1] & \RepExamQCMLabelB\ExamQCMListereponses[2] & \RepExamQCMLabelC\ExamQCMListereponses[3] & \RepExamQCMLabelD\ExamQCMListereponses[4] \\
-							\end{tblr}%
-						}%
-						{}%
-					\IfEq{\RepExamQCMNbCol}{2}%2colonnes
-						{%
-							\ifboolKV[reponsesexamqcm]{HtAuto}%
-								{%
-									\cegetheigheststring{#2}%
-									\ifboolKV[reponsesexamqcm]{Filets}%
-										{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
-										{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
-											\RepExamQCMLabelA\ExamQCMListereponses[1] & \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\ExamQCMListereponses[2]}{\RepExamQCMLabelC\ExamQCMListereponses[3]} \\
-											\ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\ExamQCMListereponses[3]}{\RepExamQCMLabelB\ExamQCMListereponses[2]} & \RepExamQCMLabelD\ExamQCMListereponses[4] \\
-									\end{tblr}%
-								}%
-								{%
-									\ifboolKV[reponsesexamqcm]{Filets}%
-										{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
-										{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
-											\RepExamQCMLabelA\ExamQCMListereponses[1] & \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\ExamQCMListereponses[2]}{\RepExamQCMLabelC\ExamQCMListereponses[3]} \\
-											\ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\ExamQCMListereponses[3]}{\RepExamQCMLabelB\ExamQCMListereponses[2]} & \RepExamQCMLabelD\ExamQCMListereponses[4] \\
-									\end{tblr}%
-								}%
-						}%
-						{}%
-					\IfEq{\RepExamQCMNbCol}{1}%1colonne
-						{%
-							%test hauteur
-							\ifboolKV[reponsesexamqcm]{HtAuto}%
-								{%
-									\cegetheigheststring{#2}%
-									\ifboolKV[reponsesexamqcm]{Filets}%
-									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
-									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
-										\RepExamQCMLabelA\ExamQCMListereponses[1] \\
+                  \end{tblr}%
+                }%
+              %fin test hauteur
+            }%
+            {}%
+        }%
+        {}%
+    }%
+    {%
+      \IfEq{\ExamQCMNbRep}{2}%2réponses
+        {%
+          \ifboolKV[reponsesexamqcm]{Filets}%
+            {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+            {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+              \RepExamQCMLabelA\ExamQCMListereponses[1] & \RepExamQCMLabelB\ExamQCMListereponses[2] \\
+          \end{tblr}%
+        }%
+        {}%
+      \IfEq{\ExamQCMNbRep}{3}%3réponses
+        {%
+          \ifboolKV[reponsesexamqcm]{Filets}%
+            {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
+            {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{3}{X[b,l]}},#3}}%
+              \RepExamQCMLabelA\ExamQCMListereponses[1] & \RepExamQCMLabelB\ExamQCMListereponses[2] & \RepExamQCMLabelC\ExamQCMListereponses[3] \\
+          \end{tblr}%
+        }%
+        {}%
+      \IfEq{\ExamQCMNbRep}{4}%4réponses
+        {%
+          \IfEq{\RepExamQCMNbCol}{4}%4colonnes
+            {%
+              \ifboolKV[reponsesexamqcm]{Filets}%
+                {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
+                {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{4}{X[b,l]}},#3}}%
+                  \RepExamQCMLabelA\ExamQCMListereponses[1] & \RepExamQCMLabelB\ExamQCMListereponses[2] & \RepExamQCMLabelC\ExamQCMListereponses[3] & \RepExamQCMLabelD\ExamQCMListereponses[4] \\
+              \end{tblr}%
+            }%
+            {}%
+          \IfEq{\RepExamQCMNbCol}{2}%2colonnes
+            {%
+              \ifboolKV[reponsesexamqcm]{HtAuto}%
+                {%
+                  \cegetheigheststring{#2}%
+                  \ifboolKV[reponsesexamqcm]{Filets}%
+                    {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
+                    {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
+                      \RepExamQCMLabelA\ExamQCMListereponses[1] & \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\ExamQCMListereponses[2]}{\RepExamQCMLabelC\ExamQCMListereponses[3]} \\
+                      \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\ExamQCMListereponses[3]}{\RepExamQCMLabelB\ExamQCMListereponses[2]} & \RepExamQCMLabelD\ExamQCMListereponses[4] \\
+                  \end{tblr}%
+                }%
+                {%
+                  \ifboolKV[reponsesexamqcm]{Filets}%
+                    {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+                    {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{2}{X[b,l]}},#3}}%
+                      \RepExamQCMLabelA\ExamQCMListereponses[1] & \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelB\ExamQCMListereponses[2]}{\RepExamQCMLabelC\ExamQCMListereponses[3]} \\
+                      \ifboolKV[reponsesexamqcm]{Swap}{\RepExamQCMLabelC\ExamQCMListereponses[3]}{\RepExamQCMLabelB\ExamQCMListereponses[2]} & \RepExamQCMLabelD\ExamQCMListereponses[4] \\
+                  \end{tblr}%
+                }%
+            }%
+            {}%
+          \IfEq{\RepExamQCMNbCol}{1}%1colonne
+            {%
+              %test hauteur
+              \ifboolKV[reponsesexamqcm]{HtAuto}%
+                {%
+                  \cegetheigheststring{#2}%
+                  \ifboolKV[reponsesexamqcm]{Filets}%
+                  {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
+                  {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},rows={ht=\cetmpheigheststring},#3}}%
+                    \RepExamQCMLabelA\ExamQCMListereponses[1] \\
                     \RepExamQCMLabelB\ExamQCMListereponses[2] \\
-										\RepExamQCMLabelC\ExamQCMListereponses[3] \\
+                    \RepExamQCMLabelC\ExamQCMListereponses[3] \\
                     \RepExamQCMLabelD\ExamQCMListereponses[4] \\
-									\end{tblr}%
-								}%
-								{%
-									\ifboolKV[reponsesexamqcm]{Filets}%
-									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},#3}}%
-									{\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},#3}}%
-										\RepExamQCMLabelA\ExamQCMListereponses[1] \\
+                  \end{tblr}%
+                }%
+                {%
+                  \ifboolKV[reponsesexamqcm]{Filets}%
+                  {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,hlines,vlines,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},#3}}%
+                  {\begin{tblr}{rowsep=\RepExamQCMOffsetLgn,colsep=\RepExamQCMOffsetCol,width=\RepExamQCMLarg,colspec={*{1}{X[b,l]}},#3}}%
+                    \RepExamQCMLabelA\ExamQCMListereponses[1] \\
                     \RepExamQCMLabelB\ExamQCMListereponses[2] \\
-										\RepExamQCMLabelC\ExamQCMListereponses[3] \\
+                    \RepExamQCMLabelC\ExamQCMListereponses[3] \\
                     \RepExamQCMLabelD\ExamQCMListereponses[4] \\
-									\end{tblr}%
-								}%
-							%fin test hauteur
-						}%
-						{}%
-				}%
-				{}%
-		}%
+                  \end{tblr}%
+                }%
+              %fin test hauteur
+            }%
+            {}%
+        }%
+        {}%
+    }%
 }
 
 %====EXAM CONFIG
 \@ifpackageloaded{amssymb}%
-	{%
-		\newcommand\examdecoexo{\scalebox{0.66}[1]{$\blacktriangleright$}\space}%
-		\newcommand\examdecoquest{\scalebox{0.66}[1]{$\blacktriangleright$}\space}%
-	}%
-	{%
-		\newcommand\examdecoexo{\textbullet\space}%
-		\newcommand\examdecoquest{\textbullet\space}%
-	}%
+  {%
+    \newcommand\examdecoexo{\scalebox{0.66}[1]{$\blacktriangleright$}\space}%
+    \newcommand\examdecoquest{\scalebox{0.66}[1]{$\blacktriangleright$}\space}%
+  }%
+  {%
+    \newcommand\examdecoexo{\textbullet\space}%
+    \newcommand\examdecoquest{\textbullet\space}%
+  }%
 \newcommand\ExamTitreExo[2]{%
-	\textbf{\large\examdecoexo\underline{Exercice #1}\space(#2 points)}%
+  \textbf{\large\examdecoexo\underline{Exercice #1}\space(#2 points)}%
 }
 \newcommand\ExamLabelAutomat[1]{%
-	\textbf{\examdecoquest\underline{Question #1}}%
+  \textbf{\examdecoquest\underline{Question #1}}%
 }
 
 %====EXAM EXO
 \NewDocumentEnvironment{ExamAutomatQuest}{ O{} m }%
 {%
-	\tcolorbox[boxrule=1pt,left=2.5mm,right=2.5mm,colframe=darkgray,colback=white,sharp corners=downhill,#1]
-	\ExamLabelAutomat{#2}
-	
-	\smallskip
+  \tcolorbox[boxrule=1pt,left=2.5mm,right=2.5mm,colframe=darkgray,colback=white,sharp corners=downhill,#1]
+  \ExamLabelAutomat{#2}
+
+  \smallskip
 }%
 {%
-	\endtcolorbox%
+  \endtcolorbox%
 }
 
 \NewDocumentEnvironment{ExamExercice}{ O{} m m }%
 {%
-	\tcolorbox[boxrule=1pt,left=2.5mm,right=2.5mm,colframe=darkgray,colback=white,sharp corners=downhill,#1]
-	\ExamTitreExo{#2}{#3}
-	
-	\medskip
+  \tcolorbox[boxrule=1pt,left=2.5mm,right=2.5mm,colframe=darkgray,colback=white,sharp corners=downhill,#1]
+  \ExamTitreExo{#2}{#3}
+
+  \medskip
 }%
 {%
-	\endtcolorbox%
+  \endtcolorbox%
 }
 
 %====EAM
 \NewDocumentCommand\QuestionAutomatismesFichier{ m O{} O{} m D<>{} }{%
-	\input{#4.tex}
-	%1=nb
-	%2=options env
-	%3=options réponses
-	%4=fichier
-	\begin{ExamAutomatQuest}[#2]{#1}
-		\AutomatEnonce
-		
-		\ExamReponsesQCM[#3]%
-		{%
-			\AutomatReponses
-		}%
-		<#5>%
-	\end{ExamAutomatQuest}%
+  \input{#4.tex}
+  %1=nb
+  %2=options env
+  %3=options réponses
+  %4=fichier
+  \begin{ExamAutomatQuest}[#2]{#1}
+    \AutomatEnonce
+
+    \ExamReponsesQCM[#3]%
+    {%
+      \AutomatReponses
+    }%
+    <#5>%
+  \end{ExamAutomatQuest}%
 }
 
 \NewDocumentCommand\QuestionAutomatismes{ m O{} m O{} m D<>{}}{%
-	%1=nb
-	%2=options env
-	%3=énoncé
-	%4=clés réponses
-	%5=options tblr réponses
-	%6=réponses
-	\begin{ExamAutomatQuest}[#2]{#1}
-	#3
-	
-	\medskip
-	
-	\ExamReponsesQCM[#4]
-	{%
-		#5
-	}%
-	<#6>%
-	\end{ExamAutomatQuest}%
+  %1=nb
+  %2=options env
+  %3=énoncé
+  %4=clés réponses
+  %5=options tblr réponses
+  %6=réponses
+  \begin{ExamAutomatQuest}[#2]{#1}
+  #3
+
+  \medskip
+
+  \ExamReponsesQCM[#4]
+  {%
+    #5
+  }%
+  <#6>%
+  \end{ExamAutomatQuest}%
 }
 
 %====EXAM BOX TITLE(s)
 \NewDocumentCommand\LetPhantomBox{}{%
-	\vphantom{(ÉAZERTYUIOPQSDFGHJKLMWXCVBN,éàço)}%
+  \vphantom{(ÉAZERTYUIOPQSDFGHJKLMWXCVBN,éàço)}%
 }
 
 \tcbset{StyleTitreSujet/.style={%
-	enhanced,size=small,
-	colback=white!5,boxrule=1.25pt,
-	attach boxed title to top left={xshift=0.5cm,yshift=1mm-\tcboxedtitleheight},
-	varwidth boxed title*=-3cm,
-	boxed title style={frame code={
-			\path[fill=tcbcolframe!50!black]
-			([yshift=-1mm,xshift=-1mm]frame.north west)
-			arc[start angle=0,end angle=180,radius=1mm]
-			([yshift=-1mm,xshift=1mm]frame.north east)
-			arc[start angle=180,end angle=0,radius=1mm];
-			\path[fill=tcbcolframe] ([xshift=-2mm]frame.north west) -- ([xshift=2mm]frame.north east) [rounded corners=1mm]-- ([xshift=1mm,yshift=-1mm]frame.north east) -- (frame.south east) -- (frame.south west) -- ([xshift=-1mm,yshift=-1mm]frame.north west) [sharp corners]-- cycle;
-		},interior engine=empty,size=fbox,
-	},
-	fonttitle=\bfseries\sffamily,
-	fontupper=\huge\bfseries\sffamily,
-	}
+  enhanced,size=small,
+  colback=white!5,boxrule=1.25pt,
+  attach boxed title to top left={xshift=0.5cm,yshift=1mm-\tcboxedtitleheight},
+  varwidth boxed title*=-3cm,
+  boxed title style={frame code={
+      \path[fill=tcbcolframe!50!black]
+      ([yshift=-1mm,xshift=-1mm]frame.north west)
+      arc[start angle=0,end angle=180,radius=1mm]
+      ([yshift=-1mm,xshift=1mm]frame.north east)
+      arc[start angle=180,end angle=0,radius=1mm];
+      \path[fill=tcbcolframe] ([xshift=-2mm]frame.north west) -- ([xshift=2mm]frame.north east) [rounded corners=1mm]-- ([xshift=1mm,yshift=-1mm]frame.north east) -- (frame.south east) -- (frame.south west) -- ([xshift=-1mm,yshift=-1mm]frame.north west) [sharp corners]-- cycle;
+    },interior engine=empty,size=fbox,
+  },
+  fonttitle=\bfseries\sffamily,
+  fontupper=\huge\bfseries\sffamily,
+  }
 }
 
 \defKV[tcbtitresujet]{%
-	AlignH=\def\tcbtitresujethalign{#1}
+  AlignH=\def\tcbtitresujethalign{#1}
 }
 
 \setKVdefault[tcbtitresujet]{%
-	Couleur=black,
-	AlignH=center
+  Couleur=black,
+  AlignH=center
 }
 
 \NewDocumentEnvironment{TitreSujet}{ O{} D<>{} m }%
 {%
-	\restoreKV[tcbtitresujet]%
-	\setKV[tcbtitresujet]{#1}%
-	\IfStrEqCase{\tcbtitresujethalign}{%
-		{right}{\tcbset{StyleTitreSujetAlign/.style={halign=flush right}}}%
-		{left}{\tcbset{StyleTitreSujetAlign/.style={halign=flush left}}}%
-	}[\tcbset{StyleTitreSujetAlign/.style={halign=flush center}}]%
-	\tcolorbox[colupper={\useKV[tcbtitresujet]{Couleur}},colframe={\useKV[tcbtitresujet]{Couleur}},StyleTitreSujet,StyleTitreSujetAlign,title={\vphantom{QJ}#3},before upper=\LetPhantomBox,after upper=\LetPhantomBox,#2]%
+  \restoreKV[tcbtitresujet]%
+  \setKV[tcbtitresujet]{#1}%
+  \IfStrEqCase{\tcbtitresujethalign}{%
+    {right}{\tcbset{StyleTitreSujetAlign/.style={halign=flush right}}}%
+    {left}{\tcbset{StyleTitreSujetAlign/.style={halign=flush left}}}%
+  }[\tcbset{StyleTitreSujetAlign/.style={halign=flush center}}]%
+  \tcolorbox[colupper={\useKV[tcbtitresujet]{Couleur}},colframe={\useKV[tcbtitresujet]{Couleur}},StyleTitreSujet,StyleTitreSujetAlign,title={\vphantom{QJ}#3},before upper=\LetPhantomBox,after upper=\LetPhantomBox,#2]%
 }%
 {%
-	\endtcolorbox%
+  \endtcolorbox%
 }
 
 \tcbset{StyleTitreSujetSousEpreuve/.style={%
-		center,after skip=1pt,size=small,boxsep=3pt,boxrule=1pt,colback=white,left=2pt,right=2pt,%
-		sharp corners,rounded corners=downhill,arc=8pt,
-		fontupper={\sffamily\bfseries\large}
-	}
+    center,after skip=1pt,size=small,boxsep=3pt,boxrule=1pt,colback=white,left=2pt,right=2pt,%
+    sharp corners,rounded corners=downhill,arc=8pt,
+    fontupper={\sffamily\bfseries\large}
+  }
 }
 
 \NewDocumentCommand\SousTitreSujetEpreuve{ O{black} m }{%
-	\tcbset{StyleTitreSujetSousEpreuveCouleur/.style={colframe=#1,colupper=#1}}
-	\IfStrEqCase{#2}{%
-		{U21}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\space\space,after upper=\space\space\faProjDiag]{Épreuve E2 - Mathématiques pour l'Informatique}}%
-		{U2}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\space\space,after upper=\space\space\faProjDiag]{Épreuve E2 - Mathématiques pour l'Informatique}}%
-		{U2CG}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\space\space,after upper=\space\space\faProjDiag]{Épreuve E2 - Mathématiques appliquées}}%
-		{U3}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\space\space,after upper=\space\space\faProjDiag]{Épreuve E3 - Mathématiques pour l'Informatique}}%
-		{UF2}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faDice\space\space,after upper=\space\space\faChartLine]{Épreuve EF2 - Mathématiques Approfondies}}%
-		{U41OL}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faDice\space\space,after upper=\space\space\faBezierCurve]{Épreuve U41 - Mathématiques}}}%
-		[{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur]{#2}}]%
+  \tcbset{StyleTitreSujetSousEpreuveCouleur/.style={colframe=#1,colupper=#1}}
+  \IfStrEqCase{#2}{%
+    {U21}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\space\space,after upper=\space\space\faProjDiag]{Épreuve E2 - Mathématiques pour l'Informatique}}%
+    {U2}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\space\space,after upper=\space\space\faProjDiag]{Épreuve E2 - Mathématiques pour l'Informatique}}%
+    {U2CG}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\space\space,after upper=\space\space\faProjDiag]{Épreuve E2 - Mathématiques appliquées}}%
+    {U3}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faArrDownNb\space\space,after upper=\space\space\faProjDiag]{Épreuve E3 - Mathématiques pour l'Informatique}}%
+    {UF2}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faDice\space\space,after upper=\space\space\faChartLine]{Épreuve EF2 - Mathématiques Approfondies}}%
+    {U41OL}{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur,before upper=\faDice\space\space,after upper=\space\space\faBezierCurve]{Épreuve U41 - Mathématiques}}}%
+    [{\tcbox[StyleTitreSujetSousEpreuve,StyleTitreSujetSousEpreuveCouleur]{#2}}]%
 }
 
 \NewDocumentCommand\SujetTitreExo{ O{black} m }{%
-	\begingroup%
-	\tcolorbox[enhanced,width=\linewidth,size=small,colback=white,colframe=#1,boxrule=0.75pt,fontupper={\color{#1}\Large\sffamily\bfseries},sharp corners,rounded corners=south,arc=4pt,before upper=\LetPhantomBox]
-	#2
-	\endtcolorbox%
-	\endgroup%
+  \begingroup%
+  \tcolorbox[enhanced,width=\linewidth,size=small,colback=white,colframe=#1,boxrule=0.75pt,fontupper={\color{#1}\Large\sffamily\bfseries},sharp corners,rounded corners=south,arc=4pt,before upper=\LetPhantomBox]
+  #2
+  \endtcolorbox%
+  \endgroup%
 }
 
 %====BLOC EXO NEW V3
@@ -545,73 +546,76 @@
 \newcommand\tmplabelblocexo{Exercice\space}%
 
 \tcbset{monstyleblocexo/.style={%
-		enhanced,%
-		opacityfill=0,%
-		size=small,%
-		boxrule=0.25mm,%
-		titlerule=0.25mm,%
-		arc=2mm,%
-		sharp corners=uphill,%
-		nobeforeafter,%
-		before skip=0.5\baselineskip,%
-		after skip=0.5\baselineskip,%
-		colback=white,%
-		colbacktitle=white,%
-		coltitle=macouleurblocexo,%
-		colframe=macouleurborduresblocexo,%
-		left=1.5mm,%
-		right=1.5mm,%
-		top=1mm,%
-		bottom=1mm,%
-		fonttitle=\tmpstyleblocexo
-	}%
+    enhanced,%
+    opacityfill=0,%
+    size=small,%
+    boxrule=0.25mm,%
+    titlerule=0.25mm,%
+    arc=2mm,%
+    sharp corners=uphill,%
+    nobeforeafter,%
+    before skip=0.5\baselineskip,%
+    after skip=0.5\baselineskip,%
+    colback=white,%
+    colbacktitle=white,%
+    coltitle=macouleurblocexo,%
+    colframe=macouleurborduresblocexo,%
+    left=1.5mm,%
+    right=1.5mm,%
+    top=1mm,%
+    bottom=1mm,%
+    fonttitle=\tmpstyleblocexo
+  }%
 }
 
 \tikzset{ligne bloc exo/.style={line width=0.25mm,macouleurborduresblocexo}}
+\newcommand\blocexolabelpersopolice{}
 
 \defKV[StyleGlobalBlocExo]{%
-	Libelle=\renewcommand\tmplabelblocexo{#1},%
-	CouleurGlobale=\def\tmpcoulglobblocexo{#1},%
-	Couleur=\colorlet{macouleurblocexo}{#1},%
-	CouleurBordures=\colorlet{macouleurborduresblocexo}{#1},%
-	CouleurDeco=\colorlet{macouleurblocexodeco}{#1},%
-	CouleurFondDeco=\colorlet{macouleurblocexodecofond}{#1},%
-	Police=\renewcommand\tmpstyleblocexo{#1},%
-	EpTrait=\setlength{\eptraitblocexo}{#1},%
-	OffsetTrait=\def\raisetraitblocexo{#1}
+  Libelle=\renewcommand\tmplabelblocexo{#1},%
+  CouleurGlobale=\def\tmpcoulglobblocexo{#1},%
+  Couleur=\colorlet{macouleurblocexo}{#1},%
+  CouleurBordures=\colorlet{macouleurborduresblocexo}{#1},%
+  CouleurDeco=\colorlet{macouleurblocexodeco}{#1},%
+  CouleurFondDeco=\colorlet{macouleurblocexodecofond}{#1},%
+  Police=\renewcommand\tmpstyleblocexo{#1},%
+  PoliceComplement=\renewcommand\blocexolabelpersopolice{#1},%
+  EpTrait=\setlength{\eptraitblocexo}{#1},%
+  OffsetTrait=\def\raisetraitblocexo{#1}
 }
 
 \setKVdefault[StyleGlobalBlocExo]{%
-	Libelle={Exercice\space},%
-	CouleurGlobale={},%
-	Couleur={black},%
-	CouleurBordures=darkgray,%
-	CouleurDeco=black,
-	CouleurFondDeco={black!33},%
-	Police={\bfseries\sffamily},%
-	EpTrait={0.25mm},%
-	OffsetTrait=0.0ex
+  Libelle={Exercice\space},%
+  CouleurGlobale={},%
+  Couleur={black},%
+  CouleurBordures=darkgray,%
+  CouleurDeco=black,
+  CouleurFondDeco={black!33},%
+  Police={\bfseries\sffamily},%
+  PoliceComplement={},%
+  EpTrait={0.25mm},%
+  OffsetTrait=0.0ex
 }
 
 \defKV[StyleLocalBlocExo]{%
-	Type=\def\EnvtExoAltType{#1},%
-	ComplementTitre=\def\EnvtExoAltCpltTitre{#1},%
-	CodeDebut=\def\EnvtExoAltCodeAvant{#1},%
-	Etoiles=\def\EnvtExoAltEtoiles{#1},%
-	Trait=\def\EnvtExoAltTrait{#1},%
-	Bordures=\def\EnvtExoAltBordures{#1},%
-	Strut=\def\blocexostrut{#1}
+  Type=\def\EnvtExoAltType{#1},%
+  ComplementTitre=\def\EnvtExoAltCpltTitre{#1},%
+  CodeDebut=\def\EnvtExoAltCodeAvant{#1},%
+  Etoiles=\def\EnvtExoAltEtoiles{#1},%
+  Trait=\def\EnvtExoAltTrait{#1},%
+  Bordures=\def\EnvtExoAltBordures{#1},%
+  Strut=\def\blocexostrut{#1}
 }
 \setKVdefault[StyleLocalBlocExo]{
-	Type=Classique,%
-	ComplementTitre={},%
-	CodeDebut={},%
-	Compteur=true,%
-	Etoiles={},%
-	Breakable=false,%
-	Trait=non,%
-	Bordures=alt,%
-	Strut=()
+  Type=Classique,%
+  ComplementTitre={},%
+  CodeDebut={},%
+  Compteur=true,%
+  Etoiles={},%
+  Breakable=false,%
+  Trait=non,%
+  Bordures=alt,%
+  Strut=()
 }
 
 \tcbuselibrary{breakable}%à voir...
@@ -624,204 +628,226 @@
 
 \NewDocumentEnvironment{BlocExo}{ O{} m }%
 {%
-	\useKVdefault[StyleLocalBlocExo]%
-	\setKV[StyleLocalBlocExo]{#1}%
-	%test couleur globale ??
-	\IfStrEq{\tmpcoulglobblocexo}{}%
-		{}%
-		{%
-			\colorlet{macouleurblocexo}{\tmpcoulglobblocexo}%
-			\colorlet{macouleurborduresblocexo}{\tmpcoulglobblocexo}%
-			\colorlet{macouleurblocexodeco}{\tmpcoulglobblocexo}%
-			\colorlet{macouleurblocexodecofond}{\tmpcoulglobblocexo!33}%
-		}%
-	%fin test
-	\addtocounter{numeroblocexo}{1}%
-	\ifboolKV[StyleLocalBlocExo]{Compteur}{}{\addtocounter{numeroblocexo}{-1}}%
-	%styles
-	\tcbset{reset}%
-	\ifboolKV[StyleLocalBlocExo]{Breakable}%
-	{%
-		\tcbset{monstyleblocexobreakable/.style={breakable}}%
-	}%
-	{%
-		\tcbset{monstyleblocexobreakable/.style={}}%
-	}%
-	\IfStrEq{\EnvtExoAltBordures}{simple}%
-		{%
-			\settototalheight\hauteurnumerocercle{\hbox{\tmpstyleblocexo 0123456789}}%
-		}%
-		{}%
-	\IfStrEqCase{\EnvtExoAltBordures}{%
-		{normal}{\tcbset{monstylebloexobordures/.style={sharp corners,rounded corners=northwest,opacityfill=1,righttitle=0mm}}}%
-		{bulle}{\tcbset{monstylebloexobordures/.style={enhanced,size=small,frame empty,interior empty,sharp corners,top=2mm+2mm,left skip=\tcboxcalloutbarleftmargin,%
-			underlay boxed title={%
-				%\filldraw[draw=none,tcboxcalloutbarcolorbg,line width=\tcboxcalloutbarbarwidth] (frame.north west) rectangle (frame.south east);%
-				\draw[macouleurborduresblocexo,line width=\tcboxcalloutbarbarwidth] (frame.north west) -- (frame.south west) --++ (1.5\tcboxcalloutbarleftmargin,0) ;
-				\draw[macouleurborduresblocexo,line width=\tcboxcalloutbarbarwidth,densely dashed] ([xshift=1.5\tcboxcalloutbarleftmargin]frame.south west) --++ (1.5\tcboxcalloutbarleftmargin,0) ;
-			},%
-			attach boxed title to top left={xshift=-\tcboxcalloutbarleftmargin,yshift=-\tcboxedtitleheight+2mm},%
-			boxed title style={interior empty,size=small,boxsep=0.3mm,left=0.5mm,right=0.5mm,frame code={\draw[macouleurborduresblocexo,rounded corners=0.5mm,fill=white,line width=\tcboxcalloutbarbarwidth] (frame.north west) |- ([xshift=\tcboxcalloutbarleftmargin+0.5\tcboxcalloutbarbarwidth]frame.south west) --++ (0.2cm,-0.175cm) --++ (-0.075cm,0.175cm) -- (frame.south east) -- (frame.north east) -- cycle ;}},fonttitle=\tmpstyleblocexo}}%
-		}%
-		{simple}{\tcbset{monstylebloexobordures/.style={frame empty,left=\dimexpr1.5\hauteurnumerocercle+1mm\relax,right=0mm,top=0mm,bottom=2mm,boxsep=0mm,%
-			finish unbroken={%
-				\filldraw[macouleurborduresblocexo] ([xshift={0.75\hauteurnumerocercle},yshift={-0.75\hauteurnumerocercle}]frame.north west) circle[radius={0.75\hauteurnumerocercle}];%
-				\draw[ligne bloc exo,macouleurborduresblocexo,rounded corners=2mm] ([xshift={0.75\hauteurnumerocercle},yshift={-0.75\hauteurnumerocercle}]frame.north west) |- ([xshift=1cm]frame.south west) ;%
-				%\draw[ligne bloc exo,macouleurblocexo,densely dashed] ([xshift=1cm]frame.south west) --++(1cm,0) ;%
-				\draw ([xshift={0.75\hauteurnumerocercle},yshift={-0.75\hauteurnumerocercle}]frame.north west) node[text=white,font=\tmpstyleblocexo,scale=0.95] {\ifnum\thenumeroblocexo<10\relax\thenumeroblocexo\else\scalebox{0.667}[1]{\thenumeroblocexo}\fi} ;%
-				},%
-			finish first={%
-				\filldraw[macouleurborduresblocexo] ([xshift={0.75\hauteurnumerocercle},yshift={-0.75\hauteurnumerocercle}]frame.north west) circle[radius={0.75\hauteurnumerocercle}];%
-				\draw[ligne bloc exo,macouleurborduresblocexo] ([xshift={0.75\hauteurnumerocercle},yshift={-0.75\hauteurnumerocercle}]frame.north west) -- ([xshift={0.75\hauteurnumerocercle},yshift={5mm}]frame.south west) ;%
-				\draw[ligne bloc exo,macouleurborduresblocexo,densely dashed] ([xshift={0.75\hauteurnumerocercle},yshift={5mm}]frame.south west) --++ (0,-5mm) ;%
-				\draw ([xshift={0.75\hauteurnumerocercle},yshift={-0.75\hauteurnumerocercle}]frame.north west) node[text=white,font=\tmpstyleblocexo,scale=0.95] {\ifnum\thenumeroblocexo<10\relax\thenumeroblocexo\else\scalebox{0.667}[1]{\thenumeroblocexo}\fi} ;%
-				},%
-			finish middle={%
-				\draw[ligne bloc exo] ([yshift=-5mm]frame.north west) -- ([yshift=5mm]frame.south west) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north west) -- (frame.north west) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south west) -- (frame.south west) ;%
-				},%
-			finish last={%
-				\draw[ligne bloc exo,macouleurborduresblocexo,densely dashed] ([xshift={0.75\hauteurnumerocercle},yshift=-5mm]frame.north west) --++ (0,5mm) ;%
-				\draw[ligne bloc exo,macouleurborduresblocexo,rounded corners=2mm] ([xshift={0.75\hauteurnumerocercle},yshift={-5mm}]frame.north west) |- ([xshift=1cm]frame.south west) ;%
-				}%
-			}%
-			}%
-		}%
-		{aucune}{\tcbset{monstylebloexobordures/.style={frame empty,left=0mm,right=0mm,boxsep=0mm,boxrule=0mm,top=2mm,before upper={\EnvtExoAltCodeAvant}}}}%
-		{alt}{\tcbset{monstylebloexobordures/.style={frame empty,top=0mm,%
-			finish unbroken={\draw[ligne bloc exo,|-|] ([xshift=0.5em-0.1mm]title.west) --++ (-0.5em-0.1mm,0) {[rounded corners=2mm]|- (frame.south east)} |- ([xshift=-0.5em+0.1mm]title.east) ;},%
-			finish first={%
-				\draw[ligne bloc exo,|-] ([xshift=0.5em-0.1mm]title.west) --++ (-0.5em-0.1mm,0) -- ([yshift=5mm]frame.south west) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south west) -- (frame.south west) ;%
-				\draw[ligne bloc exo,-|] ([yshift=5mm]frame.south east) |- ([xshift=-0.5em+0.1mm]title.east) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south east) -- (frame.south east) ;%
-				},%
-			finish middle={%
-				\draw[ligne bloc exo] ([yshift=-5mm]frame.north west) -- ([yshift=5mm]frame.south west) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north west) -- (frame.north west) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north east) -- (frame.north east) ;%
-				\draw[ligne bloc exo] ([yshift=-5mm]frame.north east) -- ([yshift=5mm]frame.south east) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south east) -- (frame.south east) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south west) -- (frame.south west) ;%
-				},%
-			finish last={%
-				\draw[ligne bloc exo] ([yshift=-5mm]frame.north west) {[rounded corners=2mm]|- (frame.south east)} -- ([yshift=-5mm]frame.north east) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north west) -- (frame.north west) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north east) -- (frame.north east) ;%
-				}%
-			}%
-			}%
-		}%
-		{fleche}{\tcbset{monstylebloexobordures/.style={frame empty,top=0mm,righttitle=0mm,%
-			finish unbroken={\draw[ligne bloc exo,->,>=latex] ([xshift=0.5em-0.1mm]title.west) --++ (-0.5em-0.1mm,0) {[rounded corners=2mm]|- (frame.south east)}  -- ($(frame.south east)!0.5!(frame.north east)$) ;},%
-			finish first={%
-				\draw[ligne bloc exo] ([xshift=0.5em-0.1mm]title.west) --++ (-0.5em-0.1mm,0) -- ([yshift=5mm]frame.south west) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south west) -- (frame.south west) ;%
-				\draw[ligne bloc exo,->,>=latex] ([yshift=5mm]frame.south east) -- ($(frame.south east)!0.5!(frame.north east)$) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south east) -- (frame.south east) ;%
-				},%
-			finish middle={%
-				\draw[ligne bloc exo] ([yshift=-5mm]frame.north west) -- ([yshift=5mm]frame.south west) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north west) -- (frame.north west) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north east) -- (frame.north east) ;%
-				\draw[ligne bloc exo] ([yshift=-5mm]frame.north east) -- ([yshift=5mm]frame.south east) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south east) -- (frame.south east) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south west) -- (frame.south west) ;%
-				},%
-			finish last={%
-				\draw[ligne bloc exo] ([yshift=-5mm]frame.north west) {[rounded corners=2mm]|- (frame.south east)} -- ([yshift=-5mm]frame.north east) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north west) -- (frame.north west) ;%
-				\draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north east) -- (frame.north east) ;%
-				}%
-			}%
-			}%
-		}%
-	}%
-	\tcbset{monstyleblocexotitre/.style={
-			title={%
-				\vphantom{\blocexostrut}%
-				\IfStrEq{\EnvtExoAltType}{Classique}%
-				{%
-					\tmplabelblocexo%
-				}%
-				{%
-					\StrBehind{\EnvtExoAltType}{/}[\EnvtExoLabel]%
-					\EnvtExoLabel%
-				}%
-				\ifboolKV[StyleLocalBlocExo]{Compteur}{\thenumeroblocexo}{}\EnvtExoAltCpltTitre%
-				\IfStrEq{\EnvtExoAltEtoiles}{}{}%les étoiles au début...
-				{%
-					\space(%
-					\IfSubStr{\EnvtExoAltEtoiles}{§}%
-					{%
-						\StrCut{\EnvtExoAltEtoiles}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
-						{\pictostars[colors=macouleurblocexodeco/macouleurblocexodecofond,dstrut=()]{\EnvtExoStarNb/\EnvtExoStarTot}}%
-					}%
-					{%
-						{\pictostars[colors=macouleurblocexodeco/macouleurblocexodecofond,dstrut=()]{\EnvtExoAltEtoiles}}%
-					}%
-					)%
-				}%
-				%trait éventuel
-				\textcolor{macouleurborduresblocexo}{%
-				\IfStrEqCase{\EnvtExoAltTrait}{%
-					{plein}%
-						{%
-							\def\hrulefill{\leavevmode\leaders\hrule height \eptraitblocexo\hfill\kern\z@}%épaisseur
-							\,\hrulefill\null%
-							\def\hrulefill{\leavevmode\leaders\hrule height 0.4pt\hfill\kern\z@}%
-						}%
-					{pointilles}{\,\dotfill\null}%
-					{dashilles}{\,\hdashrule[\raisetraitblocexo]{\fill}{\eptraitblocexo}{\eptraitblocexospace}\null}%
-					{non}{\hfill\null}%
-					{aucun}{}%
-				}%
-				}%
-				%la décoration, manuelle
-				{\tmpstyleblocexo\textcolor{macouleurblocexodeco}{#2}}%
-			}%
-		}%
-	}%
-	\IfStrEq{\EnvtExoAltBordures}{simple}%
-		{%
-			\noindent\tcolorbox[monstyleblocexo,monstyleblocexobreakable,monstylebloexobordures,notitle]
-			{\tmpstyleblocexo\EnvtExoAltCpltTitre%
-				\IfStrEq{\EnvtExoAltEtoiles}{}{}%les étoiles au début...
-				{%
-					\space(%
-					\IfSubStr{\EnvtExoAltEtoiles}{§}%
-					{%
-						\StrCut{\EnvtExoAltEtoiles}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
-						{\pictostars[colors=macouleurblocexodeco/macouleurblocexodecofond]{\EnvtExoStarNb/\EnvtExoStarTot}}%
-					}%
-					{%
-						{\pictostars[colors=macouleurblocexodeco/macouleurblocexodecofond]{\EnvtExoAltEtoiles}}%
-					}%
-					)%
-				}%
-			}%
-		}%
-		{%
-			\noindent\tcolorbox[monstyleblocexo,monstyleblocexotitre,monstyleblocexobreakable,monstylebloexobordures]
-		}%
+  \useKVdefault[StyleLocalBlocExo]%
+  \setKV[StyleLocalBlocExo]{#1}%
+  %test couleur globale ??
+  \IfStrEq{\tmpcoulglobblocexo}{}%
+    {}%
+    {%
+      \colorlet{macouleurblocexo}{\tmpcoulglobblocexo}%
+      \colorlet{macouleurborduresblocexo}{\tmpcoulglobblocexo}%
+      \colorlet{macouleurblocexodeco}{\tmpcoulglobblocexo}%
+      \colorlet{macouleurblocexodecofond}{\tmpcoulglobblocexo!33}%
+    }%
+  %fin test
+  \addtocounter{numeroblocexo}{1}%
+  \ifboolKV[StyleLocalBlocExo]{Compteur}{}{\addtocounter{numeroblocexo}{-1}}%
+  %styles
+  \tcbset{reset}%
+  \ifboolKV[StyleLocalBlocExo]{Breakable}%
+  {%
+    \tcbset{monstyleblocexobreakable/.style={breakable}}%
+  }%
+  {%
+    \tcbset{monstyleblocexobreakable/.style={}}%
+  }%
+  \IfStrEq{\EnvtExoAltBordures}{simple}%
+    {%
+      \settototalheight\hauteurnumerocercle{\hbox{\tmpstyleblocexo 0123456789}}%
+    }%
+    {}%
+  \IfStrEqCase{\EnvtExoAltBordures}{%
+    {normal}{\tcbset{monstylebloexobordures/.style={sharp corners,rounded corners=northwest,opacityfill=1,righttitle=0mm}}}%
+    {bulle}{\tcbset{monstylebloexobordures/.style={enhanced,size=small,frame empty,interior empty,sharp corners,top=2mm+2mm,left skip=\tcboxcalloutbarleftmargin,%
+      underlay boxed title={%
+        %\filldraw[draw=none,tcboxcalloutbarcolorbg,line width=\tcboxcalloutbarbarwidth] (frame.north west) rectangle (frame.south east);%
+        \draw[macouleurborduresblocexo,line width=\tcboxcalloutbarbarwidth] (frame.north west) -- (frame.south west) --++ (1.5\tcboxcalloutbarleftmargin,0) ;
+        \draw[macouleurborduresblocexo,line width=\tcboxcalloutbarbarwidth,densely dashed] ([xshift=1.5\tcboxcalloutbarleftmargin]frame.south west) --++ (1.5\tcboxcalloutbarleftmargin,0) ;
+      },%
+      attach boxed title to top left={xshift=-\tcboxcalloutbarleftmargin,yshift=-\tcboxedtitleheight+2mm},%
+      boxed title style={interior empty,size=small,boxsep=0.3mm,left=0.5mm,right=0.5mm,frame code={\draw[macouleurborduresblocexo,rounded corners=0.5mm,fill=white,line width=\tcboxcalloutbarbarwidth] (frame.north west) |- ([xshift=\tcboxcalloutbarleftmargin+0.5\tcboxcalloutbarbarwidth]frame.south west) --++ (0.2cm,-0.175cm) --++ (-0.075cm,0.175cm) -- (frame.south east) -- (frame.north east) -- cycle ;}},fonttitle=\tmpstyleblocexo}}%
+    }%
+    {simple}{\tcbset{monstylebloexobordures/.style={frame empty,left=\dimexpr1.5\hauteurnumerocercle+1mm\relax,right=0mm,top=0mm,bottom=2mm,boxsep=0mm,%
+      finish unbroken={%
+        \filldraw[macouleurborduresblocexo] ([xshift={0.75\hauteurnumerocercle},yshift={-0.75\hauteurnumerocercle}]frame.north west) circle[radius={0.75\hauteurnumerocercle}];%
+        \draw[ligne bloc exo,macouleurborduresblocexo,rounded corners=2mm] ([xshift={0.75\hauteurnumerocercle},yshift={-0.75\hauteurnumerocercle}]frame.north west) |- ([xshift=1cm]frame.south west) ;%
+        %\draw[ligne bloc exo,macouleurblocexo,densely dashed] ([xshift=1cm]frame.south west) --++(1cm,0) ;%
+        \draw ([xshift={0.75\hauteurnumerocercle},yshift={-0.75\hauteurnumerocercle}]frame.north west) node[text=white,font=\tmpstyleblocexo,scale=0.95] {\ifnum\thenumeroblocexo<10\relax\thenumeroblocexo\else\scalebox{0.667}[1]{\thenumeroblocexo}\fi} ;%
+        },%
+      finish first={%
+        \filldraw[macouleurborduresblocexo] ([xshift={0.75\hauteurnumerocercle},yshift={-0.75\hauteurnumerocercle}]frame.north west) circle[radius={0.75\hauteurnumerocercle}];%
+        \draw[ligne bloc exo,macouleurborduresblocexo] ([xshift={0.75\hauteurnumerocercle},yshift={-0.75\hauteurnumerocercle}]frame.north west) -- ([xshift={0.75\hauteurnumerocercle},yshift={5mm}]frame.south west) ;%
+        \draw[ligne bloc exo,macouleurborduresblocexo,densely dashed] ([xshift={0.75\hauteurnumerocercle},yshift={5mm}]frame.south west) --++ (0,-5mm) ;%
+        \draw ([xshift={0.75\hauteurnumerocercle},yshift={-0.75\hauteurnumerocercle}]frame.north west) node[text=white,font=\tmpstyleblocexo,scale=0.95] {\ifnum\thenumeroblocexo<10\relax\thenumeroblocexo\else\scalebox{0.667}[1]{\thenumeroblocexo}\fi} ;%
+        },%
+      finish middle={%
+        \draw[ligne bloc exo] ([yshift=-5mm]frame.north west) -- ([yshift=5mm]frame.south west) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north west) -- (frame.north west) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south west) -- (frame.south west) ;%
+        },%
+      finish last={%
+        \draw[ligne bloc exo,macouleurborduresblocexo,densely dashed] ([xshift={0.75\hauteurnumerocercle},yshift=-5mm]frame.north west) --++ (0,5mm) ;%
+        \draw[ligne bloc exo,macouleurborduresblocexo,rounded corners=2mm] ([xshift={0.75\hauteurnumerocercle},yshift={-5mm}]frame.north west) |- ([xshift=1cm]frame.south west) ;%
+        }%
+      }%
+      }%
+    }%
+    {aucune}{\tcbset{monstylebloexobordures/.style={frame empty,left=0mm,right=0mm,boxsep=0mm,boxrule=0mm,top=2mm,before upper={\EnvtExoAltCodeAvant}}}}%
+    {alt}{\tcbset{monstylebloexobordures/.style={frame empty,top=0mm,%
+      finish unbroken={\draw[ligne bloc exo,|-|] ([xshift=0.5em-0.1mm]title.west) --++ (-0.5em-0.1mm,0) {[rounded corners=2mm]|- (frame.south east)} |- ([xshift=-0.5em+0.1mm]title.east) ;},%
+      finish first={%
+        \draw[ligne bloc exo,|-] ([xshift=0.5em-0.1mm]title.west) --++ (-0.5em-0.1mm,0) -- ([yshift=5mm]frame.south west) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south west) -- (frame.south west) ;%
+        \draw[ligne bloc exo,-|] ([yshift=5mm]frame.south east) |- ([xshift=-0.5em+0.1mm]title.east) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south east) -- (frame.south east) ;%
+        },%
+      finish middle={%
+        \draw[ligne bloc exo] ([yshift=-5mm]frame.north west) -- ([yshift=5mm]frame.south west) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north west) -- (frame.north west) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north east) -- (frame.north east) ;%
+        \draw[ligne bloc exo] ([yshift=-5mm]frame.north east) -- ([yshift=5mm]frame.south east) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south east) -- (frame.south east) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south west) -- (frame.south west) ;%
+        },%
+      finish last={%
+        \draw[ligne bloc exo] ([yshift=-5mm]frame.north west) {[rounded corners=2mm]|- (frame.south east)} -- ([yshift=-5mm]frame.north east) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north west) -- (frame.north west) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north east) -- (frame.north east) ;%
+        }%
+      }%
+      }%
+    }%
+    {fleche}{\tcbset{monstylebloexobordures/.style={frame empty,top=0mm,righttitle=0mm,%attention à tikz.babel, à tester ;-)
+      finish unbroken={\draw[ligne bloc exo,->,>=latex] ([xshift=0.5em-0.1mm]title.west) --++ (-0.5em-0.1mm,0) {[rounded corners=2mm]|- (frame.south east)}  -- ($0.5*(frame.south east)+0.5*(frame.north east)$) ;},%
+      finish first={%
+        \draw[ligne bloc exo] ([xshift=0.5em-0.1mm]title.west) --++ (-0.5em-0.1mm,0) -- ([yshift=5mm]frame.south west) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south west) -- (frame.south west) ;%
+        \draw[ligne bloc exo,->,>=latex] ([yshift=5mm]frame.south east) -- ($0.5*(frame.south east)+0.5*(frame.north east)$) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south east) -- (frame.south east) ;%
+        },%
+      finish middle={%
+        \draw[ligne bloc exo] ([yshift=-5mm]frame.north west) -- ([yshift=5mm]frame.south west) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north west) -- (frame.north west) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north east) -- (frame.north east) ;%
+        \draw[ligne bloc exo] ([yshift=-5mm]frame.north east) -- ([yshift=5mm]frame.south east) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south east) -- (frame.south east) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=5mm]frame.south west) -- (frame.south west) ;%
+        },%
+      finish last={%
+        \draw[ligne bloc exo] ([yshift=-5mm]frame.north west) {[rounded corners=2mm]|- (frame.south east)} -- ([yshift=-5mm]frame.north east) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north west) -- (frame.north west) ;%
+        \draw[ligne bloc exo,densely dashed] ([yshift=-5mm]frame.north east) -- (frame.north east) ;%
+        }%
+      }%
+      }%
+    }%
+  }%
+  \tcbset{monstyleblocexotitre/.style={
+      title={%
+        \vphantom{\blocexostrut}%
+        \IfStrEq{\EnvtExoAltType}{Classique}%
+        {%
+          \tmplabelblocexo%
+        }%
+        {%
+          \StrBehind{\EnvtExoAltType}{/}[\EnvtExoLabel]%
+          \EnvtExoLabel%
+        }%
+        \ifboolKV[StyleLocalBlocExo]{Compteur}{\thenumeroblocexo}{}\EnvtExoAltCpltTitre%
+        \IfStrEq{\EnvtExoAltEtoiles}{}{}%les étoiles au début...
+        {%
+          \space(%
+          \IfSubStr{\EnvtExoAltEtoiles}{§}%
+          {%
+            \StrCut{\EnvtExoAltEtoiles}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+            {\pictostars[colors=macouleurblocexodeco/macouleurblocexodecofond,dstrut=()]{\EnvtExoStarNb/\EnvtExoStarTot}}%
+          }%
+          {%
+            {\pictostars[colors=macouleurblocexodeco/macouleurblocexodecofond,dstrut=()]{\EnvtExoAltEtoiles}}%
+          }%
+          )%
+        }%
+        %trait éventuel
+        \textcolor{macouleurborduresblocexo}{%
+        \IfStrEqCase{\EnvtExoAltTrait}{%
+          {plein}%
+            {%
+              \def\hrulefill{\leavevmode\leaders\hrule height \eptraitblocexo\hfill\kern\z@}%épaisseur
+              \,\hrulefill\null%
+              \def\hrulefill{\leavevmode\leaders\hrule height 0.4pt\hfill\kern\z@}%
+            }%
+          {pointilles}{\,\dotfill\null}%
+          {dashilles}{\,\hdashrule[\raisetraitblocexo]{\fill}{\eptraitblocexo}{\eptraitblocexospace}\null}%
+          {non}{\hfill\null}%
+          {aucun}{}%
+        }%
+        }%
+        %la décoration, manuelle
+        {\tmpstyleblocexo\textcolor{macouleurblocexodeco}{#2}}%
+      }%
+    }%
+  }%
+  \IfStrEq{\EnvtExoAltBordures}{simple}%
+    {%
+      \noindent\tcolorbox[monstyleblocexo,monstyleblocexobreakable,monstylebloexobordures,notitle]
+      {\tmpstyleblocexo\EnvtExoAltCpltTitre%
+        \IfStrEq{\EnvtExoAltEtoiles}{}{}%les étoiles au début...
+        {%
+          \space(%
+          \IfSubStr{\EnvtExoAltEtoiles}{§}%
+          {%
+            \StrCut{\EnvtExoAltEtoiles}{§}{\EnvtExoStarNb}{\EnvtExoStarTot}%
+            {\pictostars[colors=macouleurblocexodeco/macouleurblocexodecofond]{\EnvtExoStarNb/\EnvtExoStarTot}}%
+          }%
+          {%
+            {\pictostars[colors=macouleurblocexodeco/macouleurblocexodecofond]{\EnvtExoAltEtoiles}}%
+          }%
+          )%
+        }%
+      }%
+    }%
+    {%
+      \noindent\tcolorbox[monstyleblocexo,monstyleblocexotitre,monstyleblocexobreakable,monstylebloexobordures]
+    }%
 }%
 {%
-	\endtcolorbox%
+  \endtcolorbox%
+}
+
+\newcommand\blocexolabelperso[2]{%
+  {%
+    \color{#1}~~%
+    {\blocexolabelpersopolice%
+      \textperiodcentered\textperiodcentered\textperiodcentered~%
+      #2~
+      \textperiodcentered\textperiodcentered\textperiodcentered%
+      \,%
+    }%
+  }%
+}
+\NewDocumentCommand\GenereBlocExoLabel{ m m m }{%
+  \expandafter\newcommand\csname blocexolabel#1\endcsname{%
+    \blocexolabelperso{#2}{#3}%
+  }%
+}
+\NewDocumentCommand\GenereBlocExo{ m m m }{%
+  \NewDocumentEnvironment{#1}{ O{} m }%
+    {\begin{BlocExo}[##1,ComplementTitre={#2}]{#3}}%
+    {\end{BlocExo}}%
 }
 
 %===entete note (crédits JP. Bernard)
 \tcbuselibrary{raster}
 
 \tcbset{
-	BOITEENTETEbox/.style={
-		enhanced jigsaw,
-		breakable,
-		colframe=BOITEENTETEfrontColor,
-		coltitle=BOITEENTETEfrontColor,
-		colback=white,
-		boxrule=1pt
-	}
+  BOITEENTETEbox/.style={
+    enhanced jigsaw,
+    breakable,
+    colframe=BOITEENTETEfrontColor,
+    coltitle=BOITEENTETEfrontColor,
+    colback=white,
+    boxrule=1pt
+  }
 }
 
 \newcounter{tmprasterheight}
@@ -831,210 +857,210 @@
 \def\tmpfonteboite{\sffamily}
 
 \defKV[BoiteNotation]{%
-	Couleur=\colorlet{BOITEENTETEfrontColor}{#1}
+  Couleur=\colorlet{BOITEENTETEfrontColor}{#1}
 }
 \setKVdefault[BoiteNotation]{%
-	Couleur=black,%
-	Num=false
+  Couleur=black,%
+  Num=false
 }
 
 
 \NewDocumentCommand\BoiteNotation{O{}m}{%
-	% #1 = main color
-	% #2 = list of points
-	\stepcounter{tmprasterheight}%for multiple boxes
-	%clés
-	\restoreKV[BoiteNotation]%
-	\setKV[BoiteNotation]{#1}%
-	%next
-	\colorlet{BOITEENTETEbackColor}{BOITEENTETEfrontColor!10}%
-	\colorlet{BOITEENTETEexoColor}{BOITEENTETEfrontColor!75!black}%
-	\noindent%
-	\settowidth\tmptitreexoboite{\hbox{\tmpfonteboite\bfseries Exercice n°M}}%
-	\begin{tcboxedraster}[
-		fontupper=\tmpfonteboite,
-		raster columns=2,
-		raster equal height=rows,
-		raster force size=false,
-		raster row skip=5pt,
-		raster column skip=5pt,
-		raster column 1/.style={width=1.75\tmptitreexoboite,blankest},
-		raster column 2/.style={width=\linewidth-1.75\tmptitreexoboite-5pt,blankest}
-		]
-		{BOITEENTETEbox,left=3pt,right=3pt,top=1pt,bottom=1pt,colback=BOITEENTETEbackColor}
-		\begin{tcboxedraster}[
-			raster columns=2,
-			raster force size=false,
-			raster row skip=2pt,
-			raster column skip=2pt,
-			raster every box/.style={
-				boxrule=0.6pt,
-				boxsep=0pt,
-				top=3pt,
-				bottom=3pt,
-				coltext=BOITEENTETEfrontColor
-			},
-			raster column 1/.style={
-				width=\tmptitreexoboite,
-				left=0pt,
-				right=0pt,
-				fontupper=\bfseries,
-				colback=BOITEENTETEbackColor,
-				colframe=BOITEENTETEbackColor,
-				coltext=BOITEENTETEexoColor
-			},
-			raster column 2/.style={
-				width=0.75\tmptitreexoboite,
-				colback=white,
-				colframe=BOITEENTETEfrontColor,
-				coltext=BOITEENTETEexoColor,
-				halign=right,
-				right=3pt
-			}
-			]{equal height group=exercices-\arabic{tmprasterheight}}
-			\def\tmptotpts{0}%
-			\foreach \pts [count=\i] in {#2}{%
-				\xdef\tmptotpts{\fpeval{\tmptotpts+\pts}}%totalpoints
-				\begin{tcolorbox}
-					{\vphantom{(/0123456789)}Exercice n°\i}
-				\end{tcolorbox}
-				\begin{tcolorbox}
-					\ifboolKV[BoiteNotation]{Num}%
-						{%
-							{\vphantom{(/0123456789.)}/{\num{\pts}}}%
-						}%
-						{%
-							{\vphantom{(/0123456789.)}/{\pts}}%
-						}%
-				\end{tcolorbox}
-			}
-		\end{tcboxedraster}
-		%
-		\begin{tcboxedraster}[
-			raster columns=1,
-			raster column skip=5pt,
-			raster every box/.style={
-				colback=white,
-				boxrule=0.6pt,
-				boxsep=0pt,
-				left=3pt,
-				top=3pt,
-				box align=base,
-				halign=left,
-				fontupper=\bfseries,
-				equal height group=exercices-\arabic{tmprasterheight},
-				colframe=BOITEENTETEfrontColor,
-				coltext=BOITEENTETEexoColor,
-				minimum for current equal height group=2cm,
-			},
-			raster column 1/.style={},
-			raster column 2/.style={}
-			]{}
-			\begin{tcolorbox}
-				\vphantom{(/0123456789.)}Observations :
-			\end{tcolorbox}
-		\end{tcboxedraster}
-		%
-		\begin{tcboxedraster}[
-			raster columns=2,
-			raster force size=false,
-			raster column skip=2pt,
-			raster every box/.style={
-				boxrule=0.6pt,
-				boxsep=0pt,
-				top=3pt,
-				bottom=3pt,
-				coltext=BOITEENTETEfrontColor
-			},
-			raster column 1/.style={
-				width=\tmptitreexoboite,
-				left=0pt,
-				right=0pt,
-				fontupper=\bfseries,
-				colback=BOITEENTETEbackColor,
-				colframe=BOITEENTETEbackColor,
-				coltext=BOITEENTETEexoColor
-			},
-			raster column 2/.style={
-				width=0.75\tmptitreexoboite,
-				colback=white,
-				colframe=BOITEENTETEfrontColor,
-				coltext=BOITEENTETEexoColor,
-				halign=right,
-				right=3pt
-			}
-			]{}
-			\begin{tcolorbox}
-				\vphantom{(/0123456789.)}Total Ex.
-			\end{tcolorbox}
-			\begin{tcolorbox}
-				\ifboolKV[BoiteNotation]{Num}%
-					{%
-						{\vphantom{(/0123456789.)}/{\num{\tmptotpts}}}%
-					}%
-					{%
-						{\vphantom{(/0123456789.)}/{\tmptotpts}}%
-					}%
-			\end{tcolorbox}
-		\end{tcboxedraster}
-		%
-		\begin{tcboxedraster}[
-			raster columns=1,
-			raster halign=right,
-			raster every box/.style={blankest},
-			raster column 1/.style={},
-			raster column 2/.style={}
-			]{}
-			\begin{tcboxedraster}[
-				raster columns=3,
-				raster force size=false,
-				raster every box/.style={
-					boxrule=0.6pt,
-					boxsep=0pt,
-					top=3pt,
-					bottom=3pt,
-					coltext=BOITEENTETEexoColor,
-				},
-				raster column 1/.style={
-					width=3.05cm,
-					left=0pt,
-					right=0pt,
-					colback=BOITEENTETEbackColor,
-					colframe=BOITEENTETEbackColor,
-					fontupper=\bfseries,
-					halign upper=left
-				},
-				raster column 2/.style={
-					width=\tmptitreexoboite,
-					left=0pt,
-					right=0pt,
-					colback=BOITEENTETEbackColor,
-					colframe=BOITEENTETEbackColor,
-					fontupper=\bfseries,
-					halign upper=right
-				},
-				raster column 3/.style={
-					enhanced,
-					width=0.75\tmptitreexoboite,
-					colframe=BOITEENTETEfrontColor,
-					colback=white,
-					halign=right,
-					right=3pt,
-					borderline={0.6pt}{-2pt}{BOITEENTETEfrontColor}
-				},
-				raster halign=right
-				]{}
-				\begin{tcolorbox}
-				\end{tcolorbox}
-				\begin{tcolorbox}
-					\vphantom{(/0123456789.)}Note
-				\end{tcolorbox}
-				\begin{tcolorbox}
-					%
-				\end{tcolorbox}
-			\end{tcboxedraster}
-		\end{tcboxedraster}
-	\end{tcboxedraster}
+  % #1 = main color
+  % #2 = list of points
+  \stepcounter{tmprasterheight}%for multiple boxes
+  %clés
+  \restoreKV[BoiteNotation]%
+  \setKV[BoiteNotation]{#1}%
+  %next
+  \colorlet{BOITEENTETEbackColor}{BOITEENTETEfrontColor!10}%
+  \colorlet{BOITEENTETEexoColor}{BOITEENTETEfrontColor!75!black}%
+  \noindent%
+  \settowidth\tmptitreexoboite{\hbox{\tmpfonteboite\bfseries Exercice n°M}}%
+  \begin{tcboxedraster}[
+    fontupper=\tmpfonteboite,
+    raster columns=2,
+    raster equal height=rows,
+    raster force size=false,
+    raster row skip=5pt,
+    raster column skip=5pt,
+    raster column 1/.style={width=1.75\tmptitreexoboite,blankest},
+    raster column 2/.style={width=\linewidth-1.75\tmptitreexoboite-5pt,blankest}
+    ]
+    {BOITEENTETEbox,left=3pt,right=3pt,top=1pt,bottom=1pt,colback=BOITEENTETEbackColor}
+    \begin{tcboxedraster}[
+      raster columns=2,
+      raster force size=false,
+      raster row skip=2pt,
+      raster column skip=2pt,
+      raster every box/.style={
+        boxrule=0.6pt,
+        boxsep=0pt,
+        top=3pt,
+        bottom=3pt,
+        coltext=BOITEENTETEfrontColor
+      },
+      raster column 1/.style={
+        width=\tmptitreexoboite,
+        left=0pt,
+        right=0pt,
+        fontupper=\bfseries,
+        colback=BOITEENTETEbackColor,
+        colframe=BOITEENTETEbackColor,
+        coltext=BOITEENTETEexoColor
+      },
+      raster column 2/.style={
+        width=0.75\tmptitreexoboite,
+        colback=white,
+        colframe=BOITEENTETEfrontColor,
+        coltext=BOITEENTETEexoColor,
+        halign=right,
+        right=3pt
+      }
+      ]{equal height group=exercices-\arabic{tmprasterheight}}
+      \def\tmptotpts{0}%
+      \foreach \pts [count=\i] in {#2}{%
+        \xdef\tmptotpts{\fpeval{\tmptotpts+\pts}}%totalpoints
+        \begin{tcolorbox}
+          {\vphantom{(/0123456789)}Exercice n°\i}
+        \end{tcolorbox}
+        \begin{tcolorbox}
+          \ifboolKV[BoiteNotation]{Num}%
+            {%
+              {\vphantom{(/0123456789.)}/{\num{\pts}}}%
+            }%
+            {%
+              {\vphantom{(/0123456789.)}/{\pts}}%
+            }%
+        \end{tcolorbox}
+      }
+    \end{tcboxedraster}
+    %
+    \begin{tcboxedraster}[
+      raster columns=1,
+      raster column skip=5pt,
+      raster every box/.style={
+        colback=white,
+        boxrule=0.6pt,
+        boxsep=0pt,
+        left=3pt,
+        top=3pt,
+        box align=base,
+        halign=left,
+        fontupper=\bfseries,
+        equal height group=exercices-\arabic{tmprasterheight},
+        colframe=BOITEENTETEfrontColor,
+        coltext=BOITEENTETEexoColor,
+        minimum for current equal height group=2cm,
+      },
+      raster column 1/.style={},
+      raster column 2/.style={}
+      ]{}
+      \begin{tcolorbox}
+        \vphantom{(/0123456789.)}Observations :
+      \end{tcolorbox}
+    \end{tcboxedraster}
+    %
+    \begin{tcboxedraster}[
+      raster columns=2,
+      raster force size=false,
+      raster column skip=2pt,
+      raster every box/.style={
+        boxrule=0.6pt,
+        boxsep=0pt,
+        top=3pt,
+        bottom=3pt,
+        coltext=BOITEENTETEfrontColor
+      },
+      raster column 1/.style={
+        width=\tmptitreexoboite,
+        left=0pt,
+        right=0pt,
+        fontupper=\bfseries,
+        colback=BOITEENTETEbackColor,
+        colframe=BOITEENTETEbackColor,
+        coltext=BOITEENTETEexoColor
+      },
+      raster column 2/.style={
+        width=0.75\tmptitreexoboite,
+        colback=white,
+        colframe=BOITEENTETEfrontColor,
+        coltext=BOITEENTETEexoColor,
+        halign=right,
+        right=3pt
+      }
+      ]{}
+      \begin{tcolorbox}
+        \vphantom{(/0123456789.)}Total Ex.
+      \end{tcolorbox}
+      \begin{tcolorbox}
+        \ifboolKV[BoiteNotation]{Num}%
+          {%
+            {\vphantom{(/0123456789.)}/{\num{\tmptotpts}}}%
+          }%
+          {%
+            {\vphantom{(/0123456789.)}/{\tmptotpts}}%
+          }%
+      \end{tcolorbox}
+    \end{tcboxedraster}
+    %
+    \begin{tcboxedraster}[
+      raster columns=1,
+      raster halign=right,
+      raster every box/.style={blankest},
+      raster column 1/.style={},
+      raster column 2/.style={}
+      ]{}
+      \begin{tcboxedraster}[
+        raster columns=3,
+        raster force size=false,
+        raster every box/.style={
+          boxrule=0.6pt,
+          boxsep=0pt,
+          top=3pt,
+          bottom=3pt,
+          coltext=BOITEENTETEexoColor,
+        },
+        raster column 1/.style={
+          width=3.05cm,
+          left=0pt,
+          right=0pt,
+          colback=BOITEENTETEbackColor,
+          colframe=BOITEENTETEbackColor,
+          fontupper=\bfseries,
+          halign upper=left
+        },
+        raster column 2/.style={
+          width=\tmptitreexoboite,
+          left=0pt,
+          right=0pt,
+          colback=BOITEENTETEbackColor,
+          colframe=BOITEENTETEbackColor,
+          fontupper=\bfseries,
+          halign upper=right
+        },
+        raster column 3/.style={
+          enhanced,
+          width=0.75\tmptitreexoboite,
+          colframe=BOITEENTETEfrontColor,
+          colback=white,
+          halign=right,
+          right=3pt,
+          borderline={0.6pt}{-2pt}{BOITEENTETEfrontColor}
+        },
+        raster halign=right
+        ]{}
+        \begin{tcolorbox}
+        \end{tcolorbox}
+        \begin{tcolorbox}
+          \vphantom{(/0123456789.)}Note
+        \end{tcolorbox}
+        \begin{tcolorbox}
+          %
+        \end{tcolorbox}
+      \end{tcboxedraster}
+    \end{tcboxedraster}
+  \end{tcboxedraster}
 }
 
 \endinput
