@@ -2,13 +2,15 @@
 % licences        : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
 %                 : CC BY-SA 4.0 (https://tex.stackexchange.com/questions/475141/simulating-paintbrush-strokes-in-tikz from user121799)
 %                 :              (https://tex.stackexchange.com/questions/460836/custom-line-cap-to-simulate-inked-line-in-tikz/460842#460842 from user121799)
+%                 : LPPL 1.3c    (https://github.com/meyvenil0844-byte/-multicancel)
 
 \NeedsTeXFormat{LaTeX2e}
-\def\tkzdfversion{0.20b}
-\def\tkzdfdate{2026/08/17}
+\def\tkzdfversion{0.20c}
+\def\tkzdfdate{2026/09/28}
 \ProvidesPackage{tikz-decofonts}[\tkzdfdate\space \tkzdfversion\space Custom fonts or effects, made with TikZ]
 
 %------History
+% 0.20c  Multicancel effect
 % 0.20b  Bugfix with AtBeginDocument
 % 0.20a  Calligraphy macro (like pencircle in MP)
 % 0.1.8  Pen-underline
@@ -22,6 +24,7 @@
 % 0.1.0  Initial version
 
 %------Packages and library
+\RequirePackage{amsmath}
 \RequirePackage{tikz}
 \RequirePackage{tikz-3dplot}
 \RequirePackage{settobox}
@@ -1614,6 +1617,132 @@
     \calligraphypencircle*[name=fude,angle=85,line width=6bp,double=false]
     \calligraphypencircle*[name=japonais,angle=85,line width=6bp,double=false]
   }%
+}
+
+%----multicancel
+\newcommand\tkzmulticancel@type{c}
+\def\tkzmulticancel@typemap@slash{c}
+\def\tkzmulticancel@typemap@backslash{b}
+\def\tkzmulticancel@typemap@cross{x}
+\def\tkzmulticancel@typemap@to{t}
+\newcommand\tkzmulticancel@settype[1]{%
+  \ifcsname tkzmulticancel@typemap@#1\endcsname
+    \edef\tkzmulticancel@type{\csname tkzmulticancel@typemap@#1\endcsname}%
+  \else
+    \PackageError{tikz-decofonts}{Unknown type `#1' for \string\tkzmulticancel}%
+      {Available types: slash, backslash, cross, to}%
+  \fi
+}
+
+\defKV[tkzmulticancel]{%
+  type=\tkzmulticancel@settype{#1},%
+  target=\def\tkzmulticancel@target{#1},%
+  lines=\def\tkzmulticancel@count{#1},%
+  color=\def\tkzmulticancel@color{#1},%
+  extend=\def\tkzmulticancel@extend{#1},%
+  arrow=\def\tkzmulticancel@arrow{#1}%
+}
+\setKVdefault[tkzmulticancel]{%
+  type=slash,%   slash, backslash, cross or to (last line is an arrow)
+  target={},%    value written at the end of the arrow (type=to)
+  lines=1,%
+  color=black,%
+  centered=false,%
+  sep={},%       empty = automatic (2.5pt if stacked, 0pt if centered)
+  extend=1.5pt,%
+  arrow=-latex%
+}
+
+\newif\iftkzmulticancel@centered
+\def\tkzmulticancel@sw{south west}%for the test in the diag macro
+\tikzset{tkzmulticancel line/.style={semithick}}%style applied to all the lines
+ 
+\newcommand\tkzmulticancel@savedstyle{}
+\newcommand\tkzmulticancel@savedbody{}
+ 
+% #1=keys #2=tikzpicture options
+% keys are stored in private macros (local to the group), so that nested calls are safe
+\newcommand\tkzmulticancel@setup[2]{%
+  \restoreKV[tkzmulticancel]%
+  \setKV[tkzmulticancel]{#1}%
+  \ifboolKV[tkzmulticancel]{centered}%
+    {\tkzmulticancel@centeredtrue}%
+    {\tkzmulticancel@centeredfalse}%
+  \edef\tkzmulticancel@sep{\useKV[tkzmulticancel]{sep}}%
+  \ifx\tkzmulticancel@sep\@empty
+    \iftkzmulticancel@centered\def\tkzmulticancel@sep{0pt}\else\def\tkzmulticancel@sep{2.5pt}\fi
+  \fi
+  \def\tkzmulticancel@picopts{baseline=(content.base),label distance=0pt,#2}%
+}
+ 
+% #1,#2=anchors (south west/north east or north west/south east) #3=extra options #4=extra path code
+\newcommand\tkzmulticancel@diag[4]{%
+  \iftkzmulticancel@centered
+    % 'counting' bar #i: it covers its own cell (box width split in n cells), full height of the box
+    \pgfmathsetmacro{\tkzmulticancel@xa}{(\tkzmulticancel@i-1)*(\tkzmulticancel@cw+\tkzmulticancel@sep)}%
+    \pgfmathsetmacro{\tkzmulticancel@xb}{\tkzmulticancel@xa+\tkzmulticancel@cw}%
+    \def\tkzmulticancel@tmp{#1}%
+    \ifx\tkzmulticancel@tmp\tkzmulticancel@sw
+      \draw[draw=\tkzmulticancel@color,line cap=round,shorten <=-\tkzmulticancel@extend,shorten >=-\tkzmulticancel@extend,#3,tkzmulticancel line]
+        ([xshift=\tkzmulticancel@xa pt]content.south west) --
+        ([xshift=\tkzmulticancel@xb pt]content.north west) #4;%
+    \else
+      \draw[draw=\tkzmulticancel@color,line cap=round,shorten <=-\tkzmulticancel@extend,shorten >=-\tkzmulticancel@extend,#3,tkzmulticancel line]
+        ([xshift=\tkzmulticancel@xa pt]content.north west) --
+        ([xshift=\tkzmulticancel@xb pt]content.south west) #4;%
+    \fi
+  \else
+    % stacked: parallel lines shifted perpendicularly to their direction
+    \pgfmathanglebetweenpoints{\pgfpointanchor{content}{#1}}{\pgfpointanchor{content}{#2}}%
+    \pgfmathsetmacro{\tkzmulticancel@ang}{\pgfmathresult+90}%
+    \draw[draw=\tkzmulticancel@color,line cap=round,shorten <=-\tkzmulticancel@extend,shorten >=-\tkzmulticancel@extend,#3,tkzmulticancel line]
+      ([shift={(\tkzmulticancel@ang:\tkzmulticancel@o pt)}]content.#1) --
+      ([shift={(\tkzmulticancel@ang:\tkzmulticancel@o pt)}]content.#2) #4;%
+  \fi
+}
+ 
+\newcommand\tkzmulticancel@render{%
+  \expandafter\tikzpicture\expandafter[\tkzmulticancel@picopts]
+    \node[inner sep=0pt,outer sep=0pt] (content) {\ensuremath{\tkzmulticancel@savedstyle\tkzmulticancel@savedbody}};
+    \iftkzmulticancel@centered
+      \pgfpointdiff{\pgfpointanchor{content}{west}}{\pgfpointanchor{content}{east}}%
+      \edef\tkzmulticancel@boxw{\the\pgf@x}%
+      \pgfmathsetmacro{\tkzmulticancel@cw}{(\tkzmulticancel@boxw-(\tkzmulticancel@count-1)*\tkzmulticancel@sep)/\tkzmulticancel@count}%
+    \fi
+    \foreach \tkzmulticancel@i in {1,...,\tkzmulticancel@count} {%
+      \pgfmathsetmacro{\tkzmulticancel@o}{(\tkzmulticancel@i-(\tkzmulticancel@count+1)/2)*\tkzmulticancel@sep}%
+      \if\tkzmulticancel@type c
+        \tkzmulticancel@diag{south west}{north east}{}{}%
+      \fi
+      \if\tkzmulticancel@type b
+        \tkzmulticancel@diag{north west}{south east}{}{}%
+      \fi
+      \if\tkzmulticancel@type x
+        \tkzmulticancel@diag{south west}{north east}{}{}%
+        \tkzmulticancel@diag{north west}{south east}{}{}%
+      \fi
+      \if\tkzmulticancel@type t
+        \ifnum\tkzmulticancel@i=\tkzmulticancel@count
+          \tkzmulticancel@diag{south west}{north east}{\tkzmulticancel@arrow}%
+            {node[anchor=south west,inner sep=0.5pt,font=\scriptsize,text=\tkzmulticancel@color]
+              {\ensuremath{\tkzmulticancel@savedstyle\tkzmulticancel@target}}}%
+        \else
+          \tkzmulticancel@diag{south west}{north east}{}{}%
+        \fi
+      \fi
+    }%
+  \endtikzpicture%
+}
+ 
+\newcommand\tkzmulticancel@unpack[2]{%
+  \def\tkzmulticancel@savedstyle{#1}%
+  \def\tkzmulticancel@savedbody{#2}%
+  \tkzmulticancel@render
+}
+ 
+\NewDocumentCommand\tkzmulticancel{ O{} D<>{} m }{%
+  \tkzmulticancel@setup{#1}{#2}%
+  \relax\ifmmode\mathpalette{\tkzmulticancel@unpack}{#3}\else\tkzmulticancel@unpack{\textstyle}{\mbox{#3}}\fi
 }
 
 \endinput

@@ -38,80 +38,80 @@
 \tcbuselibrary{breakable,skins,hooks,listingsutf8}
 
 \lstset{
-	language=[LaTeX]TeX,%
-	basicstyle=\ttfamily,%
-	keywordstyle={\color{blue}},%
-	classoffset=0,%
-	keywords={},%
-	alsoletter={-},%
-	keywordstyle={\color{blue}},%
-	classoffset=1,%
-	alsoletter={-},%
-	morekeywords={commalists-tools},%
-	keywordstyle={\color{violet}},%
-	classoffset=2,%
-	alsoletter={-},%
-	morekeywords={\tkzbrush,\tkzink,\tkzpixl,\tkzpixletter,\tkzpixlquote,\tkzcomicbubble,\tkzunderline,\tkzsurround,\tkzfittextinarrow,\tkzcircledtxt,\tkzletterblock,\tkzunderlinepen,\phantomulinewithpen,\tkzpencircle,\calligraphypencircle,\calligraphy},%
-	keywordstyle={\color{green!50!black}},%
-	classoffset=3,%
-	morekeywords={},%
-	keywordstyle={\color{orange}}
+  language=[LaTeX]TeX,%
+  basicstyle=\ttfamily,%
+  keywordstyle={\color{blue}},%
+  classoffset=0,%
+  keywords={},%
+  alsoletter={-},%
+  keywordstyle={\color{blue}},%
+  classoffset=1,%
+  alsoletter={-},%
+  morekeywords={commalists-tools},%
+  keywordstyle={\color{violet}},%
+  classoffset=2,%
+  alsoletter={-},%
+  morekeywords={\tkzbrush,\tkzink,\tkzpixl,\tkzpixletter,\tkzpixlquote,\tkzcomicbubble,\tkzunderline,\tkzsurround,\tkzfittextinarrow,\tkzcircledtxt,\tkzletterblock,\tkzunderlinepen,\phantomulinewithpen,\tkzpencircle,\calligraphypencircle,\calligraphy,\tkzmulticancel,\tkzmultibcancel,\tkzmultixcancel,\tkzmulticancelto},%
+  keywordstyle={\color{green!50!black}},%
+  classoffset=3,%
+  morekeywords={},%
+  keywordstyle={\color{orange}}
 }
 
 \newtcblisting{DemoCode}[1]{%
-	enhanced,width=\linewidth,%
-	bicolor,size=title,%
-	colback=cyan!10!white,%
-	colbacklower=cyan!5!white,%
-	colframe=cyan!75!black,%
-	listing options={%
-		breaklines=true,%
-		breakatwhitespace=true,%
-		style=tcblatex,basicstyle=\small\ttfamily,%
-		tabsize=4,%
-		commentstyle={\itshape\color{gray}},
-		keywordstyle={\color{blue}},%
-		classoffset=0,%
-		keywords={\usepackage,\includegraphics,xstring,listofitems,\readlist,\showitems,\xintFor,\xintSeq},%
-		alsoletter={-},%
-		keywordstyle={\color{blue}},%
-		classoffset=1,%
-		alsoletter={-},%
-		morekeywords={euromoney},%
-		keywordstyle={\color{violet}},%
-		classoffset=2,%
-		alsoletter={-},%
-		morekeywords={\tkzbrush,\tkzink,\tkzpixl,\tkzpixletter,\tkzpixlquote,\tkzbicolor,\tkzcomicbubble,\tkzunderline,\tkzsurround,\tkzfittextinarrow,\tkzcircledtxt,\tkzletterblock,\tkzunderlinepen,\phantomulinewithpen,\tkzpencircle,\calligraphypencircle,\calligraphy},%
-		keywordstyle={\color{green!50!black}},%
-		classoffset=3,%
-		morekeywords={color,lines,scale,height,offseth,offsetv,thick,gridcolor,gridafter,nospaceafter,border,colors,style,intdelta,paralcolors,width,node,txtcolor,width,bheight,sheight,hoffset,shadow,shownodes,expand,globalwidth,absolute,thickness,strut,dstrut,hstretch,font,height,spacestretch,ratio,angle,line,width},%
-		keywordstyle={\color{orange}}
-	},%
-	#1
+  enhanced,width=\linewidth,%
+  bicolor,size=title,%
+  colback=cyan!10!white,%
+  colbacklower=cyan!5!white,%
+  colframe=cyan!75!black,%
+  listing options={%
+    breaklines=true,%
+    breakatwhitespace=true,%
+    style=tcblatex,basicstyle=\small\ttfamily,%
+    tabsize=4,%
+    commentstyle={\itshape\color{gray}},
+    keywordstyle={\color{blue}},%
+    classoffset=0,%
+    keywords={\usepackage,\includegraphics,xstring,listofitems,\readlist,\showitems,\xintFor,\xintSeq},%
+    alsoletter={-},%
+    keywordstyle={\color{blue}},%
+    classoffset=1,%
+    alsoletter={-},%
+    morekeywords={euromoney},%
+    keywordstyle={\color{violet}},%
+    classoffset=2,%
+    alsoletter={-},%
+    morekeywords={\tkzbrush,\tkzink,\tkzpixl,\tkzpixletter,\tkzpixlquote,\tkzbicolor,\tkzcomicbubble,\tkzunderline,\tkzsurround,\tkzfittextinarrow,\tkzcircledtxt,\tkzletterblock,\tkzunderlinepen,\phantomulinewithpen,\tkzpencircle,\calligraphypencircle,\calligraphy,\tkzmulticancel,\tkzmultibcancel,\tkzmultixcancel,\tkzmulticancelto},%
+    keywordstyle={\color{green!50!black}},%
+    classoffset=3,%
+    morekeywords={color,lines,scale,height,offseth,offsetv,thick,gridcolor,gridafter,nospaceafter,border,colors,style,intdelta,paralcolors,width,node,txtcolor,width,bheight,sheight,hoffset,shadow,shownodes,expand,globalwidth,absolute,thickness,strut,dstrut,hstretch,font,height,spacestretch,ratio,angle,line,width,centered,sep,extend,arrow,lines,type,target},%
+    keywordstyle={\color{orange}}
+  },%
+  #1
 }
 
 \newtcbinputlisting\DemoCodeFile[1]{%
-	enhanced,width=\linewidth,%
-	bicolor,size=title,%
-	colback=lightgray!10!white,%
-	colbacklower=lightgray!5!white,%
-	colframe=lightgray!75!black,%
-	listing options={%
-		breaklines=true,%
-		breakatwhitespace=true,%
-		style=tcblatex,
-		basicstyle=\scriptsize\ttfamily,%
-		tabsize=4,%
-		commentstyle={\itshape\color{gray}},%
-		%lastline=148
-	},%
-	breakable,
-	listing only,%
-	listing file={#1}
+  enhanced,width=\linewidth,%
+  bicolor,size=title,%
+  colback=lightgray!10!white,%
+  colbacklower=lightgray!5!white,%
+  colframe=lightgray!75!black,%
+  listing options={%
+    breaklines=true,%
+    breakatwhitespace=true,%
+    style=tcblatex,
+    basicstyle=\scriptsize\ttfamily,%
+    tabsize=4,%
+    commentstyle={\itshape\color{gray}},%
+    %lastline=148
+  },%
+  breakable,
+  listing only,%
+  listing file={#1}
 }
 
 \NewDocumentCommand\ShowCode{ m }{%
-	\lstinline{#1}%
+  \lstinline{#1}%
 }
 
 \def\sampleformula{$\displaystyle\int_0^1 \dfrac{1+x}{1+x^2}\,\mathrm{d}x$}
@@ -123,30 +123,29 @@
 \thispagestyle{empty}
 
 \begin{center}
-	\begin{minipage}{0.88\linewidth}
-		\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
-			\begin{center}
-				\renewcommand{\arraystretch}{1.25}%
-				\begin{tabular}{c}
-					{\Huge \texttt{tikz-decofonts}}\\
-					\\
-					{\LARGE Simple "decoration" fonts or effects,} \\
-					{\LARGE made with Ti\textit{k}Z, for small texts\ldots} \\
-					\\
-					{\small \texttt{Version \tkzdfversion{} -- \tkzdfdate}}
-				\end{tabular}
-			\end{center}
-		\end{tcolorbox}
-	\end{minipage}
+  \begin{minipage}{0.88\linewidth}
+    \begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+      \begin{center}
+        \renewcommand{\arraystretch}{1.25}%
+        \begin{tabular}{c}
+          {\Huge \texttt{tikz-decofonts}}\\
+          \\
+          {\LARGE Simple "decoration" fonts or effects,} \\
+          {\LARGE made with Ti\textit{k}Z, for small texts\ldots} \\
+          \\
+          {\small \texttt{Version \tkzdfversion{} -- \tkzdfdate}}
+        \end{tabular}
+      \end{center}
+    \end{tcolorbox}
+  \end{minipage}
 \end{center}
 
 \begin{center}
-	\begin{tabular}{c}
-		\texttt{Cédric Pierquet}\\
-		{\ttfamily c pierquet -- at -- outlook . fr}\\
-		\texttt{\url{https://forge.apps.education.fr/pierquetcedric/packages-latex}} \\
-		\texttt{\url{https://github.com/cpierquet/latex-packages/tree/main/tikz-decofonts}} \\
-	\end{tabular}
+  \begin{tabular}{c}
+    \texttt{Cédric Pierquet}\\
+    {\ttfamily c pierquet -- at -- outlook . fr}\\
+    \texttt{\url{https://github.com/cpierquet/latex-packages/tree/main/tikz-decofonts}} \\
+  \end{tabular}
 \end{center}
 
 \hrule
@@ -193,11 +192,12 @@
 
 \vspace*{5mm}
 
-\textit{Ideas and parts of codes, with \texttt{CC\,BY-SA\,4.0} licenses, come from :}
+\textit{Ideas and parts of codes, with \texttt{CC\,BY-SA\,4.0} or \texttt{LPPL 1.3c} licenses, come from :}
 
 \begin{itemize}
-	\item \href{https://tex.stackexchange.com/questions/475141/simulating-paintbrush-strokes-in-tikz}{[link on tex.stackexchange]} from \textsf{user121799} for paintbrush;
-	\item \href{https://tex.stackexchange.com/questions/460836/custom-line-cap-to-simulate-inked-line-in-tikz/460842#460842}{[link on tex.stackexchange]} from \textsf{user121799} for inkbrush.
+  \item \href{https://tex.stackexchange.com/questions/475141/simulating-paintbrush-strokes-in-tikz}{[link on tex.stackexchange]} from \textsf{user121799} for paintbrush;
+  \item \href{https://tex.stackexchange.com/questions/460836/custom-line-cap-to-simulate-inked-line-in-tikz/460842#460842}{[link on tex.stackexchange]} from \textsf{user121799} for inkbrush ;
+  \item \href{https://github.com/meyvenil0844-byte/-multicancel}{[link on github]} from \textsf{meyvenil0844-byte} for multicancel.
 \end{itemize}
 
 \pagebreak
@@ -249,8 +249,9 @@ Since many calculations are required internally, compilation time can be increas
 \textit{Ideas and parts of codes, with \texttt{CC\,BY-SA\,4.0} licenses, come from:}
 
 \begin{itemize}
-	\item \href{https://tex.stackexchange.com/questions/475141/simulating-paintbrush-strokes-in-tikz}{[link on tex.stackexchange]} from \textsf{user121799} for paintbrush;
-	\item \href{https://tex.stackexchange.com/questions/460836/custom-line-cap-to-simulate-inked-line-in-tikz/460842#460842}{[link on tex.stackexchange]} from \textsf{user121799} for inkbrush.
+  \item \href{https://tex.stackexchange.com/questions/475141/simulating-paintbrush-strokes-in-tikz}{[link on tex.stackexchange]} from \textsf{user121799} for paintbrush;
+  \item \href{https://tex.stackexchange.com/questions/460836/custom-line-cap-to-simulate-inked-line-in-tikz/460842#460842}{[link on tex.stackexchange]} from \textsf{user121799} for inkbrush ;
+  \item \href{https://github.com/meyvenil0844-byte/-multicancel}{[link on github]} from \textsf{meyvenil0844-byte} for multicancel.
 \end{itemize}
 
 Some adjustments (keys, paths) are maid from original code, but the global usage is due to the links above!
@@ -429,8 +430,8 @@ or \tkzbicolor[colors=pink/violet,style=rect]{\sampleformula}
 \begin{DemoCode}{listing only}
 %style tikz
 \tikzset{comicbubble/.style args={#1#2}{%
-	inner sep=1mm,line join=round,rectangle callout,draw,very thick,
-	text width=#1,align=flush center,callout relative pointer=#2}}
+  inner sep=1mm,line join=round,rectangle callout,draw,very thick,
+  text width=#1,align=flush center,callout relative pointer=#2}}
 \end{DemoCode}
 
 \begin{DemoCode}{listing only}
@@ -527,18 +528,18 @@ by \tkzsurround[color=blue,width=1.5pt,node=BBB]{surrounding} certain portions o
 Nodes (eg for positionning) are:
 %
 \begin{multicols}{2}
-	\begin{itemize}
-		\item \texttt{arrow-bottomleft}
-		\item \texttt{arrow-topleft}
-		\item \texttt{arrow-begin}
-		\item \texttt{arrow-end}
-		\item \texttt{arrow-textcenter}
-		\item \texttt{arrow-bottom}
-		\item \texttt{arrow-textright}
-		\item \texttt{arrow-top}
-		\item \texttt{arrow-smallbottom}
-		\item \texttt{arrow-smalltop}
-	\end{itemize}
+  \begin{itemize}
+    \item \texttt{arrow-bottomleft}
+    \item \texttt{arrow-topleft}
+    \item \texttt{arrow-begin}
+    \item \texttt{arrow-end}
+    \item \texttt{arrow-textcenter}
+    \item \texttt{arrow-bottom}
+    \item \texttt{arrow-textright}
+    \item \texttt{arrow-top}
+    \item \texttt{arrow-smallbottom}
+    \item \texttt{arrow-smalltop}
+  \end{itemize}
 \end{multicols}
 
 \begin{DemoCode}{}
@@ -862,7 +863,103 @@ Each pen is available in English and French.
 
 \pagebreak
 
+\subsection{Multiple cancellation lines}
+
+\subsubsection{Credits}
+
+Original version of code come from \textsf{meyvenil0844-byte} user, within its \href{https://github.com/meyvenil0844-byte/-multicancel}{[github]} repository !
+
+\subsubsection{Usage}
+
+Parallel cancellation lines (\textit{stacked} or \textit{counting} style) over an expression,
+in maths or in text, with a chosen type, number of lines, color, or an arrow with a target value.
+
+\begin{DemoCode}{listing only}
+\tkzmulticancel[<keys>]<tikzpicture options>{expression}
+
+%type       = slash (default), backslash, cross or to (last line is an arrow)
+%target     = text at the end of the arrow, for type=to (empty by default)
+%lines      = number of lines (1 by default)
+%color      = color of the lines (black by default)
+%centered   = boolean for the 'counting' style, see below (false by default)
+%sep        = gap between two lines (2.5pt by default) or two bars if centered (0pt)
+%extend     = overshoot of the lines out of the expression (1.5pt by default)
+%arrow      = arrow tip for type=to (-latex by default)
+
+%TikZ style 'tkzmulticancel line' (semithick by default) is applied to all the lines
+\end{DemoCode}
+
+\begin{DemoCode}{}
+%default (stacked) style
+$\tkzmulticancel{x}+y$ \quad
+$\tkzmulticancel[lines=3,color=red]{x+y}$ \quad
+$\tkzmulticancel[type=backslash,lines=2,color=blue]{A\cdot B}$ \quad
+$\tkzmulticancel[type=cross,lines=3,color=purple]{M_n}$ \quad
+$\tkzmulticancel[type=to,target=0,lines=2,color=orange]{f(x)-f(x)}$
+\end{DemoCode}
+
+Outside of math mode, the argument is typeset as text.
+
+\begin{DemoCode}{}
+A \tkzmulticancel[lines=2,color=red]{cancelled} word.
+\end{DemoCode}
+
+\smallskip
+
+By default, the lines are \textbf{stacked}: they are parallel and shifted \textit{perpendicularly}
+to their direction. With the boolean key \texttt{centered}, \(n\) bars are drawn side by side instead,
+like counting marks: they are evenly spread over the \textbf{whole width} of the expression
+and are as \textbf{tall} as it is, so they adapt to its size (with \texttt{lines=1}, both styles give the same diagonal).
+
+\begin{DemoCode}{}
+%centered style
+$\tkzmulticancel[lines=3,color=red,centered]{x+y}$ \quad
+$\tkzmulticancel[type=backslash,lines=3,color=blue,centered]{A\cdot B}$ \quad
+$\tkzmulticancel[type=cross,lines=2,color=purple,centered]{M_n}$ \quad
+$\tkzmulticancel[type=to,target=0,lines=3,color=orange,centered]{f(x)-f(x)}$
+\end{DemoCode}
+
+Only a part of an equation can be cancelled, and the bars follow the size of the cancelled part:
+
+\begin{DemoCode}{}
+$x\tkzmulticancel[lines=2,centered]{y}$ \quad
+$\displaystyle\frac%
+{\tkzmulticancel[lines=3,color=red,centered]{(x+1)}}%
+{\tkzmulticancel[lines=3,color=red,centered]{(x+1)}(x-2)}$ \quad
+$e^{\tkzmulticancel[lines=2,centered]{2x}}$
+\end{DemoCode}
+
+\smallskip
+
+Gaps, overshoot and arrow tip can be customized with keys.
+
+\begin{DemoCode}{}
+$\tkzmulticancel[lines=3,color=purple,sep=4pt]{x+y}$ \quad
+$\tkzmulticancel[lines=3,centered,sep=2pt,extend=0pt]{x+y}$ \quad
+$\tkzmulticancel[type=to,target=0,lines=2,color=red,arrow={-{Stealth[scale=1.2]}}]{a-a}$
+\end{DemoCode}
+
+The \TikZ{} style \texttt{tkzmulticancel line} is applied to every line, so it can be
+appended (globally or in a group) to change the aspect of the lines.
+
+\begin{DemoCode}{}
+\tikzset{tkzmulticancel line/.append style={dashed,line width=1pt}}
+$\tkzmulticancel[lines=2,color=purple]{x+y}$
+\end{DemoCode}
+
+The \texttt{<tikzpicture options>} are given to the \texttt{tikzpicture} containing the expression,
+which is a node named \texttt{content}. They can also be used to change the style of the lines for
+a single call, for example \texttt{<tkzmulticancel line/.append style=\{dashed\}>}.
+
+\smallskip
+
+Each cancellation is a small \texttt{tikzpicture}, so the compilation time increases with intensive use!
+
+\pagebreak
+
 \section{History}
+
+\texttt{0.20c: Multicancel}
 
 \texttt{0.20b: Bugfix with AtBeginDocument}
 

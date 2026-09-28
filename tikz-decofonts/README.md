@@ -56,3 +56,4 @@ If you want the latest version directly from this repository:
 | **License** | Released under the [LaTeX Project Public License v1.3c](http://www.latex-project.org/lppl.txt) or later · CC BY-SA 4.0 |
 | | CC BY-SA 4.0 (https://tex.stackexchange.com/questions/475141/simulating-paintbrush-strokes-in-tikz from user121799) |
 | | CC BY-SA 4.0 (https://tex.stackexchange.com/questions/460836/custom-line-cap-to-simulate-inked-line-in-tikz/460842#460842 from user121799) |
+| | LPPL 1.3c (https://github.com/meyvenil0844-byte/-multicancel from meyvenil0844-byte) |
