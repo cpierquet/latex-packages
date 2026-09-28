@@ -27,8 +27,8 @@
 \hypersetup{pdfborder=0 0 0}
 \usepackage[margin=2cm]{geometry}
 \setlength{\parindent}{0pt}
-\def\TPversion{0.1.1}
-\def\TPdate{24/09/2025}
+\def\TPversion{0.1.2}
+\def\TPdate{28/09/2026}
 \usepackage{tcolorbox}
 \tcbuselibrary{breakable,skins,hooks,listingsutf8}
 %\usepackage{soul}
@@ -222,8 +222,8 @@ Pour charger le package \texttt{mathador}, il suffit de placer, dans le préambu
 \usepackage{mathador}
 %version avec le package bm pour les opérateurs en gras
 \usepackage[bm]{mathador}
-%version sans la librairie tikz.babel
-\usepackage[nonbabel]{mathador}
+%version avec la librairie tikz.babel
+\usepackage[babel]{mathador}
 \end{DemoCode}
 
 Les packages utilisés sont \ShowCode{tikz}, \ShowCode{ifthen}, \ShowCode{listofitems}, \ShowCode{simplekv} et éventuellement \ShowCode{bm}.
@@ -371,6 +371,8 @@ Les \textsf{clés} disponibles sont :
 \pagebreak
 
 \section{Historique}
+
+\texttt{0.1.2 : Meilleure gestion des caractères actifs et \textit{babel}}
 
 \texttt{0.1.1 : Meilleure gestion des \textit{opérateurs}}
 

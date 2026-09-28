@@ -7,17 +7,18 @@
 %Le package LaTex proposé par Monsieur Cédric Pierquet est une ressource indépendante non affiliée à www.mathador.fr.
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{mathador}[2025/09/24 0.1.1 Commands for mathador game]
+\ProvidesPackage{mathador}[2026/09/28 0.1.2 Commands for mathador game]
 
 %====HISTORIQUE
-% v 0.1.1	Correction de bugs mineurs + choix des symboles
-% v 0.1.0	Version initiale
+% v 0.1.2  Suppression de la dépendance à tikz.babel (option conservée par sécurité)
+% v 0.1.1  Correction de bugs mineurs + choix des symboles
+% v 0.1.0  Version initiale
 
 %====OPTION
 \newif\if@mathadorbm \@mathadorbmfalse%
-\newif\if@mathadorbabel \@mathadorbabeltrue%
+\newif\if@mathadorbabel \@mathadorbabelfalse%
 \DeclareOption{bm}{\@mathadorbmtrue}%
-\DeclareOption{nonbabel}{\@mathadorbabelfalse}%
+\DeclareOption{babel}{\@mathadorbabeltrue}%
 \DeclareOption*{}
 \ProcessOptions\relax
 
@@ -28,12 +29,12 @@
 \RequirePackage{listofitems}
 \RequirePackage{simplekv}
 \if@mathadorbm
-	\RequirePackage{bm}
+  \RequirePackage{bm}
 \fi
 \if@mathadorbabel
-	\tikzset{mathadorbabel/.style={handle active characters in code,handle active characters in nodes}}
+  \tikzset{mathadorbabel/.style={handle active characters in code,handle active characters in nodes}}
 \else
-	\tikzset{mathadorbabel/.style={}}
+  \tikzset{mathadorbabel/.style={}}
 \fi
 
 %====LABEL
@@ -78,7 +79,7 @@
 
 %====MACROS INTERNES
 \newcommand\intmathadorgrassf[1]{%
-	\@ifpackageloaded{bm}{$\bm{\mathsf{#1}}$}{$\mathsf{#1}$}%
+  \@ifpackageloaded{bm}{$\bm{\mathsf{#1}}$}{$\mathsf{#1}$}%
 }
 \def\mathadorplussymb{\intmathadorgrassf{\vphantom{-\times\div+}+}}
 \def\mathadormoinssymb{\intmathadorgrassf{\vphantom{-\times\div+}-}}
@@ -86,445 +87,445 @@
 \def\mathadordivsymb{\intmathadorgrassf{\vphantom{-\times\div+}\div}}
 
 \newcommand\intmathador{%
-	\coordinate (OO) at (0,0) ;
-	\foreach \i in {1,...,10}{\coordinate (T\i) at ({36*(\i)-18}:\mathtexadorradius) ;}
-	\foreach \i in {6,...,10}{\coordinate (I\i) at ({36*(\i)-18}:\mathtexadorradiusB) ;}
-	\coordinate (C0) at (90:\mathtexadorradiusC) ;
-	\coordinate (A1) at (-18:{sin(18)*\mathtexadorradiusC}) ;
-	\coordinate (B1) at (198:{sin(18)*\mathtexadorradiusC}) ;
-	\coordinate (A2) at ($(A1)!0.5!(I10)$) ;
-	\coordinate (B2) at ($(B1)!0.5!(I6)$) ;
-	\coordinate (C1) at (54:\mathtexadorradiusC) ;
-	\coordinate (D1) at (126:\mathtexadorradiusC) ; 
-	\coordinate (C3) at ({\tmpcoeffAAA\mathtexadorradius+\tmpcoeffAAA\mathtexadorradiusC},{\tmpcoeffBBB\mathtexadorradius+\tmpcoeffCCC\mathtexadorradiusC}) ;
-	\coordinate (D3) at ({-\tmpcoeffAAA\mathtexadorradius-\tmpcoeffAAA\mathtexadorradiusC},{\tmpcoeffBBB\mathtexadorradius+\tmpcoeffCCC\mathtexadorradiusC}) ;
-	\coordinate (C2) at ($(C1)!0.5!(C3)$) ;
-	\coordinate (D2) at ($(D1)!0.5!(D3)$) ;
-	\ifboolKV[Mathador]{impression}%
-		{%
-			\ifboolKV[Mathador]{pastels}%
-				{%
-					\draw[mathadorppalpastel!20!black,fill=mathadorppalpastel] (T1) -- (T2) -- (T3) -- (T4) -- (T5) -- (T6) -- (T7) -- (T8) -- (T9) -- (T10) -- cycle ;
-					\draw[mathadorppalpastel!20!black,fill=mathadorsecondpastel] (T10) -- (T9) -- (I9) -- (I10) -- cycle ;
-					\draw[mathadorppalpastel!20!black,fill=mathadorsecondpastel] (T9) -- (T8) -- (I8) -- (I9) -- cycle ;
-					\draw[mathadorppalpastel!20!black,fill=mathadorsecondpastel] (T8) -- (T7) -- (I7) -- (I8) -- cycle ;
-					\draw[mathadorppalpastel!20!black,fill=mathadorsecondpastel] (T7) -- (T6) -- (I6) -- (I7) -- cycle ;
-					\draw[mathadorppalpastel!20!black,fill=mathadorppalpastel] (T10) -- (T1) -- (C3) -- (I10) -- cycle ;
-					\draw[mathadorppalpastel!20!black,fill=mathadorppalpastel] (T6) -- (T5) -- (D3) -- (I6) -- cycle ;
-					\draw[mathadorppalpastel!20!black,fill=mathadorsecondpastel] (OO) -- (I10) -- (I9) -- cycle ;
-					\draw[mathadorppalpastel!20!black,fill=mathadorsecondpastel] (OO) -- (I8) -- (I7) -- cycle ;
-					\draw[mathadorppalpastel!20!black] (OO) -- (I6) (B1) -- (OO) -- (A1) ;
-					\draw[mathadorppalpastel!20!black] (A1) -- (C1) (A2) -- (C2) (C1) -- (C3) (B1) -- (D1) (B2) -- (D2)  ;
-					\draw[mathadorppalpastel!20!black] (C0) -- (C1) -- (T2) -- (T3) -- (T4) -- (D1) -- cycle ;
-					\draw[mathadorppalpastel!20!black,fill=mathadorsecondpastel] (C1) -- (C3) -- (T1) -- (T2) -- cycle ;
-					\draw[mathadorppalpastel!20!black,fill=mathadorsecondpastel] (D1) -- (D3) -- (T5) -- (T4) -- cycle ;
-					\draw (-36:0.7857\mathtexadorradius) node[inner sep=0pt,text=mathadorppalpastel!20!black] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadordivsymb}} ;%div
-					\draw (-72:0.7857\mathtexadorradius) node[inner sep=0pt,text=mathadorppalpastel!20!black] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadorfoissymb}} ;%times
-					\draw (-108:0.7857\mathtexadorradius) node[inner sep=0pt,text=mathadorppalpastel!20!black] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadormoinssymb}} ;%-
-					\draw (-144:0.7857\mathtexadorradius) node[inner sep=0pt,text=mathadorppalpastel!20!black] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadorplussymb}} ;%+
-				}%
-				{%
-					\draw[black,fill=lightgray!30] (T1) -- (T2) -- (T3) -- (T4) -- (T5) -- (T6) -- (T7) -- (T8) -- (T9) -- (T10) -- cycle ;
-					\draw[black,fill=lightgray!10] (T10) -- (T9) -- (I9) -- (I10) -- cycle ;
-					\draw[black,fill=lightgray!10] (T9) -- (T8) -- (I8) -- (I9) -- cycle ;
-					\draw[black,fill=lightgray!10] (T8) -- (T7) -- (I7) -- (I8) -- cycle ;
-					\draw[black,fill=lightgray!10] (T7) -- (T6) -- (I6) -- (I7) -- cycle ;
-					\draw[black,fill=lightgray!30] (T10) -- (T1) -- (C3) -- (I10) -- cycle ;
-					\draw[black,fill=lightgray!30] (T6) -- (T5) -- (D3) -- (I6) -- cycle ;
-					\draw[black,fill=lightgray!10] (OO) -- (I10) -- (I9) -- cycle ;
-					\draw[black,fill=lightgray!10] (OO) -- (I8) -- (I7) -- cycle ;
-					\draw[black] (OO) -- (I6) (B1) -- (OO) -- (A1) ;
-					\draw[black] (A1) -- (C1) (A2) -- (C2) (C1) -- (C3) (B1) -- (D1) (B2) -- (D2)  ;
-					\draw[black] (C0) -- (C1) -- (T2) -- (T3) -- (T4) -- (D1) -- cycle ;
-					\draw[black,fill=lightgray!10] (C1) -- (C3) -- (T1) -- (T2) -- cycle ;
-					\draw[black,fill=lightgray!10] (D1) -- (D3) -- (T5) -- (T4) -- cycle ;
-					\draw (-36:0.7857\mathtexadorradius) node[inner sep=0pt,text=black] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadordivsymb}} ;%div
-					\draw (-72:0.7857\mathtexadorradius) node[inner sep=0pt,text=black] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadorfoissymb}} ;%times
-					\draw (-108:0.7857\mathtexadorradius) node[inner sep=0pt,text=black] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadormoinssymb}} ;%-
-					\draw (-144:0.7857\mathtexadorradius) node[inner sep=0pt,text=black] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadorplussymb}} ;%+
-				}%
-		}%
-		{%
-			\draw[white,fill=mathadorppal] (T1) -- (T2) -- (T3) -- (T4) -- (T5) -- (T6) -- (T7) -- (T8) -- (T9) -- (T10) -- cycle ;
-			\draw[white,fill=mathadorjaune] (T10) -- (T9) -- (I9) -- (I10) -- cycle ;
-			\draw[white,fill=mathadorrose] (T9) -- (T8) -- (I8) -- (I9) -- cycle ;
-			\draw[white,fill=mathadorvert] (T8) -- (T7) -- (I7) -- (I8) -- cycle ;
-			\draw[white,fill=mathadorbleu] (T7) -- (T6) -- (I6) -- (I7) -- cycle ;
-			\draw[white,fill=mathadorppal] (T10) -- (T1) -- (C3) -- (I10) -- cycle ;
-			\draw[white,fill=mathadorppal] (T6) -- (T5) -- (D3) -- (I6) -- cycle ;
-			\draw[white,fill=mathadorsecond] (OO) -- (I10) -- (I9) -- cycle ;
-			\draw[white,fill=mathadorsecond] (OO) -- (I8) -- (I7) -- cycle ;
-			\draw[white] (OO) -- (I6) (B1) -- (OO) -- (A1) ;
-			\draw[white] (A1) -- (C1) (A2) -- (C2) (C1) -- (C3) (B1) -- (D1) (B2) -- (D2)  ;
-			\draw[white] (C0) -- (C1) -- (T2) -- (T3) -- (T4) -- (D1) -- cycle ;
-			\draw[white,fill=mathadorsecond] (C1) -- (C3) -- (T1) -- (T2) -- cycle ;
-			\draw[white,fill=mathadorsecond] (D1) -- (D3) -- (T5) -- (T4) -- cycle ;
-			\draw (-36:0.7857\mathtexadorradius) node[inner sep=0pt,text=white] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadordivsymb}} ;%div
-			\draw (-72:0.7857\mathtexadorradius) node[inner sep=0pt,text=white] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadorfoissymb}} ;%times
-			\draw (-108:0.7857\mathtexadorradius) node[inner sep=0pt,text=white] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadormoinssymb}} ;%-
-			\draw (-144:0.7857\mathtexadorradius) node[inner sep=0pt,text=white] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadorplussymb}} ;%+
-		}%
-	\coordinate (K1) at ($(B2)!0.5!(I6)$) ;
-	\coordinate (L1) at ($(D2)!0.5!(D3)$) ;
-	\coordinate (N1) at ($(K1)!0.5!(L1)$) ;
-	\coordinate (K2) at ($(B2)!0.5!(B1)$) ;
-	\coordinate (L2) at ($(D1)!0.5!(D2)$) ;
-	\coordinate (N2) at ($(K2)!0.5!(L2)$) ;
-	\coordinate (K3) at ($(A1)!0.5!(A2)$) ;
-	\coordinate (L3) at ($(C1)!0.5!(C2)$) ;
-	\coordinate (N4) at ($(K3)!0.5!(L3)$) ;
-	\coordinate (K4) at ($(A2)!0.5!(I10)$) ;
-	\coordinate (L4) at ($(C2)!0.5!(C3)$) ;
-	\coordinate (N5) at ($(K4)!0.5!(L4)$) ;
-	\coordinate (U) at ($(N5)!3!(N4)$) ;
-	\coordinate (V) at ($(N1)!3!(N2)$) ;
-	\coordinate (N3) at ([yshift=-0.0375\mathtexadorradius]intersection of {N1--V} and {N5--U});
+  \coordinate (OO) at (0,0) ;
+  \foreach \i in {1,...,10}{\coordinate (T\i) at ({36*(\i)-18}:\mathtexadorradius) ;}
+  \foreach \i in {6,...,10}{\coordinate (I\i) at ({36*(\i)-18}:\mathtexadorradiusB) ;}
+  \coordinate (C0) at (90:\mathtexadorradiusC) ;
+  \coordinate (A1) at (-18:{sin(18)*\mathtexadorradiusC}) ;
+  \coordinate (B1) at (198:{sin(18)*\mathtexadorradiusC}) ;
+  \coordinate (A2) at ($0.5*(A1)+0.5*(I10)$) ;
+	\coordinate (B2) at ($0.5*(B1)+0.5*(I6)$) ;
+  \coordinate (C1) at (54:\mathtexadorradiusC) ;
+  \coordinate (D1) at (126:\mathtexadorradiusC) ; 
+  \coordinate (C3) at ({\tmpcoeffAAA\mathtexadorradius+\tmpcoeffAAA\mathtexadorradiusC},{\tmpcoeffBBB\mathtexadorradius+\tmpcoeffCCC\mathtexadorradiusC}) ;
+  \coordinate (D3) at ({-\tmpcoeffAAA\mathtexadorradius-\tmpcoeffAAA\mathtexadorradiusC},{\tmpcoeffBBB\mathtexadorradius+\tmpcoeffCCC\mathtexadorradiusC}) ;
+  \coordinate (C2) at ($0.5*(C1)+0.5*(C3)$) ;
+	\coordinate (D2) at ($0.5*(D1)+0.5*(D3)$) ;
+  \ifboolKV[Mathador]{impression}%
+    {%
+      \ifboolKV[Mathador]{pastels}%
+        {%
+          \draw[mathadorppalpastel!20!black,fill=mathadorppalpastel] (T1) -- (T2) -- (T3) -- (T4) -- (T5) -- (T6) -- (T7) -- (T8) -- (T9) -- (T10) -- cycle ;
+          \draw[mathadorppalpastel!20!black,fill=mathadorsecondpastel] (T10) -- (T9) -- (I9) -- (I10) -- cycle ;
+          \draw[mathadorppalpastel!20!black,fill=mathadorsecondpastel] (T9) -- (T8) -- (I8) -- (I9) -- cycle ;
+          \draw[mathadorppalpastel!20!black,fill=mathadorsecondpastel] (T8) -- (T7) -- (I7) -- (I8) -- cycle ;
+          \draw[mathadorppalpastel!20!black,fill=mathadorsecondpastel] (T7) -- (T6) -- (I6) -- (I7) -- cycle ;
+          \draw[mathadorppalpastel!20!black,fill=mathadorppalpastel] (T10) -- (T1) -- (C3) -- (I10) -- cycle ;
+          \draw[mathadorppalpastel!20!black,fill=mathadorppalpastel] (T6) -- (T5) -- (D3) -- (I6) -- cycle ;
+          \draw[mathadorppalpastel!20!black,fill=mathadorsecondpastel] (OO) -- (I10) -- (I9) -- cycle ;
+          \draw[mathadorppalpastel!20!black,fill=mathadorsecondpastel] (OO) -- (I8) -- (I7) -- cycle ;
+          \draw[mathadorppalpastel!20!black] (OO) -- (I6) (B1) -- (OO) -- (A1) ;
+          \draw[mathadorppalpastel!20!black] (A1) -- (C1) (A2) -- (C2) (C1) -- (C3) (B1) -- (D1) (B2) -- (D2)  ;
+          \draw[mathadorppalpastel!20!black] (C0) -- (C1) -- (T2) -- (T3) -- (T4) -- (D1) -- cycle ;
+          \draw[mathadorppalpastel!20!black,fill=mathadorsecondpastel] (C1) -- (C3) -- (T1) -- (T2) -- cycle ;
+          \draw[mathadorppalpastel!20!black,fill=mathadorsecondpastel] (D1) -- (D3) -- (T5) -- (T4) -- cycle ;
+          \draw (-36:0.7857\mathtexadorradius) node[inner sep=0pt,text=mathadorppalpastel!20!black] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadordivsymb}} ;%div
+          \draw (-72:0.7857\mathtexadorradius) node[inner sep=0pt,text=mathadorppalpastel!20!black] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadorfoissymb}} ;%times
+          \draw (-108:0.7857\mathtexadorradius) node[inner sep=0pt,text=mathadorppalpastel!20!black] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadormoinssymb}} ;%-
+          \draw (-144:0.7857\mathtexadorradius) node[inner sep=0pt,text=mathadorppalpastel!20!black] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadorplussymb}} ;%+
+        }%
+        {%
+          \draw[black,fill=lightgray!30] (T1) -- (T2) -- (T3) -- (T4) -- (T5) -- (T6) -- (T7) -- (T8) -- (T9) -- (T10) -- cycle ;
+          \draw[black,fill=lightgray!10] (T10) -- (T9) -- (I9) -- (I10) -- cycle ;
+          \draw[black,fill=lightgray!10] (T9) -- (T8) -- (I8) -- (I9) -- cycle ;
+          \draw[black,fill=lightgray!10] (T8) -- (T7) -- (I7) -- (I8) -- cycle ;
+          \draw[black,fill=lightgray!10] (T7) -- (T6) -- (I6) -- (I7) -- cycle ;
+          \draw[black,fill=lightgray!30] (T10) -- (T1) -- (C3) -- (I10) -- cycle ;
+          \draw[black,fill=lightgray!30] (T6) -- (T5) -- (D3) -- (I6) -- cycle ;
+          \draw[black,fill=lightgray!10] (OO) -- (I10) -- (I9) -- cycle ;
+          \draw[black,fill=lightgray!10] (OO) -- (I8) -- (I7) -- cycle ;
+          \draw[black] (OO) -- (I6) (B1) -- (OO) -- (A1) ;
+          \draw[black] (A1) -- (C1) (A2) -- (C2) (C1) -- (C3) (B1) -- (D1) (B2) -- (D2)  ;
+          \draw[black] (C0) -- (C1) -- (T2) -- (T3) -- (T4) -- (D1) -- cycle ;
+          \draw[black,fill=lightgray!10] (C1) -- (C3) -- (T1) -- (T2) -- cycle ;
+          \draw[black,fill=lightgray!10] (D1) -- (D3) -- (T5) -- (T4) -- cycle ;
+          \draw (-36:0.7857\mathtexadorradius) node[inner sep=0pt,text=black] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadordivsymb}} ;%div
+          \draw (-72:0.7857\mathtexadorradius) node[inner sep=0pt,text=black] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadorfoissymb}} ;%times
+          \draw (-108:0.7857\mathtexadorradius) node[inner sep=0pt,text=black] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadormoinssymb}} ;%-
+          \draw (-144:0.7857\mathtexadorradius) node[inner sep=0pt,text=black] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadorplussymb}} ;%+
+        }%
+    }%
+    {%
+      \draw[white,fill=mathadorppal] (T1) -- (T2) -- (T3) -- (T4) -- (T5) -- (T6) -- (T7) -- (T8) -- (T9) -- (T10) -- cycle ;
+      \draw[white,fill=mathadorjaune] (T10) -- (T9) -- (I9) -- (I10) -- cycle ;
+      \draw[white,fill=mathadorrose] (T9) -- (T8) -- (I8) -- (I9) -- cycle ;
+      \draw[white,fill=mathadorvert] (T8) -- (T7) -- (I7) -- (I8) -- cycle ;
+      \draw[white,fill=mathadorbleu] (T7) -- (T6) -- (I6) -- (I7) -- cycle ;
+      \draw[white,fill=mathadorppal] (T10) -- (T1) -- (C3) -- (I10) -- cycle ;
+      \draw[white,fill=mathadorppal] (T6) -- (T5) -- (D3) -- (I6) -- cycle ;
+      \draw[white,fill=mathadorsecond] (OO) -- (I10) -- (I9) -- cycle ;
+      \draw[white,fill=mathadorsecond] (OO) -- (I8) -- (I7) -- cycle ;
+      \draw[white] (OO) -- (I6) (B1) -- (OO) -- (A1) ;
+      \draw[white] (A1) -- (C1) (A2) -- (C2) (C1) -- (C3) (B1) -- (D1) (B2) -- (D2)  ;
+      \draw[white] (C0) -- (C1) -- (T2) -- (T3) -- (T4) -- (D1) -- cycle ;
+      \draw[white,fill=mathadorsecond] (C1) -- (C3) -- (T1) -- (T2) -- cycle ;
+      \draw[white,fill=mathadorsecond] (D1) -- (D3) -- (T5) -- (T4) -- cycle ;
+      \draw (-36:0.7857\mathtexadorradius) node[inner sep=0pt,text=white] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadordivsymb}} ;%div
+      \draw (-72:0.7857\mathtexadorradius) node[inner sep=0pt,text=white] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadorfoissymb}} ;%times
+      \draw (-108:0.7857\mathtexadorradius) node[inner sep=0pt,text=white] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadormoinssymb}} ;%-
+      \draw (-144:0.7857\mathtexadorradius) node[inner sep=0pt,text=white] {\resizebox*{!}{0.15\mathtexadorradius}{\mathadorplussymb}} ;%+
+    }%
+  \coordinate (K1) at ($0.5*(B2)+0.5*(I6)$) ;
+	\coordinate (L1) at ($0.5*(D2)+0.5*(D3)$) ;
+	\coordinate (N1) at ($0.5*(K1)+0.5*(L1)$) ;
+	\coordinate (K2) at ($0.5*(B2)+0.5*(B1)$) ;
+	\coordinate (L2) at ($0.5*(D1)+0.5*(D2)$) ;
+	\coordinate (N2) at ($0.5*(K2)+0.5*(L2)$) ;
+	\coordinate (K3) at ($0.5*(A1)+0.5*(A2)$) ;
+	\coordinate (L3) at ($0.5*(C1)+0.5*(C2)$) ;
+	\coordinate (N4) at ($0.5*(K3)+0.5*(L3)$) ;
+	\coordinate (K4) at ($0.5*(A2)+0.5*(I10)$) ;
+	\coordinate (L4) at ($0.5*(C2)+0.5*(C3)$) ;
+	\coordinate (N5) at ($0.5*(K4)+0.5*(L4)$) ;
+	\coordinate (U) at ($3*(N4)-2*(N5)$) ;
+	\coordinate (V) at ($3*(N2)-2*(N1)$) ;
+  \coordinate (N3) at ([yshift=-0.0375\mathtexadorradius]intersection of {N1--V} and {N5--U});
 }
 
 \newcommand\intmathadornumero[5]{%
-	\def\tmpxscalemathador{1}%
-	\ifnum#1=4\relax%
-		\ifnum#4>10\relax\def\tmpxscalemathador{0.75}\else\def\tmpxscalemathador{1}\fi%dé4
-	\fi%
-	\ifnum#1=5\relax%
-		\ifnum#4>10\relax\def\tmpxscalemathador{0.5}\else\def\tmpxscalemathador{1}\fi%dé5
-	\fi%
-	\ifboolKV[Mathador]{ombre}%
-		{%
-			\ifboolKV[TirageDesMathador]{impression}%
-				{}%
-				{%
-					\draw (#2) node[rotate=#3,xscale=\tmpxscalemathador,inner sep,font=\bfseries\sffamily,text=darkgray,xshift=2pt,yshift=-2pt] {\resizebox*{!}{1.75#5}{#4}} ;
-				}%
-		}%
-		{}%
-	\ifboolKV[TirageDesMathador]{impression}%
-		{%
-			\draw (#2) node[rotate=#3,xscale=\tmpxscalemathador,inner sep=0pt,mathadorpolicegras,text=black] {\resizebox*{!}{1.75#5}{#4}} ;
-		}%
-		{%
-			\draw (#2) node[rotate=#3,xscale=\tmpxscalemathador,inner sep=0pt,mathadorpolicegras,text=white] {\resizebox*{!}{1.75#5}{#4}} ;
-		}%
+  \def\tmpxscalemathador{1}%
+  \ifnum#1=4\relax%
+    \ifnum#4>10\relax\def\tmpxscalemathador{0.75}\else\def\tmpxscalemathador{1}\fi%dé4
+  \fi%
+  \ifnum#1=5\relax%
+    \ifnum#4>10\relax\def\tmpxscalemathador{0.5}\else\def\tmpxscalemathador{1}\fi%dé5
+  \fi%
+  \ifboolKV[Mathador]{ombre}%
+    {%
+      \ifboolKV[TirageDesMathador]{impression}%
+        {}%
+        {%
+          \draw (#2) node[rotate=#3,xscale=\tmpxscalemathador,inner sep,font=\bfseries\sffamily,text=darkgray,xshift=2pt,yshift=-2pt] {\resizebox*{!}{1.75#5}{#4}} ;
+        }%
+    }%
+    {}%
+  \ifboolKV[TirageDesMathador]{impression}%
+    {%
+      \draw (#2) node[rotate=#3,xscale=\tmpxscalemathador,inner sep=0pt,mathadorpolicegras,text=black] {\resizebox*{!}{1.75#5}{#4}} ;
+    }%
+    {%
+      \draw (#2) node[rotate=#3,xscale=\tmpxscalemathador,inner sep=0pt,mathadorpolicegras,text=white] {\resizebox*{!}{1.75#5}{#4}} ;
+    }%
 }
 
 \newcommand\intmathadortetra[1]{%NB ou COUL
-	\ifboolKV[TirageDesMathador]{impression}%
-		{%
-			\draw[black,fill=white] (0.9,0.4) -- (6.3,2.5) -- (2.6,7.3) -- cycle ;
-			\draw[black,fill=white] (0.9,0.4) -- (0.6,4.1) -- (2.6,7.3) -- cycle ;
-		}%
-		{%
-			\draw[#1!50!black,fill=#1!70!white] (0.9,0.4) -- (6.3,2.5) -- (2.6,7.3) -- cycle ;
-			\draw[#1!50!black,fill=#1!55!white] (0.9,0.4) -- (0.6,4.1) -- (2.6,7.3) -- cycle ;
-		}%
+  \ifboolKV[TirageDesMathador]{impression}%
+    {%
+      \draw[black,fill=white] (0.9,0.4) -- (6.3,2.5) -- (2.6,7.3) -- cycle ;
+      \draw[black,fill=white] (0.9,0.4) -- (0.6,4.1) -- (2.6,7.3) -- cycle ;
+    }%
+    {%
+      \draw[#1!50!black,fill=#1!70!white] (0.9,0.4) -- (6.3,2.5) -- (2.6,7.3) -- cycle ;
+      \draw[#1!50!black,fill=#1!55!white] (0.9,0.4) -- (0.6,4.1) -- (2.6,7.3) -- cycle ;
+    }%
 }
 
 \newcommand\intmathadorhexa[1]{%NB ou COUL
-	\ifboolKV[TirageDesMathador]{impression}%
-		{%
-			\draw[black,fill=white] (4.3,0.3) -- (6.3,0.9) -- (8.5,4.6) -- (6.5,4) -- cycle ;
-			\draw[black,fill=white] (6.5,4) --++ (-3.7,2.2) --++ (2,0.6) --++ (3.7,-2.2) -- cycle ;
-			\draw[black,fill=white] (6.5,4) --++ (-3.7,2.2) --++ (-2.2,-3.7) --++ (3.7,-2.2) -- cycle ;
-		}%
-		{%
-			\draw[#1!50!black,fill=#1!70!white] (4.3,0.3) -- (6.3,0.9) -- (8.5,4.6) -- (6.5,4) -- cycle ;
-			\draw[#1!50!black,fill=#1!55!white] (6.5,4) --++ (-3.7,2.2) --++ (2,0.6) --++ (3.7,-2.2) -- cycle ;
-			\draw[#1!50!black,fill=#1!40!white] (6.5,4) --++ (-3.7,2.2) --++ (-2.2,-3.7) --++ (3.7,-2.2) -- cycle ;
-		}%
+  \ifboolKV[TirageDesMathador]{impression}%
+    {%
+      \draw[black,fill=white] (4.3,0.3) -- (6.3,0.9) -- (8.5,4.6) -- (6.5,4) -- cycle ;
+      \draw[black,fill=white] (6.5,4) --++ (-3.7,2.2) --++ (2,0.6) --++ (3.7,-2.2) -- cycle ;
+      \draw[black,fill=white] (6.5,4) --++ (-3.7,2.2) --++ (-2.2,-3.7) --++ (3.7,-2.2) -- cycle ;
+    }%
+    {%
+      \draw[#1!50!black,fill=#1!70!white] (4.3,0.3) -- (6.3,0.9) -- (8.5,4.6) -- (6.5,4) -- cycle ;
+      \draw[#1!50!black,fill=#1!55!white] (6.5,4) --++ (-3.7,2.2) --++ (2,0.6) --++ (3.7,-2.2) -- cycle ;
+      \draw[#1!50!black,fill=#1!40!white] (6.5,4) --++ (-3.7,2.2) --++ (-2.2,-3.7) --++ (3.7,-2.2) -- cycle ;
+    }%
 }
 
 \newcommand\intmathadorocto[1]{%NB ou COUL
-	\ifboolKV[TirageDesMathador]{impression}%
-		{%
-			\draw[black,fill=white] (0.3,2.6)--(1.25,6.5)--(5.4,6.5)--(7,4.4)--(5.9,0.5)--(1.9,0.5)--cycle ;
-			\draw[black,fill=white] (0.3,2.6)--(1.25,6.5)--(1.9,0.5)--cycle ;
-			\draw[black,fill=white] (1.9,0.5)--(1.25,6.5)--(7,4.4)--cycle ;
-		}%
-		{%
-			\draw[#1!50!black,fill=#1!70!white] (0.3,2.6)--(1.25,6.5)--(5.4,6.5)--(7,4.4)--(5.9,0.5)--(1.9,0.5)--cycle ;
-			\draw[#1!50!black,fill=#1!40!white] (0.3,2.6)--(1.25,6.5)--(1.9,0.5)--cycle ;
-			\draw[#1!50!black,fill=#1!55!white] (1.9,0.5)--(1.25,6.5)--(7,4.4)--cycle ;
-		}%
+  \ifboolKV[TirageDesMathador]{impression}%
+    {%
+      \draw[black,fill=white] (0.3,2.6)--(1.25,6.5)--(5.4,6.5)--(7,4.4)--(5.9,0.5)--(1.9,0.5)--cycle ;
+      \draw[black,fill=white] (0.3,2.6)--(1.25,6.5)--(1.9,0.5)--cycle ;
+      \draw[black,fill=white] (1.9,0.5)--(1.25,6.5)--(7,4.4)--cycle ;
+    }%
+    {%
+      \draw[#1!50!black,fill=#1!70!white] (0.3,2.6)--(1.25,6.5)--(5.4,6.5)--(7,4.4)--(5.9,0.5)--(1.9,0.5)--cycle ;
+      \draw[#1!50!black,fill=#1!40!white] (0.3,2.6)--(1.25,6.5)--(1.9,0.5)--cycle ;
+      \draw[#1!50!black,fill=#1!55!white] (1.9,0.5)--(1.25,6.5)--(7,4.4)--cycle ;
+    }%
 }
 
 \newcommand\intmathadordodeca[1]{%NB ou COUL
-	\ifboolKV[TirageDesMathador]{impression}%
-		{%
-			\draw[black,fill=white] (0.2,3.3)--(0.7,5)--(1.7,6.5)--(3.8,7)--(5.3,6.1)--(6.7,4.3)--(6,2.3)--(5,0.9)--(2.7,0.6)--(1.3,1.7)--cycle ;
-			\draw[black,fill=white] (3.9,5.2)--(4.1,2.6)--(2.3,1.6)--(0.5,3.3) (4.1,2.6)--(6,2.3) (2.3,1.6)--(2.7,0.6) ;
-			\draw[black,fill=white] (0.2,3.3)--(0.7,5)--(1.7,6.5)--(1.5,5.5)--(0.5,3.3)--cycle ;
-			\draw[black,fill=white] (1.7,6.5)--(3.8,7)--(5.3,6.1)--(3.9,5.2)--(1.5,5.5)--cycle ;
-			\draw[black,fill=white] (0.5,3.3)--(1.5,5.5)--(3.9,5.2)--(4.1,2.6)--(2.3,1.6)--cycle ;
-		}%
-		{%
-			\draw[#1!50!black,fill=#1!75!white] (0.2,3.3)--(0.7,5)--(1.7,6.5)--(3.8,7)--(5.3,6.1)--(6.7,4.3)--(6,2.3)--(5,0.9)--(2.7,0.6)--(1.3,1.7)--cycle ;
-			\draw[#1!50!black] (3.9,5.2)--(4.1,2.6)--(2.3,1.6)--(0.5,3.3) (4.1,2.6)--(6,2.3) (2.3,1.6)--(2.7,0.6) ;
-			\draw[#1!50!black,fill=#1!40!white] (0.2,3.3)--(0.7,5)--(1.7,6.5)--(1.5,5.5)--(0.5,3.3)--cycle ;
-			\draw[#1!50!black,fill=#1!40!white] (1.7,6.5)--(3.8,7)--(5.3,6.1)--(3.9,5.2)--(1.5,5.5)--cycle ;
-			\draw[#1!50!black,fill=#1!55!white] (0.5,3.3)--(1.5,5.5)--(3.9,5.2)--(4.1,2.6)--(2.3,1.6)--cycle ;
-		}%
+  \ifboolKV[TirageDesMathador]{impression}%
+    {%
+      \draw[black,fill=white] (0.2,3.3)--(0.7,5)--(1.7,6.5)--(3.8,7)--(5.3,6.1)--(6.7,4.3)--(6,2.3)--(5,0.9)--(2.7,0.6)--(1.3,1.7)--cycle ;
+      \draw[black,fill=white] (3.9,5.2)--(4.1,2.6)--(2.3,1.6)--(0.5,3.3) (4.1,2.6)--(6,2.3) (2.3,1.6)--(2.7,0.6) ;
+      \draw[black,fill=white] (0.2,3.3)--(0.7,5)--(1.7,6.5)--(1.5,5.5)--(0.5,3.3)--cycle ;
+      \draw[black,fill=white] (1.7,6.5)--(3.8,7)--(5.3,6.1)--(3.9,5.2)--(1.5,5.5)--cycle ;
+      \draw[black,fill=white] (0.5,3.3)--(1.5,5.5)--(3.9,5.2)--(4.1,2.6)--(2.3,1.6)--cycle ;
+    }%
+    {%
+      \draw[#1!50!black,fill=#1!75!white] (0.2,3.3)--(0.7,5)--(1.7,6.5)--(3.8,7)--(5.3,6.1)--(6.7,4.3)--(6,2.3)--(5,0.9)--(2.7,0.6)--(1.3,1.7)--cycle ;
+      \draw[#1!50!black] (3.9,5.2)--(4.1,2.6)--(2.3,1.6)--(0.5,3.3) (4.1,2.6)--(6,2.3) (2.3,1.6)--(2.7,0.6) ;
+      \draw[#1!50!black,fill=#1!40!white] (0.2,3.3)--(0.7,5)--(1.7,6.5)--(1.5,5.5)--(0.5,3.3)--cycle ;
+      \draw[#1!50!black,fill=#1!40!white] (1.7,6.5)--(3.8,7)--(5.3,6.1)--(3.9,5.2)--(1.5,5.5)--cycle ;
+      \draw[#1!50!black,fill=#1!55!white] (0.5,3.3)--(1.5,5.5)--(3.9,5.2)--(4.1,2.6)--(2.3,1.6)--cycle ;
+    }%
 }
 
 \newcommand\intmathadoricosa[1]{%NB ou COUL
-	\ifboolKV[TirageDesMathador]{impression}%
-		{%
-			\draw[black,fill=white] (0.3,3.8)--(2,6.8)--(5.5,6.8)--(7.3,3.5)--(5.6,0.6)--(2,0.6)--cycle ;
-			\draw[black,fill=white] (0.3,3.8)--(1.2,3.5)--(4.5,1.4)--(7.3,3.5) (2,0.6)--(4.5,1.4)--(5.6,0.6) (1.2,3.5)--(2,0.6);
-			\draw[black,fill=white] (1.2,3.5)--(4.5,1.4)--(4.7,5.5)--cycle ;
-			\draw[black,fill=white] (4.7,5.5)--(7.3,3.5)--(4.5,1.4)--cycle ;
-			\draw[black,fill=white] (7.3,3.5)--(4.7,5.5)--(5.5,6.8)--cycle ;
-			\draw[black,fill=white] (0.3,3.8)--(1.2,3.5)--(2,6.8)--cycle ;
-			\draw[black,fill=white] (1.2,3.5)--(4.7,5.5)--(5.5,6.8)--(2,6.8)--cycle ;
-			\draw[black,fill=white] (2,6.8)--(4.7,5.5) ;
-		}%
-		{%
-			\draw[#1!50!black,fill=#1!70!white] (0.3,3.8)--(2,6.8)--(5.5,6.8)--(7.3,3.5)--(5.6,0.6)--(2,0.6)--cycle ;
-			\draw[#1!50!black] (0.3,3.8)--(1.2,3.5)--(4.5,1.4)--(7.3,3.5) (2,0.6)--(4.5,1.4)--(5.6,0.6) (1.2,3.5)--(2,0.6);
-			\draw[#1!50!black,fill=#1!55!white] (1.2,3.5)--(4.5,1.4)--(4.7,5.5)--cycle ;
-			\draw[#1!50!black,fill=#1!55!white] (4.7,5.5)--(7.3,3.5)--(4.5,1.4)--cycle ;
-			\draw[#1!50!black,fill=#1!55!white] (7.3,3.5)--(4.7,5.5)--(5.5,6.8)--cycle ;
-			\draw[#1!50!black,fill=#1!55!white] (0.3,3.8)--(1.2,3.5)--(2,6.8)--cycle ;
-			\draw[#1!50!black,fill=#1!40!white] (1.2,3.5)--(4.7,5.5)--(5.5,6.8)--(2,6.8)--cycle ;
-			\draw[#1!50!black] (2,6.8)--(4.7,5.5) ;
-		}%
+  \ifboolKV[TirageDesMathador]{impression}%
+    {%
+      \draw[black,fill=white] (0.3,3.8)--(2,6.8)--(5.5,6.8)--(7.3,3.5)--(5.6,0.6)--(2,0.6)--cycle ;
+      \draw[black,fill=white] (0.3,3.8)--(1.2,3.5)--(4.5,1.4)--(7.3,3.5) (2,0.6)--(4.5,1.4)--(5.6,0.6) (1.2,3.5)--(2,0.6);
+      \draw[black,fill=white] (1.2,3.5)--(4.5,1.4)--(4.7,5.5)--cycle ;
+      \draw[black,fill=white] (4.7,5.5)--(7.3,3.5)--(4.5,1.4)--cycle ;
+      \draw[black,fill=white] (7.3,3.5)--(4.7,5.5)--(5.5,6.8)--cycle ;
+      \draw[black,fill=white] (0.3,3.8)--(1.2,3.5)--(2,6.8)--cycle ;
+      \draw[black,fill=white] (1.2,3.5)--(4.7,5.5)--(5.5,6.8)--(2,6.8)--cycle ;
+      \draw[black,fill=white] (2,6.8)--(4.7,5.5) ;
+    }%
+    {%
+      \draw[#1!50!black,fill=#1!70!white] (0.3,3.8)--(2,6.8)--(5.5,6.8)--(7.3,3.5)--(5.6,0.6)--(2,0.6)--cycle ;
+      \draw[#1!50!black] (0.3,3.8)--(1.2,3.5)--(4.5,1.4)--(7.3,3.5) (2,0.6)--(4.5,1.4)--(5.6,0.6) (1.2,3.5)--(2,0.6);
+      \draw[#1!50!black,fill=#1!55!white] (1.2,3.5)--(4.5,1.4)--(4.7,5.5)--cycle ;
+      \draw[#1!50!black,fill=#1!55!white] (4.7,5.5)--(7.3,3.5)--(4.5,1.4)--cycle ;
+      \draw[#1!50!black,fill=#1!55!white] (7.3,3.5)--(4.7,5.5)--(5.5,6.8)--cycle ;
+      \draw[#1!50!black,fill=#1!55!white] (0.3,3.8)--(1.2,3.5)--(2,6.8)--cycle ;
+      \draw[#1!50!black,fill=#1!40!white] (1.2,3.5)--(4.7,5.5)--(5.5,6.8)--(2,6.8)--cycle ;
+      \draw[#1!50!black] (2,6.8)--(4.7,5.5) ;
+    }%
 }
 
 %====MACRO PLATEAU MATHADOR
 \defKV[Mathador]{%
-	rayon=\setlength\mathtexadorradius{#1},%
-	epaisseur=\def\mathtexadortypethick{#1}
+  rayon=\setlength\mathtexadorradius{#1},%
+  epaisseur=\def\mathtexadortypethick{#1}
 }
 
 \setKVdefault[Mathador]{%
-	rayon=5cm,%
-	logo=true,%
-	epaisseur=auto,%
-	ombre=true,%
-	impression=false,%
-	pastels=false
+  rayon=5cm,%
+  logo=true,%
+  epaisseur=auto,%
+  ombre=true,%
+  impression=false,%
+  pastels=false
 }
 
 \NewDocumentCommand\PlateauMathador{ O{} D<>{} m m }{%
-	\restoreKV[Mathador]%
-	\setKV[Mathador]{#1}%
-	\ifthenelse{\equal{\mathtexadortypethick}{auto}}%
-		{\setlength\mathtexadorthick{0.005\mathtexadorradius}}%
-		{\setlength\mathtexadorthick{\mathtexadortypethick}}%
-	\setlength\mathtexadorradiusB{0.6143\mathtexadorradius}%
-	\setlength\mathtexadorradiusC{0.4571\mathtexadorradius}%
-	\begin{tikzpicture}[line width=\mathtexadorthick,line join=bevel,every node/.style={inner sep=0pt},mathadorbabel,#2]
-		%plateau
-		\intmathador
-		%cible
-		\ifboolKV[Mathador]{impression}%
-			{%
-				\ifboolKV[Mathador]{pastels}%
-					{%
-						\draw (C0) node[above=0.02\mathtexadorradius,text=mathadorppalpastel!20!black,mathadorpolice] {\resizebox*{!}{0.0714\mathtexadorradius}{\mathadorlabelcible}} ;
-					}%
-					{%
-						\draw (C0) node[above=0.02\mathtexadorradius,text=black,mathadorpolice] {\resizebox*{!}{0.0714\mathtexadorradius}{\mathadorlabelcible}} ;
-					}%
-			}%
-			{%
-				\draw (C0) node[above=0.02\mathtexadorradius,text=white,mathadorpolice] {\resizebox*{!}{0.0714\mathtexadorradius}{\mathadorlabelcible}} ;
-			}%
-		%valeur à atteindre
-		\ifthenelse{\equal{#4}{}}%
-			{}%
-			{%
-				\ifboolKV[Mathador]{impression}%
-					{%
-						\ifboolKV[Mathador]{pastels}%
-							{%
-								\draw (90:0.72855\mathtexadorradius) node[inner sep=0pt,text=mathadorppalpastel!20!black,mathadorpolicegras] {\resizebox*{!}{0.25\mathtexadorradius}{#4}} ;
-							}%
-							{%
-								\draw (90:0.72855\mathtexadorradius) node[inner sep=0pt,text=black,mathadorpolicegras] {\resizebox*{!}{0.25\mathtexadorradius}{#4}} ;
-							}%
-					}%
-					{%
-						\draw (90:0.72855\mathtexadorradius) node[inner sep=0pt,text=mathadorcible,mathadorpolicegras] {\resizebox*{!}{0.25\mathtexadorradius}{#4}} ;
-					}%
-			}%
-		%5 valeurs
-		\foreach \nb [count=\i] in {#3}{%
-			\ifthenelse{\equal{\nb}{}}%
-				{}%
-				{%
-					\def\tmpxscalenbmathador{1}%
-					\ifnum\i=3\relax\else\ifnum\nb>10\relax\def\tmpxscalenbmathador{0.75}\else\def\tmpxscalenbmathador{1}\fi\fi%
-					\ifboolKV[Mathador]{impression}%
-						{%
-							\ifboolKV[Mathador]{pastels}%
-								{%
-									\draw (N\i) node[text=mathadorppalpastel!20!black,mathadorpolicegras,xscale=\tmpxscalenbmathador] {\resizebox*{!}{0.133\mathtexadorradius}{\nb}};
-								}%
-								{%
-									\draw (N\i) node[text=black,mathadorpolicegras,xscale=\tmpxscalenbmathador] {\resizebox*{!}{0.133\mathtexadorradius}{\nb}};
-								}%
-						}%
-						{%
-							\draw (N\i) node[text=white,mathadorpolicegras,xscale=\tmpxscalenbmathador] {\resizebox*{!}{0.133\mathtexadorradius}{\nb}};
-						}%
-				}%
-		}
-		\ifboolKV[Mathador]{logo}%
-			{%
-				\ifboolKV[Mathador]{impression}%
-					{%
-						\ifboolKV[Mathador]{pastels}%
-							{%
-								\draw (T3) node {\includegraphics[height=0.2\mathtexadorradius]{mathadorlogopastel.pdf}} ;%
-							}%
-							{%
-								\draw (T3) node {\includegraphics[height=0.2\mathtexadorradius]{mathadorlogonb.pdf}} ;%
-							}%
-					}%
-					{%
-						\draw (T3) node {\includegraphics[height=0.2\mathtexadorradius]{mathadorlogo.pdf}} ;%
-					}%
-			}%
-			{}%
-	\end{tikzpicture}%
+  \restoreKV[Mathador]%
+  \setKV[Mathador]{#1}%
+  \ifthenelse{\equal{\mathtexadortypethick}{auto}}%
+    {\setlength\mathtexadorthick{0.005\mathtexadorradius}}%
+    {\setlength\mathtexadorthick{\mathtexadortypethick}}%
+  \setlength\mathtexadorradiusB{0.6143\mathtexadorradius}%
+  \setlength\mathtexadorradiusC{0.4571\mathtexadorradius}%
+  \begin{tikzpicture}[line width=\mathtexadorthick,line join=bevel,every node/.style={inner sep=0pt},mathadorbabel,#2]
+    %plateau
+    \intmathador
+    %cible
+    \ifboolKV[Mathador]{impression}%
+      {%
+        \ifboolKV[Mathador]{pastels}%
+          {%
+            \draw (C0) node[above=0.02\mathtexadorradius,text=mathadorppalpastel!20!black,mathadorpolice] {\resizebox*{!}{0.0714\mathtexadorradius}{\mathadorlabelcible}} ;
+          }%
+          {%
+            \draw (C0) node[above=0.02\mathtexadorradius,text=black,mathadorpolice] {\resizebox*{!}{0.0714\mathtexadorradius}{\mathadorlabelcible}} ;
+          }%
+      }%
+      {%
+        \draw (C0) node[above=0.02\mathtexadorradius,text=white,mathadorpolice] {\resizebox*{!}{0.0714\mathtexadorradius}{\mathadorlabelcible}} ;
+      }%
+    %valeur à atteindre
+    \ifthenelse{\equal{#4}{}}%
+      {}%
+      {%
+        \ifboolKV[Mathador]{impression}%
+          {%
+            \ifboolKV[Mathador]{pastels}%
+              {%
+                \draw (90:0.72855\mathtexadorradius) node[inner sep=0pt,text=mathadorppalpastel!20!black,mathadorpolicegras] {\resizebox*{!}{0.25\mathtexadorradius}{#4}} ;
+              }%
+              {%
+                \draw (90:0.72855\mathtexadorradius) node[inner sep=0pt,text=black,mathadorpolicegras] {\resizebox*{!}{0.25\mathtexadorradius}{#4}} ;
+              }%
+          }%
+          {%
+            \draw (90:0.72855\mathtexadorradius) node[inner sep=0pt,text=mathadorcible,mathadorpolicegras] {\resizebox*{!}{0.25\mathtexadorradius}{#4}} ;
+          }%
+      }%
+    %5 valeurs
+    \foreach \nb [count=\i] in {#3}{%
+      \ifthenelse{\equal{\nb}{}}%
+        {}%
+        {%
+          \def\tmpxscalenbmathador{1}%
+          \ifnum\i=3\relax\else\ifnum\nb>10\relax\def\tmpxscalenbmathador{0.75}\else\def\tmpxscalenbmathador{1}\fi\fi%
+          \ifboolKV[Mathador]{impression}%
+            {%
+              \ifboolKV[Mathador]{pastels}%
+                {%
+                  \draw (N\i) node[text=mathadorppalpastel!20!black,mathadorpolicegras,xscale=\tmpxscalenbmathador] {\resizebox*{!}{0.133\mathtexadorradius}{\nb}};
+                }%
+                {%
+                  \draw (N\i) node[text=black,mathadorpolicegras,xscale=\tmpxscalenbmathador] {\resizebox*{!}{0.133\mathtexadorradius}{\nb}};
+                }%
+            }%
+            {%
+              \draw (N\i) node[text=white,mathadorpolicegras,xscale=\tmpxscalenbmathador] {\resizebox*{!}{0.133\mathtexadorradius}{\nb}};
+            }%
+        }%
+    }
+    \ifboolKV[Mathador]{logo}%
+      {%
+        \ifboolKV[Mathador]{impression}%
+          {%
+            \ifboolKV[Mathador]{pastels}%
+              {%
+                \draw (T3) node {\includegraphics[height=0.2\mathtexadorradius]{mathadorlogopastel.pdf}} ;%
+              }%
+              {%
+                \draw (T3) node {\includegraphics[height=0.2\mathtexadorradius]{mathadorlogonb.pdf}} ;%
+              }%
+          }%
+          {%
+            \draw (T3) node {\includegraphics[height=0.2\mathtexadorradius]{mathadorlogo.pdf}} ;%
+          }%
+      }%
+      {}%
+  \end{tikzpicture}%
 }
 
 %====MACRO DÉ
 \NewDocumentCommand\DeMathador{ D<>{} m m m m }{%tikz/couleur/lettre/hauteur/numero
-	\ifthenelse{\equal{#3}{A} \or \equal{#3}{Q}}%tetra
-		{%
-			\xdef\tmpmathadorscale{\fpeval{(#4)/6.9cm}}%
-			\begin{tikzpicture}[scale=\tmpmathadorscale,line width=\fpeval{\tmpmathadorscale*\mathadorcoeffepaisseurde}\mathadordetetra,line join=round,#1,transform shape]
-				\intmathadortetra{#2}
-				\ifthenelse{\equal{#5}{}}%
-					{}%
-					{%
-						\intmathadornumero{1}{3.4,3.3}{20}{#5}{\mathadordetetra}
-					}%
-			\end{tikzpicture}%
-		}%
-		{}%
-	\ifthenelse{\equal{#3}{B} \or \equal{#3}{S}}%hexa
-		{%
-			\xdef\tmpmathadorscale{\fpeval{(#4)/6.5cm}}%
-			\begin{tikzpicture}[scale=\tmpmathadorscale,line width=\fpeval{\tmpmathadorscale*\mathadorcoeffepaisseurde}\mathadordecubic,line join=round,#1,transform shape]
-				\intmathadorhexa{#2}
-				\ifthenelse{\equal{#5}{}}%
-					{}%
-					{%
-						\intmathadornumero{2}{3.55,3.25}{-30}{#5}{\mathadordecubic}
-					}%
-			\end{tikzpicture}%
-		}%
-		{}%
-	\ifthenelse{\equal{#3}{C} \or \equal{#3}{H}}%octo
-		{%
-			\xdef\tmpmathadorscale{\fpeval{(#4)/6.75cm}}%
-			\begin{tikzpicture}[scale=\tmpmathadorscale,line width=\fpeval{\tmpmathadorscale*\mathadorcoeffepaisseurde}\mathadordeocto,line join=round,#1,transform shape]
-				\intmathadorocto{#2}
-				\ifthenelse{\equal{#5}{}}%
-					{}%
-					{%
-						\intmathadornumero{3}{3.25,3.8}{37}{#5}{\mathadordeocto}
-					}%
-			\end{tikzpicture}%
-		}%
-		{}%
-	\ifthenelse{\equal{#3}{D}}%dodeca
-		{%
-			\xdef\tmpmathadorscale{\fpeval{(#4)/6.8cm}}%
-			\begin{tikzpicture}[scale=\tmpmathadorscale,line width=\fpeval{\tmpmathadorscale*\mathadorcoeffepaisseurde}\mathadordedodeca,line join=round,#1,transform shape]
-				\intmathadordodeca{#2}
-				\ifthenelse{\equal{#5}{}}%
-					{}%
-					{%
-						\intmathadornumero{4}{2.45,3.75}{-43}{#5}{\mathadordedodeca}
-					}%
-			\end{tikzpicture}%
-		}%
-		{}%
-	\ifthenelse{\equal{#3}{E} \or \equal{#3}{V}}%icosa
-		{%
-			\xdef\tmpmathadorscale{\fpeval{(#4)/6.8cm}}%
-			\begin{tikzpicture}[scale=\tmpmathadorscale,line width=\fpeval{\tmpmathadorscale*\mathadorcoeffepaisseurde}\mathadordeicosa,line join=round,#1,transform shape]
-				\intmathadoricosa{#2}
-				\ifthenelse{\equal{#5}{}}%
-					{}%
-					{%
-						\intmathadornumero{5}{3.5,3.525}{-32}{#5}{\mathadordeicosa}
-					}%
-			\end{tikzpicture}%
-		}%
-		{}%
+  \ifthenelse{\equal{#3}{A} \or \equal{#3}{Q}}%tetra
+    {%
+      \xdef\tmpmathadorscale{\fpeval{(#4)/6.9cm}}%
+      \begin{tikzpicture}[scale=\tmpmathadorscale,line width=\fpeval{\tmpmathadorscale*\mathadorcoeffepaisseurde}\mathadordetetra,line join=round,#1,transform shape]
+        \intmathadortetra{#2}
+        \ifthenelse{\equal{#5}{}}%
+          {}%
+          {%
+            \intmathadornumero{1}{3.4,3.3}{20}{#5}{\mathadordetetra}
+          }%
+      \end{tikzpicture}%
+    }%
+    {}%
+  \ifthenelse{\equal{#3}{B} \or \equal{#3}{S}}%hexa
+    {%
+      \xdef\tmpmathadorscale{\fpeval{(#4)/6.5cm}}%
+      \begin{tikzpicture}[scale=\tmpmathadorscale,line width=\fpeval{\tmpmathadorscale*\mathadorcoeffepaisseurde}\mathadordecubic,line join=round,#1,transform shape]
+        \intmathadorhexa{#2}
+        \ifthenelse{\equal{#5}{}}%
+          {}%
+          {%
+            \intmathadornumero{2}{3.55,3.25}{-30}{#5}{\mathadordecubic}
+          }%
+      \end{tikzpicture}%
+    }%
+    {}%
+  \ifthenelse{\equal{#3}{C} \or \equal{#3}{H}}%octo
+    {%
+      \xdef\tmpmathadorscale{\fpeval{(#4)/6.75cm}}%
+      \begin{tikzpicture}[scale=\tmpmathadorscale,line width=\fpeval{\tmpmathadorscale*\mathadorcoeffepaisseurde}\mathadordeocto,line join=round,#1,transform shape]
+        \intmathadorocto{#2}
+        \ifthenelse{\equal{#5}{}}%
+          {}%
+          {%
+            \intmathadornumero{3}{3.25,3.8}{37}{#5}{\mathadordeocto}
+          }%
+      \end{tikzpicture}%
+    }%
+    {}%
+  \ifthenelse{\equal{#3}{D}}%dodeca
+    {%
+      \xdef\tmpmathadorscale{\fpeval{(#4)/6.8cm}}%
+      \begin{tikzpicture}[scale=\tmpmathadorscale,line width=\fpeval{\tmpmathadorscale*\mathadorcoeffepaisseurde}\mathadordedodeca,line join=round,#1,transform shape]
+        \intmathadordodeca{#2}
+        \ifthenelse{\equal{#5}{}}%
+          {}%
+          {%
+            \intmathadornumero{4}{2.45,3.75}{-43}{#5}{\mathadordedodeca}
+          }%
+      \end{tikzpicture}%
+    }%
+    {}%
+  \ifthenelse{\equal{#3}{E} \or \equal{#3}{V}}%icosa
+    {%
+      \xdef\tmpmathadorscale{\fpeval{(#4)/6.8cm}}%
+      \begin{tikzpicture}[scale=\tmpmathadorscale,line width=\fpeval{\tmpmathadorscale*\mathadorcoeffepaisseurde}\mathadordeicosa,line join=round,#1,transform shape]
+        \intmathadoricosa{#2}
+        \ifthenelse{\equal{#5}{}}%
+          {}%
+          {%
+            \intmathadornumero{5}{3.5,3.525}{-32}{#5}{\mathadordeicosa}
+          }%
+      \end{tikzpicture}%
+    }%
+    {}%
 }
 
 %====MACRO CIBLE MATHADOR
 \NewDocumentCommand\CibleMathador{ O{purple!50!black} D<>{} m m }{%color/height/value
-	\xdef\tmpmathadorciblescale{\fpeval{(#3)/9cm}}%
-	\begin{tikzpicture}[scale=\tmpmathadorciblescale,line width=\fpeval{\tmpmathadorciblescale*0.4}\mathadorcible,#2,transform shape]
-		\ifboolKV[TirageDesMathador]{impression}%
-			{%
-				\draw[black] (0,0) circle[radius=4cm] ;
-				\draw[black] (0,0) circle[radius=3.25cm] ;
-				\draw[black] (2.5cm,0)--(4.4cm,0) (-2.5cm,0)--(-4.4cm,0) (0,2.5cm)--(0,4.4cm) (0,-2.5cm)--(0,-4.4cm) ;
-			}%
-			{%
-				\draw[#1] (0,0) circle[radius=4cm] ;
-				\draw[#1] (0,0) circle[radius=3.25cm] ;
-				\draw[#1] (2.5cm,0)--(4.4cm,0) (-2.5cm,0)--(-4.4cm,0) (0,2.5cm)--(0,4.4cm) (0,-2.5cm)--(0,-4.4cm) ;
-			}%
-		\clip (0,0) circle[radius=3cm] ;
-		\ifthenelse{\equal{#4}{}}%
-			{}%
-			{%
-				\ifboolKV[TirageDesMathador]{impression}%
-					{%
-						\draw[black] (0,0) node[inner sep=0pt,font=\sffamily\bfseries] {\resizebox*{!}{2.5cm}{#4}} ;
-					}%
-					{%
-						\draw (0,0) node[xshift=2pt,yshift=-2pt,inner sep=0pt,font=\sffamily\bfseries,text=gray] {\resizebox*{!}{2.5cm}{#4}} ;
-						\draw[#1] (0,0) node[inner sep=0pt,font=\sffamily\bfseries] {\resizebox*{!}{2.5cm}{#4}} ;
-					}%
-			}%
-	\end{tikzpicture}%
+  \xdef\tmpmathadorciblescale{\fpeval{(#3)/9cm}}%
+  \begin{tikzpicture}[scale=\tmpmathadorciblescale,line width=\fpeval{\tmpmathadorciblescale*0.4}\mathadorcible,#2,transform shape]
+    \ifboolKV[TirageDesMathador]{impression}%
+      {%
+        \draw[black] (0,0) circle[radius=4cm] ;
+        \draw[black] (0,0) circle[radius=3.25cm] ;
+        \draw[black] (2.5cm,0)--(4.4cm,0) (-2.5cm,0)--(-4.4cm,0) (0,2.5cm)--(0,4.4cm) (0,-2.5cm)--(0,-4.4cm) ;
+      }%
+      {%
+        \draw[#1] (0,0) circle[radius=4cm] ;
+        \draw[#1] (0,0) circle[radius=3.25cm] ;
+        \draw[#1] (2.5cm,0)--(4.4cm,0) (-2.5cm,0)--(-4.4cm,0) (0,2.5cm)--(0,4.4cm) (0,-2.5cm)--(0,-4.4cm) ;
+      }%
+    \clip (0,0) circle[radius=3cm] ;
+    \ifthenelse{\equal{#4}{}}%
+      {}%
+      {%
+        \ifboolKV[TirageDesMathador]{impression}%
+          {%
+            \draw[black] (0,0) node[inner sep=0pt,font=\sffamily\bfseries] {\resizebox*{!}{2.5cm}{#4}} ;
+          }%
+          {%
+            \draw (0,0) node[xshift=2pt,yshift=-2pt,inner sep=0pt,font=\sffamily\bfseries,text=gray] {\resizebox*{!}{2.5cm}{#4}} ;
+            \draw[#1] (0,0) node[inner sep=0pt,font=\sffamily\bfseries] {\resizebox*{!}{2.5cm}{#4}} ;
+          }%
+      }%
+  \end{tikzpicture}%
 }
 
 %====MACRO TIRAGE DÉS
 \defKV[TirageDesMathador]{%
-	hauteur=\setlength\mylengthtmpmathador{#1},%
-	couleurs=\def\tiragedesmathadorcouleurs{#1}
+  hauteur=\setlength\mylengthtmpmathador{#1},%
+  couleurs=\def\tiragedesmathadorcouleurs{#1}
 }
 
 \setKVdefault[TirageDesMathador]{%
-	hauteur=1.5cm,%
-	couleurs={purple!50!black,red,olive!50!lime,orange,blue,purple},%
-	superpos=true,%
-	impression=false
+  hauteur=1.5cm,%
+  couleurs={purple!50!black,red,olive!50!lime,orange,blue,purple},%
+  superpos=true,%
+  impression=false
 }
 
 \NewDocumentCommand\TirageDesMathador{ O{} m m m m m m }{%hauteur+valeurs
-	\restoreKV[TirageDesMathador]%
-	\setKV[TirageDesMathador]{#1}%
-	\setsepchar{,}%
-	\readlist*\mymathadorcouleursdes{\tiragedesmathadorcouleurs}%
-	\itemtomacro\mymathadorcouleursdes[1]\mathadorcolcible%
-	\itemtomacro\mymathadorcouleursdes[2]\mathadorcolA%
-	\itemtomacro\mymathadorcouleursdes[3]\mathadorcolB%
-	\itemtomacro\mymathadorcouleursdes[4]\mathadorcolC%
-	\itemtomacro\mymathadorcouleursdes[5]\mathadorcolD%
-	\itemtomacro\mymathadorcouleursdes[6]\mathadorcolE%
-	\setlength\mylengthtmpsepmathador{0.5\mylengthtmpmathador}%
-	\CibleMathador[\mathadorcolcible]{\mylengthtmpmathador}{#2}%
-	\ifboolKV[TirageDesMathador]{superpos}{\hspace*{\mylengthtmpsepmathador}}{}%
-	\DeMathador{\mathadorcolA}{A}{\mylengthtmpmathador}{#3}%
-	\ifboolKV[TirageDesMathador]{superpos}{\hspace*{-\fpeval{\tmpmathadorscale*2.25}\mathadordetetra}}{}%
-	\DeMathador{\mathadorcolB}{B}{\mylengthtmpmathador}{#4}%
-	\ifboolKV[TirageDesMathador]{superpos}{\hspace*{-\fpeval{\tmpmathadorscale*2.5}\mathadordecubic}}{}%
-	\DeMathador{\mathadorcolC}{C}{\mylengthtmpmathador}{#5}%
-	\ifboolKV[TirageDesMathador]{superpos}{\hspace*{-\fpeval{\tmpmathadorscale*2.25}\mathadordeocto}}{}%
-	\DeMathador{\mathadorcolD}{D}{\mylengthtmpmathador}{#6}%
-	\ifboolKV[TirageDesMathador]{superpos}{\hspace*{-\fpeval{\tmpmathadorscale*2}\mathadordedodeca}}{}%
-	\DeMathador{\mathadorcolE}{E}{\mylengthtmpmathador}{#7}%
+  \restoreKV[TirageDesMathador]%
+  \setKV[TirageDesMathador]{#1}%
+  \setsepchar{,}%
+  \readlist*\mymathadorcouleursdes{\tiragedesmathadorcouleurs}%
+  \itemtomacro\mymathadorcouleursdes[1]\mathadorcolcible%
+  \itemtomacro\mymathadorcouleursdes[2]\mathadorcolA%
+  \itemtomacro\mymathadorcouleursdes[3]\mathadorcolB%
+  \itemtomacro\mymathadorcouleursdes[4]\mathadorcolC%
+  \itemtomacro\mymathadorcouleursdes[5]\mathadorcolD%
+  \itemtomacro\mymathadorcouleursdes[6]\mathadorcolE%
+  \setlength\mylengthtmpsepmathador{0.5\mylengthtmpmathador}%
+  \CibleMathador[\mathadorcolcible]{\mylengthtmpmathador}{#2}%
+  \ifboolKV[TirageDesMathador]{superpos}{\hspace*{\mylengthtmpsepmathador}}{}%
+  \DeMathador{\mathadorcolA}{A}{\mylengthtmpmathador}{#3}%
+  \ifboolKV[TirageDesMathador]{superpos}{\hspace*{-\fpeval{\tmpmathadorscale*2.25}\mathadordetetra}}{}%
+  \DeMathador{\mathadorcolB}{B}{\mylengthtmpmathador}{#4}%
+  \ifboolKV[TirageDesMathador]{superpos}{\hspace*{-\fpeval{\tmpmathadorscale*2.5}\mathadordecubic}}{}%
+  \DeMathador{\mathadorcolC}{C}{\mylengthtmpmathador}{#5}%
+  \ifboolKV[TirageDesMathador]{superpos}{\hspace*{-\fpeval{\tmpmathadorscale*2.25}\mathadordeocto}}{}%
+  \DeMathador{\mathadorcolD}{D}{\mylengthtmpmathador}{#6}%
+  \ifboolKV[TirageDesMathador]{superpos}{\hspace*{-\fpeval{\tmpmathadorscale*2}\mathadordedodeca}}{}%
+  \DeMathador{\mathadorcolE}{E}{\mylengthtmpmathador}{#7}%
 }
 
 \endinput
