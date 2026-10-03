@@ -27,8 +27,8 @@
 \hypersetup{pdfborder=0 0 0}
 \usepackage[margin=2cm]{geometry}
 \setlength{\parindent}{0pt}
-\def\TPversion{0.20b}
-\def\TPdate{27/06/2026}
+\def\TPversion{0.20d}
+\def\TPdate{\today}
 \usepackage{tcolorbox}
 \usepackage{pgffor}
 \tcbuselibrary{breakable,skins,hooks,listingsutf8}
@@ -36,80 +36,80 @@
 %\sethlcolor{lightgray!25}
 
 \lstset{
-	language=[LaTeX]TeX,%
-	basicstyle=\ttfamily,%
-	keywordstyle={\color{blue}},%
-	classoffset=0,%
-	keywords={},%
-	alsoletter={-},%
-	keywordstyle={\color{blue}},%
-	classoffset=1,%
-	alsoletter={-},%
-	morekeywords={inlinegraphicx,calc,mwe,simplekv,graphicx},%
-	keywordstyle={\color{violet}},%
-	classoffset=2,%
-	alsoletter={-},%
-	morekeywords={\inlinegraphics,\includegraphics,\safeincludegraphics},%
-	keywordstyle={\color{green!50!black}},%
-	classoffset=3,%
-	morekeywords={scale,strut,width,angle},%
-	keywordstyle={\color{orange!75!black}}
+  language=[LaTeX]TeX,%
+  basicstyle=\ttfamily,%
+  keywordstyle={\color{blue}},%
+  classoffset=0,%
+  keywords={},%
+  alsoletter={-},%
+  keywordstyle={\color{blue}},%
+  classoffset=1,%
+  alsoletter={-},%
+  morekeywords={inlinegraphicx,calc,mwe,simplekv,graphicx},%
+  keywordstyle={\color{violet}},%
+  classoffset=2,%
+  alsoletter={-},%
+  morekeywords={\inlinegraphics,\includegraphics,\safeincludegraphics,\inlinegraphicxsetup,\inlinegraphicspath,\graphicspath},%
+  keywordstyle={\color{green!50!black}},%
+  classoffset=3,%
+  morekeywords={scale,strut,width,angle,searchpath,extensions,inherit},%
+  keywordstyle={\color{orange!75!black}}
 }
 
 \newtcblisting{DemoCode}[1]{%
-	enhanced,width=\linewidth,%
-	bicolor,size=title,%
-	colback=cyan!10!white,%
-	colbacklower=cyan!5!white,%
-	colframe=cyan!75!black,%
-	listing options={%
-		breaklines=true,%
-		breakatwhitespace=true,%
-		style=tcblatex,basicstyle=\small\ttfamily,%
-		tabsize=4,%
-		commentstyle={\itshape\color{gray}},
-		keywordstyle={\color{blue}},%
-		classoffset=0,%
-		keywords={\usepackage,\includegraphics,\safeincludegraphics,xstring,listofitems,mwe,tikz,calc,simplekv,graphicx,\readlist,\showitems,\xintFor,\xintSeq,\draw,\node},%
-		alsoletter={-},%
-		keywordstyle={\color{blue}},%
-		classoffset=1,%
-		alsoletter={-},%
-		morekeywords={euromoney},%
-		keywordstyle={\color{violet}},%
-		classoffset=2,%
-		alsoletter={-},%
-		morekeywords={\inlinegraphics,\includegraphics},%
-		keywordstyle={\color{green!50!black}},%
-		classoffset=3,%
-		morekeywords={scale,strut,width,angle},%
-		keywordstyle={\color{orange!75!black}}
-	},%
-	#1
+  enhanced,width=\linewidth,%
+  bicolor,size=title,%
+  colback=cyan!10!white,%
+  colbacklower=cyan!5!white,%
+  colframe=cyan!75!black,%
+  listing options={%
+    breaklines=true,%
+    breakatwhitespace=true,%
+    style=tcblatex,basicstyle=\small\ttfamily,%
+    tabsize=4,%
+    commentstyle={\itshape\color{gray}},
+    keywordstyle={\color{blue}},%
+    classoffset=0,%
+    keywords={\usepackage,\includegraphics,\safeincludegraphics,\graphicspath,xstring,listofitems,mwe,tikz,calc,simplekv,graphicx,\readlist,\showitems,\xintFor,\xintSeq,\draw,\node},%
+    alsoletter={-},%
+    keywordstyle={\color{blue}},%
+    classoffset=1,%
+    alsoletter={-},%
+    morekeywords={euromoney},%
+    keywordstyle={\color{violet}},%
+    classoffset=2,%
+    alsoletter={-},%
+    morekeywords={\inlinegraphics,\includegraphics,\safeincludegraphics,\inlinegraphicxsetup,\inlinegraphicspath,\graphicspath},%
+    keywordstyle={\color{green!50!black}},%
+    classoffset=3,%
+    morekeywords={scale,strut,width,angle,searchpath,extensions,inherit},%
+    keywordstyle={\color{orange!75!black}}
+  },%
+  #1
 }
 
 \newtcbinputlisting\DemoCodeFile[1]{%
-	enhanced,width=\linewidth,%
-	bicolor,size=title,%
-	colback=lightgray!10!white,%
-	colbacklower=lightgray!5!white,%
-	colframe=lightgray!75!black,%
-	listing options={%
-		breaklines=true,%
-		breakatwhitespace=true,%
-		style=tcblatex,
-		basicstyle=\tiny\ttfamily,%
-		tabsize=4,%
-		commentstyle={\itshape\color{gray}},%
-		%lastline=148
-	},%
-	breakable,
-	listing only,%
-	listing file={#1}
+  enhanced,width=\linewidth,%
+  bicolor,size=title,%
+  colback=lightgray!10!white,%
+  colbacklower=lightgray!5!white,%
+  colframe=lightgray!75!black,%
+  listing options={%
+    breaklines=true,%
+    breakatwhitespace=true,%
+    style=tcblatex,
+    basicstyle=\tiny\ttfamily,%
+    tabsize=4,%
+    commentstyle={\itshape\color{gray}},%
+    %lastline=148
+  },%
+  breakable,
+  listing only,%
+  listing file={#1}
 }
 
 \NewDocumentCommand\ShowCode{ m }{%
-	\colorbox{lightgray!50}{\lstinline!#1!}%
+  \colorbox{lightgray!50}{\lstinline!#1!}%
 }
 
 \begin{document}
@@ -117,29 +117,29 @@
 \thispagestyle{empty}
 
 \begin{center}
-	\begin{minipage}{0.88\linewidth}
-		\begin{tcolorbox}[colframe=yellow,colback=yellow!15]
-			\begin{center}
-				\renewcommand{\arraystretch}{1.25}%
-				\begin{tabular}{c}
-					{\Huge \texttt{inlinegraphicx}}\\
-					\\
-					{\LARGE Includegraphics, with an} \\
-					{\LARGE automatic inline positioning.} \\
-					\\
-					{\small \texttt{Version \TPversion{} -- \TPdate}}
-				\end{tabular}
-			\end{center}
-		\end{tcolorbox}
-	\end{minipage}
+  \begin{minipage}{0.88\linewidth}
+    \begin{tcolorbox}[colframe=yellow,colback=yellow!15]
+      \begin{center}
+        \renewcommand{\arraystretch}{1.25}%
+        \begin{tabular}{c}
+          {\Huge \texttt{inlinegraphicx}}\\
+          \\
+          {\LARGE Includegraphics, with an} \\
+          {\LARGE automatic inline positioning.} \\
+          \\
+          {\small \texttt{Version \TPversion{} -- \TPdate}}
+        \end{tabular}
+      \end{center}
+    \end{tcolorbox}
+  \end{minipage}
 \end{center}
 
 \begin{center}
-	\begin{tabular}{c}
-		\texttt{Cédric Pierquet}\\
-		{\ttfamily c pierquet -- at -- outlook . fr}\\
-		\texttt{\url{https://github.com/cpierquet/latex-packages/tree/main/inlinegraphicx}} \\
-	\end{tabular}
+  \begin{tabular}{c}
+    \texttt{Cédric Pierquet}\\
+    {\ttfamily c pierquet -- at -- outlook . fr}\\
+    \texttt{\url{https://github.com/cpierquet/latex-packages/tree/main/inlinegraphicx}} \\
+  \end{tabular}
 \end{center}
 
 \hrule
@@ -213,8 +213,8 @@ Before giving up, the package also tries appending several common extensions to 
 The code determines (total)height and, if necessary, depth of letters in the current font, in order to position the image correctly :
 
 \begin{itemize}
-	\item (total)height is given by (total)height of {\setlength\fboxsep{0pt}\fbox{qH}} in the current font ;
-	\item depth is given by depth of {\setlength\fboxsep{0pt}\fbox{qH}} in the current font.
+  \item (total)height is given by (total)height of {\setlength\fboxsep{0pt}\fbox{qH}} in the current font ;
+  \item depth is given by depth of {\setlength\fboxsep{0pt}\fbox{qH}} in the current font.
 \end{itemize}
 
 In order to adjust manually size/positioning, \ShowCode{[keys]} are available.
@@ -238,8 +238,8 @@ The starred version remove depth positioning, wheres normal version include dept
 Available keys are:
 
 \begin{itemize}
-	\item \ShowCode{scale}: re-scaling of compute height (default \ShowCode{1}) ;
-	\item \ShowCode{strut}: characters for height/depth (default \ShowCode{qH}).
+  \item \ShowCode{scale}: re-scaling of compute height (default \ShowCode{1}) ;
+  \item \ShowCode{strut}: characters for height/depth (default \ShowCode{qH}).
 \end{itemize}
 
 \subsection{Examples}
@@ -270,6 +270,67 @@ Inline insertion, \inlinegraphics*{example-image-16x10} with automatic adjustmen
 
 \pagebreak
 
+\section{Global configuration}
+
+\subsection{Purpose}
+
+The package needs to know where to look for images in order to run its existence test before calling \ShowCode{\\includegraphics}. Three approaches are available, from the most automatic to the most explicit.
+
+\subsection{Approach 1 --- automatic inheritance from graphicspath (default)}
+
+By default (\ShowCode{inherit=true}), the package automatically reads the folders declared via \ShowCode{\\graphicspath} at \ShowCode{\\begin\{document\}} and uses them for its internal existence test. \textbf{No extra macro is needed}: just use \ShowCode{\\graphicspath} as usual.
+
+\begin{DemoCode}{listing only}
+\usepackage{inlinegraphicx}
+\graphicspath{{images/}{figures/}}   % automatically inherited
+\end{DemoCode}
+
+The order of the two lines does not matter --- the inheritance is resolved at \ShowCode{\\begin\{document\}}, after all preamble commands have been processed. Note that folder paths must end with a trailing slash (\texttt{/}).
+
+\smallskip
+
+To disable automatic inheritance and manage the search path manually:
+
+\begin{DemoCode}{listing only}
+\usepackage[inherit=false]{inlinegraphicx}
+\end{DemoCode}
+
+\subsection{Approach 2 --- inlinegraphicspath (one macro for both)}
+
+\ShowCode{\\inlinegraphicspath} uses the same syntax as \ShowCode{\\graphicspath} and configures \textbf{both} simultaneously: the internal existence test and \ShowCode{\\graphicspath} from \ShowCode{graphicx}. Useful when you prefer a single macro to set everything up, or when \ShowCode{inherit=false} is active.
+
+\begin{DemoCode}{listing only}
+\usepackage{inlinegraphicx}
+\inlinegraphicspath{{images/}{figures/}}
+\end{DemoCode}
+
+\subsection{Approach 3 --- inlinegraphicxsetup (advanced, decoupled)}
+
+\ShowCode{\\inlinegraphicxsetup} configures only the internal existence test, without touching \ShowCode{\\graphicspath}. Useful when the two need to differ, or to adjust the list of tried extensions.
+
+\begin{DemoCode}{listing only}
+\inlinegraphicxsetup{key1=value1, key2=value2, ...}
+\end{DemoCode}
+
+Available keys:
+
+\begin{itemize}
+  \item \ShowCode{searchpath}: comma-separated list of folders (with trailing \texttt{/}), default empty ;
+  \item \ShowCode{extensions}: comma-separated list of extensions tried when none is given, default \ShowCode{.pdf,.png,.jpg,.jpeg,.eps}.
+\end{itemize}
+
+\begin{DemoCode}{listing only}
+% decouple inlinegraphicx search path from \graphicspath
+\usepackage[inherit=false]{inlinegraphicx}
+\graphicspath{{figures/}}
+\inlinegraphicxsetup{searchpath={images/, figures/}}
+
+% change the tried extensions
+\inlinegraphicxsetup{extensions={.pdf,.png}}
+\end{DemoCode}
+
+\pagebreak
+
 \section{The safeincludegraphics wrapper}
 
 \subsection{Purpose}
@@ -295,6 +356,10 @@ Before inserting the image, the same existence test as \ShowCode{\\inlinegraphic
 \pagebreak
 
 \section{History}
+
+\texttt{0.20d: Automatic inheritance of \textit{graphicspath} or macros for an explicit control}
+
+\texttt{0.20c: Macro for params}
 
 \texttt{0.20b: Dummy graphic if file not found}
 
