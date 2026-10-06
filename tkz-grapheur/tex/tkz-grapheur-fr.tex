@@ -376,6 +376,8 @@
     {chaud}{\tikzset{pflgrillep/.style={line width=\pflthickgridp,pflgrillepwarm!75}}\tikzset{pflgrilles/.style={line width=\pflthickgrids,pflgrilleswarm}}\tikzset{pflgrillei/.style={line width=\pflthickgridi,pflgrilleiwarm}}}%
     {contraste}{\tikzset{pflgrillep/.style={line width=\pflthickgridp,pflgrillepcontrast!75}}\tikzset{pflgrilles/.style={line width=\pflthickgrids,pflgrillescontrast}}\tikzset{pflgrillei/.style={line width=\pflthickgridi,pflgrilleicontrast}}}%
     {seyes}{\tikzset{pflgrillep/.style={line width=\pflthickgridp,pflgrillepseyes}}\tikzset{pflgrilles/.style={line width=\pflthickgrids,pflgrillesseyes}}\tikzset{pflgrillei/.style={line width=\pflthickgridi,pflgrilleiseyes}}}%
+    {violet}{\tikzset{pflgrillep/.style={line width=\pflthickgridp,pflgrillepviolet}}\tikzset{pflgrilles/.style={line width=\pflthickgrids,pflgrillesviolet}}\tikzset{pflgrillei/.style={line width=\pflthickgridi,pflgrilleiviolet}}}%
+    {rose}{\tikzset{pflgrillep/.style={line width=\pflthickgridp,pflgrilleppink}}\tikzset{pflgrilles/.style={line width=\pflthickgrids,pflgrillesspink}}\tikzset{pflgrillei/.style={line width=\pflthickgridi,pflgrilleipink}}}%
   }%
   %unités x/y pour des calculs de coordonnées (dommage vu que dans certains cas on les connais déjà :-/)
   \TikZUnites
@@ -460,6 +462,8 @@
     {sqrt}{\FormatterRacine{#2}}%
     {dsqrt}{\FormatterRacine[d]{#2}}%
     {nsqrt}{\FormatterRacine[n]{#2}}%
+    {numbrut}{\num[exponent-mode=fixed,fixed-exponent=0]{#2}}%
+    {rawnum}{\num[exponent-mode=fixed,fixed-exponent=0]{#2}}%
   }[#2]%
 }
 
@@ -477,6 +481,8 @@
     {sqrt}{\FormatterRacine{#2}}%
     {dsqrt}{\FormatterRacine[d]{#2}}%
     {nsqrt}{\FormatterRacine[n]{#2}}%
+    {numbrut}{\num[exponent-mode=fixed,fixed-exponent=0]{#2}}%
+    {rawnum}{\num[exponent-mode=fixed,fixed-exponent=0]{#2}}%
   }[#2]%
 }
 
@@ -3644,53 +3650,53 @@
   \def\xliste{#3}
   \def\yliste{#4}
   \setsepchar{,}%
-  \readlist*\LX{\xliste}
-  \readlist*\LY{\yliste}
+  \readlist*\xintregLX{\xliste}
+  \readlist*\xintregLY{\yliste}
   %taille des listes
-  \def\LNB{\inteval{\LXlen}}
+  \def\xintregLNB{\inteval{\xintregLXlen}}
   %nuage
-  \foreach \i in {1,...,\LXlen}{%
-    \itemtomacro\LX[\i]\tmpmavalx%
-    \itemtomacro\LY[\i]\tmpmavaly%
+  \foreach \i in {1,...,\xintregLXlen}{%
+    \itemtomacro\xintregLX[\i]\tmpmavalx%
+    \itemtomacro\xintregLY[\i]\tmpmavaly%
     \MarquerPts*[Style={\useKV[GraphiqueTikzRegLin]{Style}},Couleur={\useKV[GraphiqueTikzRegLin]{CouleurNuage}}]{(\tmpmavalx,\tmpmavaly)}%
   }
   %droite de régression
   \ifboolKV[GraphiqueTikzRegLin]{TracerDroite}%
     {%
       %somme des LX et des LY OK
-      \xdef\LXSomme{0}
-      \xdef\LYSomme{0}
-      \foreach \i in {1,2,...,\LNB}{
-        \xdef\LXSomme{\xintfloateval{\LXSomme+\LX[\i]}}
+      \xdef\xintregLXSomme{0}
+      \xdef\xintregLYSomme{0}
+      \foreach \i in {1,2,...,\xintregLNB}{
+        \xdef\xintregLXSomme{\xintfloateval{\xintregLXSomme+\xintregLX[\i]}}
       }
-      \foreach \i in {1,2,...,\LNB}{
-        \xdef\LYSomme{\xintfloateval{\LYSomme+\LY[\i]}}
+      \foreach \i in {1,2,...,\xintregLNB}{
+        \xdef\xintregLYSomme{\xintfloateval{\xintregLYSomme+\xintregLY[\i]}}
       }
       %moyenne des LX et des LY OK
-      \xdef\LXmoy{\xintfloateval{\LXSomme/\LNB}}
-      \xdef\LYmoy{\xintfloateval{\LYSomme/\LNB}}
+      \xdef\xintregLXmoy{\xintfloateval{\xintregLXSomme/\xintregLNB}}
+      \xdef\xintregLYmoy{\xintfloateval{\xintregLYSomme/\xintregLNB}}
       %variance des LX et des LY OK
-      \xdef\LXvar{0}
-      \foreach \i in {1,2,...,\LNB}{
-        \xdef\LXvar{\xintfloateval{\LXvar+(\LX[\i]-\LXmoy)*(\LX[\i]-\LXmoy)}}
+      \xdef\xintregLXvar{0}
+      \foreach \i in {1,2,...,\xintregLNB}{
+        \xdef\xintregLXvar{\xintfloateval{\xintregLXvar+(\xintregLX[\i]-\xintregLXmoy)*(\xintregLX[\i]-\xintregLXmoy)}}
       }
-      \xdef\LXvar{\xintfloateval{\LXvar/\LNB}}
-      \xdef\LYvar{0}
-      \foreach \i in {1,2,...,\LNB}{
-        \xdef\LYvar{\xintfloateval{\LYvar+(\LY[\i]-\LYmoy)*(\LY[\i]-\LYmoy)}}
+      \xdef\xintregLXvar{\xintfloateval{\xintregLXvar/\xintregLNB}}
+      \xdef\xintregLYvar{0}
+      \foreach \i in {1,2,...,\xintregLNB}{
+        \xdef\xintregLYvar{\xintfloateval{\xintregLYvar+(\xintregLY[\i]-\xintregLYmoy)*(\xintregLY[\i]-\xintregLYmoy)}}
       }
-      \xdef\LYvar{\xintfloateval{\LYvar/\LNB}}
+      \xdef\xintregLYvar{\xintfloateval{\xintregLYvar/\xintregLNB}}
       %covariance des XY OK
-      \xdef\LXYvar{0}
-      \foreach \i in {1,2,...,\LNB}{
-        \xdef\LXYvar{\xintfloateval{\LXYvar+(\LX[\i]-\LXmoy)*(\LY[\i]-\LYmoy)}}
+      \xdef\xintregLXYvar{0}
+      \foreach \i in {1,2,...,\xintregLNB}{
+        \xdef\xintregLXYvar{\xintfloateval{\xintregLXYvar+(\xintregLX[\i]-\xintregLXmoy)*(\xintregLY[\i]-\xintregLYmoy)}}
       }
-      \xdef\LXYvar{\xintfloateval{\LXYvar/\LNB}}
+      \xdef\xintregLXYvar{\xintfloateval{\xintregLXYvar/\xintregLNB}}
       %COEFFS OK
       \IfStrEq{\pflarrondisreglin}{}%
       {%
-        \xdef\tmpcoeffreglina{\xintfloateval{\LXYvar/\LXvar}}
-        \xdef\tmpcoeffreglinb{\xintfloateval{\LYmoy-\tmpcoeffreglina*\LXmoy}}
+        \xdef\tmpcoeffreglina{\xintfloateval{\xintregLXYvar/\xintregLXvar}}
+        \xdef\tmpcoeffreglinb{\xintfloateval{\xintregLYmoy-\tmpcoeffreglina*\xintregLXmoy}}
       }%
       {%
         \IfSubStr{\pflarrondisreglin}{/}%
@@ -3700,8 +3706,8 @@
         {%
           \xdef\pflarrondisreglina{\pflarrondisreglin}\xdef\pflarrondisreglinb{\pflarrondisreglin}
         }%
-        \xdef\tmpcoeffreglina{\xintfloateval{round(\LXYvar/\LXvar,\pflarrondisreglina)}}
-        \xdef\tmpcoeffreglinb{\xintfloateval{round(\LYmoy-\tmpcoeffreglina*\LXmoy,\pflarrondisreglinb)}}
+        \xdef\tmpcoeffreglina{\xintfloateval{round(\xintregLXYvar/\xintregLXvar,\pflarrondisreglina)}}
+        \xdef\tmpcoeffreglinb{\xintfloateval{round(\xintregLYmoy-\tmpcoeffreglina*\xintregLXmoy,\pflarrondisreglinb)}}
       }%
       \xintdeffloatfunc #2(x) := (\tmpcoeffreglina)*x+(\tmpcoeffreglinb) ;
       %tracé
@@ -3714,44 +3720,44 @@
   \ifboolKV[GraphiqueTikzRegLin]{TracerParabole}%
     {%
       %somme importantes
-      \xdef\LXSomme{0}%
-      \xdef\LXCSomme{0}%
-      \xdef\LYSomme{0}%
-      \xdef\LXXSomme{0}%
-      \xdef\LXYSomme{0}%
-      \xdef\LXXCSomme{0}%
-      \xdef\LXCXCSomme{0}%
-      \xdef\LXCYSomme{0}%
+      \xdef\xintregLXSomme{0}%
+      \xdef\xintregLXCSomme{0}%
+      \xdef\xintregLYSomme{0}%
+      \xdef\xintregLXXSomme{0}%
+      \xdef\xintregLXYSomme{0}%
+      \xdef\xintregLXXCSomme{0}%
+      \xdef\xintregLXCXCSomme{0}%
+      \xdef\xintregLXCYSomme{0}%
       %calculs
-      \foreach \i in {1,2,...,\LNB}{%
-        \xdef\LXSomme{\xintfloateval{\LXSomme+\LX[\i]}}%
-        \xdef\LXCSomme{\xintfloateval{\LXCSomme+(\LX[\i])^2}}%
+      \foreach \i in {1,2,...,\xintregLNB}{%
+        \xdef\xintregLXSomme{\xintfloateval{\xintregLXSomme+\xintregLX[\i]}}%
+        \xdef\xintregLXCSomme{\xintfloateval{\xintregLXCSomme+(\xintregLX[\i])^2}}%
       }%
-      \foreach \i in {1,2,...,\LNB}{%
-        \xdef\LYSomme{\xintfloateval{\LYSomme+\LY[\i]}}%
+      \foreach \i in {1,2,...,\xintregLNB}{%
+        \xdef\xintregLYSomme{\xintfloateval{\xintregLYSomme+\xintregLY[\i]}}%
       }%
-      \xdef\LXmoy{\xintfloateval{\LXSomme/\LNB}}%
-      \xdef\LYmoy{\xintfloateval{\LYSomme/\LNB}}%
-      \xdef\LXCmoy{\xintfloateval{\LXCSomme/\LNB}}%
+      \xdef\xintregLXmoy{\xintfloateval{\xintregLXSomme/\xintregLNB}}%
+      \xdef\xintregLYmoy{\xintfloateval{\xintregLYSomme/\xintregLNB}}%
+      \xdef\xintregLXCmoy{\xintfloateval{\xintregLXCSomme/\xintregLNB}}%
       %calculs suites
-      \foreach \i in {1,2,...,\LNB}{%
-        \xdef\LXXSomme{\xintfloateval{\LXXSomme+(\LX[\i]-\LXmoy)^2}}%
-        \xdef\LXYSomme{\xintfloateval{\LXYSomme+(\LX[\i]-\LXmoy)*(\LY[\i]-\LYmoy)}}%
-        \xdef\LXXCSomme{\xintfloateval{\LXXCSomme+(\LX[\i]-\LXmoy)*((\LX[\i])*(\LX[\i])-\LXCmoy)}}%
-        \xdef\LXCXCSomme{\xintfloateval{\LXCXCSomme+((\LX[\i])^2-\LXCmoy)^2}}%
-        \xdef\LXCYSomme{\xintfloateval{\LXCYSomme+((\LX[\i])^2-\LXCmoy)*(\LY[\i]-\LYmoy)}}%
+      \foreach \i in {1,2,...,\xintregLNB}{%
+        \xdef\xintregLXXSomme{\xintfloateval{\xintregLXXSomme+(\xintregLX[\i]-\xintregLXmoy)^2}}%
+        \xdef\xintregLXYSomme{\xintfloateval{\xintregLXYSomme+(\xintregLX[\i]-\xintregLXmoy)*(\xintregLY[\i]-\xintregLYmoy)}}%
+        \xdef\xintregLXXCSomme{\xintfloateval{\xintregLXXCSomme+(\xintregLX[\i]-\xintregLXmoy)*((\xintregLX[\i])*(\xintregLX[\i])-\xintregLXCmoy)}}%
+        \xdef\xintregLXCXCSomme{\xintfloateval{\xintregLXCXCSomme+((\xintregLX[\i])^2-\xintregLXCmoy)^2}}%
+        \xdef\xintregLXCYSomme{\xintfloateval{\xintregLXCYSomme+((\xintregLX[\i])^2-\xintregLXCmoy)*(\xintregLY[\i]-\xintregLYmoy)}}%
       }%
       %COEFFS OK
       \IfStrEq{\pflarrondisreglin}{}%
         {%
-          \xdef\tmpcoeffregquadb{\xintfloateval{(\LXYSomme*\LXCXCSomme-\LXCYSomme*\LXXCSomme)/(\LXXSomme*\LXCXCSomme-(\LXXCSomme)^2)}}
-          \xdef\tmpcoeffregquada{\xintfloateval{(\LXCYSomme*\LXXSomme-\LXYSomme*\LXXCSomme)/(\LXXSomme*\LXCXCSomme-(\LXXCSomme)^2)}}
-          \xdef\tmpcoeffregquadc{\xintfloateval{\LYmoy-\tmpcoeffregquadb*\LXmoy-\tmpcoeffregquada*\LXCmoy}}
+          \xdef\tmpcoeffregquadb{\xintfloateval{(\xintregLXYSomme*\xintregLXCXCSomme-\xintregLXCYSomme*\xintregLXXCSomme)/(\xintregLXXSomme*\xintregLXCXCSomme-(\xintregLXXCSomme)^2)}}
+          \xdef\tmpcoeffregquada{\xintfloateval{(\xintregLXCYSomme*\xintregLXXSomme-\xintregLXYSomme*\xintregLXXCSomme)/(\xintregLXXSomme*\xintregLXCXCSomme-(\xintregLXXCSomme)^2)}}
+          \xdef\tmpcoeffregquadc{\xintfloateval{\xintregLYmoy-\tmpcoeffregquadb*\xintregLXmoy-\tmpcoeffregquada*\xintregLXCmoy}}
         }%
         {%
-          \xdef\tmpcoeffregquadb{\xintfloateval{round((\LXYSomme*\LXCXCSomme-\LXCYSomme*\LXXCSomme)/(\LXXSomme*\LXCXCSomme-(\LXXCSomme)^2),\pflarrondisreglin)}}
-          \xdef\tmpcoeffregquada{\xintfloateval{round((\LXCYSomme*\LXXSomme-\LXYSomme*\LXXCSomme)/(\LXXSomme*\LXCXCSomme-(\LXXCSomme)^2),\pflarrondisreglin)}}
-          \xdef\tmpcoeffregquadc{\xintfloateval{round(\LYmoy-\tmpcoeffregquadb*\LXmoy-\tmpcoeffregquada*\LXCmoy,\pflarrondisreglin)}}
+          \xdef\tmpcoeffregquadb{\xintfloateval{round((\xintregLXYSomme*\xintregLXCXCSomme-\xintregLXCYSomme*\xintregLXXCSomme)/(\xintregLXXSomme*\xintregLXCXCSomme-(\xintregLXXCSomme)^2),\pflarrondisreglin)}}
+          \xdef\tmpcoeffregquada{\xintfloateval{round((\xintregLXCYSomme*\xintregLXXSomme-\xintregLXYSomme*\xintregLXXCSomme)/(\xintregLXXSomme*\xintregLXCXCSomme-(\xintregLXXCSomme)^2),\pflarrondisreglin)}}
+          \xdef\tmpcoeffregquadc{\xintfloateval{round(\xintregLYmoy-\tmpcoeffregquadb*\xintregLXmoy-\tmpcoeffregquada*\xintregLXCmoy,\pflarrondisreglin)}}
         }%
       \xintdeffloatfunc #2(x) := (\tmpcoeffregquada)*x^2+(\tmpcoeffregquadb)*x+\tmpcoeffregquadc ;
       %tracé
@@ -6652,11 +6658,11 @@
 
 \NewDocumentCommand\TracerNuageSemiLog{ O{} D<>{d} m m }{%
   \setsepchar{,}%
-  \readlist*\LX{#3}%
-  \readlist*\LY{#4}%
-  \foreach \i in {1,...,\LXlen}{%
-    \itemtomacro\LX[\i]\tmpmavalx%
-    \itemtomacro\LY[\i]\tmpmavaly%
+  \readlist*\xintregLX{#3}%
+  \readlist*\xintregLY{#4}%
+  \foreach \i in {1,...,\xintregLXlen}{%
+    \itemtomacro\xintregLX[\i]\tmpmavalx%
+    \itemtomacro\xintregLY[\i]\tmpmavaly%
     % transformation y → log10(y) - expomin
     \xdef\tmpmavalytrans{\xintfloateval{log10(\tmpmavaly)-(\pflslogexpomin)}}%
     \MarquerPts*[#1]{(\tmpmavalx,\tmpmavalytrans)}%
@@ -6665,11 +6671,11 @@
 
 \NewDocumentCommand\TracerNuageLogLog{ O{} D<>{d} m m }{%
   \setsepchar{,}%
-  \readlist*\LX{#3}%
-  \readlist*\LY{#4}%
-  \foreach \i in {1,...,\LXlen}{%
-    \itemtomacro\LX[\i]\tmpmavalx%
-    \itemtomacro\LY[\i]\tmpmavaly%
+  \readlist*\xintregLX{#3}%
+  \readlist*\xintregLY{#4}%
+  \foreach \i in {1,...,\xintregLXlen}{%
+    \itemtomacro\xintregLX[\i]\tmpmavalx%
+    \itemtomacro\xintregLY[\i]\tmpmavaly%
     % transformation x ET y
     \xdef\tmpmavalxtrans{\xintfloateval{log10(\tmpmavalx)-(\pflslogexpominx)}}%
     \xdef\tmpmavalytrans{\xintfloateval{log10(\tmpmavaly)-(\pflslogexpomin)}}%

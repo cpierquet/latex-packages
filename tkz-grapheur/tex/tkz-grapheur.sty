@@ -2,13 +2,15 @@
 % licence    : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{tkz-grapheur}[2026/09/19 0.31e Des outils en TikZ pour travailler comme avec un grapheur]
-\def\tkzgrapheurversion{0.31e}
-\def\tkzgrapheurdateversion{19/09/2026}
-\def\tkzgrapheurdatefrversion{19 septembre 2026}
+\ProvidesPackage{tkz-grapheur}[2026/10/06 0.32a Des outils en TikZ pour travailler comme avec un grapheur]
+\def\tkzgrapheurversion{0.32a}
+\def\tkzgrapheurdateversion{06/10/2026}
+\def\tkzgrapheurdatefrversion{06 octobre 2026}
 
 %====HISTORIQUE
-% v 0.31e  Ajout de commandes pour le version normalisée
+% v 0.32a  Correction de bugs sur la version normalisée
+% v 0.31f  Ajout de commandes pour la version normalisée + nouvelle version des pics (beta)
+% v 0.31e  Ajout de commandes pour la version normalisée
 % v 0.31d  Ajout de commandes pour les suites récurrentes (wrapper 'complet') + Améliorations dans le code + 'nice numbers' + minigraphiques
 % v.0.31c  Correction d'un bug mineur sur le pas avec DefinirCourbe / TracerCourbe + Nuage/calcul suite un+1=f(un,n) 
 % v 0.31b  Correction d'un bug + commandes expérimentales d'analyse de Points d'Intérêts
@@ -126,6 +128,10 @@
 \setlength\pflthickgridi{0.5pt}
 \setlength\pflthickgrids{0.35pt}
 
+%====EPAISSEUR POINT
+\newlength\pflststylethick
+\setlength\pflststylethick{0.95pt}
+
 %====STYLES DE BASE (PARTAGÉS - FR)
 \tikzset{pflnoeud/.style={}}
 \tikzset{pflpoint/.style={line width=0.95pt}}
@@ -197,11 +203,70 @@
   },
   pics/pflptcarre/.default={2pt/0}
 }
+
 \usetikzlibrary{decorations,decorations.pathmorphing}
 \tikzset{%
   tkzgmainlevee/.style args={#1et#2}{%
   decorate,decoration={random steps, segment length=#1,amplitude=#2}},
   tkzgmainlevee/.default={3mm et 0.3pt}
+}
+\tikzset{%
+  pics/pflptstyle/o/.style={code={%disque
+      \filldraw[pflpoint,line width=\pflststylethick] (0,0) circle[radius=\pflststylesizeo] ;}},%
+  pics/pflptstyle/oo/.style={code={%cercle
+      \draw[pflpoint,fill=none,line width=\pflststylethick] (0,0) circle[radius=\pflststylesizeo] ;}},%
+  pics/pflptstyle/x/.style={code={%croix
+      \draw[pflpoint,line width=\pflststylethick] (0,0) pic{pflptcroix=\pflststylesizex/45} ;}},%
+  pics/pflptstyle/plus/.style={code={%plus
+      \draw[pflpoint,line width=\pflststylethick] (0,0) pic{pflptcroix=\pflststylesizex/90} ;}},%
+  pics/pflptstyle/c/.style={code={%carré plein
+      \filldraw[draw=none,pflpoint] (0,0) pic{pflptcarre=\pflststylesizec/0} ;}},%
+  pics/pflptstyle/s/.style={pflptstyle/c},%
+  pics/pflptstyle/co/.style={code={%
+    \draw[pflpoint,fill=none,line width=\pflststylethick] (-\pflststylesizec,-\pflststylesizec) rectangle (\pflststylesizec,\pflststylesizec) ;}},%
+  pics/pflptstyle/so/.style={pflptstyle/co},%
+  pics/pflptstyle/d/.style={code={%diamant plein
+      \filldraw[draw=none,pflpoint] (0,0) pic{pflptcarre=\pflststylesizeo/45} ;}},%
+  pics/pflptstyle/do/.style={code={%
+    \draw[pflpoint,fill=none,line width=\pflststylethick,rotate=45] (-\pflststylesizec,-\pflststylesizec) rectangle (\pflststylesizec,\pflststylesizec) ;}},%
+  pics/pflptstyle/ggb/.style={code={%geogebra
+      \draw[pflpointggb,pflpoint,line width=\pflststylethick] (0,0) circle[radius=\pflststylesizeo] ;}},%
+  pics/pflptstyle/ast/.style={code={%
+    \draw[pflpoint,line width=\pflststylethick] (0,0) pic{pflptcroix=\pflststylesizex/45} ;%
+    \draw[pflpoint,line width=\pflststylethick] (0,0) pic{pflptcroix=\pflststylesizex/90} ;}},%
+  pics/pflptstyle/star/.style={pflptstyle/ast},%
+  pics/pflptstyle/t/.style={code={%
+    \filldraw[pflpoint,line width=\pflststylethick]
+      (0,\pflststylesizec) --
+      ({-\pflststylesizec*0.866},{-\pflststylesizec*0.5}) --
+      ({\pflststylesizec*0.866},{-\pflststylesizec*0.5}) -- cycle ;}},%
+  pics/pflptstyle/to/.style={code={%
+    \draw[pflpoint,fill=none,line width=\pflststylethick]
+      (0,\pflststylesizec) --
+      ({-\pflststylesizec*0.866},{-\pflststylesizec*0.5}) --
+      ({\pflststylesizec*0.866},{-\pflststylesizec*0.5}) -- cycle ;}},%
+  pics/pflptstyle/po/.style={code={%
+    \draw[pflpoint,fill=none,line width=\pflststylethick]
+      (0,0) pic{pflptcroix=\pflststylesizeo/90} ;%
+    \draw[pflpoint,fill=none,line width=\pflststylethick]
+      (0,0) circle[radius=\pflststylesizeo] ;}},%
+  pics/pflptstyle/px/.style={code={%
+    \draw[pflpoint,fill=none,line width=\pflststylethick]
+      (0,0) pic{pflptcroix=\pflststylesizeo/45} ;%
+    \draw[pflpoint,fill=none,line width=\pflststylethick]
+      (0,0) circle[radius=\pflststylesizeo] ;}},%
+  pics/pflptstyle/td/.style={code={%
+    \filldraw[pflpoint,line width=\pflststylethick]
+      (0,-\pflststylesizec) --
+      ({-\pflststylesizec*0.866},{\pflststylesizec*0.5}) --
+      ({\pflststylesizec*0.866},{\pflststylesizec*0.5}) -- cycle ;}},%
+  pics/pflptstyle/tdo/.style={code={%
+    \draw[pflpoint,fill=none,line width=\pflststylethick]
+      (0,-\pflststylesizec) --
+      ({-\pflststylesizec*0.866},{\pflststylesizec*0.5}) --
+      ({\pflststylesizec*0.866},{\pflststylesizec*0.5}) -- cycle ;}},%
+  pics/pflptstyle/tb/.style={pflptstyle/td},%
+  pics/pflptstyle/tbo/.style={pflptstyle/tdo},%
 }
 
 %====STYLES DE BASE (EN)
@@ -274,6 +339,12 @@
 \definecolor{pflgrillepseyes}{HTML}{E6B8E6}
 \definecolor{pflgrilleiseyes}{HTML}{D7E2EE}
 \definecolor{pflgrillesseyes}{HTML}{D7E2EE}
+\definecolor{pflgrillepviolet}{HTML}{6a1b9a}
+\definecolor{pflgrilleiviolet}{HTML}{ce93d8}
+\definecolor{pflgrillesviolet}{HTML}{f3e5f5}
+\definecolor{pflgrilleppink}{HTML}{ad1457}
+\definecolor{pflgrilleipink}{HTML}{f48fb1}
+\definecolor{pflgrillesspink}{HTML}{fce4ec}
 
 %====Longueurs utiles
 \newlength\pflglobalwidth
