@@ -3,7 +3,9 @@
 % licence cliparts...: CC0 from openclipart or svgrepo
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{ProfLycee-Light}[2026/09/19 4.01d Aide pour l'utilisation de LaTeX en lycee]
+\ProvidesPackage{ProfLycee-Light}[2026/10/06 4.02b Aide pour l'utilisation de LaTeX en lycee]
+%4.02b  Compat siunitx + {+pmatrix}
+%4.02a  Fusion Light/LEGACY
 %4.01d  Modif mineure des styles piton + tkztab patches
 %4.01c  Modif mineure des styles piton
 %4.01b  Correction de bugs mineurs
@@ -83,6 +85,8 @@
   \usetikzlibrary{babel}
 \fi
 \RequirePackage{ifthen}
+\RequirePackage{pgf,pgffor}
+\RequirePackage{xkeyval}
 \RequirePackage{xstring}
 \RequirePackage{xintexpr}
 \RequirePackage{xintbinhex}
@@ -98,51 +102,16 @@
 \RequirePackage{nicefrac}
 \RequirePackage{siunitx}
 \if@loadsiunitxfr
-  \sisetup{%
-    locale=FR,output-decimal-marker={,},%
+  \sisetup{%locale=FR (deprecated),%
+    exponent-product=\times,inter-unit-product=\,,output-decimal-marker={,},%
     mode=match,propagate-math-font=true,%
     reset-math-version=false,reset-text-family=false,%
     reset-text-series=false,reset-text-shape=false,%
-    text-family-to-math=true,text-series-to-math=true,%
-    group-minimum-digits=4%
-  }%
+    text-family-to-math=true,text-series-to-math=true,%  group-minimum-digits=4%
+  }
 \fi
 \RequirePackage{tcolorbox}%
 \tcbuselibrary{breakable,fitting,skins,listings,listingsutf8,hooks}
-
-%%=====LABELS MULTILANGUES SI OPTION
-\if@pfllngfr
-  \def\labelcodepython{Code Python}
-  \def\labelpseudocode{Pseudo-Code}
-  \def\labelconsolepythondebut{Début de la console Python}
-  \def\labelconsolepythonfin{Fin de la console Python}
-  \def\labelsepdec{,}
-  \def\labelavec{avec}
-\fi
-\if@pfllngen
-  \def\labelcodepython{Python code}
-  \def\labelpseudocode{Pseudocode}
-  \def\labelconsolepythondebut{Start of Python console}
-  \def\labelconsolepythonfin{End of Python console}
-  \def\labelsepdec{.}
-  \def\labelavec{with}
-\fi
-\if@pfllngde
-  \def\labelcodepython{Python-Code}
-  \def\labelpseudocode{Pseudocódigo}
-  \def\labelconsolepythondebut{Beginn der Python-Konsole}
-  \def\labelconsolepythonfin{Ende der Python-Konsole}
-  \def\labelsepdec{,}
-  \def\labelavec{mit}
-\fi
-\if@pfllnges
-  \def\labelcodepython{Código Python}
-  \def\labelpseudocode{Pseudocode}
-  \def\labelconsolepythondebut{Inicio de la consola de Python}
-  \def\labelconsolepythonfin{Fin de la consola de Python}
-  \def\labelsepdec{,}
-  \def\labelavec{con}
-\fi
 
 %%=====FONTAWESOME...
 \if@fafive
@@ -208,12 +177,14 @@
 %%=====MACROS INTERNES
 \RequirePackage{ProfLycee-Macros}
 
+%%=====DICTIONNAIRE DE TRADUCTION CENTRALISE (4.02a)
+\input{proflycee-tools-dictionnaire.tex}
+
 %%=====LIBRAIRIES/BIBIOTHÈQUES
 \ExplSyntaxOn
 
 \cs_new_protected:Npn \proflycee_use_library:n #1
   {
-    % si "most" est présent, charger le pack complet
     \str_if_in:nnTF {,#1,} {,most,}
       {
         \file_input:n { proflycee-tools-analyse.tex }
@@ -225,6 +196,11 @@
         \file_input:n { proflycee-tools-arithm.tex }
         \file_input:n { proflycee-tools-aleatoire.tex }
         \file_input:n { proflycee-tools-suites.tex }
+        \file_input:n { proflycee-tools-geom.tex }
+        \file_input:n { proflycee-tools-complexes.tex }
+        \file_input:n { proflycee-tools-recreat.tex }
+        \file_input:n { proflycee-tools-competences.tex }
+        \file_input:n { proflycee-tools-exams.tex }
         \file_input:n { proflycee-tools-cliparts.tex }
         \RequirePackage { ProfLycee-Pictosbac }
       }
@@ -253,6 +229,15 @@
     \str_if_in:nnT {,#1,} {,space,}        { \file_input:n { proflycee-tools-espace.tex } }
     \str_if_in:nnT {,#1,} {,ecritures,}    { \file_input:n { proflycee-tools-ecritures.tex } }
     \str_if_in:nnT {,#1,} {,mathwriting,}  { \file_input:n { proflycee-tools-ecritures.tex } }
+    \str_if_in:nnT {,#1,} {,pythontex,}
+      {
+        \RequirePackage[gobble=auto]{pythontex}
+        \setpythontexlistingenv{pythont} %pour ne pas télescoper lstlistings (?)
+        \if@build
+          \setpythontexoutputdir{./build/pythontex-files-\jobname}
+        \fi
+        \file_input:n { proflycee-tools-pythontex.tex }
+      }
     \str_if_in:nnT {,#1,} {,complexes,}    { \file_input:n { proflycee-tools-complexes.tex } }
     \str_if_in:nnT {,#1,} {,recreat,}      { \file_input:n { proflycee-tools-recreat.tex } }
     \str_if_in:nnT {,#1,} {,competences,}  { \file_input:n { proflycee-tools-competences.tex } }
@@ -276,42 +261,11 @@
     {en} {\@pfllngentrue}  % Anglais
     {de} {\@pfllngdetrue}  % Allemand
     {es} {\@pfllngestrue}  % Espagnol
-  }{
+  }%
+  {%
     % Cas par défaut (si la langue n'est pas reconnue)
     \PackageError{proflycee}{Langue~'#1'~non~reconnue.~Utilisez~fr,~en,~de~ou~es.}{}
   }%
-  \if@pfllngfr
-    \def\labelcodepython{Code~Python}
-    \def\labelpseudocode{Pseudo-Code}
-    \def\labelconsolepythondebut{Début~de~la~console~Python}
-    \def\labelconsolepythonfin{Fin~de~la~console~Python}
-    \def\labelsepdec{,}
-    \def\labelavec{avec}
-  \fi
-  \if@pfllngen
-    \def\labelcodepython{Python~code}
-    \def\labelpseudocode{Pseudocode}
-    \def\labelconsolepythondebut{Start~of~Python~console}
-    \def\labelconsolepythonfin{End~of~Python~console}
-    \def\labelsepdec{.}
-    \def\labelavec{with}
-  \fi
-  \if@pfllngde
-    \def\labelcodepython{Python-Code}
-    \def\labelpseudocode{Pseudocódigo}
-    \def\labelconsolepythondebut{Beginn~der~Python-Konsole}
-    \def\labelconsolepythonfin{Ende~der~Python-Konsole}
-    \def\labelsepdec{,}
-    \def\labelavec{mit}
-  \fi
-  \if@pfllnges
-    \def\labelcodepython{Código~Python}
-    \def\labelpseudocode{Pseudocode}
-    \def\labelconsolepythondebut{Inicio~de~la~consola~de~Python}
-    \def\labelconsolepythonfin{Fin~de~la~consola~de~Python}
-    \def\labelsepdec{,}
-    \def\labelavec{con}
-  \fi
 }
 \ExplSyntaxOff
 

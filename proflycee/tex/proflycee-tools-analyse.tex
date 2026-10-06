@@ -13,7 +13,7 @@
   % * = moins sur le numérateur
   % #2 = argument optionnel [d/t/n/dec=...]
   % #3 = argument mandataire {calcul ou fraction}
-  
+
   % Calcul et transformation en A/B
   \tl_set:Ne \l_tmpa_tl { \xintPRaw { \xintIrr { \xinteval{#3} } } }
   % Test si le symbole / apparaît (fraction ou entier)
@@ -379,7 +379,8 @@
   %#4 = décalage
   %\shorthandoff{:}\shorthandoff{!} %bizzzzzzzzare, non c'est babel !!!!!
   %\NoAutoSpacing
-  \coordinate (ZZZ) at ($(T2#2)!.5!(T2\the\numexpr#2+1\relax)$) ;
+  %\coordinate (ZZZ) at ($(T2#2)!.5!(T2\the\numexpr#2+1\relax)$) ;
+  \coordinate (ZZZ) at ($0.5*(T2#2)+0.5*(T2\the\numexpr#2+1\relax)$) ;
   %\shorthandon{:}\shorthandon{!}
   \path (ZZZ.east) + (#4,0) pic[right,scale=#3,every node/.style={scale=#3}] {code={\MiniSchemaSignes[#1]}} ;
 }
@@ -439,7 +440,8 @@
   %#2 = numligne
   %#3 = échelle
   %#4 = décalage
-  \coordinate (ZZZ) at ($(T2#2)!.5!(T2\the\numexpr#2+1\relax)$) ;
+  %\coordinate (ZZZ) at ($(T2#2)!.5!(T2\the\numexpr#2+1\relax)$) ;
+  \coordinate (ZZZ) at ($0.5*(T2#2)+0.5*(T2\the\numexpr#2+1\relax)$) ;
   \node[anchor=west,inner sep=0pt] at ($(ZZZ.east)+(#4,0)$) {%
     \tikz[baseline,scale=#3,every node/.style={scale=#3}]{%
       \pic[]{code={\MiniSchemaSignes[#1]}};%
@@ -447,7 +449,8 @@
   };
 }
 \newcommand\@tkztabdeco@node@middle[1]{
-    \coordinate (M) at ($(T2#1)!.5!(T2\the\numexpr#1+1\relax)$)
+    %\coordinate (M) at ($(T2#1)!.5!(T2\the\numexpr#1+1\relax)$)
+    \coordinate (M) at ($0.5*(T2#1)+0.5*(T2\the\numexpr#1+1\relax)$)
 }
 \NewDocumentCommand\tkzTabComLigne{ O{blue} m m O{0.5} }{%
     \@tkztabdeco@node@middle{#2};
@@ -483,51 +486,14 @@
   \setKVboolfalsedefaultmulti[dichoto]{sweep}{Balayage}%
   \setKVboolfalsedefaultmulti[dichoto]{calculator}{Calculatrice}%
   \setKVbooltruedefaultmulti[dichoto]{capital}{Majuscule}%
-  %multilng
-  \if@pfllngfr
-    \def\labelsolutionseuilbalayage{ar balayage, on obtient~}
-    \def\labelsolutionseuilbalayagemaj{P}
-    \def\labelsolutionseuilbalayagemin{p}
-    %
-    \def\labelsolutionseuilcalc{ar calculatrice, on obtient~}
-    \def\labelsolutionseuilcalcmaj{P}
-    \def\labelsolutionseuilcalcmin{p}
-    %
-    \def\labelsolutionseuilet{~et~}
-  \fi
-  \if@pfllngen
-    \def\labelsolutionseuilbalayage{y sweeping, we obtain~}
-    \def\labelsolutionseuilbalayagemaj{B}
-    \def\labelsolutionseuilbalayagemin{b}
-    %
-    \def\labelsolutionseuilcalc{ith a calculator, we get~}
-    \def\labelsolutionseuilcalcmaj{W}
-    \def\labelsolutionseuilcalcmin{w}
-    %
-    \def\labelsolutionseuilet{~and~}
-  \fi
-  \if@pfllngde
-    \def\labelsolutionseuilbalayage{it einer Sweep-Methode ergibt sich~}
-    \def\labelsolutionseuilbalayagemaj{M}
-    \def\labelsolutionseuilbalayagemin{m}
-    %
-    \def\labelsolutionseuilcalc{it dem Taschenrechner erhält man~}
-    \def\labelsolutionseuilcalcmaj{M}
-    \def\labelsolutionseuilcalcmin{m}
-    %
-    \def\labelsolutionseuilet{~und~}
-  \fi
-  \if@pfllnges
-    \def\labelsolutionseuilbalayage{ediante un barrido, se obtiene~}
-    \def\labelsolutionseuilbalayagemaj{M}
-    \def\labelsolutionseuilbalayagemin{m}
-    %
-    \def\labelsolutionseuilcalc{on la calculadora, se obtiene~}
-    \def\labelsolutionseuilcalcmaj{C}
-    \def\labelsolutionseuilcalcmin{c}
-    %
-    \def\labelsolutionseuilet{~y~}
-  \fi
+  %multilng (4.02b : dictionnaire centralise)
+  \def\labelsolutionseuilbalayage{\PflTexte{dichoto-balayage}}
+  \def\labelsolutionseuilbalayagemaj{\PflTexte{dichoto-balayage-maj}}
+  \def\labelsolutionseuilbalayagemin{\PflTexte{dichoto-balayage-min}}
+  \def\labelsolutionseuilcalc{\PflTexte{dichoto-calc}}
+  \def\labelsolutionseuilcalcmaj{\PflTexte{dichoto-calc-maj}}
+  \def\labelsolutionseuilcalcmin{\PflTexte{dichoto-calc-min}}
+  \def\labelsolutionseuilet{\PflTexte{dichoto-et}}
   %next
   \xintdeffloatfunc varfct(x) := #2 ;%
   \ifboolKV[dichoto]{Balayage}{\ifboolKV[dichoto]{Majuscule}{\labelsolutionseuilbalayagemaj}{\labelsolutionseuilbalayagemin}\labelsolutionseuilbalayage}{}%
@@ -904,26 +870,17 @@
   %Les cas particuliers
   \xintifboolexpr{\ListePoints[2,2] == \ListePoints[1,2] 'and' \ListePoints[2,3] == \ListePoints[1,3] }%
     {%
-      \if@pfllngfr Les deux points donnés sont identiques, donc pas de droite\ldots\fi%
-      \if@pfllngen The two given points are identical, so no line exists\ldots\fi%
-      \if@pfllngde Die beiden gegebenen Punkte sind identisch, also gibt es keine Gerade\ldots\fi%
-      \if@pfllnges Los dos puntos dados son idénticos, por lo tanto no hay recta\ldots\fi%
+      \PflTexte{eqred-points-identiques}%
     }%
     {}%
   \xintifboolexpr{\ListePoints[2,2] == \ListePoints[1,2] 'and' \ListePoints[2,3] != \ListePoints[1,3] }%
     {%
-      \if@pfllngfr Étant donné que $x_{\ListePoints[1,1]} = x_{\ListePoints[2,1]}$, la droite $(\ListePoints[1,1]\ListePoints[2,1])$ est verticale, dont une équation est $x=\ConversionFraction[#1]{\ListePoints[1,2]}$.\fi%
-      \if@pfllngen Since $x_{\ListePoints[1,1]} = x_{\ListePoints[2,1]}$, the line $(\ListePoints[1,1]\ListePoints[2,1])$ is vertical, with equation $x=\ConversionFraction[#1]{\ListePoints[1,2]}$.\fi%
-      \if@pfllngde Da $x_{\ListePoints[1,1]} = x_{\ListePoints[2,1]}$, ist die Gerade $(\ListePoints[1,1]\ListePoints[2,1])$ vertikal, mit Gleichung $x=\ConversionFraction[#1]{\ListePoints[1,2]}$.\fi%
-      \if@pfllnges Dado que $x_{\ListePoints[1,1]} = x_{\ListePoints[2,1]}$, la recta $(\ListePoints[1,1]\ListePoints[2,1])$ es vertical, con ecuación $x=\ConversionFraction[#1]{\ListePoints[1,2]}$.\fi%
+      \PflTexte{eqred-vertical}{#1}%
     }%
     {}%
   \xintifboolexpr{\ListePoints[2,2] != \ListePoints[1,2] 'and' \ListePoints[2,3] == \ListePoints[1,3] }%
     {%
-      \if@pfllngfr Étant donné que $y_{\ListePoints[1,1]} = y_{\ListePoints[2,1]}$, la droite $(\ListePoints[1,1]\ListePoints[2,1])$ est horizontale, dont une équation est $y=\ConversionFraction[#1]{\ListePoints[1,3]}$.\fi%
-      \if@pfllngen Since $y_{\ListePoints[1,1]} = y_{\ListePoints[2,1]}$, the line $(\ListePoints[1,1]\ListePoints[2,1])$ is horizontal, with equation $y=\ConversionFraction[#1]{\ListePoints[1,3]}$.\fi%
-      \if@pfllngde Da $y_{\ListePoints[1,1]} = y_{\ListePoints[2,1]}$, ist die Gerade $(\ListePoints[1,1]\ListePoints[2,1])$ horizontal, mit Gleichung $y=\ConversionFraction[#1]{\ListePoints[1,3]}$.\fi%
-      \if@pfllnges Dado que $y_{\ListePoints[1,1]} = y_{\ListePoints[2,1]}$, la recta $(\ListePoints[1,1]\ListePoints[2,1])$ es horizontal, con ecuación $y=\ConversionFraction[#1]{\ListePoints[1,3]}$.\fi%
+      \PflTexte{eqred-horizontal}{#1}%
     }%
     {}%
   \xintifboolexpr{\ListePoints[2,2] != \ListePoints[1,2] 'and' \ListePoints[2,3] != \ListePoints[1,3] }%
@@ -938,38 +895,23 @@
       \xdef\OrdoOrigBrut{\xinteval{\yB-(\CoeffDirBrut*(\xB))}}%
       \xdef\CoeffDirConv{\ConversionFraction{(\yB-(\yA))/(\xB-(\xA))}}%
       \xdef\OrdoOrigConv{\ConversionFraction{\yB-(\CoeffDirBrut*(\xB))}}%
-      \if@pfllngfr Afin de déterminer l'équation réduite d'une droite passant par les points $\NomA$ et $\NomB$, on doit d'abord déterminer le coefficient directeur $m$ :\fi%
-      \if@pfllngen To determine the slope-intercept form of a line passing through points $\NomA$ and $\NomB$, we must first determine the slope $m$:\fi%
-      \if@pfllngde Um die Gleichung einer Geraden durch die Punkte $\NomA$ und $\NomB$ zu bestimmen, müssen wir zuerst die Steigung $m$ bestimmen:\fi%
-      \if@pfllnges Para determinar la ecuación reducida de una recta que pasa por los puntos $\NomA$ y $\NomB$, primero debemos determinar la pendiente $m$:\fi%
+      \PflTexte{eqred-coeff-directeur}%
       \[m=\frac{y_\NomB-y_\NomA}{x_\NomB-x_\NomA}=
       \frac{\AffCoeffFloat[]{\yB}-\AffCoeffFloatPa[]{\yA}}{\AffCoeffFloat[]{\xB}-\AffCoeffFloatPa[]{\xA}}=
       \frac{\ConversionFraction{\xinteval{\yB-(\yA)}}}{\ConversionFraction{\xinteval{\xB-(\xA)}}}=
       \ConversionFraction{\CoeffDirBrut}\]%
       %
-      \if@pfllngfr L'équation réduite de la droite est donc de la forme $(\NomA\NomB)$ : $y=\AffCoeffFAm[#1]{\CoeffDirBrut}+p$.\par\fi%
-      \if@pfllngen The equation of the line is therefore of the form $(\NomA\NomB)$: $y=\AffCoeffFAm[#1]{\CoeffDirBrut}+p$.\par\fi%
-      \if@pfllngde Die Gleichung der Geraden hat also die Form $(\NomA\NomB)$: $y=\AffCoeffFAm[#1]{\CoeffDirBrut}+p$.\par\fi%
-      \if@pfllnges La ecuación de la recta es entonces de la forma $(\NomA\NomB)$: $y=\AffCoeffFAm[#1]{\CoeffDirBrut}+p$.\par\fi%
+      \PflTexte{eqred-forme-generale}{#1}\par%
       %
-      \if@pfllngfr Il faut enfin déterminer l'ordonnée à l'origine $p$.\par\fi%
-      \if@pfllngen We must finally determine the y-intercept $p$.\par\fi%
-      \if@pfllngde Schließlich müssen wir den y-Achsenabschnitt $p$ bestimmen.\par\fi%
-      \if@pfllnges Finalmente debemos determinar la ordenada al origen $p$.\par\fi%
+      \PflTexte{eqred-ordonnee-origine}\par%
       %
-      \if@pfllngfr On sait que la droite passe par le point $\NomA$, donc les coordonnées $\NomA\left(\AffCoeffFloat[]{\xA};\AffCoeffFloat[]{\yA}\right)$ vérifient l'équation. On a alors :\fi%
-      \if@pfllngen We know that the line passes through point $\NomA$, so the coordinates $\NomA\left(\AffCoeffFloat[]{\xA};\AffCoeffFloat[]{\yA}\right)$ satisfy the equation. We then have:\fi%
-      \if@pfllngde Wir wissen, dass die Gerade durch den Punkt $\NomA$ geht, also erfüllen die Koordinaten $\NomA\left(\AffCoeffFloat[]{\xA};\AffCoeffFloat[]{\yA}\right)$ die Gleichung. Wir haben dann:\fi%
-      \if@pfllnges Sabemos que la recta pasa por el punto $\NomA$, por lo tanto las coordenadas $\NomA\left(\AffCoeffFloat[]{\xA};\AffCoeffFloat[]{\yA}\right)$ verifican la ecuación. Tenemos entonces:\fi%
+      \PflTexte{eqred-passe-par}%
       %
       \[y_\NomA=\ConversionFraction{\CoeffDirBrut} \times x_\NomA+p
-      \implies 
+      \implies
       \AffCoeffFloat[#1]{\yA} = \ConversionFraction{\CoeffDirBrut} \times \AffCoeffFloatPa[#1]{\xA} + p \implies p = \AffCoeffFloat[#1]{\yA} - \left(\ConversionFraction{\CoeffDirBrut} \times \AffCoeffFloatPa{\xA}\right) \implies p = \OrdoOrigConv\]
       %
-      \if@pfllngfr Donc l'équation réduite de $(\NomA\NomB)$ est $y=\AffCoeffFAm[#1]{\CoeffDirBrut} \AffCoeffFAp[#1]{\OrdoOrigBrut}$.\fi%
-      \if@pfllngen Therefore the equation of $(\NomA\NomB)$ is $y=\AffCoeffFAm[#1]{\CoeffDirBrut} \AffCoeffFAp[#1]{\OrdoOrigBrut}$.\fi%
-      \if@pfllngde Also lautet die Gleichung von $(\NomA\NomB)$ $y=\AffCoeffFAm[#1]{\CoeffDirBrut} \AffCoeffFAp[#1]{\OrdoOrigBrut}$.\fi%
-      \if@pfllnges Por lo tanto la ecuación de $(\NomA\NomB)$ es $y=\AffCoeffFAm[#1]{\CoeffDirBrut} \AffCoeffFAp[#1]{\OrdoOrigBrut}$.\fi%
+      \PflTexte{eqred-conclusion}{#1}%
     }%
     {}%
 }
@@ -1036,55 +978,33 @@
       %phrase d'accroche
       \xintifboolexpr{\tmp@len@apr == 0}%
         {%
-          \noindent 
-          \if@pfllngfr On note $\FracPerVar=\tmp@enonce$.\par
-          \noindent La première égalité est donc \[\boxed{\FracPerVar=\tmp@enonce} \quad (1)\]\fi%
-          \if@pfllngen We set $\FracPerVar=\tmp@enonce$.\par
-          \noindent The first equality is therefore \[\boxed{\FracPerVar=\tmp@enonce} \quad (1)\]\fi%
-          \if@pfllngde Wir setzen $\FracPerVar=\tmp@enonce$.\par
-          \noindent Die erste Gleichung lautet also \[\boxed{\FracPerVar=\tmp@enonce} \quad (1)\]\fi%
-          \if@pfllnges Ponemos $\FracPerVar=\tmp@enonce$.\par
-          \noindent La primera igualdad es entonces \[\boxed{\FracPerVar=\tmp@enonce} \quad (1)\]\fi%
+          \noindent
+          \PflTexte{fracperiod-note-complete}%
         }%
         {%
-          \noindent 
-          \if@pfllngfr On note $\FracPerVar=\tmp@enonce$.\par\fi%
-          \if@pfllngen We set $\FracPerVar=\tmp@enonce$.\par\fi%
-          \if@pfllngde Wir setzen $\FracPerVar=\tmp@enonce$.\par\fi%
-          \if@pfllnges Ponemos $\FracPerVar=\tmp@enonce$.\par\fi%
+          \noindent
+          \PflTexte{fracperiod-note-simple}%
         }%
       \xintifboolexpr{\tmp@len@apr == 0}%
         {}%
         {%
-          \noindent 
-          \if@pfllngfr On \textit{ramène} la période près de la virgule en multipliant par $10^{\tmp@len@apr}$ :\fi%
-          \if@pfllngen We \textit{shift} the period close to the decimal point by multiplying by $10^{\tmp@len@apr}$:\fi%
-          \if@pfllngde Wir \textit{verschieben} die Periode nahe dem Komma, indem wir mit $10^{\tmp@len@apr}$ multiplizieren:\fi%
-          \if@pfllnges \textit{Desplazamos} el período cerca de la coma multiplicando por $10^{\tmp@len@apr}$:\fi%
+          \noindent
+          \PflTexte{fracperiod-ramene}%
           \[\boxed{10^{\tmp@len@apr}\times\FracPerVar=\num{\xinteval{\tmp@avt*10**(\tmp@len@apr)+\tmp@apr}}{\labelsepdec}\overline{#3}} \quad (1)\]
         }%
-      \noindent 
-      \if@pfllngfr On \textit{décale} la période avant la virgule, en multipliant l'égalité (1) par $10^{\tmp@len@per}$ :\fi%
-      \if@pfllngen We \textit{shift} the period before the decimal point by multiplying equality (1) by $10^{\tmp@len@per}$:\fi%
-      \if@pfllngde Wir \textit{verschieben} die Periode vor das Komma, indem wir Gleichung (1) mit $10^{\tmp@len@per}$ multiplizieren:\fi%
-      \if@pfllnges \textit{Desplazamos} el período antes de la coma multiplicando la igualdad (1) por $10^{\tmp@len@per}$:\fi%
+      \noindent
+      \PflTexte{fracperiod-decale}%
       \[10^{\tmp@len@per}\xintifboolexpr{\tmp@len@apr == 0}{}{\times10^{\tmp@len@apr}}\times\FracPerVar=10^{\tmp@len@per}\times\num{\xinteval{\tmp@avt*10**(\tmp@len@apr)+\tmp@apr}}{\labelsepdec}\overline{#3} \Rightarrow \boxed{10^{\xinteval{\tmp@len@per+\tmp@len@apr}}\times\FracPerVar = \num{\xintieval{10**(\tmp@len@per)*(\tmp@avt*10**(\tmp@len@apr)+\tmp@apr)+#3}}{\labelsepdec}\overline{#3}} \quad (2)\]
       %soustraction
-      \if@pfllngfr On soustrait les deux égalités, $(2)-(1)$, ce qui permet d'\textit{enlever} la partie décimale :\fi%
-      \if@pfllngen We subtract the two equalities, $(2)-(1)$, which allows us to \textit{remove} the decimal part:\fi%
-      \if@pfllngde Wir subtrahieren die beiden Gleichungen, $(2)-(1)$, wodurch wir den Dezimalteil \textit{entfernen} können:\fi%
-      \if@pfllnges Restamos las dos igualdades, $(2)-(1)$, lo que nos permite \textit{eliminar} la parte decimal:\fi%
+      \PflTexte{fracperiod-soustrait}%
       \begin{align*}
         10^{\xinteval{\tmp@len@per+\tmp@len@apr}}\times\FracPerVar-\xintifboolexpr{\tmp@len@apr == 0}{}{10^{\tmp@len@apr}\times}\FracPerVar = \num{\xintieval{10**(\tmp@len@per)*(\tmp@avt*10**(\tmp@len@apr)+\tmp@apr)+#3}}{\labelsepdec}\overline{#3} -\num{\xinteval{\tmp@avt*10**(\tmp@len@apr)+\tmp@apr}}{\labelsepdec}\overline{#3} &\Rightarrow \big(10^{\xinteval{\tmp@len@per+\tmp@len@apr}}-\xintifboolexpr{\tmp@len@apr == 0}{1}{10^{\tmp@len@apr}}\big)\times\FracPerVar = \num{\xintieval{10**(\tmp@len@per)*(\tmp@avt*10**(\tmp@len@apr)+\tmp@apr)+#3}} - \num{\xintieval{\tmp@avt*10**(\tmp@len@apr)+\tmp@apr}} \\
         \phantom{10^{\xinteval{\tmp@len@per+\tmp@len@apr}}\times\FracPerVar-10^{\tmp@len@apr}\times\FracPerVar = \num{\xintieval{10**(\tmp@len@per)*(\tmp@avt*10**(\tmp@len@apr)+\tmp@apr)+#3}}{\labelsepdec}\overline{#3} -\num{\xinteval{\tmp@avt*10**(\tmp@len@apr)+\tmp@apr}}{\labelsepdec}\overline{#3}} &\Rightarrow \num{\xinteval{10**(\tmp@len@per+\tmp@len@apr)-10**(\tmp@len@apr)}}\times\FracPerVar=\num{\xintieval{10**(\tmp@len@per)*(\tmp@avt*10**(\tmp@len@apr)+\tmp@apr)+#3- (\tmp@avt*10**(\tmp@len@apr)+\tmp@apr)}} \\
         &\Rightarrow\FracPerVar = \ifboolKV[FracPeriod]{d}{\displaystyle}{}\frac{\num{\tmp@num@brut}}{\num{\tmp@denom@brut}}
       \end{align*}
       %affichage(s) OK
-      \noindent 
-      \if@pfllngfr Ainsi on a \fi%
-      \if@pfllngen Thus we have \fi%
-      \if@pfllngde Also haben wir \fi%
-      \if@pfllnges Así tenemos \fi%
+      \noindent
+      \PflTexte{fracperiod-ainsi}%
       \ensuremath{\tmp@enonce = \ifboolKV[FracPeriod]{d}{\displaystyle}{}\frac{\num{\tmp@num@brut}}{\num{\tmp@denom@brut}} \xintifboolexpr{\tmp@pgcd == 1}{}{=\ifboolKV[FracPeriod]{d}{\displaystyle}{}\frac{\num{\xintieval{\tmp@num@brut/\tmp@pgcd}}}{\num{\xintieval{\tmp@denom@brut/\tmp@pgcd}}}} \xintifboolexpr{\tmp@denom@brut/\tmp@pgcd == 1}{=\num{\xintieval{\tmp@num@brut/\tmp@pgcd}}}{}%
       }.\par%
     }%
@@ -1103,7 +1023,7 @@
       \noindent\ensuremath{%
         \ifboolKV[FracPeriod]{Enonce}%
           {%
-            \tmp@enonce = 
+            \tmp@enonce =
           }%
           {}%
         \ifboolKV[FracPeriod]{d}{\displaystyle}{}\frac{\num{\tmp@num@brut}}{\num{\tmp@denom@brut}} \xintifboolexpr{\tmp@pgcd == 1}{}{=\ifboolKV[FracPeriod]{d}{\displaystyle}{}\frac{\num{\xintieval{\tmp@num@brut/\tmp@pgcd}}}{\num{\xintieval{\tmp@denom@brut/\tmp@pgcd}}}}%
@@ -1122,27 +1042,10 @@
   %étoilé := mode texte
   %1 := ligne
   %2 := liste des cases ( ccv / cvx / t / d / i / i* )
-  %multilng
-  \if@pfllngfr
-    \def\labelconvexinflex{point\\d'inflexion}
-    \def\labelconvexccv{concave}
-    \def\labelconvexcvx{convexe}
-  \fi
-  \if@pfllngen
-    \def\labelconvexinflex{inflection\\point}
-    \def\labelconvexccv{concave}
-    \def\labelconvexcvx{convex}
-  \fi
-  \if@pfllngde
-    \def\labelconvexinflex{Wende-\\punkt}
-    \def\labelconvexccv{konkav}
-    \def\labelconvexcvx{konvex}
-  \fi
-  \if@pfllnges
-    \def\labelconvexinflex{punto de\\inflexión}
-    \def\labelconvexccv{cóncava}
-    \def\labelconvexcvx{convexa}
-  \fi
+  %multilng (4.02b : dictionnaire centralise)
+  \def\labelconvexinflex{\PflTexte{convex-inflex}}
+  \def\labelconvexccv{\PflTexte{convex-ccv}}
+  \def\labelconvexcvx{\PflTexte{convex-cvx}}
   %calculs intermédiaires
   \xdef\j{#2}%
   \xdef\k{\inteval{#2+1}}%
@@ -1186,10 +1089,12 @@
         \xdef\nodedouble{\inteval{(\i)/2}}%
         \IfBooleanTF{#1}%
         {%
-          \draw ($(M\nodedouble\j)!0.5!(M\nodedouble\k)$) node {\labelconvexccv} ;%
+          %\draw ($(M\nodedouble\j)!0.5!(M\nodedouble\k)$) node {\labelconvexccv} ;%
+          \draw ($0.5*(M\nodedouble\j)+0.5*(M\nodedouble\k)$) node {\labelconvexccv} ;%
         }%
         {%
-          \draw[line width={1.5*\cmdTAB@tbs@lw}] ($(M\nodedouble\j)!0.5!(M\nodedouble\k)+({-0.275*\cmdTAB@tbs@espcl},{-0.25*\tmphautligne})$) parabola bend ++({0.275*\cmdTAB@tbs@espcl},{0.5*\tmphautligne})  ($(M\nodedouble\j)!0.5!(M\nodedouble\k)+({0.275*\cmdTAB@tbs@espcl},{-0.25*\tmphautligne})$) ;
+          %\draw[line width={1.5*\cmdTAB@tbs@lw}] ($(M\nodedouble\j)!0.5!(M\nodedouble\k)+({-0.275*\cmdTAB@tbs@espcl},{-0.25*\tmphautligne})$) parabola bend ++({0.275*\cmdTAB@tbs@espcl},{0.5*\tmphautligne})  ($(M\nodedouble\j)!0.5!(M\nodedouble\k)+({0.275*\cmdTAB@tbs@espcl},{-0.25*\tmphautligne})$) ;
+          \draw[line width={1.5*\cmdTAB@tbs@lw}] ($0.5*(M\nodedouble\j)+0.5*(M\nodedouble\k)+({-0.275*\cmdTAB@tbs@espcl},{-0.25*\tmphautligne})$) parabola bend ++({0.275*\cmdTAB@tbs@espcl},{0.5*\tmphautligne})  ($0.5*(M\nodedouble\j)+0.5*(M\nodedouble\k)+({0.275*\cmdTAB@tbs@espcl},{-0.25*\tmphautligne})$) ;
         }%
       }%
       {cvx}%convexe
@@ -1197,10 +1102,12 @@
         \xdef\nodedouble{\inteval{(\i)/2}}%
         \IfBooleanTF{#1}%
         {%
-          \draw ($(M\nodedouble\j)!0.5!(M\nodedouble\k)$) node {\labelconvexcvx} ;%
+          %\draw ($(M\nodedouble\j)!0.5!(M\nodedouble\k)$) node {\labelconvexcvx} ;%
+          \draw ($0.5*(M\nodedouble\j)+0.5*(M\nodedouble\k)$) node {\labelconvexccv} ;%
         }%
         {%
-          \draw[line width={1.5*\cmdTAB@tbs@lw}] ($(M\nodedouble\j)!0.5!(M\nodedouble\k)+({-0.275*\cmdTAB@tbs@espcl},{0.25*\tmphautligne})$) parabola bend ++({0.275*\cmdTAB@tbs@espcl},{-0.5*\tmphautligne})  ($(M\nodedouble\j)!0.5!(M\nodedouble\k)+({0.275*\cmdTAB@tbs@espcl},{0.25*\tmphautligne})$) ;
+          %\draw[line width={1.5*\cmdTAB@tbs@lw}] ($(M\nodedouble\j)!0.5!(M\nodedouble\k)+({-0.275*\cmdTAB@tbs@espcl},{0.25*\tmphautligne})$) parabola bend ++({0.275*\cmdTAB@tbs@espcl},{-0.5*\tmphautligne})  ($(M\nodedouble\j)!0.5!(M\nodedouble\k)+({0.275*\cmdTAB@tbs@espcl},{0.25*\tmphautligne})$) ;
+          \draw[line width={1.5*\cmdTAB@tbs@lw}] ($0.5*(M\nodedouble\j)+0.5*(M\nodedouble\k)+({-0.275*\cmdTAB@tbs@espcl},{0.25*\tmphautligne})$) parabola bend ++({0.275*\cmdTAB@tbs@espcl},{-0.5*\tmphautligne})  ($0.5*(M\nodedouble\j)+0.5*(M\nodedouble\k)+({0.275*\cmdTAB@tbs@espcl},{0.25*\tmphautligne})$) ;
         }%
       }%
     }%

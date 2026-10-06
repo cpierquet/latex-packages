@@ -236,6 +236,7 @@
 
 %====COORDONNEES, VECTEURS
 \RequirePackage{nicematrix}
+\UseTblrLibrary{amsmath}   %test
 
 \NewDocumentCommand\CoordPtPl{ O{0} m m }{%
   \IfEq{#1}{0}%si pas d'argument optionnel := array, sinon nicematrix avec cell-space-limits
@@ -270,6 +271,11 @@
 }
 \NewCommandCopy\pflcoordvecpl\CoordVecPl
 
+\NewDocumentCommand\CoordVecPlTblr{ m m }{%
+  \ensuremath{\begin{+pmatrix} #1 \\ #2 \end{+pmatrix}}%
+}
+\NewCommandCopy\pflcoordvecpltblr\CoordVecPlTblr
+
 \NewDocumentCommand\CoordVecEsp{ O{0} m m m }{%
   \IfEq{#1}{0}%si pas d'argument optionnel := array, sinon nicematrix avec cell-space-limits
     {%
@@ -280,6 +286,11 @@
     }%
 }
 \NewCommandCopy\pflcoordvecesp\CoordVecEsp
+
+\NewDocumentCommand\CoordVecEspTblr{ m m m }{%
+  \ensuremath{\begin{+pmatrix} #1 \\ #2 \\ #3 \end{+pmatrix}}%
+}
+\NewCommandCopy\pflcoordvecesptblr\CoordVecEspTblr
 
 \NewDocumentCommand\MatDeux{ O{0} m m m m }{%
   \IfEq{#1}{0}%si pas d'argument optionnel := array, sinon nicematrix avec cell-space-limits
@@ -292,6 +303,12 @@
 }
 \NewCommandCopy\pflmatdeux\MatDeux
 \NewCommandCopy\pflmatrixtwo\MatDeux
+
+\NewDocumentCommand\MatDeuxTblr{ m m m m }{%
+  \ensuremath{\begin{+pmatrix} #1 & #2 \\ #3 & #4 \end{+pmatrix}}%
+}
+\NewCommandCopy\pflmatdeuxtblr\MatDeuxTblr
+\NewCommandCopy\pflmatrixtwotblr\MatDeuxTblr
 
 \NewDocumentCommand\Vecteur{ s m O{} }{%
   \IfBooleanTF{#1}{\ensuremath{\vv*{#2}{#3}}}{\ensuremath{\vv{#2}}}%

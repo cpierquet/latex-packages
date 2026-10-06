@@ -178,51 +178,15 @@
   \setKVbooltruedefaultmulti[suiteseuil]{conclusion}{Conclusion}%
   \setKVboolfalsedefaultmulti[suiteseuil]{simple}{Simple}%
   %next
-  %multilng
-  \if@pfllngfr
-    \def\labelsolutionseuilbalayage{ar balayage, on obtient~}
-    \def\labelsolutionseuilbalayagemaj{P}
-    \def\labelsolutionseuilbalayagemin{p}
-    %
-    \def\labelsolutionseuilcalc{ar calculatrice, on obtient~}
-    \def\labelsolutionseuilcalcmaj{P}
-    \def\labelsolutionseuilcalcmin{p}
-    %
-    \def\labelsolutionseuilet{~et~}
-  \fi
-  \if@pfllngen
-    \def\labelsolutionseuilbalayage{y sweeping, we obtain~}
-    \def\labelsolutionseuilbalayagemaj{B}
-    \def\labelsolutionseuilbalayagemin{b}
-    %
-    \def\labelsolutionseuilcalc{ith a calculator, we get~}
-    \def\labelsolutionseuilcalcmaj{W}
-    \def\labelsolutionseuilcalcmin{w}
-    %
-    \def\labelsolutionseuilet{~and~}
-  \fi
-  \if@pfllngde
-    \def\labelsolutionseuilbalayage{it einer Sweep-Methode ergibt sich~}
-    \def\labelsolutionseuilbalayagemaj{M}
-    \def\labelsolutionseuilbalayagemin{m}
-    %
-    \def\labelsolutionseuilcalc{it dem Taschenrechner erhält man~}
-    \def\labelsolutionseuilcalcmaj{M}
-    \def\labelsolutionseuilcalcmin{m}
-    %
-    \def\labelsolutionseuilet{~und~}
-  \fi
-  \if@pfllnges
-    \def\labelsolutionseuilbalayage{ediante un barrido, se obtiene~}
-    \def\labelsolutionseuilbalayagemaj{M}
-    \def\labelsolutionseuilbalayagemin{m}
-    %
-    \def\labelsolutionseuilcalc{on la calculadora, se obtiene~}
-    \def\labelsolutionseuilcalcmaj{C}
-    \def\labelsolutionseuilcalcmin{c}
-    %
-    \def\labelsolutionseuilet{~y~}
-  \fi
+  %multilng (4.02b : dictionnaire centralise, memes cles que \SolutionSeuil
+  % dans proflycee-tools-analyse.tex -- ce bloc en etait une copie exacte)
+  \def\labelsolutionseuilbalayage{\PflTexte{dichoto-balayage}}
+  \def\labelsolutionseuilbalayagemaj{\PflTexte{dichoto-balayage-maj}}
+  \def\labelsolutionseuilbalayagemin{\PflTexte{dichoto-balayage-min}}
+  \def\labelsolutionseuilcalc{\PflTexte{dichoto-calc}}
+  \def\labelsolutionseuilcalcmaj{\PflTexte{dichoto-calc-maj}}
+  \def\labelsolutionseuilcalcmin{\PflTexte{dichoto-calc-min}}
+  \def\labelsolutionseuilet{\PflTexte{dichoto-et}}
   %on détermine le seuil, directement et on stocke les bascules !!!
   \CalculSeuil{\SEUILindiceinit}{\SEUILtermeinit}{#2}{\SEUILsens}{#3}%
   \def\SEUILn{\inteval{\the\CompteurSeuil}}%

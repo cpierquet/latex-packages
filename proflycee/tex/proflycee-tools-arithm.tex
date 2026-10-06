@@ -570,19 +570,8 @@
   \setKVboolfalsedefaultmulti[eqdioph]{border}{Cadres}%
   \setKVbooltruedefaultmulti[eqdioph]{pres gcd}{PresPGCD}%
   %next
-  %====multilng
-  \if@pfllngfr
-    \def\labeldapres{\text{ d'après }}
-  \fi
-  \if@pfllngen
-    \def\labeldapres{\text{ from }}
-  \fi
-  \if@pfllngde
-    \def\labeldapres{\text{ nach }}
-  \fi
-  \if@pfllnges
-    \def\labeldapres{\text{ según }}
-  \fi
+  %====multilng (4.02b : dictionnaire centralise, cf proflycee-tools-dictionnaire.tex)
+  \def\labeldapres{\text{\PflTexte{dioph-dapres}}}
     \setlength{\parindent}{0pt}%
     % Extractions des paramètres
     \StrBefore[1]{\InconnuesSolEDioph}{/}[\XXX]%
@@ -608,31 +597,11 @@
     % Calcul du PGCD
     \xdef\PGCDD{\xinteval{gcd(\AA,\BB)}}%
 
-    % Texte multilingue : Énoncé de l'équation
-    \if@pfllngfr
-        On cherche à résoudre l'équation diophantienne :\[ \num{\AA}\XXX + \AffCoeffDioph{\BB}\YYY=\num{\CC} \xintifboolexpr{ \PGCDD == 1 'or' \xintiiRem{\CC}{\PGCDD} != 0 }{\qquad (\LettreSolEDioph)}{} \]%
-        \ifboolKV[eqdioph]{PresPGCD}%
-            {D'après l'algorithme d'Euclide : \PresentationPGCD[Rectangle=false]{\xinteval{abs(\AA)}}{\xinteval{abs(\BB)}}.}%
-            {Le PGCD de \num{\AA} et de \num{\BB} vaut \num{\PGCDD}.}%
-    \fi
-    \if@pfllngen
-        We seek to solve the Diophantine equation: \[ \num{\AA}\XXX + \AffCoeffDioph{\BB}\YYY=\num{\CC} \xintifboolexpr{ \PGCDD == 1 'or' \xintiiRem{\CC}{\PGCDD} != 0 }{\qquad (\LettreSolEDioph)}{} \]%
-        \ifboolKV[eqdioph]{PresPGCD}%
-            {Using the Euclidean algorithm: \PresentationPGCD[Rectangle=false]{\xinteval{abs(\AA)}}{\xinteval{abs(\BB)}}.}%
-            {The GCD of \num{\AA} and \num{\BB} is \num{\PGCDD}.}%
-    \fi
-    \if@pfllngde
-        Man sucht die Lösungen der diophantischen Gleichung: \[ \num{\AA}\XXX + \AffCoeffDioph{\BB}\YYY=\num{\CC} \xintifboolexpr{ \PGCDD == 1 'or' \xintiiRem{\CC}{\PGCDD} != 0 }{\qquad (\LettreSolEDioph)}{} \]%
-        \ifboolKV[eqdioph]{PresPGCD}%
-            {Nach dem euklidischen Algorithmus: \PresentationPGCD[Rectangle=false]{\xinteval{abs(\AA)}}{\xinteval{abs(\BB)}}.}%
-            {Der GGT von \num{\AA} und \num{\BB} ist \num{\PGCDD}.}%
-    \fi
-    \if@pfllnges
-        Se busca resolver la ecuación diofántica: \[ \num{\AA}\XXX + \AffCoeffDioph{\BB}\YYY=\num{\CC} \xintifboolexpr{ \PGCDD == 1 'or' \xintiiRem{\CC}{\PGCDD} != 0 }{\qquad (\LettreSolEDioph)}{} \]%
-        \ifboolKV[eqdioph]{PresPGCD}%
-            {Según el algoritmo de Euclides: \PresentationPGCD[Rectangle=false]{\xinteval{abs(\AA)}}{\xinteval{abs(\BB)}}.}%
-            {El MCD de \num{\AA} y \num{\BB} es \num{\PGCDD}.}%
-    \fi
+    % Texte multilingue : Énoncé de l'équation (4.02b : dictionnaire centralise)
+    \PflTexte{dioph-intro}\[ \num{\AA}\XXX + \AffCoeffDioph{\BB}\YYY=\num{\CC} \xintifboolexpr{ \PGCDD == 1 'or' \xintiiRem{\CC}{\PGCDD} != 0 }{\qquad (\LettreSolEDioph)}{} \]%
+    \ifboolKV[eqdioph]{PresPGCD}%
+        {\PflTexte{dioph-euclide}\PresentationPGCD[Rectangle=false]{\xinteval{abs(\AA)}}{\xinteval{abs(\BB)}}.}%
+        {\PflTexte{dioph-pgcd-vaut}{\AA}{\BB}{\PGCDD}}%
 
     \par\smallskip
 
@@ -641,66 +610,19 @@
         {%
             \xintifboolexpr{ \PGCDD == 1}%
                 {%
-                    \if@pfllngfr
-                        Les entiers \num{\xinteval{abs(\AA)}} et \num{\xinteval{abs(\BB)}} sont premiers entre eux, donc l'équation $(\LettreSolEDioph)$ admet une infinité de solutions.\par
-                        \xdef\AAA{\AA}\xdef\BBB{\BB}\xdef\CCC{\CC}%
-                    \fi
-                    \if@pfllngen
-                        The integers \num{\xinteval{abs(\AA)}} and \num{\xinteval{abs(\BB)}} are coprime, so the equation $(\LettreSolEDioph)$ has infinitely many solutions.\par
-                        \xdef\AAA{\AA}\xdef\BBB{\BB}\xdef\CCC{\CC}%
-                    \fi
-                    \if@pfllngde
-                        Die Zahlen \num{\xinteval{abs(\AA)}} und \num{\xinteval{abs(\BB)}} sind teilerfremd, also hat die Gleichung $(\LettreSolEDioph)$ unendlich viele Lösungen.\par
-                        \xdef\AAA{\AA}\xdef\BBB{\BB}\xdef\CCC{\CC}%
-                    \fi
-                    \if@pfllnges
-                        Los números \num{\xinteval{abs(\AA)}} y \num{\xinteval{abs(\BB)}} son primos entre sí, por lo que la ecuación $(\LettreSolEDioph)$ tiene infinitas soluciones.\par
-                        \xdef\AAA{\AA}\xdef\BBB{\BB}\xdef\CCC{\CC}%
-                    \fi
+                    \PflTexte{dioph-coprem-infini}{\xinteval{abs(\AA)}}{\xinteval{abs(\BB)}}\par
+                    \xdef\AAA{\AA}\xdef\BBB{\BB}\xdef\CCC{\CC}%
                 }%
                 {%
-                    \if@pfllngfr
-                        Le PGCD de \num{\AA} et \num{\BB} divise \num{\CC}, donc on peut simplifier l'équation diophantienne par \num{\PGCDD}.
-                    \fi
-                    \if@pfllngen
-                        The GCD of \num{\AA} and \num{\BB} divides \num{\CC}, so we can simplify the Diophantine equation by \num{\PGCDD}.
-                    \fi
-                    \if@pfllngde
-                        Der GGT von \num{\AA} und \num{\BB} teilt \num{\CC}, also können wir die diophantische Gleichung durch \num{\PGCDD} vereinfachen.
-                    \fi
-                    \if@pfllnges
-                        El MCD de \num{\AA} y \num{\BB} divide a \num{\CC}, por lo que podemos simplificar la ecuación diofántica por \num{\PGCDD}.
-                    \fi
+                    \PflTexte{dioph-simplification}{\AA}{\BB}{\CC}{\PGCDD}
                     \xdef\AAA{\xintiieval{\AA/\PGCDD}}\xdef\BBB{\xintiieval{\BB/\PGCDD}}\xdef\CCC{\xintiieval{\CC/\PGCDD}}%
                     %
                     \[ \num{\AA}\XXX+\AffCoeffDioph{\BB}\YYY=\num{\CC} \underset{\div\num{\PGCDD}}{\Longleftrightarrow} \num{\AAA}\XXX+\AffCoeffDioph{\BBB}\YYY=\num{\CCC} \qquad (\LettreSolEDioph) \]%
-                    \if@pfllngfr
-                        Les entiers \num{\AAA} et \num{\BBB} sont premiers entre eux, donc l'équation $(\LettreSolEDioph)$ admet une infinité de solutions.\par
-                    \fi
-                    \if@pfllngen
-                        The integers \num{\AAA} and \num{\BBB} are coprime, so the equation $(\LettreSolEDioph)$ has infinitely many solutions.\par
-                    \fi
-                    \if@pfllngde
-                        Die Zahlen \num{\AAA} und \num{\BBB} sind teilerfremd, also hat die Gleichung $(\LettreSolEDioph)$ unendlich viele Lösungen.\par
-                    \fi
-                    \if@pfllnges
-                        Los números \num{\AAA} y \num{\BBB} son primos entre sí, por lo que la ecuación $(\LettreSolEDioph)$ tiene infinitas soluciones.\par
-                    \fi
+                    \PflTexte{dioph-coprem-infini}{\AAA}{\BBB}\par
                 }%
             \xintAssign{\xintBezout{\AAA}{\BBB}}\to\TmpU\TmpV\TmpD
             %
-            \if@pfllngfr
-                On détermine une solution particulière de $(E)$ :
-            \fi
-            \if@pfllngen
-                We determine a particular solution of $(E)$:
-            \fi
-            \if@pfllngde
-                Wir bestimmen eine spezielle Lösung von $(E)$:
-            \fi
-            \if@pfllnges
-                Determinamos una solución particular de $(E)$:
-            \fi
+            \PflTexte{dioph-sol-particuliere}
             \[ \num{\AAA} \times \mathcolor{\CouleurSolEDioph}{\AffCoeffBezout{\TmpU}} + \AffCoeffBezout{\BBB} \times \mathcolor{\CouleurSolEDioph}{\AffCoeffBezout{\TmpV}} = \num{\TmpD}
             \xintifboolexpr{ \CCC != 1}%
                 {%
@@ -711,18 +633,7 @@
                 \qquad ({\LettreSolEDioph}_0)
              \]%
             %
-            \if@pfllngfr
-                Par soustraction :
-            \fi
-            \if@pfllngen
-                By subtraction:
-            \fi
-            \if@pfllngde
-                Durch Subtraktion:
-            \fi
-            \if@pfllnges
-                Restando:
-            \fi
+            \PflTexte{dioph-par-soustraction}
             %
             \[%
             {\renewcommand\arraystretch{1.25}%
@@ -735,42 +646,11 @@
             \def\TmpPartieA{\XXX \mathcolor{\CouleurSolEDioph}{\AffCoeffDiophSign{\xinteval{-\TmpU*\CCC}}}}%
             \def\TmpPartieB{\YYY \mathcolor{\CouleurSolEDioph}{\AffCoeffDiophSign{\xinteval{-\TmpV*\CCC}}}}%
             %
-            \if@pfllngfr
-                On en déduit que $\num{\AAA} \times \underbrace{\left( \TmpPartieA \right)}_{\text{entier}} = \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$, et donc que $\num{\AAA} \mid \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$.\par\smallskip
-                Or \num{\xinteval{abs(\AAA)}} et \num{\xinteval{abs(\BBB)}} sont premiers entre eux, donc d'après le théorème de Gauss, on a $\num{\AAA} \mid \TmpPartieB$.\par
-                Il existe donc un entier $\KKK$ tel que $\TmpPartieB = \num{\AAA} \times \KKK$, ce qui donne
-                $\ifboolKV[eqdioph]{Cadres}
+            \PflTexte{dioph-gauss}{\xinteval{abs(\AAA)}}{\xinteval{abs(\BBB)}}{%
+                \ifboolKV[eqdioph]{Cadres}
                     {\boxed{\YYY = \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}}
-                    {\YYY = \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}
-                $.\par
-            \fi
-            \if@pfllngen
-                We deduce that $\num{\AAA} \times \underbrace{\left( \TmpPartieA \right)}_{\text{integer}} = \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$, and therefore that $\num{\AAA} \mid \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$.\par\smallskip
-                Since \num{\xinteval{abs(\AAA)}} and \num{\xinteval{abs(\BBB)}} are coprime, by Gauss's theorem, we have $\num{\AAA} \mid \TmpPartieB$.\par
-                There exists an integer $\KKK$ such that $\TmpPartieB = \num{\AAA} \times \KKK$, which gives
-                $\ifboolKV[eqdioph]{Cadres}
-                    {\boxed{\YYY = \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}}
-                    {\YYY = \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}
-                $.\par
-            \fi
-            \if@pfllngde
-                Daraus folgt, dass $\num{\AAA} \times \underbrace{\left( \TmpPartieA \right)}_{\text{ganze Zahl}} = \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$, und somit $\num{\AAA} \mid \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$.\par\smallskip
-                Da \num{\xinteval{abs(\AAA)}} und \num{\xinteval{abs(\BBB)}} teilerfremd sind, folgt nach dem Satz von Gauss, dass $\num{\AAA} \mid \TmpPartieB$.\par
-                Es existiert eine ganze Zahl $\KKK$, sodass $\TmpPartieB = \num{\AAA} \times \KKK$, was ergibt
-                $\ifboolKV[eqdioph]{Cadres}
-                    {\boxed{\YYY = \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}}
-                    {\YYY = \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}
-                $.\par
-            \fi
-            \if@pfllnges
-                Se deduce que $\num{\AAA} \times \underbrace{\left( \TmpPartieA \right)}_{\text{entero}} = \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$, y por lo tanto que $\num{\AAA} \mid \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$.\par\smallskip
-                Como \num{\xinteval{abs(\AAA)}} y \num{\xinteval{abs(\BBB)}} son primos entre sí, según el teorema de Gauss, tenemos $\num{\AAA} \mid \TmpPartieB$.\par
-                Existe un entero $\KKK$ tal que $\TmpPartieB = \num{\AAA} \times \KKK$, lo que da
-                $\ifboolKV[eqdioph]{Cadres}
-                    {\boxed{\YYY = \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}}
-                    {\YYY = \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}
-                $.\par
-            \fi
+                    {\YYY = \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}%
+            }%
             % Suite des calculs
             \begin{align*}
                 \num{\AAA} \times \left( \TmpPartieA \right) = \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right) & \implies \num{\AAA} \times \left( \TmpPartieA \right) = \num{\xinteval{-\BBB}} \times \big( \underbrace{\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}} \AffCoeffDiophSign{\AAA}\KKK}_{\mathclap{\YYY}}  \mathcolor{\CouleurSolEDioph}{\AffCoeffDiophSign{\xinteval{-\CCC*\TmpV}}} \big) \\
@@ -781,22 +661,9 @@
                     {\XXX = \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK}
             \end{align*}
             %
-            \if@pfllngfr
-                Ainsi, si $\XXX$ et $\YYY$ sont solutions de $(\LettreSolEDioph)$, alors il existe un entier $\KKK$ tel que ${\XXX=\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK}$ et ${\YYY=\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}$.\par\medskip
-                Réciproquement, soit $\KKK$ un entier quelconque :
-            \fi
-            \if@pfllngen
-                Therefore, if $\XXX$ and $\YYY$ are solutions of $(\LettreSolEDioph)$, then there exists an integer $\KKK$ such that ${\XXX=\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK}$ and ${\YYY=\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}$.\par\medskip
-                Conversely, let $\KKK$ be any integer:
-            \fi
-            \if@pfllngde
-                Daher sind, wenn $\XXX$ und $\YYY$ Lösungen von $(\LettreSolEDioph)$ sind, dann existiert eine ganze Zahl $\KKK$, sodass ${\XXX=\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK}$ und ${\YYY=\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}$.\par\medskip
-                Umgekehrt sei $\KKK$ eine beliebige ganze Zahl:
-            \fi
-            \if@pfllnges
-                Por lo tanto, si $\XXX$ y $\YYY$ son soluciones de $(\LettreSolEDioph)$, entonces existe un entero $\KKK$ tal que ${\XXX=\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK}$ y ${\YYY=\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}$.\par\medskip
-                Recíprocamente, sea $\KKK$ un entero cualquiera:
-            \fi
+            \PflTexte{dioph-ainsi-reciproquement}%
+                {\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK}%
+                {\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}%
             %
             \begin{align*}
                 \num{\AAA} \times \left( \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK \right) + \AffCoeffDioph{\BBB} \times  \left( \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK \right) & = \num{\AAA} \times \mathcolor{\CouleurSolEDioph}{\AffCoeffDioph{\xinteval{\CCC*\TmpU}}} + \cancel{\AffCoeffDioph{\AAA} \times \AffCoeffDioph{\xinteval{-\BBB}} \KKK} + \AffCoeffDioph{\BBB} \times \mathcolor{\CouleurSolEDioph}{\AffCoeffDioph{\xinteval{\CCC*\TmpV}}} +  \cancel{\AffCoeffDioph{\BBB} \times \AffCoeffDioph{\AAA} \KKK} \\
@@ -804,37 +671,12 @@
                 & = \num{\CCC}
             \end{align*}
             %
-            \if@pfllngfr
-                On en déduit que $\left(\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK \mathpunct{}; \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK \right)$ est solution de $(\LettreSolEDioph)$.\par\medskip
-                %On en déduit que $\left(\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK \mathpunct{}; \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK \right)$ est solution de $(\LettreSolEDioph)$.\par\medskip
-                En conclusion, les solutions de $(E)$ sont donc les couples $\left(\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK \mathpunct{}; \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}} \AffCoeffDiophSign{\AAA}\KKK \right)$, avec $\KKK$ un entier relatif.
-            \fi
-            \if@pfllngen
-                We deduce that $\left(\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK \mathpunct{}; \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK \right)$ is a solution of $(\LettreSolEDioph)$.\par\medskip
-                In conclusion, the solutions of $(E)$ are the pairs $\left(\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK \mathpunct{}; \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}} \AffCoeffDiophSign{\AAA}\KKK \right)$, with $\KKK$ any integer.
-            \fi
-            \if@pfllngde
-                Daraus folgt, dass $\left(\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK \mathpunct{}; \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK \right)$ eine Lösung von $(\LettreSolEDioph)$ ist.\par\medskip
-                Zusammenfassend sind die Lösungen von $(E)$ die Paare $\left(\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK \mathpunct{}; \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}} \AffCoeffDiophSign{\AAA}\KKK \right)$, wobei $\KKK$ eine ganze Zahl ist.
-            \fi
-            \if@pfllnges
-                Se deduce que $\left(\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK \mathpunct{}; \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK \right)$ es solución de $(\LettreSolEDioph)$.\par\medskip
-                En conclusión, las soluciones de $(E)$ son los pares $\left(\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK \mathpunct{}; \mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}} \AffCoeffDiophSign{\AAA}\KKK \right)$, con $\KKK$ un entero.
-            \fi
+            \PflTexte{dioph-conclusion}%
+                {\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpU}}} \AffCoeffDiophSign{\xinteval{-\BBB}}\KKK}%
+                {\mathcolor{\CouleurSolEDioph}{\num{\xinteval{\CCC*\TmpV}}}  \AffCoeffDiophSign{\AAA}\KKK}%
         }%
         {%
-            \if@pfllngfr
-                Le PGCD de \num{\AA} et \num{\BB} ne divise pas \num{\CC}, donc l'équation $(\LettreSolEDioph)$ n'admet aucune solution.
-            \fi
-            \if@pfllngen
-                The GCD of \num{\AA} and \num{\BB} does not divide \num{\CC}, so the equation $(\LettreSolEDioph)$ has no solution.
-            \fi
-            \if@pfllngde
-                Der GGT von \num{\AA} und \num{\BB} teilt nicht \num{\CC}, also hat die Gleichung $(\LettreSolEDioph)$ keine Lösung.
-            \fi
-            \if@pfllnges
-                El MCD de \num{\AA} y \num{\BB} no divide a \num{\CC}, por lo que la ecuación $(\LettreSolEDioph)$ no tiene solución.
-            \fi
+            \PflTexte{dioph-pas-de-solution}{\AA}{\BB}{\CC}
         }%
 }
 

@@ -1,0 +1,238 @@
+% ProfLycee -- Dictionnaire de traduction centralisé (pilote 4.02a)
+
+\NewDocumentCommand\PflDefTexte{m m m +m}{%
+  \expandafter\NewDocumentCommand\csname pfltxt-#1-#2\endcsname{#3}{#4}%
+}
+
+\NewDocumentCommand\PflTexte{m}{%
+  \def\pfl@lang{fr}%
+  \if@pfllngen\def\pfl@lang{en}\fi
+  \if@pfllngde\def\pfl@lang{de}\fi
+  \if@pfllnges\def\pfl@lang{es}\fi
+  \ifcsname pfltxt-\pfl@lang-#1\endcsname\else\def\pfl@lang{fr}\fi
+  \csname pfltxt-\pfl@lang-#1\endcsname
+}
+
+\PflDefTexte{fr}{dioph-dapres}{}{ d'après }
+\PflDefTexte{en}{dioph-dapres}{}{ from }
+\PflDefTexte{de}{dioph-dapres}{}{ nach }
+\PflDefTexte{es}{dioph-dapres}{}{ según }
+
+\PflDefTexte{fr}{dioph-intro}{}{On cherche à résoudre l'équation diophantienne :}
+\PflDefTexte{en}{dioph-intro}{}{We seek to solve the Diophantine equation:}
+\PflDefTexte{de}{dioph-intro}{}{Man sucht die Lösungen der diophantischen Gleichung:}
+\PflDefTexte{es}{dioph-intro}{}{Se busca resolver la ecuación diofántica:}
+
+\PflDefTexte{fr}{dioph-euclide}{}{D'après l'algorithme d'Euclide : }
+\PflDefTexte{en}{dioph-euclide}{}{Using the Euclidean algorithm: }
+\PflDefTexte{de}{dioph-euclide}{}{Nach dem euklidischen Algorithmus: }
+\PflDefTexte{es}{dioph-euclide}{}{Según el algoritmo de Euclides: }
+
+\PflDefTexte{fr}{dioph-pgcd-vaut}{m m m}{Le PGCD de \num{#1} et de \num{#2} vaut \num{#3}.}
+\PflDefTexte{en}{dioph-pgcd-vaut}{m m m}{The GCD of \num{#1} and \num{#2} is \num{#3}.}
+\PflDefTexte{de}{dioph-pgcd-vaut}{m m m}{Der GGT von \num{#1} und \num{#2} ist \num{#3}.}
+\PflDefTexte{es}{dioph-pgcd-vaut}{m m m}{El MCD de \num{#1} y \num{#2} es \num{#3}.}
+
+\PflDefTexte{fr}{dioph-coprem-infini}{m m}{Les entiers \num{#1} et \num{#2} sont premiers entre eux, donc l'équation $(\LettreSolEDioph)$ admet une infinité de solutions.}
+\PflDefTexte{en}{dioph-coprem-infini}{m m}{The integers \num{#1} and \num{#2} are coprime, so the equation $(\LettreSolEDioph)$ has infinitely many solutions.}
+\PflDefTexte{de}{dioph-coprem-infini}{m m}{Die Zahlen \num{#1} und \num{#2} sind teilerfremd, also hat die Gleichung $(\LettreSolEDioph)$ unendlich viele Lösungen.}
+\PflDefTexte{es}{dioph-coprem-infini}{m m}{Los números \num{#1} y \num{#2} son primos entre sí, por lo que la ecuación $(\LettreSolEDioph)$ tiene infinitas soluciones.}
+
+\PflDefTexte{fr}{dioph-simplification}{m m m m}{Le PGCD de \num{#1} et \num{#2} divise \num{#3}, donc on peut simplifier l'équation diophantienne par \num{#4}.}
+\PflDefTexte{en}{dioph-simplification}{m m m m}{The GCD of \num{#1} and \num{#2} divides \num{#3}, so we can simplify the Diophantine equation by \num{#4}.}
+\PflDefTexte{de}{dioph-simplification}{m m m m}{Der GGT von \num{#1} und \num{#2} teilt \num{#3}, also können wir die diophantische Gleichung durch \num{#4} vereinfachen.}
+\PflDefTexte{es}{dioph-simplification}{m m m m}{El MCD de \num{#1} y \num{#2} divide a \num{#3}, por lo que podemos simplificar la ecuación diofántica por \num{#4}.}
+
+\PflDefTexte{fr}{dioph-sol-particuliere}{}{On détermine une solution particulière de $(E)$ :}
+\PflDefTexte{en}{dioph-sol-particuliere}{}{We determine a particular solution of $(E)$:}
+\PflDefTexte{de}{dioph-sol-particuliere}{}{Wir bestimmen eine spezielle Lösung von $(E)$:}
+\PflDefTexte{es}{dioph-sol-particuliere}{}{Determinamos una solución particular de $(E)$:}
+
+\PflDefTexte{fr}{dioph-par-soustraction}{}{Par soustraction :}
+\PflDefTexte{en}{dioph-par-soustraction}{}{By subtraction:}
+\PflDefTexte{de}{dioph-par-soustraction}{}{Durch Subtraktion:}
+\PflDefTexte{es}{dioph-par-soustraction}{}{Restando:}
+
+\PflDefTexte{fr}{dioph-gauss}{m m m}{On en déduit que $\num{\AAA} \times \underbrace{\left( \TmpPartieA \right)}_{\text{entier}} = \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$, et donc que $\num{\AAA} \mid \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$.\par\smallskip Or \num{#1} et \num{#2} sont premiers entre eux, donc d'après le théorème de Gauss, on a $\num{\AAA} \mid \TmpPartieB$.\par Il existe donc un entier $\KKK$ tel que $\TmpPartieB = \num{\AAA} \times \KKK$, ce qui donne $#3$.\par}
+\PflDefTexte{en}{dioph-gauss}{m m m}{We deduce that $\num{\AAA} \times \underbrace{\left( \TmpPartieA \right)}_{\text{integer}} = \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$, and therefore that $\num{\AAA} \mid \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$.\par\smallskip Since \num{#1} and \num{#2} are coprime, by Gauss's theorem, we have $\num{\AAA} \mid \TmpPartieB$.\par There exists an integer $\KKK$ such that $\TmpPartieB = \num{\AAA} \times \KKK$, which gives $#3$.\par}
+\PflDefTexte{de}{dioph-gauss}{m m m}{Daraus folgt, dass $\num{\AAA} \times \underbrace{\left( \TmpPartieA \right)}_{\text{ganze Zahl}} = \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$, und somit $\num{\AAA} \mid \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$.\par\smallskip Da \num{#1} und \num{#2} teilerfremd sind, folgt nach dem Satz von Gauss, dass $\num{\AAA} \mid \TmpPartieB$.\par Es existiert eine ganze Zahl $\KKK$, sodass $\TmpPartieB = \num{\AAA} \times \KKK$, was ergibt $#3$.\par}
+\PflDefTexte{es}{dioph-gauss}{m m m}{Se deduce que $\num{\AAA} \times \underbrace{\left( \TmpPartieA \right)}_{\text{entero}} = \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$, y por lo tanto que $\num{\AAA} \mid \num{\xinteval{-\BBB}} \times \left( \TmpPartieB \right)$.\par\smallskip Como \num{#1} y \num{#2} son primos entre sí, según el teorema de Gauss, tenemos $\num{\AAA} \mid \TmpPartieB$.\par Existe un entero $\KKK$ tal que $\TmpPartieB = \num{\AAA} \times \KKK$, lo que da $#3$.\par}
+
+\PflDefTexte{fr}{dioph-ainsi-reciproquement}{m m}{Ainsi, si $\XXX$ et $\YYY$ sont solutions de $(\LettreSolEDioph)$, alors il existe un entier $\KKK$ tel que ${\XXX=#1}$ et ${\YYY=#2}$.\par\medskip Réciproquement, soit $\KKK$ un entier quelconque :}
+\PflDefTexte{en}{dioph-ainsi-reciproquement}{m m}{Therefore, if $\XXX$ and $\YYY$ are solutions of $(\LettreSolEDioph)$, then there exists an integer $\KKK$ such that ${\XXX=#1}$ and ${\YYY=#2}$.\par\medskip Conversely, let $\KKK$ be any integer:}
+\PflDefTexte{de}{dioph-ainsi-reciproquement}{m m}{Daher sind, wenn $\XXX$ und $\YYY$ Lösungen von $(\LettreSolEDioph)$ sind, dann existiert eine ganze Zahl $\KKK$, sodass ${\XXX=#1}$ und ${\YYY=#2}$.\par\medskip Umgekehrt sei $\KKK$ eine beliebige ganze Zahl:}
+\PflDefTexte{es}{dioph-ainsi-reciproquement}{m m}{Por lo tanto, si $\XXX$ y $\YYY$ son soluciones de $(\LettreSolEDioph)$, entonces existe un entero $\KKK$ tal que ${\XXX=#1}$ y ${\YYY=#2}$.\par\medskip Recíprocamente, sea $\KKK$ un entero cualquiera:}
+
+\PflDefTexte{fr}{dioph-conclusion}{m m}{On en déduit que $\left(#1 \mathpunct{}; #2 \right)$ est solution de $(\LettreSolEDioph)$.\par\medskip En conclusion, les solutions de $(E)$ sont donc les couples $\left(#1 \mathpunct{}; #2 \right)$, avec $\KKK$ un entier relatif.}
+\PflDefTexte{en}{dioph-conclusion}{m m}{We deduce that $\left(#1 \mathpunct{}; #2 \right)$ is a solution of $(\LettreSolEDioph)$.\par\medskip In conclusion, the solutions of $(E)$ are the pairs $\left(#1 \mathpunct{}; #2 \right)$, with $\KKK$ any integer.}
+\PflDefTexte{de}{dioph-conclusion}{m m}{Daraus folgt, dass $\left(#1 \mathpunct{}; #2 \right)$ eine Lösung von $(\LettreSolEDioph)$ ist.\par\medskip Zusammenfassend sind die Lösungen von $(E)$ die Paare $\left(#1 \mathpunct{}; #2 \right)$, wobei $\KKK$ eine ganze Zahl ist.}
+\PflDefTexte{es}{dioph-conclusion}{m m}{Se deduce que $\left(#1 \mathpunct{}; #2 \right)$ es solución de $(\LettreSolEDioph)$.\par\medskip En conclusión, las soluciones de $(E)$ son los pares $\left(#1 \mathpunct{}; #2 \right)$, con $\KKK$ un entero.}
+
+\PflDefTexte{fr}{dioph-pas-de-solution}{m m m}{Le PGCD de \num{#1} et \num{#2} ne divise pas \num{#3}, donc l'équation $(\LettreSolEDioph)$ n'admet aucune solution.}
+\PflDefTexte{en}{dioph-pas-de-solution}{m m m}{The GCD of \num{#1} and \num{#2} does not divide \num{#3}, so the equation $(\LettreSolEDioph)$ has no solution.}
+\PflDefTexte{de}{dioph-pas-de-solution}{m m m}{Der GGT von \num{#1} und \num{#2} teilt nicht \num{#3}, also hat die Gleichung $(\LettreSolEDioph)$ keine Lösung.}
+\PflDefTexte{es}{dioph-pas-de-solution}{m m m}{El MCD de \num{#1} y \num{#2} no divide a \num{#3}, por lo que la ecuación $(\LettreSolEDioph)$ no tiene solución.}
+
+% --- \SolutionSeuil (fragments de phrase assembles dynamiquement) ---
+\PflDefTexte{fr}{dichoto-balayage}{}{ar balayage, on obtient~}
+\PflDefTexte{en}{dichoto-balayage}{}{y sweeping, we obtain~}
+\PflDefTexte{de}{dichoto-balayage}{}{it einer Sweep-Methode ergibt sich~}
+\PflDefTexte{es}{dichoto-balayage}{}{ediante un barrido, se obtiene~}
+
+\PflDefTexte{fr}{dichoto-balayage-maj}{}{P}
+\PflDefTexte{en}{dichoto-balayage-maj}{}{B}
+\PflDefTexte{de}{dichoto-balayage-maj}{}{M}
+\PflDefTexte{es}{dichoto-balayage-maj}{}{M}
+
+\PflDefTexte{fr}{dichoto-balayage-min}{}{p}
+\PflDefTexte{en}{dichoto-balayage-min}{}{b}
+\PflDefTexte{de}{dichoto-balayage-min}{}{m}
+\PflDefTexte{es}{dichoto-balayage-min}{}{m}
+
+\PflDefTexte{fr}{dichoto-calc}{}{ar calculatrice, on obtient~}
+\PflDefTexte{en}{dichoto-calc}{}{ith a calculator, we get~}
+\PflDefTexte{de}{dichoto-calc}{}{it dem Taschenrechner erhält man~}
+\PflDefTexte{es}{dichoto-calc}{}{on la calculadora, se obtiene~}
+
+\PflDefTexte{fr}{dichoto-calc-maj}{}{P}
+\PflDefTexte{en}{dichoto-calc-maj}{}{W}
+\PflDefTexte{de}{dichoto-calc-maj}{}{M}
+\PflDefTexte{es}{dichoto-calc-maj}{}{C}
+
+\PflDefTexte{fr}{dichoto-calc-min}{}{p}
+\PflDefTexte{en}{dichoto-calc-min}{}{w}
+\PflDefTexte{de}{dichoto-calc-min}{}{m}
+\PflDefTexte{es}{dichoto-calc-min}{}{c}
+
+\PflDefTexte{fr}{dichoto-et}{}{~et~}
+\PflDefTexte{en}{dichoto-et}{}{~and~}
+\PflDefTexte{de}{dichoto-et}{}{~und~}
+\PflDefTexte{es}{dichoto-et}{}{~y~}
+
+% --- \EquationReduite ---
+\PflDefTexte{fr}{eqred-points-identiques}{}{Les deux points donnés sont identiques, donc pas de droite\ldots}
+\PflDefTexte{en}{eqred-points-identiques}{}{The two given points are identical, so no line exists\ldots}
+\PflDefTexte{de}{eqred-points-identiques}{}{Die beiden gegebenen Punkte sind identisch, also gibt es keine Gerade\ldots}
+\PflDefTexte{es}{eqred-points-identiques}{}{Los dos puntos dados son idénticos, por lo tanto no hay recta\ldots}
+
+\PflDefTexte{fr}{eqred-vertical}{m}{Étant donné que $x_{\ListePoints[1,1]} = x_{\ListePoints[2,1]}$, la droite $(\ListePoints[1,1]\ListePoints[2,1])$ est verticale, dont une équation est $x=\ConversionFraction[#1]{\ListePoints[1,2]}$.}
+\PflDefTexte{en}{eqred-vertical}{m}{Since $x_{\ListePoints[1,1]} = x_{\ListePoints[2,1]}$, the line $(\ListePoints[1,1]\ListePoints[2,1])$ is vertical, with equation $x=\ConversionFraction[#1]{\ListePoints[1,2]}$.}
+\PflDefTexte{de}{eqred-vertical}{m}{Da $x_{\ListePoints[1,1]} = x_{\ListePoints[2,1]}$, ist die Gerade $(\ListePoints[1,1]\ListePoints[2,1])$ vertikal, mit Gleichung $x=\ConversionFraction[#1]{\ListePoints[1,2]}$.}
+\PflDefTexte{es}{eqred-vertical}{m}{Dado que $x_{\ListePoints[1,1]} = x_{\ListePoints[2,1]}$, la recta $(\ListePoints[1,1]\ListePoints[2,1])$ es vertical, con ecuación $x=\ConversionFraction[#1]{\ListePoints[1,2]}$.}
+
+\PflDefTexte{fr}{eqred-horizontal}{m}{Étant donné que $y_{\ListePoints[1,1]} = y_{\ListePoints[2,1]}$, la droite $(\ListePoints[1,1]\ListePoints[2,1])$ est horizontale, dont une équation est $y=\ConversionFraction[#1]{\ListePoints[1,3]}$.}
+\PflDefTexte{en}{eqred-horizontal}{m}{Since $y_{\ListePoints[1,1]} = y_{\ListePoints[2,1]}$, the line $(\ListePoints[1,1]\ListePoints[2,1])$ is horizontal, with equation $y=\ConversionFraction[#1]{\ListePoints[1,3]}$.}
+\PflDefTexte{de}{eqred-horizontal}{m}{Da $y_{\ListePoints[1,1]} = y_{\ListePoints[2,1]}$, ist die Gerade $(\ListePoints[1,1]\ListePoints[2,1])$ horizontal, mit Gleichung $y=\ConversionFraction[#1]{\ListePoints[1,3]}$.}
+\PflDefTexte{es}{eqred-horizontal}{m}{Dado que $y_{\ListePoints[1,1]} = y_{\ListePoints[2,1]}$, la recta $(\ListePoints[1,1]\ListePoints[2,1])$ es horizontal, con ecuación $y=\ConversionFraction[#1]{\ListePoints[1,3]}$.}
+
+\PflDefTexte{fr}{eqred-coeff-directeur}{}{Afin de déterminer l'équation réduite d'une droite passant par les points $\NomA$ et $\NomB$, on doit d'abord déterminer le coefficient directeur $m$ :}
+\PflDefTexte{en}{eqred-coeff-directeur}{}{To determine the slope-intercept form of a line passing through points $\NomA$ and $\NomB$, we must first determine the slope $m$:}
+\PflDefTexte{de}{eqred-coeff-directeur}{}{Um die Gleichung einer Geraden durch die Punkte $\NomA$ und $\NomB$ zu bestimmen, müssen wir zuerst die Steigung $m$ bestimmen:}
+\PflDefTexte{es}{eqred-coeff-directeur}{}{Para determinar la ecuación reducida de una recta que pasa por los puntos $\NomA$ y $\NomB$, primero debemos determinar la pendiente $m$:}
+
+\PflDefTexte{fr}{eqred-forme-generale}{m}{L'équation réduite de la droite est donc de la forme $(\NomA\NomB)$ : $y=\AffCoeffFAm[#1]{\CoeffDirBrut}+p$.}
+\PflDefTexte{en}{eqred-forme-generale}{m}{The equation of the line is therefore of the form $(\NomA\NomB)$: $y=\AffCoeffFAm[#1]{\CoeffDirBrut}+p$.}
+\PflDefTexte{de}{eqred-forme-generale}{m}{Die Gleichung der Geraden hat also die Form $(\NomA\NomB)$: $y=\AffCoeffFAm[#1]{\CoeffDirBrut}+p$.}
+\PflDefTexte{es}{eqred-forme-generale}{m}{La ecuación de la recta es entonces de la forma $(\NomA\NomB)$: $y=\AffCoeffFAm[#1]{\CoeffDirBrut}+p$.}
+
+\PflDefTexte{fr}{eqred-ordonnee-origine}{}{Il faut enfin déterminer l'ordonnée à l'origine $p$.}
+\PflDefTexte{en}{eqred-ordonnee-origine}{}{We must finally determine the y-intercept $p$.}
+\PflDefTexte{de}{eqred-ordonnee-origine}{}{Schließlich müssen wir den y-Achsenabschnitt $p$ bestimmen.}
+\PflDefTexte{es}{eqred-ordonnee-origine}{}{Finalmente debemos determinar la ordenada al origen $p$.}
+
+\PflDefTexte{fr}{eqred-passe-par}{}{On sait que la droite passe par le point $\NomA$, donc les coordonnées $\NomA\left(\AffCoeffFloat[]{\xA};\AffCoeffFloat[]{\yA}\right)$ vérifient l'équation. On a alors :}
+\PflDefTexte{en}{eqred-passe-par}{}{We know that the line passes through point $\NomA$, so the coordinates $\NomA\left(\AffCoeffFloat[]{\xA};\AffCoeffFloat[]{\yA}\right)$ satisfy the equation. We then have:}
+\PflDefTexte{de}{eqred-passe-par}{}{Wir wissen, dass die Gerade durch den Punkt $\NomA$ geht, also erfüllen die Koordinaten $\NomA\left(\AffCoeffFloat[]{\xA};\AffCoeffFloat[]{\yA}\right)$ die Gleichung. Wir haben dann:}
+\PflDefTexte{es}{eqred-passe-par}{}{Sabemos que la recta pasa por el punto $\NomA$, por lo tanto las coordenadas $\NomA\left(\AffCoeffFloat[]{\xA};\AffCoeffFloat[]{\yA}\right)$ verifican la ecuación. Tenemos entonces:}
+
+\PflDefTexte{fr}{eqred-conclusion}{m}{Donc l'équation réduite de $(\NomA\NomB)$ est $y=\AffCoeffFAm[#1]{\CoeffDirBrut} \AffCoeffFAp[#1]{\OrdoOrigBrut}$.}
+\PflDefTexte{en}{eqred-conclusion}{m}{Therefore the equation of $(\NomA\NomB)$ is $y=\AffCoeffFAm[#1]{\CoeffDirBrut} \AffCoeffFAp[#1]{\OrdoOrigBrut}$.}
+\PflDefTexte{de}{eqred-conclusion}{m}{Also lautet die Gleichung von $(\NomA\NomB)$ $y=\AffCoeffFAm[#1]{\CoeffDirBrut} \AffCoeffFAp[#1]{\OrdoOrigBrut}$.}
+\PflDefTexte{es}{eqred-conclusion}{m}{Por lo tanto la ecuación de $(\NomA\NomB)$ es $y=\AffCoeffFAm[#1]{\CoeffDirBrut} \AffCoeffFAp[#1]{\OrdoOrigBrut}$.}
+
+% --- \FractionPeriode ---
+\PflDefTexte{fr}{fracperiod-note-complete}{}{On note $\FracPerVar=\tmp@enonce$.\par
+\noindent La première égalité est donc \[\boxed{\FracPerVar=\tmp@enonce} \quad (1)\]}
+\PflDefTexte{en}{fracperiod-note-complete}{}{We set $\FracPerVar=\tmp@enonce$.\par
+\noindent The first equality is therefore \[\boxed{\FracPerVar=\tmp@enonce} \quad (1)\]}
+\PflDefTexte{de}{fracperiod-note-complete}{}{Wir setzen $\FracPerVar=\tmp@enonce$.\par
+\noindent Die erste Gleichung lautet also \[\boxed{\FracPerVar=\tmp@enonce} \quad (1)\]}
+\PflDefTexte{es}{fracperiod-note-complete}{}{Ponemos $\FracPerVar=\tmp@enonce$.\par
+\noindent La primera igualdad es entonces \[\boxed{\FracPerVar=\tmp@enonce} \quad (1)\]}
+
+\PflDefTexte{fr}{fracperiod-note-simple}{}{On note $\FracPerVar=\tmp@enonce$.\par}
+\PflDefTexte{en}{fracperiod-note-simple}{}{We set $\FracPerVar=\tmp@enonce$.\par}
+\PflDefTexte{de}{fracperiod-note-simple}{}{Wir setzen $\FracPerVar=\tmp@enonce$.\par}
+\PflDefTexte{es}{fracperiod-note-simple}{}{Ponemos $\FracPerVar=\tmp@enonce$.\par}
+
+\PflDefTexte{fr}{fracperiod-ramene}{}{On \textit{ramène} la période près de la virgule en multipliant par $10^{\tmp@len@apr}$ :}
+\PflDefTexte{en}{fracperiod-ramene}{}{We \textit{shift} the period close to the decimal point by multiplying by $10^{\tmp@len@apr}$:}
+\PflDefTexte{de}{fracperiod-ramene}{}{Wir \textit{verschieben} die Periode nahe dem Komma, indem wir mit $10^{\tmp@len@apr}$ multiplizieren:}
+\PflDefTexte{es}{fracperiod-ramene}{}{\textit{Desplazamos} el período cerca de la coma multiplicando por $10^{\tmp@len@apr}$:}
+
+\PflDefTexte{fr}{fracperiod-decale}{}{On \textit{décale} la période avant la virgule, en multipliant l'égalité (1) par $10^{\tmp@len@per}$ :}
+\PflDefTexte{en}{fracperiod-decale}{}{We \textit{shift} the period before the decimal point by multiplying equality (1) by $10^{\tmp@len@per}$:}
+\PflDefTexte{de}{fracperiod-decale}{}{Wir \textit{verschieben} die Periode vor das Komma, indem wir Gleichung (1) mit $10^{\tmp@len@per}$ multiplizieren:}
+\PflDefTexte{es}{fracperiod-decale}{}{\textit{Desplazamos} el período antes de la coma multiplicando la igualdad (1) por $10^{\tmp@len@per}$:}
+
+\PflDefTexte{fr}{fracperiod-soustrait}{}{On soustrait les deux égalités, $(2)-(1)$, ce qui permet d'\textit{enlever} la partie décimale :}
+\PflDefTexte{en}{fracperiod-soustrait}{}{We subtract the two equalities, $(2)-(1)$, which allows us to \textit{remove} the decimal part:}
+\PflDefTexte{de}{fracperiod-soustrait}{}{Wir subtrahieren die beiden Gleichungen, $(2)-(1)$, wodurch wir den Dezimalteil \textit{entfernen} können:}
+\PflDefTexte{es}{fracperiod-soustrait}{}{Restamos las dos igualdades, $(2)-(1)$, lo que nos permite \textit{eliminar} la parte decimal:}
+
+\PflDefTexte{fr}{fracperiod-ainsi}{}{Ainsi on a }
+\PflDefTexte{en}{fracperiod-ainsi}{}{Thus we have }
+\PflDefTexte{de}{fracperiod-ainsi}{}{Also haben wir }
+\PflDefTexte{es}{fracperiod-ainsi}{}{Así tenemos }
+
+% --- \tkzTabLineConvex ---
+\PflDefTexte{fr}{convex-inflex}{}{point\\d'inflexion}
+\PflDefTexte{en}{convex-inflex}{}{inflection\\point}
+\PflDefTexte{de}{convex-inflex}{}{Wende-\\punkt}
+\PflDefTexte{es}{convex-inflex}{}{punto de\\inflexión}
+
+\PflDefTexte{fr}{convex-ccv}{}{concave}
+\PflDefTexte{en}{convex-ccv}{}{concave}
+\PflDefTexte{de}{convex-ccv}{}{konkav}
+\PflDefTexte{es}{convex-ccv}{}{cóncava}
+
+\PflDefTexte{fr}{convex-cvx}{}{convexe}
+\PflDefTexte{en}{convex-cvx}{}{convex}
+\PflDefTexte{de}{convex-cvx}{}{konvex}
+\PflDefTexte{es}{convex-cvx}{}{convexa}
+
+%%=====LABELS MULTILANGUES SI OPTION
+\if@pfllngfr
+  \def\labelcodepython{Code Python}
+  \def\labelpseudocode{Pseudo-Code}
+  \def\labelconsolepythondebut{Début de la console Python}
+  \def\labelconsolepythonfin{Fin de la console Python}
+  \def\labelsepdec{,}
+  \def\labelavec{avec}
+\fi
+\if@pfllngen
+  \def\labelcodepython{Python code}
+  \def\labelpseudocode{Pseudocode}
+  \def\labelconsolepythondebut{Start of Python console}
+  \def\labelconsolepythonfin{End of Python console}
+  \def\labelsepdec{.}
+  \def\labelavec{with}
+\fi
+\if@pfllngde
+  \def\labelcodepython{Python-Code}
+  \def\labelpseudocode{Pseudocódigo}
+  \def\labelconsolepythondebut{Beginn der Python-Konsole}
+  \def\labelconsolepythonfin{Ende der Python-Konsole}
+  \def\labelsepdec{,}
+  \def\labelavec{mit}
+\fi
+\if@pfllnges
+  \def\labelcodepython{Código Python}
+  \def\labelpseudocode{Pseudocode}
+  \def\labelconsolepythondebut{Inicio de la consola de Python}
+  \def\labelconsolepythonfin{Fin de la consola de Python}
+  \def\labelsepdec{,}
+  \def\labelavec{con}
+\fi
+
+\endinput

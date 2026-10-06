@@ -1,5 +1,5 @@
 % proflycee-tools-stats.tex
-% Copyright 2023-2025 Cédric Pierquet
+% Copyright 2023-2026 Cédric Pierquet
 % Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
 
 %3.12b  Amélioration des histogrammes
@@ -71,10 +71,10 @@
   }%
   \xdef\LXYvar{\fpeval{\LXYvar/\LNB}}%
   %COEFFS OK
-  \expandafter\def\csname\RegLinCoeffa\endcsname{\fpeval{\LXYvar/\LXvar}}%
-  \expandafter\def\csname\RegLinCoeffb\endcsname{\fpeval{\LYmoy-\csname\RegLinCoeffa\endcsname*\LXmoy}}%
-  \expandafter\def\csname\RegLinCoeffr\endcsname{\fpeval{\LXYvar/sqrt(\LXvar*\LYvar)}}%
-  \expandafter\def\csname\RegLinCoeffrd\endcsname{\fpeval{\csname\RegLinCoeffr\endcsname*\csname\RegLinCoeffr\endcsname}}%
+  \expandafter\xdef\csname\RegLinCoeffa\endcsname{\fpeval{\LXYvar/\LXvar}}%
+  \expandafter\xdef\csname\RegLinCoeffb\endcsname{\fpeval{\LYmoy-\csname\RegLinCoeffa\endcsname*\LXmoy}}%
+  \expandafter\xdef\csname\RegLinCoeffr\endcsname{\fpeval{\LXYvar/sqrt(\LXvar*\LYvar)}}%
+  \expandafter\xdef\csname\RegLinCoeffrd\endcsname{\fpeval{\csname\RegLinCoeffr\endcsname*\csname\RegLinCoeffr\endcsname}}%
 }
 \NewCommandCopy\pflcalcreglin\CalculsRegLin
 
@@ -137,9 +137,9 @@
     \xdef\LXCYSomme{\xintfloateval{\LXCYSomme+((\LX[\i])^2-\LXCmoy)*(\LY[\i]-\LYmoy)}}%
   }%
   %COEFFS OK
-  \expandafter\def\csname\RegQuadCoeffb\endcsname{\xintfloateval{(\LXYSomme*\LXCXCSomme-\LXCYSomme*\LXXCSomme)/(\LXXSomme*\LXCXCSomme-(\LXXCSomme)^2)}}%
-  \expandafter\def\csname\RegQuadCoeffa\endcsname{\xintfloateval{(\LXCYSomme*\LXXSomme-\LXYSomme*\LXXCSomme)/(\LXXSomme*\LXCXCSomme-(\LXXCSomme)^2)}}%
-  \expandafter\def\csname\RegQuadCoeffc\endcsname{\xintfloateval{\LYmoy-\csname\RegQuadCoeffb\endcsname*\LXmoy-\csname\RegQuadCoeffa\endcsname*\LXCmoy}}%
+  \expandafter\xdef\csname\RegQuadCoeffb\endcsname{\xintfloateval{(\LXYSomme*\LXCXCSomme-\LXCYSomme*\LXXCSomme)/(\LXXSomme*\LXCXCSomme-(\LXXCSomme)^2)}}%
+  \expandafter\xdef\csname\RegQuadCoeffa\endcsname{\xintfloateval{(\LXCYSomme*\LXXSomme-\LXYSomme*\LXXCSomme)/(\LXXSomme*\LXCXCSomme-(\LXXCSomme)^2)}}%
+  \expandafter\xdef\csname\RegQuadCoeffc\endcsname{\xintfloateval{\LYmoy-\csname\RegQuadCoeffb\endcsname*\LXmoy-\csname\RegQuadCoeffa\endcsname*\LXCmoy}}%
 }
 \NewCommandCopy\pflcalcregquad\CalculsRegQuad
 

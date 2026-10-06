@@ -466,7 +466,8 @@
     %légende éventuelle
     \ifboolKV[houseofcards]{Legende}%
       {%
-        \draw ($(A\HoCardsNbLevel-0)!0.5!(A\HoCardsNbLevel-\HoCardsNbLevel)$) node[below,font=\HoCardsFonteLeg] {$n = \HoCardsNbLevel$} ;
+        %\draw ($(A\HoCardsNbLevel-0)!0.5!(A\HoCardsNbLevel-\HoCardsNbLevel)$) node[below,font=\HoCardsFonteLeg] {$n = \HoCardsNbLevel$} ;
+        \draw ($0.5*(A\HoCardsNbLevel-0)+0.5*(A\HoCardsNbLevel-\HoCardsNbLevel)$) node[below,font=\HoCardsFonteLeg] {$n = \HoCardsNbLevel$} ;
       }{}%
   \end{tikzpicture}
 }
