@@ -1,0 +1,261 @@
+% pennstander-otf.sty
+% C. Pierquet 2025-2026
+% https://github.com/juliusross1/Pennstander SIL OPEN FONT LICENSE Version 1.1
+% https://etceteratype.co/pages/grandstander from Tyler Finck
+% Code inspired by fourier-otf.sty from D. Flipo
+% This file is distributed under the terms of the LaTeX Project Public
+% License from CTAN archives in directory  macros/latex/base/lppl.txt.
+% Either version 1.3 or, at your option, any later version.
+
+\ProvidesPackage{pennstander-otf}[2026/10/11 v0.5 Supports pennstander fonts for lualatex and xelatex (v0.5)] 
+
+\RequirePackage{iftex}
+\RequireTUTeX
+\RequirePackage{unicode-math}
+\newcommand\pennstanderbasefontsize{\strip@pt\fontdimen6\font}
+\newcommand\pennstanderscriptfontsize{\strip@pt\fontdimen6\scriptfont0}
+
+\newtoks\PSOTtoksT
+\newtoks\PSOTtoksM
+\newcommand*{\StorePS@KV@Option}[2]{%
+  \PSOTtoksM=\expandafter{\the\PSOTtoksM #1={#2},}
+  \def\PSOT@opt{#1}%
+  %specific options
+  \def\PSOT@scale{Scale}%
+  \def\PSOT@scalet{ScaleT}%
+  \def\PSOT@scalem{ScaleM}%
+  \def\PSOT@stylset{StylisticSet}%
+  \def\PSOT@stylsett{StylisticSetT}%
+  \def\PSOT@stylsetm{StylisticSetM}%
+  \def\PSOT@rawfeat{RawFeature}%
+  \def\PSOT@rawfeatt{RawFeatureT}%
+  \def\PSOT@rawfeatm{RawFeatureM}%
+  %scale specific option (global or indiv)
+  \ifx\PSOT@opt\PSOT@scale%
+    \PSOTtoksT=\expandafter{\the\PSOTtoksT Scale={#2},}%
+    \PSOTtoksM=\expandafter{\the\PSOTtoksM Scale={#2},}%
+  \else%
+    \ifx\PSOT@opt\PSOT@scalet%
+      \PSOTtoksT=\expandafter{\the\PSOTtoksT Scale={#2},}%
+    \fi%
+    \ifx\PSOT@opt\PSOT@scalem%
+      \PSOTtoksM=\expandafter{\the\PSOTtoksM Scale={#2},}%
+    \fi%
+  \fi%
+  %stylisticset specific option (global or indiv)
+  \ifx\PSOT@opt\PSOT@stylset%
+    \PSOTtoksT=\expandafter{\the\PSOTtoksT StylisticSet={#2},}%
+    \PSOTtoksM=\expandafter{\the\PSOTtoksM StylisticSet={#2},}%
+  \else%
+    \ifx\PSOT@opt\PSOT@stylsett%
+      \PSOTtoksT=\expandafter{\the\PSOTtoksT StylisticSet={#2},}%
+    \fi%
+    \ifx\PSOT@opt\PSOT@stylsetm%
+      \PSOTtoksM=\expandafter{\the\PSOTtoksM StylisticSet={#2},}%
+    \fi%
+  \fi%
+  %rawfeature specific option (global or indiv)
+  \ifx\PSOT@opt\PSOT@rawfeat%
+    \PSOTtoksT=\expandafter{\the\PSOTtoksT RawFeature={#2},}%
+    \PSOTtoksM=\expandafter{\the\PSOTtoksM RawFeature={#2},}%
+  \else%
+    \ifx\PSOT@opt\PSOT@rawfeatt%
+      \PSOTtoksT=\expandafter{\the\PSOTtoksT RawFeature={#2},}%
+    \fi
+    \ifx\PSOT@opt\PSOT@rawfeatm%
+      \PSOTtoksM=\expandafter{\the\PSOTtoksM RawFeature={#2},}%
+    \fi
+  \fi
+  }
+
+\def\PSOT@weight{}
+\def\PSOT@weightT{Regular}
+\def\PSOT@weightM{Regular}
+
+\DeclareKeys
+{
+  no-macros.if          = PSOT@nomacros                           ,
+  onlyconfig.if         = PSOT@onlyconfig                         ,
+  opsz.if               = PSOT@opsz                               ,
+  no-ssty.if            = PSOT@nossty                             ,
+  Weight.code           = \def\PSOT@weight{#1}                    ,% WeightGlobal: Thin, ExtraLight, Light, Regular, Medium, SemiBold, Bold, Extrabold, Black
+  WeightT.code          = \def\PSOT@weightT{#1}                   ,% Weight: Thin, ExtraLight, Light, Regular, Medium, SemiBold, Bold, Extrabold, Black
+  WeightM.code          = \def\PSOT@weightM{#1}                   ,% Weight: Thin, ExtraLight, Light, Regular, Medium, SemiBold, Bold, Extrabold, Black
+  no-text.if            = PSOT@notext                             ,
+  no-math.if            = PSOT@nomath                             ,
+  altfour.if            = PSOT@altfour                            ,
+  frenchseven.if        = PSOT@frenchseven                        ,
+  math-style.code       = \StorePS@KV@Option{math-style}{#1}      ,
+  bold-style.code       = \StorePS@KV@Option{bold-style}{#1}      ,
+  StylisticSet.code     = \StorePS@KV@Option{StylisticSet}{#1}    ,
+  StylisticSetT.code    = \StorePS@KV@Option{StylisticSetT}{#1}   ,
+  StylisticSetM.code    = \StorePS@KV@Option{StylisticSetM}{#1}   ,
+  RawFeature.code       = \StorePS@KV@Option{RawFeature}{#1}      ,
+  RawFeatureT.code      = \StorePS@KV@Option{RawFeatureT}{#1}     ,
+  RawFeatureM.code      = \StorePS@KV@Option{RawFeatureM}{#1}     ,
+  Scale.code            = \StorePS@KV@Option{Scale}{#1}           ,
+  ScaleT.code           = \StorePS@KV@Option{ScaleT}{#1}          ,
+  ScaleM.code           = \StorePS@KV@Option{ScaleM}{#1}
+}
+\ProcessKeyOptions
+
+%====global weight
+\ifx\PSOT@weight\empty
+\else
+  \def\PSOT@weightT{\PSOT@weight}
+  \def\PSOT@weightM{\PSOT@weight}
+\fi
+
+%====onlyconfig (for using fonstpec files only)
+\ifPSOT@onlyconfig%
+  \PSOT@nomacrostrue%
+  \PSOT@nomathtrue%
+  \PSOT@notexttrue%
+\fi
+
+%====if opsz := math then text
+\ifPSOT@opsz%VF.ttf
+  \ifPSOT@nomath
+  \else
+    \IfFontExistsTF{PennstanderMath-\PSOT@weightM}%
+    {%
+      \ifPSOT@altfour
+        \PSOTtoksM=\expandafter{\the\PSOTtoksM RawFeature={+ss04},}%
+      \fi
+      \ifPSOT@frenchseven
+        \PSOTtoksM=\expandafter{\the\PSOTtoksM RawFeature={+ss07},}%
+      \fi
+      \ifPSOT@nossty
+        \PSOTtoksM=\expandafter{\the\PSOTtoksM RawFeature={-ssty},}%
+      \fi
+      \begingroup
+        \edef\temp{%
+          \endgroup
+          \noexpand\setmathfont{PennstanderMath-\PSOT@weightM}[\unexpanded\expandafter{\the\PSOTtoksM}]%
+        }%
+      \temp
+    }%
+    {%
+      \PackageWarning{pennstander-otf}{Font 'PennstanderMath-\PSOT@weightM' not found}%
+    }%
+  \fi
+  \ifPSOT@notext
+  \else
+    \IfFontExistsTF{PennstanderVF}%
+      {%
+        \ifPSOT@altfour
+          \PSOTtoksT=\expandafter{\the\PSOTtoksT RawFeature={+ss04},}%
+        \fi
+        \ifPSOT@frenchseven
+          \PSOTtoksT=\expandafter{\the\PSOTtoksT RawFeature={+ss07},}%
+        \fi
+        \begingroup
+          \edef\temp{%
+          \endgroup
+          \noexpand\setmainfont{Pennstander-\PSOT@weightT-opsz}[\unexpanded\expandafter{\the\PSOTtoksT}]%
+          }%
+        \temp
+      }%
+      {%
+        \PackageWarning{pennstander-otf}{Font 'Pennstander-VF' not found}%
+      }%
+    \fi
+\else
+  \ifPSOT@notext
+  \else
+    \IfFontExistsTF{Pennstander-\PSOT@weightT}%
+      {%
+        \ifPSOT@altfour
+          \PSOTtoksT=\expandafter{\the\PSOTtoksT RawFeature={+ss04},}%
+        \fi
+        \ifPSOT@frenchseven
+          \PSOTtoksT=\expandafter{\the\PSOTtoksT RawFeature={+ss07},}%
+        \fi
+        \begingroup
+          \edef\temp{%
+          \endgroup
+          \noexpand\setmainfont{Pennstander-\PSOT@weightT}[\unexpanded\expandafter{\the\PSOTtoksT}]%
+          }%
+        \temp
+      }%
+      {%
+        \PackageWarning{pennstander-otf}{Font 'Pennstander-\PSOT@weightT' not found}%
+      }%
+  \fi
+  \ifPSOT@nomath
+  \else
+    \IfFontExistsTF{PennstanderMath-\PSOT@weightM}%
+    {%
+      \ifPSOT@altfour
+        \PSOTtoksM=\expandafter{\the\PSOTtoksM RawFeature={+ss04},}%
+      \fi
+      \ifPSOT@frenchseven
+        \PSOTtoksM=\expandafter{\the\PSOTtoksM RawFeature={+ss07},}%
+      \fi
+      \ifPSOT@nossty
+        \PSOTtoksM=\expandafter{\the\PSOTtoksM RawFeature={-ssty},}%
+      \fi
+      \begingroup
+        \edef\temp{%
+          \endgroup
+          \noexpand\setmathfont{PennstanderMath-\PSOT@weightM}[\unexpanded\expandafter{\the\PSOTtoksM}]%
+        }%
+      \temp
+    }%
+    {%
+      \PackageWarning{pennstander-otf}{Font 'PennstanderMath-\PSOT@weightM' not found}%
+    }%
+  \fi
+\fi
+
+\ifPSOT@onlyconfig%
+\else%
+  \ifPSOT@nomacros%
+  \else
+    %====fontfamily
+    \ifPSOT@opsz%
+      \newfontfamily\pennstanderthin{Pennstander-Thin-opsz}[Scale=MatchLowercase]%
+      \newfontfamily\pennstanderextralight{Pennstander-ExtraLight-opsz}[Scale=MatchLowercase]%
+      \newfontfamily\pennstanderlight{Pennstander-Light-opsz}[Scale=MatchLowercase]%
+      \newfontfamily\pennstander{Pennstander-Regular-opsz}[Scale=MatchLowercase]%
+      \newfontfamily\pennstandermedium{Pennstander-Medium-opsz}[Scale=MatchLowercase]%
+      \newfontfamily\pennstandersemibold{Pennstander-SemiBold-opsz}[Scale=MatchLowercase]%
+      \newfontfamily\pennstanderbold{Pennstander-Bold-opsz}[Scale=MatchLowercase]%
+      \newfontfamily\pennstanderextrabold{Pennstander-ExtraBold-opsz}[Scale=MatchLowercase]%
+      \newfontfamily\pennstanderblack{Pennstander-Black-opsz}[Scale=MatchLowercase]%
+    \else
+      \newfontfamily\pennstanderthin{Pennstander-Thin}[Scale=MatchLowercase]%
+      \newfontfamily\pennstanderextralight{Pennstander-ExtraLight}[Scale=MatchLowercase]%
+      \newfontfamily\pennstanderlight{Pennstander-Light}[Scale=MatchLowercase]%
+      \newfontfamily\pennstander{Pennstander-Regular}[Scale=MatchLowercase]%
+      \newfontfamily\pennstandermedium{Pennstander-Medium}[Scale=MatchLowercase]%
+      \newfontfamily\pennstandersemibold{Pennstander-SemiBold}[Scale=MatchLowercase]%
+      \newfontfamily\pennstanderbold{Pennstander-Bold}[Scale=MatchLowercase]%
+      \newfontfamily\pennstanderextrabold{Pennstander-ExtraBold}[Scale=MatchLowercase]%
+      \newfontfamily\pennstanderblack{Pennstander-Black}[Scale=MatchLowercase]%
+    \fi
+
+    %====mathfontface
+    \setmathfontface\pennstandermaththin{PennstanderMath-Thin}[Scale=MatchLowercase]%
+    \setmathfontface\pennstandermathextralight{PennstanderMath-ExtraLight}[Scale=MatchLowercase]%
+    \setmathfontface\pennstandermathlight{PennstanderMath-Light}[Scale=MatchLowercase]%
+    \setmathfontface\pennstandermath{PennstanderMath-Regular}[Scale=MatchLowercase]%
+    \setmathfontface\pennstandermathmedium{PennstanderMath-Medium}[Scale=MatchLowercase]%
+    \setmathfontface\pennstandermathsemibold{PennstanderMath-SemiBold}[Scale=MatchLowercase]%
+    \setmathfontface\pennstandermathbold{PennstanderMath-Bold}[Scale=MatchLowercase]%
+    \setmathfontface\pennstandermathextrabold{PennstanderMath-ExtraBold}[Scale=MatchLowercase]%
+    \setmathfontface\pennstandermathblack{PennstanderMath-Black}[Scale=MatchLowercase]%
+  \fi
+\fi
+%====default
+\defaultfontfeatures{}
+
+%====alt chars
+\AtBeginDocument{%
+  % pennstander specific math
+  % \Umathchardef\<cmd> = <math type> <family> <slot>
+  % <math type> : \mathord=0 \mathrel=3 ; <family>=0
+  \Umathchardef\eff =        0 0 "0192 \relax
+}
+
+\endinput

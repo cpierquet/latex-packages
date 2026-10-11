@@ -1,0 +1,37 @@
+%=== Regular (400) ===
+\defaultfontfeatures[Pennstander-Regular-opsz]
+{ Extension           = ttf,
+  UprightFont         = PennstanderVF.ttf,
+  ItalicFont          = PennstanderVF.ttf,
+  BoldFont            = PennstanderVF.ttf,
+  BoldItalicFont      = PennstanderVF.ttf,
+  Ligatures           = {Common,TeX},
+    UprightFeatures={
+    SizeFeatures = {
+    {Size=-\pennstanderscriptfontsize,RawAxis={wght=463}},
+    {Size=\pennstanderscriptfontsize-\pennstanderbasefontsize,RawAxis={wght=431}},
+    {Size=\pennstanderbasefontsize-,RawAxis={wght=400}}
+    }
+  },
+    BoldFeatures={
+    SizeFeatures = {
+    {Size=-\pennstanderscriptfontsize, RawAxis={wght=638}},
+    {Size=\pennstanderscriptfontsize-\pennstanderbasefontsize,RawAxis={wght=619}},
+    {Size=\pennstanderbasefontsize-,RawAxis={wght=600}}
+    }
+  },
+    ItalicFeatures={
+    SizeFeatures = {
+    {Size=-\pennstanderscriptfontsize,RawAxis={wght=463,ital=50}},
+    {Size=\pennstanderscriptfontsize-\pennstanderbasefontsize,RawAxis={wght=431,ital=50}},
+    {Size=\pennstanderbasefontsize-,RawAxis={wght=400,ital=50}}
+    }
+  }, 
+  BoldItalicFeatures={
+    SizeFeatures = {
+    {Size=-\pennstanderscriptfontsize,RawAxis={wght=638,ital=50}},
+    {Size=\pennstanderscriptfontsize-\pennstanderbasefontsize,RawAxis={wght=619,ital=50}},
+    {Size=\pennstanderbasefontsize-,RawAxis={wght=600,ital=50}}
+    }
+  }
+}

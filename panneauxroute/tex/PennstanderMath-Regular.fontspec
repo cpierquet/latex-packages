@@ -1,0 +1,5 @@
+\defaultfontfeatures[PennstanderMath-Regular]
+{
+  UprightFont  = PennstanderMath-Regular.otf,
+  BoldFont     = PennstanderMath-SemiBold.otf
+}

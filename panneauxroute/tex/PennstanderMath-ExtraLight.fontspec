@@ -1,0 +1,5 @@
+\defaultfontfeatures[PennstanderMath-ExtraLight]
+{
+  UprightFont  = PennstanderMath-ExtraLight.otf,
+  BoldFont     = PennstanderMath-Light.otf
+}

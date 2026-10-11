@@ -1,0 +1,9 @@
+\defaultfontfeatures[Pennstander-Thin]
+{
+  Extension           = .otf,
+  UprightFont         = Pennstander-Thin,
+  ItalicFont          = Pennstander-ItalicThin,
+  BoldFont            = Pennstander-Light,
+  BoldItalicFont      = Pennstander-ItalicLight,
+  Ligatures           = {Common,TeX}
+}

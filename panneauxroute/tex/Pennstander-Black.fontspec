@@ -1,0 +1,9 @@
+\defaultfontfeatures[Pennstander-Black]
+{
+  Extension           = .otf,
+  UprightFont         = Pennstander-Black,
+  ItalicFont          = Pennstander-ItalicBlack,
+  BoldFont            = Pennstander-Black,
+  BoldItalicFont      = Pennstander-ItalicBlack,
+  Ligatures           = {Common,TeX}
+}
