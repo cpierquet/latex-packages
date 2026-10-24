@@ -1,0 +1,691 @@
+% Author.............: C. Pierquet
+% licence............: Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+% help...............: Anthropic Claude AI, corrections manuelles
+
+\ProvidesExplPackage{ProfLycee-Arbres}{2026/10/23}{0.1.0}
+  {Arbres de probabilites avec moteur TikZ (syntaxe recursive)}
+
+\RequirePackage{tikz}
+
+%%--------------------------------------------------------------------
+%% Styles TikZ publics (modifiables par l'utilisateur avec \tikzset)
+%%--------------------------------------------------------------------
+\tikzset
+  {
+    %% styles francais : portent les valeurs par defaut
+    tkzArbreProbas~noeud/.style              = { } ,
+    tkzArbreProbas~feuille/.style            = { } ,
+    tkzArbreProbas~vide/.style               = { inner~sep = 0pt , outer~sep = 0pt , minimum~size = 0pt } ,
+    tkzArbreProbas~arete/.style              = { semithick } ,
+    tkzArbreProbas~proba/.style              = { font = \small , inner~sep = 2pt } ,
+    tkzArbreProbas~proba~dessus/.style       = { above = 1pt } ,
+    tkzArbreProbas~proba~dessous/.style      = { below = 1pt } ,
+    tkzArbreProbas~proba~sur/.style          = { fill = white } ,
+    tkzArbreProbas~surbrillance~arete/.style = { red , thick } ,
+    tkzArbreProbas~surbrillance~noeud/.style = { text = red } ,
+    tkzArbreProbas~resultat/.style           = { } ,
+    %% alias anglais : vides, appliques apres les styles francais
+    tkzProbaTree~node/.style                 = { } ,
+    tkzProbaTree~leaf/.style                 = { } ,
+    tkzProbaTree~empty/.style                = { } ,
+    tkzProbaTree~edge/.style                 = { } ,
+    tkzProbaTree~prob/.style                 = { } ,
+    tkzProbaTree~prob~above/.style           = { } ,
+    tkzProbaTree~prob~below/.style           = { } ,
+    tkzProbaTree~prob~on/.style              = { } ,
+    tkzProbaTree~hl~edge/.style              = { } ,
+    tkzProbaTree~hl~node/.style              = { } ,
+    tkzProbaTree~result/.style               = { } ,
+  }
+
+%%--------------------------------------------------------------------
+%% Variables
+%%--------------------------------------------------------------------
+\int_new:N  \g__tkzpt_n_int          % nombre de noeuds (hors racine)
+\int_new:N  \g__tkzpt_leaf_int       % compteur de feuilles
+\int_new:N  \g__tkzpt_maxdep_int     % profondeur maximale d'une feuille
+\int_new:N  \g__tkzpt_ref_int        % une feuille de profondeur maximale
+\int_new:N  \l__tkzpt_cur_int        % parent courant pendant le parsing
+\int_new:N  \l__tkzpt_id_int         % identifiant du noeud en cours de creation
+\int_new:N  \l__tkzpt_walk_int
+\int_new:N  \l__tkzpt_dir_int        % 1 = horizontal, 2 = vertical
+\int_new:N  \l__tkzpt_res_int        % 1 = rien, 2 = num, 3 = prod
+\int_new:N  \l__tkzpt_digits_int
+\box_new:N  \l__tkzpt_box
+\fp_new:N   \l__tkzpt_acc_fp
+\bool_new:N \l__tkzpt_known_bool
+\bool_new:N \l__tkzpt_paren_bool
+\bool_new:N \l__tkzpt_sloped_bool
+\bool_new:N \l__tkzpt_arrows_bool
+\bool_new:N \l__tkzpt_inline_bool
+\bool_new:N \l__tkzpt_align_bool
+\bool_new:N \l__tkzpt_k_hl_bool
+\dim_new:N  \l__tkzpt_ls_dim
+\dim_new:N  \l__tkzpt_cs_dim
+\dim_new:N  \l__tkzpt_rsep_dim
+\str_new:N  \l__tkzpt_tmp_str
+\cs_generate_variant:Nn \str_remove_all:Nn { NV }
+\tl_new:N   \l__tkzpt_coord_tl
+\tl_new:N   \l__tkzpt_tmp_tl
+\tl_new:N   \l__tkzpt_sty_tl
+\tl_new:N   \l__tkzpt_pos_tl
+\tl_new:N   \l__tkzpt_sym_tl
+\tl_new:N   \l__tkzpt_v_tl
+\tl_new:N   \l__tkzpt_p_tl
+\tl_new:N   \l__tkzpt_times_tl
+\tl_new:N   \l__tkzpt_restext_tl
+\tl_set:Nn   \l__tkzpt_times_tl { \times }
+\clist_new:N \l__tkzpt_lvlsty_clist
+\clist_new:N \l__tkzpt_elvlsty_clist
+
+%% champs temporaires pour les cles de branche
+\tl_new:N \l__tkzpt_k_p_tl
+\tl_new:N \l__tkzpt_k_v_tl
+\tl_new:N \l__tkzpt_k_name_tl
+\tl_new:N \l__tkzpt_k_style_tl
+\tl_new:N \l__tkzpt_k_edge_tl
+\tl_new:N \l__tkzpt_k_pos_tl
+
+%%--------------------------------------------------------------------
+%% Stockage des donnees : g__tkzpt_<champ>_<id>_tl
+%%--------------------------------------------------------------------
+\cs_new_protected:Npn \__tkzpt_gset:nnn #1#2#3
+  {
+    \tl_gclear_new:c { g__tkzpt_ #1 _ #2 _tl }
+    \tl_gset:cn { g__tkzpt_ #1 _ #2 _tl } {#3}
+  }
+\cs_generate_variant:Nn \__tkzpt_gset:nnn { nVn , nVx , nnx , nnV , nVV }
+
+\cs_new:Npn \__tkzpt_get:nn #1#2 { \tl_use:c { g__tkzpt_ #1 _ #2 _tl } }
+\cs_generate_variant:Nn \__tkzpt_get:nn { nV }
+
+\cs_new:Npn \__tkzpt_nch:n #1 { \clist_count:c { g__tkzpt_ch_ #1 _clist } }
+
+%% nom TikZ du noeud : <prefixe>-<chemin>
+\cs_new:Npn \__tkzpt_name:n #1 { \l__tkzpt_prefix_tl - \__tkzpt_get:nn { path } {#1} }
+\tl_new:N \l__tkzpt_prefix_tl
+
+%%--------------------------------------------------------------------
+%% Cles de l'arbre
+%%--------------------------------------------------------------------
+\tl_new:N \l__tkzpt_root_tl
+\tl_new:N \l__tkzpt_nstyle_tl
+\tl_new:N \l__tkzpt_lstyle_tl
+\tl_new:N \l__tkzpt_estyle_tl
+\tl_new:N \l__tkzpt_probstyle_tl
+\tl_new:N \l__tkzpt_probpos_tl
+\tl_new:N \l__tkzpt_probbg_tl
+\tl_new:N \l__tkzpt_hlstyle_tl
+\tl_new:N \l__tkzpt_hlnodestyle_tl
+\tl_new:N \l__tkzpt_resstyle_tl
+\tl_new:N \l__tkzpt_dec_tl
+\tl_new:N \l__tkzpt_tikz_tl
+
+\cs_new_protected:Npn \__tkzpt_resfmt:n #1 { \ensuremath {#1} }
+
+\keys_define:nn { tkzProbaTree }
+  {
+    level~sep      .dim_set:N = \l__tkzpt_ls_dim ,
+    level~sep      .initial:n = { 3cm } ,
+    leaf~sep       .dim_set:N = \l__tkzpt_cs_dim ,
+    leaf~sep       .initial:n = { 1cm } ,
+    direction      .choices:nn = { right , down , droite , bas }
+      { \int_set:Nn \l__tkzpt_dir_int { \int_mod:nn { \l_keys_choice_int + 1 } { 2 } + 1 } } ,
+    direction      .initial:n = { right } ,
+    root           .tl_set:N = \l__tkzpt_root_tl ,
+    node~style     .tl_set:N = \l__tkzpt_nstyle_tl ,
+    leaf~style     .tl_set:N = \l__tkzpt_lstyle_tl ,
+    edge~style     .tl_set:N = \l__tkzpt_estyle_tl ,
+    prob~style     .tl_set:N = \l__tkzpt_probstyle_tl ,
+    prob~pos       .tl_set:N = \l__tkzpt_probpos_tl ,
+    prob~pos       .initial:n = { auto } ,
+    sloped         .bool_set:N = \l__tkzpt_sloped_bool ,
+    sloped         .initial:n = { true } ,
+    arrows         .bool_set:N = \l__tkzpt_arrows_bool ,
+    level~styles   .clist_set:N = \l__tkzpt_lvlsty_clist ,
+    edge~level~styles .clist_set:N = \l__tkzpt_elvlsty_clist ,
+    hl~style       .tl_set:N = \l__tkzpt_hlstyle_tl ,
+    hl~node~style  .tl_set:N = \l__tkzpt_hlnodestyle_tl ,
+    results        .choices:nn = { false , num , prod }
+      { \int_set_eq:NN \l__tkzpt_res_int \l_keys_choice_int } ,
+    results        .default:n = { num } ,
+    results        .initial:n = { false } ,
+    result~style   .tl_set:N = \l__tkzpt_resstyle_tl ,
+    result~sep     .dim_set:N = \l__tkzpt_rsep_dim ,
+    result~sep     .initial:n = { 4mm } ,
+    result~format  .code:n = { \cs_set:Npn \__tkzpt_resfmt:n ##1 {#1} } ,
+    align~results  .bool_set:N = \l__tkzpt_align_bool ,
+    align~results  .initial:n = { true } ,
+    digits         .int_set:N = \l__tkzpt_digits_int ,
+    digits         .initial:n = { 3 } ,
+    decimal~sep    .tl_set:N = \l__tkzpt_dec_tl ,
+    decimal~sep    .initial:n = { {,} } ,
+    name~prefix    .tl_set:N = \l__tkzpt_prefix_tl ,
+    name~prefix    .initial:n = { tkzPT } ,
+    tikz           .tl_set:N = \l__tkzpt_tikz_tl ,
+    inline         .bool_set:N = \l__tkzpt_inline_bool ,
+    %% alias francais
+    espace~niveaux .meta:n = { level~sep = {#1} } ,
+    espace~feuilles .meta:n = { leaf~sep = {#1} } ,
+    racine         .meta:n = { root = {#1} } ,
+    style~noeuds   .meta:n = { node~style = {#1} } ,
+    style~feuilles .meta:n = { leaf~style = {#1} } ,
+    style~aretes   .meta:n = { edge~style = {#1} } ,
+    style~probas   .meta:n = { prob~style = {#1} } ,
+    position~probas .meta:n = { prob~pos = {#1} } ,
+    incline        .meta:n = { sloped = {#1} } ,
+    fleches        .meta:n = { arrows = {#1} } ,
+    style~surbrillance .meta:n = { hl~style = {#1} } ,
+    resultats      .meta:n = { results = {#1} } ,
+    resultats      .default:n = { num } ,
+    style~resultats .meta:n = { result~style = {#1} } ,
+    format~resultats .meta:n = { result~format = {#1} } ,
+    chiffres       .meta:n = { digits = {#1} } ,
+    separateur~decimal .meta:n = { decimal~sep = {#1} } ,
+    prefixe        .meta:n = { name~prefix = {#1} } ,
+    styles~niveaux .meta:n = { level~styles = {#1} } ,
+    styles~aretes~niveaux .meta:n = { edge~level~styles = {#1} } ,
+    style~surbrillance~noeud .meta:n = { hl~node~style = {#1} } ,
+    alignement~resultats .meta:n = { align~results = {#1} } ,
+    separateur~resultats .meta:n = { result~sep = {#1} } ,
+    sans~environnement .meta:n = { inline = {#1} } ,
+    incline        .default:n = { true } ,
+    fleches        .default:n = { true } ,
+    sans~environnement .default:n = { true } ,
+  }
+
+%% cles d'une branche
+\keys_define:nn { tkzProbaTree / branch }
+  {
+    p      .tl_set:N   = \l__tkzpt_k_p_tl ,
+    v      .tl_set:N   = \l__tkzpt_k_v_tl ,
+    name   .tl_set:N   = \l__tkzpt_k_name_tl ,
+    style  .tl_set:N   = \l__tkzpt_k_style_tl ,
+    edge   .tl_set:N   = \l__tkzpt_k_edge_tl ,
+    pos    .tl_set:N   = \l__tkzpt_k_pos_tl ,
+    hl     .bool_set:N = \l__tkzpt_k_hl_bool ,
+    hl     .default:n  = { true } ,
+    proba  .meta:n = { p = {#1} } ,
+    valeur .meta:n = { v = {#1} } ,
+    nom    .meta:n = { name = {#1} } ,
+    arete  .meta:n = { edge = {#1} } ,
+    position .meta:n = { pos = {#1} } ,
+    surbrillance .meta:n = { hl = {#1} } ,
+    surbrillance .default:n = { true } ,
+  }
+
+%%--------------------------------------------------------------------
+%% Valeur numerique deduite de la proba affichee (0{,}3 ; 0.3 ; 1/3)
+%%--------------------------------------------------------------------
+\cs_new_protected:Npn \__tkzpt_derive_v:
+  {
+    \tl_if_empty:NT \l__tkzpt_k_v_tl
+      {
+        \tl_if_empty:NF \l__tkzpt_k_p_tl
+          {
+            \tl_set_eq:NN \l__tkzpt_tmp_tl \l__tkzpt_k_p_tl
+            %% on nettoie l'etiquette saisie par l'utilisateur : $ , \num, \frac, {,}
+            \regex_replace_all:nnN { \cM\$ } { } \l__tkzpt_tmp_tl
+            \regex_replace_all:nnN
+              { \c{[dt]?frac} \cB\{ (.*?) \cE\} \cB\{ (.*?) \cE\} } { (\1)/(\2) }
+              \l__tkzpt_tmp_tl
+            \regex_replace_all:nnN { \c{num} } { } \l__tkzpt_tmp_tl
+            \str_set:Nx \l__tkzpt_tmp_str { \tl_to_str:N \l__tkzpt_tmp_tl }
+            \str_remove_all:NV \l__tkzpt_tmp_str \c_left_brace_str
+            \str_remove_all:NV \l__tkzpt_tmp_str \c_right_brace_str
+            \str_replace_all:Nnn \l__tkzpt_tmp_str { , } { . }
+            \regex_match:nVT { \A [ 0-9 . / * + ( ) \- \ ]+ \Z } \l__tkzpt_tmp_str
+              { \tl_set_eq:NN \l__tkzpt_k_v_tl \l__tkzpt_tmp_str }
+          }
+      }
+  }
+
+%%--------------------------------------------------------------------
+%% Parsing : \tkzProbaTreeBranch(*)[opts]{label}{enfants}
+%%--------------------------------------------------------------------
+\NewDocumentCommand \tkzProbaTreeBranch { s O{} m }
+  {
+    \IfBooleanTF {#1}
+      { \__tkzpt_peek_children:nnn { 1 } {#2} {#3} }
+      { \__tkzpt_peek_children:nnn { 0 } {#2} {#3} }
+  }
+\cs_new_protected:Npn \__tkzpt_peek_children:nnn #1#2#3
+  {
+    \peek_charcode_ignore_spaces:NTF \c_group_begin_token
+      { \__tkzpt_branch:nnnn {#1} {#2} {#3} }
+      { \__tkzpt_branch:nnnn {#1} {#2} {#3} { } }
+  }
+
+\cs_new_protected:Npn \__tkzpt_branch:nnnn #1#2#3#4
+  {
+    \group_begin:
+      \int_gincr:N \g__tkzpt_n_int
+      \int_set_eq:NN \l__tkzpt_id_int \g__tkzpt_n_int
+      \tl_clear:N \l__tkzpt_k_p_tl
+      \tl_clear:N \l__tkzpt_k_v_tl
+      \tl_clear:N \l__tkzpt_k_name_tl
+      \tl_clear:N \l__tkzpt_k_style_tl
+      \tl_clear:N \l__tkzpt_k_edge_tl
+      \tl_clear:N \l__tkzpt_k_pos_tl
+      \bool_set_false:N \l__tkzpt_k_hl_bool
+      \tl_if_in:nnTF {#2} { = }
+        { \keys_set:nn { tkzProbaTree / branch } {#2} }
+        { \tl_set:Nn \l__tkzpt_k_p_tl {#2} }
+      \__tkzpt_derive_v:
+      \int_compare:nNnT {#1} = { 1 } { \bool_set_true:N \l__tkzpt_k_hl_bool }
+      %% enregistrement
+      \__tkzpt_gset:nVx { par }  \l__tkzpt_id_int { \int_use:N \l__tkzpt_cur_int }
+      \__tkzpt_gset:nVx { dep }  \l__tkzpt_id_int
+        { \int_eval:n { \__tkzpt_get:nV { dep } \l__tkzpt_cur_int + 1 } }
+      \__tkzpt_gset:nVx { path } \l__tkzpt_id_int
+        {
+          \int_compare:nNnF { \l__tkzpt_cur_int } = { 0 }
+            { \__tkzpt_get:nV { path } \l__tkzpt_cur_int - }
+          \int_eval:n { \__tkzpt_nch:n { \int_use:N \l__tkzpt_cur_int } + 1 }
+        }
+      \__tkzpt_gset:nVn { lab }  \l__tkzpt_id_int {#3}
+      \__tkzpt_gset:nVn { alias } \l__tkzpt_id_int { }
+      \__tkzpt_gset:nVV { p }    \l__tkzpt_id_int \l__tkzpt_k_p_tl
+      \tl_set_eq:NN \l__tkzpt_tmp_tl \l__tkzpt_k_p_tl
+      \regex_replace_all:nnN { \cM\$ } { } \l__tkzpt_tmp_tl
+      \__tkzpt_gset:nVV { psym } \l__tkzpt_id_int \l__tkzpt_tmp_tl
+      \__tkzpt_gset:nVV { v }    \l__tkzpt_id_int \l__tkzpt_k_v_tl
+      \__tkzpt_gset:nVV { sty }  \l__tkzpt_id_int \l__tkzpt_k_style_tl
+      \__tkzpt_gset:nVV { esty } \l__tkzpt_id_int \l__tkzpt_k_edge_tl
+      \__tkzpt_gset:nVV { pos }  \l__tkzpt_id_int \l__tkzpt_k_pos_tl
+      \bool_if:NTF \l__tkzpt_k_hl_bool
+        {
+          \__tkzpt_gset:nVn { hl } \l__tkzpt_id_int { 1 }
+          \__tkzpt_gset:nVn { hn } \l__tkzpt_id_int { 1 }
+        }
+        {
+          \__tkzpt_gset:nVn { hl } \l__tkzpt_id_int { 0 }
+          \__tkzpt_gset:nVn { hn } \l__tkzpt_id_int { 0 }
+        }
+      \clist_gclear_new:c { g__tkzpt_ch_ \int_use:N \l__tkzpt_id_int _clist }
+      \clist_gput_right:cx { g__tkzpt_ch_ \int_use:N \l__tkzpt_cur_int _clist }
+        { \int_use:N \l__tkzpt_id_int }
+      %% nom personnalise (alias TikZ) : enregistre pour plus tard
+      \tl_if_empty:NF \l__tkzpt_k_name_tl
+        { \__tkzpt_gset:nVV { alias } \l__tkzpt_id_int \l__tkzpt_k_name_tl }
+      %% enfants
+      \int_set_eq:NN \l__tkzpt_cur_int \l__tkzpt_id_int
+      #4
+    \group_end:
+  }
+
+%%--------------------------------------------------------------------
+%% Placement : feuilles equi-reparties, parents centrés sur les enfants
+%%--------------------------------------------------------------------
+\cs_new_protected:Npn \__tkzpt_layout_leaf:n #1
+  {
+    \int_compare:nNnT { \__tkzpt_nch:n {#1} } = { 0 }
+      {
+        \__tkzpt_gset:nnx { q } {#1} { \int_use:N \g__tkzpt_leaf_int }
+        \int_gincr:N \g__tkzpt_leaf_int
+        \int_compare:nNnT { \__tkzpt_get:nn { dep } {#1} } > { \g__tkzpt_maxdep_int }
+          {
+            \int_gset:Nn \g__tkzpt_maxdep_int { \__tkzpt_get:nn { dep } {#1} }
+            \int_gset:Nn \g__tkzpt_ref_int {#1}
+          }
+      }
+  }
+
+\cs_new_protected:Npn \__tkzpt_layout_inner:n #1
+  {
+    \int_compare:nNnF { \__tkzpt_nch:n {#1} } = { 0 }
+      {
+        \__tkzpt_gset:nnx { q } {#1}
+          {
+            \fp_eval:n
+              {
+                (
+                  \__tkzpt_get:nn { q } { \clist_item:cn { g__tkzpt_ch_ #1 _clist } { 1 } }
+                  +
+                  \__tkzpt_get:nn { q } { \clist_item:cn { g__tkzpt_ch_ #1 _clist } { -1 } }
+                ) / 2
+              }
+          }
+      }
+  }
+
+%% propagation de la surbrillance vers la racine
+\cs_new_protected:Npn \__tkzpt_hl_prop:n #1
+  {
+    \str_if_eq:eeT { \__tkzpt_get:nn { hl } {#1} } { 1 }
+      { \__tkzpt_gset:nxn { hl } { \__tkzpt_get:nn { par } {#1} } { 1 } }
+  }
+\cs_generate_variant:Nn \__tkzpt_gset:nnn { nxn }
+
+\cs_new_protected:Npn \__tkzpt_layout:
+  {
+    \int_gzero:N \g__tkzpt_leaf_int
+    \int_gzero:N \g__tkzpt_maxdep_int
+    \int_gzero:N \g__tkzpt_ref_int
+    \int_step_function:nnnN { 1 } { 1 } { \g__tkzpt_n_int } \__tkzpt_layout_leaf:n
+    \int_step_function:nnnN { \g__tkzpt_n_int } { -1 } { 0 } \__tkzpt_layout_inner:n
+    \int_step_function:nnnN { \g__tkzpt_n_int } { -1 } { 1 } \__tkzpt_hl_prop:n
+  }
+
+%%--------------------------------------------------------------------
+%% Dessin
+%%--------------------------------------------------------------------
+\cs_new_protected:Npn \__tkzpt_node_coord:n #1
+  {
+    \int_compare:nNnTF { \l__tkzpt_dir_int } = { 1 }
+      {
+        \tl_set:Nx \l__tkzpt_coord_tl
+          {
+            \fp_to_dim:n { \__tkzpt_get:nn { dep } {#1} * \dim_to_fp:n { \l__tkzpt_ls_dim } } ,
+            \fp_to_dim:n { - \__tkzpt_get:nn { q } {#1} * \dim_to_fp:n { \l__tkzpt_cs_dim } }
+          }
+      }
+      {
+        \tl_set:Nx \l__tkzpt_coord_tl
+          {
+            \fp_to_dim:n { \__tkzpt_get:nn { q } {#1} * \dim_to_fp:n { \l__tkzpt_cs_dim } } ,
+            \fp_to_dim:n { - \__tkzpt_get:nn { dep } {#1} * \dim_to_fp:n { \l__tkzpt_ls_dim } }
+          }
+      }
+  }
+
+%% style de niveau (item de la clist selon la profondeur)
+\cs_new_protected:Npn \__tkzpt_level_style:Nn #1#2
+  {
+    \tl_clear:N \l__tkzpt_sty_tl
+    \int_compare:nNnT { \clist_count:N #1 } > { 0 }
+      { \tl_set:Nf \l__tkzpt_sty_tl { \clist_item:Nn #1 { \__tkzpt_get:nn { dep } {#2} } } }
+  }
+
+\tl_new:N \l__tkzpt_opts_tl
+\tl_new:N \l__tkzpt_lopts_tl
+\tl_new:N \l__tkzpt_nm_tl
+\tl_new:N \l__tkzpt_pnm_tl
+\tl_new:N \l__tkzpt_rnm_tl
+
+%% commandes TikZ : les listes d'options sont passees par expansion (V)
+\cs_new_protected:Npn \__tkzpt_node_cmd:nn #1#2
+  { \node [#1] ( \l__tkzpt_nm_tl ) at ( \l__tkzpt_coord_tl ) {#2} ; }
+\cs_generate_variant:Nn \__tkzpt_node_cmd:nn { Vv }
+
+\cs_new_protected:Npn \__tkzpt_edge_cmd:n #1
+  { \draw [#1] ( \l__tkzpt_pnm_tl ) -- ( \l__tkzpt_nm_tl ) ; }
+\cs_generate_variant:Nn \__tkzpt_edge_cmd:n { V }
+
+\cs_new_protected:Npn \__tkzpt_edge_cmd:nnn #1#2#3
+  {
+    \draw [#1] ( \l__tkzpt_pnm_tl ) -- ( \l__tkzpt_nm_tl )
+      node [#2] {#3} ;
+  }
+\cs_generate_variant:Nn \__tkzpt_edge_cmd:nnn { VVv }
+
+\cs_new_protected:Npn \__tkzpt_draw_node:n #1
+  {
+    \__tkzpt_node_coord:n {#1}
+    \tl_set:Nx \l__tkzpt_nm_tl { \__tkzpt_name:n {#1} }
+    \tl_if_empty:cTF { g__tkzpt_lab_ #1 _tl }
+      {
+        \tl_set:Nn \l__tkzpt_opts_tl { tkzArbreProbas~vide , tkzProbaTree~empty }
+      }
+      {
+        \__tkzpt_level_style:Nn \l__tkzpt_lvlsty_clist {#1}
+        \tl_set:Nn \l__tkzpt_opts_tl { tkzArbreProbas~noeud , tkzProbaTree~node , }
+        \tl_put_right:NV \l__tkzpt_opts_tl \l__tkzpt_nstyle_tl
+        \tl_put_right:Nn \l__tkzpt_opts_tl { , }
+        \int_compare:nNnT { \__tkzpt_nch:n {#1} } = { 0 }
+          {
+            \tl_put_right:Nn \l__tkzpt_opts_tl { tkzArbreProbas~feuille , tkzProbaTree~leaf , }
+            \tl_put_right:NV \l__tkzpt_opts_tl \l__tkzpt_lstyle_tl
+            \tl_put_right:Nn \l__tkzpt_opts_tl { , }
+          }
+        \tl_put_right:NV \l__tkzpt_opts_tl \l__tkzpt_sty_tl
+        \tl_put_right:Nn \l__tkzpt_opts_tl { , }
+        \tl_put_right:Nv \l__tkzpt_opts_tl { g__tkzpt_sty_ #1 _tl }
+        \str_if_eq:eeT { \__tkzpt_get:nn { hn } {#1} } { 1 }
+          {
+            \tl_put_right:Nn \l__tkzpt_opts_tl { , tkzArbreProbas~surbrillance~noeud , tkzProbaTree~hl~node , }
+            \tl_put_right:NV \l__tkzpt_opts_tl \l__tkzpt_hlnodestyle_tl
+          }
+      }
+    \__tkzpt_node_cmd:Vv \l__tkzpt_opts_tl { g__tkzpt_lab_ #1 _tl }
+    \tl_if_empty:cF { g__tkzpt_alias_ #1 _tl }
+      { \pgfnodealias { \tl_use:c { g__tkzpt_alias_ #1 _tl } } { \l__tkzpt_nm_tl } }
+  }
+
+%% position de l'etiquette d'une branche
+\cs_new_protected:Npn \__tkzpt_edge_pos:n #1
+  {
+    \tl_set_eq:Nc \l__tkzpt_pos_tl { g__tkzpt_pos_ #1 _tl }
+    \tl_if_empty:NT \l__tkzpt_pos_tl { \tl_set_eq:NN \l__tkzpt_pos_tl \l__tkzpt_probpos_tl }
+    \str_case:Vn \l__tkzpt_pos_tl
+      {
+        { dessus }  { \tl_set:Nn \l__tkzpt_pos_tl { above } }
+        { dessous } { \tl_set:Nn \l__tkzpt_pos_tl { below } }
+        { sur }     { \tl_set:Nn \l__tkzpt_pos_tl { on } }
+      }
+    \str_if_eq:VnT \l__tkzpt_pos_tl { auto }
+      {
+        \fp_compare:nNnTF
+          { \__tkzpt_get:nn { q } {#1} } < { \__tkzpt_get:nn { q } { \__tkzpt_get:nn { par } {#1} } }
+          { \tl_set:Nn \l__tkzpt_pos_tl { above } }
+          {
+            \fp_compare:nNnTF
+              { \__tkzpt_get:nn { q } {#1} } > { \__tkzpt_get:nn { q } { \__tkzpt_get:nn { par } {#1} } }
+              { \tl_set:Nn \l__tkzpt_pos_tl { below } }
+              { \tl_set:Nn \l__tkzpt_pos_tl { on } }
+          }
+      }
+    \str_case:Vn \l__tkzpt_pos_tl
+      {
+        { above } { \tl_set:Nn \l__tkzpt_pos_tl { tkzArbreProbas~proba~dessus , tkzProbaTree~prob~above } }
+        { below } { \tl_set:Nn \l__tkzpt_pos_tl { tkzArbreProbas~proba~dessous , tkzProbaTree~prob~below } }
+        { on }    { \tl_set:Nn \l__tkzpt_pos_tl { tkzArbreProbas~proba~sur , tkzProbaTree~prob~on } }
+      }
+  }
+
+\cs_new_protected:Npn \__tkzpt_draw_edge:n #1
+  {
+    \tl_set:Nx \l__tkzpt_nm_tl  { \__tkzpt_name:n {#1} }
+    \tl_set:Nx \l__tkzpt_pnm_tl { \__tkzpt_name:n { \__tkzpt_get:nn { par } {#1} } }
+    \__tkzpt_level_style:Nn \l__tkzpt_elvlsty_clist {#1}
+    \tl_set:Nn \l__tkzpt_opts_tl { tkzArbreProbas~arete , tkzProbaTree~edge , }
+    \tl_put_right:NV \l__tkzpt_opts_tl \l__tkzpt_estyle_tl
+    \bool_if:NT \l__tkzpt_arrows_bool
+      { \tl_put_right:Nn \l__tkzpt_opts_tl { , -> , >=latex } }
+    \tl_put_right:Nn \l__tkzpt_opts_tl { , }
+    \tl_put_right:NV \l__tkzpt_opts_tl \l__tkzpt_sty_tl
+    \tl_put_right:Nn \l__tkzpt_opts_tl { , }
+    \tl_put_right:Nv \l__tkzpt_opts_tl { g__tkzpt_esty_ #1 _tl }
+    \str_if_eq:eeT { \__tkzpt_get:nn { hl } {#1} } { 1 }
+      {
+        \tl_put_right:Nn \l__tkzpt_opts_tl { , tkzArbreProbas~surbrillance~arete , tkzProbaTree~hl~edge , }
+        \tl_put_right:NV \l__tkzpt_opts_tl \l__tkzpt_hlstyle_tl
+      }
+    \tl_if_empty:cTF { g__tkzpt_p_ #1 _tl }
+      { \__tkzpt_edge_cmd:V \l__tkzpt_opts_tl }
+      {
+        \__tkzpt_edge_pos:n {#1}
+        \tl_set:Nn \l__tkzpt_lopts_tl { midway , tkzArbreProbas~proba , tkzProbaTree~prob , }
+        \bool_if:NT \l__tkzpt_sloped_bool
+          { \tl_put_right:Nn \l__tkzpt_lopts_tl { sloped , } }
+        \tl_put_right:NV \l__tkzpt_lopts_tl \l__tkzpt_pos_tl
+        \tl_put_right:Nn \l__tkzpt_lopts_tl { , }
+        \tl_put_right:NV \l__tkzpt_lopts_tl \l__tkzpt_probstyle_tl
+        \__tkzpt_edge_cmd:VVv \l__tkzpt_opts_tl \l__tkzpt_lopts_tl { g__tkzpt_p_ #1 _tl }
+      }
+  }
+
+%%--------------------------------------------------------------------
+%% Resultats : produit des probas le long du chemin
+%%--------------------------------------------------------------------
+\cs_new_protected:Npn \__tkzpt_path_info:n #1
+  {
+    \fp_set:Nn \l__tkzpt_acc_fp { 1 }
+    \tl_clear:N \l__tkzpt_sym_tl
+    \bool_set_true:N \l__tkzpt_known_bool
+    \int_set:Nn \l__tkzpt_walk_int {#1}
+    \int_while_do:nNnn { \l__tkzpt_walk_int } > { 0 }
+      {
+        \tl_set_eq:Nc \l__tkzpt_v_tl { g__tkzpt_v_ \int_use:N \l__tkzpt_walk_int _tl }
+        \tl_set_eq:Nc \l__tkzpt_p_tl { g__tkzpt_psym_ \int_use:N \l__tkzpt_walk_int _tl }
+        \tl_if_empty:NTF \l__tkzpt_v_tl
+          { \bool_set_false:N \l__tkzpt_known_bool }
+          { \fp_set:Nn \l__tkzpt_acc_fp { \l__tkzpt_acc_fp * ( \l__tkzpt_v_tl ) } }
+        \tl_if_empty:NF \l__tkzpt_p_tl
+          {
+            \tl_if_empty:NF \l__tkzpt_sym_tl
+              { \tl_put_left:NV \l__tkzpt_sym_tl \l__tkzpt_times_tl }
+            %% parentheses autour d'une proba composee (1-p, a+b...)
+            \bool_set_false:N \l__tkzpt_paren_bool
+            \tl_if_in:NnT \l__tkzpt_p_tl { - } { \bool_set_true:N \l__tkzpt_paren_bool }
+            \tl_if_in:NnT \l__tkzpt_p_tl { + } { \bool_set_true:N \l__tkzpt_paren_bool }
+            \bool_if:NT \l__tkzpt_paren_bool
+              {
+                \tl_put_left:Nn \l__tkzpt_p_tl { ( }
+                \tl_put_right:Nn \l__tkzpt_p_tl { ) }
+              }
+            \tl_put_left:NV \l__tkzpt_sym_tl \l__tkzpt_p_tl
+          }
+        \int_set:Nn \l__tkzpt_walk_int { \__tkzpt_get:nV { par } \l__tkzpt_walk_int }
+      }
+  }
+
+\cs_new_protected:Npn \__tkzpt_result_node:nn #1#2
+  { \node [#1] at ( #2 ) { \exp_args:NV \__tkzpt_resfmt:n \l__tkzpt_restext_tl } ; }
+\cs_generate_variant:Nn \__tkzpt_result_node:nn { Vx }
+
+\cs_new_protected:Npn \__tkzpt_draw_result:n #1
+  {
+    \int_compare:nNnT { \__tkzpt_nch:n {#1} } = { 0 }
+      {
+        \__tkzpt_path_info:n {#1}
+        \int_compare:nNnTF { \l__tkzpt_res_int } = { 2 }
+          {
+            \bool_if:NTF \l__tkzpt_known_bool
+              {
+                \tl_set:Nx \l__tkzpt_restext_tl
+                  { \fp_to_decimal:n { round ( \l__tkzpt_acc_fp , \l__tkzpt_digits_int ) } }
+                \tl_replace_once:NnV \l__tkzpt_restext_tl { . } \l__tkzpt_dec_tl
+              }
+              { \tl_set_eq:NN \l__tkzpt_restext_tl \l__tkzpt_sym_tl }
+          }
+          { \tl_set_eq:NN \l__tkzpt_restext_tl \l__tkzpt_sym_tl }
+        \tl_set:Nx \l__tkzpt_nm_tl  { \__tkzpt_name:n {#1} }
+        \tl_set:Nx \l__tkzpt_rnm_tl { \__tkzpt_name:n { \int_use:N \g__tkzpt_ref_int } }
+        \int_compare:nNnTF { \l__tkzpt_dir_int } = { 1 }
+          {
+            \tl_set:Nn \l__tkzpt_opts_tl { anchor = west , xshift = \l__tkzpt_rsep_dim , tkzArbreProbas~resultat , tkzProbaTree~result , }
+            \tl_put_right:NV \l__tkzpt_opts_tl \l__tkzpt_resstyle_tl
+            \bool_if:NTF \l__tkzpt_align_bool
+              { \__tkzpt_result_node:Vx \l__tkzpt_opts_tl { \l__tkzpt_rnm_tl .east ~ |- ~ \l__tkzpt_nm_tl .center } }
+              { \__tkzpt_result_node:Vx \l__tkzpt_opts_tl { \l__tkzpt_nm_tl .east } }
+          }
+          {
+            \tl_set:Nn \l__tkzpt_opts_tl { anchor = north , yshift = - \l__tkzpt_rsep_dim , tkzArbreProbas~resultat , tkzProbaTree~result , }
+            \tl_put_right:NV \l__tkzpt_opts_tl \l__tkzpt_resstyle_tl
+            \bool_if:NTF \l__tkzpt_align_bool
+              { \__tkzpt_result_node:Vx \l__tkzpt_opts_tl { \l__tkzpt_nm_tl .center ~ |- ~ \l__tkzpt_rnm_tl .south } }
+              { \__tkzpt_result_node:Vx \l__tkzpt_opts_tl { \l__tkzpt_nm_tl .south } }
+          }
+      }
+  }
+
+\cs_new_protected:Npn \__tkzpt_draw_body:
+  {
+    \int_step_function:nnnN { 0 } { 1 } { \g__tkzpt_n_int } \__tkzpt_draw_node:n
+    \int_step_function:nnnN { 1 } { 1 } { \g__tkzpt_n_int } \__tkzpt_draw_edge:n
+    \int_compare:nNnF { \l__tkzpt_res_int } = { 1 }
+      { \int_step_function:nnnN { 1 } { 1 } { \g__tkzpt_n_int } \__tkzpt_draw_result:n }
+  }
+
+\cs_new_protected:Npn \__tkzpt_draw:
+  {
+    \bool_if:NTF \l__tkzpt_inline_bool
+      {
+        \begin{scope} [ \l__tkzpt_tikz_tl ]
+          \__tkzpt_draw_body:
+        \end{scope}
+      }
+      {
+        \begin{tikzpicture} [ \l__tkzpt_tikz_tl ]
+          \__tkzpt_draw_body:
+        \end{tikzpicture}
+      }
+  }
+
+%%--------------------------------------------------------------------
+%% Interface
+%%   \begin{tkzProbaTree}[opts] ... \end{tkzProbaTree}
+%%   \tkzProbaTree[opts]{ ... }
+%%   \tkzProbaTreeSetup{opts}   (reglages par defaut, locaux au gpe)
+%%--------------------------------------------------------------------
+\cs_new_protected:Npn \__tkzpt_run:nn #1#2
+  {
+    \group_begin:
+      \keys_set:nn { tkzProbaTree } {#1}
+      \int_gzero:N \g__tkzpt_n_int
+      \int_set:Nn \l__tkzpt_cur_int { 0 }
+      %% racine
+      \__tkzpt_gset:nnn { par }   { 0 } { 0 }
+      \__tkzpt_gset:nnn { dep }   { 0 } { 0 }
+      \__tkzpt_gset:nnn { path }  { 0 } { 0 }
+      \__tkzpt_gset:nnV { lab }   { 0 } \l__tkzpt_root_tl
+      \__tkzpt_gset:nnn { p }     { 0 } { }
+      \__tkzpt_gset:nnn { psym }  { 0 } { }
+      \__tkzpt_gset:nnn { v }     { 0 } { }
+      \__tkzpt_gset:nnn { sty }   { 0 } { }
+      \__tkzpt_gset:nnn { esty }  { 0 } { }
+      \__tkzpt_gset:nnn { pos }   { 0 } { }
+      \__tkzpt_gset:nnn { hl }    { 0 } { 0 }
+      \__tkzpt_gset:nnn { hn }    { 0 } { 0 }
+      \__tkzpt_gset:nnn { alias } { 0 } { }
+      \clist_gclear_new:c { g__tkzpt_ch_0_clist }
+      %% lecture du corps (dans une boite pour neutraliser les espaces)
+      \hbox_set:Nn \l__tkzpt_box {#2}
+      \__tkzpt_layout:
+      \__tkzpt_draw:
+    \group_end:
+  }
+
+%% \tkzProbaTree sert a la fois de macro (corps entre accolades)
+%% et de debut d'environnement (corps lu jusqu'a \end{tkzProbaTree})
+\NewDocumentCommand \tkzProbaTree { O{} }
+  {
+    \peek_charcode_ignore_spaces:NTF \c_group_begin_token
+      { \__tkzpt_cmd:nn {#1} }
+      { \__tkzpt_env:nnw {#1} { } }
+  }
+\cs_new_protected:Npn \__tkzpt_cmd:nn #1#2 { \__tkzpt_run:nn {#1} {#2} }
+\clist_new:N \g__tkzpt_envnames_clist
+\clist_gput_right:Nn \g__tkzpt_envnames_clist { tkzProbaTree }
+\cs_new_protected:Npn \__tkzpt_env:nnw #1#2#3 \end #4
+  {
+    \clist_if_in:NnTF \g__tkzpt_envnames_clist {#4}
+      { \__tkzpt_run:nn {#1} { #2 #3 } \end {#4} }
+      { \__tkzpt_env:nnw {#1} { #2 #3 \end {#4} } }
+  }
+\cs_new_protected:Npn \endtkzProbaTree { }
+
+\NewDocumentCommand \tkzProbaTreeSetup { m }
+  { \keys_set:nn { tkzProbaTree } {#1} }
+
+%%--------------------------------------------------------------------
+%% Alias (macros ET environnements)
+%%--------------------------------------------------------------------
+\cs_new_protected:Npn \__tkzpt_alias_env:n #1
+  {
+    \clist_gput_right:Nn \g__tkzpt_envnames_clist {#1}
+    \cs_new_protected:cpn { end #1 } { }
+    \exp_args:Nc \NewCommandCopy {#1} \tkzProbaTree
+  }
+\__tkzpt_alias_env:n { tkzptree }
+\__tkzpt_alias_env:n { tkzArbre }
+
+\NewCommandCopy \tkzptreebranch \tkzProbaTreeBranch
+\NewCommandCopy \tkzptreesetup  \tkzProbaTreeSetup
+
+\NewCommandCopy \tkzArbreArete  \tkzProbaTreeBranch
+\NewCommandCopy \tkzArbreArc    \tkzProbaTreeBranch
+\NewCommandCopy \tkzArbreConfig \tkzProbaTreeSetup
+
+\endinput

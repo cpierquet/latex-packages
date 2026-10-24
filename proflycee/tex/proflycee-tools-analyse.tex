@@ -458,6 +458,36 @@
 }
 \makeatother
 
+\makeatletter
+% 1er jeton = commande (\Large...) -> taille ; sinon -> facteur scalebox
+\def\tkz@sgn@a#1#2\@nil#3#4{%
+  \ifcat\noexpand#1\relax\mbox{#3$#4$}\else\scalebox{#3}{$#4$}\fi%
+}
+\newcommand\tkz@sgn[2]{\tkz@sgn@a#1\@nil{#1}{#2}}
+\NewDocumentCommand\tkzTabP{ o }{\IfNoValueTF{#1}{\ensuremath{+}}{\tkz@sgn{#1}{+}}}
+\NewDocumentCommand\tkzTabM{ o }{\IfNoValueTF{#1}{\ensuremath{-}}{\tkz@sgn{#1}{-}}}
+\makeatother
+
+\makeatletter
+\def\tkz@lt@a#1#2\@nil#3#4#5{%
+  \ifcat\noexpand#1\relax
+    {#3\tkzTabLine[#4]{#5}}%                 % commande de taille (\Large...)
+  \else
+    \begin{scope}[every node/.append style={scale=#3}]%
+      \tkzTabLine[#4]{#5}%                   % facteur d'échelle sur les nœuds
+    \end{scope}%
+  \fi%
+}
+% \tkzTabLineTaille[taille][options de \tkzTabLine]{liste}
+\NewDocumentCommand\tkzTabLineTaille{ o O{} m }{%
+  \IfNoValueTF{#1}{\tkzTabLine[#2]{#3}}{%
+    \IfBlankTF{#1}{\tkzTabLine[#2]{#3}}{\tkz@lt@a#1\@nil{#1}{#2}{#3}}%
+  }
+}
+\makeatother
+
+\newcommand\tkzTabActiveSignes{\let\+\tkzTabP \let\-\tkzTabM}
+
 %%------TVISOLUTION
 \defKV[dichoto]{%
   NomFct=\def\DHTnomfct{#1},fct name=\def\DHTnomfct{#1},%
