@@ -4,6 +4,10 @@
 
 \documentclass{article}
 \usepackage[margin=1in]{geometry}
+\usepackage{bera}
+\usepackage{inconsolata}
+\usepackage[T1]{fontenc}
+\usepackage[scale=0.875]{cabin}
 \usepackage{vscodeicons}
 \usepackage{xcolor}
 \pagecolor{yellow!2.5}
@@ -42,7 +46,7 @@
 
 \begin{document}
 
-\title{The \textsf{vscodeicons} package (12.19.0) -- 2026/07/06}
+\title{The \textsf{vscodeicons} package (12.19.0a) -- 2026/10/26}
 \author{%
 	Cédric Pierquet\\%
 	\url{https://github.com/vscode-icons/vscode-icons} (Source version v12.19)\\%
@@ -148,7 +152,7 @@ Example: Inline{\setlength\fboxsep{0pt}\fbox{\vscodeicon{root-folder}}}version o
 
 \subsection{Used packages}
 
-\texttt{ifthen}, \texttt{calc}, \texttt{graphicx} and \texttt{simplekv} are loaded and used by the package.%, \texttt{xstring}
+\texttt{graphicx} is loaded and used by the package (the key handling relies on \texttt{expl3}, which is part of the \LaTeX{} kernel since October 2020).
 
 \subsection{Bugs}
 

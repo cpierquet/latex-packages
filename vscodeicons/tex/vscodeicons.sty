@@ -3,36 +3,18 @@
 % licence icons : MIT License, see https://github.com/tabler/tabler-icons
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{vscodeicons}[2026/07/06 v12.19.0 LaTeX vscodeicons (source v12.19.0)]
+\ProvidesPackage{vscodeicons}[2026/10/26 v12.19.0a LaTeX vscodeicons (source v12.19.0)]
 
 %====history
-% 12.19.0: new version
-% 0.1.1  : bugfix with syntax
-% 0.1.0  : initial version
+% 12.19.0a: expl version
+% 12.19.0 : new version
+% 0.1.1   : bugfix with syntax
+% 0.1.0   : initial version
 
 %====packages
-\RequirePackage{ifthen}
-\RequirePackage{calc}
 \RequirePackage{graphicx}
-\RequirePackage{simplekv}
 
-%====internal macros
-\ExplSyntaxOn
-\NewDocumentCommand\intvstestsubstr{ m m m m }%
-{
-  \tl_set:Ne \l_tmpa_tl { #1 }
-  \tl_if_in:NnTF \l_tmpa_tl { #2 } { #3 } { #4 }
-}
-
-\NewDocumentCommand\intvscutsplit{ m m m m }%
-{
-  \seq_gset_split:Nee \l_tmpa_seq { #2 } { #1 }
-  \tl_set:Ne #3 { \seq_item:Nn \l_tmpa_seq {1} }
-  \tl_set:Ne #4 { \seq_item:Nn \l_tmpa_seq {2} }
-}
-\ExplSyntaxOff
-
-%====lengths
+%====lengths (names kept for compatibility)
 \newlength{\vscodeiconsDefaultTotalHeight}
 \newlength{\vscodeiconsDefaultHeight}
 \newlength{\vscodeiconsNormalHeight}
@@ -49,83 +31,154 @@
 	\pdfsuppresswarningpagegroup=1\relax
 \fi
 
-%====macro for generating default version
-\newcommand{\GenerateVscodeIconDefault}[2]{%
-	\expandafter\newcommand\csname vscodeicondefault #2\endcsname[1]{%
-		\includegraphics[page=#1, ##1]{vscodeicons-default-all.pdf}}%
-}%
+\ExplSyntaxOn
 
-%====macro for generating filetype version
-\newcommand{\GenerateVscodeIconFileType}[2]{%
-	\expandafter\newcommand\csname vscodeiconfiletype #2\endcsname[1]{%
-		\includegraphics[page=#1, ##1]{vscodeicons-filetype-all.pdf}}%
-}%
+%====variables
+\tl_new:N   \l__vscode_name_tl
+\tl_new:N   \l__vscode_page_tl
+\tl_new:N   \l__vscode_height_tl
+\tl_new:N   \l__vscode_strut_tl
+\tl_new:N   \l__vscode_dstrut_tl
+\dim_new:N  \l__vscode_height_dim
+\dim_new:N  \l__vscode_depth_dim
+\box_new:N  \l__vscode_box
+\seq_new:N  \l__vscode_seq
+\bool_new:N \l__vscode_default_bool
+\bool_new:N \l__vscode_filetype_bool
+\bool_new:N \l__vscode_foldertype_bool
 
-%====macro for generating foldertype version
-\newcommand{\GenerateVscodeIconFolderType}[2]{%
-	\expandafter\newcommand\csname vscodeiconfoldertype #2\endcsname[1]{%
-		\includegraphics[page=#1, ##1]{vscodeicons-foldertype-all.pdf}}%
-}%
+%====keys
+\keys_define:nn { vscodeicon }
+	{
+		height .tl_set:N  = \l__vscode_height_tl ,
+		height .initial:n = dauto ,
+		strut  .tl_set:N  = \l__vscode_strut_tl ,
+		strut  .initial:n = X ,
+		dstrut .tl_set:N  = \l__vscode_dstrut_tl ,
+		dstrut .initial:n = qX ,
+		default .bool_set:N = \l__vscode_default_bool ,
+		default .initial:n = true ,
+		filetype .bool_set:N = \l__vscode_filetype_bool ,
+		filetype .initial:n = false ,
+		foldertype .bool_set:N = \l__vscode_foldertype_bool ,
+		foldertype .initial:n = false ,
+	}
 
-%====int macros
-\newcommand{\vscodeicondefault}[2][height=\vscodeiconsDefaultHeight]{%
-	\csname vscodeicondefault #2\endcsname{#1}%
-}%
+%====message
+\msg_new:nnn { vscodeicons } { unknown-icon }
+	{ Unknown~icon~'#1'. }
 
-\newcommand{\vscodeiconfiletype}[2][height=\vscodeiconsDefaultHeight]{%
-	\csname vscodeiconfiletype #2\endcsname{#1}%
-}%
+%====registration of the icons : the page is stored in a macro named after the icon
+\NewDocumentCommand \GenerateVscodeIconDefault { m m }
+	{ \cs_gset_nopar:cpn { __vscode_page_default_ #2 } {#1} }
+\NewDocumentCommand \GenerateVscodeIconFileType { m m }
+	{ \cs_gset_nopar:cpn { __vscode_page_filetype_ #2 } {#1} }
+\NewDocumentCommand \GenerateVscodeIconFolderType { m m }
+	{ \cs_gset_nopar:cpn { __vscode_page_foldertype_ #2 } {#1} }
 
-\newcommand{\vscodeiconfoldertype}[2][height=\vscodeiconsDefaultHeight]{%
-	\csname vscodeiconfoldertype #2\endcsname{#1}%
-}%
+%====inclusion of an icon (#1 = variant, #2 = pdf file, #3 = includegraphics keys)
+\cs_new_protected:Npn \__vscode_include:nnn #1#2#3
+	{
+		\cs_if_exist:cTF { __vscode_page_ #1 _ \l__vscode_name_tl }
+			{
+				\tl_set_eq:Nc \l__vscode_page_tl { __vscode_page_ #1 _ \l__vscode_name_tl }
+				\includegraphics [ page = \l__vscode_page_tl , #3 ] {#2}
+			}
+			{ \msg_error:nnV { vscodeicons } { unknown-icon } \l__vscode_name_tl }
+	}
+
+%====choice of the version (#1 = includegraphics keys)
+\cs_new_protected:Npn \__vscode_variants:n #1
+	{
+		\bool_if:NT \l__vscode_default_bool
+			{ \__vscode_include:nnn { default } { vscodeicons-default-all.pdf } {#1} }
+		\bool_if:NT \l__vscode_filetype_bool
+			{ \__vscode_include:nnn { filetype } { vscodeicons-filetype-all.pdf } {#1} }
+		\bool_if:NT \l__vscode_foldertype_bool
+			{ \__vscode_include:nnn { foldertype } { vscodeicons-foldertype-all.pdf } {#1} }
+	}
+
+\cs_new_protected:Npn \__vscode_include:nn #1#2
+	{ \__vscode_variants:n { height = #1 , #2 } }
+
+%====height / depth (#1 = extra includegraphics keys)
+\cs_new_protected:Npn \__vscode_typeset:n #1
+	{
+		\str_if_eq:VnTF \l__vscode_height_tl { auto }
+			{
+				% height of the strut
+				\hbox_set:Nn \l__vscode_box { \l__vscode_strut_tl }
+				\dim_set:Nn \l__vscode_height_dim { \box_ht:N \l__vscode_box }
+				\__vscode_include:nn { \l__vscode_height_dim } {#1}
+			}
+			{
+				\str_if_eq:VnTF \l__vscode_height_tl { dauto }
+					{
+						% total height and depth of the dstrut
+						\hbox_set:Nn \l__vscode_box { \l__vscode_dstrut_tl }
+						\dim_set:Nn \l__vscode_depth_dim { \box_dp:N \l__vscode_box }
+						\dim_set:Nn \l__vscode_height_dim { \box_ht:N \l__vscode_box + \box_dp:N \l__vscode_box }
+						\raisebox { - \l__vscode_depth_dim }
+							{ \__vscode_include:nn { \l__vscode_height_dim } {#1} }
+					}
+					{
+						\seq_set_split:NnV \l__vscode_seq { / } \l__vscode_height_tl
+						\int_compare:nNnTF { \seq_count:N \l__vscode_seq } > { 1 }
+							{
+								% height/depth given manually
+								\dim_set:Nn \l__vscode_height_dim { \seq_item:Nn \l__vscode_seq { 1 } }
+								\dim_set:Nn \l__vscode_depth_dim  { \seq_item:Nn \l__vscode_seq { 2 } }
+								\raisebox { \l__vscode_depth_dim }
+									{ \__vscode_include:nn { \l__vscode_height_dim } {#1} }
+							}
+							{
+								\dim_set:Nn \l__vscode_height_dim { \l__vscode_height_tl }
+								\__vscode_include:nn { \l__vscode_height_dim } {#1}
+							}
+					}
+			}
+	}
+
+%====direct macros (\macro[includegraphics keys]{name})
+\NewDocumentCommand \vscodeicondefault { O{height=\vscodeiconsDefaultHeight} m }
+	{
+		\group_begin:
+			\tl_set:Nn \l__vscode_name_tl {#2}
+			\__vscode_include:nnn { default } { vscodeicons-default-all.pdf } {#1}
+		\group_end:
+	}
+
+\NewDocumentCommand \vscodeiconfiletype { O{height=\vscodeiconsDefaultHeight} m }
+	{
+		\group_begin:
+			\tl_set:Nn \l__vscode_name_tl {#2}
+			\__vscode_include:nnn { filetype } { vscodeicons-filetype-all.pdf } {#1}
+		\group_end:
+	}
+
+\NewDocumentCommand \vscodeiconfoldertype { O{height=\vscodeiconsDefaultHeight} m }
+	{
+		\group_begin:
+			\tl_set:Nn \l__vscode_name_tl {#2}
+			\__vscode_include:nnn { foldertype } { vscodeicons-foldertype-all.pdf } {#1}
+		\group_end:
+	}
 
 %====main macro
-\defKV[vscodeicon]{height=\def\vscodeiconheigth{#1},strut=\def\vscodeiconstrut{#1},dstrut=\def\vscodeicondstrut{#1}}
-\setKVdefault[vscodeicon]{height=dauto,default=true,filetype=false,foldertype=false,strut={X},dstrut={qX}}
+\NewDocumentCommand \vscodeicon { O{} D<>{} m }
+	{
+		\group_begin:
+			\keys_set:nn { vscodeicon } {#1}
+			\tl_set:Nn \l__vscode_name_tl {#3}
+			\bool_if:NT \l__vscode_filetype_bool
+				{ \bool_set_false:N \l__vscode_default_bool \bool_set_false:N \l__vscode_foldertype_bool }
+			\bool_if:NT \l__vscode_foldertype_bool
+				{ \bool_set_false:N \l__vscode_default_bool \bool_set_false:N \l__vscode_filetype_bool }
+			\__vscode_typeset:n {#2}
+		\group_end:
+	}
 
-\NewDocumentCommand\vscodeicon{O{}D<>{}m}{%
-	\restoreKV[vscodeicon]%
-	\setKV[vscodeicon]{#1}%
-	%booleans
-	\ifboolKV[vscodeicon]{filetype}{\setKV[vscodeicon]{default=false,foldertype=false}}{}%
-	\ifboolKV[vscodeicon]{foldertype}{\setKV[vscodeicon]{default=false,filetype=false}}{}%
-	%lengths
-	\ifthenelse{\equal{\vscodeiconheigth}{auto}}%
-		{%
-			\settoheight\vscodeiconsDefaultHeight{\hbox{\vscodeiconstrut}}%height of \vscodeiconstrut
-			\ifboolKV[vscodeicon]{default}{\vscodeicondefault[height=\vscodeiconsDefaultHeight,#2]{#3}}{}%
-			\ifboolKV[vscodeicon]{filetype}{\vscodeiconfiletype[height=\vscodeiconsDefaultHeight,#2]{#3}}{}%
-			\ifboolKV[vscodeicon]{foldertype}{\vscodeiconfoldertype[height=\vscodeiconsDefaultHeight,#2]{#3}}{}%
-		}%
-		{%
-			\ifthenelse{\equal{\vscodeiconheigth}{dauto}}%
-				{%
-					\settototalheight\vscodeiconsDefaultTotalHeight{\hbox{\vscodeicondstrut}}%height of \vscodeicondstrut
-					\settodepth\vscodeiconsDefaultDepth{\hbox{\vscodeicondstrut}}%depth of \vscodeicondstrut
-					\ifboolKV[vscodeicon]{default}{\raisebox{-\vscodeiconsDefaultDepth}{\vscodeicondefault[height=\vscodeiconsDefaultTotalHeight,#2]{#3}}}{}%
-					\ifboolKV[vscodeicon]{filetype}{\raisebox{-\vscodeiconsDefaultDepth}{\vscodeiconfiletype[height=\vscodeiconsDefaultTotalHeight,#2]{#3}}}{}%
-					\ifboolKV[vscodeicon]{foldertype}{\raisebox{-\vscodeiconsDefaultDepth}{\vscodeiconfoldertype[height=\vscodeiconsDefaultTotalHeight,#2]{#3}}}{}%
-				}%
-				{%
-					\intvstestsubstr{\vscodeiconheigth}{/}%
-						{%
-							\intvscutsplit{\vscodeiconheigth}{/}{\vscodeiconmanualheight}{\vscodeiconmanualdepth}%
-							\setlength\vscodeiconsNormalHeight{\vscodeiconmanualheight}%
-							\setlength\vscodeiconsDefaultDepth{\vscodeiconmanualdepth}%
-							\ifboolKV[vscodeicon]{default}{\raisebox{\vscodeiconsDefaultDepth}{\vscodeicondefault[height=\vscodeiconsNormalHeight,#2]{#3}}}{}%
-							\ifboolKV[vscodeicon]{filetype}{\raisebox{\vscodeiconsDefaultDepth}{\vscodeiconfiletype[height=\vscodeiconsNormalHeight,#2]{#3}}}{}%
-							\ifboolKV[vscodeicon]{foldertype}{\raisebox{\vscodeiconsDefaultDepth}{\vscodeiconfoldertype[height=\vscodeiconsNormalHeight,#2]{#3}}}{}%
-						}%
-						{%
-							\setlength\vscodeiconsNormalHeight{\vscodeiconheigth}%
-							\ifboolKV[vscodeicon]{default}{\vscodeicondefault[height=\vscodeiconsNormalHeight,#2]{#3}}{}%
-							\ifboolKV[vscodeicon]{filetype}{\vscodeiconfiletype[height=\vscodeiconsNormalHeight,#2]{#3}}{}%
-							\ifboolKV[vscodeicon]{foldertype}{\vscodeiconfoldertype[height=\vscodeiconsNormalHeight,#2]{#3}}{}%
-						}%
-				}%
-		}%
-}
+\ExplSyntaxOff
 
 %====default version
 \GenerateVscodeIconDefault{1}{file}

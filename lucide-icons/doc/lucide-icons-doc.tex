@@ -4,6 +4,10 @@
 
 \documentclass{article}
 \usepackage[margin=1in]{geometry}
+\usepackage{bera}
+\usepackage{inconsolata}
+\usepackage[T1]{fontenc}
+\usepackage[scale=0.875]{cabin}
 \usepackage{lucide-icons}
 \usepackage{xcolor}
 \usepackage{longtable}
@@ -34,7 +38,7 @@
 
 \begin{document}
 
-\title{The \textsf{lucide-icons} package (1.23.0) -- 05/07/2026}
+\title{The \textsf{lucide-icons} package (1.23.0a) -- 26/10/2026}
 \author{%
 	Cédric Pierquet\\%
 	\url{https://lucide.dev} (Source version 1.23.0)\\%
@@ -147,7 +151,7 @@ Example: Inline{\setlength\fboxsep{0pt}\fbox{\lucideicon{anchor}}}version or inl
 
 \subsection{Used packages}
 
-\texttt{ifthen}, \texttt{calc}, \texttt{graphicx}, \texttt{xstring} and \texttt{simplekv} are loaded and used by the package.
+\texttt{graphicx} is loaded and used by the package (the key handling relies on \texttt{expl3}, which is part of the \LaTeX{} kernel since October 2020).
 
 \subsection{Bugs}
 
