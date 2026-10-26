@@ -1,0 +1,170 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{bera}
+\usepackage{inconsolata}
+\usepackage[T1]{fontenc}
+\usepackage[scale=0.875]{cabin}
+\usepackage{doodle-icons}
+\usepackage{xcolor}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{shortvrb}
+\MakeShortVerb{\|}
+\setlength{\parindent}{0pt}
+
+\newenvironment{doodleiconcase}
+{%
+  \footnotesize
+	\begin{longtable}{cllr}%icon + name + macro + page
+		\cmidrule[\heavyrulewidth]{1-4}% \toprule
+		\bfseries Icon & \bfseries Name & \bfseries Direct command & \bfseries PDF page \\
+		\cmidrule{1-4}
+		\endhead
+}%
+{%
+		\cmidrule[\heavyrulewidth]{1-4}
+	\end{longtable}%
+}
+
+\NewDocumentCommand{\showcasedoodleicons}{mm}{%name + macro + page
+	\textcolor{violet}{\Large\doodleicon{#1}} & \itshape #1 & \ttfamily \textbackslash doodleicon\{#1\} & \sffamily #2 \\
+}
+
+\begin{document}
+
+\title{The \textsf{doodle-icons} package (1.0a) -- 26/10/2026}
+\author{%
+	Cédric Pierquet\\%
+	\url{https://khushmeen.com/icons} \\%
+	\url{https://github.com/cpierquet/latex-packages/tree/main/doodle-icons} (\LaTeX{} package)
+}
+\date{cpierquet -- at -- outlook . fr}\maketitle
+
+This package provides \LaTeX{} support for the \textsf{Doodle-Icons} project (\url{https://khushmeen.com/icons}).
+
+\medskip
+
+\hspace*{5mm}\fbox{\begin{minipage}{0.75\linewidth}{\emph{A set of 439 free CC0 License high-quality SVG/PDF icons for you to use in your web projects.}}\end{minipage}}
+
+\medskip
+
+To use \textsf{doodle-icons} in your document, include the package with |\usepackage{doodle-icons}|.
+
+An icon can be accessed using the icon name. A list of all included icons with their respective \textit{page} can be found at the end of this document.
+
+\medskip
+
+The individual icons are provided as pages of a PDF and are ultimately loaded using the |\includegraphics| command from the |graphicx| package.
+
+\medskip
+
+Thanks to \textsf{priiduonu} for the tip with stroke color !
+
+\section{Example}
+
+\begin{Verbatim}[frame=single]
+...
+\usepackage{doodle-icons}
+...
+\begin{document}
+...
+Inline \doodleicon{bottle} version, and colored \textcolor{red}{\doodleicon{bottle}}
+...
+\end{document}
+\end{Verbatim}
+
+Result: Inline \doodleicon{bottle} version, and \textcolor{red}{\doodleicon{bottle}} colored version
+
+\pagebreak
+
+\section{Usage}
+
+\subsection{Generic macro}
+
+\begin{Verbatim}[frame=single]
+\doodleicon[height=...,(d)strut=...]<includegraphics options>{name}
+\end{Verbatim}
+
+Key \texttt{[height=...]} can be:
+
+\begin{itemize}
+	\item \texttt{dauto} (by default): inline insertion with height/depth;
+	\item \texttt{auto}: inline insertion with height/nodepth;
+	\item \texttt{a length}: normal insertion with fixed height;
+	\item \texttt{manuel height/depth}: normal insertion with fixed height/depth.
+\end{itemize}
+
+The keys \texttt{[(d)strut=...]} can be used to set the \textit{reference} box for dimension calculations.
+
+\medskip
+
+By default, icons are given with a small border (with fixed 196x196 size), so the given height is the height of the \textit{full} box, not the hight of the icons.
+
+\medskip
+
+Example: Inline{\setlength\fboxsep{0pt}\fbox{\doodleicon{bottle}}}version or inline {\setlength\fboxsep{0pt}\fbox{\doodleicon{bottle}}} version
+
+\pagebreak
+
+\subsection{Examples}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height/depth (from qX characters)
+\doodleicon[height=dauto]{bottle} %or \doodleicon{bottle}
+\end{Verbatim}
+
+{\Huge q\doodleicon{bottle}X}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height/depth (from specified characters)
+(q\doodleicon[height=dauto,dstrut=(qB)]{bottle}B)
+\end{Verbatim}
+
+{\Huge (q\doodleicon[height=dauto,dstrut=(qB)]{bottle}B)}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height (from X character) default version
+\doodleicon[height=auto]{bottle}
+\end{Verbatim}
+
+{\Huge X\doodleicon[height=auto]{bottle}X}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with manual height/depth
+\doodleicon[height={0.8em/-0.4em}]{bottle}
+\end{Verbatim}
+
+{\Huge qb\doodleicon[height={0.8em/-0.4em}]{bottle}Xz}
+
+\begin{Verbatim}[frame=single]
+%fixed height
+\doodleicon[height=2in]{bottle}
+\end{Verbatim}
+
+\doodleicon[height=1.5in]{bottle}
+
+\subsection{Used packages}
+
+\texttt{graphicx} is loaded and used by the package (the key handling relies on \texttt{expl3}, which is part of the \LaTeX{} kernel since October 2020).
+
+\subsection{Bugs}
+
+For bug reports and feature requests, report on the GitHub repository \url{https://github.com/cpierquet/latex-packages/issues}.
+
+\newpage
+
+\section{List of icons}
+
+The \textsf{PDF} file is \texttt{doodle-icons-all}.
+
+Icons are colored in \textcolor{violet}{violet}.
+
+\input{doodleiconsbindings}
+
+\end{document}
