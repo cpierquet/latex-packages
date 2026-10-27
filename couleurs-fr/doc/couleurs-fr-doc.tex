@@ -6,7 +6,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{DejaVuSerif}
-\usepackage[scale=1.125]{inconsolata}
+\usepackage[scale=1]{inconsolata}
 \usepackage{amssymb}
 \usepackage{couleurs-fr}
 \usepackage{tikz}
@@ -34,8 +34,8 @@
 \usepackage[margin=1.5cm]{geometry}
 \setlength{\parindent}{0pt}
 
-\def\TPversion{0.1.5}
-\def\TPdate{7 avril 2026}
+\def\TPversion{0.1.6}
+\def\TPdate{27 octobre 2026}
 \def\HtRet{0.45}\def\LgRect{1.5}
 \usepackage{tcolorbox}
 
@@ -216,6 +216,8 @@ Pour éviter des éventuelles confusions avec d'autres couleurs précédemment d
 \pagebreak
 
 \subsection{Historique}
+
+\verb|v0.1.6|~:~~~~Macro pour créer des raccourcis + alias + corrections de noms/doublons
 
 \verb|v0.1.5|~:~~~~Couleur de texte en fonction d'une couleur de fond + couleur complémentaire
 
@@ -440,7 +442,7 @@ Les couleurs et leurs noms sont issues des bases \textsf{svgnames/dvipsnames} de
 	\MontreCouleur{OcreRouge}{HTML}{DD985C}
 	\MontreCouleur{Ocre}{HTML}{DFAF2C}
 	\MontreCouleur{Olivatre}{rgb}{.42,.556,.136}
-	\MontreCouleur{Olive}{rgb}{.5,.5,0}
+	\MontreCouleur{Olive}{HTML}{708D23}
 	\MontreCouleur{OrangeBrule}{HTML}{CC5500}
 	\MontreCouleur{OrangeFonce}{rgb}{1,.55,0}
 	\MontreCouleur{OrangeRoughy}{HTML}{C04F16}
@@ -553,7 +555,7 @@ Les couleurs et leurs noms sont issues des bases \textsf{svgnames/dvipsnames} de
 	\MontreCouleur{VertSapin}{HTML}{095228}
 	\MontreCouleur{VertSauge}{HTML}{689D71}
 	\MontreCouleur{VertTilleul}{HTML}{A5D152}
-	\MontreCouleur{VertVeronèse}{HTML}{5A6521}
+	\MontreCouleur{VertVeronese}{HTML}{5A6521}
 	\MontreCouleur{VertVessie}{HTML}{22780F}
 	\MontreCouleur{Vert}{rgb}{0,.5,0}
 	\MontreCouleur{VieilleDentelle}{rgb}{.992,.96,.9}
@@ -786,7 +788,7 @@ Pour des soucis de compatibilité avec d'autres couleurs prédéfinies, les coul
 	\MontreCouleurXKCD{Beige}{D1B26F}
 	\MontreCouleurXKCD{Beurre}{FFFF81}
 	\MontreCouleurXKCD{Bile}{B5C306}
-	\MontreCouleurXKCD{BlancCasse}{FFFFFE4}
+	\MontreCouleurXKCD{BlancCasse}{FFFFE4}
 	\MontreCouleurXKCD{Blanc}{FFFFFF}
 	\MontreCouleurXKCD{BleuAcier}{5A7D9A}
 	\MontreCouleurXKCD{BleuAgreable}{107AB0}
@@ -970,7 +972,7 @@ Pour des soucis de compatibilité avec d'autres couleurs prédéfinies, les coul
 	\MontreCouleurXKCD{Fougere}{63A950}
 	\MontreCouleurXKCD{Fraise}{FB2943}
 	\MontreCouleurXKCD{Framboise}{B00149}
-	\MontreCouleurXKCD{FuchsiaFoncé}{9D0759}
+	\MontreCouleurXKCD{FuchsiaFonce}{9D0759}
 	\MontreCouleurXKCD{Fuchsia}{ED0DD9}
 	\MontreCouleurXKCD{Glace}{D6FFFA}
 	\MontreCouleurXKCD{Glaviot}{9BB53C}
@@ -1021,7 +1023,7 @@ Pour des soucis de compatibilité avec d'autres couleurs prédéfinies, les coul
 	\MontreCouleurXKCD{JauneCanari}{FDFF63}
 	\MontreCouleurXKCD{JauneCitronVert}{D0FE1D}
 	\MontreCouleurXKCD{JauneCitron}{FDFF38}
-	\MontreCouleurXKCD{JauneClair}{FFFFE7A}
+	\MontreCouleurXKCD{JauneClair}{FFFE7A}
 	\MontreCouleurXKCD{JauneDore}{FEC615}
 	\MontreCouleurXKCD{JauneEnsoleille}{FFF917}
 	\MontreCouleurXKCD{JauneFane}{FEFF7F}
@@ -1389,7 +1391,7 @@ Pour des soucis de compatibilité avec d'autres couleurs prédéfinies, les coul
 	\MontreCouleurXKCD{VertCourse}{014600}
 	\MontreCouleurXKCD{VertCrotteNez}{96B403}
 	\MontreCouleurXKCD{VertDecolore}{6BA353}
-	\MontreCouleurXKCD{VertDegoutant}{8FAE22}
+	\MontreCouleurXKCD{VertBeurk}{8FAE22}
 	\MontreCouleurXKCD{VertDegoutant}{A0BF16}
 	\MontreCouleurXKCD{VertDelave}{BCF5A6}
 	\MontreCouleurXKCD{VertDesagreable}{70B23F}
@@ -1505,7 +1507,7 @@ Pour des soucis de compatibilité avec d'autres couleurs prédéfinies, les coul
 	\MontreCouleurXKCD{VioletClair}{A552E6}
 	\MontreCouleurXKCD{VioletFonce}{34013F}
 	\MontreCouleurXKCD{VioletMochard}{A442A0}
-	\MontreCouleurXKCD{VioletPale}{B790D4}
+	\MontreCouleurXKCD{PourprePale}{B790D4}
 	\MontreCouleurXKCD{VioletPale}{CEAEFA}
 	\MontreCouleurXKCD{VioletPaques}{C071FE}
 	\MontreCouleurXKCD{VioletPlusClair}{A55AF4}
@@ -1668,6 +1670,7 @@ L'idée est de proposer une macro \textit{simpliste} pour générer une couleur 
 \begin{codehigh}[language=latex/latex3,style/main=BleuAlice,style/code=BleuAlice]
 \gencoultxtcontrast{couleur}[couleurtexte]
 %stocke, dans couleurtexte, black ou white
+%alias : \gencoltxtcontrast
 \end{codehigh}
 
 \begin{demohigh}[language=latex/latex3,style/main=BleuAlice,style/code=BleuAlice]
@@ -1695,6 +1698,7 @@ L'idée est de proposer une macro \textit{simpliste} pour générer une couleur 
 
 \begin{codehigh}[language=latex/latex3,style/main=BleuAlice,style/code=BleuAlice]
 \gencoulcompl{couleur}[couleurcomplementaire]
+%alias : \gencolcompl
 \end{codehigh}
 
 \begin{demohigh}[language=latex/latex3,style/main=BleuAlice,style/code=BleuAlice]
@@ -1712,5 +1716,31 @@ L'idée est de proposer une macro \textit{simpliste} pour générer une couleur 
 \textecomplementaire{Noisette}{Noisette}\\
 \textecomplementaire{VertMerFonce}{VertMerFonce}
 \end{demohigh}
+
+\pagebreak
+
+\section{Créer des raccourcis de couleurs}
+
+\begin{codehigh}[language=latex/latex3,style/main=BleuAlice,style/code=BleuAlice]
+\CreerRaccourcisCouleurs{liste de couleurs}
+%alias : \genmacrocoul
+\end{codehigh}
+
+Pour chaque couleur de la liste (séparée par des virgules), la macro crée la commande \MontreCode{\textbackslash Nom} équivalente à \MontreCode{\textbackslash color\{Nom\}}.
+
+\begin{demohigh}[language=latex/latex3,style/main=BleuAlice,style/code=BleuAlice]
+\CreerRaccourcisCouleurs{Carotte,VertMer,Mure}
+{\Carotte Texte en Carotte}, {\VertMer texte en VertMer} et {\Mure texte en Mure}.
+\end{demohigh}
+
+\smallskip
+
+\textbf{Remarques}~:
+
+\begin{itemize}
+	\item si la commande \MontreCode{\textbackslash Nom} existe déjà (par exemple \MontreCode{\textbackslash Vert}, qui est une commande mathématique), elle n'est pas redéfinie et un avertissement est émis~;
+	\item le nom de la couleur doit pouvoir former un nom de commande, c'est-à-dire n'être composé que de lettres (donc pas de raccourci pour les couleurs \textsf{flexoki} comme \MontreCode{fRouge-50})~;
+	\item l'existence de la couleur n'est pas vérifiée à la création~: une erreur n'apparaît qu'à l'utilisation de la commande.
+\end{itemize}
 
 \end{document}

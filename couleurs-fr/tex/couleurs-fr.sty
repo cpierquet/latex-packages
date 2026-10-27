@@ -2,9 +2,12 @@
 % licence  : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{couleurs-fr}[2026/04/07 0.1.5 Version fr de couleurs svgnames/dvipsnames de xcolor, ainsi que des schemes xkcd/flexoki]
+\ProvidesPackage{couleurs-fr}[2026/10/27 0.1.6 Version fr de couleurs svgnames/dvipsnames de xcolor, ainsi que des schemes xkcd/flexoki]
 
 %====HISTORIQUE
+% v 0.1.6  Ajout d'une macro pour créer des raccourcis de couleurs -> \CreerRaccourcisCouleurs (alias \genmacrocoul)
+%          Renommage de VertVeronèse/xFuchsiaFoncé (accents), doublons xkcd (VertDegoutant, VioletPale)
+%          Arrondi des composantes de \gencoulcompl
 % v 0.1.5  Ajout d'une macro pour obtenir une couleur de texte en fonction d'une couleur de fond + couleur complémentaire
 % v 0.1.4  Correction de doublons
 % v 0.1.3  Ajout des flexoki (https://stephango.com/flexoki)
@@ -28,7 +31,7 @@
 \tl_new:N   \l__cc_rgb_tl
 \tl_new:N   \l__cc_result_tl
 
-\NewDocumentCommand \gencoultxtcontrast { m O{ couleurtexte } }
+\NewDocumentCommand \gencoultxtcontrast { m O { couleurtexte } }
 {
   % 1/ Extraction du modèle et des valeurs
   \extractcolorspecs{#1}{\l__cc_model_tl}{\l__cc_specs_tl}
@@ -142,15 +145,27 @@
   \__cc_comp_hsl_to_rgb:
   \tl_set:Nx \l__cc_result_tl
   {
-    \fp_eval:n { \l__cc_RR_fp } ,
-    \fp_eval:n { \l__cc_GG_fp } ,
-    \fp_eval:n { \l__cc_BB_fp }
+    \fp_eval:n { round( \l__cc_RR_fp , 3 ) } ,
+    \fp_eval:n { round( \l__cc_GG_fp , 3 ) } ,
+    \fp_eval:n { round( \l__cc_BB_fp , 3 ) }
   }
   \exp_args:NnnV \definecolor { #2 } { rgb } \l__cc_result_tl
 }
 \NewCommandCopy\gencolcompl\gencoulcompl
 
+\NewDocumentCommand \CreerRaccourcisCouleurs { m }
+{
+  \clist_map_inline:nn { #1 }
+    {
+      \cs_if_exist:cTF { ##1 }
+        { \PackageWarning{couleurs-fr}{La~commande~\c_backslash_str ##1~existe~deja} }
+        { \cs_new:cpn { ##1 } { \color{##1} } }
+    }
+}
+\NewCommandCopy\genmacrocoul\CreerRaccourcisCouleurs
+
 \ExplSyntaxOff
+
 
 %====PREFIXE
 \newif\if@tmpprefixe \@tmpprefixefalse
@@ -657,7 +672,7 @@
   VertSapin,095228;%
   VertSauge,689D71;%
   VertTilleul,A5D152;%
-  VertVeronèse,5A6521;%
+  VertVeronese,5A6521;%
   VertVessie,22780F;%
   VioletEveque,723E64;%
   Viride,40826D;%
@@ -823,7 +838,7 @@
   VertSapin,095228;%
   VertSauge,689D71;%
   VertTilleul,A5D152;%
-  VertVeronèse,5A6521;%
+  VertVeronese,5A6521;%
   VertVessie,22780F;%
   VioletEveque,723E64;%
   Viride,40826D;%
@@ -1049,7 +1064,7 @@
   Fraise,FB2943;%
   Framboise,B00149;%
   Fuchsia,ED0DD9;%
-  FuchsiaFoncé,9D0759;%
+  FuchsiaFonce,9D0759;%
   Glace,D6FFFA;%
   Glaviot,9BB53C;%
   Glycine,A87DC2;%
@@ -1468,7 +1483,7 @@
   VertCourseBritannique,05480D;%
   VertCrotteNez,96B403;%
   VertDecolore,6BA353;%
-  VertDegoutant,8FAE22;%
+  VertBeurk,8FAE22;%
   VertDegoutant,A0BF16;%
   VertDelave,BCF5A6;%
   VertDesagreable,70B23F;%
@@ -1584,7 +1599,8 @@
   VioletClair,A552E6;%
   VioletFonce,34013F;%
   VioletMochard,A442A0;%
-  VioletPale,B790D4;%
+  PourprePale,B790D4;%
+  VioletPale,CEAEFA;%
   VioletPaques,C071FE;%
   VioletPlusClair,A55AF4;%
   VioletProfond,490648;%
