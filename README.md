@@ -10,6 +10,7 @@ https://ctan.org/author/pierquet
 * couleurs-fr
 * CreationBoites
 * customenvs
+* doodle-icons
 * euromoney
 * FenetreCas
 * fontawesomescaled
