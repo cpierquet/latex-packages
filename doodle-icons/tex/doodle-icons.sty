@@ -3,25 +3,25 @@
 % licence icons : CC0 license https://khushmeen.com/icons
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{doodle-icons}[2026/10/26 v0.1a doodle-icons]
+\ProvidesPackage{doodle-icons}[2026/10/27 v0.1b doodle-icons]
 
 %====history
+% 0.1b : bugfix with prop
 % 0.1a : initial version
 
 %====packages
 \RequirePackage{graphicx}
- 
+
 %====suppress warnings
 \begingroup\expandafter\expandafter\expandafter\endgroup
 \expandafter\ifx\csname pdfsuppresswarningpagegroup\endcsname\relax
 \else
   \pdfsuppresswarningpagegroup=1\relax
 \fi
- 
+
 \ExplSyntaxOn
- 
+
 %====variables
-\prop_new:N \g__doodleicon_pages_prop
 \tl_new:N   \l__doodleicon_page_tl
 \tl_new:N   \l__doodleicon_height_tl
 \tl_new:N   \l__doodleicon_strut_tl
@@ -30,7 +30,7 @@
 \dim_new:N  \l__doodleicon_depth_dim
 \box_new:N  \l__doodleicon_box
 \seq_new:N  \l__doodleicon_seq
- 
+
 %====keys
 \keys_define:nn { doodleicon }
   {
@@ -41,23 +41,23 @@
     dstrut .tl_set:N  = \l__doodleicon_dstrut_tl ,
     dstrut .initial:n = qX ,
   }
- 
+
 %====messages
 \msg_new:nnn { doodle-icons } { unknown-icon }
   { Unknown~icon~'#1'. }
- 
+
 %====icon registration : page number in doodleicons-all.pdf
 \NewDocumentCommand \GenerateDoodleIcons { m m }
-  { \prop_gput:Nnn \g__doodleicon_pages_prop {#2} {#1} }
- 
+  { \cs_gset_nopar:cpn { __doodleicon_page_ #2 } {#1} }
+
 %====alias : \AliasDoodleIcon{new name}{existing name} (to be used after the icons are registered)
 \NewDocumentCommand \AliasDoodleIcon { m m }
   {
-    \prop_get:NnNTF \g__doodleicon_pages_prop {#2} \l__doodleicon_page_tl
-      { \prop_gput:NnV \g__doodleicon_pages_prop {#1} \l__doodleicon_page_tl }
+    \cs_if_exist:cTF { __doodleicon_page_ #2 }
+      { \cs_gset_eq:cc { __doodleicon_page_ #1 } { __doodleicon_page_ #2 } }
       { \msg_error:nnn { doodle-icons } { unknown-icon } {#2} }
   }
- 
+
 %====includegraphics call (#1 = height, #2 = extra keys)
 \cs_new_protected:Npn \__doodleicon_include:nn #1#2
   {
@@ -65,7 +65,7 @@
       [ page = \l__doodleicon_page_tl , height = #1 , #2 ]
       { doodleicons-all.pdf }
   }
- 
+
 %====main macro
 \cs_new_protected:Npn \__doodleicon_typeset:n #1
   {
@@ -104,19 +104,22 @@
           }
       }
   }
- 
+
 \NewDocumentCommand \doodleicon { O{} D<>{} m }
   {
     \group_begin:
       \keys_set:nn { doodleicon } {#1}
-      \prop_get:NnNTF \g__doodleicon_pages_prop {#3} \l__doodleicon_page_tl
-        { \__doodleicon_typeset:n {#2} }
+      \cs_if_exist:cTF { __doodleicon_page_ #3 }
+        {
+          \tl_set_eq:Nc \l__doodleicon_page_tl { __doodleicon_page_ #3 }
+          \__doodleicon_typeset:n {#2}
+        }
         { \msg_error:nnn { doodle-icons } { unknown-icon } {#3} }
     \group_end:
   }
- 
+
 \ExplSyntaxOff
- 
+
 %====macros
 \GenerateDoodleIcons{1}{2-double-tap}
 \GenerateDoodleIcons{2}{2-scroll-left}
@@ -557,7 +560,7 @@
 \GenerateDoodleIcons{437}{zoom-in}
 \GenerateDoodleIcons{438}{zoom-out-1}
 \GenerateDoodleIcons{439}{zoom-out}
- 
+
 %====aliases (corrected / normalised names ; the original names remain valid)
 \AliasDoodleIcon{female}{femaile}
 \AliasDoodleIcon{hetero}{hetro}
@@ -566,5 +569,5 @@
 \AliasDoodleIcon{vector}{Vector}
 \AliasDoodleIcon{product-hunt}{product hunt}
 \AliasDoodleIcon{tik-tok}{tik tok}
- 
+
 \endinput
