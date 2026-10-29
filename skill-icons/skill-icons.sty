@@ -1,0 +1,981 @@
+% Author        : C. Pierquet
+% licence       : Released under the LaTeX Project Public License v1.3c or later, see http://www.latex-project.org/lppl.txt
+% licence icons : MIT License, see https://github.com/LelouchFR/skill-icons (fork of https://github.com/tandpfun/skill-icons)
+%                 The logos remain the property of their respective owners.
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{skill-icons}[2026/10/29 v0.1a skill-icons]
+
+%====history
+% 0.1a : initial version
+
+%====packages
+\RequirePackage{graphicx}
+
+%====options (default theme)
+\newcommand*{\skilliconsdefaulttheme}{dark}
+\DeclareOption{dark}{\renewcommand*{\skilliconsdefaulttheme}{dark}}
+\DeclareOption{light}{\renewcommand*{\skilliconsdefaulttheme}{light}}
+\ProcessOptions\relax
+
+%====suppress warnings
+\begingroup\expandafter\expandafter\expandafter\endgroup
+\expandafter\ifx\csname pdfsuppresswarningpagegroup\endcsname\relax
+\else
+  \pdfsuppresswarningpagegroup=1\relax
+\fi
+
+\ExplSyntaxOn
+
+%====variables
+\tl_new:N   \l__skillicon_page_tl
+\tl_new:N   \l__skillicon_height_tl
+\tl_new:N   \l__skillicon_strut_tl
+\tl_new:N   \l__skillicon_dstrut_tl
+\tl_new:N   \l__skillicon_theme_tl
+\tl_new:N   \g__skillicon_theme_tl
+\tl_new:N   \l__skillicon_file_tl
+\dim_new:N  \l__skillicon_height_dim
+\dim_new:N  \l__skillicon_depth_dim
+\box_new:N  \l__skillicon_box
+\seq_new:N  \l__skillicon_seq
+
+%====default theme (package option, can be changed with \skilliconssetup)
+\tl_gset:NV \g__skillicon_theme_tl \skilliconsdefaulttheme
+\cs_undefine:N \skilliconsdefaulttheme
+
+%====keys
+\keys_define:nn { skillicon }
+  {
+    height .tl_set:N  = \l__skillicon_height_tl ,
+    height .initial:n = dauto ,
+    strut  .tl_set:N  = \l__skillicon_strut_tl ,
+    strut  .initial:n = X ,
+    dstrut .tl_set:N  = \l__skillicon_dstrut_tl ,
+    dstrut .initial:n = qX ,
+    theme  .choices:nn = { dark , light }
+      { \tl_set_eq:NN \l__skillicon_theme_tl \l_keys_choice_tl } ,
+  }
+
+\keys_define:nn { skillicon-setup }
+  {
+    theme  .choices:nn = { dark , light }
+      { \tl_gset_eq:NN \g__skillicon_theme_tl \l_keys_choice_tl } ,
+  }
+
+%====messages
+\msg_new:nnn { skill-icons } { unknown-icon }
+  { Unknown~icon~'#1'. }
+
+%====icon registration : page number in skill-icons-dark-all.pdf and skill-icons-light-all.pdf
+\NewDocumentCommand \GenerateSkillIcons { m m }
+  { \cs_gset_nopar:cpn { __skillicon_page_ #2 } {#1} }
+
+%====default theme for the whole document : \skilliconssetup{theme=light}
+\NewDocumentCommand \skilliconssetup { m }
+  { \keys_set:nn { skillicon-setup } {#1} }
+
+%====includegraphics call (#1 = height, #2 = extra keys)
+\cs_new_protected:Npn \__skillicon_include:nn #1#2
+  {
+    \includegraphics
+      [ page = \l__skillicon_page_tl , height = #1 , #2 ]
+      { \l__skillicon_file_tl }
+  }
+
+%====main macro
+\cs_new_protected:Npn \__skillicon_typeset:n #1
+  {
+    \str_if_eq:VnTF \l__skillicon_height_tl { auto }
+      {
+        % height of the strut
+        \hbox_set:Nn \l__skillicon_box { \l__skillicon_strut_tl }
+        \dim_set:Nn \l__skillicon_height_dim { \box_ht:N \l__skillicon_box }
+        \__skillicon_include:nn { \l__skillicon_height_dim } {#1}
+      }
+      {
+        \str_if_eq:VnTF \l__skillicon_height_tl { dauto }
+          {
+            % total height and depth of the dstrut
+            \hbox_set:Nn \l__skillicon_box { \l__skillicon_dstrut_tl }
+            \dim_set:Nn \l__skillicon_depth_dim { \box_dp:N \l__skillicon_box }
+            \dim_set:Nn \l__skillicon_height_dim
+              { \box_ht:N \l__skillicon_box + \box_dp:N \l__skillicon_box }
+            \raisebox { - \l__skillicon_depth_dim }
+              { \__skillicon_include:nn { \l__skillicon_height_dim } {#1} }
+          }
+          {
+            \seq_set_split:NnV \l__skillicon_seq { / } \l__skillicon_height_tl
+            \int_compare:nNnTF { \seq_count:N \l__skillicon_seq } > { 1 }
+              {
+                % height/depth given manually
+                \dim_set:Nn \l__skillicon_height_dim { \seq_item:Nn \l__skillicon_seq { 1 } }
+                \dim_set:Nn \l__skillicon_depth_dim  { \seq_item:Nn \l__skillicon_seq { 2 } }
+                \raisebox { \l__skillicon_depth_dim }
+                  { \__skillicon_include:nn { \l__skillicon_height_dim } {#1} }
+              }
+              {
+                \dim_set:Nn \l__skillicon_height_dim { \l__skillicon_height_tl }
+                \__skillicon_include:nn { \l__skillicon_height_dim } {#1}
+              }
+          }
+      }
+  }
+
+\NewDocumentCommand \skillicons { O{} D<>{} m }
+  {
+    \group_begin:
+      \tl_set_eq:NN \l__skillicon_theme_tl \g__skillicon_theme_tl
+      \keys_set:nn { skillicon } {#1}
+      \cs_if_exist:cTF { __skillicon_page_ #3 }
+        {
+          \tl_set_eq:Nc \l__skillicon_page_tl { __skillicon_page_ #3 }
+          \tl_set:Nx \l__skillicon_file_tl { skill-icons- \l__skillicon_theme_tl -all.pdf }
+          \__skillicon_typeset:n {#2}
+        }
+        { \msg_error:nnn { skill-icons } { unknown-icon } {#3} }
+    \group_end:
+  }
+
+\ExplSyntaxOff
+
+%====macros
+\GenerateSkillIcons{1}{aave}
+\GenerateSkillIcons{2}{ableton}
+\GenerateSkillIcons{3}{acrobat}
+\GenerateSkillIcons{4}{activitypub}
+\GenerateSkillIcons{5}{actix}
+\GenerateSkillIcons{6}{adobespark}
+\GenerateSkillIcons{7}{adonis}
+\GenerateSkillIcons{8}{aero}
+\GenerateSkillIcons{9}{affinity}
+\GenerateSkillIcons{10}{aftereffects}
+\GenerateSkillIcons{11}{agno}
+\GenerateSkillIcons{12}{aiogram}
+\GenerateSkillIcons{13}{airbyte}
+\GenerateSkillIcons{14}{airflow}
+\GenerateSkillIcons{15}{aiscript}
+\GenerateSkillIcons{16}{alacritty}
+\GenerateSkillIcons{17}{alchemy}
+\GenerateSkillIcons{18}{alpinejs}
+\GenerateSkillIcons{19}{amplify}
+\GenerateSkillIcons{20}{anaconda}
+\GenerateSkillIcons{21}{android}
+\GenerateSkillIcons{22}{androidstudio}
+\GenerateSkillIcons{23}{angular}
+\GenerateSkillIcons{24}{animate}
+\GenerateSkillIcons{25}{animejs}
+\GenerateSkillIcons{26}{anki}
+\GenerateSkillIcons{27}{ansible}
+\GenerateSkillIcons{28}{ansys}
+\GenerateSkillIcons{29}{antdesign}
+\GenerateSkillIcons{30}{antigravity}
+\GenerateSkillIcons{31}{apache}
+\GenerateSkillIcons{32}{apeworx}
+\GenerateSkillIcons{33}{apexcharts}
+\GenerateSkillIcons{34}{api}
+\GenerateSkillIcons{35}{apidog}
+\GenerateSkillIcons{36}{apigateway}
+\GenerateSkillIcons{37}{apollo}
+\GenerateSkillIcons{38}{appactive}
+\GenerateSkillIcons{39}{appcode}
+\GenerateSkillIcons{40}{apple}
+\GenerateSkillIcons{41}{appstore}
+\GenerateSkillIcons{42}{apptainer}
+\GenerateSkillIcons{43}{appwrite}
+\GenerateSkillIcons{44}{aqua}
+\GenerateSkillIcons{45}{arcbrowser}
+\GenerateSkillIcons{46}{arch}
+\GenerateSkillIcons{47}{arcjet}
+\GenerateSkillIcons{48}{arduino}
+\GenerateSkillIcons{49}{argocd}
+\GenerateSkillIcons{50}{arrow}
+\GenerateSkillIcons{51}{aseprite}
+\GenerateSkillIcons{52}{assembly}
+\GenerateSkillIcons{53}{astro}
+\GenerateSkillIcons{54}{athena}
+\GenerateSkillIcons{55}{atom}
+\GenerateSkillIcons{56}{audacity}
+\GenerateSkillIcons{57}{audition}
+\GenerateSkillIcons{58}{aurora}
+\GenerateSkillIcons{59}{authenticator}
+\GenerateSkillIcons{60}{authjs}
+\GenerateSkillIcons{61}{autocad}
+\GenerateSkillIcons{62}{avaloniaui}
+\GenerateSkillIcons{63}{aws}
+\GenerateSkillIcons{64}{axios}
+\GenerateSkillIcons{65}{azul}
+\GenerateSkillIcons{66}{azure}
+\GenerateSkillIcons{67}{azuredevops}
+\GenerateSkillIcons{68}{babel}
+\GenerateSkillIcons{69}{balancer}
+\GenerateSkillIcons{70}{barbajs}
+\GenerateSkillIcons{71}{bash}
+\GenerateSkillIcons{72}{beam}
+\GenerateSkillIcons{73}{beeceptor}
+\GenerateSkillIcons{74}{behance}
+\GenerateSkillIcons{75}{behat}
+\GenerateSkillIcons{76}{betterauth}
+\GenerateSkillIcons{77}{bevy}
+\GenerateSkillIcons{78}{bigquery}
+\GenerateSkillIcons{79}{biome}
+\GenerateSkillIcons{80}{bitbucket}
+\GenerateSkillIcons{81}{bitrix24}
+\GenerateSkillIcons{82}{blazor}
+\GenerateSkillIcons{83}{blender}
+\GenerateSkillIcons{84}{bluesky}
+\GenerateSkillIcons{85}{bokeh}
+\GenerateSkillIcons{86}{bootstrap}
+\GenerateSkillIcons{87}{brave}
+\GenerateSkillIcons{88}{breeze}
+\GenerateSkillIcons{89}{bridge}
+\GenerateSkillIcons{90}{bsd}
+\GenerateSkillIcons{91}{btlo}
+\GenerateSkillIcons{92}{bulma}
+\GenerateSkillIcons{93}{bun}
+\GenerateSkillIcons{94}{burn}
+\GenerateSkillIcons{95}{burpsuite}
+\GenerateSkillIcons{96}{c}
+\GenerateSkillIcons{97}{cachyos}
+\GenerateSkillIcons{98}{caddy}
+\GenerateSkillIcons{99}{cairo}
+\GenerateSkillIcons{100}{canva}
+\GenerateSkillIcons{101}{capacitor}
+\GenerateSkillIcons{102}{capture}
+\GenerateSkillIcons{103}{cashier}
+\GenerateSkillIcons{104}{cassandra}
+\GenerateSkillIcons{105}{catppuccin}
+\GenerateSkillIcons{106}{celerdata}
+\GenerateSkillIcons{107}{celery}
+\GenerateSkillIcons{108}{centos}
+\GenerateSkillIcons{109}{chainlink}
+\GenerateSkillIcons{110}{chakraui}
+\GenerateSkillIcons{111}{chaosblade}
+\GenerateSkillIcons{112}{characteranimator}
+\GenerateSkillIcons{113}{chartjs}
+\GenerateSkillIcons{114}{chatgpt}
+\GenerateSkillIcons{115}{chi}
+\GenerateSkillIcons{116}{chrome}
+\GenerateSkillIcons{117}{chromedevtools}
+\GenerateSkillIcons{118}{chromium}
+\GenerateSkillIcons{119}{circleci}
+\GenerateSkillIcons{120}{claude}
+\GenerateSkillIcons{121}{clerk}
+\GenerateSkillIcons{122}{clickhouse}
+\GenerateSkillIcons{123}{clickup}
+\GenerateSkillIcons{124}{clion}
+\GenerateSkillIcons{125}{clojure}
+\GenerateSkillIcons{126}{cloudflare}
+\GenerateSkillIcons{127}{cloudformation}
+\GenerateSkillIcons{128}{cloudfront}
+\GenerateSkillIcons{129}{cloudwatch}
+\GenerateSkillIcons{130}{cmake}
+\GenerateSkillIcons{131}{cockroachdb}
+\GenerateSkillIcons{132}{codeberg}
+\GenerateSkillIcons{133}{codeblocks}
+\GenerateSkillIcons{134}{codeigniter}
+\GenerateSkillIcons{135}{codepen}
+\GenerateSkillIcons{136}{coffeescript}
+\GenerateSkillIcons{137}{commercetools}
+\GenerateSkillIcons{138}{composer}
+\GenerateSkillIcons{139}{confluence}
+\GenerateSkillIcons{140}{confluent}
+\GenerateSkillIcons{141}{consul}
+\GenerateSkillIcons{142}{contentful}
+\GenerateSkillIcons{143}{cpp}
+\GenerateSkillIcons{144}{creativecloud}
+\GenerateSkillIcons{145}{crewai}
+\GenerateSkillIcons{146}{crystal}
+\GenerateSkillIcons{147}{cs}
+\GenerateSkillIcons{148}{css}
+\GenerateSkillIcons{149}{cuda}
+\GenerateSkillIcons{150}{cursor}
+\GenerateSkillIcons{151}{cypress}
+\GenerateSkillIcons{152}{d}
+\GenerateSkillIcons{153}{d3}
+\GenerateSkillIcons{154}{daft}
+\GenerateSkillIcons{155}{dailydev}
+\GenerateSkillIcons{156}{daisyui}
+\GenerateSkillIcons{157}{dapper}
+\GenerateSkillIcons{158}{dart}
+\GenerateSkillIcons{159}{dask}
+\GenerateSkillIcons{160}{databricks}
+\GenerateSkillIcons{161}{datadog}
+\GenerateSkillIcons{162}{datagrip}
+\GenerateSkillIcons{163}{dataspell}
+\GenerateSkillIcons{164}{davinci}
+\GenerateSkillIcons{165}{dbeaver}
+\GenerateSkillIcons{166}{dbtlabs}
+\GenerateSkillIcons{167}{debian}
+\GenerateSkillIcons{168}{deepseek}
+\GenerateSkillIcons{169}{defold}
+\GenerateSkillIcons{170}{delta}
+\GenerateSkillIcons{171}{deltars}
+\GenerateSkillIcons{172}{deno}
+\GenerateSkillIcons{173}{desmos}
+\GenerateSkillIcons{174}{devto}
+\GenerateSkillIcons{175}{digitalocean}
+\GenerateSkillIcons{176}{dimension}
+\GenerateSkillIcons{177}{directus}
+\GenerateSkillIcons{178}{discord}
+\GenerateSkillIcons{179}{discordbots}
+\GenerateSkillIcons{180}{discordjs}
+\GenerateSkillIcons{181}{django}
+\GenerateSkillIcons{182}{djangorestframework}
+\GenerateSkillIcons{183}{dn42}
+\GenerateSkillIcons{184}{docker}
+\GenerateSkillIcons{185}{docksal}
+\GenerateSkillIcons{186}{docsify}
+\GenerateSkillIcons{187}{doctrine}
+\GenerateSkillIcons{188}{doris}
+\GenerateSkillIcons{189}{dotnet}
+\GenerateSkillIcons{190}{dreamweaver}
+\GenerateSkillIcons{191}{dremio}
+\GenerateSkillIcons{192}{drizzle}
+\GenerateSkillIcons{193}{drupal}
+\GenerateSkillIcons{194}{dubbo}
+\GenerateSkillIcons{195}{duckdb}
+\GenerateSkillIcons{196}{duckduckgo}
+\GenerateSkillIcons{197}{dusk}
+\GenerateSkillIcons{198}{dynamodb}
+\GenerateSkillIcons{199}{ec2}
+\GenerateSkillIcons{200}{echo}
+\GenerateSkillIcons{201}{eclipse}
+\GenerateSkillIcons{202}{ecr}
+\GenerateSkillIcons{203}{ecs}
+\GenerateSkillIcons{204}{edge}
+\GenerateSkillIcons{205}{ejs}
+\GenerateSkillIcons{206}{eks}
+\GenerateSkillIcons{207}{elasticbeanstalk}
+\GenerateSkillIcons{208}{elasticsearch}
+\GenerateSkillIcons{209}{elb}
+\GenerateSkillIcons{210}{electron}
+\GenerateSkillIcons{211}{element}
+\GenerateSkillIcons{212}{elementor}
+\GenerateSkillIcons{213}{elementplus}
+\GenerateSkillIcons{214}{elixir}
+\GenerateSkillIcons{215}{elm}
+\GenerateSkillIcons{216}{elysia}
+\GenerateSkillIcons{217}{emacs}
+\GenerateSkillIcons{218}{ember}
+\GenerateSkillIcons{219}{emotion}
+\GenerateSkillIcons{220}{emr}
+\GenerateSkillIcons{221}{envoyer}
+\GenerateSkillIcons{222}{erlang}
+\GenerateSkillIcons{223}{eslint}
+\GenerateSkillIcons{224}{etcd}
+\GenerateSkillIcons{225}{ethereum}
+\GenerateSkillIcons{226}{eventbridge}
+\GenerateSkillIcons{227}{excel}
+\GenerateSkillIcons{228}{expo}
+\GenerateSkillIcons{229}{expressjs}
+\GenerateSkillIcons{230}{fabric}
+\GenerateSkillIcons{231}{fabricmc}
+\GenerateSkillIcons{232}{facebook}
+\GenerateSkillIcons{233}{fargate}
+\GenerateSkillIcons{234}{fastai}
+\GenerateSkillIcons{235}{fastapi}
+\GenerateSkillIcons{236}{fastlane}
+\GenerateSkillIcons{237}{fediverse}
+\GenerateSkillIcons{238}{fedora}
+\GenerateSkillIcons{239}{ffmpeg}
+\GenerateSkillIcons{240}{fiber}
+\GenerateSkillIcons{241}{figma}
+\GenerateSkillIcons{242}{filament}
+\GenerateSkillIcons{243}{filmora}
+\GenerateSkillIcons{244}{firebase}
+\GenerateSkillIcons{245}{firefox}
+\GenerateSkillIcons{246}{fiverr}
+\GenerateSkillIcons{247}{fivetran}
+\GenerateSkillIcons{248}{flameshot}
+\GenerateSkillIcons{249}{flask}
+\GenerateSkillIcons{250}{fleet}
+\GenerateSkillIcons{251}{flink}
+\GenerateSkillIcons{252}{flutter}
+\GenerateSkillIcons{253}{flutterflow}
+\GenerateSkillIcons{254}{flyio}
+\GenerateSkillIcons{255}{fonts}
+\GenerateSkillIcons{256}{forge}
+\GenerateSkillIcons{257}{forgejo}
+\GenerateSkillIcons{258}{forgemc}
+\GenerateSkillIcons{259}{forth}
+\GenerateSkillIcons{260}{fortran}
+\GenerateSkillIcons{261}{foundry}
+\GenerateSkillIcons{262}{framer}
+\GenerateSkillIcons{263}{frankenphp}
+\GenerateSkillIcons{264}{freecad}
+\GenerateSkillIcons{265}{freecodecamp}
+\GenerateSkillIcons{266}{freelancer}
+\GenerateSkillIcons{267}{fresco}
+\GenerateSkillIcons{268}{fresh}
+\GenerateSkillIcons{269}{fuse}
+\GenerateSkillIcons{270}{gamemakerstudio}
+\GenerateSkillIcons{271}{ganache}
+\GenerateSkillIcons{272}{gatsby}
+\GenerateSkillIcons{273}{gcp}
+\GenerateSkillIcons{274}{gdevelop}
+\GenerateSkillIcons{275}{gemini}
+\GenerateSkillIcons{276}{gentoo}
+\GenerateSkillIcons{277}{gherkin}
+\GenerateSkillIcons{278}{ghostty}
+\GenerateSkillIcons{279}{gimp}
+\GenerateSkillIcons{280}{gin}
+\GenerateSkillIcons{281}{git}
+\GenerateSkillIcons{282}{gitbash}
+\GenerateSkillIcons{283}{gitea}
+\GenerateSkillIcons{284}{github}
+\GenerateSkillIcons{285}{githubactions}
+\GenerateSkillIcons{286}{githubcopilot}
+\GenerateSkillIcons{287}{githubdesktop}
+\GenerateSkillIcons{288}{githubpages}
+\GenerateSkillIcons{289}{gitkraken}
+\GenerateSkillIcons{290}{gitlab}
+\GenerateSkillIcons{291}{gleam}
+\GenerateSkillIcons{292}{glue}
+\GenerateSkillIcons{293}{gmail}
+\GenerateSkillIcons{294}{gmx}
+\GenerateSkillIcons{295}{gnome}
+\GenerateSkillIcons{296}{godot}
+\GenerateSkillIcons{297}{goland}
+\GenerateSkillIcons{298}{golang}
+\GenerateSkillIcons{299}{googleanalytics}
+\GenerateSkillIcons{300}{googleappsscript}
+\GenerateSkillIcons{301}{googlecolab}
+\GenerateSkillIcons{302}{googleplay}
+\GenerateSkillIcons{303}{googleplayconsole}
+\GenerateSkillIcons{304}{gorm}
+\GenerateSkillIcons{305}{gradio}
+\GenerateSkillIcons{306}{gradle}
+\GenerateSkillIcons{307}{grafana}
+\GenerateSkillIcons{308}{grails}
+\GenerateSkillIcons{309}{granica}
+\GenerateSkillIcons{310}{graphite}
+\GenerateSkillIcons{311}{graphql}
+\GenerateSkillIcons{312}{grok}
+\GenerateSkillIcons{313}{gromacs}
+\GenerateSkillIcons{314}{groq}
+\GenerateSkillIcons{315}{grpc}
+\GenerateSkillIcons{316}{grunt}
+\GenerateSkillIcons{317}{gsap}
+\GenerateSkillIcons{318}{gtk}
+\GenerateSkillIcons{319}{gulp}
+\GenerateSkillIcons{320}{hackerrank}
+\GenerateSkillIcons{321}{hackthebox}
+\GenerateSkillIcons{322}{hadoop}
+\GenerateSkillIcons{323}{hardhat}
+\GenerateSkillIcons{324}{haskell}
+\GenerateSkillIcons{325}{haxe}
+\GenerateSkillIcons{326}{haxeflixel}
+\GenerateSkillIcons{327}{helia}
+\GenerateSkillIcons{328}{helix}
+\GenerateSkillIcons{329}{helm}
+\GenerateSkillIcons{330}{herd}
+\GenerateSkillIcons{331}{heroku}
+\GenerateSkillIcons{332}{hexo}
+\GenerateSkillIcons{333}{hibernate}
+\GenerateSkillIcons{334}{higress}
+\GenerateSkillIcons{335}{hive}
+\GenerateSkillIcons{336}{holyc}
+\GenerateSkillIcons{337}{hono}
+\GenerateSkillIcons{338}{horizon}
+\GenerateSkillIcons{339}{html}
+\GenerateSkillIcons{340}{htmx}
+\GenerateSkillIcons{341}{htop}
+\GenerateSkillIcons{342}{hudi}
+\GenerateSkillIcons{343}{huggingface}
+\GenerateSkillIcons{344}{hugo}
+\GenerateSkillIcons{345}{hydrogen}
+\GenerateSkillIcons{346}{hyprland}
+\GenerateSkillIcons{347}{i3}
+\GenerateSkillIcons{348}{iceberg}
+\GenerateSkillIcons{349}{iced}
+\GenerateSkillIcons{350}{idea}
+\GenerateSkillIcons{351}{ignite}
+\GenerateSkillIcons{352}{illustrator}
+\GenerateSkillIcons{353}{immuta}
+\GenerateSkillIcons{354}{impala}
+\GenerateSkillIcons{355}{incopy}
+\GenerateSkillIcons{356}{indesign}
+\GenerateSkillIcons{357}{inertia}
+\GenerateSkillIcons{358}{informatica}
+\GenerateSkillIcons{359}{infura}
+\GenerateSkillIcons{360}{inkscape}
+\GenerateSkillIcons{361}{insomnia}
+\GenerateSkillIcons{362}{instagram}
+\GenerateSkillIcons{363}{integrations}
+\GenerateSkillIcons{364}{ipfs}
+\GenerateSkillIcons{365}{itchio}
+\GenerateSkillIcons{366}{jaeger}
+\GenerateSkillIcons{367}{jamovi}
+\GenerateSkillIcons{368}{java}
+\GenerateSkillIcons{369}{javascript}
+\GenerateSkillIcons{370}{jax}
+\GenerateSkillIcons{371}{jekyll}
+\GenerateSkillIcons{372}{jenkins}
+\GenerateSkillIcons{373}{jest}
+\GenerateSkillIcons{374}{jetpackcompose}
+\GenerateSkillIcons{375}{jetstream}
+\GenerateSkillIcons{376}{jira}
+\GenerateSkillIcons{377}{joomla}
+\GenerateSkillIcons{378}{jqlang}
+\GenerateSkillIcons{379}{jquery}
+\GenerateSkillIcons{380}{json}
+\GenerateSkillIcons{381}{julia}
+\GenerateSkillIcons{382}{junit}
+\GenerateSkillIcons{383}{jupyter}
+\GenerateSkillIcons{384}{jwt}
+\GenerateSkillIcons{385}{k3s}
+\GenerateSkillIcons{386}{kafka}
+\GenerateSkillIcons{387}{kaggle}
+\GenerateSkillIcons{388}{kakoune}
+\GenerateSkillIcons{389}{kali}
+\GenerateSkillIcons{390}{karma}
+\GenerateSkillIcons{391}{kde}
+\GenerateSkillIcons{392}{kdenlive}
+\GenerateSkillIcons{393}{keycloak}
+\GenerateSkillIcons{394}{keydb}
+\GenerateSkillIcons{395}{kibana}
+\GenerateSkillIcons{396}{kitty}
+\GenerateSkillIcons{397}{kong}
+\GenerateSkillIcons{398}{kotlin}
+\GenerateSkillIcons{399}{ktor}
+\GenerateSkillIcons{400}{kubernetes}
+\GenerateSkillIcons{401}{kubevela}
+\GenerateSkillIcons{402}{lambda}
+\GenerateSkillIcons{403}{lancedb}
+\GenerateSkillIcons{404}{lando}
+\GenerateSkillIcons{405}{langchain}
+\GenerateSkillIcons{406}{laravel}
+\GenerateSkillIcons{407}{laravelspark}
+\GenerateSkillIcons{408}{latex}
+\GenerateSkillIcons{409}{lazyvim}
+\GenerateSkillIcons{410}{leaflet}
+\GenerateSkillIcons{411}{leetcode}
+\GenerateSkillIcons{412}{less}
+\GenerateSkillIcons{413}{libreoffice}
+\GenerateSkillIcons{414}{librewolf}
+\GenerateSkillIcons{415}{libsql}
+\GenerateSkillIcons{416}{lighthouse}
+\GenerateSkillIcons{417}{lightning}
+\GenerateSkillIcons{418}{lightroom}
+\GenerateSkillIcons{419}{lightroomclassic}
+\GenerateSkillIcons{420}{linkedin}
+\GenerateSkillIcons{421}{linux}
+\GenerateSkillIcons{422}{liquidsoap}
+\GenerateSkillIcons{423}{lit}
+\GenerateSkillIcons{424}{litestar}
+\GenerateSkillIcons{425}{litmus}
+\GenerateSkillIcons{426}{livewire}
+\GenerateSkillIcons{427}{llamaindex}
+\GenerateSkillIcons{428}{logto}
+\GenerateSkillIcons{429}{looker}
+\GenerateSkillIcons{430}{lottielab}
+\GenerateSkillIcons{431}{lua}
+\GenerateSkillIcons{432}{luau}
+\GenerateSkillIcons{433}{lucidchart}
+\GenerateSkillIcons{434}{lunacy}
+\GenerateSkillIcons{435}{lxc}
+\GenerateSkillIcons{436}{lynxjs}
+\GenerateSkillIcons{437}{macos}
+\GenerateSkillIcons{438}{manim}
+\GenerateSkillIcons{439}{manjaro}
+\GenerateSkillIcons{440}{mariadb}
+\GenerateSkillIcons{441}{markdown}
+\GenerateSkillIcons{442}{mastodon}
+\GenerateSkillIcons{443}{materialui}
+\GenerateSkillIcons{444}{matlab}
+\GenerateSkillIcons{445}{matplotlib}
+\GenerateSkillIcons{446}{maven}
+\GenerateSkillIcons{447}{max8}
+\GenerateSkillIcons{448}{max9}
+\GenerateSkillIcons{449}{mcp}
+\GenerateSkillIcons{450}{mdbook}
+\GenerateSkillIcons{451}{mediaencoder}
+\GenerateSkillIcons{452}{medium}
+\GenerateSkillIcons{453}{mermaid}
+\GenerateSkillIcons{454}{metabase}
+\GenerateSkillIcons{455}{meteorjs}
+\GenerateSkillIcons{456}{micropython}
+\GenerateSkillIcons{457}{microsoftcopilot}
+\GenerateSkillIcons{458}{miktex}
+\GenerateSkillIcons{459}{millionjs}
+\GenerateSkillIcons{460}{milvus}
+\GenerateSkillIcons{461}{mindsdb}
+\GenerateSkillIcons{462}{mint}
+\GenerateSkillIcons{463}{miro}
+\GenerateSkillIcons{464}{misskey}
+\GenerateSkillIcons{465}{mistral}
+\GenerateSkillIcons{466}{mjml}
+\GenerateSkillIcons{467}{ml5}
+\GenerateSkillIcons{468}{mlflow}
+\GenerateSkillIcons{469}{mobx}
+\GenerateSkillIcons{470}{mocha}
+\GenerateSkillIcons{471}{modelviewer}
+\GenerateSkillIcons{472}{mojo}
+\GenerateSkillIcons{473}{mongodb}
+\GenerateSkillIcons{474}{mongoose}
+\GenerateSkillIcons{475}{mux}
+\GenerateSkillIcons{476}{mysql}
+\GenerateSkillIcons{477}{n8n}
+\GenerateSkillIcons{478}{nacos}
+\GenerateSkillIcons{479}{neo4j}
+\GenerateSkillIcons{480}{neoforge}
+\GenerateSkillIcons{481}{neon}
+\GenerateSkillIcons{482}{neovim}
+\GenerateSkillIcons{483}{nestjs}
+\GenerateSkillIcons{484}{netlify}
+\GenerateSkillIcons{485}{nextflow}
+\GenerateSkillIcons{486}{nextjs}
+\GenerateSkillIcons{487}{nginx}
+\GenerateSkillIcons{488}{ngrok}
+\GenerateSkillIcons{489}{ngrx}
+\GenerateSkillIcons{490}{nim}
+\GenerateSkillIcons{491}{nixos}
+\GenerateSkillIcons{492}{nodejs}
+\GenerateSkillIcons{493}{notepadpp}
+\GenerateSkillIcons{494}{notion}
+\GenerateSkillIcons{495}{nova}
+\GenerateSkillIcons{496}{npm}
+\GenerateSkillIcons{497}{numpy}
+\GenerateSkillIcons{498}{nunjucks}
+\GenerateSkillIcons{499}{nuxtjs}
+\GenerateSkillIcons{500}{nvidia}
+\GenerateSkillIcons{501}{obs}
+\GenerateSkillIcons{502}{obsidian}
+\GenerateSkillIcons{503}{ocaml}
+\GenerateSkillIcons{504}{octane}
+\GenerateSkillIcons{505}{octave}
+\GenerateSkillIcons{506}{odin}
+\GenerateSkillIcons{507}{ollama}
+\GenerateSkillIcons{508}{onedrive}
+\GenerateSkillIcons{509}{onehouse}
+\GenerateSkillIcons{510}{onenote}
+\GenerateSkillIcons{511}{opencode}
+\GenerateSkillIcons{512}{opencv}
+\GenerateSkillIcons{513}{openmm}
+\GenerateSkillIcons{514}{opensergo}
+\GenerateSkillIcons{515}{openshift}
+\GenerateSkillIcons{516}{opensource}
+\GenerateSkillIcons{517}{openstack}
+\GenerateSkillIcons{518}{opentelemetry}
+\GenerateSkillIcons{519}{openzeppelin}
+\GenerateSkillIcons{520}{opera}
+\GenerateSkillIcons{521}{oracle}
+\GenerateSkillIcons{522}{orchid}
+\GenerateSkillIcons{523}{outlook}
+\GenerateSkillIcons{524}{overleaf}
+\GenerateSkillIcons{525}{p4}
+\GenerateSkillIcons{526}{p5js}
+\GenerateSkillIcons{527}{pail}
+\GenerateSkillIcons{528}{pancakeswap}
+\GenerateSkillIcons{529}{pandas}
+\GenerateSkillIcons{530}{papertrail}
+\GenerateSkillIcons{531}{payload}
+\GenerateSkillIcons{532}{pbi}
+\GenerateSkillIcons{533}{pennant}
+\GenerateSkillIcons{534}{perl}
+\GenerateSkillIcons{535}{phaser}
+\GenerateSkillIcons{536}{photoshop}
+\GenerateSkillIcons{537}{photoshopclassic}
+\GenerateSkillIcons{538}{photoshopexpress}
+\GenerateSkillIcons{539}{php}
+\GenerateSkillIcons{540}{phpstan}
+\GenerateSkillIcons{541}{phpstorm}
+\GenerateSkillIcons{542}{picocss}
+\GenerateSkillIcons{543}{pinecone}
+\GenerateSkillIcons{544}{pinescript}
+\GenerateSkillIcons{545}{pinia}
+\GenerateSkillIcons{546}{pint}
+\GenerateSkillIcons{547}{pkl}
+\GenerateSkillIcons{548}{plan9}
+\GenerateSkillIcons{549}{planetscale}
+\GenerateSkillIcons{550}{platformio}
+\GenerateSkillIcons{551}{playcanvas}
+\GenerateSkillIcons{552}{playfab}
+\GenerateSkillIcons{553}{playwright}
+\GenerateSkillIcons{554}{plotly}
+\GenerateSkillIcons{555}{plsql}
+\GenerateSkillIcons{556}{pm2}
+\GenerateSkillIcons{557}{pnpm}
+\GenerateSkillIcons{558}{pocketbase}
+\GenerateSkillIcons{559}{podman}
+\GenerateSkillIcons{560}{polar}
+\GenerateSkillIcons{561}{polars}
+\GenerateSkillIcons{562}{popos}
+\GenerateSkillIcons{563}{portainer}
+\GenerateSkillIcons{564}{portfolio}
+\GenerateSkillIcons{565}{postcss}
+\GenerateSkillIcons{566}{postgresql}
+\GenerateSkillIcons{567}{postman}
+\GenerateSkillIcons{568}{powerautomate}
+\GenerateSkillIcons{569}{powerpoint}
+\GenerateSkillIcons{570}{powershell}
+\GenerateSkillIcons{571}{powertoys}
+\GenerateSkillIcons{572}{preact}
+\GenerateSkillIcons{573}{prelude}
+\GenerateSkillIcons{574}{premiere}
+\GenerateSkillIcons{575}{premiererush}
+\GenerateSkillIcons{576}{presto}
+\GenerateSkillIcons{577}{prettier}
+\GenerateSkillIcons{578}{primeng}
+\GenerateSkillIcons{579}{primereact}
+\GenerateSkillIcons{580}{primevue}
+\GenerateSkillIcons{581}{prisma}
+\GenerateSkillIcons{582}{processing}
+\GenerateSkillIcons{583}{prometheus}
+\GenerateSkillIcons{584}{prompts}
+\GenerateSkillIcons{585}{proton}
+\GenerateSkillIcons{586}{proxmox}
+\GenerateSkillIcons{587}{pug}
+\GenerateSkillIcons{588}{pulsar}
+\GenerateSkillIcons{589}{pulse}
+\GenerateSkillIcons{590}{pulumi}
+\GenerateSkillIcons{591}{puppeteer}
+\GenerateSkillIcons{592}{puppygraph}
+\GenerateSkillIcons{593}{putty}
+\GenerateSkillIcons{594}{pwa}
+\GenerateSkillIcons{595}{pycharm}
+\GenerateSkillIcons{596}{pydantic}
+\GenerateSkillIcons{597}{pygame}
+\GenerateSkillIcons{598}{pypi}
+\GenerateSkillIcons{599}{pyspark}
+\GenerateSkillIcons{600}{pytest}
+\GenerateSkillIcons{601}{python}
+\GenerateSkillIcons{602}{pytorch}
+\GenerateSkillIcons{603}{pyxel}
+\GenerateSkillIcons{604}{qdrant}
+\GenerateSkillIcons{605}{qemu}
+\GenerateSkillIcons{606}{qodana}
+\GenerateSkillIcons{607}{qt}
+\GenerateSkillIcons{608}{quarkus}
+\GenerateSkillIcons{609}{qubesos}
+\GenerateSkillIcons{610}{querydsl}
+\GenerateSkillIcons{611}{quiltmc}
+\GenerateSkillIcons{612}{r}
+\GenerateSkillIcons{613}{rabbitmq}
+\GenerateSkillIcons{614}{radix}
+\GenerateSkillIcons{615}{rails}
+\GenerateSkillIcons{616}{railway}
+\GenerateSkillIcons{617}{rancher}
+\GenerateSkillIcons{618}{raspberrypi}
+\GenerateSkillIcons{619}{ratatui}
+\GenerateSkillIcons{620}{ray}
+\GenerateSkillIcons{621}{rclone}
+\GenerateSkillIcons{622}{rds}
+\GenerateSkillIcons{623}{react}
+\GenerateSkillIcons{624}{reactbootstrap}
+\GenerateSkillIcons{625}{reactivex}
+\GenerateSkillIcons{626}{reactlynx}
+\GenerateSkillIcons{627}{reactnative}
+\GenerateSkillIcons{628}{reactos}
+\GenerateSkillIcons{629}{reactquery}
+\GenerateSkillIcons{630}{reactrouter}
+\GenerateSkillIcons{631}{recoil}
+\GenerateSkillIcons{632}{reddit}
+\GenerateSkillIcons{633}{redhat}
+\GenerateSkillIcons{634}{redis}
+\GenerateSkillIcons{635}{redshift}
+\GenerateSkillIcons{636}{redux}
+\GenerateSkillIcons{637}{regex}
+\GenerateSkillIcons{638}{remix}
+\GenerateSkillIcons{639}{render}
+\GenerateSkillIcons{640}{renpy}
+\GenerateSkillIcons{641}{replit}
+\GenerateSkillIcons{642}{resend}
+\GenerateSkillIcons{643}{resharper}
+\GenerateSkillIcons{644}{restructuredtext}
+\GenerateSkillIcons{645}{reverb}
+\GenerateSkillIcons{646}{revolt}
+\GenerateSkillIcons{647}{rider}
+\GenerateSkillIcons{648}{robloxstudio}
+\GenerateSkillIcons{649}{rocket}
+\GenerateSkillIcons{650}{rocketmq}
+\GenerateSkillIcons{651}{rollupjs}
+\GenerateSkillIcons{652}{ros}
+\GenerateSkillIcons{653}{rubocop}
+\GenerateSkillIcons{654}{ruby}
+\GenerateSkillIcons{655}{rubymine}
+\GenerateSkillIcons{656}{rust}
+\GenerateSkillIcons{657}{rustrover}
+\GenerateSkillIcons{658}{s3}
+\GenerateSkillIcons{659}{safari}
+\GenerateSkillIcons{660}{sail}
+\GenerateSkillIcons{661}{salesforce}
+\GenerateSkillIcons{662}{sanctum}
+\GenerateSkillIcons{663}{sanity}
+\GenerateSkillIcons{664}{sas}
+\GenerateSkillIcons{665}{sass}
+\GenerateSkillIcons{666}{scala}
+\GenerateSkillIcons{667}{scikitlearn}
+\GenerateSkillIcons{668}{scipy}
+\GenerateSkillIcons{669}{scout}
+\GenerateSkillIcons{670}{scratch}
+\GenerateSkillIcons{671}{seaborn}
+\GenerateSkillIcons{672}{seata}
+\GenerateSkillIcons{673}{selenium}
+\GenerateSkillIcons{674}{sentinel}
+\GenerateSkillIcons{675}{sentry}
+\GenerateSkillIcons{676}{sequelize}
+\GenerateSkillIcons{677}{ses}
+\GenerateSkillIcons{678}{session}
+\GenerateSkillIcons{679}{shadcn}
+\GenerateSkillIcons{680}{sharepoint}
+\GenerateSkillIcons{681}{shopify}
+\GenerateSkillIcons{682}{signal}
+\GenerateSkillIcons{683}{skeletonui}
+\GenerateSkillIcons{684}{sketchup}
+\GenerateSkillIcons{685}{skywalking}
+\GenerateSkillIcons{686}{slack}
+\GenerateSkillIcons{687}{snowflake}
+\GenerateSkillIcons{688}{snyk}
+\GenerateSkillIcons{689}{socialite}
+\GenerateSkillIcons{690}{socketio}
+\GenerateSkillIcons{691}{solana}
+\GenerateSkillIcons{692}{solidity}
+\GenerateSkillIcons{693}{solidjs}
+\GenerateSkillIcons{694}{sonarqube}
+\GenerateSkillIcons{695}{spark}
+\GenerateSkillIcons{696}{sparksql}
+\GenerateSkillIcons{697}{sphinx}
+\GenerateSkillIcons{698}{spring}
+\GenerateSkillIcons{699}{springbatch}
+\GenerateSkillIcons{700}{springdatajpa}
+\GenerateSkillIcons{701}{springsecurity}
+\GenerateSkillIcons{702}{sqlalchemy}
+\GenerateSkillIcons{703}{sqlite}
+\GenerateSkillIcons{704}{sqlserver}
+\GenerateSkillIcons{705}{sqs}
+\GenerateSkillIcons{706}{stackoverflow}
+\GenerateSkillIcons{707}{stan}
+\GenerateSkillIcons{708}{starburst}
+\GenerateSkillIcons{709}{starrocks}
+\GenerateSkillIcons{710}{steam}
+\GenerateSkillIcons{711}{stock}
+\GenerateSkillIcons{712}{storyblok}
+\GenerateSkillIcons{713}{storybook}
+\GenerateSkillIcons{714}{strapi}
+\GenerateSkillIcons{715}{streamlit}
+\GenerateSkillIcons{716}{stripe}
+\GenerateSkillIcons{717}{styledcomponents}
+\GenerateSkillIcons{718}{stylelint}
+\GenerateSkillIcons{719}{stylus}
+\GenerateSkillIcons{720}{sublime}
+\GenerateSkillIcons{721}{supabase}
+\GenerateSkillIcons{722}{surrealdb}
+\GenerateSkillIcons{723}{sushiswap}
+\GenerateSkillIcons{724}{svelte}
+\GenerateSkillIcons{725}{svg}
+\GenerateSkillIcons{726}{svn}
+\GenerateSkillIcons{727}{swagger}
+\GenerateSkillIcons{728}{swift}
+\GenerateSkillIcons{729}{symfony}
+\GenerateSkillIcons{730}{systemd}
+\GenerateSkillIcons{731}{t3}
+\GenerateSkillIcons{732}{tableau}
+\GenerateSkillIcons{733}{taiga}
+\GenerateSkillIcons{734}{tailscale}
+\GenerateSkillIcons{735}{tailsos}
+\GenerateSkillIcons{736}{tailwindcss}
+\GenerateSkillIcons{737}{tallyprime}
+\GenerateSkillIcons{738}{tanstack}
+\GenerateSkillIcons{739}{tauri}
+\GenerateSkillIcons{740}{teams}
+\GenerateSkillIcons{741}{tecton}
+\GenerateSkillIcons{742}{telegram}
+\GenerateSkillIcons{743}{telescope}
+\GenerateSkillIcons{744}{tensorflow}
+\GenerateSkillIcons{745}{terminal}
+\GenerateSkillIcons{746}{terraform}
+\GenerateSkillIcons{747}{testinglibrary}
+\GenerateSkillIcons{748}{texmaker}
+\GenerateSkillIcons{749}{threejs}
+\GenerateSkillIcons{750}{thunderbird}
+\GenerateSkillIcons{751}{thunkable}
+\GenerateSkillIcons{752}{tidb}
+\GenerateSkillIcons{753}{tmux}
+\GenerateSkillIcons{754}{tokiors}
+\GenerateSkillIcons{755}{tomcat}
+\GenerateSkillIcons{756}{toml}
+\GenerateSkillIcons{757}{tor}
+\GenerateSkillIcons{758}{touchdesigner}
+\GenerateSkillIcons{759}{trino}
+\GenerateSkillIcons{760}{trpc}
+\GenerateSkillIcons{761}{truffle}
+\GenerateSkillIcons{762}{tryhackme}
+\GenerateSkillIcons{763}{turborepo}
+\GenerateSkillIcons{764}{turso}
+\GenerateSkillIcons{765}{twig}
+\GenerateSkillIcons{766}{twitch}
+\GenerateSkillIcons{767}{typeorm}
+\GenerateSkillIcons{768}{typescript}
+\GenerateSkillIcons{769}{typst}
+\GenerateSkillIcons{770}{ubuntu}
+\GenerateSkillIcons{771}{uml}
+\GenerateSkillIcons{772}{uniswap}
+\GenerateSkillIcons{773}{unity}
+\GenerateSkillIcons{774}{unitycatalog}
+\GenerateSkillIcons{775}{unocss}
+\GenerateSkillIcons{776}{unrealengine}
+\GenerateSkillIcons{777}{unstructured}
+\GenerateSkillIcons{778}{upwork}
+\GenerateSkillIcons{779}{v}
+\GenerateSkillIcons{780}{vagrant}
+\GenerateSkillIcons{781}{vala}
+\GenerateSkillIcons{782}{vapor}
+\GenerateSkillIcons{783}{vegaspro}
+\GenerateSkillIcons{784}{vercel}
+\GenerateSkillIcons{785}{vim}
+\GenerateSkillIcons{786}{virtualbox}
+\GenerateSkillIcons{787}{visio}
+\GenerateSkillIcons{788}{visualbasic}
+\GenerateSkillIcons{789}{visualstudio}
+\GenerateSkillIcons{790}{vite}
+\GenerateSkillIcons{791}{vitepress}
+\GenerateSkillIcons{792}{vitest}
+\GenerateSkillIcons{793}{vmwareworkstation}
+\GenerateSkillIcons{794}{vscode}
+\GenerateSkillIcons{795}{vscodeinsiders}
+\GenerateSkillIcons{796}{vscodium}
+\GenerateSkillIcons{797}{vuejs}
+\GenerateSkillIcons{798}{vuetify}
+\GenerateSkillIcons{799}{vyper}
+\GenerateSkillIcons{800}{wails}
+\GenerateSkillIcons{801}{wandb}
+\GenerateSkillIcons{802}{warp}
+\GenerateSkillIcons{803}{webassembly}
+\GenerateSkillIcons{804}{webflow}
+\GenerateSkillIcons{805}{webpack}
+\GenerateSkillIcons{806}{websocket}
+\GenerateSkillIcons{807}{webstorm}
+\GenerateSkillIcons{808}{webstudio}
+\GenerateSkillIcons{809}{wezterm}
+\GenerateSkillIcons{810}{windicss}
+\GenerateSkillIcons{811}{windmill}
+\GenerateSkillIcons{812}{windows}
+\GenerateSkillIcons{813}{winedt}
+\GenerateSkillIcons{814}{wireshark}
+\GenerateSkillIcons{815}{word}
+\GenerateSkillIcons{816}{wordpress}
+\GenerateSkillIcons{817}{workers}
+\GenerateSkillIcons{818}{wsl}
+\GenerateSkillIcons{819}{wxt}
+\GenerateSkillIcons{820}{x}
+\GenerateSkillIcons{821}{xcode}
+\GenerateSkillIcons{822}{xd}
+\GenerateSkillIcons{823}{xtable}
+\GenerateSkillIcons{824}{yaml}
+\GenerateSkillIcons{825}{yammer}
+\GenerateSkillIcons{826}{yarn}
+\GenerateSkillIcons{827}{yew}
+\GenerateSkillIcons{828}{yii}
+\GenerateSkillIcons{829}{youtube}
+\GenerateSkillIcons{830}{yui}
+\GenerateSkillIcons{831}{zabbix}
+\GenerateSkillIcons{832}{zed}
+\GenerateSkillIcons{833}{zellij}
+\GenerateSkillIcons{834}{zen}
+\GenerateSkillIcons{835}{zig}
+\GenerateSkillIcons{836}{zudoku}
+\GenerateSkillIcons{837}{zustand}
+
+\endinput

@@ -1,0 +1,223 @@
+% !TeX TXS-program:compile = txs:///arara
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+% arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
+
+\documentclass{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{bera}
+\usepackage{inconsolata}
+\usepackage[T1]{fontenc}
+\usepackage[scale=0.875]{cabin}
+\usepackage{skill-icons}
+\usepackage{xcolor}
+\pagecolor{yellow!5}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{fancyvrb}
+\usepackage{shortvrb}
+\MakeShortVerb{\|}
+\setlength{\parindent}{0pt}
+
+\newenvironment{skilliconcase}
+{%
+  \footnotesize
+  \begin{longtable}{cc@{\hspace{2em}}llr}%dark + light + name + macro + page
+    \cmidrule[\heavyrulewidth]{1-5}% \toprule
+    \bfseries Dark & \bfseries Light & \bfseries Name & \bfseries Direct command & \bfseries PDF page \\
+    \cmidrule{1-5}
+    \endhead
+}%
+{%
+    \cmidrule[\heavyrulewidth]{1-5}
+  \end{longtable}%
+}
+
+\NewDocumentCommand{\showcaseskillicons}{mm}{%name + page
+  \skillicons[theme=dark,height=2em]{#1} & \skillicons[theme=light,height=2em]{#1} & \itshape #1 & \ttfamily \textbackslash skillicons\{#1\} & \ttfamily #2 \\
+}
+
+\begin{document}
+
+\title{The \textsf{skill-icons} package (0.1a) -- 29/10/2026}
+\author{%
+  Cédric Pierquet\\%
+  \url{https://github.com/LelouchFR/skill-icons} \\%
+  \url{https://github.com/cpierquet/latex-packages/tree/main/skill-icons} (\LaTeX{} package)
+}
+\date{cpierquet -- at -- outlook . fr}\maketitle
+
+This package provides \LaTeX{} support for the \textsf{Skill Icons} project (\url{https://github.com/LelouchFR/skill-icons}), a set of icons of programming languages, tools, frameworks and software, with a \textit{dark} and a \textit{light} version.
+
+\medskip
+
+\hspace*{5mm}\fbox{\begin{minipage}{0.75\linewidth}{\emph{A set of 837 icons (logos of languages, tools, frameworks\ldots), each one with a \textcolor{violet}{dark} and a \textcolor{violet}{light} version.}}\end{minipage}}
+
+\medskip
+
+To use \textsf{skill-icons} in your document, include the package with |\usepackage{skill-icons}|.
+
+\medskip
+
+An icon can be accessed using the icon name. A list of all included icons with their respective \textit{page} can be found at the end of this document.
+
+\medskip
+
+The individual icons are provided as pages of two PDF files (one for each theme) and are ultimately loaded using the |\includegraphics| command from the |graphicx| package.
+
+\medskip
+
+The icons are \textbf{colored} (logos with their own background): the current color of the text has no effect on them.
+
+\section{Example}
+
+\begin{Verbatim}[frame=single]
+...
+\usepackage{skill-icons}
+...
+\begin{document}
+...
+Inline \skillicons{python} version, and light \skillicons[theme=light]{python} version
+...
+\end{document}
+\end{Verbatim}
+
+Result: Inline \skillicons{python} version, and light \skillicons[theme=light]{python} version
+
+\pagebreak
+
+\section{Usage}
+
+\subsection{Generic macro}
+
+\begin{Verbatim}[frame=single]
+\skillicons[height=...,(d)strut=...,theme=...]<includegraphics options>{name}
+\end{Verbatim}
+
+Key \texttt{[height=...]} can be:
+
+\begin{itemize}
+  \item \texttt{dauto} (by default): inline insertion with height/depth;
+  \item \texttt{auto}: inline insertion with height/nodepth;
+  \item \texttt{a length}: normal insertion with fixed height;
+  \item \texttt{manual height/depth}: normal insertion with fixed height/depth.
+\end{itemize}
+
+The keys \texttt{[(d)strut=...]} can be used to set the \textit{reference} box for dimension calculations.
+
+\medskip
+
+The key \texttt{[theme=...]} can be \texttt{dark} (by default) or \texttt{light}, see the next subsection.
+
+\medskip
+
+The given height is the height of the \textit{full} box of the icon (the icon may include a small border).
+
+\medskip
+
+Example: Inline{\setlength\fboxsep{0pt}\fbox{\skillicons{python}}}version or inline {\setlength\fboxsep{0pt}\fbox{\skillicons{python}}} version
+
+\pagebreak
+
+\subsection{Dark and light themes}
+
+Each icon exists in two versions, stored in two PDF files with the same page numbers: \texttt{skill-icons-dark-all} and \texttt{skill-icons-light-all}.
+
+\medskip
+
+\begin{itemize}
+  \item the \textbf{dark} theme (by default): icons with a \textit{dark} background (or designed for it);
+  \item the \textbf{light} theme: the same icons, with a \textit{light} background (or designed for it);
+  \item some icons are \textit{neutral}: the original project provides only one version, which is then the same in both PDF files.
+\end{itemize}
+
+The theme can be chosen:
+
+\begin{itemize}
+  \item for an icon, with the key \texttt{[theme=dark]} or \texttt{[theme=light]};
+  \item for the whole document, with the package option, \verb|\usepackage[light]{skill-icons}|, or at any time with \verb|\skilliconssetup{theme=light}| (the setting is global, and can be changed by another call).
+\end{itemize}
+
+\begin{Verbatim}[frame=single]
+\skillicons[theme=dark]{github} \skillicons[theme=light]{github}
+\skilliconssetup{theme=light}
+\skillicons{github} \skillicons[theme=dark]{github}
+\end{Verbatim}
+
+{\Huge \skillicons[theme=dark]{github} \skillicons[theme=light]{github}
+\skilliconssetup{theme=light}
+\skillicons{github} \skillicons[theme=dark]{github}}
+\skilliconssetup{theme=dark}
+
+\pagebreak
+
+\subsection{Examples}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height/depth (from qX characters)
+\skillicons[height=dauto]{python} %or \skillicons{python}
+\end{Verbatim}
+
+{\Huge q\skillicons{python}X}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height/depth (from specified characters)
+(q\skillicons[height=dauto,dstrut=(qB)]{python}B)
+\end{Verbatim}
+
+{\Huge (q\skillicons[height=dauto,dstrut=(qB)]{python}B)}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with automatic height (from X character)
+\skillicons[height=auto]{python}
+\end{Verbatim}
+
+{\Huge X\skillicons[height=auto]{python}X}
+
+\begin{Verbatim}[frame=single]
+%normal version: inline with manual height/depth
+\skillicons[height={0.8em/-0.4em}]{python}
+\end{Verbatim}
+
+{\Huge qb\skillicons[height={0.8em/-0.4em}]{python}Xz}
+
+\begin{Verbatim}[frame=single]
+%fixed height
+\skillicons[height=2in]{python}
+\end{Verbatim}
+
+\skillicons[height=1.5in]{python}
+
+\subsection{Used packages}
+
+\texttt{graphicx} is loaded and used by the package (the key handling relies on \texttt{expl3}, which is part of the \LaTeX{} kernel since October 2020).
+
+\subsection{License and attribution}
+
+The package is released under the \LaTeX{} Project Public License v1.3c or later.
+
+\medskip
+
+The icons come from the \textsf{Skill Icons} project, released under the \textsf{MIT} license: the original project is \textsf{tandpfun/skill-icons} (\url{https://github.com/tandpfun/skill-icons}, \textcopyright{} 2022 tandpfun), and the icon set used here (with the dark and light versions) is the one of \textsf{LelouchFR/skill-icons} (\url{https://github.com/LelouchFR/skill-icons}, \textcopyright{} 2024 Baptiste Zahnow). The MIT license requires to keep the copyright notice and the permission notice in all copies of the icons.
+
+\medskip
+
+The icons are the logos of programming languages, tools, companies and software, which remain the \textbf{property of their respective owners}; they are provided to identify these products and their use may be subject to the guidelines of their owners.
+
+\subsection{Naming}
+
+The icon names are those of the original project, in lowercase and without separators (\texttt{python}, \texttt{githubactions}, \texttt{vscode}, \texttt{reactnative}\ldots). A package named \textsf{skillicons} also exists on CTAN: \textsf{skill-icons} is a distinct package, and all its files are prefixed by \texttt{skill-icons}.
+
+\subsection{Bugs}
+
+For bug reports and feature requests, report on the GitHub repository \url{https://github.com/cpierquet/latex-packages/issues}.
+
+\newpage
+
+\section{List of icons}
+
+The \textsf{PDF} files are \texttt{skill-icons-dark-all} and \texttt{skill-icons-light-all} (same page numbers).
+
+\input{skilliconsbindings}
+
+\end{document}
