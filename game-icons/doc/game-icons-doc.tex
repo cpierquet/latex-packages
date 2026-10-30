@@ -2,15 +2,16 @@
 % arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
 % arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
 
-\documentclass{article}
-\usepackage[margin=1in]{geometry}
+\documentclass[11pt,a4paper]{ltxdoc}
+\usepackage[margin=0.75in]{geometry}
 \usepackage{bera}
 \usepackage{inconsolata}
 \usepackage[T1]{fontenc}
 \usepackage[scale=0.875]{cabin}
 \usepackage{game-icons}
 \usepackage{xcolor}
-\pagecolor{yellow!10}
+\definecolor{lightbg}{HTML}{F9F7F1}
+\pagecolor{lightbg}
 \usepackage{longtable}
 \usepackage{booktabs}
 \usepackage{hyperref}
@@ -21,16 +22,14 @@
 
 \newenvironment{gameiconcase}
 {%
-  \footnotesize
-  \begin{longtable}{cllr}%icon + name + macro + page
-    \cmidrule[\heavyrulewidth]{1-4}% \toprule
-    \bfseries Icon & \bfseries Name & \bfseries Direct command & \bfseries PDF page \\
-    \cmidrule{1-4}
-    \endhead
-}%
-{%
-    \cmidrule[\heavyrulewidth]{1-4}
-  \end{longtable}%
+  \scriptsize
+  \setlength{\columnsep}{1em}%
+  \setlength{\columnseprule}{0.2pt}%
+  \begin{multicols}{4}%icon + name + page
+    \raggedright
+  }%
+  {%
+  \end{multicols}%
 }
 
 \newenvironment{gameiconbadgecase}
@@ -41,8 +40,8 @@
     \bfseries Badge & \bfseries On an icon & \bfseries Name & \bfseries PDF page \\
     \cmidrule{1-4}
     \endhead
-}%
-{%
+  }%
+  {%
     \cmidrule[\heavyrulewidth]{1-4}
   \end{longtable}%
 }
@@ -52,12 +51,14 @@
 }
 
 \NewDocumentCommand{\showcasegameicons}{mm}{%name + page
-  \textcolor{violet}{\Large\gameicons{#1}} & \itshape #1 & \ttfamily \textbackslash gameicons\{#1\} & \ttfamily #2 \\
+  \noindent\hangindent=1.9em\relax
+  \makebox[1.9em][l]{\textcolor{violet}{\gameicons[height=1.2em]{#1}}}%
+  \itshape #1\upshape\hfill{\ttfamily #2}\par
 }
 
 \begin{document}
 
-\title{The \textsf{game-icons} package (0.1a) -- 28/10/2026}
+\title{The \textsf{game-icons} package (0.1a) -- 30/10/2026}
 \author{%
   Cédric Pierquet\\%
   \url{https://game-icons.net} \\%
@@ -85,16 +86,14 @@ The individual icons are provided as pages of a PDF and are ultimately loaded us
 
 The icons are black by default and take the current color, so |\textcolor|, |\color|, etc. work as expected.
 
+\tableofcontents
+
 \section{Example}
 
 \begin{Verbatim}[frame=single]
-...
 \usepackage{game-icons}
 ...
-\begin{document}
-...
 Inline \gameicons{meeple} version, and colored \textcolor{red}{\gameicons{meeple}}
-...
 \end{document}
 \end{Verbatim}
 
@@ -128,6 +127,39 @@ The given height is the height of the \textit{full} box of the icon (the icon ma
 \medskip
 
 Example: Inline{\setlength\fboxsep{0pt}\fbox{\gameicons{meeple}}}version or inline {\setlength\fboxsep{0pt}\fbox{\gameicons{meeple}}} version
+
+\subsection{Used packages}
+
+\texttt{graphicx} is loaded and used by the package (the key handling relies on \texttt{expl3}, which is part of the \LaTeX{} kernel since October 2020).
+
+\subsection{License and attribution}
+
+The package is released under the \LaTeX{} Project Public License v1.3c or later.
+
+\medskip
+
+The icons are provided by \textsf{Game-icons.net} (\url{https://game-icons.net}) under the \textsf{CC BY 3.0} license (\url{https://creativecommons.org/licenses/by/3.0/}), except the icons of \textsf{Viscious Speed} and \textsf{Zeromancer}, which are \textsf{CC0}. The attribution is required: the authors must be credited when the icons are used, for example \textit{``Icons made by \{author\}. Available on \url{https://game-icons.net}''}, as requested in the \texttt{license.txt} file of the icons repository (\url{https://github.com/game-icons/icons}).
+
+\medskip
+
+Each icon was drawn by one of the following contributors (one folder per contributor in the repository):
+
+\medskip
+
+{\small
+  Lorc, Delapouite, John Colburn, Felbrigg, John Redman, Carl Olsen, Sbed, PriorBlue, Willdabeast, Viscious Speed (CC0), Lord Berandas, Irongamer, HeavenlyDog, Lucas, Faithtoken, Skoll, Andy Meneely, Cathelineau, Kier Heyl, Aussiesim, Sparker, Zeromancer (CC0), Rihlsul, Quoting, Guard13007, DarkZaitzev, SpencerDub, GeneralAce135, Zajkonur, Catsu, Starseeker, Pepijn Poolman, Pierre Leducq, Caro Asercion, SeregaCthtuf.\par}
+
+\medskip
+
+The \textsf{badges} are also provided by \textsf{Game-icons.net}. The author of each icon can be found on \url{https://game-icons.net}.
+
+\subsection{Icons with the same name}
+
+The repository contains 4180 icons, but only 4133 different names: 47 names exist twice, drawn by two different contributors (for example \texttt{castle}, \texttt{bat}, \texttt{fairy}, \texttt{mouse} or \texttt{screw}). This package provides \textbf{one icon per name}: when a name exists in several folders, the icon of the first contributor in alphabetical order of the folder names is kept.
+
+\subsection{Bugs}
+
+For bug reports and feature requests, report on the GitHub repository \url{https://github.com/cpierquet/latex-packages/issues}.
 
 \pagebreak
 
@@ -168,6 +200,8 @@ Example: Inline{\setlength\fboxsep{0pt}\fbox{\gameicons{meeple}}}version or inli
 
 \gameicons[height=1.5in]{meeple}
 
+\pagebreak
+
 \subsection{Badges}
 
 The \textsf{Game-icons.net} badges (59 small symbols) can be added to an icon, as in the Studio of the website, with the key \texttt{[badge=...]}:
@@ -189,39 +223,6 @@ The \textsf{Game-icons.net} badges (59 small symbols) can be added to an icon, a
 
 The height keys (\texttt{height}, \texttt{strut}, \texttt{dstrut}) apply to the icon, and the badge follows its size. A badge alone can also be used with \verb|\gameiconsbadge[height=...]<includegraphics options>{name}|: \gameiconsbadge{bolt}, \textcolor{red}{\gameiconsbadge{skull}}.
 
-\subsection{Used packages}
-
-\texttt{graphicx} is loaded and used by the package (the key handling relies on \texttt{expl3}, which is part of the \LaTeX{} kernel since October 2020).
-
-\subsection{License and attribution}
-
-The package is released under the \LaTeX{} Project Public License v1.3c or later.
-
-\medskip
-
-The icons are provided by \textsf{Game-icons.net} (\url{https://game-icons.net}) under the \textsf{CC BY 3.0} license (\url{https://creativecommons.org/licenses/by/3.0/}), except the icons of \textsf{Viscious Speed} and \textsf{Zeromancer}, which are \textsf{CC0}. The attribution is required: the authors must be credited when the icons are used, for example \textit{``Icons made by \{author\}. Available on \url{https://game-icons.net}''}, as requested in the \texttt{license.txt} file of the icons repository (\url{https://github.com/game-icons/icons}).
-
-\medskip
-
-Each icon was drawn by one of the following contributors (one folder per contributor in the repository):
-
-\medskip
-
-{\small
-Lorc, Delapouite, John Colburn, Felbrigg, John Redman, Carl Olsen, Sbed, PriorBlue, Willdabeast, Viscious Speed (CC0), Lord Berandas, Irongamer, HeavenlyDog, Lucas, Faithtoken, Skoll, Andy Meneely, Cathelineau, Kier Heyl, Aussiesim, Sparker, Zeromancer (CC0), Rihlsul, Quoting, Guard13007, DarkZaitzev, SpencerDub, GeneralAce135, Zajkonur, Catsu, Starseeker, Pepijn Poolman, Pierre Leducq, Caro Asercion, SeregaCthtuf.\par}
-
-\medskip
-
-The \textsf{badges} are also provided by \textsf{Game-icons.net}. The author of each icon can be found on \url{https://game-icons.net}.
-
-\subsection{Icons with the same name}
-
-The repository contains 4180 icons, but only 4133 different names: 47 names exist twice, drawn by two different contributors (for example \texttt{castle}, \texttt{bat}, \texttt{fairy}, \texttt{mouse} or \texttt{screw}). This package provides \textbf{one icon per name}: when a name exists in several folders, the icon of the first contributor in alphabetical order of the folder names is kept.
-
-\subsection{Bugs}
-
-For bug reports and feature requests, report on the GitHub repository \url{https://github.com/cpierquet/latex-packages/issues}.
-
 \newpage
 
 \section{List of icons}
@@ -237,6 +238,8 @@ Icons are colored in \textcolor{violet}{violet}.
 \section{List of badges}
 
 The \textsf{PDF} file is \texttt{gameicons-badges-all}.
+
+Icons are colored in \textcolor{darkgray}{darkgray} and badge in \textcolor{red}{red}.
 
 \input{gameiconsbadgesbindings}
 
