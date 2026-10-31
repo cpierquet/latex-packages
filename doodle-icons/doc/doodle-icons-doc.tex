@@ -2,7 +2,7 @@
 % arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
 % arara: pdflatex: {shell: no, synctex: no, interaction: batchmode}
 
-\documentclass{article}
+\documentclass[11pt,a4paper]{ltxdoc}
 \usepackage[margin=1in]{geometry}
 \usepackage{bera}
 \usepackage{inconsolata}
@@ -10,6 +10,8 @@
 \usepackage[scale=0.875]{cabin}
 \usepackage{doodle-icons}
 \usepackage{xcolor}
+\definecolor{lightbg}{HTML}{F9F7F1}
+\pagecolor{lightbg}
 \usepackage{longtable}
 \usepackage{booktabs}
 \usepackage{hyperref}
@@ -38,7 +40,7 @@
 
 \begin{document}
 
-\title{The \textsf{doodle-icons} package (1.0b) -- 27/10/2026}
+\title{The \textsf{doodle-icons} package (0.1c) -- 31/10/2026}
 \author{%
 	Cédric Pierquet\\%
 	\url{https://khushmeen.com/icons} \\%
@@ -66,6 +68,10 @@ The individual icons are provided as pages of a PDF and are ultimately loaded us
 
 Thanks to \textsf{priiduonu} for the tip with stroke color !
 
+\tableofcontents
+
+\pagebreak
+
 \section{Example}
 
 \begin{Verbatim}[frame=single]
@@ -74,14 +80,13 @@ Thanks to \textsf{priiduonu} for the tip with stroke color !
 ...
 \begin{document}
 ...
-Inline \doodleicon{bottle} version, and colored \textcolor{red}{\doodleicon{bottle}}
+Inline \doodleicon{bottle} version,
+and colored \textcolor{red}{\doodleicon{bottle}}
 ...
 \end{document}
 \end{Verbatim}
 
 Result: Inline \doodleicon{bottle} version, and \textcolor{red}{\doodleicon{bottle}} colored version
-
-\pagebreak
 
 \section{Usage}
 
@@ -149,6 +154,39 @@ Example: Inline{\setlength\fboxsep{0pt}\fbox{\doodleicon{bottle}}}version or inl
 
 \doodleicon[height=1.5in]{bottle}
 
+\pagebreak
+
+\subsection{Option \texttt{nolist} and manual use}
+
+By default, the package loads the list of all the icons (file \texttt{doodle-icons-list.def}), so that an icon is accessed by its name.
+
+\medskip
+
+With the option |nolist|, this list is \textbf{not} loaded: only the icons declared by the user are available. An icon is declared with its \textit{page} in the \textsf{PDF} file (see the list of icons at the end of this document):
+
+\begin{Verbatim}[frame=single]
+\usepackage[nolist]{doodle-icons}
+...
+\GenerateDoodleIcons{<page>}{<name>}
+\AliasDoodleIcon{<new name>}{<declared name>}
+\end{Verbatim}
+
+\begin{Verbatim}[frame=single]
+\usepackage[nolist]{doodle-icons}
+...
+\GenerateDoodleIcons{56}{bottle}
+\GenerateDoodleIcons{437}{zoom-in}
+\AliasDoodleIcon{flask}{bottle}
+...
+\doodleicon{bottle} \doodleicon[height=2em]{flask}
+\end{Verbatim}
+
+\GenerateDoodleIcons{56}{mybottle}\AliasDoodleIcon{myflask}{mybottle}Result (with the names \texttt{mybottle} and \texttt{myflask} declared by hand): \doodleicon{mybottle} \doodleicon[height=2em]{myflask}
+
+\medskip
+
+The name can be freely chosen. An alias can only be defined for an icon that is already declared. The page numbers of the list can change when the icons are updated: with |nolist|, check them after updating the package.
+
 \subsection{Used packages}
 
 \texttt{graphicx} is loaded and used by the package (the key handling relies on \texttt{expl3}, which is part of the \LaTeX{} kernel since October 2020).
@@ -161,7 +199,7 @@ For bug reports and feature requests, report on the GitHub repository \url{https
 
 \section{List of icons}
 
-The \textsf{PDF} file is \texttt{doodle-icons-all}.
+The \textsf{PDF} file is \texttt{doodleicons-all}.
 
 Icons are colored in \textcolor{violet}{violet}.
 
